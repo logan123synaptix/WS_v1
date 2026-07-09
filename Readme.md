@@ -20,4 +20,4 @@ Còn đây là repo mẫu v1: "https://github.com/logan123synaptix/WS_v0.git"
 
 - Ở phiên bản hiện tại tôi đang dùng con sim7680 (do tôi tận dụng 1 project trước đó dùng chip stm32h563riv6, giờ bạn có thể tái cấu trúc sim để phục vụ prj hiện tại dùng a7677s)
 
-- trước tiên bạn hãy đọc prj để hiểu và cùng tôi xây dựng nốt architecture của prj ver sau
+- trước tiên bạn hãy đọc prj để hiểu và cùng tôi xây dựng nốt architecture của prj ver sau, sau khi hoàn thiện architecture thì chúng ta bắt đầu code, và code sẽ từng chức năng nhỏ chứ ko 1 phát làm hết 

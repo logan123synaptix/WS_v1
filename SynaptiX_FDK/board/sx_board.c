@@ -62,6 +62,12 @@ static sx_gpio_pin_t s_spi_cs_pin = {.pin = SPI_CS_Pin, .port = SPI_CS_Port};
 static sx_gpio_t     s_rtc_pwr;
 static sx_gpio_pin_t s_rtc_pwr_pin = {.pin = NULL, .port = NULL};
 
+static sx_gpio_t     s_imu_en;
+static sx_gpio_pin_t s_imu_en_pin = {.pin = NULL, .port = NULL};
+
+static sx_gpio_t     s_imu_reset;
+static sx_gpio_pin_t s_imu_reset_pin = {.pin = NULL, .port = NULL};
+
 /*  SPI */
 // static sx_gpio_t s_spi_cs;
 // static sx_gpio_t s_spi_pwr;
@@ -175,9 +181,9 @@ void sx_board_init(void)
     sx_gpio_write(&s_imu_en, SX_GPIO_LOW);
     bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_imu_en, &s_imu_reset);
 
-    HAL_ADCEx_Calibration_Start(hal_adc, ADC_SINGLE_ENDED);
-    HAL_ADC_Start(hal_adc);
-    sx_adc_reader_init(&board.s_adc_reader);
+    // HAL_ADCEx_Calibration_Start(hal_adc, ADC_SINGLE_ENDED);
+    // HAL_ADC_Start(hal_adc);
+    // sx_adc_reader_init(&board.s_adc_reader);
 }
 
 static void sx_sim76_uart_abort(void) {
@@ -214,67 +220,31 @@ void sx_board_uart_resume_it(void) {
     board_sim_uart_resume_it();
 }
 
-static void set_enter_sleep_mode(void) {
-    sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH); 
-    sx_gpio_write(&s_charge, SX_GPIO_LOW);
-    log_info(TAG, "Enter sleep POWER");
-}
-
-// static void set_enter_full_mode(void) {
-//     sx_gpio_write(&s_charge, SX_GPIO_HIGH);
-//     sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH);
-//     log_info(TAG, "Enter full POWER");
+// static void set_enter_sleep_mode(void) {
+//     sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH); 
+//     sx_gpio_write(&s_charge, SX_GPIO_LOW);
+//     log_info(TAG, "Enter sleep POWER");
 // }
-
-void read_vol_pin(uint32_t time_stamp) {
-    sx_adc_reader_process(&board.s_adc_reader, hal_adc, time_stamp);
-    board.voltage.v_bat = board.s_adc_reader.v_bat_filtered;
-}
 
 /* USB IT CB    */
 void tud_mount_cb(void) {
     log_info(TAG, "USB tiny connected");
-    
-    //app_sync_gps_log_to_disk();
-    // set_enter_full_mode();
-    //app_mode = APP_MODE_FULL_POWER;
-    //app_notify_usb_connected();
 }
 
 void tud_umount_cb(void) {
-    //(void)remote_wakeup_en;
-    sx_gpio_write(&s_charge, SX_GPIO_LOW);
-    sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH);
     log_info(TAG,"USB discharge");
     app_request_sleep();
     log_info(TAG, "USB tiny disconnected");
-    // set_enter_sleep_mode();
-    // app_request_sleep();
-    
 }
 
 void tud_suspend_cb(bool remote_wakeup_en) {
-    sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH);
-    // (void)remote_wakeup_en;
-    sx_gpio_write(&s_charge, SX_GPIO_LOW);
-    // log_info(TAG,"USB discharge");
-    // app_request_sleep();
-    // log_info(TAG, "USB tiny suspended"); 
+
 }
 
 void tud_resume_cb(void) {
     log_info(TAG, "USB tiny resumed");
-    // HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 0);
-    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
-    //set_enter_full_mode();
-    // app_mode = APP_MODE_FULL_POWER;
-    // app_notify_usb_connected();
 }
 
-void check_charge(void){
-    uint8_t ret = HAL_GPIO_ReadPin(VBUS_PORT, VBUS_PIN);
-    (ret == 1)?(sx_gpio_write(&s_charge, SX_GPIO_HIGH)):(sx_gpio_write(&s_charge, SX_GPIO_LOW));
-}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -287,33 +257,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     } else if(huart == hal_uart[UART_LOG]){
         sx_uart_rx_callback(bsp_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
         HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
-    }
-}
-
-void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
-{
-    if(GPIO_Pin == VBUS_PIN){
-        
-        /* Set EXTI wake reason for sleep manager if MCU is waking from sleep */
-        sx_sleep_set_exti_wake();
-        
-        sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH);
-        sx_gpio_write(&s_charge, SX_GPIO_HIGH);
-
-        app_sync_gps_log_to_disk();
-        app_mode_full_pw();
-        app_notify_usb_connected();
-        log_info(TAG,"USB charge");
-    }
-}
-
-void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin){
-    if(GPIO_Pin == VBUS_PIN){
-        sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH);
-        sx_gpio_write(&s_charge, SX_GPIO_LOW);
-        
-        app_request_sleep();
-        log_info(TAG,"USB discharge");
     }
 }
 

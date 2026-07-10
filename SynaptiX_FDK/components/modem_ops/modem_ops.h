@@ -96,11 +96,31 @@ typedef struct {
      * client_id: MQTT client identifier (AT+CMQTTACCQ). Must be unique per
      *   device/session. NULL is not allowed (MQTT spec requires a non-empty
      *   client ID for clean_session=0; most brokers also reject empty IDs).
+     * use_ssl: 0 = plain TCP (broker URI built as "tcp://host:port"), the
+     *   ca_cert/client_cert/client_key parameters below are ignored entirely
+     *   in this case, regardless of what is passed in them.
+     *   1 = TLS (broker URI built as "ssl://host:port"); the driver runs the
+     *   AT+CSSLCFG/AT+CCERTDOWN sequence before AT+CMQTTCONNECT.
+     * ca_cert/client_cert/client_key: only consulted when use_ssl is 1.
+     *   PEM text (NUL-terminated), or NULL/"" if not used:
+     *     - ca_cert NULL/"" and client_cert/client_key NULL/"": TLS with the
+     *       module's own trust handling / no certs uploaded (server-auth-off
+     *       or module-default trust, driver-dependent).
+     *     - ca_cert set, client_cert/client_key NULL/"": server-authentication
+     *       TLS only (the common HTTPS-like case).
+     *     - all three set: mutual TLS (client authenticates to the broker
+     *       too, e.g. AWS IoT Core).
+     *   There is no separate "mutual TLS" flag — whether mutual auth happens
+     *   is entirely determined by whether client_cert/client_key are supplied.
      * username/password: may be NULL or "" if the broker does not require
      *   authentication (the driver will skip sending credentials). */
     int (*mqtt_connect)(void *ctx, const char *client_id,
                          const char *broker, uint16_t port,
-                         uint8_t use_ssl, uint16_t keepalive,
+                         uint8_t use_ssl,
+                         const char *ca_cert,
+                         const char *client_cert,
+                         const char *client_key,
+                         uint16_t keepalive,
                          uint8_t clean_session, const char *username,
                          const char *password, mqtt_cb_t cb);
     int (*mqtt_disconnect)(void *ctx, mqtt_cb_t cb);

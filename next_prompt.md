@@ -29,6 +29,7 @@ Dự án này **tận dụng lại 1 project cũ (WS_v0) cũng dùng STM32H563RI
 - Board tương lai (kích thước lớn hơn) dự định có lại chân cắt nguồn cho từng module — đây là lý do field `powerPin`/`hasPowerPin` vẫn phải giữ lại trong base layer (`modem_t`), không được xóa, chỉ luôn để `hasPowerPin = 0` trên board hiện tại.
 - Chân điều khiển thật duy nhất cho A7677S: **PWRKEY**.
 - A7677S **không có chân DTR, không có chân STATUS** nối STM32.
+- A7677S có chân Reset connect đến STM32
 
 ### QUYẾT ĐỊNH PHẠM VI QUAN TRỌNG NHẤT — ĐÃ CHỐT, KHÔNG ĐƯỢC LÀM SAI
 Ban đầu có 3 phương án cho `sim76xx.c` (giữ song song + vtable / refactor non-blocking / bỏ hẳn). **Người dùng đã chốt dứt điểm sau nhiều vòng làm rõ**:

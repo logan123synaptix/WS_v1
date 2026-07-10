@@ -51,6 +51,16 @@ extern "C" {
  * A7677S_MQTT_CLIENT_INDEX being fixed at 0 - this driver only ever manages
  * a single MQTT client/SSL context, matching the board's single-modem,
  * single-broker design). */
+/* URC scanner raw-line buffer. Only needs to hold ONE line at a time
+ * (headers like "+CMQTTRXTOPIC:0,1024\r\n" plus at most one chunk of
+ * topic/payload data per read) — the actual accumulated topic/payload
+ * content lives in mqtt_rx_topic/mqtt_rx_payload (sized to the real max),
+ * not here. 256 bytes comfortably covers a header line plus a generously
+ * sized single UART read burst; a chunk longer than this simply gets
+ * consumed across more than one urc_poll() iteration (handled the same way
+ * as any other multi-chunk RXTOPIC/RXPAYLOAD line). */
+#define A7677S_URC_BUF_SIZE          256U
+
 #define A7677S_SSL_CTX_INDEX         0U
 #define A7677S_CERT_PEM_MAX          10241U  /* 1-10240 bytes + NUL, per AT+CCERTDOWN */
 #define A7677S_CERT_FILENAME_CA      "cacert.pem"
@@ -221,16 +231,11 @@ typedef enum {
     A7677S_MQTT_RX_END,
 } a7677s_mqtt_rx_state_t;
 
-/* Callback fired when a subscribed message arrives.
- * topic/topic_len: the topic string (not NUL-terminated, raw bytes).
- * payload/payload_len: the message body.
- * user_ctx: opaque pointer the caller registered alongside the callback. */
-typedef void (*mqtt_incoming_cb_t)(const char *topic, uint16_t topic_len,
-                                    const char *payload, uint16_t payload_len,
-                                    void *user_ctx);
-
-/* Callback fired on passive disconnect (+CMQTTCONNLOST). */
-typedef void (*mqtt_connlost_cb_t)(void *user_ctx);
+/* mqtt_incoming_cb_t / mqtt_connlost_cb_t are now defined in modem_ops.h
+ * (the generic vtable contract) rather than here, so the service layer can
+ * register callbacks through modem_ops_t.mqtt_set_callbacks() without ever
+ * including this header. Kept no local redefinition to avoid the two
+ * getting out of sync. */
 
 typedef struct a7677s a7677s_t;
 
@@ -339,18 +344,52 @@ struct a7677s
     /* Caller callbacks for the in-flight async operation. */
     mqtt_cb_t mqtt_op_cb;       /* connect / disconnect / publish / subscribe result */
 
-    /* Inbound message receive state machine. */
+    /* Inbound message receive state machine, driven by urc_poll() (see
+     * a7677s.c) rather than by mqtt_state — a message can arrive at any
+     * time the session is connected, independent of any pub/sub command
+     * currently in flight.
+     * mqtt_rx_topic_len/mqtt_rx_payload_len track bytes ACCUMULATED so far
+     * (reset to 0 at RXSTART, incremented as each RXTOPIC/RXPAYLOAD chunk
+     * is appended). mqtt_rx_topic_total_len/mqtt_rx_payload_total_len are
+     * the TARGET lengths announced once by +CMQTTRXSTART:<idx>,<topic_len>,
+     * <payload_len> — per a76xx_at_cmd.md 18.4, a long topic or payload can
+     * be split across more than one +CMQTTRXTOPIC:/+CMQTTRXPAYLOAD: line,
+     * so the accumulated length must be compared against the total, not
+     * assumed to complete after a single line. */
     a7677s_mqtt_rx_state_t mqtt_rx_state;
     char     mqtt_rx_topic[A7677S_MQTT_TOPIC_MAX];
     char     mqtt_rx_payload[A7677S_MQTT_PAYLOAD_MAX];
     uint16_t mqtt_rx_topic_len;
     uint16_t mqtt_rx_payload_len;
+    uint16_t mqtt_rx_topic_total_len;
+    uint16_t mqtt_rx_payload_total_len;
 
     /* Registered inbound-message and connection-lost callbacks.
      * Set once by the service layer; not per-operation. */
     mqtt_incoming_cb_t mqtt_incoming_cb;
     mqtt_connlost_cb_t mqtt_connlost_cb;
     void              *mqtt_user_ctx;    /* passed back to both callbacks above */
+
+    /* --- Unsolicited-Result-Code (URC) scanner state ---
+     * Reads raw UART bytes directly, completely separate from modem->buff /
+     * modem_send_command()'s command/response channel. Only runs while
+     * !modem_is_busy(&base) — i.e. no AT command is currently awaiting a
+     * response — so it never contends with modem_poll() for the same UART
+     * peripheral or buffer. See a7677s_poll()/a7677s_urc_poll() in a7677s.c.
+     * Deliberately NOT reusing modem->buff (512 bytes, owned by the command/
+     * response state machine) to avoid any risk of one channel's partial
+     * data corrupting the other's parse. */
+    char     urc_buf[A7677S_URC_BUF_SIZE];
+    uint16_t urc_buf_len;
+    /* 0 = scanner is expecting a "\r\n"-terminated header line next
+     * (+CMQTTRXTOPIC:/+CMQTTRXPAYLOAD:/+CMQTTRXEND:/+CMQTTCONNLOST:/etc).
+     * >0 = scanner is mid-chunk, this many more RAW bytes still need to be
+     * copied into mqtt_rx_topic/mqtt_rx_payload before it goes back to
+     * expecting a header line. This can NOT be done by scanning for the
+     * next "\r\n" instead, because topic/payload content is arbitrary
+     * bytes and may itself contain "\r\n" — the chunk length announced by
+     * the header line is the only reliable delimiter. */
+    uint16_t urc_chunk_remaining;
 };
 
 void a7677s_init(a7677s_t *dce);

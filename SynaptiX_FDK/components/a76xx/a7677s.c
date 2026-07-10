@@ -114,6 +114,23 @@ static void send_mqtt_dynamic(a7677s_t *dce, const char *cmd_str,
                                modem_command_response_callback_t cb,
                                uint32_t timeout_ms);
 
+/* URC (Unsolicited Result Code) scanner — reassembles +CMQTTRXSTART/TOPIC/
+ * PAYLOAD/END, +CMQTTCONNLOST, and +CGEV PDN-deactivation lines. Runs only
+ * while !modem_is_busy(), see a7677s_poll(). Fully self-contained inside
+ * this driver: the service layer never sees any of this, it only ever gets
+ * mqtt_incoming_cb/mqtt_connlost_cb fired through the generic
+ * modem_ops_t.mqtt_set_callbacks() vtable entry. */
+static void urc_poll(a7677s_t *dce);
+static void urc_reset_rx_state(a7677s_t *dce);
+static void urc_process_header_line(a7677s_t *dce, char *line);
+
+/* modem_ops_t.mqtt_set_callbacks wrapper — thin adapter so the service layer
+ * calls this only through the vtable, never a7677s_mqtt_register_callbacks()
+ * directly. */
+static void a7677s_mqtt_set_callbacks(void *ctx, mqtt_incoming_cb_t incoming_cb,
+                                       mqtt_connlost_cb_t connlost_cb,
+                                       void *user_ctx);
+
 /* Helper: fire the in-flight MQTT op callback and clear it. */
 static void mqtt_op_done(a7677s_t *dce, modem_ops_result_t result);
 
@@ -177,9 +194,15 @@ void a7677s_init(a7677s_t *dce)
     dce->mqtt_rx_payload[0]  = '\0';
     dce->mqtt_rx_topic_len   = 0;
     dce->mqtt_rx_payload_len = 0;
+    dce->mqtt_rx_topic_total_len   = 0;
+    dce->mqtt_rx_payload_total_len = 0;
     dce->mqtt_incoming_cb  = NULL;
     dce->mqtt_connlost_cb  = NULL;
     dce->mqtt_user_ctx     = NULL;
+
+    dce->urc_buf[0] = '\0';
+    dce->urc_buf_len = 0;
+    dce->urc_chunk_remaining = 0;
 
     log_debug(TAG, "Initializing");
 }
@@ -282,6 +305,17 @@ static void a7677s_poll(void *ctx, uint32_t ts)
      * any in-flight AT command (probe or CPOF) gets its callback fired
      * before we act on power_state below. */
     modem_poll(pModem(dce), ts);
+
+    /* URC scanner: only safe to read the UART for unsolicited lines while
+     * no AT command is currently awaiting its response (modem_poll() above
+     * owns the UART/modem->buff channel exclusively whenever isBusy is 1).
+     * Since modem_poll() just ran and may have cleared isBusy in the same
+     * tick (command completed), checking is_busy() here, after it, means a
+     * URC arriving in the same tick a command just completed is still
+     * picked up — no extra tick of latency. */
+    if (!modem_is_busy(pModem(dce))) {
+        urc_poll(dce);
+    }
 
     switch (dce->power_state) {
 
@@ -699,6 +733,231 @@ static int a7677s_exit_low_power(void *ctx, power_mode_cb_t cb)
 /*  MQTT — helpers                                                      */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/*  MQTT — URC (Unsolicited Result Code) scanner                        */
+/* ------------------------------------------------------------------ */
+/* Reassembles, from raw UART bytes read independently of the AT command/
+ * response channel (see urc_poll() call site in a7677s_poll()):
+ *   +CMQTTRXSTART: <idx>,<topic_total_len>,<payload_total_len>
+ *   +CMQTTRXTOPIC: <idx>,<chunk_len>\r\n<chunk raw bytes>      (may repeat)
+ *   +CMQTTRXPAYLOAD: <idx>,<chunk_len>\r\n<chunk raw bytes>    (may repeat)
+ *   +CMQTTRXEND: <idx>
+ * per a76xx_at_cmd.md 18.4 — topic/payload chunks repeat as needed until
+ * their accumulated length reaches the total announced by RXSTART. Also
+ * catches +CMQTTCONNLOST:<idx>,<cause> (passive MQTT disconnect) and
+ * +CGEV: ME/NW PDN DEACT (network-level loss — treated as an implicit MQTT
+ * disconnect too, since MQTT cannot survive without the underlying PDN). */
+
+static void urc_reset_rx_state(a7677s_t *dce)
+{
+    dce->mqtt_rx_state             = A7677S_MQTT_RX_IDLE;
+    dce->mqtt_rx_topic_len         = 0;
+    dce->mqtt_rx_payload_len       = 0;
+    dce->mqtt_rx_topic_total_len   = 0;
+    dce->mqtt_rx_payload_total_len = 0;
+    dce->urc_chunk_remaining       = 0;
+}
+
+/* line: a single NUL-terminated header line, "\r\n" already stripped.
+ * Only called when urc_chunk_remaining == 0 (i.e. between raw-byte
+ * chunks) — see urc_poll(). */
+static void urc_process_header_line(a7677s_t *dce, char *line)
+{
+    if (strstr(line, "+CMQTTRXSTART:")) {
+        unsigned idx = 0, topic_len = 0, payload_len = 0;
+        char *p = strchr(line, ':');
+        if (p && sscanf(p + 1, "%u,%u,%u", &idx, &topic_len, &payload_len) == 3) {
+            urc_reset_rx_state(dce);
+            dce->mqtt_rx_state             = A7677S_MQTT_RX_TOPIC;
+            dce->mqtt_rx_topic_total_len   = (uint16_t)topic_len;
+            dce->mqtt_rx_payload_total_len = (uint16_t)payload_len;
+            dce->mqtt_rx_topic[0]   = '\0';
+            dce->mqtt_rx_payload[0] = '\0';
+            log_debug(TAG, "RXSTART idx=%u topic_len=%u payload_len=%u",
+                      idx, topic_len, payload_len);
+        } else {
+            log_error(TAG, "Malformed +CMQTTRXSTART: [%s]", line);
+            urc_reset_rx_state(dce);
+        }
+        return;
+    }
+
+    if (strstr(line, "+CMQTTRXTOPIC:")) {
+        unsigned idx = 0, chunk_len = 0;
+        char *p = strchr(line, ':');
+        if (dce->mqtt_rx_state == A7677S_MQTT_RX_TOPIC && p &&
+            sscanf(p + 1, "%u,%u", &idx, &chunk_len) == 2 && chunk_len > 0) {
+            if ((size_t)dce->mqtt_rx_topic_len + chunk_len >= sizeof(dce->mqtt_rx_topic)) {
+                log_error(TAG, "RX topic overflows buffer (have %u + chunk %u >= %u) — dropping message",
+                          (unsigned)dce->mqtt_rx_topic_len, chunk_len, (unsigned)sizeof(dce->mqtt_rx_topic));
+                urc_reset_rx_state(dce);
+                return;
+            }
+            dce->urc_chunk_remaining = (uint16_t)chunk_len;
+        } else {
+            log_error(TAG, "Unexpected +CMQTTRXTOPIC: [%s] (rx_state=%d)", line, dce->mqtt_rx_state);
+            urc_reset_rx_state(dce);
+        }
+        return;
+    }
+
+    if (strstr(line, "+CMQTTRXPAYLOAD:")) {
+        unsigned idx = 0, chunk_len = 0;
+        char *p = strchr(line, ':');
+        if ((dce->mqtt_rx_state == A7677S_MQTT_RX_TOPIC ||
+             dce->mqtt_rx_state == A7677S_MQTT_RX_PAYLOAD) && p &&
+            sscanf(p + 1, "%u,%u", &idx, &chunk_len) == 2 && chunk_len > 0) {
+            if ((size_t)dce->mqtt_rx_payload_len + chunk_len >= sizeof(dce->mqtt_rx_payload)) {
+                log_error(TAG, "RX payload overflows buffer (have %u + chunk %u >= %u) — dropping message",
+                          (unsigned)dce->mqtt_rx_payload_len, chunk_len, (unsigned)sizeof(dce->mqtt_rx_payload));
+                urc_reset_rx_state(dce);
+                return;
+            }
+            dce->mqtt_rx_state       = A7677S_MQTT_RX_PAYLOAD;
+            dce->urc_chunk_remaining = (uint16_t)chunk_len;
+        } else {
+            log_error(TAG, "Unexpected +CMQTTRXPAYLOAD: [%s] (rx_state=%d)", line, dce->mqtt_rx_state);
+            urc_reset_rx_state(dce);
+        }
+        return;
+    }
+
+    if (strstr(line, "+CMQTTRXEND:")) {
+        if (dce->mqtt_rx_topic_len   < dce->mqtt_rx_topic_total_len ||
+            dce->mqtt_rx_payload_len < dce->mqtt_rx_payload_total_len) {
+            log_warn(TAG, "RXEND before topic/payload fully accumulated (topic %u/%u, payload %u/%u) — delivering partial message",
+                      (unsigned)dce->mqtt_rx_topic_len, (unsigned)dce->mqtt_rx_topic_total_len,
+                      (unsigned)dce->mqtt_rx_payload_len, (unsigned)dce->mqtt_rx_payload_total_len);
+        }
+        dce->mqtt_rx_topic[dce->mqtt_rx_topic_len]     = '\0';
+        dce->mqtt_rx_payload[dce->mqtt_rx_payload_len] = '\0';
+        if (dce->mqtt_incoming_cb) {
+            dce->mqtt_incoming_cb(dce->mqtt_rx_topic, dce->mqtt_rx_topic_len,
+                                   dce->mqtt_rx_payload, dce->mqtt_rx_payload_len,
+                                   dce->mqtt_user_ctx);
+        }
+        urc_reset_rx_state(dce);
+        return;
+    }
+
+    if (strstr(line, "+CMQTTCONNLOST:")) {
+        log_warn(TAG, "MQTT connection lost (URC): %s", line);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        urc_reset_rx_state(dce);
+        if (dce->mqtt_connlost_cb) dce->mqtt_connlost_cb(dce->mqtt_user_ctx);
+        return;
+    }
+
+    if (strstr(line, "+CGEV: ME PDN DEACT") || strstr(line, "+CGEV: NW PDN DEACT")) {
+        log_warn(TAG, "PDN deactivated (URC) — restarting network attach sequence");
+        /* A7677S_INIT_AT doubles as the "restart the whole sequence" entry
+         * point (see a7677s_init_state_t comment) — reuse it rather than
+         * inventing a second restart path. */
+        dce->init_state       = A7677S_INIT_AT;
+        dce->init_elapsed     = 0;
+        dce->init_cmd_pending = 0;
+        dce->mqtt_state       = A7677S_MQTT_IDLE;
+        urc_reset_rx_state(dce);
+        /* MQTT cannot survive the PDN going down even if CMQTTCONNLOST never
+         * arrives separately — tell the service layer now so its reconnect
+         * logic starts retrying (harmlessly failing via is_ready()==false
+         * until re-attach completes, then succeeding on its own). */
+        if (dce->mqtt_connlost_cb) dce->mqtt_connlost_cb(dce->mqtt_user_ctx);
+        return;
+    }
+
+    /* Unrecognized line (e.g. +CREG:, +CPIN:, other chatter arriving
+     * outside a command exchange) — ignore. */
+}
+
+static void urc_poll(a7677s_t *dce)
+{
+    int available = sx_uart_available(&dce->base.uart);
+    if (available <= 0) return;
+
+    int space = (int)sizeof(dce->urc_buf) - 1 - (int)dce->urc_buf_len;
+    if (space <= 0) {
+        /* A header line longer than A7677S_URC_BUF_SIZE with no "\r\n" in
+         * sight is not a real modem response — defensive reset only. */
+        log_error(TAG, "URC buffer full without a line terminator — resetting (buf=[%.*s])",
+                  (int)dce->urc_buf_len, dce->urc_buf);
+        dce->urc_buf_len = 0;
+        urc_reset_rx_state(dce);
+        space = (int)sizeof(dce->urc_buf) - 1;
+    }
+    if (available > space) available = space;
+
+    int read = sx_uart_read(&dce->base.uart, (uint8_t *)dce->urc_buf + dce->urc_buf_len,
+                             available, 10);
+    if (read <= 0) return;
+    dce->urc_buf_len += (uint16_t)read;
+    dce->urc_buf[dce->urc_buf_len] = '\0';
+
+    /* Drain every complete unit (header line or raw chunk) currently fully
+     * present in urc_buf. Loops because one UART read can easily contain
+     * more than one complete line/chunk (e.g. RXTOPIC header + full small
+     * topic + RXPAYLOAD header all in one burst). */
+    for (;;) {
+        if (dce->urc_chunk_remaining > 0) {
+            uint16_t take = dce->urc_buf_len < dce->urc_chunk_remaining
+                             ? dce->urc_buf_len : dce->urc_chunk_remaining;
+            if (take == 0) break;
+
+            if (dce->mqtt_rx_state == A7677S_MQTT_RX_TOPIC) {
+                memcpy(dce->mqtt_rx_topic + dce->mqtt_rx_topic_len, dce->urc_buf, take);
+                dce->mqtt_rx_topic_len += take;
+            } else if (dce->mqtt_rx_state == A7677S_MQTT_RX_PAYLOAD) {
+                memcpy(dce->mqtt_rx_payload + dce->mqtt_rx_payload_len, dce->urc_buf, take);
+                dce->mqtt_rx_payload_len += take;
+            }
+            dce->urc_chunk_remaining -= take;
+
+            memmove(dce->urc_buf, dce->urc_buf + take, dce->urc_buf_len - take);
+            dce->urc_buf_len -= take;
+            dce->urc_buf[dce->urc_buf_len] = '\0';
+
+            if (dce->urc_chunk_remaining > 0) break; /* need more bytes next poll */
+
+            /* The modem sends a trailing "\r\n" after each data chunk,
+             * before the next header line. Consume it now if it is already
+             * here; if not, the blank-line skip below handles it next
+             * iteration once it arrives. */
+            if (dce->urc_buf_len >= 2 && dce->urc_buf[0] == '\r' && dce->urc_buf[1] == '\n') {
+                memmove(dce->urc_buf, dce->urc_buf + 2, dce->urc_buf_len - 2);
+                dce->urc_buf_len -= 2;
+                dce->urc_buf[dce->urc_buf_len] = '\0';
+            }
+            continue;
+        }
+
+        char *eol = strstr(dce->urc_buf, "\r\n");
+        if (!eol) break; /* incomplete line — wait for more bytes */
+
+        size_t line_len = (size_t)(eol - dce->urc_buf);
+        if (line_len == 0) {
+            /* blank line between URCs — consume and continue */
+            memmove(dce->urc_buf, dce->urc_buf + 2, dce->urc_buf_len - 2);
+            dce->urc_buf_len -= 2;
+            dce->urc_buf[dce->urc_buf_len] = '\0';
+            continue;
+        }
+
+        char line[A7677S_URC_BUF_SIZE];
+        memcpy(line, dce->urc_buf, line_len);
+        line[line_len] = '\0';
+
+        size_t consumed = line_len + 2; /* + "\r\n" */
+        memmove(dce->urc_buf, dce->urc_buf + consumed, dce->urc_buf_len - consumed);
+        dce->urc_buf_len -= (uint16_t)consumed;
+        dce->urc_buf[dce->urc_buf_len] = '\0';
+
+        urc_process_header_line(dce, line);
+        /* Loop again — urc_process_header_line() may have set
+         * urc_chunk_remaining > 0 (RXTOPIC/RXPAYLOAD header), which the top
+         * of this loop now handles against whatever remains in urc_buf. */
+    }
+}
+
 void a7677s_mqtt_register_callbacks(a7677s_t *dce,
                                      mqtt_incoming_cb_t incoming_cb,
                                      mqtt_connlost_cb_t connlost_cb,
@@ -707,6 +966,16 @@ void a7677s_mqtt_register_callbacks(a7677s_t *dce,
     dce->mqtt_incoming_cb = incoming_cb;
     dce->mqtt_connlost_cb = connlost_cb;
     dce->mqtt_user_ctx    = user_ctx;
+}
+
+/* modem_ops_t vtable adapter — identical signature to
+ * a7677s_mqtt_register_callbacks() above, just reached through the generic
+ * interface so sx_mqtt.c never has to include a7677s.h. */
+static void a7677s_mqtt_set_callbacks(void *ctx, mqtt_incoming_cb_t incoming_cb,
+                                       mqtt_connlost_cb_t connlost_cb,
+                                       void *user_ctx)
+{
+    a7677s_mqtt_register_callbacks((a7677s_t *)ctx, incoming_cb, connlost_cb, user_ctx);
 }
 
 /* Fire the in-flight op callback and clear it so it cannot fire twice. */
@@ -1669,10 +1938,11 @@ const modem_ops_t a7677s_ops = {
     .enter_low_power  = a7677s_enter_low_power,
     .exit_low_power   = a7677s_exit_low_power,
 
-    .mqtt_connect     = a7677s_mqtt_connect,
-    .mqtt_disconnect  = a7677s_mqtt_disconnect,
-    .mqtt_publish     = a7677s_mqtt_publish,
-    .mqtt_subscribe   = a7677s_mqtt_subscribe,
+    .mqtt_connect      = a7677s_mqtt_connect,
+    .mqtt_disconnect   = a7677s_mqtt_disconnect,
+    .mqtt_publish      = a7677s_mqtt_publish,
+    .mqtt_subscribe    = a7677s_mqtt_subscribe,
+    .mqtt_set_callbacks = a7677s_mqtt_set_callbacks,
 
     .poll             = a7677s_poll,
 };

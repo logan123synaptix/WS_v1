@@ -196,7 +196,6 @@ void sim76xx_power_on(sim76xx_t *dce)
     sx_delay_ms(8000);
     // lte_uart_it_enable();
     log_info(TAG, "Power On OK!");
-    
 }
 void sim76xx_power_off(sim76xx_t *dce)
 {

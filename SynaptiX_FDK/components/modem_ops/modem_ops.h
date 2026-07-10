@@ -45,6 +45,20 @@ typedef enum {
  *      fires. */
 typedef void (*mqtt_cb_t)(modem_ops_result_t result, void *ctx);
 
+/* Callback fired when an inbound MQTT message is fully received (i.e. after
+ * the driver has accumulated all +CMQTTRXTOPIC/+CMQTTRXPAYLOAD fragments up
+ * to +CMQTTRXEND). topic/payload are NUL-terminated but not guaranteed to
+ * stay valid after the callback returns — copy out anything needed.
+ * ctx: the user_ctx pointer passed to mqtt_set_callbacks(). */
+typedef void (*mqtt_incoming_cb_t)(const char *topic, uint16_t topic_len,
+                                    const char *payload, uint16_t payload_len,
+                                    void *ctx);
+
+/* Callback fired when the MQTT session drops asynchronously (+CMQTTCONNLOST
+ * URC, or a PDN deactivation that the driver knows MQTT cannot survive).
+ * ctx: the user_ctx pointer passed to mqtt_set_callbacks(). */
+typedef void (*mqtt_connlost_cb_t)(void *ctx);
+
 /* Callback used for enter_low_power / exit_low_power, since these are also
  * asynchronous operations (waiting for the AT+CFUN=0/1 response via
  * poll()). */
@@ -128,6 +142,14 @@ typedef struct {
                          uint8_t qos, uint8_t retain, mqtt_cb_t cb);
     int (*mqtt_subscribe)(void *ctx, const char *topic, uint8_t qos,
                            mqtt_cb_t cb);
+
+    /* Registers the callbacks used to deliver inbound MQTT messages and
+     * connection-lost notifications. Not an async op (no cb param of its
+     * own) — just stores the two function pointers on the driver's context.
+     * Call once after modem_handle_t is set up, before mqtt_connect(). */
+    void (*mqtt_set_callbacks)(void *ctx, mqtt_incoming_cb_t incoming_cb,
+                                mqtt_connlost_cb_t connlost_cb,
+                                void *user_ctx);
 
     /* --- Mandatory poll, called continuously from the main loop --- */
 

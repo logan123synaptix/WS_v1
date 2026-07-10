@@ -101,6 +101,9 @@ void sim_it_handle(void);
 void board_gps_uart_resume_it(void);
 void board_sim_uart_resume_it(void);
 
+inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+inline uint32_t sx_gettick(void){return HAL_GetTick();}
+
 void sx_board_uart_abort(void);
 void sx_board_uart_resume_it(void);
 void check_charge(void);

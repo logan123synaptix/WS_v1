@@ -14,6 +14,7 @@ extern "C" {
 #define A7677S_TIMEOUT_AT      2500U
 #define A7677S_TIMEOUT_CPOF    5000U
 #define A7677S_TIMEOUT_NETWORK 9000U    /* CGDCONT/CGAUTH/CGACT/COPS, per a76xx_at_cmd.md MaxResponseTime */
+#define A7677S_TIMEOUT_CFUN    9000U    /* AT+CFUN=0/1, MaxResponseTime per a76xx_at_cmd.md section 3.2.1 */
 #define A7677S_CREG_POLL_MS    2000U    /* interval between AT+CREG? polls while waiting for registration */
 #define A7677S_MAX_RETRY       3U       /* consecutive AT-layer failures before restarting the attach sequence from AT */
 
@@ -110,7 +111,18 @@ struct a7677s
     char username[A7677S_APN_MAX_LEN];
     char password[A7677S_APN_MAX_LEN];
 
-    /* --- TODO (next piece): MQTT client state, low power (CFUN) state. */
+    /* --- Low power (AT+CFUN=0/1), replaces PSM (see modem_ops.h design
+     * notes: no DTR pin wired, so PSM's early-wake is not usable). Per
+     * Documents/a7677s.md section 5.3.3, the serial port stays usable at
+     * CFUN=0 (only RF/USIM turn off) — no extra UART-settling wait is
+     * needed beyond the normal AT_CMD_TIMEOUT for the CFUN command itself. */
+    uint8_t low_power_active;   /* 1 after AT+CFUN=0 succeeded, until AT+CFUN=1 succeeds again.
+                                  * is_ready() returns false while this is set, since RF/network
+                                  * is off and MQTT cannot work regardless of init_state. */
+    uint8_t cfun_cmd_pending;   /* 1 while an AT+CFUN=0/1 command is in flight */
+    power_mode_cb_t cfun_cb;    /* caller's callback for the in-flight enter/exit_low_power() call */
+
+    /* --- TODO (next piece): MQTT client state. */
 };
 
 void a7677s_init(a7677s_t *dce);

@@ -19,7 +19,9 @@ static const char *TAG = "A7677S";
 #define CMD_COPS_SET        4
 #define CMD_COPS_QUERY      5
 #define CMD_CGDCONT_QUERY   6
-#define CMD_DYNAMIC         7   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
+#define CMD_CFUN_0          7
+#define CMD_CFUN_1          8
+#define CMD_DYNAMIC         9   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
 
 static modem_command_t command[] = {
     [CMD_AT]            = {.cmd = "AT\r\n",              .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
@@ -29,6 +31,8 @@ static modem_command_t command[] = {
     [CMD_COPS_SET]      = {.cmd = "AT+COPS=0\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_COPS_QUERY]    = {.cmd = "AT+COPS?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CGDCONT_QUERY] = {.cmd = "AT+CGDCONT?\r\n",     .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CFUN_0]        = {.cmd = "AT+CFUN=0\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CFUN_1]        = {.cmd = "AT+CFUN=1\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_DYNAMIC]       = {0},
 };
 
@@ -54,6 +58,8 @@ static void cb_creg_poll      (modem_t *modem, const char *response, modem_respo
 static void cb_cops_set       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cops_query     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgdcont_query  (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cfun_0         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cfun_1         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 
 /* ------------------------------------------------------------------ */
 /*  Init                                                                */
@@ -74,6 +80,10 @@ void a7677s_init(a7677s_t *dce)
     dce->apn[0]      = '\0';
     dce->username[0] = '\0';
     dce->password[0] = '\0';
+
+    dce->low_power_active = 0;
+    dce->cfun_cmd_pending  = 0;
+    dce->cfun_cb           = NULL;
 
     log_debug(TAG, "Initializing");
 }
@@ -442,8 +452,65 @@ static void cb_cgdcont_query(modem_t *modem, const char *response, modem_respons
     log_info(TAG, "Network attach complete, ready for MQTT");
 }
 
+/* ------------------------------------------------------------------ */
+/*  Low power (AT+CFUN=0/1)                                            */
+/* ------------------------------------------------------------------ */
+/* Per Documents/a7677s.md section 5.3.3: at CFUN=0 the serial port stays
+ * usable (only RF/USIM turn off), so unlike the CREG_POLL deviation above,
+ * no extra confirmation step is needed here — AT+CFUN's own OK/ERROR is a
+ * direct, reliable result per a76xx_at_cmd.md section 3.2.1. */
+
+static void cb_cfun_0(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->cfun_cmd_pending = 0;
+
+    modem_ops_result_t result;
+    if (res == MODEM_RESPONSE_SUCCESS) {
+        log_info(TAG, "Entered low power (AT+CFUN=0)");
+        dce->low_power_active = 1;
+        result = MODEM_OPS_OK;
+    } else if (res == MODEM_RESPONSE_TIMEOUT) {
+        log_error(TAG, "AT+CFUN=0 timed out");
+        result = MODEM_OPS_TIMEOUT;
+    } else {
+        log_error(TAG, "AT+CFUN=0 failed");
+        result = MODEM_OPS_ERROR;
+    }
+
+    power_mode_cb_t cb = dce->cfun_cb;
+    dce->cfun_cb = NULL;
+    if (cb) cb(result, dce);
+}
+
+static void cb_cfun_1(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->cfun_cmd_pending = 0;
+
+    modem_ops_result_t result;
+    if (res == MODEM_RESPONSE_SUCCESS) {
+        log_info(TAG, "Exited low power (AT+CFUN=1)");
+        dce->low_power_active = 0;
+        result = MODEM_OPS_OK;
+    } else if (res == MODEM_RESPONSE_TIMEOUT) {
+        log_error(TAG, "AT+CFUN=1 timed out");
+        result = MODEM_OPS_TIMEOUT;
+        /* Deliberately leave low_power_active=1 on failure: we do not know
+         * the module's true state, and is_ready() staying false is the
+         * safe default until a retry succeeds — better than reporting
+         * "ready" while unsure the module actually left CFUN=0. */
+    } else {
+        log_error(TAG, "AT+CFUN=1 failed");
+        result = MODEM_OPS_ERROR;
+    }
+
+    power_mode_cb_t cb = dce->cfun_cb;
+    dce->cfun_cb = NULL;
+    if (cb) cb(result, dce);
+}
+
 /* TODO (next piece, not yet implemented):
- *   - enter_low_power()/exit_low_power(): AT+CFUN=0/1, not yet implemented.
  *   - mqtt_connect/disconnect/publish/subscribe: AT+CMQTT* sequence, not yet
  *     implemented (see confirmed AT command set in Documents/a76xx_at_cmd.md
  *     section 18.2, and the errcode-parsing bug fix noted in the handoff).
@@ -479,10 +546,59 @@ static bool a7677s_is_ready(void *ctx)
 {
     a7677s_t *dce = (a7677s_t *)ctx;
     return dce->power_state == A7677S_PWR_READY &&
-           dce->init_state  == A7677S_INIT_READY;
+           dce->init_state  == A7677S_INIT_READY &&
+           !dce->low_power_active;
 }
-static int a7677s_enter_low_power_stub(void *ctx, power_mode_cb_t cb) { (void)ctx; (void)cb; return -1; }
-static int a7677s_exit_low_power_stub(void *ctx, power_mode_cb_t cb)  { (void)ctx; (void)cb; return -1; }
+
+static int a7677s_enter_low_power(void *ctx, power_mode_cb_t cb)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+
+    if (dce->power_state != A7677S_PWR_READY) {
+        log_warn(TAG, "enter_low_power(): power not ready");
+        return -1;
+    }
+    if (modem_is_busy(pModem(dce)) || dce->init_cmd_pending || dce->cfun_cmd_pending) {
+        log_warn(TAG, "enter_low_power(): modem busy");
+        return -1;
+    }
+    if (dce->low_power_active) {
+        log_warn(TAG, "enter_low_power(): already in low power");
+        return -1;
+    }
+
+    dce->cfun_cb = cb;
+    command[CMD_CFUN_0].callback = cb_cfun_0;
+    command[CMD_CFUN_0].arg      = dce;
+    dce->cfun_cmd_pending = 1;
+    modem_send_command(pModem(dce), &command[CMD_CFUN_0], A7677S_TIMEOUT_CFUN);
+    return 0;
+}
+
+static int a7677s_exit_low_power(void *ctx, power_mode_cb_t cb)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+
+    if (dce->power_state != A7677S_PWR_READY) {
+        log_warn(TAG, "exit_low_power(): power not ready");
+        return -1;
+    }
+    if (modem_is_busy(pModem(dce)) || dce->init_cmd_pending || dce->cfun_cmd_pending) {
+        log_warn(TAG, "exit_low_power(): modem busy");
+        return -1;
+    }
+    if (!dce->low_power_active) {
+        log_warn(TAG, "exit_low_power(): not in low power");
+        return -1;
+    }
+
+    dce->cfun_cb = cb;
+    command[CMD_CFUN_1].callback = cb_cfun_1;
+    command[CMD_CFUN_1].arg      = dce;
+    dce->cfun_cmd_pending = 1;
+    modem_send_command(pModem(dce), &command[CMD_CFUN_1], A7677S_TIMEOUT_CFUN);
+    return 0;
+}
 static int a7677s_mqtt_connect_stub(void *ctx, const char *broker, uint16_t port,
                                      uint8_t use_ssl, uint16_t keepalive,
                                      uint8_t clean_session, const char *username,
@@ -513,8 +629,8 @@ const modem_ops_t a7677s_ops = {
     .start            = a7677s_start,
     .is_ready         = a7677s_is_ready,
 
-    .enter_low_power  = a7677s_enter_low_power_stub, /* TODO next piece */
-    .exit_low_power   = a7677s_exit_low_power_stub,  /* TODO next piece */
+    .enter_low_power  = a7677s_enter_low_power,
+    .exit_low_power   = a7677s_exit_low_power,
 
     .mqtt_connect     = a7677s_mqtt_connect_stub,    /* TODO next piece */
     .mqtt_disconnect  = a7677s_mqtt_disconnect_stub, /* TODO next piece */

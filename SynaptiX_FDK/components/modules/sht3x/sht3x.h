@@ -7,7 +7,7 @@ extern "C" {
 
 #include "sx_i2c.h"
 
-#define SHT3X_DEVICE_ADDR       0x44    // ADDR pin connect to GND
+#define SHT3X_DEVICE_ADDR       (0x44<<1)    // ADDR pin connect to GND
 #define SHT3X_TIMEOUT_MS        50
 
 typedef struct {
@@ -16,12 +16,12 @@ typedef struct {
     float temperature;
 } SHT3X_T;
 
-typedef enum {
+typedef enum{
     SHT3X_OK = 0,
     SHT3X_ERR,
     SHT3X_ERR_CRC,
     SHT3X_ERR_TIMEOUT
-} sht3x_status_t;
+} SHT3X_STATUS_T;
 
 /* Commands */
 typedef enum {
@@ -39,13 +39,13 @@ typedef enum {
     SHT3X_CMD_HEATER_ENABLE           = 0x306D,
     SHT3X_CMD_HEATER_DISABLE          = 0x3066,
     SHT3X_CMD_BREAK                   = 0x3093
-} sht3x_command_t;
+} SHT3X_COMMAND_T;
 
-uint8_t sht3x_init(SHT3X_T *sht3x, sx_i2c_t *i2c);
-uint8_t sht3x_soft_reset(SHT3X_T *sht3x);
-uint8_t sht3x_read_status(SHT3X_T *sht3x, uint16_t *status);
-uint8_t sht3x_measure_single_shot(SHT3X_T *sht3x, sht3x_command_t cmd);
-uint8_t sht3x_read_measurement(SHT3X_T *sht3x);
+SHT3X_STATUS_T sht3x_init(SHT3X_T *sht3x, sx_i2c_t *i2c);
+SHT3X_STATUS_T sht3x_soft_reset(SHT3X_T *sht3x);
+SHT3X_STATUS_T sht3x_read_status(SHT3X_T *sht3x, uint16_t *status);
+SHT3X_STATUS_T sht3x_measure_single_shot(SHT3X_T *sht3x, SHT3X_COMMAND_T cmd);
+SHT3X_STATUS_T sht3x_read_measurement(SHT3X_T *sht3x);
 
 #ifdef __cplusplus
 }

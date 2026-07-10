@@ -19,13 +19,13 @@ static uint8_t calculate_crc(const uint8_t *data, uint8_t length)
 }
 
 /* Send 2 bytes command */
-static uint8_t sht3x_send_cmd(SHT3X_T *sht3x, sht3x_command_t cmd)
+static SHT3X_STATUS_T sht3x_send_cmd(SHT3X_T *sht3x, SHT3X_COMMAND_T cmd)
 {
     uint8_t buf[2] = {(cmd >> 8) & 0xFF, cmd & 0xFF};
     return sx_i2c_write(sht3x->i2c, SHT3X_DEVICE_ADDR, buf, 2) == 0 ? SHT3X_OK : SHT3X_ERR;
 }
 
-uint8_t sht3x_init(SHT3X_T *sht3x, sx_i2c_t *i2c)
+SHT3X_STATUS_T sht3x_init(SHT3X_T *sht3x, sx_i2c_t *i2c)
 {
     if (sht3x == NULL || i2c == NULL) return SHT3X_ERR;
 
@@ -43,12 +43,12 @@ uint8_t sht3x_init(SHT3X_T *sht3x, sx_i2c_t *i2c)
     return SHT3X_OK;
 }
 
-uint8_t sht3x_soft_reset(SHT3X_T *sht3x)
+SHT3X_STATUS_T sht3x_soft_reset(SHT3X_T *sht3x)
 {
     return sht3x_send_cmd(sht3x, SHT3X_CMD_SOFT_RESET);
 }
 
-uint8_t sht3x_read_status(SHT3X_T *sht3x, uint16_t *status)
+SHT3X_STATUS_T sht3x_read_status(SHT3X_T *sht3x, uint16_t *status)
 {
     uint8_t buf[3];
     if (sht3x_send_cmd(sht3x, SHT3X_CMD_READ_STATUS) != SHT3X_OK) {
@@ -69,12 +69,12 @@ uint8_t sht3x_read_status(SHT3X_T *sht3x, uint16_t *status)
     return SHT3X_OK;
 }
 
-uint8_t sht3x_measure_single_shot(SHT3X_T *sht3x, sht3x_command_t cmd)
+SHT3X_STATUS_T sht3x_measure_single_shot(SHT3X_T *sht3x, SHT3X_COMMAND_T cmd)
 {
     return sht3x_send_cmd(sht3x, cmd);
 }
 
-uint8_t sht3x_read_measurement(SHT3X_T *sht3x)
+SHT3X_STATUS_T sht3x_read_measurement(SHT3X_T *sht3x)
 {
     uint8_t buf[6];
     if (sx_i2c_read(sht3x->i2c, SHT3X_DEVICE_ADDR, buf, 6) != 0) {

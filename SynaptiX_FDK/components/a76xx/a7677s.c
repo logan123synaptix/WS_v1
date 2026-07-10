@@ -1646,10 +1646,19 @@ static void cb_mqtt_sub_topic(modem_t *modem, const char *response,
         return;
     }
 
+    /* BUGFIX: same class of bug as cb_mqtt_pub_topic() above. Pass
+     * dce->mqtt_sub_topic directly instead of copying through
+     * s_mqtt_dyn_cmd_buf (384 bytes). send_mqtt_dynamic()/command[].cmd only
+     * stores the pointer (no copy), and sx_uart_write() has no 384-byte
+     * limit of its own. Topic max is A7677S_MQTT_TOPIC_MAX (1025 bytes),
+     * which already exceeds the old scratch buffer, so the old strncpy()
+     * silently truncated any subscribe topic longer than 383 bytes while
+     * the AT+CMQTTSUBTOPIC=...,<len> command line had already told the
+     * modem the untruncated length — causing the modem to wait for bytes
+     * that never arrived (timeout) or to misread subsequent AT traffic as
+     * topic data. */
     dce->mqtt_state = A7677S_MQTT_SUB_TOPIC_DATA;
-    strncpy(s_mqtt_dyn_cmd_buf, dce->mqtt_sub_topic, sizeof(s_mqtt_dyn_cmd_buf) - 1);
-    s_mqtt_dyn_cmd_buf[sizeof(s_mqtt_dyn_cmd_buf) - 1] = '\0';
-    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+    send_mqtt_dynamic(dce, dce->mqtt_sub_topic, "\r\nOK\r\n", "\r\nERROR\r\n",
                       cb_mqtt_sub_topic_data, A7677S_TIMEOUT_AT);
 }
 

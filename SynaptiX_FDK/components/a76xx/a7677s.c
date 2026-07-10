@@ -866,11 +866,19 @@ static void cb_mqtt_pub_topic(modem_t *modem, const char *response,
     }
 
     /* Send raw topic bytes — modem has already accepted req_length so it
-     * reads exactly that many bytes without needing \r\n. */
+     * reads exactly that many bytes without needing \r\n.
+     * BUGFIX: pass dce->mqtt_pub_topic directly instead of copying through
+     * s_mqtt_dyn_cmd_buf (384 bytes). send_mqtt_dynamic()/command[].cmd only
+     * stores the pointer (no copy), and modem_send_command()/sx_uart_write()
+     * has no 384-byte limit of its own (it transmits exactly strlen(cmd)
+     * bytes via HAL_UART_Transmit()). Topic max is A7677S_MQTT_TOPIC_MAX
+     * (1025 bytes) which already exceeds the old scratch buffer, so the old
+     * strncpy() silently truncated any topic longer than 383 bytes while the
+     * AT+CMQTTTOPIC=...,<len> command line had already told the modem the
+     * untruncated length — causing the modem to wait for bytes that never
+     * arrived (timeout) or to misread subsequent AT traffic as topic data. */
     dce->mqtt_state = A7677S_MQTT_PUB_TOPIC_DATA;
-    strncpy(s_mqtt_dyn_cmd_buf, dce->mqtt_pub_topic, sizeof(s_mqtt_dyn_cmd_buf) - 1);
-    s_mqtt_dyn_cmd_buf[sizeof(s_mqtt_dyn_cmd_buf) - 1] = '\0';
-    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+    send_mqtt_dynamic(dce, dce->mqtt_pub_topic, "\r\nOK\r\n", "\r\nERROR\r\n",
                       cb_mqtt_pub_topic_data, A7677S_TIMEOUT_AT);
 }
 
@@ -908,10 +916,14 @@ static void cb_mqtt_pub_payload(modem_t *modem, const char *response,
         return;
     }
 
+    /* BUGFIX: same class of bug as cb_mqtt_pub_topic() above. Payload can be
+     * up to A7677S_MQTT_PAYLOAD_MAX (10240 bytes), far beyond the 384-byte
+     * s_mqtt_dyn_cmd_buf scratch buffer — the old strncpy() truncated any
+     * payload longer than 383 bytes while AT+CMQTTPAYLOAD=...,<len> had
+     * already announced the untruncated length to the modem. Pass the
+     * pointer directly instead. */
     dce->mqtt_state = A7677S_MQTT_PUB_PAYLOAD_DATA;
-    strncpy(s_mqtt_dyn_cmd_buf, dce->mqtt_pub_payload, sizeof(s_mqtt_dyn_cmd_buf) - 1);
-    s_mqtt_dyn_cmd_buf[sizeof(s_mqtt_dyn_cmd_buf) - 1] = '\0';
-    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+    send_mqtt_dynamic(dce, dce->mqtt_pub_payload, "\r\nOK\r\n", "\r\nERROR\r\n",
                       cb_mqtt_pub_payload_data, A7677S_TIMEOUT_AT);
 }
 

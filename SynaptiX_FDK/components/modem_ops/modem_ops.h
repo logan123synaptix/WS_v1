@@ -89,12 +89,17 @@ typedef struct {
 
     /* --- MQTT --- */
 
-    /* broker/port/username/password/keepalive/clean_session are passed in
-     * on every call (not pre-configured via a setter) so the caller
-     * (sx_mqtt.c) can reconnect to a different broker without needing to
-     * know which concrete driver it is talking to. username/password may
-     * be NULL/empty if the broker does not require auth. */
-    int (*mqtt_connect)(void *ctx, const char *broker, uint16_t port,
+    /* All connection parameters are passed on every call so the caller
+     * (sx_mqtt.c) can reconnect to a different broker or use a different
+     * identity without knowing the concrete driver type.
+     *
+     * client_id: MQTT client identifier (AT+CMQTTACCQ). Must be unique per
+     *   device/session. NULL is not allowed (MQTT spec requires a non-empty
+     *   client ID for clean_session=0; most brokers also reject empty IDs).
+     * username/password: may be NULL or "" if the broker does not require
+     *   authentication (the driver will skip sending credentials). */
+    int (*mqtt_connect)(void *ctx, const char *client_id,
+                         const char *broker, uint16_t port,
                          uint8_t use_ssl, uint16_t keepalive,
                          uint8_t clean_session, const char *username,
                          const char *password, mqtt_cb_t cb);

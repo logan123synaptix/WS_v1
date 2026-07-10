@@ -7,6 +7,31 @@ extern "C" {
 #include "modem.h"
 #include "modem_ops.h"
 
+/* Timeouts (ms) for the MQTT state machine.
+ * AT+CMQTTSTART/STOP: MaxResponseTime per datasheet is 12000 ms.
+ * AT+CMQTTCONNECT: no explicit max in datasheet; 30 s is conservative.
+ * AT+CMQTTDISC: timeout param range is 0 or 60-180 s; we pass 120 s to the
+ *   modem and give the AT layer 130 s so it never fires before the modem.
+ * AT+CMQTTPUB: pub_timeout must be 60-180 s (datasheet 18.2.12); we use 60 s
+ *   and give the AT layer 70 s so it never fires before the modem.
+ * AT+CMQTTSUBTOPIC/CMQTTSUB prompt (">") and OK: short, reuse AT timeout. */
+#define A7677S_TIMEOUT_MQTT_START    13000U
+#define A7677S_TIMEOUT_MQTT_CONNECT  30000U
+#define A7677S_TIMEOUT_MQTT_DISC     130000U
+#define A7677S_TIMEOUT_MQTT_PUB      70000U
+#define A7677S_MQTT_PUB_TIMEOUT_S    60U     /* passed to AT+CMQTTPUB as <pub_timeout> */
+#define A7677S_MQTT_DISC_TIMEOUT_S   120U    /* passed to AT+CMQTTDISC as <timeout> */
+#define A7677S_MQTT_CLIENT_INDEX     0U      /* only one client used; index 0 */
+
+/* Max lengths for MQTT dynamic command buffers. */
+#define A7677S_MQTT_CLIENT_ID_MAX    129U    /* 1-128 bytes per datasheet + NUL */
+#define A7677S_MQTT_BROKER_MAX       257U    /* "tcp://host:port" up to 256 bytes + NUL */
+#define A7677S_MQTT_USERNAME_MAX     257U    /* up to 256 bytes + NUL */
+#define A7677S_MQTT_PASSWORD_MAX     257U    /* up to 256 bytes + NUL */
+#define A7677S_MQTT_TOPIC_MAX        1025U   /* 1-1024 bytes + NUL */
+#define A7677S_MQTT_PAYLOAD_MAX      10241U  /* 1-10240 bytes + NUL */
+#define A7677S_MQTT_DYN_CMD_MAX      384U    /* scratch buffer for built AT cmds */
+
 /* Timeouts (ms) for the power state machine and AT init sequence. */
 #define A7677S_PULSE_HIGH_MS   50U
 #define A7677S_PULSE_LOW_MS    500U
@@ -76,6 +101,71 @@ typedef enum {
     A7677S_INIT_READY,          /* attach sequence complete, is_ready() true */
 } a7677s_init_state_t;
 
+/* Non-blocking MQTT state machine, driven by poll() after is_ready() is true.
+ *
+ * Connect sequence: MQTT_IDLE -> START -> ACCQ -> CONNECT -> CONNECTED
+ * Disconnect:       CONNECTED -> DISC -> REL -> STOP -> MQTT_IDLE
+ * Publish:          CONNECTED -> PUB_TOPIC -> PUB_PAYLOAD -> PUB_SEND -> CONNECTED
+ * Subscribe:        CONNECTED -> SUB_TOPIC -> SUB_SEND -> CONNECTED
+ *
+ * On any AT-layer failure in the connect sequence, the state machine rewinds
+ * to MQTT_IDLE and fires the caller's callback with MODEM_OPS_ERROR so the
+ * service layer can retry.  Failures during pub/sub fire the callback and
+ * return to CONNECTED (the TCP session is still alive).
+ *
+ * Inbound data (subscribed topics) arrives as URCs at any time while
+ * CONNECTED. The URCs are parsed inside poll() via the rx state machine:
+ *   +CMQTTRXSTART  -> rx_state = RX_TOPIC
+ *   +CMQTTRXTOPIC  -> copy topic bytes from UART, rx_state = RX_PAYLOAD
+ *   +CMQTTRXPAYLOAD-> copy payload bytes from UART, rx_state = RX_END
+ *   +CMQTTRXEND    -> fire incoming_cb, rx_state = RX_IDLE
+ *   +CMQTTCONNLOST -> fire conn_lost_cb, mqtt_state = MQTT_IDLE
+ *
+ * NOTE: The A7677S URC for inbound data sends raw bytes immediately after the
+ * URC header line (no extra prompt). The length is in the URC header so the
+ * driver reads exactly that many bytes from the UART ring buffer. */
+typedef enum {
+    A7677S_MQTT_IDLE = 0,        /* not connected, no sequence running */
+    /* --- connect sequence --- */
+    A7677S_MQTT_START,           /* AT+CMQTTSTART sent, waiting URC +CMQTTSTART:0 */
+    A7677S_MQTT_ACCQ,            /* AT+CMQTTACCQ sent, waiting OK */
+    A7677S_MQTT_CONNECT,         /* AT+CMQTTCONNECT sent, waiting URC +CMQTTCONNECT:0,0 */
+    A7677S_MQTT_CONNECTED,       /* session live, ready for pub/sub */
+    /* --- disconnect sequence --- */
+    A7677S_MQTT_DISC,            /* AT+CMQTTDISC sent, waiting URC +CMQTTDISC:0,0 */
+    A7677S_MQTT_REL,             /* AT+CMQTTREL sent, waiting OK */
+    A7677S_MQTT_STOP,            /* AT+CMQTTSTOP sent, waiting URC +CMQTTSTOP:0 */
+    /* --- publish sequence (CONNECTED -> back to CONNECTED) --- */
+    A7677S_MQTT_PUB_TOPIC,       /* AT+CMQTTTOPIC sent, waiting ">" prompt */
+    A7677S_MQTT_PUB_TOPIC_DATA,  /* topic bytes sent, waiting OK */
+    A7677S_MQTT_PUB_PAYLOAD,     /* AT+CMQTTPAYLOAD sent, waiting ">" prompt */
+    A7677S_MQTT_PUB_PAYLOAD_DATA,/* payload bytes sent, waiting OK */
+    A7677S_MQTT_PUB_SEND,        /* AT+CMQTTPUB sent, waiting URC +CMQTTPUB:0,0 */
+    /* --- subscribe sequence (CONNECTED -> back to CONNECTED) --- */
+    A7677S_MQTT_SUB_TOPIC,       /* AT+CMQTTSUBTOPIC sent, waiting ">" prompt */
+    A7677S_MQTT_SUB_TOPIC_DATA,  /* topic bytes sent, waiting OK */
+    A7677S_MQTT_SUB_SEND,        /* AT+CMQTTSUB sent, waiting URC +CMQTTSUB:0,0 */
+} a7677s_mqtt_state_t;
+
+/* Inbound-message receive state (driven by URCs, independent of mqtt_state). */
+typedef enum {
+    A7677S_MQTT_RX_IDLE = 0,
+    A7677S_MQTT_RX_TOPIC,
+    A7677S_MQTT_RX_PAYLOAD,
+    A7677S_MQTT_RX_END,
+} a7677s_mqtt_rx_state_t;
+
+/* Callback fired when a subscribed message arrives.
+ * topic/topic_len: the topic string (not NUL-terminated, raw bytes).
+ * payload/payload_len: the message body.
+ * user_ctx: opaque pointer the caller registered alongside the callback. */
+typedef void (*mqtt_incoming_cb_t)(const char *topic, uint16_t topic_len,
+                                    const char *payload, uint16_t payload_len,
+                                    void *user_ctx);
+
+/* Callback fired on passive disconnect (+CMQTTCONNLOST). */
+typedef void (*mqtt_connlost_cb_t)(void *user_ctx);
+
 typedef struct a7677s a7677s_t;
 
 struct a7677s
@@ -122,7 +212,47 @@ struct a7677s
     uint8_t cfun_cmd_pending;   /* 1 while an AT+CFUN=0/1 command is in flight */
     power_mode_cb_t cfun_cb;    /* caller's callback for the in-flight enter/exit_low_power() call */
 
-    /* --- TODO (next piece): MQTT client state. */
+    /* --- MQTT client state --- */
+    a7677s_mqtt_state_t    mqtt_state;
+    uint8_t                mqtt_cmd_pending;  /* 1 while an MQTT AT cmd is in flight */
+
+    /* Parameters saved across the async connect/pub/sub sequences. */
+    char mqtt_client_id[A7677S_MQTT_CLIENT_ID_MAX];
+    char mqtt_broker[A7677S_MQTT_BROKER_MAX];    /* "tcp://host:port" or "ssl://..." */
+    char mqtt_username[A7677S_MQTT_USERNAME_MAX];
+    char mqtt_password[A7677S_MQTT_PASSWORD_MAX];
+    uint16_t mqtt_keepalive;
+    uint8_t  mqtt_clean_session;
+    uint8_t  mqtt_use_ssl;
+
+    /* Saved publish parameters. */
+    char     mqtt_pub_topic[A7677S_MQTT_TOPIC_MAX];
+    char     mqtt_pub_payload[A7677S_MQTT_PAYLOAD_MAX];
+    uint16_t mqtt_pub_topic_len;
+    uint16_t mqtt_pub_payload_len;
+    uint8_t  mqtt_pub_qos;
+    uint8_t  mqtt_pub_retain;
+
+    /* Saved subscribe parameters. */
+    char     mqtt_sub_topic[A7677S_MQTT_TOPIC_MAX];
+    uint16_t mqtt_sub_topic_len;
+    uint8_t  mqtt_sub_qos;
+
+    /* Caller callbacks for the in-flight async operation. */
+    mqtt_cb_t mqtt_op_cb;       /* connect / disconnect / publish / subscribe result */
+
+    /* Inbound message receive state machine. */
+    a7677s_mqtt_rx_state_t mqtt_rx_state;
+    char     mqtt_rx_topic[A7677S_MQTT_TOPIC_MAX];
+    char     mqtt_rx_payload[A7677S_MQTT_PAYLOAD_MAX];
+    uint16_t mqtt_rx_topic_len;
+    uint16_t mqtt_rx_payload_len;
+
+    /* Registered inbound-message and connection-lost callbacks.
+     * Set once by the service layer; not per-operation. */
+    mqtt_incoming_cb_t mqtt_incoming_cb;
+    mqtt_connlost_cb_t mqtt_connlost_cb;
+    void              *mqtt_user_ctx;    /* passed back to both callbacks above */
 };
 
 void a7677s_init(a7677s_t *dce);
@@ -132,6 +262,16 @@ void a7677s_init(a7677s_t *dce);
  * be NULL or "" if the APN does not require authentication (CGAUTH is then
  * skipped entirely). Mirrors sim76xx_set_full_apn(). */
 void a7677s_set_full_apn(a7677s_t *dce, const char *apn, const char *username, const char *password);
+
+/* Register callbacks for inbound MQTT messages and passive disconnects.
+ * Must be called once during board init (before mqtt_connect).
+ * incoming_cb fires whenever a subscribed message arrives (+CMQTTRXPAYLOAD).
+ * connlost_cb fires on passive disconnect (+CMQTTCONNLOST).
+ * user_ctx is passed back unchanged to both callbacks. */
+void a7677s_mqtt_register_callbacks(a7677s_t *dce,
+                                     mqtt_incoming_cb_t incoming_cb,
+                                     mqtt_connlost_cb_t connlost_cb,
+                                     void *user_ctx);
 
 /* modem_ops_t implementation (see a7677s.c). The service layer should only
  * ever touch this driver through a modem_handle_t { .ops = &a7677s_ops,

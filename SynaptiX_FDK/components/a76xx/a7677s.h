@@ -19,6 +19,10 @@ extern "C" {
 #define A7677S_TIMEOUT_MQTT_CONNECT  30000U
 #define A7677S_TIMEOUT_MQTT_DISC     130000U
 #define A7677S_TIMEOUT_MQTT_PUB      70000U
+/* AT+CCERTDOWN and AT+CSSLCFG: MaxResponseTime 120000 ms per datasheet
+ * sections 19.2.1/19.2.2. We give 121 s so the AT layer's own timeout never
+ * races the modem's documented worst case. */
+#define A7677S_TIMEOUT_CERT_CMD      121000U
 #define A7677S_MQTT_PUB_TIMEOUT_S    60U     /* passed to AT+CMQTTPUB as <pub_timeout> */
 #define A7677S_MQTT_DISC_TIMEOUT_S   120U    /* passed to AT+CMQTTDISC as <timeout> */
 #define A7677S_MQTT_CLIENT_INDEX     0U      /* only one client used; index 0 */
@@ -31,6 +35,20 @@ extern "C" {
 #define A7677S_MQTT_TOPIC_MAX        1025U   /* 1-1024 bytes + NUL */
 #define A7677S_MQTT_PAYLOAD_MAX      10241U  /* 1-10240 bytes + NUL */
 #define A7677S_MQTT_DYN_CMD_MAX      384U    /* scratch buffer for built AT cmds */
+
+/* TLS/certificate support (only used when a7677s_mqtt_connect() is called
+ * with use_ssl=1). Per a76xx_at_cmd.md 19.2.2 (AT+CCERTDOWN), a single cert
+ * file may be up to 10240 bytes; we size the buffers to that maximum since
+ * the caller (sx_mqtt.c today, sx_user_mqtt.c indirectly) may hand in a
+ * full PEM chain. ssl_ctx_index 0 is used exclusively (mirrors
+ * A7677S_MQTT_CLIENT_INDEX being fixed at 0 - this driver only ever manages
+ * a single MQTT client/SSL context, matching the board's single-modem,
+ * single-broker design). */
+#define A7677S_SSL_CTX_INDEX         0U
+#define A7677S_CERT_PEM_MAX          10241U  /* 1-10240 bytes + NUL, per AT+CCERTDOWN */
+#define A7677S_CERT_FILENAME_CA      "cacert.pem"
+#define A7677S_CERT_FILENAME_CLIENT  "clientcert.pem"
+#define A7677S_CERT_FILENAME_KEY     "clientkey.pem"
 
 /* Timeouts (ms) for the power state machine and AT init sequence. */
 #define A7677S_PULSE_HIGH_MS   50U
@@ -103,15 +121,32 @@ typedef enum {
 
 /* Non-blocking MQTT state machine, driven by poll() after is_ready() is true.
  *
- * Connect sequence: MQTT_IDLE -> START -> ACCQ -> CONNECT -> CONNECTED
+ * Connect sequence (plain TCP, use_ssl=0):
+ *   MQTT_IDLE -> START -> ACCQ -> CONNECT -> CONNECTED
+ *
+ * Connect sequence (TLS, use_ssl=1) inserts a cert-upload/SSL-config block
+ * between START and ACCQ. Each cert step is skipped entirely if the
+ * corresponding cert string is NULL/"" (see a7677s_mqtt_connect() below):
+ *   MQTT_IDLE -> START
+ *     -> [CERT_CA_PROMPT -> CERT_CA_DATA]         (only if ca_cert set)
+ *     -> [CERT_CLIENT_PROMPT -> CERT_CLIENT_DATA] (only if client_cert set)
+ *     -> [CERT_KEY_PROMPT -> CERT_KEY_DATA]       (only if client_key set)
+ *     -> SSLCFG_CACERT -> SSLCFG_CLIENTCERT -> SSLCFG_CLIENTKEY
+ *     -> SSLCFG_AUTHMODE -> SSLBIND
+ *   -> ACCQ -> CONNECT -> CONNECTED
+ * authmode sent in SSLCFG_AUTHMODE: 0 if no certs at all, 1 if only ca_cert
+ * (server-authentication TLS), 2 if client_cert+client_key are also set
+ * (mutual TLS). Matches AT+CSSLCFG="authmode",... per a76xx_at_cmd.md 19.2.1.
+ *
  * Disconnect:       CONNECTED -> DISC -> REL -> STOP -> MQTT_IDLE
  * Publish:          CONNECTED -> PUB_TOPIC -> PUB_PAYLOAD -> PUB_SEND -> CONNECTED
  * Subscribe:        CONNECTED -> SUB_TOPIC -> SUB_SEND -> CONNECTED
  *
- * On any AT-layer failure in the connect sequence, the state machine rewinds
- * to MQTT_IDLE and fires the caller's callback with MODEM_OPS_ERROR so the
- * service layer can retry.  Failures during pub/sub fire the callback and
- * return to CONNECTED (the TCP session is still alive).
+ * On any AT-layer failure in the connect sequence (including the cert/SSL
+ * steps), the state machine rewinds to MQTT_IDLE and fires the caller's
+ * callback with MODEM_OPS_ERROR so the service layer can retry.  Failures
+ * during pub/sub fire the callback and return to CONNECTED (the TCP/TLS
+ * session is still alive).
  *
  * Inbound data (subscribed topics) arrives as URCs at any time while
  * CONNECTED. The URCs are parsed inside poll() via the rx state machine:
@@ -120,6 +155,10 @@ typedef enum {
  *   +CMQTTRXPAYLOAD-> copy payload bytes from UART, rx_state = RX_END
  *   +CMQTTRXEND    -> fire incoming_cb, rx_state = RX_IDLE
  *   +CMQTTCONNLOST -> fire conn_lost_cb, mqtt_state = MQTT_IDLE
+ * NOTE (not yet implemented as of this revision — see handoff): this rx
+ * state machine and the two URC callbacks below are currently wired up in
+ * the struct/registration function only; poll() does not yet parse these
+ * URCs. Tracked separately, not part of this TLS change.
  *
  * NOTE: The A7677S URC for inbound data sends raw bytes immediately after the
  * URC header line (no extra prompt). The length is in the URC header so the
@@ -128,6 +167,21 @@ typedef enum {
     A7677S_MQTT_IDLE = 0,        /* not connected, no sequence running */
     /* --- connect sequence --- */
     A7677S_MQTT_START,           /* AT+CMQTTSTART sent, waiting URC +CMQTTSTART:0 */
+    /* --- TLS-only: cert upload block, entered from START only if use_ssl=1,
+     * each pair skipped if the corresponding cert string is NULL/"" --- */
+    A7677S_MQTT_CERT_CA_PROMPT,      /* AT+CCERTDOWN="<name>",<len> sent, waiting ">" */
+    A7677S_MQTT_CERT_CA_DATA,        /* CA cert PEM bytes sent, waiting OK */
+    A7677S_MQTT_CERT_CLIENT_PROMPT,  /* AT+CCERTDOWN for client cert, waiting ">" */
+    A7677S_MQTT_CERT_CLIENT_DATA,    /* client cert PEM bytes sent, waiting OK */
+    A7677S_MQTT_CERT_KEY_PROMPT,     /* AT+CCERTDOWN for client key, waiting ">" */
+    A7677S_MQTT_CERT_KEY_DATA,       /* client key PEM bytes sent, waiting OK */
+    /* --- TLS-only: SSL context config, always run when use_ssl=1 (even if
+     * no certs were uploaded, to set sslversion/authmode=0) --- */
+    A7677S_MQTT_SSLCFG_CACERT,       /* AT+CSSLCFG="cacert",0,"<file|\"\">" */
+    A7677S_MQTT_SSLCFG_CLIENTCERT,   /* AT+CSSLCFG="clientcert",0,"<file|\"\">" */
+    A7677S_MQTT_SSLCFG_CLIENTKEY,    /* AT+CSSLCFG="clientkey",0,"<file|\"\">" */
+    A7677S_MQTT_SSLCFG_AUTHMODE,     /* AT+CSSLCFG="authmode",0,<0|1|2> */
+    A7677S_MQTT_SSLBIND,             /* AT+CMQTTSSLCFG=0,0 - binds ssl_ctx 0 to client 0 */
     A7677S_MQTT_ACCQ,            /* AT+CMQTTACCQ sent, waiting OK */
     A7677S_MQTT_CONNECT,         /* AT+CMQTTCONNECT sent, waiting URC +CMQTTCONNECT:0,0 */
     A7677S_MQTT_CONNECTED,       /* session live, ready for pub/sub */
@@ -224,6 +278,38 @@ struct a7677s
     uint16_t mqtt_keepalive;
     uint8_t  mqtt_clean_session;
     uint8_t  mqtt_use_ssl;
+
+    /* --- TLS certificates, only populated/used when mqtt_use_ssl is 1.
+     * Caller-owned PEM text is copied in by a7677s_mqtt_connect() (the
+     * caller's buffer does not need to outlive the call) into one of the
+     * three dedicated buffers below -- kept separate rather than sharing one
+     * scratch buffer so the CA/client-cert/client-key content is all still
+     * available for re-send if a later step in the connect sequence fails
+     * and the caller retries mqtt_connect() without re-supplying the certs
+     * (the caller does still have to re-supply them today -- see the note
+     * in a7677s_mqtt_connect() -- this just avoids a second, unrelated bug
+     * of overwriting cert N while cert N+1 is still using the same buffer).
+     * Sent to the modem via AT+CCERTDOWN=<filename>,<len> per cert (single
+     * UART write per cert; datasheet 19.2.2's 3072-byte "per packet" note is
+     * about the modem's own internal chunking of large inputs, not a limit
+     * this driver needs to split at, since sx_uart_write() is not
+     * packet-limited). mqtt_cert_has_ca/client/key record which steps were
+     * actually requested (cert string was non-NULL/non-empty at connect()
+     * time) so poll()'s cert-block state machine knows which
+     * A7677S_MQTT_CERT_* states to skip. */
+    uint8_t  mqtt_cert_has_ca;
+    uint8_t  mqtt_cert_has_client;
+    uint8_t  mqtt_cert_has_key;
+    char     mqtt_cert_ca[A7677S_CERT_PEM_MAX];
+    char     mqtt_cert_client[A7677S_CERT_PEM_MAX];
+    char     mqtt_cert_key[A7677S_CERT_PEM_MAX];
+    uint16_t mqtt_cert_ca_len;
+    uint16_t mqtt_cert_client_len;
+    uint16_t mqtt_cert_key_len;
+    /* authmode sent via AT+CSSLCFG="authmode",... : 0/1/2, computed once at
+     * the start of the cert block from mqtt_cert_has_client && mqtt_cert_has_key
+     * (see a7677s.h enum comment above A7677S_MQTT_SSLCFG_AUTHMODE). */
+    uint8_t  mqtt_ssl_authmode;
 
     /* Saved publish parameters. */
     char     mqtt_pub_topic[A7677S_MQTT_TOPIC_MAX];

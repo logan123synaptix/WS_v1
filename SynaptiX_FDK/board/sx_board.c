@@ -45,6 +45,9 @@ static sx_gpio_t     s_lte_gpio;
 static sx_gpio_pin_t s_lte_pwrkey_pin = {.pin = LTE_PWRKEY_Pin, .port = LTE_PWRKEY_Port};
 static sx_gpio_pin_t s_lte_rst_pin = {.pin = LTE_RESET_Pin, .port = LTE_RESET_Port};
 
+static sx_gpio_t     powerPin;
+static sx_gpio_pin_t s_lte_powerPin = {.pin = NULL, .port = NULL};
+
 static sx_gpio_t     s_gps_gpio;
 static sx_gpio_pin_t s_gps_power_pin = {.pin = GPS_EN_PW_Pin, .port = GPS_EN_PW_Port};
 static sx_gpio_pin_t s_gps_pps_pin = {.pin = GPS_PPS_Pin, .port = GPS_PPS_Port};

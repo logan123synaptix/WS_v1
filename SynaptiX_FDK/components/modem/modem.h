@@ -35,11 +35,23 @@ struct modem
     char buff[MODEM_RX_BUFFER_SIZE];
     uint32_t buff_id;
     sx_uart_t uart;
-    sx_gpio_t powerPin;
-    sx_gpio_t pwrPin;
+    sx_gpio_t pwrPin;        /* PWRKEY line — every modem driver has this */
+    sx_gpio_t powerPin;      /* VBAT cutoff transistor GPIO — optional,
+                              * depends on board revision. Only valid to use
+                              * when hasPowerPin is 1. */
+    uint8_t hasPowerPin;     /* 1 if this board wires a VBAT cutoff for this
+                              * modem, 0 otherwise. Must be explicitly set by
+                              * the board init code (sx_board.c), never
+                              * assumed. Drivers must check this flag before
+                              * touching powerPin. */
     uint8_t isBusy;
     uint8_t isReady;
     uint32_t timeOut;
+    uint32_t waitElapsed;    /* elapsed time accumulator for the current
+                              * command timeout, tracked per-instance.
+                              * Replaces the old "static uint32_t s_time"
+                              * local in modem_poll(), which was unsafe with
+                              * more than one modem instance. */
     uint32_t resID;
     modem_command_t *cmd;
 };

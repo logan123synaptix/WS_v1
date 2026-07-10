@@ -6,6 +6,7 @@ extern "C"{
 #endif
 
 #include <stdint.h>
+#include "modem_ops.h"
 
 #define SX_MQTT_TOPIC_MAX_LEN       128U
 #define SX_MQTT_MESSAGE_MAX_LEN     512U
@@ -16,29 +17,23 @@ extern "C"{
 #define SX_MQTT_TIMEOUT_PUB         3000U
 #define SX_MQTT_TIMEOUT_SUB         5000U
 
+/* NOTE: driver-level states (CMQTTSTART, cert upload, CSSLCFG, ACCQ,
+ * CMQTTCFG version, CMQTTCONNECT...) all now live inside the concrete modem
+ * driver's own state machine (e.g. a7677s_mqtt_state_t in a7677s.c), reached
+ * through a single modem_ops_t.mqtt_connect() call. This service layer only
+ * needs to track its own coarse-grained state, not the driver's internals —
+ * that is the whole point of going through modem_ops_t rather than calling
+ * driver-specific functions directly. Swapping to a different modem module
+ * later only means writing a new driver; this file does not change. */
 typedef enum{
     SX_MQTT_STATE_DISCONNECTED = 0,
-    SX_MQTT_STATE_CONFIGURING,   /* AT+CMQTTSTART  */
-    SX_MQTT_STATE_CERT_CA,          // upload CA cert
-    SX_MQTT_STATE_CERT_CLIENT,      // upload client cert
-    SX_MQTT_STATE_CERT_KEY,         // upload client key
-    SX_MQTT_STATE_CERT_CONTENT,
-    SX_MQTT_STATE_SSL_CFG,
-    SX_MQTT_STATE_ACQUIRING,     /* AT+CMQTTACCQ   */
-    SX_MQTT_STATE_CONNECTING,    /* AT+CMQTTCONNECT */
+    SX_MQTT_STATE_CONNECTING,    /* mqtt_connect() issued, waiting for cb */
     SX_MQTT_STATE_CONNECTED,
-    SX_MQTT_STATE_DISCONNECTING,
+    SX_MQTT_STATE_DISCONNECTING, /* mqtt_disconnect() issued, waiting for cb */
     SX_MQTT_STATE_ERROR,
 } sx_mqtt_state_t;
 
 typedef struct sx_mqtt sx_mqtt_t;
-
-typedef enum {
-    URC_IDLE = 0,
-    URC_GOT_START,          /* +CMQTTRXSTART received */
-    URC_GOT_TOPIC_HDR,      /* +CMQTTRXTOPIC received  */
-    URC_GOT_PAYLOAD_HDR,    /* +CMQTTRXPAYLOAD received */
-} sx_mqtt_urc_state_t;
 
 typedef void (*sx_mqtt_on_connected_cb_t) (sx_mqtt_t *mqtt);
 
@@ -75,13 +70,12 @@ typedef enum{
 } sx_mqtt_conf_step_t;
 
 struct sx_mqtt{
-    void *dce;
+    /* Handle into the concrete modem driver (e.g. &board.a7677s paired with
+     * &a7677s_ops). This service layer never touches the driver except
+     * through modem->ops->xxx(modem->ctx, ...) — see modem_ops.h. */
+    modem_handle_t *modem;
     sx_mqtt_config_t config;
     sx_mqtt_state_t state;
-    
-    sx_mqtt_urc_state_t urc_state;
-    char urc_topic [SX_MQTT_TOPIC_MAX_LEN];
-    char urc_payload [SX_MQTT_MESSAGE_MAX_LEN];
 
     uint32_t reconnect_elapsed;
     uint32_t reconnect_delay;
@@ -127,7 +121,7 @@ static inline void sx_mqtt_force_disconnect(sx_mqtt_t *mqtt) {
 }
 
 /*  API */
-void sx_mqtt_init(sx_mqtt_t *mqtt, void *dce);
+void sx_mqtt_init(sx_mqtt_t *mqtt, modem_handle_t *modem);
 void sx_mqtt_set_config(sx_mqtt_t *mqtt, const sx_mqtt_config_t *config);
 int sx_mqtt_connect(sx_mqtt_t *mqtt);
 int sx_mqtt_disconnect(sx_mqtt_t *mqtt);

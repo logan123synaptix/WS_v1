@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "a7677s.h"
 #include "sx_gpio.h"
 #include "logger.h"
@@ -10,16 +12,48 @@
 static const char *TAG = "A7677S";
 
 /* --- AT command table (mirrors the pattern already used in sim76xx.c) --- */
-#define CMD_AT   0
-#define CMD_CPOF 1
+#define CMD_AT              0
+#define CMD_CPOF            1
+#define CMD_CREG_SET        2
+#define CMD_CREG_POLL       3
+#define CMD_COPS_SET        4
+#define CMD_COPS_QUERY      5
+#define CMD_CGDCONT_QUERY   6
+#define CMD_DYNAMIC         7   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
 
 static modem_command_t command[] = {
-    [CMD_AT]   = {.cmd = "AT\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
-    [CMD_CPOF] = {.cmd = "AT+CPOF\r\n",  .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_AT]            = {.cmd = "AT\r\n",              .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CPOF]          = {.cmd = "AT+CPOF\r\n",         .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CREG_SET]      = {.cmd = "AT+CREG=1\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CREG_POLL]     = {.cmd = "AT+CREG?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_COPS_SET]      = {.cmd = "AT+COPS=0\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_COPS_QUERY]    = {.cmd = "AT+COPS?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CGDCONT_QUERY] = {.cmd = "AT+CGDCONT?\r\n",     .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_DYNAMIC]       = {0},
 };
+
+/* Scratch buffer for the CGDCONT/CGAUTH/CGACT commands built at runtime
+ * (need apn/username/password filled in) — mirrors s_dyn_cmd_buf in
+ * sim76xx.c. Not re-entrant, matches the existing single-instance
+ * assumption already made by the command[] table above. */
+static char s_dyn_cmd_buf[96];
 
 static void cb_at_probe(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cpof(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+
+static void restart_init(a7677s_t *dce);
+static void send_init_cmd(a7677s_t *dce, int idx, modem_command_response_callback_t cb, uint32_t timeout_ms);
+static void send_init_dynamic(a7677s_t *dce, const char *cmd_str, modem_command_response_callback_t cb, uint32_t timeout_ms);
+
+static void cb_init_at        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cgdcont        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cgauth         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cgact          (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_creg_set       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_creg_poll      (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cops_set       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cops_query     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cgdcont_query  (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 
 /* ------------------------------------------------------------------ */
 /*  Init                                                                */
@@ -31,7 +65,34 @@ void a7677s_init(a7677s_t *dce)
     dce->power_state    = A7677S_PWR_IDLE;
     dce->power_elapsed  = 0;
     dce->at_probe_pending = 0;
+
+    dce->init_state       = A7677S_INIT_IDLE;
+    dce->init_elapsed     = 0;
+    dce->init_retry_count = 0;
+    dce->creg_poll_count  = 0;
+    dce->init_cmd_pending = 0;
+    dce->apn[0]      = '\0';
+    dce->username[0] = '\0';
+    dce->password[0] = '\0';
+
     log_debug(TAG, "Initializing");
+}
+
+void a7677s_set_full_apn(a7677s_t *dce, const char *apn, const char *username, const char *password)
+{
+    strncpy(dce->apn, apn ? apn : "", sizeof(dce->apn) - 1);
+    dce->apn[sizeof(dce->apn) - 1] = '\0';
+
+    strncpy(dce->username, username ? username : "", sizeof(dce->username) - 1);
+    dce->username[sizeof(dce->username) - 1] = '\0';
+
+    strncpy(dce->password, password ? password : "", sizeof(dce->password) - 1);
+    dce->password[sizeof(dce->password) - 1] = '\0';
+
+    log_info(TAG, "APN config: %s | User: %s | Pass: %s",
+             dce->apn,
+             dce->username[0] ? dce->username : "(none)",
+             dce->password[0] ? dce->password : "(none)");
 }
 
 /* ------------------------------------------------------------------ */
@@ -158,16 +219,230 @@ static void a7677s_poll(void *ctx, uint32_t ts)
          * by cb_cpof() above, driven by modem_poll(). */
         break;
     }
+
+    /* Advance the network attach sequence. Only A7677S_INIT_CREG_POLL needs
+     * timer-driven action here (send the next AT+CREG? after
+     * A7677S_CREG_POLL_MS) — every other init_state transitions purely via
+     * its AT-command callback, already fired above by modem_poll(). */
+    if (dce->init_state == A7677S_INIT_CREG_POLL && !dce->init_cmd_pending &&
+        !modem_is_busy(pModem(dce))) {
+        dce->init_elapsed += ts;
+        if (dce->init_elapsed >= A7677S_CREG_POLL_MS) {
+            dce->init_elapsed = 0;
+            send_init_cmd(dce, CMD_CREG_POLL, cb_creg_poll, A7677S_TIMEOUT_AT);
+        }
+    }
 }
 
 /* ------------------------------------------------------------------ */
-/*  modem_ops_t vtable                                                 */
+/*  Network attach (AT init sequence)                                  */
 /* ------------------------------------------------------------------ */
+/* Order and command syntax: see the comment above a7677s_init_state_t in
+ * a7677s.h for the two reference sources and the one deliberate deviation
+ * (explicit AT+CREG? poll instead of trusting AT+CREG=1's "OK"). */
+
+static void send_init_cmd(a7677s_t *dce, int idx, modem_command_response_callback_t cb, uint32_t timeout_ms)
+{
+    command[idx].callback = cb;
+    command[idx].arg      = dce;
+    dce->init_cmd_pending = 1;
+    log_debug(TAG, "INIT CMD: %s", command[idx].cmd);
+    modem_send_command(pModem(dce), &command[idx], timeout_ms);
+}
+
+static void send_init_dynamic(a7677s_t *dce, const char *cmd_str, modem_command_response_callback_t cb, uint32_t timeout_ms)
+{
+    command[CMD_DYNAMIC].cmd         = cmd_str;
+    command[CMD_DYNAMIC].res_success = "\r\nOK\r\n";
+    command[CMD_DYNAMIC].res_fail    = "\r\nERROR\r\n";
+    command[CMD_DYNAMIC].callback    = cb;
+    command[CMD_DYNAMIC].arg         = dce;
+    dce->init_cmd_pending = 1;
+    log_debug(TAG, "INIT CMD: %s", cmd_str);
+    modem_send_command(pModem(dce), &command[CMD_DYNAMIC], timeout_ms);
+}
+
+/* Restarts the whole attach sequence from AT, incrementing the retry
+ * counter. Mirrors sim76xx.c's restart_at(). Does NOT touch power_state —
+ * if the module stopped responding entirely, that is caught separately by
+ * power_is_busy()/is_ready() going false, not handled here. */
+static void restart_init(a7677s_t *dce)
+{
+    dce->init_retry_count++;
+    log_error(TAG, "Init step failed (retry %u/%u)", dce->init_retry_count, A7677S_MAX_RETRY);
+
+    if (dce->init_retry_count >= A7677S_MAX_RETRY) {
+        /* Give up restarting silently forever; go back to IDLE so the
+         * caller (board/service layer) can decide to power-cycle via
+         * power_off_start()/power_on_start() instead of looping here. */
+        dce->init_retry_count = 0;
+        dce->init_state       = A7677S_INIT_IDLE;
+        log_error(TAG, "Init sequence failed after max retries, giving up (caller should power-cycle)");
+        return;
+    }
+
+    dce->init_state   = A7677S_INIT_AT;
+    dce->init_elapsed = 0;
+    send_init_cmd(dce, CMD_AT, cb_init_at, A7677S_TIMEOUT_AT);
+}
+
+static void cb_init_at(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
+
+    dce->init_retry_count = 0;
+    dce->init_state       = A7677S_INIT_CGDCONT;
+    snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGDCONT=1,\"IP\",\"%s\"\r\n", dce->apn);
+    send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgdcont, A7677S_TIMEOUT_NETWORK);
+}
+
+static void cb_cgdcont(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
+
+    if (dce->username[0] != '\0' && dce->password[0] != '\0') {
+        /* PAP: AT+CGAUTH=<cid>,<auth_type>,<passwd>,<user> — password comes
+         * BEFORE username. Confirmed against a76xx_at_cmd.md section 5.2.16
+         * (WriteCommand: AT+CGAUTH=<cid>[,<auth_type>[,<passwd>[,<user>]]]).
+         * WS_v0/A76xx.c has this swapped (passes username, then password) —
+         * that is a bug in WS_v0, not followed here. */
+        dce->init_state = A7677S_INIT_CGAUTH;
+        snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGAUTH=1,1,\"%s\",\"%s\"\r\n",
+                 dce->password, dce->username);
+        send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgauth, A7677S_TIMEOUT_NETWORK);
+        return;
+    }
+    if (dce->password[0] != '\0') {
+        /* CHAP: only <passwd> given. */
+        dce->init_state = A7677S_INIT_CGAUTH;
+        snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGAUTH=1,2,\"%s\"\r\n", dce->password);
+        send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgauth, A7677S_TIMEOUT_NETWORK);
+        return;
+    }
+    /* No auth configured — skip CGAUTH entirely, go straight to CGACT. */
+    dce->init_state = A7677S_INIT_CGACT;
+    snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGACT=1,1\r\n");
+    send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgact, A7677S_TIMEOUT_NETWORK);
+}
+
+static void cb_cgauth(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
+
+    log_info(TAG, "CGAUTH OK");
+    dce->init_state = A7677S_INIT_CGACT;
+    snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGACT=1,1\r\n");
+    send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgact, A7677S_TIMEOUT_NETWORK);
+}
+
+static void cb_cgact(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
+
+    dce->init_state = A7677S_INIT_CREG_SET;
+    send_init_cmd(dce, CMD_CREG_SET, cb_creg_set, A7677S_TIMEOUT_AT);
+}
+
+static void cb_creg_set(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
+
+    /* AT+CREG=1 only enabled the unsolicited report — it did not confirm
+     * registration. Move to CREG_POLL, which is driven from poll() below
+     * (waits A7677S_CREG_POLL_MS between each AT+CREG? read). */
+    dce->init_state      = A7677S_INIT_CREG_POLL;
+    dce->init_elapsed     = 0;
+    dce->creg_poll_count  = 0;
+}
+
+static void cb_creg_poll(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        /* Response format: +CREG: <n>,<stat>[,<lac>,<ci>] */
+        const char *p = strstr(response, "+CREG:");
+        if (p) {
+            p = strchr(p, ',');
+            if (p) {
+                int stat = (int)strtol(p + 1, NULL, 10);
+                log_debug(TAG, "CREG stat=%d (poll %u/%u)", stat, dce->creg_poll_count, A7677S_CREG_MAX_POLL);
+                if (stat == 1 || stat == 5) {
+                    log_info(TAG, "Network registered (stat=%d)", stat);
+                    dce->init_state = A7677S_INIT_COPS_SET;
+                    send_init_cmd(dce, CMD_COPS_SET, cb_cops_set, A7677S_TIMEOUT_NETWORK);
+                    return;
+                }
+            }
+        }
+    }
+
+    /* Not registered yet (or response didn't parse) — keep polling until
+     * A7677S_CREG_MAX_POLL is reached, then treat it as a failed attach. */
+    dce->creg_poll_count++;
+    if (dce->creg_poll_count >= A7677S_CREG_MAX_POLL) {
+        log_error(TAG, "Network registration timed out after %u polls", dce->creg_poll_count);
+        restart_init(dce);
+        return;
+    }
+    /* Stay in A7677S_INIT_CREG_POLL; poll() will send the next AT+CREG?
+     * after another A7677S_CREG_POLL_MS. */
+    dce->init_elapsed = 0;
+}
+
+static void cb_cops_set(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
+
+    dce->init_state = A7677S_INIT_COPS_QUERY;
+    send_init_cmd(dce, CMD_COPS_QUERY, cb_cops_query, A7677S_TIMEOUT_NETWORK);
+}
+
+static void cb_cops_query(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
+
+    if (response) {
+        log_info(TAG, "COPS: %s", response);
+    }
+    dce->init_state = A7677S_INIT_CGDCONT_QUERY;
+    send_init_cmd(dce, CMD_CGDCONT_QUERY, cb_cgdcont_query, A7677S_TIMEOUT_AT);
+}
+
+static void cb_cgdcont_query(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* Purely informational read-back (mirrors sim76xx.c's
+     * cb_cgdcont_query()) — even on FAIL/TIMEOUT here we still consider the
+     * attach sequence complete, since CGACT/CREG already succeeded; a
+     * failed final read-back should not block is_ready(). */
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        log_info(TAG, "CGDCONT: %s", response);
+    } else {
+        log_warn(TAG, "CGDCONT read-back failed (non-fatal)");
+    }
+    dce->init_retry_count = 0;
+    dce->init_state       = A7677S_INIT_READY;
+    log_info(TAG, "Network attach complete, ready for MQTT");
+}
+
 /* TODO (next piece, not yet implemented):
- *   - start()/is_ready(): currently is_ready() only reflects "AT responsive"
- *     (power_state == READY), NOT full network attach. A proper AT init
- *     sequence (COPS/CGATT/CGDCONT, mirroring the pattern already used in
- *     sim76xx.c's state machine) still needs to be added.
  *   - enter_low_power()/exit_low_power(): AT+CFUN=0/1, not yet implemented.
  *   - mqtt_connect/disconnect/publish/subscribe: AT+CMQTT* sequence, not yet
  *     implemented (see confirmed AT command set in Documents/a76xx_at_cmd.md
@@ -175,11 +450,36 @@ static void a7677s_poll(void *ctx, uint32_t ts)
  * These functions are stubbed to fail safely (return -1 / false) so the
  * vtable compiles and is safe to wire up incrementally.
  */
-static int a7677s_start_stub(void *ctx) { (void)ctx; return -1; }
+static int a7677s_start(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+
+    if (dce->power_state != A7677S_PWR_READY) {
+        log_warn(TAG, "start(): power not ready yet");
+        return -1;
+    }
+    if (modem_is_busy(pModem(dce)) || dce->init_cmd_pending) {
+        log_warn(TAG, "start(): modem busy");
+        return -1;
+    }
+    if (dce->init_state != A7677S_INIT_IDLE && dce->init_state != A7677S_INIT_READY) {
+        log_warn(TAG, "start(): attach sequence already in progress");
+        return -1;
+    }
+
+    log_info(TAG, "Starting network attach sequence");
+    dce->init_retry_count = 0;
+    dce->creg_poll_count  = 0;
+    dce->init_state       = A7677S_INIT_AT;
+    send_init_cmd(dce, CMD_AT, cb_init_at, A7677S_TIMEOUT_AT);
+    return 0;
+}
+
 static bool a7677s_is_ready(void *ctx)
 {
     a7677s_t *dce = (a7677s_t *)ctx;
-    return dce->power_state == A7677S_PWR_READY;
+    return dce->power_state == A7677S_PWR_READY &&
+           dce->init_state  == A7677S_INIT_READY;
 }
 static int a7677s_enter_low_power_stub(void *ctx, power_mode_cb_t cb) { (void)ctx; (void)cb; return -1; }
 static int a7677s_exit_low_power_stub(void *ctx, power_mode_cb_t cb)  { (void)ctx; (void)cb; return -1; }
@@ -210,7 +510,7 @@ const modem_ops_t a7677s_ops = {
     .power_off_start  = a7677s_power_off_start,
     .power_is_busy    = a7677s_power_is_busy,
 
-    .start            = a7677s_start_stub,          /* TODO next piece */
+    .start            = a7677s_start,
     .is_ready         = a7677s_is_ready,
 
     .enter_low_power  = a7677s_enter_low_power_stub, /* TODO next piece */

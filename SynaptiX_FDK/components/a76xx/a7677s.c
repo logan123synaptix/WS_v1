@@ -63,6 +63,7 @@ static void send_init_dynamic(a7677s_t *dce, const char *cmd_str, modem_command_
 /* MQTT sequence callbacks (forward declarations). */
 static void cb_mqtt_start         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_mqtt_accq          (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_cfg_version   (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_mqtt_connect       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_mqtt_disc          (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_mqtt_rel           (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
@@ -75,6 +76,37 @@ static void cb_mqtt_pub_send      (modem_t *modem, const char *response, modem_r
 static void cb_mqtt_sub_topic     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_mqtt_sub_topic_data(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_mqtt_sub_send      (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+
+/* TLS cert-upload / SSL-config sequence callbacks. Order mirrors
+ * a7677s_mqtt_state_t: START -> [CERT_CA -> CERT_CLIENT -> CERT_KEY]
+ * -> SSLCFG_CACERT -> SSLCFG_CLIENTCERT -> SSLCFG_CLIENTKEY
+ * -> SSLCFG_AUTHMODE -> SSLBIND -> ACCQ. Only entered when mqtt_use_ssl=1
+ * (see cb_mqtt_start()). Each *_prompt callback fires after the modem sends
+ * ">" for AT+CCERTDOWN; each *_data callback fires after the raw PEM bytes
+ * are accepted (OK). */
+static void cb_mqtt_cert_ca_prompt      (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_cert_ca_data        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_cert_client_prompt  (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_cert_client_data    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_cert_key_prompt     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_cert_key_data       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_sslcfg_cacert       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_sslcfg_clientcert   (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_sslcfg_clientkey    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_sslcfg_authmode     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_mqtt_sslbind             (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+
+/* begin_ssl_cert_block(): entry point from cb_mqtt_start() when use_ssl=1.
+ * Uploads whichever of CA/client-cert/client-key were supplied (skipping
+ * any not set), then falls through to begin_sslcfg_block(). */
+static void begin_ssl_cert_block(a7677s_t *dce);
+/* begin_sslcfg_block(): runs the AT+CSSLCFG/AT+CMQTTSSLCFG sequence that
+ * always executes when use_ssl=1, regardless of whether any certs were
+ * uploaded (this is what actually sets authmode=0 in the no-cert case).
+ * Called either directly from begin_ssl_cert_block() (no certs at all) or
+ * after the last requested cert finishes uploading. */
+static void begin_sslcfg_block(a7677s_t *dce);
+static void advance_to_accq(a7677s_t *dce);
 
 /* Helper: send a dynamic MQTT command (built into s_mqtt_dyn_cmd_buf). */
 static void send_mqtt_dynamic(a7677s_t *dce, const char *cmd_str,
@@ -729,12 +761,335 @@ static void cb_mqtt_start(modem_t *modem, const char *response,
         return;
     }
 
+    /* TLS: run the cert-upload/SSL-config block before ACCQ. Plain TCP
+     * skips straight to ACCQ, unchanged from before this TLS support was
+     * added. */
+    if (dce->mqtt_use_ssl) {
+        begin_ssl_cert_block(dce);
+    } else {
+        advance_to_accq(dce);
+    }
+}
+
+/* Shared tail of the connect sequence: AT+CMQTTACCQ then AT+CMQTTCONNECT.
+ * Reached either directly (use_ssl=0) or after the TLS cert/SSLCFG block
+ * completes (use_ssl=1, right after cb_mqtt_sslbind() succeeds). */
+static void advance_to_accq(a7677s_t *dce)
+{
     dce->mqtt_state = A7677S_MQTT_ACCQ;
     snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
              "AT+CMQTTACCQ=%u,\"%s\",%u\r\n",
              A7677S_MQTT_CLIENT_INDEX, dce->mqtt_client_id, (unsigned)dce->mqtt_use_ssl);
     send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
                       cb_mqtt_accq, A7677S_TIMEOUT_AT);
+}
+
+/* ------------------------------------------------------------------ */
+/*  MQTT — TLS cert-upload block (use_ssl=1 only)                       */
+/* ------------------------------------------------------------------ */
+/* Sequence, each pair skipped entirely if the corresponding cert was not
+ * supplied to a7677s_mqtt_connect():
+ *   [CERT_CA_PROMPT -> CERT_CA_DATA]
+ *   [CERT_CLIENT_PROMPT -> CERT_CLIENT_DATA]
+ *   [CERT_KEY_PROMPT -> CERT_KEY_DATA]
+ *   -> begin_sslcfg_block()
+ * AT+CCERTDOWN="<filename>",<len> waits for ">" then the raw PEM bytes are
+ * sent as a second AT-layer write, waiting for OK. Per a76xx_at_cmd.md
+ * 19.2.2, MaxResponseTime is 120000 ms, hence A7677S_TIMEOUT_CERT_CMD. */
+
+static void begin_ssl_cert_block(a7677s_t *dce)
+{
+    if (dce->mqtt_cert_has_ca) {
+        dce->mqtt_state = A7677S_MQTT_CERT_CA_PROMPT;
+        snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+                 "AT+CCERTDOWN=\"%s\",%u\r\n",
+                 A7677S_CERT_FILENAME_CA, (unsigned)dce->mqtt_cert_ca_len);
+        send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, ">", "\r\nERROR\r\n",
+                          cb_mqtt_cert_ca_prompt, A7677S_TIMEOUT_CERT_CMD);
+        return;
+    }
+    if (dce->mqtt_cert_has_client) {
+        dce->mqtt_state = A7677S_MQTT_CERT_CLIENT_PROMPT;
+        snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+                 "AT+CCERTDOWN=\"%s\",%u\r\n",
+                 A7677S_CERT_FILENAME_CLIENT, (unsigned)dce->mqtt_cert_client_len);
+        send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, ">", "\r\nERROR\r\n",
+                          cb_mqtt_cert_client_prompt, A7677S_TIMEOUT_CERT_CMD);
+        return;
+    }
+    if (dce->mqtt_cert_has_key) {
+        dce->mqtt_state = A7677S_MQTT_CERT_KEY_PROMPT;
+        snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+                 "AT+CCERTDOWN=\"%s\",%u\r\n",
+                 A7677S_CERT_FILENAME_KEY, (unsigned)dce->mqtt_cert_key_len);
+        send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, ">", "\r\nERROR\r\n",
+                          cb_mqtt_cert_key_prompt, A7677S_TIMEOUT_CERT_CMD);
+        return;
+    }
+    /* No certs at all — still run SSLCFG (authmode=0, filenames "") so the
+     * modem knows this SSL context has no client-side trust material. */
+    begin_sslcfg_block(dce);
+}
+
+static void cb_mqtt_cert_ca_prompt(modem_t *modem, const char *response,
+                                    modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CCERTDOWN (ca) prompt failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    /* Pass the pointer directly — same reasoning as cb_mqtt_pub_topic()/
+     * cb_mqtt_pub_payload() above: s_mqtt_dyn_cmd_buf is only 384 bytes,
+     * far smaller than A7677S_CERT_PEM_MAX (10241 bytes), and copying
+     * through it would silently truncate the cert while AT+CCERTDOWN has
+     * already told the modem the untruncated length. */
+    dce->mqtt_state = A7677S_MQTT_CERT_CA_DATA;
+    send_mqtt_dynamic(dce, dce->mqtt_cert_ca, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_cert_ca_data, A7677S_TIMEOUT_CERT_CMD);
+}
+
+static void cb_mqtt_cert_ca_data(modem_t *modem, const char *response,
+                                  modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "CA cert upload failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    if (dce->mqtt_cert_has_client) {
+        dce->mqtt_state = A7677S_MQTT_CERT_CLIENT_PROMPT;
+        snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+                 "AT+CCERTDOWN=\"%s\",%u\r\n",
+                 A7677S_CERT_FILENAME_CLIENT, (unsigned)dce->mqtt_cert_client_len);
+        send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, ">", "\r\nERROR\r\n",
+                          cb_mqtt_cert_client_prompt, A7677S_TIMEOUT_CERT_CMD);
+        return;
+    }
+    if (dce->mqtt_cert_has_key) {
+        dce->mqtt_state = A7677S_MQTT_CERT_KEY_PROMPT;
+        snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+                 "AT+CCERTDOWN=\"%s\",%u\r\n",
+                 A7677S_CERT_FILENAME_KEY, (unsigned)dce->mqtt_cert_key_len);
+        send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, ">", "\r\nERROR\r\n",
+                          cb_mqtt_cert_key_prompt, A7677S_TIMEOUT_CERT_CMD);
+        return;
+    }
+    begin_sslcfg_block(dce);
+}
+
+static void cb_mqtt_cert_client_prompt(modem_t *modem, const char *response,
+                                        modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CCERTDOWN (client) prompt failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    dce->mqtt_state = A7677S_MQTT_CERT_CLIENT_DATA;
+    send_mqtt_dynamic(dce, dce->mqtt_cert_client, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_cert_client_data, A7677S_TIMEOUT_CERT_CMD);
+}
+
+static void cb_mqtt_cert_client_data(modem_t *modem, const char *response,
+                                      modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "client cert upload failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    if (dce->mqtt_cert_has_key) {
+        dce->mqtt_state = A7677S_MQTT_CERT_KEY_PROMPT;
+        snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+                 "AT+CCERTDOWN=\"%s\",%u\r\n",
+                 A7677S_CERT_FILENAME_KEY, (unsigned)dce->mqtt_cert_key_len);
+        send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, ">", "\r\nERROR\r\n",
+                          cb_mqtt_cert_key_prompt, A7677S_TIMEOUT_CERT_CMD);
+        return;
+    }
+    begin_sslcfg_block(dce);
+}
+
+static void cb_mqtt_cert_key_prompt(modem_t *modem, const char *response,
+                                     modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CCERTDOWN (key) prompt failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    dce->mqtt_state = A7677S_MQTT_CERT_KEY_DATA;
+    send_mqtt_dynamic(dce, dce->mqtt_cert_key, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_cert_key_data, A7677S_TIMEOUT_CERT_CMD);
+}
+
+static void cb_mqtt_cert_key_data(modem_t *modem, const char *response,
+                                   modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "client key upload failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    /* Key is always last in the block regardless of which certs were
+     * present, so the next step is always SSLCFG. */
+    begin_sslcfg_block(dce);
+}
+
+/* ------------------------------------------------------------------ */
+/*  MQTT — TLS SSL-config block (use_ssl=1 only)                        */
+/* ------------------------------------------------------------------ */
+/* Always runs when use_ssl=1, even with zero certs uploaded (that case
+ * still needs AT+CSSLCFG="authmode",0,0 and empty filenames so the modem
+ * does not try to use stale cert files from a previous session).
+ * Sequence: SSLCFG_CACERT -> SSLCFG_CLIENTCERT -> SSLCFG_CLIENTKEY ->
+ * SSLCFG_AUTHMODE -> SSLBIND -> advance_to_accq(). */
+
+static void begin_sslcfg_block(a7677s_t *dce)
+{
+    dce->mqtt_state = A7677S_MQTT_SSLCFG_CACERT;
+    snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+             "AT+CSSLCFG=\"cacert\",%u,\"%s\"\r\n",
+             A7677S_SSL_CTX_INDEX,
+             dce->mqtt_cert_has_ca ? A7677S_CERT_FILENAME_CA : "");
+    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_sslcfg_cacert, A7677S_TIMEOUT_CERT_CMD);
+}
+
+static void cb_mqtt_sslcfg_cacert(modem_t *modem, const char *response,
+                                   modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CSSLCFG cacert failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    dce->mqtt_state = A7677S_MQTT_SSLCFG_CLIENTCERT;
+    snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+             "AT+CSSLCFG=\"clientcert\",%u,\"%s\"\r\n",
+             A7677S_SSL_CTX_INDEX,
+             dce->mqtt_cert_has_client ? A7677S_CERT_FILENAME_CLIENT : "");
+    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_sslcfg_clientcert, A7677S_TIMEOUT_CERT_CMD);
+}
+
+static void cb_mqtt_sslcfg_clientcert(modem_t *modem, const char *response,
+                                       modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CSSLCFG clientcert failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    dce->mqtt_state = A7677S_MQTT_SSLCFG_CLIENTKEY;
+    snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+             "AT+CSSLCFG=\"clientkey\",%u,\"%s\"\r\n",
+             A7677S_SSL_CTX_INDEX,
+             dce->mqtt_cert_has_key ? A7677S_CERT_FILENAME_KEY : "");
+    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_sslcfg_clientkey, A7677S_TIMEOUT_CERT_CMD);
+}
+
+static void cb_mqtt_sslcfg_clientkey(modem_t *modem, const char *response,
+                                      modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CSSLCFG clientkey failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    dce->mqtt_state = A7677S_MQTT_SSLCFG_AUTHMODE;
+    snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+             "AT+CSSLCFG=\"authmode\",%u,%u\r\n",
+             A7677S_SSL_CTX_INDEX, (unsigned)dce->mqtt_ssl_authmode);
+    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_sslcfg_authmode, A7677S_TIMEOUT_CERT_CMD);
+}
+
+static void cb_mqtt_sslcfg_authmode(modem_t *modem, const char *response,
+                                     modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CSSLCFG authmode failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    /* AT+CMQTTSSLCFG=<client_index>,<ssl_ctx_index> binds the SSL context
+     * just configured above to the MQTT client we are about to ACCQ. */
+    dce->mqtt_state = A7677S_MQTT_SSLBIND;
+    snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+             "AT+CMQTTSSLCFG=%u,%u\r\n",
+             A7677S_MQTT_CLIENT_INDEX, A7677S_SSL_CTX_INDEX);
+    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_sslbind, A7677S_TIMEOUT_AT);
+}
+
+static void cb_mqtt_sslbind(modem_t *modem, const char *response,
+                             modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CMQTTSSLCFG bind failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    /* SSL context is bound — continue exactly as the plain-TCP path does. */
+    advance_to_accq(dce);
 }
 
 static void cb_mqtt_accq(modem_t *modem, const char *response,
@@ -745,6 +1100,32 @@ static void cb_mqtt_accq(modem_t *modem, const char *response,
 
     if (res != MODEM_RESPONSE_SUCCESS) {
         log_error(TAG, "AT+CMQTTACCQ failed (res=%d)", res);
+        dce->mqtt_state = A7677S_MQTT_IDLE;
+        mqtt_op_done(dce, MODEM_OPS_ERROR);
+        return;
+    }
+
+    /* AT+CMQTTCFG="version",<idx>,<value> must be sent after ACCQ and
+     * before CONNECT per datasheet. Fixed at MQTT 3.1.1
+     * (A7677S_MQTT_PROTOCOL_VERSION); this project does not expose a way to
+     * select 3.1 vs 3.1.1 per-connection since 3.1.1 is accepted by every
+     * broker this project targets. */
+    dce->mqtt_state = A7677S_MQTT_CFG_VERSION;
+    snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
+             "AT+CMQTTCFG=\"version\",%u,%u\r\n",
+             A7677S_MQTT_CLIENT_INDEX, A7677S_MQTT_PROTOCOL_VERSION);
+    send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, "\r\nOK\r\n", "\r\nERROR\r\n",
+                      cb_mqtt_cfg_version, A7677S_TIMEOUT_AT);
+}
+
+static void cb_mqtt_cfg_version(modem_t *modem, const char *response,
+                                 modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->mqtt_cmd_pending = 0;
+
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CMQTTCFG=\"version\" failed (res=%d)", res);
         dce->mqtt_state = A7677S_MQTT_IDLE;
         mqtt_op_done(dce, MODEM_OPS_ERROR);
         return;
@@ -1058,7 +1439,11 @@ static void cb_mqtt_sub_send(modem_t *modem, const char *response,
 
 static int a7677s_mqtt_connect(void *ctx, const char *client_id,
                                 const char *broker, uint16_t port,
-                                uint8_t use_ssl, uint16_t keepalive,
+                                uint8_t use_ssl,
+                                const char *ca_cert,
+                                const char *client_cert,
+                                const char *client_key,
+                                uint16_t keepalive,
                                 uint8_t clean_session, const char *username,
                                 const char *password, mqtt_cb_t cb)
 {
@@ -1096,6 +1481,69 @@ static int a7677s_mqtt_connect(void *ctx, const char *client_id,
     dce->mqtt_username[sizeof(dce->mqtt_username) - 1] = '\0';
     strncpy(dce->mqtt_password, password ? password : "", sizeof(dce->mqtt_password) - 1);
     dce->mqtt_password[sizeof(dce->mqtt_password) - 1] = '\0';
+
+    /* Certs are only consulted when use_ssl=1 (per modem_ops.h doc-comment on
+     * mqtt_connect). When use_ssl=0 we deliberately clear the has_* flags so
+     * a stale cert from a previous TLS connect() call cannot leak into a
+     * later plain-TCP session (the buffers themselves are left alone since
+     * clearing 3x10KB here would be wasted work — has_ca/has_client/has_key
+     * gate every use of them). */
+    if (use_ssl) {
+        dce->mqtt_cert_has_ca     = (ca_cert     && ca_cert[0]);
+        dce->mqtt_cert_has_client = (client_cert && client_cert[0]);
+        dce->mqtt_cert_has_key    = (client_key  && client_key[0]);
+
+        if (dce->mqtt_cert_has_ca) {
+            size_t len = strlen(ca_cert);
+            if (len >= A7677S_CERT_PEM_MAX) {
+                log_error(TAG, "mqtt_connect: ca_cert too large (%u bytes, max %u)",
+                          (unsigned)len, (unsigned)(A7677S_CERT_PEM_MAX - 1));
+                return -1;
+            }
+            memcpy(dce->mqtt_cert_ca, ca_cert, len + 1);
+            dce->mqtt_cert_ca_len = (uint16_t)len;
+        }
+        if (dce->mqtt_cert_has_client) {
+            size_t len = strlen(client_cert);
+            if (len >= A7677S_CERT_PEM_MAX) {
+                log_error(TAG, "mqtt_connect: client_cert too large (%u bytes, max %u)",
+                          (unsigned)len, (unsigned)(A7677S_CERT_PEM_MAX - 1));
+                return -1;
+            }
+            memcpy(dce->mqtt_cert_client, client_cert, len + 1);
+            dce->mqtt_cert_client_len = (uint16_t)len;
+        }
+        if (dce->mqtt_cert_has_key) {
+            size_t len = strlen(client_key);
+            if (len >= A7677S_CERT_PEM_MAX) {
+                log_error(TAG, "mqtt_connect: client_key too large (%u bytes, max %u)",
+                          (unsigned)len, (unsigned)(A7677S_CERT_PEM_MAX - 1));
+                return -1;
+            }
+            memcpy(dce->mqtt_cert_key, client_key, len + 1);
+            dce->mqtt_cert_key_len = (uint16_t)len;
+        }
+
+        /* authmode per a76xx_at_cmd.md 19.2.1 / a7677s.h enum comment:
+         *   0 = no client-side trust material at all
+         *   1 = server-authentication only (ca_cert present, no client cert/key)
+         *   2 = mutual TLS (client_cert AND client_key both present)
+         * Note client_cert/client_key must both be set for mode 2; if only
+         * one of the two was supplied we fall back to mode 1 rather than
+         * silently attempting an incomplete mutual-auth handshake. */
+        if (dce->mqtt_cert_has_client && dce->mqtt_cert_has_key) {
+            dce->mqtt_ssl_authmode = 2;
+        } else if (dce->mqtt_cert_has_ca) {
+            dce->mqtt_ssl_authmode = 1;
+        } else {
+            dce->mqtt_ssl_authmode = 0;
+        }
+    } else {
+        dce->mqtt_cert_has_ca     = 0;
+        dce->mqtt_cert_has_client = 0;
+        dce->mqtt_cert_has_key    = 0;
+        dce->mqtt_ssl_authmode    = 0;
+    }
 
     dce->mqtt_op_cb = cb;
     dce->mqtt_state = A7677S_MQTT_START;

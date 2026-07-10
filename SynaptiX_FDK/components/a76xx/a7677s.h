@@ -26,6 +26,13 @@ extern "C" {
 #define A7677S_MQTT_PUB_TIMEOUT_S    60U     /* passed to AT+CMQTTPUB as <pub_timeout> */
 #define A7677S_MQTT_DISC_TIMEOUT_S   120U    /* passed to AT+CMQTTDISC as <timeout> */
 #define A7677S_MQTT_CLIENT_INDEX     0U      /* only one client used; index 0 */
+/* AT+CMQTTCFG="version",<idx>,<value>: value is a SIMCom-internal code, NOT
+ * the real MQTT protocol level printed anywhere in the datasheet by name.
+ * Confirmed via SIMCom application examples (A76XX/SIM76xx family): 3 = MQTT
+ * v3.1, 4 = MQTT v3.1.1. This project uses 3.1.1, which is accepted by
+ * effectively all modern brokers (Mosquitto, EMQX, AWS IoT, HiveMQ, etc.) —
+ * MQTT 5.0 is not supported by this AT command set at all (range is 3-4 only). */
+#define A7677S_MQTT_PROTOCOL_VERSION 4U
 
 /* Max lengths for MQTT dynamic command buffers. */
 #define A7677S_MQTT_CLIENT_ID_MAX    129U    /* 1-128 bytes per datasheet + NUL */
@@ -122,7 +129,7 @@ typedef enum {
 /* Non-blocking MQTT state machine, driven by poll() after is_ready() is true.
  *
  * Connect sequence (plain TCP, use_ssl=0):
- *   MQTT_IDLE -> START -> ACCQ -> CONNECT -> CONNECTED
+ *   MQTT_IDLE -> START -> ACCQ -> CFG_VERSION -> CONNECT -> CONNECTED
  *
  * Connect sequence (TLS, use_ssl=1) inserts a cert-upload/SSL-config block
  * between START and ACCQ. Each cert step is skipped entirely if the
@@ -133,7 +140,11 @@ typedef enum {
  *     -> [CERT_KEY_PROMPT -> CERT_KEY_DATA]       (only if client_key set)
  *     -> SSLCFG_CACERT -> SSLCFG_CLIENTCERT -> SSLCFG_CLIENTKEY
  *     -> SSLCFG_AUTHMODE -> SSLBIND
- *   -> ACCQ -> CONNECT -> CONNECTED
+ *   -> ACCQ -> CFG_VERSION -> CONNECT -> CONNECTED
+ * CFG_VERSION always runs (TLS and plain TCP alike), right after ACCQ and
+ * before CONNECT, per AT+CMQTTCFG's documented requirement of being called
+ * after ACCQ and before CONNECT. Sets MQTT protocol level to 3.1.1
+ * (A7677S_MQTT_PROTOCOL_VERSION = 4).
  * authmode sent in SSLCFG_AUTHMODE: 0 if no certs at all, 1 if only ca_cert
  * (server-authentication TLS), 2 if client_cert+client_key are also set
  * (mutual TLS). Matches AT+CSSLCFG="authmode",... per a76xx_at_cmd.md 19.2.1.
@@ -183,6 +194,7 @@ typedef enum {
     A7677S_MQTT_SSLCFG_AUTHMODE,     /* AT+CSSLCFG="authmode",0,<0|1|2> */
     A7677S_MQTT_SSLBIND,             /* AT+CMQTTSSLCFG=0,0 - binds ssl_ctx 0 to client 0 */
     A7677S_MQTT_ACCQ,            /* AT+CMQTTACCQ sent, waiting OK */
+    A7677S_MQTT_CFG_VERSION,     /* AT+CMQTTCFG="version",0,4 sent, waiting OK (sets MQTT 3.1.1) */
     A7677S_MQTT_CONNECT,         /* AT+CMQTTCONNECT sent, waiting URC +CMQTTCONNECT:0,0 */
     A7677S_MQTT_CONNECTED,       /* session live, ready for pub/sub */
     /* --- disconnect sequence --- */

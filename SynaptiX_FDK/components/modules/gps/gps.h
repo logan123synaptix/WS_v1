@@ -28,7 +28,7 @@ struct sx_gps
     /* data */
     sx_uart_t comm;
     sx_gpio_t pwr;
-    // sx_gpio_t rst;
+    sx_gpio_t rst;
     uint32_t buff_id;
     float latitude;
     float longtitude;

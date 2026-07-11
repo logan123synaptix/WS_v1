@@ -10,10 +10,24 @@ static void gps_callback_task(sx_gps_t *gps, char *message, void *arg);
 void gps_init(sx_gps_t *_gps, sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops, void *_pwr_arg, void *_rst_arg)
 {
     sx_uart_init(&_gps->comm, _uart_cfg, GPS_BUFF_MAX_SIZE, GPS_BUFF_MAX_SIZE);
+
+    /* N/F (Shutdown Control, per Ai-Thinker GP-02 datasheet): must be held
+     * HIGH during normal operation (internal pull-up; LOW = shutdown). This
+     * board wires N/F directly to an MCU GPIO (no transistor, unlike the
+     * old board), so the firmware must actively drive it HIGH itself. */
     sx_gpio_init(&_gps->pwr, _gpio_ops, _pwr_arg);
-    // sx_gpio_init(&_gps->rst, _gpio_ops, _rst_arg);
-    sx_gpio_write(&_gps->pwr, SX_GPIO_LOW);
-    // sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
+    sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
+
+    /* RST (external reset input, internal pull-up): datasheet says leave
+     * floating if unused. This board has it wired to an MCU GPIO configured
+     * as push-pull output (see Core/Src/gpio.c), driven LOW by the
+     * CubeMX-generated startup code before any application code runs —
+     * holding the module in permanent reset unless corrected here. Drive it
+     * HIGH once at init as a second layer of protection, independent of the
+     * CubeMX initial level. */
+    sx_gpio_init(&_gps->rst, _gpio_ops, _rst_arg);
+    sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
+
     memset(_gps->buff, 0, GPS_BUFF_MAX_SIZE);
     _gps->state = GPS_IDLE;
     _gps->buff_id = 0;
@@ -28,21 +42,20 @@ void gps_set_callback_handle(sx_gps_t *_gps, gps_callback _cb, void *_arg)
     _gps->arg = _arg;
 }
 
+/* Pulse RST LOW for >=160ms (datasheet reset time), then release HIGH. */
 void gps_reset(sx_gps_t *_gps)
 {
-    // sx_gpio_write(&_gps->rst, SX_GPIO_LOW);
-    // sx_delay_ms(100);
-    // sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
+    sx_gpio_write(&_gps->rst, SX_GPIO_LOW);
+    sx_delay_ms(200);
+    sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
 }
 void gps_power_on(sx_gps_t *_gps)
 {
-    //sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
-    sx_gpio_write(&_gps->pwr, SX_GPIO_LOW);
+    sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
 }
 void gps_power_off(sx_gps_t *_gps)
 {
-    //sx_gpio_write(&_gps->pwr, SX_GPIO_LOW);
-    sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
+    sx_gpio_write(&_gps->pwr, SX_GPIO_LOW);
 }
 
 void gps_process(sx_gps_t *_gps, uint32_t _timestamp)

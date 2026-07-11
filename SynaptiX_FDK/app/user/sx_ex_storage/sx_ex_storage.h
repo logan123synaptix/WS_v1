@@ -24,9 +24,7 @@ typedef struct {
     SPI_HandleTypeDef *hspi;
     sx_spi_t s_spi;
     sx_gpio_t s_cs;
-    sx_gpio_t s_pwr;
     sx_gpio_pin_t cs_pin;
-    sx_gpio_pin_t pwr_pin;
 } sx_storage_cfg_t;
 
 /*  Init    */

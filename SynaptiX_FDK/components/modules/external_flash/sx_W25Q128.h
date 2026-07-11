@@ -39,12 +39,15 @@ extern "C"{
 typedef struct {
     sx_spi_t *spi;
     bool      initialized;
-    sx_gpio_t power;
 } sx_W25Q128_t;
 
 /*API*/
 
-bool sx_W25Q128_init            (sx_W25Q128_t *dev, sx_spi_t *spi, sx_gpio_ops_t *pwr_ops, sx_gpio_pin_t *pwr_pin);
+/* No power-cutoff GPIO on this board revision — the chip's 3.3V is wired
+ * directly, no transistor to drive. Power management is done purely at the
+ * SPI level via the chip's own Deep Power-Down mode (see sx_W25Q128_sleep_on
+ * / sx_W25Q128_sleep_off() below), which works regardless of board wiring. */
+bool sx_W25Q128_init            (sx_W25Q128_t *dev, sx_spi_t *spi);
 int  sx_W25Q128_read            (uint32_t addr, uint8_t *buf, uint32_t len);
 int  sx_W25Q128_write           (uint32_t addr, const uint8_t *buf, uint32_t len);
 int  sx_W25Q128_erase_sector    (uint32_t addr);
@@ -53,8 +56,6 @@ bool sx_W25Q128_is_busy         (void);
 
 void sx_W25Q128_sleep_on(sx_W25Q128_t *dev);
 void sx_W25Q128_sleep_off(sx_W25Q128_t *dev);
-void sx_W25Q128_power_down(sx_W25Q128_t *dev);
-void sx_W25Q128_power_up(sx_W25Q128_t *dev);
 
 extern sx_ext_flash_ops_t sx_W25Q128_ops;
 extern sx_ext_flash_info_t sx_W25Q128_info;

@@ -21,7 +21,7 @@ sx_storage_err_t sx_storage_init(sx_storage_cfg_t *cfg)
     sx_gpio_write(&cfg->s_cs, SX_GPIO_HIGH);
     sx_spi_init(&cfg->s_spi, &sx_spi_ops, cfg->hspi, &cfg->s_cs); 
 
-    if (!sx_W25Q128_init(&s_w25q128, &cfg->s_spi, &sx_gpio_ops, &cfg->pwr_pin)) {
+    if (!sx_W25Q128_init(&s_w25q128, &cfg->s_spi)) {
         log_error(TAG, "W25Q128 init failed");
         return SX_STORAGE_ERR_IO;
     }

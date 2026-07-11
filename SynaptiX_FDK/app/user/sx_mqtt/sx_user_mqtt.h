@@ -8,6 +8,12 @@ extern "C"{
 // #include "sx_mqtt.h"
 #include <stdint.h>
 
+/* NOTE: sx_user_mqtt_uart_feed() below is declared but was never
+ * implemented in sx_user_mqtt.c, in the version inherited before this
+ * refactor — not something introduced by moving from sim76xx to a7677s.
+ * Left as-is, not touched, since its intended design is unknown; flagged
+ * here for visibility rather than silently dropped or guessed at. */
+
 typedef void (*sx_user_mqtt_on_connected_cb_t)   (void);
 typedef void (*sx_user_mqtt_on_disconnected_cb_t)(void);
 typedef void (*sx_user_mqtt_on_message_cb_t)     (const char *topic, const char *message);

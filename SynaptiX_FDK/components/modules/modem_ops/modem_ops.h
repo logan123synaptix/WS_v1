@@ -64,6 +64,22 @@ typedef void (*mqtt_connlost_cb_t)(void *ctx);
  * poll()). */
 typedef void (*power_mode_cb_t)(modem_ops_result_t result, void *ctx);
 
+/* Callback fired exactly once, the moment the driver's internal state
+ * transitions into "ready" (rising edge — the driver must track its own
+ * previous state and only fire on the 0->1 transition, never repeatedly
+ * while already ready). Lets the caller react immediately (e.g. kick off
+ * mqtt_connect()) instead of having to poll is_ready() every loop.
+ * ctx: the user_ctx pointer passed to set_on_ready(). */
+typedef void (*modem_ready_cb_t)(void *ctx);
+
+/* Callback fired when the driver detects an unrecoverable error condition
+ * outside of any in-flight operation (e.g. network deregistration, modem
+ * stopped responding to AT during normal operation). Not related to a
+ * specific mqtt_cb_t/power_mode_cb_t call already in flight — those still
+ * report their own failure through their own callback.
+ * ctx: the user_ctx pointer passed to set_on_error(). */
+typedef void (*modem_error_cb_t)(void *ctx);
+
 typedef struct {
     /* --- Power state machine (non-blocking, PWRKEY pulse + poll based) --- */
 
@@ -91,6 +107,19 @@ typedef struct {
     /* true once the modem has finished init and is ready for
      * network/MQTT use. */
     bool (*is_ready)(void *ctx);
+
+    /* Registers a one-shot-per-transition callback fired when is_ready()
+     * would flip from false to true. Not an async op of its own — just
+     * stores the callback + user_ctx on the driver. Call once, any time
+     * after modem_handle_t is set up (before or after start()). Passing
+     * cb=NULL disables the notification (driver keeps polling internally
+     * but does not fire anything). */
+    void (*set_on_ready)(void *ctx, modem_ready_cb_t cb, void *user_ctx);
+
+    /* Registers a callback fired when the driver detects it has dropped out
+     * of the ready state due to an error condition (not a normal, expected
+     * transition like entering low power). Passing cb=NULL disables it. */
+    void (*set_on_error)(void *ctx, modem_error_cb_t cb, void *user_ctx);
 
     /* --- Low power mode (replaces PSM) --- */
 
@@ -150,6 +179,28 @@ typedef struct {
     void (*mqtt_set_callbacks)(void *ctx, mqtt_incoming_cb_t incoming_cb,
                                 mqtt_connlost_cb_t connlost_cb,
                                 void *user_ctx);
+
+    /* --- Device info (cached values, updated internally by the driver;
+     * these never block or send an AT command synchronously) --- */
+
+    /* Returns the device IMEI (AT+CGSN), NUL-terminated, or "" if not yet
+     * read (e.g. still waiting on start() to finish). The string is read
+     * once and cached — it does not change for the lifetime of the modem,
+     * so no callback/refresh mechanism is needed. Pointer remains valid for
+     * the lifetime of ctx. */
+    const char *(*get_imei)(void *ctx);
+
+    /* Returns the last-known signal quality from AT+CSQ, as the raw "rssi"
+     * value (0-31, 99 = unknown), refreshed periodically by the driver's own
+     * poll() — this call never blocks or sends AT itself, it only reads the
+     * cached value. */
+    int (*get_rssi)(void *ctx);
+
+    /* Returns the current PDP context IP address, NUL-terminated, or "" if
+     * not attached yet. Cached after a successful start(); refreshed again
+     * if the driver detects the PDN was re-attached. Pointer remains valid
+     * for the lifetime of ctx. */
+    const char *(*get_ip)(void *ctx);
 
     /* --- Mandatory poll, called continuously from the main loop --- */
 

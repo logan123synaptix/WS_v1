@@ -263,6 +263,20 @@ struct a7677s
     uint8_t               creg_poll_count;  /* AT+CREG? polls done so far, see A7677S_CREG_MAX_POLL */
     uint8_t               init_cmd_pending; /* 1 while an init-sequence AT command is in flight */
 
+    /* --- modem_ops_t.set_on_ready/set_on_error registrations (see
+     * modem_ops.h). was_ready tracks the previous tick's is_ready() result so
+     * poll() can fire ready_cb exactly once on the 0->1 transition, never
+     * repeatedly while already ready. error_cb currently fires on the same
+     * kind of transition but in reverse (1->0) ONLY when the cause was an
+     * error condition, not a normal low-power entry — see the check in
+     * poll() below, which excludes low_power_active from counting as an
+     * error drop. */
+    modem_ready_cb_t ready_cb;
+    void            *ready_cb_ctx;
+    modem_error_cb_t error_cb;
+    void            *error_cb_ctx;
+    uint8_t          was_ready;
+
     /* APN/auth, set once via a7677s_set_full_apn() before ops->start(ctx) is
      * called (mirrors the existing sim76xx_set_full_apn() pattern used by
      * sx_user_mqtt.c — NOT part of modem_ops_t.start() itself, since APN is

@@ -170,6 +170,12 @@ void a7677s_init(a7677s_t *dce)
     dce->cfun_cmd_pending  = 0;
     dce->cfun_cb           = NULL;
 
+    dce->ready_cb     = NULL;
+    dce->ready_cb_ctx = NULL;
+    dce->error_cb     = NULL;
+    dce->error_cb_ctx = NULL;
+    dce->was_ready    = 0;
+
     dce->mqtt_state       = A7677S_MQTT_IDLE;
     dce->mqtt_cmd_pending = 0;
     dce->mqtt_client_id[0] = '\0';
@@ -315,6 +321,23 @@ static void a7677s_poll(void *ctx, uint32_t ts)
      * picked up — no extra tick of latency. */
     if (!modem_is_busy(pModem(dce))) {
         urc_poll(dce);
+    }
+
+    /* set_on_ready/set_on_error edge detection — must run every tick,
+     * independent of which state machine below is active. Only fires each
+     * callback once per transition (never repeatedly while steady). A 1->0
+     * transition caused by entering low power on purpose is NOT treated as
+     * an error (low_power_active is part of is_ready()'s own definition, so
+     * a deliberate enter_low_power() call would otherwise look identical to
+     * an unexpected drop — excluded explicitly below). */
+    {
+        bool now_ready = a7677s_is_ready(dce);
+        if (now_ready && !dce->was_ready) {
+            if (dce->ready_cb) dce->ready_cb(dce->ready_cb_ctx);
+        } else if (!now_ready && dce->was_ready && !dce->low_power_active) {
+            if (dce->error_cb) dce->error_cb(dce->error_cb_ctx);
+        }
+        dce->was_ready = now_ready;
     }
 
     switch (dce->power_state) {
@@ -678,6 +701,24 @@ static bool a7677s_is_ready(void *ctx)
     return dce->power_state == A7677S_PWR_READY &&
            dce->init_state  == A7677S_INIT_READY &&
            !dce->low_power_active;
+}
+
+/* modem_ops_t.set_on_ready / set_on_error — just store the callback + ctx;
+ * actual firing (rising/falling edge detection) happens once per tick at
+ * the top of a7677s_poll(), see the was_ready check there. Not an async op
+ * of its own, so it never touches modem_cmd_pending/mqtt_cmd_pending etc. */
+static void a7677s_set_on_ready(void *ctx, modem_ready_cb_t cb, void *user_ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    dce->ready_cb     = cb;
+    dce->ready_cb_ctx = user_ctx;
+}
+
+static void a7677s_set_on_error(void *ctx, modem_error_cb_t cb, void *user_ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    dce->error_cb     = cb;
+    dce->error_cb_ctx = user_ctx;
 }
 
 static int a7677s_enter_low_power(void *ctx, power_mode_cb_t cb)
@@ -1943,6 +1984,8 @@ const modem_ops_t a7677s_ops = {
 
     .start            = a7677s_start,
     .is_ready         = a7677s_is_ready,
+    .set_on_ready     = a7677s_set_on_ready,
+    .set_on_error     = a7677s_set_on_error,
 
     .enter_low_power  = a7677s_enter_low_power,
     .exit_low_power   = a7677s_exit_low_power,

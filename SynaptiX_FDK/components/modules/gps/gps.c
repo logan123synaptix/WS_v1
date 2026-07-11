@@ -110,52 +110,6 @@ void gps_process(sx_gps_t *_gps, uint32_t _timestamp)
     }
 }
 
-// static void gps_callback_task(sx_gps_t *gps, char *message, void *arg)
-// {
-//     gps->_sentence_id = minmea_sentence_id((const char *)message, false);
-//     switch (gps->_sentence_id)
-//     {
-//     case MINMEA_SENTENCE_RMC:
-//     {
-//         struct minmea_sentence_rmc rmc;
-//         if (minmea_parse_rmc(&rmc, (char *)message))
-//         {
-//             if (!rmc.valid)
-//             {
-//                 log_warn(TAG, "RMC sentence is not valid");
-//                 break;
-//             }
-//             gps->latitude = minmea_tocoord(&rmc.latitude);
-//             gps->longtitude = minmea_tocoord(&rmc.longitude);
-//             log_info(TAG, "RMC: lat %f lon %f", gps->latitude, gps->longtitude);
-//             if (rmc.time.hours != -1 && rmc.date.year != -1)
-//             {
-//                 minmea_getdatetime(&gps->tim, &rmc.date, &rmc.time);
-//                 // UTC+7
-//                 gps->tim.tm_hour += 7;
-//                 if (gps->tim.tm_hour >= 24)
-//                 {
-//                     gps->tim.tm_hour -= 24;
-//                     gps->tim.tm_mday += 1;
-//                 }
-//                 log_info(TAG, "RMC: lat=%.6f lon=%.6f time=%02d:%02d:%02d date=%02d/%02d/%04d",
-//                          gps->latitude, gps->longtitude,
-//                          gps->tim.tm_hour, gps->tim.tm_min, gps->tim.tm_sec,
-//                          gps->tim.tm_mday, gps->tim.tm_mon + 1, gps->tim.tm_year + 1900);
-//             }
-//         }
-//         else
-//         {
-//             log_warn(TAG, "RMC sentence is not valid");
-//         }
-//     }
-//     break;
-//     default:
-//         break;
-//     }
-// }
-
-
 static void gps_callback_task(sx_gps_t *gps, char *message, void *arg)
 {
     gps->_sentence_id = minmea_sentence_id((const char *)message, false);

@@ -75,7 +75,9 @@ extern "C" {
 #define A7677S_TIMEOUT_CPOF    5000U
 #define A7677S_TIMEOUT_NETWORK 9000U    /* CGDCONT/CGAUTH/CGACT/COPS, per a76xx_at_cmd.md MaxResponseTime */
 #define A7677S_TIMEOUT_CFUN    9000U    /* AT+CFUN=0/1, MaxResponseTime per a76xx_at_cmd.md section 3.2.1 */
+#define A7677S_TIMEOUT_CSQ     9000U    /* AT+CSQ, MaxResponseTime per a76xx_at_cmd.md section 3.2.2 */
 #define A7677S_CREG_POLL_MS    2000U    /* interval between AT+CREG? polls while waiting for registration */
+#define A7677S_RSSI_POLL_MS    10000U   /* interval between AT+CSQ polls once ready, refreshes get_rssi() */
 #define A7677S_MAX_RETRY       3U       /* consecutive AT-layer failures before restarting the attach sequence from AT */
 
 /* Max retries while polling AT+CREG? for <stat> == 1 (home) or 5 (roaming).
@@ -90,6 +92,17 @@ extern "C" {
  * (SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.h: apn[20], username_apn[20],
  * password_apn[20]) so a7677s_set_full_apn() can take those buffers as-is. */
 #define A7677S_APN_MAX_LEN     20U
+
+/* IMEI is always exactly 15 digits (3GPP TS 23.003) + NUL. IP buffer sized
+ * for a full IPv4 dotted-quad ("255.255.255.255" = 15 chars) + NUL; A7677S
+ * PDP context here is IPv4-only (see A7677S_INIT_CGDCONT_QUERY's AT+CGDCONT
+ * with PDP type "IP", not "IPV4V6"), so no IPv6 buffer is needed. */
+#define A7677S_IMEI_LEN         16U
+#define A7677S_IP_LEN           16U
+/* AT+CSQ's own documented sentinel for "not known or not detectable"
+ * (a76xx_at_cmd.md 3.2.2) — used as the cached value before the first
+ * successful AT+CSQ poll completes, and again if a poll fails. */
+#define A7677S_RSSI_UNKNOWN     99
 
 /* Non-blocking power state machine. A7677S has neither a STATUS pin nor a
  * DTR pin wired to the STM32 (confirmed hardware fact, see handoff notes),
@@ -132,7 +145,13 @@ typedef enum {
     A7677S_INIT_CREG_POLL,      /* AT+CREG? - polled until <stat> == 1 or 5 */
     A7677S_INIT_COPS_SET,       /* AT+COPS=0 (automatic operator selection) */
     A7677S_INIT_COPS_QUERY,     /* AT+COPS? */
-    A7677S_INIT_CGDCONT_QUERY,  /* AT+CGDCONT? - final read-back, then READY */
+    A7677S_INIT_CGDCONT_QUERY,  /* AT+CGDCONT? - final read-back */
+    /* --- one-shot device info, read once right before READY. Neither step
+     * blocks is_ready() on failure (see cb_get_imei()/cb_get_ip()) since
+     * both are purely informational and CGACT/CREG already confirmed the
+     * attach itself succeeded. --- */
+    A7677S_INIT_GET_IMEI,       /* AT+CGSN - cached into dce->imei, see get_imei() */
+    A7677S_INIT_GET_IP,         /* AT+CGPADDR=1 - cached into dce->ip, see get_ip() */
     A7677S_INIT_READY,          /* attach sequence complete, is_ready() true */
 } a7677s_init_state_t;
 
@@ -276,6 +295,21 @@ struct a7677s
     modem_error_cb_t error_cb;
     void            *error_cb_ctx;
     uint8_t          was_ready;
+
+    /* --- Device info, exposed via modem_ops_t.get_imei/get_rssi/get_ip (see
+     * modem_ops.h). imei/ip are read once during start() (A7677S_INIT_
+     * GET_IMEI/GET_IP) and stay fixed thereafter — empty string ("") until
+     * that point, or if the read failed. rssi is refreshed periodically by
+     * poll() (A7677S_RSSI_POLL_MS), independent of init_state, so it keeps
+     * updating for the whole time the modem is ready; A7677S_RSSI_UNKNOWN
+     * (99, AT+CSQ's own "not known" sentinel) until the first successful
+     * poll. rssi_poll_elapsed/rssi_cmd_pending drive that periodic poll,
+     * mirroring the init_elapsed/init_cmd_pending pattern used elsewhere. */
+    char    imei[A7677S_IMEI_LEN];
+    char    ip[A7677S_IP_LEN];
+    int     rssi;
+    uint32_t rssi_poll_elapsed;
+    uint8_t  rssi_cmd_pending;
 
     /* APN/auth, set once via a7677s_set_full_apn() before ops->start(ctx) is
      * called (mirrors the existing sim76xx_set_full_apn() pattern used by

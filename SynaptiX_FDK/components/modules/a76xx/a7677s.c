@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "a7677s.h"
 #include "sx_gpio.h"
 #include "logger.h"
@@ -21,7 +22,10 @@ static const char *TAG = "A7677S";
 #define CMD_CGDCONT_QUERY   6
 #define CMD_CFUN_0          7
 #define CMD_CFUN_1          8
-#define CMD_DYNAMIC         9   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
+#define CMD_CGSN            9    /* AT+CGSN - read IMEI, once during start() */
+#define CMD_CGPADDR         10   /* AT+CGPADDR=1 - read PDP IP, once during start() */
+#define CMD_CSQ             11   /* AT+CSQ - read signal quality, polled periodically once ready */
+#define CMD_DYNAMIC         12   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
 
 static modem_command_t command[] = {
     [CMD_AT]            = {.cmd = "AT\r\n",              .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
@@ -33,6 +37,9 @@ static modem_command_t command[] = {
     [CMD_CGDCONT_QUERY] = {.cmd = "AT+CGDCONT?\r\n",     .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CFUN_0]        = {.cmd = "AT+CFUN=0\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CFUN_1]        = {.cmd = "AT+CFUN=1\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CGSN]          = {.cmd = "AT+CGSN\r\n",         .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CGPADDR]       = {.cmd = "AT+CGPADDR=1\r\n",    .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CSQ]           = {.cmd = "AT+CSQ\r\n",          .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_DYNAMIC]       = {0},
 };
 
@@ -143,6 +150,9 @@ static void cb_creg_poll      (modem_t *modem, const char *response, modem_respo
 static void cb_cops_set       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cops_query     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgdcont_query  (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_get_imei       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_get_ip         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_csq            (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cfun_0         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cfun_1         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 
@@ -175,6 +185,12 @@ void a7677s_init(a7677s_t *dce)
     dce->error_cb     = NULL;
     dce->error_cb_ctx = NULL;
     dce->was_ready    = 0;
+
+    dce->imei[0]           = '\0';
+    dce->ip[0]             = '\0';
+    dce->rssi              = A7677S_RSSI_UNKNOWN;
+    dce->rssi_poll_elapsed = 0;
+    dce->rssi_cmd_pending  = 0;
 
     dce->mqtt_state       = A7677S_MQTT_IDLE;
     dce->mqtt_cmd_pending = 0;
@@ -338,6 +354,26 @@ static void a7677s_poll(void *ctx, uint32_t ts)
             if (dce->error_cb) dce->error_cb(dce->error_cb_ctx);
         }
         dce->was_ready = now_ready;
+    }
+
+    /* Periodic AT+CSQ refresh for get_rssi() — only while ready, and only
+     * when no other AT command (init sequence, MQTT, CFUN) is already in
+     * flight, since this shares the same single command/response channel
+     * as everything else in modem_send_command()/modem_poll(). Skipping a
+     * tick when busy just delays the refresh slightly; it is re-attempted
+     * every tick thereafter since rssi_poll_elapsed keeps accumulating. */
+    if (a7677s_is_ready(dce) && !dce->rssi_cmd_pending &&
+        !modem_is_busy(pModem(dce)) && !dce->init_cmd_pending &&
+        !dce->mqtt_cmd_pending && !dce->cfun_cmd_pending)
+    {
+        dce->rssi_poll_elapsed += ts;
+        if (dce->rssi_poll_elapsed >= A7677S_RSSI_POLL_MS) {
+            dce->rssi_poll_elapsed = 0;
+            dce->rssi_cmd_pending  = 1;
+            command[CMD_CSQ].callback = cb_csq;
+            command[CMD_CSQ].arg      = dce;
+            modem_send_command(pModem(dce), &command[CMD_CSQ], A7677S_TIMEOUT_CSQ);
+        }
     }
 
     switch (dce->power_state) {
@@ -593,16 +629,118 @@ static void cb_cgdcont_query(modem_t *modem, const char *response, modem_respons
     dce->init_cmd_pending = 0;
     /* Purely informational read-back (mirrors sim76xx.c's
      * cb_cgdcont_query()) — even on FAIL/TIMEOUT here we still consider the
-     * attach sequence complete, since CGACT/CREG already succeeded; a
-     * failed final read-back should not block is_ready(). */
+     * attach itself complete, since CGACT/CREG already succeeded; a failed
+     * read-back should not block is_ready(). Proceeds to the one-shot
+     * device-info reads (IMEI/IP) rather than READY directly. */
     if (res == MODEM_RESPONSE_SUCCESS && response) {
         log_info(TAG, "CGDCONT: %s", response);
     } else {
         log_warn(TAG, "CGDCONT read-back failed (non-fatal)");
     }
     dce->init_retry_count = 0;
-    dce->init_state       = A7677S_INIT_READY;
+    dce->init_state       = A7677S_INIT_GET_IMEI;
+    send_init_cmd(dce, CMD_CGSN, cb_get_imei, A7677S_TIMEOUT_AT);
+}
+
+static void cb_get_imei(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* AT+CGSN's success response is a single line containing just the IMEI
+     * digits (a76xx_at_cmd.md 2.2.19), e.g. "351602000330570" — no "+CGSN:"
+     * prefix, unlike most other queries. Non-fatal on failure: leaves
+     * dce->imei as "" (already the case from a7677s_init()'s memset-less
+     * init, or from a previous failed attempt), does not block is_ready(). */
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        char imei_buf[A7677S_IMEI_LEN] = {0};
+        int i = 0;
+        const char *p = response;
+        /* Skip any leading \r\n left over from the raw response buffer;
+         * copy only ASCII digits, stop at the first non-digit or buffer
+         * limit. Mirrors the defensive-parsing style used elsewhere in this
+         * file (e.g. cb_creg_poll's strtol on a trusted-format substring),
+         * but here the whole line IS the value, not a "key: value" pair. */
+        while (*p && (*p == '\r' || *p == '\n')) p++;
+        while (*p && isdigit((unsigned char)*p) && i < (int)(A7677S_IMEI_LEN - 1)) {
+            imei_buf[i++] = *p++;
+        }
+        imei_buf[i] = '\0';
+        if (i > 0) {
+            memcpy(dce->imei, imei_buf, sizeof(imei_buf));
+            log_info(TAG, "IMEI: %s", dce->imei);
+        } else {
+            log_warn(TAG, "CGSN response did not parse as digits: %s", response);
+        }
+    } else {
+        log_warn(TAG, "AT+CGSN failed (non-fatal)");
+    }
+
+    dce->init_state = A7677S_INIT_GET_IP;
+    send_init_cmd(dce, CMD_CGPADDR, cb_get_ip, A7677S_TIMEOUT_AT);
+}
+
+static void cb_get_ip(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* Response format: +CGPADDR:<cid>,<PDP_addr> (a76xx_at_cmd.md 5.2.13).
+     * cid is always 1 here (matches the single AT+CGDCONT=1,... context this
+     * driver ever sets up). Non-fatal on failure: leaves dce->ip as "". */
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        const char *p = strstr(response, "+CGPADDR:");
+        if (p) {
+            p = strchr(p, ',');
+            if (p) {
+                p++; /* skip the comma, now at the start of <PDP_addr> */
+                char ip_buf[A7677S_IP_LEN] = {0};
+                int i = 0;
+                while (*p && *p != '\r' && *p != '\n' && *p != ',' &&
+                       i < (int)(A7677S_IP_LEN - 1)) {
+                    ip_buf[i++] = *p++;
+                }
+                ip_buf[i] = '\0';
+                if (i > 0) {
+                    memcpy(dce->ip, ip_buf, sizeof(ip_buf));
+                    log_info(TAG, "IP: %s", dce->ip);
+                }
+            }
+        }
+        if (dce->ip[0] == '\0') {
+            log_warn(TAG, "CGPADDR response did not parse: %s", response);
+        }
+    } else {
+        log_warn(TAG, "AT+CGPADDR failed (non-fatal)");
+    }
+
+    dce->init_state = A7677S_INIT_READY;
     log_info(TAG, "Network attach complete, ready for MQTT");
+}
+
+/* Fired by the periodic AT+CSQ refresh in a7677s_poll() (not part of the
+ * init_state sequence — this keeps running for as long as the modem stays
+ * ready, see the a7677s_is_ready() gate at the call site). Response format:
+ * +CSQ:<rssi>,<ber> (a76xx_at_cmd.md 3.2.2). On failure, caches
+ * A7677S_RSSI_UNKNOWN rather than leaving the previous value, since a
+ * failed AT+CSQ IS informative (link likely degraded) — unlike IMEI/IP,
+ * which are one-shot facts that failing to re-read does not invalidate. */
+static void cb_csq(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->rssi_cmd_pending = 0;
+
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        const char *p = strstr(response, "+CSQ:");
+        if (p) {
+            int rssi = (int)strtol(p + 5, NULL, 10);
+            dce->rssi = rssi;
+            log_debug(TAG, "RSSI: %d", rssi);
+            return;
+        }
+        log_warn(TAG, "CSQ response did not parse: %s", response);
+    } else {
+        log_warn(TAG, "AT+CSQ failed");
+    }
+    dce->rssi = A7677S_RSSI_UNKNOWN;
 }
 
 /* ------------------------------------------------------------------ */
@@ -719,6 +857,29 @@ static void a7677s_set_on_error(void *ctx, modem_error_cb_t cb, void *user_ctx)
     a7677s_t *dce = (a7677s_t *)ctx;
     dce->error_cb     = cb;
     dce->error_cb_ctx = user_ctx;
+}
+
+/* modem_ops_t.get_imei/get_rssi/get_ip — all three just return a cached
+ * value, never send AT or block (see modem_ops.h's doc-comment on each).
+ * get_imei/get_ip return "" until the corresponding A7677S_INIT_GET_IMEI/
+ * A7677S_INIT_GET_IP step has run (or if it failed); get_rssi returns
+ * A7677S_RSSI_UNKNOWN (99) until the first successful periodic AT+CSQ. */
+static const char *a7677s_get_imei(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    return dce->imei;
+}
+
+static int a7677s_get_rssi(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    return dce->rssi;
+}
+
+static const char *a7677s_get_ip(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    return dce->ip;
 }
 
 static int a7677s_enter_low_power(void *ctx, power_mode_cb_t cb)
@@ -1995,6 +2156,10 @@ const modem_ops_t a7677s_ops = {
     .mqtt_publish      = a7677s_mqtt_publish,
     .mqtt_subscribe    = a7677s_mqtt_subscribe,
     .mqtt_set_callbacks = a7677s_mqtt_set_callbacks,
+
+    .get_imei         = a7677s_get_imei,
+    .get_rssi         = a7677s_get_rssi,
+    .get_ip           = a7677s_get_ip,
 
     .poll             = a7677s_poll,
 };

@@ -77,11 +77,18 @@ static void _on_publish(sx_mqtt_t *mqtt, int success)
 {
     (void)mqtt;
     s_publishing = 0;
-    s_publish_retry = 0;
 
     log_debug(TAG, "Publish %s", success ? "OK" : "FAIL");
 
     if (!success) {
+        /* NOTE: s_publish_retry is intentionally NOT reset here — it must
+         * accumulate across consecutive failures for MQTT_PUBLISH_MAX_RETRY
+         * to ever be reached. It is only cleared on a successful publish
+         * (see the success branch below) or by the max-retry recovery path
+         * itself. Previously this was reset to 0 unconditionally at the top
+         * of this function before the increment below, which meant the
+         * counter always went 0->1 on every failure and the max-retry
+         * threshold was effectively unreachable through normal operation. */
         s_publish_retry++;
         log_warn(TAG, "Publish fail %d/%d", s_publish_retry, MQTT_PUBLISH_MAX_RETRY);
         if (s_publish_retry >= MQTT_PUBLISH_MAX_RETRY) {
@@ -99,6 +106,7 @@ static void _on_publish(sx_mqtt_t *mqtt, int success)
         return;
     }
 
+    s_publish_retry = 0;
     dispatch_next();
     if (s_on_publish) s_on_publish(1);
 }

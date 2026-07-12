@@ -477,6 +477,20 @@ static void restart_init(a7677s_t *dce)
         dce->init_retry_count = 0;
         dce->init_state       = A7677S_INIT_IDLE;
         log_error(TAG, "Init sequence failed after max retries, giving up (caller should power-cycle)");
+
+        /* Gap fix: a7677s_poll()'s ready/error edge detection only fires
+         * error_cb on a was_ready=1 -> now_ready=0 transition. If the module
+         * never reached ready once (this is the very first attach attempt
+         * and it failed A7677S_MAX_RETRY times in a row), was_ready is still
+         * 0 here, so that transition never happens and error_cb would
+         * otherwise never fire — leaving the caller layer with no signal
+         * that the attach sequence is dead and sitting idle in
+         * A7677S_INIT_IDLE forever. Fire error_cb directly for this specific
+         * "never became ready" case so the caller can still decide to
+         * power-cycle, same as the normal drop-after-ready case. */
+        if (!dce->was_ready && dce->error_cb) {
+            dce->error_cb(dce->error_cb_ctx);
+        }
         return;
     }
 

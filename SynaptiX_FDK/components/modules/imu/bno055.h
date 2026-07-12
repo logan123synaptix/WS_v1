@@ -75,16 +75,18 @@ typedef struct {
 typedef struct {
     sx_i2c_t  *i2c;
     uint16_t   dev_addr;
-    sx_gpio_t *en_gpio;
     sx_gpio_t *reset_gpio;
     bool       initialized;
 } bno055_t;
 
-int bno055_power_on(bno055_t *dev);
-int bno055_power_off(bno055_t *dev);
-
+/* No power-cutoff GPIO on this board revision. BNO055 has no dedicated
+ * "enable" pin at all (only VDD/VDDIO analog supply pins and nRESET, per
+ * the datasheet's power management section) — the old en_gpio was never a
+ * real chip pin to begin with, just a leftover transistor-style control
+ * that never matched this chip. reset_gpio, unlike en_gpio, is real
+ * (nRESET) and stays. */
 int bno055_init(bno055_t *dev, sx_i2c_t *i2c, uint16_t dev_addr,
-                sx_gpio_t *en_gpio, sx_gpio_t *reset_gpio);
+                sx_gpio_t *reset_gpio);
 
 int bno055_set_opr_mode(bno055_t *dev, bno055_opr_mode_t mode);
 int bno055_set_pwr_mode(bno055_t *dev, bno055_pwr_mode_t mode);

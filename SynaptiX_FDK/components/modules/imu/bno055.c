@@ -26,7 +26,6 @@ static const char* TAG = "IMU";
 #define REG_ACC_RADIUS_LSB   0x67U
 #define REG_MAG_RADIUS_LSB   0x69U
 
-#define DELAY_POWER_ON_MS    10U
 #define DELAY_RESET_MS       650U
 #define DELAY_MODE_SWITCH_MS 20U
 
@@ -50,33 +49,13 @@ static int _read_vec3(bno055_t *dev, uint8_t start_reg, bno055_vec3_t *out)
     return BNO055_OK;
 }
 
-int bno055_power_on(bno055_t *dev)
-{
-    if (!dev) return BNO055_ERR_PARAM;
-    if (dev->en_gpio) {
-        sx_gpio_write(dev->en_gpio, SX_GPIO_LOW);
-        sx_delay_ms(DELAY_POWER_ON_MS);
-    }
-    return BNO055_OK;
-}
-
-int bno055_power_off(bno055_t *dev)
-{
-    if (!dev) return BNO055_ERR_PARAM;
-    if (dev->en_gpio) {
-        sx_gpio_write(dev->en_gpio, SX_GPIO_HIGH);
-    }
-    return BNO055_OK;
-}
-
 int bno055_init(bno055_t *dev, sx_i2c_t *i2c, uint16_t dev_addr,
-                sx_gpio_t *en_gpio, sx_gpio_t *reset_gpio)
+                sx_gpio_t *reset_gpio)
 {
     if (!dev || !i2c) return BNO055_ERR_PARAM;
 
     dev->i2c         = i2c;
     dev->dev_addr    = dev_addr;
-    dev->en_gpio     = en_gpio;
     dev->reset_gpio  = reset_gpio;
     dev->initialized = false;
 

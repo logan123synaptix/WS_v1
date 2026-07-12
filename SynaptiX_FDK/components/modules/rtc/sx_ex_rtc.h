@@ -104,7 +104,6 @@ typedef struct {
 
 typedef struct {
     sx_i2c_t  *i2c;
-    sx_gpio_t *pwr_pin;     
     bool       initialized;
 } rx8130ce_t;
 
@@ -112,10 +111,10 @@ typedef struct {
 /*  Public API                                                         */
 /* ------------------------------------------------------------------ */
 
-int rx8130ce_init(rx8130ce_t *dev, sx_i2c_t *i2c, sx_gpio_t *pwr_pin);
-
-int rx8130ce_power_on(rx8130ce_t *dev);
-int rx8130ce_power_off(rx8130ce_t *dev);
+/* No power-cutoff GPIO on this board revision — VIO/VDD/VBAT are wired
+ * directly to 3.3V (through ferrite/inductor filtering only, no P-MOSFET
+ * switch), unlike the old board's transistor-gated supply. */
+int rx8130ce_init(rx8130ce_t *dev, sx_i2c_t *i2c);
 
 int rx8130ce_set_time(rx8130ce_t *dev, const rx8130ce_time_t *t);
 

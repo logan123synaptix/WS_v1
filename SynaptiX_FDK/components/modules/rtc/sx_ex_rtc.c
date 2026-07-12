@@ -35,23 +35,6 @@ static int _reg_read(rx8130ce_t *dev, uint8_t reg, uint8_t *buf, uint32_t len)
 }
 
 /* ------------------------------------------------------------------ */
-/*  Power control                                                      */
-/* ------------------------------------------------------------------ */
-
-int rx8130ce_power_on(rx8130ce_t *dev)
-{
-    if (!dev || !dev->pwr_pin) return RX8130CE_ERR_PARAM;
-    /* P-channel MOSFET: gate LOW → transistor ON → 3.3 V to RTC */
-    return sx_gpio_write(dev->pwr_pin, SX_GPIO_LOW);
-}
-
-int rx8130ce_power_off(rx8130ce_t *dev)
-{
-    if (!dev || !dev->pwr_pin) return RX8130CE_ERR_PARAM;
-    return sx_gpio_write(dev->pwr_pin, SX_GPIO_HIGH);
-}
-
-/* ------------------------------------------------------------------ */
 /*  Software Reset sequence (datasheet §18.2)                         */
 /* ------------------------------------------------------------------ */
 
@@ -81,27 +64,28 @@ static int _software_reset(rx8130ce_t *dev)
 /*  Initialisation                                                     */
 /* ------------------------------------------------------------------ */
 
-int rx8130ce_init(rx8130ce_t *dev, sx_i2c_t *i2c, sx_gpio_t *pwr_pin)
+int rx8130ce_init(rx8130ce_t *dev, sx_i2c_t *i2c)
 {
-    if (!dev || !i2c || !pwr_pin) return RX8130CE_ERR_PARAM;
+    if (!dev || !i2c) return RX8130CE_ERR_PARAM;
 
     dev->i2c         = i2c;
-    dev->pwr_pin     = pwr_pin;
     dev->initialized = false;
 
-    /* 1. Power ON */
-    if (rx8130ce_power_on(dev) != 0) return RX8130CE_ERR_I2C;
-
-    /* 2. Wait ≥ 30 ms (datasheet: oscillation start + stable) */
+    /* No power-on GPIO step here — VIO/VDD/VBAT are wired directly to
+     * 3.3V on this board (no P-MOSFET switch), so supply is already stable
+     * by the time board init reaches this call. Still wait for
+     * oscillation start-up, per the datasheet (>= 30 ms after VDD is
+     * applied) — this delay is intrinsic to the chip, not to how power was
+     * turned on. */
     sx_delay_ms(40);
 
-    /* 3. Dummy read — ignore ACK/NACK */
+    /* 2. Dummy read — ignore ACK/NACK */
     {
         uint8_t dummy;
         (void)_reg_read(dev, RX8130CE_REG_FLAG, &dummy, 1);
     }
 
-    /* 4. Check VLF bit */
+    /* 3. Check VLF bit */
     uint8_t flag = 0;
     if (_reg_read(dev, RX8130CE_REG_FLAG, &flag, 1) != 0)
         return RX8130CE_ERR_I2C;
@@ -111,7 +95,7 @@ int rx8130ce_init(rx8130ce_t *dev, sx_i2c_t *i2c, sx_gpio_t *pwr_pin)
         if (_software_reset(dev) != 0) return RX8130CE_ERR_I2C;
     }
 
-    /* 5. Configure Control Register 1 (0x1F):
+    /* 4. Configure Control Register 1 (0x1F):
      *      INIEN = 1  (power switchover enabled)
      *      CHGEN = 0  (VBAT is hardwired 3.3 V — no charge needed)
      */
@@ -124,14 +108,14 @@ int rx8130ce_init(rx8130ce_t *dev, sx_i2c_t *i2c, sx_gpio_t *pwr_pin)
     if (_reg_write(dev, RX8130CE_REG_CTRL1, ctrl1) != 0)
         return RX8130CE_ERR_I2C;
 
-    /* 6. Configure Control Register 0 (0x1E):
+    /* 5. Configure Control Register 0 (0x1E):
      *      TEST = 0, AIE = 0, TIE = 0, UIE = 0
      *      STOP = 0  (timekeeping running)
      */
     if (_reg_write(dev, RX8130CE_REG_CTRL0, 0x00) != 0)
         return RX8130CE_ERR_I2C;
 
-    /* 7. Clear TE bit in Extension Register (0x1C) — timer not used */
+    /* 6. Clear TE bit in Extension Register (0x1C) — timer not used */
     uint8_t ext = 0;
     if (_reg_read(dev, RX8130CE_REG_EXT, &ext, 1) != 0)
         return RX8130CE_ERR_I2C;
@@ -140,7 +124,7 @@ int rx8130ce_init(rx8130ce_t *dev, sx_i2c_t *i2c, sx_gpio_t *pwr_pin)
     if (_reg_write(dev, RX8130CE_REG_EXT, ext) != 0)
         return RX8130CE_ERR_I2C;
 
-    /* 8. Clear VLF bit */
+    /* 7. Clear VLF bit */
     flag &= ~RX8130CE_FLAG_VLF;
     if (_reg_write(dev, RX8130CE_REG_FLAG, flag) != 0)
         return RX8130CE_ERR_I2C;

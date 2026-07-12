@@ -1,225 +1,176 @@
 HANDOFF PROMPT — Weather Station V2 + Modem Abstraction Layer (A7677S)
-(Bản cập nhật lần 3 — nối tiếp phiên 1, 2, và phiên hiện tại đang dở, gần hết token)
+(Bản cập nhật lần 4 — nối tiếp phiên 1, 2, 3, và phiên hiện tại đang dở)
+
 ROLE
 Bạn là Principal Embedded Firmware Architect với hơn 15 năm kinh nghiệm về: STM32 (HAL, LL, CMSIS), Embedded C, Low Power Design, RTOS và Bare-metal, Driver Development, Firmware Architecture, UART/SPI/I2C/USB/MQTT, Bootloader, Logging System, Flash File System, State Machine, Event Driven Architecture, Embedded Design Pattern.
 Bạn đóng vai một thành viên senior trong team firmware — không chỉ trả lời câu hỏi mà còn chủ động phát hiện vấn đề về architecture, performance, maintainability và power consumption.
-Đây là bàn giao từ phiên Claude thứ 3 đã dừng do gần hết token. Toàn bộ context bên dưới là quyết định đã chốt qua nhiều vòng trao đổi với người dùng — không được đảo lại, không được suy đoán thêm, không được tự ý đổi thiết kế trừ khi người dùng yêu cầu.
-QUY TẮC CODE STYLE (đã chốt, BẮT BUỘC)
+Đây là bàn giao từ phiên Claude thứ 4. Toàn bộ context bên dưới là quyết định đã chốt qua nhiều vòng trao đổi với người dùng — không được đảo lại, không được suy đoán thêm, không được tự ý đổi thiết kế trừ khi người dùng yêu cầu.
 
-Toàn bộ comment trong code (.c/.h) phải viết bằng tiếng Anh. Không dùng tiếng Việt trong comment code.
-Trao đổi với người dùng trong chat vẫn bằng tiếng Việt.
-Format trả lời bắt buộc mỗi lượt: 1. Hiểu vấn đề → 2. Phân tích → 3. Kết luận → 4. Đề xuất → 5. Việc tiếp theo.
+QUY TẮC CODE STYLE (đã chốt, BẮT BUỘC)
+- Toàn bộ comment trong code (.c/.h) phải viết bằng tiếng Anh. Không dùng tiếng Việt trong comment code.
+- Trao đổi với người dùng trong chat vẫn bằng tiếng Việt.
+- Format trả lời bắt buộc mỗi lượt: 1. Hiểu vấn đề → 2. Phân tích → 3. Kết luận → 4. Đề xuất → 5. Việc tiếp theo.
 
 GHI CHÚ VỀ LỖI HIỂN THỊ FILE (quan trọng, tránh mất thời gian)
 present_files có thể lỗi "Failed to load file content" ở UI dù file trên đĩa hoàn toàn hợp lệ. Cách xử lý: luôn dán toàn bộ nội dung file hoặc đoạn diff trực tiếp vào chat, song song với gọi present_files, để người dùng không bị chặn tiến độ nếu UI lỗi tiếp. Bắt buộc phải trình chiếu được file — sau khi tạo/sửa file nào, luôn gọi present_files VÀ dán nội dung/diff vào chat, không chỉ làm 1 trong 2.
+
+MỤC TIÊU KIẾN TRÚC TỐI THƯỢNG — NHẮC LẠI, TUYỆT ĐỐI KHÔNG ĐƯỢC QUÊN
+Người dùng đã nhấn mạnh trực tiếp trong phiên này (bài học rút ra sau khi tôi từng đề xuất sai hướng): **sau này đổi sang bất kỳ module SIM nào khác, chỉ cần sửa đúng 1 file driver (ví dụ a7677s.c/.h), các layer phía trên (modem.c, modem_ops.h, sx_mqtt.c, sx_mqtt.h, sx_user_mqtt.c, sx_user_mqtt.h, sx_board.c ở phần logic nghiệp vụ...) không cần sửa lại logic gì — chỉ đổi loại field/khởi tạo con trỏ ops.**
+
+Đây là lý do modem_ops_t (vtable) tồn tại. Hệ quả bắt buộc:
+- MỌI tương tác từ service/app layer (sx_mqtt.c, sx_user_mqtt.c) xuống driver PHẢI đi qua modem_ops_t. KHÔNG CÓ NGOẠI LỆ — kể cả những thứ tưởng chừng "chỉ là lấy thông tin trạng thái" như get_ip(), get_rssi(), get_imei() cũng phải có field tương ứng trong modem_ops_t, KHÔNG được gọi thẳng a7677s_get_ip() kiểu cụ thể từ sx_user_mqtt.c.
+- CẢNH BÁO CHO CHÍNH BẠN (bài học từ phiên này): ở lượt gần cuối phiên 4, tôi (Claude phiên trước) đã đề xuất sai — nói rằng "thông tin trạng thái đơn thuần không bắt buộc phải qua vtable, trừ khi người dùng muốn". Người dùng đã chỉnh lại ngay: đây là lệch hoàn toàn khỏi mục tiêu gốc. Đừng lặp lại sai lầm này. Bất kỳ hàm nào sx_user_mqtt.c hoặc sx_mqtt.c cần gọi xuống driver — dù là hành động (connect/publish) hay chỉ đọc trạng thái (get_ip/get_rssi/get_imei) — đều phải nằm trong modem_ops_t.
+- Chỉ có sx_board.c được phép biết kiểu cụ thể a7677s_t (vì đó là nơi khai báo instance board.a7677s và gán board.modem.ops = &a7677s_ops). Mọi file khác chỉ được cầm modem_handle_t*.
+
+QUY TẮC CHUNG (nhắc lại, bắt buộc tuân thủ)
+- Nếu repository/tài liệu chưa đọc hết → không được kết luận. Nếu chưa chắc chắn → tiếp tục đọc, không đoán.
+- TUYỆT ĐỐI KHÔNG tin vào phần "tiến độ" tường thuật trong handoff (kể cả file này) — luôn tự đọc lại repo thật (git log/git status/git diff/view/grep) trước khi kết luận bất cứ điều gì đã làm hay chưa. Bài học thực tế đã xảy ra 2 lần trong các phiên trước: handoff mô tả sai so với remote vì người dùng đã tự sửa/commit thêm sau khi handoff được viết. Luôn git fetch + git log --oneline -10 để so sánh commit hash, đừng giả định branch đứng yên.
+- Không sửa âm thầm. Nếu phát hiện bug hoặc điểm lệch thiết kế, phải trình bày rõ nguyên nhân/ảnh hưởng/lựa chọn xử lý và hỏi lại người dùng trước khi code.
+- Luôn dừng lại sau mỗi phần nhỏ để người dùng review, không code nhiều file/nhiều chức năng lớn liền một lúc.
+- Luôn present_files VÀ dán nội dung/diff trực tiếp vào chat cho mọi file tạo/sửa, không chỉ làm 1 trong 2.
+- Watchdog/auto-reset: người dùng tự làm sau, không tự ý thêm.
+- RX URC handling ở tầng modem.c (isBusy gate): gác lại chờ người dùng test thực tế, không tự ý code (xem chi tiết bên dưới).
+- Chân RESET vật lý (GPIOD PIN_11): không dùng, đã chốt dùng lại PWRKEY cycle thay thế.
+- Ngôn ngữ: luôn trả lời bằng tiếng Việt (trừ comment code). Tên hàm, biến, API, thuật ngữ kỹ thuật giữ nguyên tiếng Anh.
+
 PROJECT: Weather Station V2
+- Repo đang làm (V2): https://github.com/logan123synaptix/WS_v1.git
+- Repo tham khảo (V1 cũ hơn nữa): https://github.com/logan123synaptix/WS_v0.git
+- Container mới sẽ trống hoàn toàn — chưa có git clone nào cả. Phải tự git clone lại cả 2 repo ngay khi bắt đầu.
 
-Repo đang làm (V2): https://github.com/logan123synaptix/WS_v1.git
-Repo tham khảo (V1 cũ hơn nữa): https://github.com/logan123synaptix/WS_v0.git
-Container mới sẽ trống hoàn toàn — chưa có git clone nào cả. Phải tự git clone lại cả 2 repo ngay khi bắt đầu, KHÔNG tin bất kỳ tường thuật tiến độ nào (kể cả file handoff này) cho tới khi tự đọc lại repo thật bằng git log/git status/view/grep.
-QUAN TRỌNG — bài học từ phiên trước: handoff phiên 2 đã SAI khá nhiều so với thực tế trên remote (nói a7677s.c mới xong 1/3 trong khi thực tế đã xong toàn bộ MQTT; nói thư mục là components/a7677s/ trong khi thực tế là components/a76xx/; nói sim76xx.c còn để tham khảo trong khi thực tế đã bị xóa khỏi repo). Bài học: luôn tự đọc code thật bằng view/grep, không suy luận từ mô tả trong handoff, kể cả bản handoff này.
+Bối cảnh phần cứng (đã chốt, không đổi):
+- Board V2 hiện tại KHÔNG có GPIO cắt nguồn VBAT thật cho modem. Field powerPin/hasPowerPin trong modem_t vẫn phải giữ hasPowerPin = 0 (board tương lai sẽ có lại, nên field vẫn giữ, không xóa).
+- Chân điều khiển thật duy nhất cho A7677S: PWRKEY (field modem_t.pwrPin — khác hẳn powerPin/VBAT-cutoff).
+- A7677S không có chân DTR, không có chân STATUS nối STM32.
+- A7677S có chân RESET vật lý nối STM32 (LTE_RESET_Pin, GPIOD PIN_11, s_lte_rst_pin trong sx_board.h/.c) nhưng KHÔNG dùng — khi cần "reset cứng" dùng lại chu kỳ power_off_start()/power_on_start() (PWRKEY cycle), không thêm GPIO reset mới.
 
-Bối cảnh dự án
-Dự án tận dụng lại 1 project cũ (WS_v0) cũng dùng STM32H563RIV6, trước đó chạy modem SIM7680, có mạch cắt nguồn VBAT thật (transistor kích GPIO). Người dùng đã tự sửa lại board/code để chuyển hướng sang dùng A7677S, và trong quá trình tự sửa đã gỡ bỏ mạch cắt nguồn VBAT.
-Kết luận đã chốt về phần cứng (xác nhận trực tiếp với người dùng, không suy đoán):
+QUYẾT ĐỊNH PHẠM VI QUAN TRỌNG NHẤT — ĐÃ CHỐT
+KHÔNG giữ sim76xx.c chạy song song. Dự án chỉ chạy A7677S thật. sim76xx.c/.h đã bị xóa khỏi repo hoàn toàn (xác nhận bằng find trong phiên 4, không còn tồn tại). Nếu cần đối chiếu hành vi cũ, dùng git log/git show trên commit cũ, hoặc dùng các file CHƯA refactor (sx_board.c, sx_user_mqtt.c, sx_sleep_manager.c — vẫn còn gọi sim76xx_* trong nguồn, dù file gốc không còn) làm tài liệu tham khảo gián tiếp.
 
-Board V2 hiện tại không có chân GPIO cắt nguồn VBAT thật cho bất kỳ modem nào — field powerPin/hasPowerPin trong modem_t phải giữ hasPowerPin = 0.
-Board tương lai dự định có lại chân cắt nguồn — field powerPin/hasPowerPin vẫn phải giữ lại trong modem_t, không được xóa.
-Chân điều khiển thật duy nhất cho A7677S: PWRKEY (field modem_t.pwrPin, khác hẳn powerPin/VBAT-cutoff — đừng nhầm 2 field này).
-A7677S không có chân DTR, không có chân STATUS nối STM32.
-A7677S có chân RESET nối STM32 (LTE_RESET_Pin, GPIOD PIN_11, đã khai báo trong sx_board.h/sx_board.c dưới tên s_lte_rst_pin) nhưng CHƯA từng được sx_gpio_init(), chưa có field tương ứng trong modem_t/a7677s_t, chưa được dùng ở bất kỳ đâu. Người dùng đã CHỐT: không dùng chân RESET vật lý này — khi cần "reset cứng" (AT không phản hồi), dùng lại chu kỳ power_off_start()/power_on_start() (PWRKEY cycle) đã có sẵn, không thêm GPIO reset mới. Không được tự ý đổi quyết định này.
+MQTT VERSION — ĐÃ CHỐT
+Dùng MQTT v3.1.1 cố định (không cho chọn 3.1). Đã xác nhận: a7677s.c đã tự động gửi AT+CMQTTCFG="version",0,4 (A7677S_MQTT_PROTOCOL_VERSION = 4U) trong sequence connect, sau ACCQ trước CONNECT. Không cần sửa gì thêm ở điểm này.
 
-QUYẾT ĐỊNH PHẠM VI QUAN TRỌNG NHẤT — ĐÃ CHỐT, KHÔNG ĐƯỢC LÀM SAI
-KHÔNG giữ sim76xx.c chạy song song trong hệ thống, KHÔNG viết vtable cho nó. Dự án chỉ chạy A7677S thật. Xác nhận thực tế (phiên này đã tự kiểm tra): file sim76xx.c/sim76xx.h đã bị xóa khỏi repo hoàn toàn, không còn tồn tại để tham khảo trực tiếp nữa (nếu cần đối chiếu cách gọi cũ, dùng git log/git show trên commit cũ hơn, hoặc dùng sx_mqtt.c hiện tại — vốn vẫn còn gọi sim76xx_* — làm tài liệu tham khảo gián tiếp về hành vi cũ).
-Mục tiêu kiến trúc thật sự: sau này đổi sang bất kỳ module SIM nào khác, chỉ cần sửa đúng 1 file driver, các layer phía trên (modem.c, modem_ops.h, sx_mqtt.c, mqtt_app...) không cần sửa gì. Đây là lý do tồn tại của modem_ops_t (vtable interface).
 Hardware — MCU STM32H563RIV6
-PeripheralModuleGhi chúUART1A7677S (cellular/MQTT/network)Nhiệm vụ trọng tâm hiện tạiUART2GPS GP02Baudrate 9600UART3RS485Baudrate 115200UART4Dust Sensor SPS30UART5ZE12AUART6Debug LogI2C1SHT3x, RTC RX8130CE, IMU BNO055RTC/IMU đã có driver; SHT3x chưaSPIExternal Flash W25Q128Driver đã có
-Tài liệu (đã đọc, đã xác nhận nội dung thật — không suy đoán)
-Trong WS_v1/Documents/:
+| Peripheral | Module | Ghi chú |
+|---|---|---|
+| UART1 | A7677S (cellular/MQTT/network) | Nhiệm vụ trọng tâm hiện tại |
+| UART2 | GPS GP02 | Baudrate 9600 |
+| UART3 | RS485 | Baudrate 115200 |
+| UART4 | Dust Sensor SPS30 | |
+| UART5 | ZE12A | |
+| UART6 | Debug Log | |
+| I2C1 | SHT3x, RTC RX8130CE, IMU BNO055 | RTC/IMU đã có driver; SHT3x chưa |
+| SPI | External Flash W25Q128 | Driver đã có |
 
-a7677s.md — Hardware Design A7677S. Dòng 1126: AT+CPOF để power off. Dòng 2403-2419: AT+CFUN=0/1/4. Section 5.3.3: ở CFUN=0 serial port vẫn hoạt động bình thường (chỉ RF/USIM tắt) — không cần thêm delay ổn định UART.
-a76xx_at_cmd.md (21238 dòng) — AT Command Manual A76XX V1.06.
+Tài liệu (đã đọc, đã xác nhận nội dung — không suy đoán):
+- Documents/a7677s.md — Hardware Design A7677S. AT+CPOF power off. AT+CFUN=0/1/4. Ở CFUN=0 serial port vẫn hoạt động bình thường.
+- Documents/a76xx_at_cmd.md (21238 dòng) — AT Command Manual A76XX V1.06. Mục 18.2: AT+CMQTT*. Mục 18.4: URC nhận dữ liệu inbound (+CMQTTRXSTART/+CMQTTRXTOPIC/+CMQTTRXPAYLOAD/+CMQTTRXEND, +CMQTTCONNLOST). Mục 19.2.1/19.2.2: AT+CSSLCFG, AT+CCERTDOWN. Mục 3.2.6: AT+CRESET.
+- Datasheet_SHT3x_DIS.md, SPS30_dust_sensor (1).md, ze12a-...md — chưa đọc, không thuộc phạm vi hiện tại.
 
-Mục 18.2 (dòng ~14965+): tập lệnh AT+CMQTT* đầy đủ. Nhiều lệnh trả OK trước rồi 1 dòng URC riêng báo errcode thật sau (VD +CMQTTSTART:0, +CMQTTCONNECT:<idx>,0) — code hiện tại đã xử lý đúng bằng cách đặt res_success = chuỗi URC đầy đủ kèm errcode=0.
-Mục 18.4 (dòng ~15966+): URC nhận dữ liệu inbound — đã đọc kỹ, quan trọng: sequence thật là +CMQTTRXSTART:<idx>,<topic_total_len>,<payload_total_len> → +CMQTTRXTOPIC:<idx>,<sub_topic_len>\r\n<sub_topic> (có thể lặp nhiều lần nếu topic dài, phải cộng dồn cho đủ topic_total_len) → +CMQTTRXPAYLOAD:<idx>,<sub_payload_len>\r\n<sub_payload> (cũng có thể lặp nhiều lần) → +CMQTTRXEND:<idx>. Còn có +CMQTTCONNLOST:<idx>,<cause> khi mất kết nối thụ động.
-Mục 19.2.1 AT+CSSLCFG (dòng ~16088+): cấu hình SSL context — sslversion, authmode (0/1/2), cacert/clientcert/clientkey (tên file), enableSNI. MaxResponseTime 120000ms.
-Mục 19.2.2 AT+CCERTDOWN=<filename>,<len> (dòng ~16359+): upload cert — chờ > rồi gửi nội dung thô. <len> 1-10240 bytes. <filename> 5-108 bytes, phải có đuôi .pem/.der. Ghi chú "mỗi packet nên ≤3072 bytes" — đã xác nhận đây là giới hạn nội bộ của modem khi chia nhỏ input lớn, KHÔNG phải giới hạn sx_uart_write() cần tự chia (xem mục UART bug bên dưới).
-Mục 3.2.6 AT+CRESET (dòng 2666+): software reset qua AT, module tự reboot, OK ngay, MaxResponseTime 9000ms. Không dùng trong phạm vi việc đang làm (người dùng nói sẽ tự làm watchdog/reset logic sau).
+TRẠNG THÁI GIT THẬT TẠI THỜI ĐIỂM VIẾT HANDOFF NÀY (bắt buộc tự xác minh lại, KHÔNG tin số liệu này)
+Tại thời điểm viết file này, remote WS_v1 ở commit c81f80a ("mqtt_set_cb add in modem_ops.h"), lịch sử gần nhất:
+  c81f80a mqtt_set_cb add in modem_ops.h
+  5b3771b still fix a7677s.c
+  eab09ff fix urc
+  1b7c2fd add tls
+  df00e21 .
+Người dùng tự commit/push trực tiếp trong phiên (không phải Claude push qua git). Việc đầu tiên khi tiếp nhận: git fetch origin, git log --oneline -10, so sánh với danh sách trên — nếu khác, nghĩa là người dùng đã làm thêm gì đó ngoài phạm vi handoff này, phải đọc lại code thật trước khi tin bất kỳ mô tả nào bên dưới.
 
+TIẾN ĐỘ THỰC TẾ — ĐÃ XÁC MINH BẰNG ĐỌC CODE THẬT TRONG PHIÊN 4 (tại commit c81f80a)
 
-Datasheet_SHT3x_DIS.md, SPS30_dust_sensor (1).md, ze12a-...md — chưa đọc, không thuộc phạm vi hiện tại.
+Cấu trúc file liên quan:
+- SynaptiX_FDK/components/modem/modem.h + modem.c (81 dòng) — base layer.
+- SynaptiX_FDK/components/modem_ops/modem_ops.h (182 dòng) — vtable interface.
+- SynaptiX_FDK/components/a76xx/a7677s.h (420 dòng) + a7677s.c (1956 dòng) — driver A7677S. Thư mục thật là a76xx/, không phải a7677s/.
+- SynaptiX_FDK/board/sx_board.c (267 dòng) + sx_board.h (113 dòng) — CHƯA refactor, vẫn dùng sim76xx_*, vẫn #include "sim76xx.h".
+- SynaptiX_FDK/services/mqtt/sx_mqtt.c (665 dòng gốc) + sx_mqtt.h (141 dòng gốc) — ĐÃ REFACTOR XONG trong phiên 4 (xem chi tiết bên dưới), NHƯNG CHƯA ĐƯỢC COMMIT/PUSH, chỉ tồn tại trong container tạm /home/claude/work/edit/. Sẽ MẤT khi phiên kết thúc — nội dung đầy đủ đã dán trong lịch sử chat, có thể tái tạo lại.
+- SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c (344 dòng) + sx_user_mqtt.h (65 dòng) — CHƯA refactor, đang là việc dở dang, ĐANG BỊ CHẶN bởi 3 lỗ hổng thiết kế (xem mục "ĐANG LÀM DỞ" bên dưới), CHƯA viết được dòng code nào cho việc này.
+- SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c (152 dòng) + .h (72 dòng) — CHƯA refactor, chưa động vào.
+- sim76xx.h/sim76xx.c đã bị xóa khỏi repo hoàn toàn.
 
-TIẾN ĐỘ THỰC TẾ — ĐÃ XÁC MINH BẰNG ĐỌC CODE THẬT TRONG PHIÊN NÀY
-Repo gốc /home/claude/work/WS_v1 (đã git clone sạch, đối chiếu remote commit 811bc54)
-Cấu trúc file liên quan (đã xác nhận bằng find/view, không suy đoán):
+HẬU QUẢ: project hiện tại KHÔNG COMPILE ĐƯỢC vì 3 nhóm file (sx_board.c/h, sx_user_mqtt.c, sx_sleep_manager.c/h) vẫn include "sim76xx.h" và gọi sim76xx_* nhưng file nguồn không còn tồn tại.
 
-SynaptiX_FDK/components/modem/modem.h + modem.c — base layer, ĐÃ ỔN ĐỊNH, không cần sửa gì thêm trong phạm vi hiện tại (trừ 1 vấn đề đã phát hiện, xem mục "LỖ HỔNG CHƯA XỬ LÝ" bên dưới).
-SynaptiX_FDK/components/modem_ops/modem_ops.h — vtable interface.
-SynaptiX_FDK/components/a76xx/a7677s.h + a7677s.c — driver A7677S, LƯU Ý thư mục thật là a76xx/ không phải a7677s/.
-SynaptiX_FDK/board/sx_board.c + sx_board.h — board init, CHƯA refactor, vẫn dùng sim76xx_*.
-SynaptiX_FDK/services/mqtt/sx_mqtt.c + sx_mqtt.h — service layer MQTT, ĐANG REFACTOR DỞ (việc chính của phiên này), vẫn include sim76xx.h và gọi sim76xx_* trực tiếp.
-SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c — app layer, CHƯA refactor, vẫn dùng sim76xx_*.
-SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c + .h — CHƯA refactor, vẫn dùng sim76xx_*.
-sim76xx.h/sim76xx.c đã bị xóa khỏi repo hoàn toàn (xác nhận bằng find, không còn file nào tên này trong cây).
+Thư mục làm việc của phiên 4: /home/claude/work/WS_v1 (clone sạch, đối chiếu remote, KHÔNG có thay đổi chưa commit nào — mọi sửa cho sx_mqtt.c/.h được làm ở /home/claude/work/edit/ để không làm bẩn bản đối chiếu). Container mới sẽ KHÔNG có các thư mục này — phải tự tạo lại:
+1. git clone https://github.com/logan123synaptix/WS_v1.git /home/claude/work/WS_v1 (bản đối chiếu remote).
+2. mkdir -p /home/claude/work/edit rồi cp 2 file sx_mqtt.h + sx_mqtt.c gốc vào đó để chỉnh sửa (tránh làm bẩn bản clone).
+3. Tái tạo lại nội dung sx_mqtt.h/sx_mqtt.c mới theo mô tả đầy đủ bên dưới, đối chiếu với bản đầy đủ đã dán trong lịch sử chat nếu còn truy cập được.
 
-HẬU QUẢ QUAN TRỌNG: project ở trạng thái hiện tại KHÔNG COMPILE ĐƯỢC — 4 file (sx_board.c/h, sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c/h) #include "sim76xx.h" và gọi hàm sim76xx_* nhưng file nguồn đó không còn tồn tại. Đây không phải lỗi tôi gây ra, đã tồn tại từ trước khi phiên này bắt đầu — cần refactor các file này sang modem_handle_t/a7677s_ops để build lại được.
-Thư mục làm việc thật của phiên này: /home/claude/work/WS_v1_edit
-Đây là bản copy ghi được (/home/claude/work/WS_v1 là bản chỉ đọc dùng để đối chiếu remote). Container mới sẽ KHÔNG có thư mục này — phải tự tạo lại bằng cách:
+ĐÃ SỬA XONG, ĐÃ ĐƯỢC NGƯỜI DÙNG DUYỆT TRONG CÁC PHIÊN TRƯỚC (đã commit, có trên remote tại c81f80a — KHÔNG cần làm lại, chỉ cần xác nhận lại bằng đọc code)
 
-git clone https://github.com/logan123synaptix/WS_v1.git /home/claude/work/WS_v1 (bản đối chiếu remote, chỉ đọc, không sửa vào đây).
-cp -r /home/claude/work/WS_v1 /home/claude/work/WS_v1_edit rồi làm việc trong WS_v1_edit.
-Tự đọc lại 2 file đã sửa trong phiên này (modem_ops.h, a7677s.h — nội dung đầy đủ đã dán trong chat, có thể tái tạo lại y hệt nếu cần, nhưng ưu tiên đọc từ chat trước khi gõ lại) để xác nhận đúng trạng thái trước khi tiếp tục.
-CHƯA hề git commit/git push bất kỳ thay đổi nào của phiên này — mọi thứ chỉ nằm trong file system tạm của container, sẽ mất khi phiên kết thúc. Đây là lý do file handoff này phải chứa đủ nội dung để tái tạo lại.
+1. SynaptiX_FDK/components/modem_ops/modem_ops.h:
+   - Chữ ký mqtt_connect có thêm ca_cert/client_cert/client_key (use_ssl=1 mới dùng tới, NULL/"" nếu không dùng cert; mutual TLS = có cả client_cert VÀ client_key).
+   - Đã thêm 2 typedef: mqtt_incoming_cb_t (topic, topic_len, payload, payload_len, ctx) -> void, và mqtt_connlost_cb_t (ctx) -> void.
+   - Đã thêm field mqtt_set_callbacks(void *ctx, mqtt_incoming_cb_t, mqtt_connlost_cb_t, void *user_ctx) vào struct modem_ops_t, đặt sau mqtt_subscribe.
+   - modem_handle_t { const modem_ops_t *ops; void *ctx; } đã có sẵn, cùng 2 inline helper modem_handle_poll() và modem_handle_is_ready(). CHƯA có helper cho các thao tác MQTT khác — phải gọi trực tiếp handle->ops->mqtt_connect(handle->ctx, ...).
+   - QUAN TRỌNG — điểm dễ nhầm khi viết callback: mqtt_cb_t có chữ ký (modem_ops_result_t result, void *ctx). Tham số ctx khi driver gọi lại KHÔNG PHẢI user_ctx tùy chọn — nó luôn là con trỏ context riêng của driver (ví dụ dce, tức a7677s_t*), xem mqtt_op_done() trong a7677s.c: "cb(result, dce)". Nghĩa là sx_mqtt.c KHÔNG THỂ dùng tham số ctx để tự nhận diện instance sx_mqtt_t nào — phải dùng lại pattern static s_instance (singleton), giống hệt cách sim76xx-based code cũ đã làm. Đừng cố "sửa" điều này thành user_ctx riêng trừ khi người dùng đồng ý đổi cả modem_ops_t.
 
-ĐÃ SỬA XONG, ĐÃ ĐƯỢC NGƯỜI DÙNG REVIEW/DUYỆT TRONG PHIÊN NÀY (nội dung đầy đủ dưới đây, có thể copy-paste tái tạo)
-1. SynaptiX_FDK/components/modem_ops/modem_ops.h — đã sửa chữ ký mqtt_connect, ĐÃ DUYỆT:
-Chữ ký cũ (SAI, không dùng nữa):
-cint (*mqtt_connect)(void *ctx, const char *client_id,
-                     const char *broker, uint16_t port,
-                     uint8_t use_ssl, uint16_t keepalive,
-                     uint8_t clean_session, const char *username,
-                     const char *password, mqtt_cb_t cb);
-Chữ ký mới (ĐÃ CHỐT, đã duyệt):
-c/* use_ssl: 0 = plain TCP ("tcp://host:port"), cert params ignored entirely.
- *   1 = TLS ("ssl://host:port"); driver runs AT+CSSLCFG/AT+CCERTDOWN first.
- * ca_cert/client_cert/client_key: only consulted when use_ssl is 1. NULL/""
- *   if not used. No separate "mutual TLS" flag — mutual auth happens iff
- *   client_cert AND client_key are both supplied (else server-auth-only TLS
- *   if only ca_cert given, or TLS-with-no-certs if none given at all).
- * username/password: NULL/"" if the broker does not require authentication. */
-int (*mqtt_connect)(void *ctx, const char *client_id,
-                     const char *broker, uint16_t port,
-                     uint8_t use_ssl,
-                     const char *ca_cert,
-                     const char *client_cert,
-                     const char *client_key,
-                     uint16_t keepalive,
-                     uint8_t clean_session, const char *username,
-                     const char *password, mqtt_cb_t cb);
-Đã cập nhật full doc-comment phía trên hàm trong file thật, giải thích rõ 3 trường hợp (TCP thường / TLS server-auth / TLS mutual).
-2. SynaptiX_FDK/components/a76xx/a7677s.h — đã mở rộng, ĐÃ DUYỆT. Các thay đổi cụ thể:
+2. SynaptiX_FDK/components/a76xx/a7677s.h + a7677s.c:
+   - TLS/cert-upload (AT+CCERTDOWN, AT+CSSLCFG, AT+CMQTTSSLCFG) đã implement đầy đủ, không phải chỉ forward declaration như handoff phiên 3 từng nói sai.
+   - RX URC state machine (A7677S_MQTT_RX_IDLE/TOPIC/PAYLOAD/END) đã có, tự cộng dồn multi-fragment topic/payload theo đúng tài liệu.
+   - Bug truncate qua buffer 384-byte (s_mqtt_dyn_cmd_buf, chỉ 384 bytes trong khi payload/topic buffer lên tới 1025-10241 bytes) đã được sửa SẠCH HOÀN TOÀN ở cả 2 vị trí: cb_mqtt_pub_topic/cb_mqtt_pub_payload (sửa từ trước, có comment /* BUGFIX */), và cb_mqtt_sub_topic (sửa trong phiên 4, cùng pattern — truyền thẳng con trỏ dce->mqtt_sub_topic thay vì strncpy qua buffer nhỏ). Đã grep xác nhận không còn strncpy(s_mqtt_dyn_cmd_buf, ...) nào sót lại trong toàn file.
+   - Cert-upload cũng truyền thẳng con trỏ dce->mqtt_cert_ca/_client/_key, không qua buffer nhỏ — không lặp lại bug truncate.
+   - Vtable a7677s_ops đối chiếu đủ 12/12 field function-pointer trong modem_ops_t, không thiếu không thừa (đã grep so sánh danh sách 2 bên).
+   - a7677s_mqtt_set_callbacks() đã implement, gọi qua a7677s_mqtt_register_callbacks() nội bộ, khớp đúng chữ ký field mqtt_set_callbacks trong modem_ops_t.
+   - MQTT version 3.1.1: A7677S_MQTT_PROTOCOL_VERSION = 4U, gửi AT+CMQTTCFG="version",0,4 tự động trong sequence connect (state A7677S_MQTT_CFG_VERSION, sau ACCQ trước CONNECT).
+   - a7677s_set_full_apn(a7677s_t *dce, const char *apn, const char *username, const char *password) đã có — tương đương sim76xx_set_full_apn cũ.
+   - CHỈ có 3 hàm public trong a7677s.h: a7677s_init(), a7677s_set_full_apn(), a7677s_mqtt_register_callbacks(). KHÔNG CÓ get_ip/get_rssi/get_imei/set_on_ready/set_on_error/mqtt_stop — xem lỗ hổng B bên dưới.
 
-Thêm #define A7677S_TIMEOUT_CERT_CMD 121000U (121s, theo MaxResponseTime 120000ms của CCERTDOWN/CSSLCFG).
-Thêm block:
+3. sim76xx cleanup: xác nhận modem.c, modem_ops.h, a7677s.c/.h chỉ còn nhắc "sim76xx" trong comment tham khảo lịch sử, không còn code gọi hàm thật.
 
-c  #define A7677S_SSL_CTX_INDEX         0U
-  #define A7677S_CERT_PEM_MAX          10241U  /* 1-10240 bytes + NUL, per AT+CCERTDOWN */
-  #define A7677S_CERT_FILENAME_CA      "cacert.pem"
-  #define A7677S_CERT_FILENAME_CLIENT  "clientcert.pem"
-  #define A7677S_CERT_FILENAME_KEY     "clientkey.pem"
+ĐÃ VIẾT XONG TRONG PHIÊN 4 (CHƯA COMMIT — chỉ ở /home/claude/work/edit/, phải tái tạo lại, nội dung đầy đủ đã dán trong lịch sử chat của phiên 4)
 
-Mở rộng a7677s_mqtt_state_t — chèn 11 state mới giữa A7677S_MQTT_START và A7677S_MQTT_ACCQ:
+4. SynaptiX_FDK/services/mqtt/sx_mqtt.h — refactor xong, ĐÃ ĐƯỢC NGƯỜI DÙNG DUYỆT ("ok đến sx_mqtt.c" = ngầm duyệt phần .h). Các thay đổi chính so với bản gốc:
+   - #include "modem_ops.h" thay vì phụ thuộc ngầm sim76xx.h.
+   - sx_mqtt_state_t rút gọn còn 5 state: DISCONNECTED/CONNECTING/CONNECTED/DISCONNECTING/ERROR. Xóa 5 state cert/ssl cũ (CERT_CA/CERT_CLIENT/CERT_KEY/CERT_CONTENT/SSL_CFG) vì driver tự lo hết bên trong mqtt_connect().
+   - Xóa hẳn sx_mqtt_urc_state_t và 2 buffer urc_topic/urc_payload khỏi struct sx_mqtt — không cần tự buffer URC nữa.
+   - struct sx_mqtt: field dce (void*) đổi thành modem (modem_handle_t*).
+   - sx_mqtt_init(sx_mqtt_t *mqtt, modem_handle_t *modem) — đổi tham số theo đó.
+   - sx_mqtt_config_t giữ nguyên y hệt (đã đủ field use_ssl/ca_cert/client_cert/client_key/ssl_auth_mode từ trước, khớp thẳng mqtt_connect mới).
 
-c  A7677S_MQTT_START,
-  /* --- TLS-only, entered from START only if use_ssl=1 --- */
-  A7677S_MQTT_CERT_CA_PROMPT,      /* AT+CCERTDOWN="<n>",<len> sent, waiting ">" */
-  A7677S_MQTT_CERT_CA_DATA,        /* CA cert PEM bytes sent, waiting OK */
-  A7677S_MQTT_CERT_CLIENT_PROMPT,
-  A7677S_MQTT_CERT_CLIENT_DATA,
-  A7677S_MQTT_CERT_KEY_PROMPT,
-  A7677S_MQTT_CERT_KEY_DATA,
-  A7677S_MQTT_SSLCFG_CACERT,       /* AT+CSSLCFG="cacert",0,"<file|\"\">" */
-  A7677S_MQTT_SSLCFG_CLIENTCERT,
-  A7677S_MQTT_SSLCFG_CLIENTKEY,
-  A7677S_MQTT_SSLCFG_AUTHMODE,     /* AT+CSSLCFG="authmode",0,<0|1|2> */
-  A7677S_MQTT_SSLBIND,             /* AT+CMQTTSSLCFG=0,0 */
-  A7677S_MQTT_ACCQ,
-Mỗi cặp CERT_*_PROMPT/DATA bị bỏ qua hoàn toàn nếu cert tương ứng là NULL/"". SSLCFG_*/SSLBIND luôn chạy khi use_ssl=1 (kể cả không có cert nào, để set authmode=0).
-Comment enum đã cập nhật đầy đủ mô tả sequence (xem file thật để lấy nguyên văn).
-Đã thêm cảnh báo rõ ràng trong comment: RX URC parsing (+CMQTTRXSTART/TOPIC/PAYLOAD/END, +CMQTTCONNLOST) vẫn CHƯA implement trong poll(), việc TLS này không đụng vào phần đó — xem mục "LỖ HỔNG CHƯA XỬ LÝ" bên dưới, đừng nhầm là đã xong.
+5. SynaptiX_FDK/services/mqtt/sx_mqtt.c — refactor xong, ĐÃ ĐƯỢC NGƯỜI DÙNG DUYỆT NGẦM (yêu cầu tiếp "viết sx_user_mqtt" ở lượt sau nghĩa là chấp nhận bản này để tiếp tục). Từ 665 dòng gốc còn khoảng 250 dòng. Chi tiết:
+   - XÓA HẲN: 10 callback cert/ssl cũ (cb_cert_*, cb_ssl_*, cb_sslcfg, cb_sslbind, goto_ssl_cfg, cb_version, cb_start_after_stop), process_urc_line()/urc_handler() (~110 dòng gồm cả khối code cũ bị comment sẵn song song), s_ssl_cmd_buf, s_start_retry, #include "sim76xx.h".
+   - GIỮ pattern static s_instance (singleton con trỏ tới sx_mqtt_t đang active) — BẮT BUỘC vì lý do đã nêu ở mục modem_ops.h phía trên (ctx trong mqtt_cb_t không phải user_ctx tùy chọn).
+   - 4 callback chính viết lại gọn theo đúng chữ ký mqtt_cb_t(result, ctx): cb_connect_done, cb_disconnect_done, cb_publish_done, cb_subscribe_done.
+   - 2 callback mới: on_incoming(topic, topic_len, payload, payload_len, ctx) và on_connlost(ctx) — đăng ký MỘT LẦN trong sx_mqtt_init() qua modem->ops->mqtt_set_callbacks(modem->ctx, on_incoming, on_connlost, mqtt).
+   - do_error(): GIỮ NGUYÊN Y HỆT logic cũ, kể cả một quirk có sẵn từ bản gốc (tăng reconnect_count ở cả trong do_error() lẫn trong sx_mqtt_poll() khi tới lúc retry — tức là bị tăng đúp trong một số trường hợp). ĐÃ PHÁT HIỆN quirk này khi refactor nhưng CHỦ ĐỘNG KHÔNG SỬA vì chưa được người dùng cho phép, chỉ refactor cách gọi (sim76xx_* → modem->ops->*), không tự ý thay đổi hành vi. Khi restart modem sau 3 lần retry lỗi, gọi qua modem->ops->power_off_start/power_on_start/start (không gọi sim76xx_* trực tiếp nữa).
+   - API public không đổi chữ ký (trừ sx_mqtt_init): sx_mqtt_connect/disconnect/publish/subscribe/poll, sx_mqtt_set_config, sx_mqtt_set_on_connected/disconnected/message/publish, sx_mqtt_is_connected, sx_mqtt_force_disconnect — mục đích để sx_user_mqtt.c KHÔNG CẦN sửa các lời gọi hàm này.
+   - Đã grep xác nhận: không còn sim76xx/s_ssl_cmd_buf/s_start_retry/urc_state/urc_topic/urc_payload/process_urc_line/urc_handler nào sót lại (chỉ còn 1 dòng comment lịch sử giải thích lý do dùng s_instance, không phải code gọi hàm).
 
-Thêm field trong struct a7677s, ngay sau mqtt_use_ssl:
+VIỆC ĐANG LÀM DỞ — BỊ CHẶN BỞI 3 LỖ HỔNG THIẾT KẾ, CHƯA VIẾT ĐƯỢC DÒNG NÀO — ĐÂY LÀ VIỆC ĐẦU TIÊN CẦN LÀM TIẾP
 
-c  uint8_t  mqtt_cert_has_ca;
-  uint8_t  mqtt_cert_has_client;
-  uint8_t  mqtt_cert_has_key;
-  char     mqtt_cert_ca[A7677S_CERT_PEM_MAX];
-  char     mqtt_cert_client[A7677S_CERT_PEM_MAX];
-  char     mqtt_cert_key[A7677S_CERT_PEM_MAX];
-  uint16_t mqtt_cert_ca_len;
-  uint16_t mqtt_cert_client_len;
-  uint16_t mqtt_cert_key_len;
-  uint8_t  mqtt_ssl_authmode;  /* 0/1/2, computed từ has_client && has_key */
-3 buffer cert tách riêng (không dùng chung 1 scratch buffer) để nội dung cert vẫn còn nếu cần retry 1 bước sau mà không phải gọi lại mqtt_connect() với cert mới — dù hiện tại mqtt_connect() vẫn yêu cầu người gọi truyền lại cert mỗi lần gọi (xem TODO bên dưới).
-Nội dung đầy đủ 2 file này đã được dán trong chat trước đó (2 lượt gần nhất của phiên trước khi hết token) — nếu cần đối chiếu chính xác từng dòng, tìm lại trong lịch sử chat trước khi gõ lại từ đầu.
-ĐANG LÀM DỞ — CHƯA HOÀN THÀNH, ĐÂY LÀ VIỆC ĐẦU TIÊN CẦN LÀM TIẾP
-3. SynaptiX_FDK/components/a76xx/a7677s.c — mới sửa forward declarations, CHƯA implement logic:
-Đã thêm (xác nhận đã áp dụng vào file thật trong WS_v1_edit):
-c/* TLS cert-upload / SSL-config sequence callbacks (forward declarations). */
-static void cb_mqtt_cert_ca_prompt      (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_cert_ca_data        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_cert_client_prompt  (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_cert_client_data    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_cert_key_prompt     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_cert_key_data       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_sslcfg_cacert       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_sslcfg_clientcert   (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_sslcfg_clientkey    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_sslcfg_authmode     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_mqtt_sslbind             (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+Mục tiêu: refactor SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c (344 dòng) + sx_user_mqtt.h (65 dòng). Đã đọc toàn bộ 2 file này trong phiên 4. Phát hiện 3 lỗ hổng CHẶN việc viết code, đã trình bày với người dùng nhưng CHƯA nhận được câu trả lời cụ thể (phiên dừng ở đây):
 
-static void begin_ssl_cert_block(a7677s_t *dce);
-static void begin_sslcfg_block(a7677s_t *dce);
-CHƯA CÓ IMPLEMENTATION THẬT cho bất kỳ hàm nào ở trên — chỉ mới khai báo forward declaration, chưa viết thân hàm.
-VIỆC CẦN LÀM TIẾP THEO, THEO ĐÚNG THỨ TỰ:
-a) Implement a7677s_mqtt_connect() với chữ ký mới (thêm ca_cert/client_cert/client_key), lưu cert content vào 3 buffer mới, set mqtt_cert_has_*, tính mqtt_ssl_authmode, rồi rẽ nhánh: nếu use_ssl=0 giữ nguyên luồng cũ (START → ACCQ → CONNECT), nếu use_ssl=1 sau cb_mqtt_start thành công thì gọi begin_ssl_cert_block(dce) thay vì đi thẳng ACCQ.
-b) Implement begin_ssl_cert_block(dce): kiểm tra mqtt_cert_has_ca → nếu có, chuyển mqtt_state = A7677S_MQTT_CERT_CA_PROMPT, gửi AT+CCERTDOWN="<A7677S_CERT_FILENAME_CA>",<mqtt_cert_ca_len>\r\n (chờ ">"), callback cb_mqtt_cert_ca_prompt. Nếu không có CA cert → nhảy thẳng qua kiểm tra mqtt_cert_has_client, tương tự... nếu không có cert nào cả → gọi thẳng begin_sslcfg_block(dce).
-c) Implement từng cặp cb_mqtt_cert_*_prompt/cb_mqtt_cert_*_data: _prompt callback (chờ ">" thành công) → gửi raw PEM bytes (dùng send_mqtt_dynamic(dce, dce->mqtt_cert_ca, "\r\nOK\r\n", "\r\nERROR\r\n", cb_mqtt_cert_ca_data, A7677S_TIMEOUT_CERT_CMD) — QUAN TRỌNG: truyền THẲNG con trỏ dce->mqtt_cert_ca (10241 bytes), TUYỆT ĐỐI KHÔNG copy qua s_mqtt_dyn_cmd_buf (chỉ 384 bytes) — xem mục "BUG ĐÃ PHÁT HIỆN" bên dưới, đây chính là bug cần tránh lặp lại) → _data callback (chờ OK) → chuyển sang cert tiếp theo hoặc begin_sslcfg_block().
-d) Implement begin_sslcfg_block(dce) + cb_mqtt_sslcfg_cacert/clientcert/clientkey/authmode + cb_mqtt_sslbind: chuỗi AT+CSSLCFG="cacert",0,"<file|\"\">" → AT+CSSLCFG="clientcert",0,"<file|\"\">" → AT+CSSLCFG="clientkey",0,"<file|\"\">" → AT+CSSLCFG="authmode",0,<mqtt_ssl_authmode> → AT+CMQTTSSLCFG=0,0 (bind ssl_ctx 0 vào client 0) → sau khi cb_mqtt_sslbind OK thì chuyển A7677S_MQTT_ACCQ, tiếp tục luồng cũ y hệt nhánh TCP thường. Nếu cert rỗng ở 1 bước CSSLCFG (VD không có client_cert), vẫn phải gửi AT+CSSLCFG="clientcert",0,"" (chuỗi rỗng) để modem biết bỏ qua field đó — không được skip lệnh, chỉ skip nội dung filename.
-e) Sửa cb_mqtt_start (đã có sẵn, đọc lại trước khi sửa): sau khi AT+CMQTTSTART OK, hiện tại code cũ luôn nhảy thẳng ACCQ. Cần đổi thành: nếu dce->mqtt_use_ssl → gọi begin_ssl_cert_block(dce); nếu không → giữ nguyên nhảy ACCQ như cũ.
-BUG ĐÃ PHÁT HIỆN TRONG PHIÊN NÀY, CHƯA SỬA, NGƯỜI DÙNG CHƯA KỊP XÁC NHẬN CHO PHÉP SỬA (dừng lại đúng ở đây khi hết token)
-Vị trí: cb_mqtt_pub_topic() (dòng ~890) và cb_mqtt_pub_payload() (dòng ~932) trong a7677s.c hiện tại (bản gốc, TRƯỚC khi phiên này sửa gì).
-Mô tả bug: cả 2 hàm đều làm:
-cstrncpy(s_mqtt_dyn_cmd_buf, dce->mqtt_pub_topic /* hoặc mqtt_pub_payload */, sizeof(s_mqtt_dyn_cmd_buf) - 1);
-s_mqtt_dyn_cmd_buf[sizeof(s_mqtt_dyn_cmd_buf) - 1] = '\0';
-send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf, ...);
-s_mqtt_dyn_cmd_buf chỉ 384 bytes (A7677S_MQTT_DYN_CMD_MAX), nhưng mqtt_pub_payload là buffer 10241 bytes (A7677S_MQTT_PAYLOAD_MAX). Với payload dài hơn 383 byte, nội dung bị cắt cụt (truncate) trước khi gửi cho modem, trong khi bước trước đó (AT+CMQTTPAYLOAD=...,<mqtt_pub_payload_len>) đã báo cho modem đúng độ dài GỐC (không bị cắt) — modem sẽ chờ đủ số byte gốc nhưng chỉ nhận được phần bị cắt, dẫn tới timeout hoặc đọc nhầm dữ liệu tiếp theo (VD AT+CMQTTPUB=...) là một phần của payload.
-Nguyên nhân gốc: bước copy qua s_mqtt_dyn_cmd_buf là thừa, không cần thiết. send_mqtt_dynamic() chỉ gán con trỏ (command[CMD_DYNAMIC].cmd = cmd_str), không copy — và modem_send_command()/sx_uart_write() không có giới hạn 384 byte nào cả (sx_uart_write() gọi thẳng HAL_UART_Transmit() với đúng strlen(cmd->cmd), không giới hạn kích thước gói).
-Cách sửa đúng (đã thống nhất hướng, CHƯA CODE): bỏ bước strncpy trung gian, truyền thẳng dce->mqtt_pub_topic/dce->mqtt_pub_payload làm cmd_str cho send_mqtt_dynamic(). Vì cùng cách viết (copy-qua-384-byte-buffer) là pattern có sẵn trong code, cần cẩn thận KHÔNG lặp lại bug này khi viết code cert upload mới (mục 3c ở trên) — cert PEM cũng dài, phải truyền thẳng dce->mqtt_cert_ca/_client/_key chứ không qua s_mqtt_dyn_cmd_buf.
-Trạng thái xác nhận với người dùng: đã hỏi "Xác nhận bạn đồng ý tôi sửa luôn bug này?" — CHƯA NHẬN ĐƯỢC CÂU TRẢ LỜI, phiên hết token ngay tại điểm này. Việc đầu tiên khi tiếp nhận: hỏi lại người dùng câu này trước khi động vào cb_mqtt_pub_topic/cb_mqtt_pub_payload. Không tự ý sửa mà chưa hỏi lại, dù hướng sửa đã rõ.
-LỖ HỔNG CHƯA XỬ LÝ — ĐÃ BÁO CÁO, NGƯỜI DÙNG ĐÃ QUYẾT ĐỊNH TẠM GÁC LẠI
-RX URC parsing hoàn toàn chưa implement + modem_poll() có thể mất dữ liệu URC:
+LỖ HỔNG A — Chưa quyết định cách expose get_ip/get_rssi/get_imei qua vtable:
+sx_user_mqtt.c hiện gọi trực tiếp sim76xx_get_imei(dce), sim76xx_get_ip(&board.sim76xx), sim76xx_get_rssi(&board.sim76xx) để build client_id (đuôi 8 ký tự cuối IMEI) và để log. a7677s.h HIỆN KHÔNG CÓ hàm tương đương nào — ĐÃ XÁC NHẬN bằng grep: a7677s.c/.h hoàn toàn không có bất kỳ field hay logic nào liên quan IMEI/RSSI/IP (không phải chỉ thiếu hàm expose, mà driver còn chưa từng lưu trữ các giá trị này ở đâu cả — cần kiểm tra xem module A7677S có gửi AT+CGSN (lấy IMEI)/AT+CSQ (RSSI)/AT+CGPADDR hoặc AT+CNACT (lấy IP) ở đâu trong sequence start() hay không, và nếu có, parse kết quả vào field nào chưa được thêm vào struct a7677s).
+Ngoài ra sx_user_mqtt.h khai báo sẵn 3 hàm public sx_user_mqtt_get_ip()/get_imei()/get_rssi() nhưng CẢ 3 ĐỀU KHÔNG ĐƯỢC IMPLEMENT trong sx_user_mqtt.c — đây là bug/thiếu sót có sẵn từ TRƯỚC khi việc chuyển sim76xx→a7677s bắt đầu, không phải lỗi do phiên này gây ra.
+QUAN TRỌNG — bài học vừa được người dùng chỉnh trong phiên 4: Claude từng đề xuất sai là "gọi thẳng a7677s_get_ip() không qua vtable vì đây chỉ là thông tin trạng thái, không phải hành vi MQTT quan trọng cần trừu tượng hóa". Người dùng đã bác bỏ ngay: mục tiêu là ĐỔI MODULE CHỈ SỬA 1 FILE DRIVER, không có ngoại lệ nào cho "loại thông tin nào coi là ít quan trọng". Phải thêm get_ip/get_rssi/get_imei vào modem_ops_t như các field khác, KHÔNG được gọi thẳng a7677s_* từ sx_user_mqtt.c.
 
-a7677s.h mô tả kiến trúc rx state machine (mqtt_rx_state, mqtt_incoming_cb, mqtt_connlost_cb) nhưng a7677s.c không có bất kỳ code nào thực sự parse +CMQTTRXSTART/TOPIC/PAYLOAD/END/+CMQTTCONNLOST.
-Tài liệu xác nhận: RXTOPIC và RXPAYLOAD có thể lặp lại nhiều lần nếu topic/payload dài — comment header hiện tại đơn giản hóa quá mức, code thật (khi viết) phải cộng dồn đúng theo topic_total_len/payload_total_len từ RXSTART, không phải chỉ 1 lần.
-Vấn đề nặng hơn ở tầng modem.c: modem_poll() có if (!modem->isBusy) return; ngay đầu hàm — UART chỉ được đọc khi đang có 1 AT command đang chờ phản hồi. URC bất đồng bộ (đến khi module đang rảnh, không có AT command nào đang bay) sẽ bị mất hoàn toàn ở tầng UART, trước khi a7677s.c kịp thấy, không có log lỗi nào — dữ liệu chỉ đơn giản biến mất.
-Dự án CÓ dùng subscribe thật (người dùng xác nhận) → lỗ hổng này nghiêm trọng, gần như chắc chắn xảy ra khi vận hành thật với bất kỳ lệnh điều khiển nào gửi từ server xuống ngoài cửa sổ hẹp lúc isBusy=1.
-Quyết định của người dùng: "để tôi test thực tế mới quyết định" — tức là KHÔNG sửa ngay bây giờ, để sau khi test hardware thật rồi mới quay lại thiết kế hướng sửa (2 hướng đã đề xuất, chưa chọn: (A) generic URC handler trong modem.c kiểu add_urc_handler như WS_v0, hay (B) đơn giản modem.c luôn đọc UART vào buffer chung, a7677s.c tự quét URC riêng). Không tự ý code phần này cho tới khi người dùng quay lại với kết quả test và chọn hướng.
+LỖ HỔNG B — Cơ chế "modem ready/error" chưa có tương đương qua vtable:
+sx_user_mqtt.c dùng sim76xx_set_on_ready(dce, cb)/sim76xx_set_on_error(dce, cb) để tự động gọi sx_mqtt_connect() đúng lúc modem vừa init xong, và để bắn s_on_disconnected() khi modem lỗi. a7677s.h không có cơ chế callback tương đương — chỉ có is_ready(ctx) (qua modem_handle_is_ready(), đã có trong modem_ops_t) để POLL, không có callback bắn một lần khi vừa chuyển trạng thái.
+Hai hướng khả thi (CHƯA CHỌN, phải hỏi người dùng): (1) thêm 2 field callback mới vào modem_ops_t kiểu set_on_ready(ctx, cb)/set_on_error(ctx, cb), giống pattern mqtt_set_callbacks đã làm; hoặc (2) bỏ callback, đổi sang polling is_ready() bằng một biến "was_ready" trong sx_user_mqtt_poll() để tự phát hiện cạnh lên (rising edge) rồi tự gọi sx_mqtt_connect() — đơn giản hơn, không cần sửa modem_ops_t, nhưng thay đổi hành vi thời điểm gọi (poll-based thay vì event-based, có độ trễ tối đa bằng 1 chu kỳ poll).
 
-WATCHDOG / AUTO-RESET LOGIC — NGƯỜI DÙNG SẼ TỰ LÀM SAU
-Người dùng đã nêu yêu cầu tổng quát: publish fail 5 lần liên tiếp → reset SIM (dùng AT+CRESET, đã xác nhận cú pháp — software reset, module tự reboot, không cần GPIO); AT không phản hồi (treo cứng) → reset module bằng lại chu kỳ PWRKEY (power_off_start()/power_on_start(), không dùng chân RESET vật lý GPIOD PIN_11); timeout ở bước nào không thực thi tiếp được → reset. Nhưng người dùng đã chốt rõ: "sau này tôi tự thêm" — đây KHÔNG phải việc cần code trong các phiên tiếp theo trừ khi người dùng chủ động yêu cầu lại. Không tự ý thêm watchdog logic vào a7677s.c/sx_mqtt.c.
-VIỆC SAU KHI XONG a7677s.c (mục 3 ở trên) — CHƯA BẮT ĐẦU
+LỖ HỔNG C — sx_user_mqtt_stop_service() dùng API cấp thấp không còn khớp:
+Hàm này hiện gọi trực tiếp sim76xx_mqtt_disconnect(&board.sim76xx, cb_mqtt_disc_done, 5000) và sim76xx_mqtt_stop(&board.sim76xx, cb_mqtt_stop_done, 3000) với callback kiểu modem_t*/modem_response_st_t cũ (không phải mqtt_cb_t mới), rồi tự busy-wait bằng vòng lặp sim76xx_poll()+sx_delay_ms(10) tới khi xong hoặc timeout 10000ms. Cần quyết định: dùng thẳng sx_mqtt_disconnect() (đã có qua vtable, đã refactor xong ở sx_mqtt.c) có đủ thay thế 2 lệnh AT cũ (CMQTTDISC rồi CMQTTSTOP) không, hay cần thêm 1 thao tác "mqtt_stop" riêng (dừng hẳn MQTT client, không chỉ ngắt kết nối) vào modem_ops_t. Cũng cần quyết định có giữ kiểu busy-wait chặn (blocking loop) này hay chuyển sang non-blocking như phần còn lại của kiến trúc.
 
-Refactor sx_mqtt.c (người dùng đã chọn làm file này TRƯỚC sx_board.c) — bỏ #include "sim76xx.h", chuyển toàn bộ gọi sim76xx_* sang modem_handle_t/a7677s_ops. Đã đọc kỹ toàn bộ 666 dòng sx_mqtt.c + sx_mqtt.h trong phiên này, cần nắm những điểm sau trước khi code:
+Tên field board sau refactor CHƯA CHỐT CHÍNH THỨC (chỉ mới đề xuất, chưa hỏi xong): dự kiến board.a7677s (kiểu a7677s_t) + board.modem (kiểu modem_handle_t, với .ctx = &board.a7677s, .ops = &a7677s_ops) — nhưng đây thuộc phạm vi refactor sx_board.c/.h (việc SAU sx_user_mqtt.c theo thứ tự người dùng chọn), nên sx_user_mqtt.c mới chỉ cần nhận modem_handle_t *modem truyền vào qua tham số init (không tự ý biết tên field board cụ thể), đúng như sx_mqtt_init() đã làm.
 
-sx_mqtt.c hiện có sẵn 1 bộ URC parser hoàn chỉnh cho +CMQTTRX*/+CMQTTCONNLOST (process_urc_line(), urc_handler(), dòng 44-211 của file gốc) — đăng ký qua sim76xx_set_on_urc(dce, urc_handler), hàm này KHÔNG có trong modem_ops_t. Cần quyết định: giữ logic parse này ở sx_mqtt.c (cần thêm cách nào đó cho a7677s.c expose URC ra ngoài — nhưng đây lại đụng vào lỗ hổng RX URC đã gác lại ở trên) hay chuyển hẳn logic parse vào a7677s.c (dùng mqtt_incoming_cb_t/mqtt_connlost_cb_t đã có sẵn trong a7677s.h, gọi qua a7677s_mqtt_register_callbacks()). Chưa chốt hướng này với người dùng — cần hỏi trước khi code phần liên quan tới URC trong sx_mqtt.c.
-sx_mqtt.c hiện dùng sim76xx_mqtt_send_raw_cmd/sim76xx_mqtt_raw_send (gửi AT thô tùy ý, VD AT+CMQTTCFG="version",0,4 để set MQTT version 3.1.1) — không có trong modem_ops_t, và a7677s.c hiện tại KHÔNG gửi lệnh này ở đâu cả. Cần xác nhận với người dùng: có cần set MQTT version qua AT+CMQTTCFG cho A7677S không, hay bỏ qua (dùng default của modem)? Chưa hỏi.
-sx_mqtt.c bắt riêng +CGEV: ME PDN DEACT/+CGEV: NW PDN DEACT (mất mạng) để tự gọi lại sim76xx_start(). Cũng thuộc lỗ hổng URC đã gác lại — chưa có hướng xử lý.
-Sau khi cert-upload/SSL logic trong a7677s.c xong (mục 3), sx_mqtt.c sẽ không cần tự làm SSL cert download nữa — chỉ cần gọi mqtt_connect() với đủ tham số mới, đơn giản hóa đáng kể so với code cũ (hiện sx_mqtt.c có ~10 callback riêng cho luồng cert: cb_cert_ca_prompt/done, cb_cert_client_prompt/done, cb_cert_key_prompt/done, cb_ssl_cacert/clientcert/clientkey/authmode, cb_sslcfg, cb_sslbind — TẤT CẢ SẼ BỊ XÓA khi refactor, logic tương đương giờ nằm trong a7677s.c).
+CÔNG VIỆC SAU KHI XONG sx_user_mqtt.c — CHƯA BẮT ĐẦU
+1. Refactor sx_board.c/sx_board.h — khởi tạo board.a7677s (kiểu a7677s_t) + board.modem (modem_handle_t { .ops = &a7677s_ops, .ctx = &board.a7677s }). Dọn 3 biến chết đã phát hiện từ các phiên trước (static sx_gpio_t s_lte_gpio;, static sx_gpio_t powerPin;, static sx_gpio_pin_t s_lte_powerPin = {NULL, NULL};) — người dùng đã đồng ý dọn cùng lúc bước này (xác nhận ở phiên 3).
+2. Refactor sx_sleep_manager.c/.h — bỏ sim76xx_*, chuyển sang modem_handle_t/modem_ops_t.
 
+LỖ HỔNG CHƯA XỬ LÝ — ĐÃ BÁO CÁO, NGƯỜI DÙNG ĐÃ QUYẾT ĐỊNH TẠM GÁC LẠI (không đổi từ phiên 3)
+modem_poll() trong modem.c vẫn còn nguyên if (!modem->isBusy) return; ở đầu hàm (đã xác nhận lại bằng grep trong phiên 4, KHÔNG được sửa dù a7677s.c giờ đã có state machine RX URC đầy đủ). Nghĩa là URC bất đồng bộ đến khi modem đang rảnh (isBusy=0) vẫn sẽ bị mất hoàn toàn ở tầng UART, trước khi a7677s.c kịp thấy. Dự án CÓ dùng subscribe thật → lỗ hổng nghiêm trọng khi vận hành thật. Quyết định của người dùng (từ phiên 3, chưa đổi): "để tôi test thực tế mới quyết định" — KHÔNG sửa ngay, để sau khi test hardware thật rồi mới chọn hướng (A: generic URC handler kiểu add_urc_handler như WS_v0, hay B: modem.c luôn đọc UART vào buffer chung, a7677s.c tự quét URC riêng). Không tự ý code phần này.
 
-Refactor sx_board.c/sx_board.h — khởi tạo board.a7677s (kiểu a7677s_t) qua modem_handle_t { .ops = &a7677s_ops, .ctx = &board.a7677s }. Đồng thời dọn 3 biến chết đã phát hiện từ phiên trước (static sx_gpio_t s_lte_gpio;, static sx_gpio_t powerPin;, static sx_gpio_pin_t s_lte_powerPin = {NULL, NULL}; ở đầu sx_board.c) — người dùng đã đồng ý dọn cùng lúc bước này.
-Refactor sx_user_mqtt.c — tương tự, bỏ sim76xx_*.
-Refactor sx_sleep_manager.c/.h — tương tự, bỏ sim76xx_*.
+WATCHDOG / AUTO-RESET LOGIC — NGƯỜI DÙNG SẼ TỰ LÀM SAU (không đổi từ phiên 3)
+Publish fail 5 lần liên tiếp → reset SIM bằng AT+CRESET; AT không phản hồi (treo cứng) → reset bằng lại chu kỳ PWRKEY; timeout ở bước nào không thực thi tiếp được → reset. Người dùng đã chốt: "sau này tôi tự thêm" — KHÔNG code trong các phiên tiếp theo trừ khi người dùng chủ động yêu cầu lại.
 
-NGUYÊN TẮC QUAN TRỌNG (nhắc lại, bắt buộc tuân thủ)
-
-Nếu repository/tài liệu chưa đọc hết → không được kết luận. Nếu chưa chắc chắn → tiếp tục đọc, không đoán.
-Tuyệt đối không tin vào phần "tiến độ" tường thuật trong handoff (kể cả file này) — luôn tự đọc lại repo thật (git log/git status/git diff/view/grep) trước khi kết luận bất cứ điều gì đã làm hay chưa.
-Không sửa âm thầm. Nếu phát hiện bug hoặc điểm lệch thiết kế, phải trình bày rõ nguyên nhân/ảnh hưởng/lựa chọn xử lý và hỏi lại người dùng trước khi code — như đã làm với vụ lệch chữ ký mqtt_connect/mqtt_publish và bug truncate s_mqtt_dyn_cmd_buf (câu hỏi đang treo, xem mục BUG ở trên).
-Luôn dừng lại sau mỗi phần nhỏ để người dùng review (Phase 5), không code nhiều file/nhiều chức năng lớn liền một lúc.
-Luôn present_files VÀ dán nội dung/diff trực tiếp vào chat cho mọi file tạo/sửa, không chỉ làm 1 trong 2.
-Watchdog/auto-reset: người dùng tự làm sau, không tự ý thêm.
-RX URC handling: gác lại chờ người dùng test thực tế, không tự ý code.
-Chân RESET vật lý (GPIOD PIN_11): không dùng, đã chốt dùng lại PWRKEY cycle thay thế.
-
-Ngôn ngữ
-Luôn trả lời bằng tiếng Việt (trừ comment code). Tên hàm, biến, API, thuật ngữ kỹ thuật giữ nguyên tiếng Anh. Giải thích theo hướng kỹ sư firmware, có chiều sâu, không trả lời chung chung.
 VIỆC ĐẦU TIÊN KHI TIẾP NHẬN — THEO ĐÚNG THỨ TỰ
-
-git clone lại WS_v1 vào /home/claude/work/WS_v1 (bản chỉ đọc, đối chiếu remote) và WS_v0 vào /home/claude/work/WS_v0.
-cp -r /home/claude/work/WS_v1 /home/claude/work/WS_v1_edit — tạo lại thư mục làm việc.
-Tái tạo lại 2 file đã sửa (modem_ops.h, a7677s.h) vào WS_v1_edit theo đúng nội dung mô tả ở mục "ĐÃ SỬA XONG" bên trên (đối chiếu lại với nội dung đầy đủ đã dán trong lịch sử chat nếu còn truy cập được).
-Xác nhận lại forward declarations đã thêm vào a7677s.c (mục 3 ở trên) — nếu chưa có, thêm lại.
-Hỏi lại người dùng câu hỏi đang treo: có đồng ý sửa bug truncate s_mqtt_dyn_cmd_buf ở cb_mqtt_pub_topic/cb_mqtt_pub_payload không (mục "BUG ĐÃ PHÁT HIỆN" ở trên)?
-Sau khi có câu trả lời, bắt tay vào việc số 3 (a)-(e) ở trên: implement đầy đủ logic TLS/cert-upload trong a7677s.c, tránh lặp lại bug truncate khi viết code mới. Dừng lại sau khi xong để người dùng review.
+1. git clone lại WS_v1 vào /home/claude/work/WS_v1, git fetch + git log --oneline -10, so sánh với danh sách commit đã liệt kê ở mục "TRẠNG THÁI GIT THẬT" phía trên — nếu remote đã tiến xa hơn (commit hash khác), đọc lại code thật bằng git show/git diff cho từng commit mới trước khi tin bất kỳ điều gì trong handoff này.
+2. git clone WS_v0 vào /home/claude/work/WS_v0 (tham khảo).
+3. mkdir -p /home/claude/work/edit, tái tạo lại sx_mqtt.h + sx_mqtt.c theo đúng mô tả ở mục 4 và 5 phía trên (đối chiếu nội dung đầy đủ trong lịch sử chat phiên 4 nếu còn truy cập được) — HAI FILE NÀY CHƯA ĐƯỢC COMMIT, sẽ không có sẵn trong git clone.
+4. Đọc lại toàn bộ SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c + sx_user_mqtt.h thật (đừng chỉ tin mô tả trong handoff này) để tự xác nhận lại 3 lỗ hổng A/B/C.
+5. Hỏi lại người dùng, theo đúng thứ tự, để mở khóa việc viết sx_user_mqtt.c:
+   a. Lỗ hổng A: xác nhận sẽ thêm get_ip/get_rssi/get_imei vào modem_ops_t (không gọi thẳng driver). Cần đọc kỹ a7677s.c xem AT+CGSN/AT+CSQ/lấy IP đã được gửi ở đâu trong start() sequence chưa, nếu chưa có thì cần hỏi người dùng có muốn thêm logic gửi các lệnh AT này vào a7677s.c luôn không (việc phát sinh ngoài phạm vi refactor thuần túy, cần xác nhận riêng).
+   b. Lỗ hổng B: chọn hướng (1) thêm callback set_on_ready/set_on_error vào modem_ops_t, hay (2) polling is_ready() phát hiện rising edge trong sx_user_mqtt_poll().
+   c. Lỗ hổng C: sx_mqtt_disconnect() hiện có đã đủ thay thế cho cả disconnect+stop hay cần thêm thao tác mqtt_stop riêng vào modem_ops_t; có giữ kiểu busy-wait blocking trong stop_service() hay chuyển non-blocking.
+6. Sau khi có đủ câu trả lời, viết modem_ops.h (nếu cần thêm field) → a7677s.c (implement field mới) → sx_user_mqtt.c/.h (refactor cuối). Dừng lại sau mỗi file để người dùng review.

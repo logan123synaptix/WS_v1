@@ -7,6 +7,15 @@
 #define SX_MQTT_RECONNECT_DELAY_BASE    1000U
 #define SX_MQTT_RECONNECT_DELAY_MAX     5000U
 #define SX_MQTT_MAX_RETRY_BEFORE_RESTART 3U
+#define SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET 3U  /* consecutive PWRKEY
+    power-cycle recoveries (each already SX_MQTT_MAX_RETRY_BEFORE_RESTART
+    connect failures in a row) that themselves failed to reach a connected
+    state, before escalating to modem_ops_t.hard_reset() (physical RST pin).
+    Matches A7677S_MAX_RETRY's spirit (3 consecutive failures at a given
+    layer before escalating one level up) but is a service-layer constant of
+    its own, since this layer must not include any driver header (a7677s.h)
+    to get it — see modem_ops_t's design note on the service layer only
+    ever knowing modem_ops.h. */
 
 static const char *TAG = "SX_MQTT";
 
@@ -141,15 +150,27 @@ static void do_error(sx_mqtt_t *mqtt)
     mqtt->reconnect_elapsed = 0;
 
     if (mqtt->reconnect_count >= SX_MQTT_MAX_RETRY_BEFORE_RESTART) {
-        log_warn(TAG, "Too many retries — restarting modem power/init sequence");
         mqtt->reconnect_count = 0;
         mqtt->state = SX_MQTT_STATE_DISCONNECTED;
-        /* Same recovery action as before (full power cycle + re-init), now
-         * reached only through modem_ops_t so this file stays
-         * driver-agnostic. */
-        mqtt->modem->ops->power_off_start(mqtt->modem->ctx);
-        mqtt->modem->ops->power_on_start(mqtt->modem->ctx);
-        mqtt->modem->ops->start(mqtt->modem->ctx);
+        mqtt->restart_cycle_count++;
+
+        if (mqtt->restart_cycle_count >= SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET) {
+            log_error(TAG, "PWRKEY power-cycle recovery failed %u times in a row — "
+                      "escalating to hard_reset() (RST pin)",
+                      mqtt->restart_cycle_count);
+            mqtt->restart_cycle_count = 0;
+            mqtt->modem->ops->hard_reset(mqtt->modem->ctx);
+        } else {
+            log_warn(TAG, "Too many retries — restarting modem power/init sequence "
+                     "(restart cycle %u/%u before hard_reset escalation)",
+                     mqtt->restart_cycle_count, SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET);
+            /* Same recovery action as before (full power cycle + re-init), now
+             * reached only through modem_ops_t so this file stays
+             * driver-agnostic. */
+            mqtt->modem->ops->power_off_start(mqtt->modem->ctx);
+            mqtt->modem->ops->power_on_start(mqtt->modem->ctx);
+            mqtt->modem->ops->start(mqtt->modem->ctx);
+        }
     }
 
     log_warn(TAG, "Error — reconnect after: %lu ms (retry #%d)",
@@ -263,5 +284,6 @@ void sx_mqtt_poll(sx_mqtt_t *mqtt, uint32_t ts)
     if (mqtt->state == SX_MQTT_STATE_CONNECTED) {
         mqtt->reconnect_count = 0;
         mqtt->reconnect_delay = SX_MQTT_RECONNECT_DELAY_BASE;
+        mqtt->restart_cycle_count = 0;
     }
 }

@@ -81,6 +81,17 @@ struct sx_mqtt{
     uint32_t reconnect_delay;
     uint8_t  reconnect_count;
 
+    /* Counts how many times the PWRKEY power-cycle recovery in do_error()
+     * has itself been triggered without a successful connect happening in
+     * between (i.e. reconnect_count reaching SX_MQTT_MAX_RETRY_BEFORE_RESTART
+     * repeatedly). Only cleared on an actual CONNECTED transition (see
+     * sx_mqtt_poll()) — unlike reconnect_count, which resets every time a
+     * restart is triggered. Once this reaches
+     * SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET, do_error() escalates to
+     * modem_ops_t.hard_reset() (physical RST pin) instead of another PWRKEY
+     * cycle. */
+    uint8_t  restart_cycle_count;
+
     /*  Callback    */
     sx_mqtt_on_connected_cb_t on_connected;
     sx_mqtt_on_disconnected_cb_t on_disconnected;

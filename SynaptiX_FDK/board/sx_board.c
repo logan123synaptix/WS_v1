@@ -64,7 +64,7 @@ static sx_gpio_t     s_rtc_pwr;
 static sx_gpio_pin_t s_rtc_pwr_pin = {.pin = NULL, .port = NULL};
 
 static sx_gpio_t     s_imu_reset;
-static sx_gpio_pin_t s_imu_reset_pin = {.pin = NULL, .port = NULL};
+static sx_gpio_pin_t s_imu_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
 
 /* I2C1_RESET_Pin and RS485_RDE_Pin are wired (see sx_board.h) but not yet
  * driven by any init call in this file — left undeclared here rather than

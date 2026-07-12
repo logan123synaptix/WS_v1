@@ -60,8 +60,12 @@ static sx_gpio_pin_t s_gps_rst_pin = {.pin = GPS_RST_Pin, .port = GPS_RST_Port};
 
 static sx_gpio_pin_t s_spi_cs_pin = {.pin = SPI_CS_Pin, .port = SPI_CS_Port};
 
+/*Dont have power pin */
 static sx_gpio_t     s_rtc_pwr;
 static sx_gpio_pin_t s_rtc_pwr_pin = {.pin = NULL, .port = NULL};
+
+static sx_gpio_t     s_rtc_reset;
+static sx_gpio_pin_t s_rtc_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
 
 static sx_gpio_t     s_imu_reset;
 static sx_gpio_pin_t s_imu_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
@@ -159,7 +163,9 @@ void sx_board_init(void)
     // I2C
     sx_i2c_init(&board.i2c1, &sx_i2c_ops, &hi2c1);
     // RTC
-    sx_gpio_init(&s_rtc_pwr,   &sx_gpio_ops, &s_rtc_pwr_pin);
+    /*Dont have power pin */
+    // sx_gpio_init(&s_rtc_pwr,   &sx_gpio_ops, &s_rtc_pwr_pin);
+    sx_gpio_init(&s_rtc_reset, &sx_gpio_ops, &s_rtc_reset_pin);
     rx8130ce_init(&board.rtc,  &board.i2c1, &s_rtc_pwr);
     // IMU
     sx_gpio_init(&s_imu_reset, &sx_gpio_ops, &s_imu_reset_pin);

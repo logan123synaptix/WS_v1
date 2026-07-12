@@ -70,6 +70,12 @@ extern "C" {
 /* Timeouts (ms) for the power state machine and AT init sequence. */
 #define A7677S_PULSE_HIGH_MS   50U
 #define A7677S_PULSE_LOW_MS    500U
+#define A7677S_RST_PULSE_MS    2500U    /* RST pin hard-reset pulse width, per
+                                          * a7677s.md Table 17 (Treset min 2s,
+                                          * typ 2.5s) and note 1 ("recommended
+                                          * to use the reset pin only in case
+                                          * of emergency... reset time
+                                          * recommended to be 2.5s") */
 #define A7677S_BOOT_PROBE_MS   500U     /* interval between "AT" probes while waiting for boot */
 #define A7677S_TIMEOUT_AT      2500U
 #define A7677S_TIMEOUT_CPOF    5000U
@@ -119,6 +125,15 @@ typedef enum {
     A7677S_PWR_IDLE = 0,      /* powered off, no sequence in progress */
     A7677S_PWR_PULSE_HIGH,    /* PWRKEY driven high, waiting A7677S_PULSE_HIGH_MS */
     A7677S_PWR_PULSE_LOW,     /* PWRKEY driven low, waiting A7677S_PULSE_LOW_MS */
+    A7677S_PWR_RST_PULSE,     /* RST line driven high (via Q2) for A7677S_RST_PULSE_MS,
+                               * hard reset path — see a7677s_hard_reset(). Distinct from
+                               * the PWRKEY pulse states above: this drives a different
+                               * physical pin (LTE_RESET_Pin) through a separate transistor
+                               * (schematic: MCU HIGH -> Q2 base via R17 -> Q2 conducts ->
+                               * pulls module's own RESET pin LOW, which is the chip's
+                               * active-low reset per its datasheet). Idle/default (MCU
+                               * LOW, Q2 off) leaves the module's RESET pin floating high
+                               * via its internal pull-up to VBAT, i.e. normal operation. */
     A7677S_PWR_WAIT_BOOT,     /* PWRKEY released high, probing "AT" until OK */
     A7677S_PWR_READY,         /* module confirmed responsive to AT */
     A7677S_PWR_OFF_WAIT,      /* AT+CPOF sent, waiting for OK/timeout */
@@ -261,6 +276,15 @@ typedef struct a7677s a7677s_t;
 struct a7677s
 {
     modem_t base;
+
+    /* RST line (LTE_RESET_Pin, GPIOD PIN_11 per schematic) — drives Q2's
+     * base through R17. MCU HIGH turns Q2 on, which pulls the module's own
+     * RESET pin low (its native active-low reset). MCU LOW (idle/default,
+     * R19 pulls Q2's base down) leaves the module's RESET pin floating high
+     * via its internal VBAT pull-up — normal operation. Only used by
+     * a7677s_hard_reset() / A7677S_PWR_RST_PULSE; must be initialized by the
+     * board layer (sx_board.c) via sx_gpio_init(), same as base.pwrPin. */
+    sx_gpio_t resetPin;
 
     a7677s_power_state_t power_state;
 

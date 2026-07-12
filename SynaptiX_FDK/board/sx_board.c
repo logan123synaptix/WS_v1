@@ -42,10 +42,18 @@ void USB_DRD_FS_IRQHandler(void)
 /*  GPIO Define                                                       */
 /* ------------------------------------------------------------------ */
 static sx_gpio_pin_t s_lte_pwrkey_pin = {.pin = LTE_PWRKEY_Pin, .port = LTE_PWRKEY_Port};
-/* LTE_RESET_Pin (GPIOD PIN_11) is wired but deliberately NOT used — hard
- * resets go through the PWRKEY power_off/power_on cycle instead, see
- * a7677s.c. Kept here as a name-only reminder of what's physically wired,
- * not passed to any init call. */
+/* LTE_RESET_Pin (GPIOD PIN_11) — per schematic, drives Q2's base through
+ * R17 (open-collector style switch to GND on the module's own RESET pin).
+ * MCU HIGH -> Q2 on -> module's RESET pin pulled low (native active-low
+ * reset). MCU LOW (default/idle, R19 pulls Q2's base down, CubeMX also
+ * inits this pin LOW at boot) -> Q2 off -> module's RESET pin floats high
+ * via its internal VBAT pull-up -> normal operation. Used only by
+ * a7677s_hard_reset() (modem_ops_t.hard_reset) as a last-resort escalation
+ * when the normal PWRKEY power_off_start()/power_on_start() cycle has
+ * itself failed to recover the modem, or it has stopped responding to AT
+ * entirely — not a routine recovery path. See a7677s_t.resetPin's
+ * doc-comment in a7677s.h for the full timing/state-machine details. */
+static sx_gpio_pin_t s_lte_reset_pin = {.pin = LTE_RESET_Pin, .port = LTE_RESET_Port};
 
 /* No VBAT-cutoff transistor on this board revision for the modem — see
  * a7677s_t.hasPowerPin (set to 0 below). A future board revision may add
@@ -176,6 +184,7 @@ void sx_board_init(void)
     a7677s_init(&board.a7677s);
     board.a7677s.base.hasPowerPin = 0;   /* no VBAT-cutoff transistor on this board */
     sx_gpio_init(&board.a7677s.base.pwrPin, &sx_gpio_ops, &s_lte_pwrkey_pin);
+    sx_gpio_init(&board.a7677s.resetPin, &sx_gpio_ops, &s_lte_reset_pin);
     a7677s_set_full_apn(&board.a7677s, APN, USERNAME_APN, PASSWORD_APN);
     sx_uart_init(&board.a7677s.base.uart, &uart_config[UART_LTE], 512, 512);
     HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);

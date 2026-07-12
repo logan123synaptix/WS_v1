@@ -280,6 +280,28 @@ static void a7677s_power_off_start(void *ctx)
     modem_send_command(pModem(dce), &command[CMD_CPOF], A7677S_TIMEOUT_CPOF);
 }
 
+/* Last-resort hard reset via the physical RST line (LTE_RESET_Pin, through
+ * Q2 — see resetPin's doc-comment in a7677s.h). Bypasses AT+CPOF and the
+ * PWRKEY pulse entirely: this is for the case where the module has stopped
+ * responding to AT at all, or repeated power_off_start()/power_on_start()
+ * cycles have themselves failed to recover it. Unconditionally overrides
+ * whatever power_state/init_state the driver was in — an emergency
+ * escalation, not a normal sequenced call — so unlike start() it does not
+ * check power_is_busy() first. Any AT command that happened to be in flight
+ * is abandoned; its callback (if any) will not fire. */
+static void a7677s_hard_reset(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+
+    log_error(TAG, "Hard reset via RST pin (emergency recovery)");
+    dce->power_state      = A7677S_PWR_RST_PULSE;
+    dce->power_elapsed    = 0;
+    dce->at_probe_pending = 0;
+    dce->init_state       = A7677S_INIT_IDLE;
+    dce->init_retry_count = 0;
+    sx_gpio_write(&dce->resetPin, SX_GPIO_HIGH);
+}
+
 static bool a7677s_power_is_busy(void *ctx)
 {
     a7677s_t *dce = (a7677s_t *)ctx;
@@ -391,6 +413,21 @@ static void a7677s_poll(void *ctx, uint32_t ts)
         dce->power_elapsed += ts;
         if (dce->power_elapsed >= A7677S_PULSE_LOW_MS) {
             sx_gpio_write(&dce->base.pwrPin, SX_GPIO_HIGH);
+            dce->power_state      = A7677S_PWR_WAIT_BOOT;
+            dce->power_elapsed    = 0;
+            dce->at_probe_pending = 0;
+        }
+        break;
+
+    case A7677S_PWR_RST_PULSE:
+        dce->power_elapsed += ts;
+        if (dce->power_elapsed >= A7677S_RST_PULSE_MS) {
+            /* Release: MCU drives resetPin back LOW, Q2 turns off, and the
+             * module's own RESET pin floats back high via its internal VBAT
+             * pull-up — normal operation resumes and the module reboots on
+             * its own. Reuse A7677S_PWR_WAIT_BOOT's existing AT-probe logic
+             * to confirm boot completion, same as after a PWRKEY cycle. */
+            sx_gpio_write(&dce->resetPin, SX_GPIO_LOW);
             dce->power_state      = A7677S_PWR_WAIT_BOOT;
             dce->power_elapsed    = 0;
             dce->at_probe_pending = 0;
@@ -2156,6 +2193,7 @@ const modem_ops_t a7677s_ops = {
     .power_on_start   = a7677s_power_on_start,
     .power_off_start  = a7677s_power_off_start,
     .power_is_busy    = a7677s_power_is_busy,
+    .hard_reset       = a7677s_hard_reset,
 
     .start            = a7677s_start,
     .is_ready         = a7677s_is_ready,

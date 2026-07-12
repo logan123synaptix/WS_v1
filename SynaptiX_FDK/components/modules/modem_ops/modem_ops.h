@@ -96,6 +96,24 @@ typedef struct {
      * commands yet. */
     bool (*power_is_busy)(void *ctx);
 
+    /* Last-resort hard reset via the module's physical RST pin (if wired on
+     * this board revision), bypassing the graceful AT+CPOF/PWRKEY shutdown
+     * sequence entirely. Non-blocking — pulses the pin for the manufacturer-
+     * recommended duration, then the module re-boots on its own; progress
+     * (including the post-reset AT/OK probe) is advanced inside poll(), same
+     * as power_on_start(). Callers should treat this the same as a fresh
+     * power_on_start() for sequencing purposes (e.g. wait for is_ready()/
+     * set_on_ready() afterwards) — do not call start() immediately after
+     * this returns.
+     * Intended only as an escalation when the normal power_off_start()/
+     * power_on_start() cycle has itself failed to recover the modem
+     * repeatedly, or the modem has stopped responding to AT entirely — not
+     * as a routine recovery path. A driver with no RST pin wired on a given
+     * board revision may implement this as a no-op that simply falls back to
+     * power_off_start()+power_on_start(); callers must not assume the RST
+     * pin was actually pulsed. */
+    void (*hard_reset)(void *ctx);
+
     /* --- Modem initialization after power is up --- */
 
     /* Runs the AT init sequence (network attach, APN, etc). Returns 0 if the

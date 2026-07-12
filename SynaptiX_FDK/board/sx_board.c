@@ -41,44 +41,38 @@ void USB_DRD_FS_IRQHandler(void)
 /* ------------------------------------------------------------------ */
 /*  GPIO Define                                                       */
 /* ------------------------------------------------------------------ */
-static sx_gpio_t     s_lte_gpio;
 static sx_gpio_pin_t s_lte_pwrkey_pin = {.pin = LTE_PWRKEY_Pin, .port = LTE_PWRKEY_Port};
-static sx_gpio_pin_t s_lte_rst_pin = {.pin = LTE_RESET_Pin, .port = LTE_RESET_Port};
+/* LTE_RESET_Pin (GPIOD PIN_11) is wired but deliberately NOT used — hard
+ * resets go through the PWRKEY power_off/power_on cycle instead, see
+ * a7677s.c. Kept here as a name-only reminder of what's physically wired,
+ * not passed to any init call. */
 
-static sx_gpio_t     powerPin;
-static sx_gpio_pin_t s_lte_powerPin = {.pin = NULL, .port = NULL};
+/* No VBAT-cutoff transistor on this board revision for the modem — see
+ * a7677s_t.hasPowerPin (set to 0 below). A future board revision may add
+ * one back, hence the field stays in modem_t/a7677s_t rather than being
+ * removed outright (see modem.h's own comment on hasPowerPin/powerPin). */
 
-static sx_gpio_t     s_gps_gpio;
-static sx_gpio_pin_t s_gps_power_pin = {.pin = GPS_EN_PW_Pin, .port = GPS_EN_PW_Port};
-static sx_gpio_pin_t s_gps_pps_pin = {.pin = GPS_PPS_Pin, .port = GPS_PPS_Port};
+static sx_gpio_pin_t s_gps_cpw_pin = {.pin = GPS_CPW_Pin, .port = GPS_CPW_Port};
 static sx_gpio_pin_t s_gps_rst_pin = {.pin = GPS_RST_Pin, .port = GPS_RST_Port};
+/* GPS_PPS_Pin is wired but not used by this firmware yet (no 1PPS capture
+ * configured) — no sx_gpio_pin_t declared for it, nothing to pass around
+ * until that feature is implemented. */
 
-static sx_gpio_t     s_i2c_rst_gpio;
-static sx_gpio_pin_t s_i2c_rst_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
-
-static sx_gpio_t     s_rs485_rde_gpio;
-static sx_gpio_pin_t s_rs485_rde_pin = {.pin = RS485_RDE_Pin, .port = RS485_RDE_Port};
-
-static sx_gpio_t     s_spi_cs_gpio;
 static sx_gpio_pin_t s_spi_cs_pin = {.pin = SPI_CS_Pin, .port = SPI_CS_Port};
 
 static sx_gpio_t     s_rtc_pwr;
 static sx_gpio_pin_t s_rtc_pwr_pin = {.pin = NULL, .port = NULL};
 
-static sx_gpio_t     s_imu_en;
-static sx_gpio_pin_t s_imu_en_pin = {.pin = NULL, .port = NULL};
-
 static sx_gpio_t     s_imu_reset;
 static sx_gpio_pin_t s_imu_reset_pin = {.pin = NULL, .port = NULL};
 
-/*  SPI */
-// static sx_gpio_t s_spi_cs;
-// static sx_gpio_t s_spi_pwr;
-// static sx_spi_t storage_spi;
+/* I2C1_RESET_Pin and RS485_RDE_Pin are wired (see sx_board.h) but not yet
+ * driven by any init call in this file — left undeclared here rather than
+ * adding unused sx_gpio_t/sx_gpio_pin_t pairs for pins nothing reads or
+ * writes yet, matching what was flagged as dead code in earlier review. */
 
 static void spi_storage_init(void){
     board.storage_cfg.cs_pin = s_spi_cs_pin;
-    board.storage_cfg.pwr_pin = NULL;
     board.storage_cfg.hspi = &hspi1;
 
     sx_storage_init(&board.storage_cfg);
@@ -159,7 +153,7 @@ void sx_board_init(void)
     uart_config[UART_LOG].parity = 0;
     uart_config[UART_LOG].stopbits = 1;
 
-    bsp_uart[UART_LTE] = &board.sim76xx.base.uart;
+    bsp_uart[UART_LTE] = &board.a7677s.base.uart;
     bsp_uart[UART_GPS] = &board.gps.comm;
 
     // I2C
@@ -169,27 +163,41 @@ void sx_board_init(void)
     rx8130ce_init(&board.rtc,  &board.i2c1, &s_rtc_pwr);
     // IMU
     sx_gpio_init(&s_imu_reset, &sx_gpio_ops, &s_imu_reset_pin);
-    // Initialize LTE
-    sx_gpio_init(&board.sim76xx.base.pwrPin, &sx_gpio_ops, &s_lte_pwrkey_pin);
-    sx_uart_init(&board.sim76xx.base.uart, &uart_config[UART_LTE], 512, 512);
-    sim76xx_init(&board.sim76xx);
+
+    // Initialize LTE (A7677S)
+    a7677s_init(&board.a7677s);
+    board.a7677s.base.hasPowerPin = 0;   /* no VBAT-cutoff transistor on this board */
+    sx_gpio_init(&board.a7677s.base.pwrPin, &sx_gpio_ops, &s_lte_pwrkey_pin);
+    a7677s_set_full_apn(&board.a7677s, APN, USERNAME_APN, PASSWORD_APN);
+    sx_uart_init(&board.a7677s.base.uart, &uart_config[UART_LTE], 512, 512);
     HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
-    sim76xx_power_on(&board.sim76xx);
-    gps_init(&board.gps, &uart_config[UART_GPS], &sx_gpio_ops, &s_gps_power_pin, NULL);
-    HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
-    sim76xx_start(&board.sim76xx);
+
+    board.modem.ops = &a7677s_ops;
+    board.modem.ctx = &board.a7677s;
+
+    /* Only kick off power-on here — power_on_start() is asynchronous
+     * (advances through a7677s_power_state_t over several poll() ticks).
+     * start() is NOT called here: it would be rejected immediately since
+     * power_state isn't READY yet. The app layer (sx_user_mqtt.c's
+     * _common_init()) is what actually calls start(), via
+     * set_on_ready()'s callback firing once the modem is truly ready — see
+     * modem_ops.h. This keeps board init limited to bringing up hardware,
+     * not driving application-level sequencing. */
+    board.modem.ops->power_on_start(board.modem.ctx);
+
     // Initialize GPS
+    gps_init(&board.gps, &uart_config[UART_GPS], &sx_gpio_ops, &s_gps_cpw_pin, &s_gps_rst_pin);
+    HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+
     spi_storage_init();
-    bno055_power_on(&board.imu);
-    sx_gpio_write(&s_imu_en, SX_GPIO_LOW);
-    bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_imu_en, &s_imu_reset);
+    bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_imu_reset);
 
     // HAL_ADCEx_Calibration_Start(hal_adc, ADC_SINGLE_ENDED);
     // HAL_ADC_Start(hal_adc);
     // sx_adc_reader_init(&board.s_adc_reader);
 }
 
-static void sx_sim76_uart_abort(void) {
+static void sx_lte_uart_abort(void) {
     HAL_UART_Abort(hal_uart[UART_LTE]);
 }
 
@@ -211,7 +219,7 @@ void board_gps_uart_resume_it(void){
 }
 
 void board_sim_uart_resume_it(void){
-    sx_sim76_uart_abort();
+    sx_lte_uart_abort();
     sim_it_handle();
 }
 void sx_board_uart_resume_it(void) {

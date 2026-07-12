@@ -13,7 +13,8 @@ extern "C" {
 #include "sx_gpio.h"
 #include "sx_uart.h"
 #include "gps.h"
-#include "sim76xx.h"
+#include "a7677s.h"
+#include "modem_ops.h"
 #include "sx_delay.h"
 #include "sx_W25Q128.h"
 #include "sx_ex_storage.h"
@@ -33,7 +34,13 @@ typedef struct {
 }voltage_t;
 
 typedef struct Board{
-    sim76xx_t sim76xx;
+    /* Concrete driver instance + the modem_ops_t handle service/app layers
+     * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+     * modem_ops.h). Swapping to a different modem module later means
+     * replacing a7677s below with the new driver's type and pointing
+     * modem.ops/modem.ctx at it — nothing outside this file changes. */
+    a7677s_t        a7677s;
+    modem_handle_t  modem;
     sx_gps_t gps;
     sx_uart_t log_uart;
     voltage_t voltage;

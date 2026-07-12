@@ -8,7 +8,6 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "sx_i2c.h"
-#include "sx_gpio.h"
 
 #define SX_I2C_MEMADD_SIZE_8BIT     0x0001U
 #define SX_I2C_MEMADD_SIZE_16BIT    0x0010U

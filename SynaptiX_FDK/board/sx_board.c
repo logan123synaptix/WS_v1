@@ -60,20 +60,19 @@ static sx_gpio_pin_t s_gps_rst_pin = {.pin = GPS_RST_Pin, .port = GPS_RST_Port};
 
 static sx_gpio_pin_t s_spi_cs_pin = {.pin = SPI_CS_Pin, .port = SPI_CS_Port};
 
-/*Dont have power pin */
-static sx_gpio_t     s_rtc_pwr;
-static sx_gpio_pin_t s_rtc_pwr_pin = {.pin = NULL, .port = NULL};
+/* RTC and IMU share the same physical reset line (I2C1_RESET_Pin) per the
+ * schematic — one wire, not two independent pins. RTC does not use it at
+ * all (rx8130ce_init() resets itself via an I2C register sequence per the
+ * datasheet, see sx_ex_rtc.c's _software_reset()); only IMU takes this GPIO
+ * as its reset_gpio. Kept as a single sx_gpio_t rather than one per
+ * consumer, since writing it from two independent handles for what is one
+ * physical wire invites the two drivers stepping on each other. */
+static sx_gpio_t     s_i2c1_reset;
+static sx_gpio_pin_t s_i2c1_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
 
-static sx_gpio_t     s_rtc_reset;
-static sx_gpio_pin_t s_rtc_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
-
-static sx_gpio_t     s_imu_reset;
-static sx_gpio_pin_t s_imu_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
-
-/* I2C1_RESET_Pin and RS485_RDE_Pin are wired (see sx_board.h) but not yet
- * driven by any init call in this file — left undeclared here rather than
- * adding unused sx_gpio_t/sx_gpio_pin_t pairs for pins nothing reads or
- * writes yet, matching what was flagged as dead code in earlier review. */
+/* RS485_RDE_Pin is wired (see sx_board.h) but not yet driven by any init
+ * call in this file — left undeclared here rather than adding an unused
+ * sx_gpio_t/sx_gpio_pin_t pair for a pin nothing reads or writes yet. */
 
 static void spi_storage_init(void){
     board.storage_cfg.cs_pin = s_spi_cs_pin;
@@ -162,13 +161,16 @@ void sx_board_init(void)
 
     // I2C
     sx_i2c_init(&board.i2c1, &sx_i2c_ops, &hi2c1);
-    // RTC
-    /*Dont have power pin */
-    // sx_gpio_init(&s_rtc_pwr,   &sx_gpio_ops, &s_rtc_pwr_pin);
-    sx_gpio_init(&s_rtc_reset, &sx_gpio_ops, &s_rtc_reset_pin);
-    rx8130ce_init(&board.rtc,  &board.i2c1, &s_rtc_pwr);
-    // IMU
-    sx_gpio_init(&s_imu_reset, &sx_gpio_ops, &s_imu_reset_pin);
+
+    /* Shared I2C1 reset line — see s_i2c1_reset's own comment above. Only
+     * initialized once here; RTC does not take it (self-resets via I2C),
+     * only IMU below does. */
+    sx_gpio_init(&s_i2c1_reset, &sx_gpio_ops, &s_i2c1_reset_pin);
+
+    // RTC — no power-cutoff GPIO on this board (VIO/VDD/VBAT wired
+    // directly to 3.3V), see sx_ex_rtc.c/.h.
+    rx8130ce_init(&board.rtc, &board.i2c1);
+    // IMU reset uses the shared s_i2c1_reset initialized above.
 
     // Initialize LTE (A7677S)
     a7677s_init(&board.a7677s);
@@ -196,7 +198,7 @@ void sx_board_init(void)
     HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
 
     spi_storage_init();
-    bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_imu_reset);
+    bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_i2c1_reset);
 
     // HAL_ADCEx_Calibration_Start(hal_adc, ADC_SINGLE_ENDED);
     // HAL_ADC_Start(hal_adc);

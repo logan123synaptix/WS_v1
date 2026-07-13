@@ -208,10 +208,6 @@ void sx_board_init(void)
 
     spi_storage_init();
     bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_i2c1_reset);
-
-    // HAL_ADCEx_Calibration_Start(hal_adc, ADC_SINGLE_ENDED);
-    // HAL_ADC_Start(hal_adc);
-    // sx_adc_reader_init(&board.s_adc_reader);
 }
 
 static void sx_lte_uart_abort(void) {

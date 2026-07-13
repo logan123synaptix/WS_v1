@@ -153,13 +153,13 @@ void sx_board_init(void)
     uart_config[UART_DUST].stopbits = 1;
 
     uart_config[UART_EXTEND].pDriver = hal_uart[UART_EXTEND];
-    uart_config[UART_EXTEND].baudrate = 115200;
+    uart_config[UART_EXTEND].baudrate = 9600;
     uart_config[UART_EXTEND].bits = 8;
     uart_config[UART_EXTEND].parity = 0;
     uart_config[UART_EXTEND].stopbits = 1;
 
     uart_config[UART_LOG].pDriver = hal_uart[UART_LOG];
-    uart_config[UART_LOG].baudrate = 256000;
+    uart_config[UART_LOG].baudrate = 115200;
     uart_config[UART_LOG].bits = 8;
     uart_config[UART_LOG].parity = 0;
     uart_config[UART_LOG].stopbits = 1;

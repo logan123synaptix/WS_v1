@@ -60,7 +60,7 @@ typedef enum{
     UART_GPS,
     UART_RS485,
     UART_DUST,
-    UART_EXTEND,
+    UART_EXTEND, // gas sensor ZE12A
     UART_LOG
 }BSP_NUM_UART;
 

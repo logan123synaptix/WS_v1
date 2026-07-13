@@ -92,12 +92,16 @@ static void _on_publish(sx_mqtt_t *mqtt, int success)
         s_publish_retry++;
         log_warn(TAG, "Publish fail %d/%d", s_publish_retry, MQTT_PUBLISH_MAX_RETRY);
         if (s_publish_retry >= MQTT_PUBLISH_MAX_RETRY) {
-            log_error(TAG, "Max retry — restart modem");
+            log_error(TAG, "Max retry — reporting to sx_mqtt.c's recovery ladder");
             s_publish_retry = 0;
             cqueue_init_static(&s_queue, s_queue_buf, MQTT_QUEUE_SIZE,
                                sizeof(mqtt_queue_item_t));
             if (s_on_publish) s_on_publish(0);
-            board.modem.ops->start(board.modem.ctx);
+            /* Let sx_mqtt.c decide the actual recovery action (it may
+             * already be mid-PWRKEY-cycle from an unrelated connect
+             * failure) — this file no longer calls board.modem.ops->start()
+             * directly, see sx_mqtt_report_failure()'s doc-comment. */
+            sx_mqtt_report_failure(&s_mqtt);
             return;
         }
         s_publishing = 1;
@@ -142,7 +146,8 @@ static void _on_modem_ready(void *ctx)
 static void _on_modem_error(void *ctx)
 {
     (void)ctx;
-    log_error(TAG, "Modem error");
+    log_error(TAG, "Modem error — feeding into recovery ladder");
+    sx_mqtt_report_failure(&s_mqtt);
     if (s_on_disconnected) s_on_disconnected();
 }
 

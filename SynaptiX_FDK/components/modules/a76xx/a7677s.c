@@ -191,6 +191,7 @@ void a7677s_init(a7677s_t *dce)
     dce->rssi              = A7677S_RSSI_UNKNOWN;
     dce->rssi_poll_elapsed = 0;
     dce->rssi_cmd_pending  = 0;
+    dce->csq_fail_count    = 0;
 
     dce->mqtt_state       = A7677S_MQTT_IDLE;
     dce->mqtt_cmd_pending = 0;
@@ -794,6 +795,7 @@ static void cb_csq(modem_t *modem, const char *response, modem_response_st_t res
     dce->rssi_cmd_pending = 0;
 
     if (res == MODEM_RESPONSE_SUCCESS && response) {
+        dce->csq_fail_count = 0;
         const char *p = strstr(response, "+CSQ:");
         if (p) {
             int rssi = (int)strtol(p + 5, NULL, 10);
@@ -801,11 +803,25 @@ static void cb_csq(modem_t *modem, const char *response, modem_response_st_t res
             log_debug(TAG, "RSSI: %d", rssi);
             return;
         }
+        /* Got a response, just not the expected format — a parsing/format
+         * issue, not evidence the modem stopped responding, so this does
+         * NOT count toward csq_fail_count. */
         log_warn(TAG, "CSQ response did not parse: %s", response);
-    } else {
-        log_warn(TAG, "AT+CSQ failed");
+        dce->rssi = A7677S_RSSI_UNKNOWN;
+        return;
     }
+
+    log_warn(TAG, "AT+CSQ failed");
     dce->rssi = A7677S_RSSI_UNKNOWN;
+
+    dce->csq_fail_count++;
+    if (dce->csq_fail_count >= A7677S_MAX_RETRY) {
+        log_error(TAG, "AT+CSQ failed %u times in a row while modem was "
+                  "supposed to be ready — modem appears unresponsive",
+                  dce->csq_fail_count);
+        dce->csq_fail_count = 0;
+        if (dce->error_cb) dce->error_cb(dce->error_cb_ctx);
+    }
 }
 
 /* ------------------------------------------------------------------ */

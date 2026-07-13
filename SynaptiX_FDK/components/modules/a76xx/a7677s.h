@@ -334,6 +334,17 @@ struct a7677s
     int     rssi;
     uint32_t rssi_poll_elapsed;
     uint8_t  rssi_cmd_pending;
+    /* Consecutive AT+CSQ failures (no/failed response, i.e. res !=
+     * MODEM_RESPONSE_SUCCESS — NOT a successful response that merely failed
+     * to parse, which is a format-mismatch bug, not a sign the modem is
+     * unresponsive). The periodic CSQ poll above is the only AT traffic
+     * guaranteed to keep running continuously while ready, even during long
+     * idle stretches with no MQTT activity — so it doubles as a runtime
+     * "is the modem still alive" heartbeat. After A7677S_MAX_RETRY
+     * consecutive failures, cb_csq() fires error_cb so a caller layer (e.g.
+     * sx_mqtt.c) can decide to recover, same as any other AT-layer failure
+     * in this driver. Reset to 0 on any successful CSQ. */
+    uint8_t  csq_fail_count;
 
     /* APN/auth, set once via a7677s_set_full_apn() before ops->start(ctx) is
      * called (mirrors the existing sim76xx_set_full_apn() pattern used by

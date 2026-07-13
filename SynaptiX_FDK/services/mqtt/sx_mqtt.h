@@ -139,6 +139,7 @@ int sx_mqtt_disconnect(sx_mqtt_t *mqtt);
 int sx_mqtt_publish(sx_mqtt_t *mqtt, const char *topic, const char *message, uint8_t qos, uint8_t retain);
 int sx_mqtt_subscribe(sx_mqtt_t *mqtt, const char *topic, uint8_t qos);
 void sx_mqtt_poll(sx_mqtt_t *mqtt, uint32_t ts);
+void sx_mqtt_report_failure(sx_mqtt_t *mqtt);
 
 #ifdef __cplusplus
 }

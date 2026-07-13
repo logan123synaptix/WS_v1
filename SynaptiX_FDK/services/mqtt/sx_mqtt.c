@@ -140,18 +140,19 @@ static void on_connlost(void *ctx)
  * Internal helpers
  */
 
-static void do_error(sx_mqtt_t *mqtt)
+/* Shared escalation ladder: reconnect_count -> (PWRKEY power-cycle) ->
+ * restart_cycle_count -> (hard_reset via RST pin). Used both by do_error()
+ * (an actual connect/operation failure reported by the driver) and by
+ * sx_mqtt_report_failure() (repeated publish failures reported by
+ * the app layer, sx_user_mqtt.c) — see that function's doc-comment for why
+ * publish failures must feed into this same counter instead of running an
+ * independent recovery path of their own. */
+static void escalate_recovery(sx_mqtt_t *mqtt)
 {
-    mqtt->state = SX_MQTT_STATE_ERROR;
     mqtt->reconnect_count++;
-    mqtt->reconnect_delay = SX_MQTT_RECONNECT_DELAY_BASE;
-    if (mqtt->reconnect_delay > SX_MQTT_RECONNECT_DELAY_MAX)
-        mqtt->reconnect_delay = SX_MQTT_RECONNECT_DELAY_MAX;
-    mqtt->reconnect_elapsed = 0;
 
     if (mqtt->reconnect_count >= SX_MQTT_MAX_RETRY_BEFORE_RESTART) {
         mqtt->reconnect_count = 0;
-        mqtt->state = SX_MQTT_STATE_DISCONNECTED;
         mqtt->restart_cycle_count++;
 
         if (mqtt->restart_cycle_count >= SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET) {
@@ -172,6 +173,17 @@ static void do_error(sx_mqtt_t *mqtt)
             mqtt->modem->ops->start(mqtt->modem->ctx);
         }
     }
+}
+
+static void do_error(sx_mqtt_t *mqtt)
+{
+    mqtt->state = SX_MQTT_STATE_ERROR;
+    mqtt->reconnect_delay = SX_MQTT_RECONNECT_DELAY_BASE;
+    if (mqtt->reconnect_delay > SX_MQTT_RECONNECT_DELAY_MAX)
+        mqtt->reconnect_delay = SX_MQTT_RECONNECT_DELAY_MAX;
+    mqtt->reconnect_elapsed = 0;
+
+    escalate_recovery(mqtt);
 
     log_warn(TAG, "Error — reconnect after: %lu ms (retry #%d)",
              (unsigned long)mqtt->reconnect_delay, mqtt->reconnect_count);
@@ -194,6 +206,30 @@ void sx_mqtt_init(sx_mqtt_t *mqtt, modem_handle_t *modem)
     modem->ops->mqtt_set_callbacks(modem->ctx, on_incoming, on_connlost, mqtt);
 
     log_info(TAG, "init OK");
+}
+
+/* Lets other layers report a failure into this file's shared recovery
+ * ladder (see escalate_recovery()) instead of running their own independent
+ * power-cycle/start() decision. Two current callers:
+ *   - sx_user_mqtt.c's _on_publish(), after MQTT_PUBLISH_MAX_RETRY
+ *     consecutive publish failures.
+ *   - sx_user_mqtt.c's _on_modem_error() (modem_ops_t.set_on_error callback),
+ *     fired by the driver itself for: (a) the init-attach sequence never
+ *     reaching ready in the first place (see a7677s.c's restart_init() gap
+ *     fix), or (b) the periodic AT+CSQ heartbeat failing
+ *     A7677S_MAX_RETRY times in a row while runtime-idle (see a7677s.c's
+ *     csq_fail_count) — both are the driver's own signal that something is
+ *     wrong, previously only logged and never coordinated with any recovery
+ *     action.
+ * Deliberately does NOT set mqtt->state or fire on_disconnected: none of
+ * these failure reports by themselves prove the MQTT connection is down
+ * (state is driven by the real connect/disconnect/connlost paths elsewhere
+ * in this file) — this call only means "count this toward the shared
+ * recovery ladder." */
+void sx_mqtt_report_failure(sx_mqtt_t *mqtt)
+{
+    log_warn(TAG, "Failure reported — feeding into recovery ladder");
+    escalate_recovery(mqtt);
 }
 
 void sx_mqtt_set_config(sx_mqtt_t *mqtt, const sx_mqtt_config_t *config)

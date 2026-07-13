@@ -311,7 +311,15 @@ void sx_mqtt_poll(sx_mqtt_t *mqtt, uint32_t ts)
         mqtt->reconnect_elapsed += ts;
         if (mqtt->reconnect_elapsed >= mqtt->reconnect_delay) {
             mqtt->reconnect_elapsed = 0;
-            mqtt->reconnect_count++;
+            /* Do NOT increment reconnect_count here — it is already
+             * incremented exactly once per real failure inside
+             * escalate_recovery() (called from do_error() /
+             * sx_mqtt_report_failure()). Incrementing it again here double-
+             * counts every failure cycle, causing
+             * SX_MQTT_MAX_RETRY_BEFORE_RESTART and, worse,
+             * SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET (physical RST pin) to
+             * be reached at roughly half the intended number of real
+             * failures. */
             log_info(TAG, "Reconnecting... (retry #%d)", mqtt->reconnect_count);
             sx_mqtt_connect(mqtt);
         }

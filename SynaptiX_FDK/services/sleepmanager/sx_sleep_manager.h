@@ -8,7 +8,7 @@ extern "C" {
 #include <stdint.h>
 #include "rtc.h"
 #include "sx_sleep.h"
-#include "sim76xx.h"
+#include "modem_ops.h"
 #include "gps.h"
 #include "sx_W25Q128.h"
 
@@ -22,7 +22,7 @@ typedef enum {
 } sx_wake_step_t;
 
 typedef struct {
-    sim76xx_t     *sim;
+    modem_handle_t *modem;
     sx_gps_t      *gps;
     /*  add another */
     sx_W25Q128_t *ex_flash;
@@ -45,11 +45,12 @@ typedef struct {
     uint8_t        published;          
     uint32_t       sleep_ms;        
     uint32_t       wake_timeout_ms;
+    uint8_t        sim_start_sent;   /* see SX_WAKE_STEP_SIM_WAKE in .c */
 } sx_sleep_manager_t;
 
 void sx_sleep_manager_init (sx_sleep_manager_t *mgr,
                             sx_sleep_t         *sleep,
-                            sim76xx_t          *sim,
+                            modem_handle_t     *modem,
                             sx_gps_t           *gps);
 
 void sx_sleep_manager_enter(sx_sleep_manager_t *mgr);

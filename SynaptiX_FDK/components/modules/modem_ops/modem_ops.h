@@ -114,6 +114,19 @@ typedef struct {
      * pin was actually pulsed. */
     void (*hard_reset)(void *ctx);
 
+    /* Clears stale low-level UART/RX-buffer state (busy flag, receive
+     * buffer index/contents) without touching power state, init state, or
+     * any higher-level session/connection state. Needed specifically
+     * because power-cycling (power_off_start()/power_on_start()/hard_reset())
+     * does NOT by itself clear this state — only the driver's one-time
+     * boot-time init function does, which callers outside the driver cannot
+     * invoke again mid-runtime. Intended for callers such as a sleep/wake
+     * manager that power-cycle the modem across a sleep period and need to
+     * guarantee no stale byte count or half-received command survives into
+     * the post-wake AT sequence, before calling start() again. Safe to call
+     * at any time; does not send any AT command and completes synchronously. */
+    void (*comm_reset)(void *ctx);
+
     /* --- Modem initialization after power is up --- */
 
     /* Runs the AT init sequence (network attach, APN, etc). Returns 0 if the

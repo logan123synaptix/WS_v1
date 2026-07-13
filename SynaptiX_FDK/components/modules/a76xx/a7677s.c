@@ -302,6 +302,20 @@ static void a7677s_hard_reset(void *ctx)
     sx_gpio_write(&dce->resetPin, SX_GPIO_HIGH);
 }
 
+/* Clears stale UART/RX-buffer state only — see modem_ops.h's doc-comment on
+ * comm_reset for why this is needed separately from power-cycling. Does NOT
+ * touch power_state/init_state/mqtt_state: those are sequenced by their own
+ * state machines (power_on_start()/start()/etc) and callers are expected to
+ * drive those separately, same as before this existed. */
+static void a7677s_comm_reset(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+
+    pModem(dce)->isBusy  = 0;
+    pModem(dce)->buff_id = 0;
+    memset(pModem(dce)->buff, 0, MODEM_RX_BUFFER_SIZE);
+}
+
 static bool a7677s_power_is_busy(void *ctx)
 {
     a7677s_t *dce = (a7677s_t *)ctx;
@@ -2194,6 +2208,7 @@ const modem_ops_t a7677s_ops = {
     .power_off_start  = a7677s_power_off_start,
     .power_is_busy    = a7677s_power_is_busy,
     .hard_reset       = a7677s_hard_reset,
+    .comm_reset       = a7677s_comm_reset,
 
     .start            = a7677s_start,
     .is_ready         = a7677s_is_ready,

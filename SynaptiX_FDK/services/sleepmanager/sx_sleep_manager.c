@@ -8,11 +8,11 @@ static const char *TAG = "SX_SLEEP_MGR";
 
 void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                            sx_sleep_t         *sleep,
-                           sim76xx_t          *sim,
+                           modem_handle_t     *modem,
                            sx_gps_t           *gps)
 {
     mgr->sleep              = sleep;
-    mgr->module.sim         = sim;
+    mgr->module.modem       = modem;
     mgr->module.gps         = gps;
     mgr->wake_step          = SX_WAKE_STEP_IDLE;
     mgr->published          = 0;
@@ -21,6 +21,7 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
     mgr->elapsed.sim_elapsed_ms  = 0;
     mgr->sleep_ms        = 0;   
     mgr->wake_timeout_ms = 0;
+    mgr->sim_start_sent  = 0;
 
     log_info(TAG, "init OK — waiting for config values");
 }
@@ -37,7 +38,7 @@ void sx_sleep_manager_enter(sx_sleep_manager_t *mgr)
     sx_delay_ms(100);
     mgr->module.gps->latitude   = 0.0f;
     mgr->module.gps->longtitude = 0.0f;
-    sim76xx_power_off(mgr->module.sim);
+    mgr->module.modem->ops->power_off_start(mgr->module.modem->ctx);
     sx_delay_ms(500);
 
     log_info(TAG, "Setting RTC wakeup = %lu sec", sleep_sec);  
@@ -91,28 +92,42 @@ void sx_sleep_manager_wake_process(sx_sleep_manager_t *mgr, uint32_t delta_ms)
 
         sx_board_uart_resume_it();
 
-        mgr->module.sim->base.isBusy  = 0;
-        mgr->module.sim->base.buff_id = 0;
-        memset(mgr->module.sim->base.buff, 0, MODEM_RX_BUFFER_SIZE);
-        mgr->module.sim->state = SIM76XX_STATE_IDLE;
-
-        sim76xx_power_on(mgr->module.sim);
-        sim76xx_start(mgr->module.sim);
+        mgr->module.modem->ops->comm_reset(mgr->module.modem->ctx);
+        mgr->module.modem->ops->power_on_start(mgr->module.modem->ctx);
 
         mgr->elapsed.sim_elapsed_ms = 0;
+        mgr->sim_start_sent         = 0;
         mgr->wake_step = SX_WAKE_STEP_SIM_WAKE;
         break;
 
     case SX_WAKE_STEP_SIM_WAKE:
         mgr->elapsed.sim_elapsed_ms += delta_ms;
-        if (sim76xx_is_ready(mgr->module.sim)) {
+
+        /* power_on_start() (called on entry to this step) is asynchronous —
+         * its PWRKEY pulse + boot-probe sequence completes later, tracked
+         * via power_is_busy(). start() must not be called until that
+         * finishes (power_state == READY), same requirement as
+         * sx_board_init()'s power-on sequencing. Send it exactly once, as
+         * soon as power is no longer busy. */
+        if (!mgr->sim_start_sent &&
+            !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
+            mgr->module.modem->ops->start(mgr->module.modem->ctx);
+            mgr->sim_start_sent = 1;
+        }
+
+        if (mgr->module.modem->ops->is_ready(mgr->module.modem->ctx)) {
             log_info(TAG, "SIM ready after wake");
             mgr->wake_step = SX_WAKE_STEP_DONE;
         } else if (mgr->elapsed.sim_elapsed_ms >= 90000U) {
-            log_warn(TAG, "SIM timeout — reset");
+            log_warn(TAG, "SIM timeout — hard reset (RST pin)");
             mgr->elapsed.sim_elapsed_ms = 0;
-            sim76xx_reset(mgr->module.sim);
-            sim76xx_start(mgr->module.sim);
+            mgr->sim_start_sent         = 0;
+            mgr->module.modem->ops->hard_reset(mgr->module.modem->ctx);
+            /* hard_reset() re-enters the same async power sequence as
+             * power_on_start() (see a7677s.c's A7677S_PWR_RST_PULSE ->
+             * A7677S_PWR_WAIT_BOOT handoff) — the power_is_busy() check
+             * above will naturally wait for it and re-send start() once,
+             * same as after the initial power_on_start(). */
         }
         break;
 
@@ -150,4 +165,5 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr)
     mgr->elapsed.wake_elapsed_ms     = 0;
     mgr->elapsed.gps_elapsed_ms      = 0;
     mgr->elapsed.sim_elapsed_ms      = 0;
+    mgr->sim_start_sent              = 0;
 }

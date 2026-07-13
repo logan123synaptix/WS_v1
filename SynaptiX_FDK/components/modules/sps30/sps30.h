@@ -33,10 +33,10 @@ typedef enum{
 
 typedef struct{
     sx_uart_t *uart;
-    
+
 }sps30_handle_t;
 
-SPS30_ERR_T sps30_init(void);
+SPS30_ERR_T sps30_init(sps30_handle_t sps30_handle);
 
 #ifdef __cplusplus
 }

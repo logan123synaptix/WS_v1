@@ -118,7 +118,17 @@ void gas_sensor_poll(uint32_t time_stamp_ms)
 {
     /* Non-blocking byte assembly: pull whatever bytes are already queued
      * this tick, same approach as gps_process(). Never wait here - if
-     * fewer than 9 bytes are available, just resume next tick. */
+     * fewer than 9 bytes are available, just resume next tick.
+     *
+     * advance_channel mirrors the reference driver's `res == 0` condition:
+     * gas_sensor_process() in WS_v0 returns 0 (success) only once a full
+     * 9-byte frame has been collected AND its checksum is valid AND its
+     * gas code matched a known sensor type. Any other outcome (no frame
+     * yet, bad checksum, unknown gas code) leaves res == -1 and the mux
+     * stays on the current channel until the 2s ceiling is hit. We mirror
+     * that here: only a fully valid, matched frame triggers an early
+     * channel switch; a checksum failure or unknown code does not. */
+    bool advance_channel = false;
     uint8_t byte;
     while (sx_uart_available(&s_comm) > 0) {
         if (1 != sx_uart_read(&s_comm, &byte, 1, 0)) {
@@ -138,7 +148,9 @@ void gas_sensor_poll(uint32_t time_stamp_ms)
         case GAS_SENSOR_RX_COLLECTING:
             s_rx_buf[s_rx_count++] = byte;
             if (s_rx_count >= sizeof(s_rx_buf)) {
-                ze12a_handle_frame(s_rx_buf);
+                if (ze12a_handle_frame(s_rx_buf)) {
+                    advance_channel = true;
+                }
                 s_rx_state = GAS_SENSOR_RX_WAIT_START;
                 s_rx_count = 0;
             }
@@ -151,11 +163,13 @@ void gas_sensor_poll(uint32_t time_stamp_ms)
         }
     }
 
-    /* Round-robin the mux to the next channel once we've given the
-     * current one enough time to have sent at least one frame (ZE12A's
-     * default active-upload interval is ~1s). */
+    /* Round-robin the mux to the next channel either as soon as we've
+     * successfully read one valid frame from the current channel (fast
+     * path, matches WS_v0's res==0 early-advance), or once the 2s dwell
+     * ceiling is reached regardless of success (ensures we never get
+     * stuck on a silent/disconnected channel). */
     s_channel_dwell_ms += time_stamp_ms;
-    if (s_channel_dwell_ms >= GAS_SENSOR_CHANNEL_DWELL_MS) {
+    if (advance_channel || s_channel_dwell_ms >= GAS_SENSOR_CHANNEL_DWELL_MS) {
         s_channel_dwell_ms = 0;
         s_mux_channel = (uint8_t)((s_mux_channel + 1U) % GAS_SENSOR_MUX_CHANNEL_COUNT);
         ze12a_select_mux_channel(s_mux_channel);

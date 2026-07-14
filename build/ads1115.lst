@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
   26:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     i2c->pDriver = pDriver;
   27:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
   28:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 2
 
 
   29:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline int sx_i2c_write(sx_i2c_t *i2c, uint16_t dev_addr, const uint8_t *data, uint32_t len)
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
   68              		@ sp needed
   69 0018 30BD     		pop	{r4, r5, pc}
   70              	.LVL2:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 3
 
 
   71              	.L3:
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  120 000a 4CB1     		cbz	r4, .L9
   49:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****         return i2c->ops->mem_read(i2c, dev_addr, mem_addr, mem_addr_size, data, len);
  121              		.loc 2 49 9 is_stmt 1 view .LVU21
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 4
 
 
  122              		.loc 2 49 16 is_stmt 0 view .LVU22
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  170 0000 10B5     		push	{r4, lr}
  171              	.LCFI8:
  172              		.cfi_def_cfa_offset 8
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 5
 
 
  173              		.cfi_offset 4, -8
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
    5:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****  * TI datasheet's Full-Scale-Range / 32768 table. Same values and mapping
    6:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****  * as the reference WS_v0 driver. */
    7:SynaptiX_FDK/components/modules/ads1115/ads1115.c **** static float ads1115_volt_coef_for_pga(uint16_t pga)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 6
 
 
    8:SynaptiX_FDK/components/modules/ads1115/ads1115.c **** {
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  263              		.loc 1 15 40 is_stmt 0 view .LVU51
  264 0030 9FED070A 		vldr.32	s0, .L26+12
  265 0034 7047     		bx	lr
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 7
 
 
  266              	.L17:
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  313              		.loc 1 22 25 discriminator 2 view .LVU60
  314 0008 99B1     		cbz	r1, .L31
   23:SynaptiX_FDK/components/modules/ads1115/ads1115.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 8
 
 
   24:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****     ads1115->i2c = i2c;
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  359              		.loc 1 32 1 view .LVU76
  360 0030 7047     		bx	lr
  361              	.LVL25:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 9
 
 
  362              	.L31:
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
   37:SynaptiX_FDK/components/modules/ads1115/ads1115.c **** 
   38:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****     uint8_t config[2];
  411              		.loc 1 38 5 is_stmt 1 view .LVU84
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 10
 
 
   39:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****     config[0] = ADS1115_OS | muxPort | ads1115->pga | ADS1115_MODE;
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
   54:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****             return ADS1115_ERR;
   55:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****         }
   56:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****         if (status[0] & ADS1115_OS) {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 11
 
 
   57:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****             break;
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  486              		.loc 1 59 12 view .LVU111
  487 006a 632C     		cmp	r4, #99
  488 006c E9D9     		bls	.L50
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 12
 
 
   60:SynaptiX_FDK/components/modules/ads1115/ads1115.c ****         }
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  531              		.loc 1 73 12 is_stmt 0 view .LVU128
  532 00aa 02E0     		b	.L37
  533              	.LVL40:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 13
 
 
  534              	.L40:
@@ -778,34 +778,34 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 1
  582              	.LFE12:
  584              		.text
  585              	.Letext0:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 14
 
 
  586              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  587              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  588              		.file 5 "SynaptiX_FDK/components/modules/ads1115/ads1115.h"
  589              		.file 6 "SynaptiX_FDK/utils/delay/sx_delay.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc323ppB.s 			page 15
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 ads1115.c
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:22     .text.sx_i2c_mem_write:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:27     .text.sx_i2c_mem_write:00000000 sx_i2c_mem_write
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:90     .text.sx_i2c_mem_read:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:95     .text.sx_i2c_mem_read:00000000 sx_i2c_mem_read
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:157    .text.sx_i2c_is_device_ready:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:162    .text.sx_i2c_is_device_ready:00000000 sx_i2c_is_device_ready
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:209    .text.ads1115_volt_coef_for_pga:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:214    .text.ads1115_volt_coef_for_pga:00000000 ads1115_volt_coef_for_pga
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:227    .text.ads1115_volt_coef_for_pga:00000008 $d
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:279    .text.ads1115_volt_coef_for_pga:00000044 $d
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:287    .text.ADS1115_Init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:293    .text.ADS1115_Init:00000000 ADS1115_Init
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:378    .text.ADS1115_readSingleEnded:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:384    .text.ADS1115_readSingleEnded:00000000 ADS1115_readSingleEnded
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:242    .text.ads1115_volt_coef_for_pga:00000017 $d
-C:\Users\DELL\AppData\Local\Temp\cc0cR0pX.s:242    .text.ads1115_volt_coef_for_pga:00000018 $t
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:22     .text.sx_i2c_mem_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:27     .text.sx_i2c_mem_write:00000000 sx_i2c_mem_write
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:90     .text.sx_i2c_mem_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:95     .text.sx_i2c_mem_read:00000000 sx_i2c_mem_read
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:157    .text.sx_i2c_is_device_ready:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:162    .text.sx_i2c_is_device_ready:00000000 sx_i2c_is_device_ready
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:209    .text.ads1115_volt_coef_for_pga:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:214    .text.ads1115_volt_coef_for_pga:00000000 ads1115_volt_coef_for_pga
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:227    .text.ads1115_volt_coef_for_pga:00000008 $d
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:279    .text.ads1115_volt_coef_for_pga:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:287    .text.ADS1115_Init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:293    .text.ADS1115_Init:00000000 ADS1115_Init
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:378    .text.ADS1115_readSingleEnded:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:384    .text.ADS1115_readSingleEnded:00000000 ADS1115_readSingleEnded
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:242    .text.ads1115_volt_coef_for_pga:00000017 $d
+C:\Users\DELL\AppData\Local\Temp\cc323ppB.s:242    .text.ads1115_volt_coef_for_pga:00000018 $t
 
 UNDEFINED SYMBOLS
 sx_delay_ms

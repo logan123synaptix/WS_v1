@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
   27:SynaptiX_FDK/services/logger/logger.c **** static void serial_write_func(const char *s)
   28:SynaptiX_FDK/services/logger/logger.c **** {
   30              		.loc 1 28 1 view -0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 2
 
 
   31              		.cfi_startproc
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
   49:SynaptiX_FDK/services/logger/logger.c ****     "\x1B[31m",
   50:SynaptiX_FDK/services/logger/logger.c ****     "\x1B[33m",
   51:SynaptiX_FDK/services/logger/logger.c ****     "\x1B[32m",
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 3
 
 
   52:SynaptiX_FDK/services/logger/logger.c ****     "\x1B[34m", 
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
   77:SynaptiX_FDK/services/logger/logger.c ****     xSemaphoreTake(logger_mutex, portMAX_DELAY);
   78:SynaptiX_FDK/services/logger/logger.c **** #endif
   79:SynaptiX_FDK/services/logger/logger.c ****     char *format = buff;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 4
 
 
   80:SynaptiX_FDK/services/logger/logger.c ****     sprintf(format, "%s%s%s : ", colors[level], log_level_strings[level], TAG);
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  122 0020 0091     		str	r1, [sp]
  123 0022 154B     		ldr	r3, .L8+12
  124 0024 53F82030 		ldr	r3, [r3, r0, lsl #2]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 5
 
 
  125 0028 1449     		ldr	r1, .L8+16
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  166              		.loc 1 92 22 is_stmt 0 view .LVU24
  167 005e 094B     		ldr	r3, .L8+24
  168 0060 1B68     		ldr	r3, [r3]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 6
 
 
   92:SynaptiX_FDK/services/logger/logger.c ****     {
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  220              	.LC2:
  221 0000 25303258 		.ascii	"%02X \000"
  221      2000
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 7
 
 
  222              		.section	.text.log_print_hex,"ax",%progbits
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  124:SynaptiX_FDK/services/logger/logger.c ****     }
  125:SynaptiX_FDK/services/logger/logger.c ****     strcat(format, "\r\n");
  126:SynaptiX_FDK/services/logger/logger.c ****     if (serial_write == NULL)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 8
 
 
  127:SynaptiX_FDK/services/logger/logger.c ****     {
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  119:SynaptiX_FDK/services/logger/logger.c ****     for (uint16_t i = 0; i < length; i++)
  302              		.loc 1 119 5 view .LVU46
  119:SynaptiX_FDK/services/logger/logger.c ****     for (uint16_t i = 0; i < length; i++)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 9
 
 
  303              		.loc 1 119 12 is_stmt 0 view .LVU47
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  346 0070 0B4B     		ldr	r3, .L20+24
  347 0072 1988     		ldrh	r1, [r3]	@ unaligned
  348 0074 9B78     		ldrb	r3, [r3, #2]	@ zero_extendqisi2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 10
 
 
  349 0076 2152     		strh	r1, [r4, r0]	@ unaligned
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  386      20202020 
  386      20202020 
  386      20202020 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 11
 
 
  386      20202020 
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  397      2020202A 
  397      23232020 
  398 02e0 20202020 		.ascii	"                          ,,,,,,*   (###(\015\012  "
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 12
 
 
  398      20202020 
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  428 0002 0A4B     		ldr	r3, .L24
  429 0004 1860     		str	r0, [r3]
  139:SynaptiX_FDK/services/logger/logger.c ****     serial_write = p_func;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 13
 
 
  430              		.loc 1 139 5 is_stmt 1 view .LVU67
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  481 0000 00000000 		.space	4096
  481      00000000 
  481      00000000 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 14
 
 
  481      00000000 
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  525              		.section	.rodata.log_level_strings,"a"
  526              		.align	2
  529              	log_level_strings:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 15
 
 
  530 0000 28000000 		.word	.LC10
@@ -864,39 +864,39 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 1
  554              		.file 7 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  555              		.file 8 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  556              		.file 9 "<built-in>"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s 			page 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc52wcey.s 			page 16
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 logger.c
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:22     .text.serial_write_func:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:27     .text.serial_write_func:00000000 serial_write_func
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:49     .rodata.log_func.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:56     .text.log_func:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:62     .text.log_func:00000000 log_func
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:180    .text.log_func:0000006c $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:545    .data.LOG_LEVEL:00000000 LOG_LEVEL
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:503    .data.colors:00000000 colors
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:480    .bss.buff:00000000 buff
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:529    .rodata.log_level_strings:00000000 log_level_strings
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:539    .data.serial_write:00000000 serial_write
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:191    .text.logger_set_level:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:197    .text.logger_set_level:00000000 logger_set_level
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:214    .text.logger_set_level:00000008 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:219    .rodata.log_print_hex.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:223    .text.log_print_hex:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:229    .text.log_print_hex:00000000 log_print_hex
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:366    .text.log_print_hex:00000088 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:378    .rodata.logger_init.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:405    .text.logger_init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:411    .text.logger_init:00000000 logger_init
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:467    .text.logger_init:0000002c $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:477    .bss.buff:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:484    .rodata.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:500    .data.colors:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:526    .rodata.log_level_strings:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:536    .data.serial_write:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cchFSqpD.s:542    .data.LOG_LEVEL:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:22     .text.serial_write_func:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:27     .text.serial_write_func:00000000 serial_write_func
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:49     .rodata.log_func.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:56     .text.log_func:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:62     .text.log_func:00000000 log_func
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:180    .text.log_func:0000006c $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:545    .data.LOG_LEVEL:00000000 LOG_LEVEL
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:503    .data.colors:00000000 colors
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:480    .bss.buff:00000000 buff
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:529    .rodata.log_level_strings:00000000 log_level_strings
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:539    .data.serial_write:00000000 serial_write
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:191    .text.logger_set_level:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:197    .text.logger_set_level:00000000 logger_set_level
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:214    .text.logger_set_level:00000008 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:219    .rodata.log_print_hex.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:223    .text.log_print_hex:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:229    .text.log_print_hex:00000000 log_print_hex
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:366    .text.log_print_hex:00000088 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:378    .rodata.logger_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:405    .text.logger_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:411    .text.logger_init:00000000 logger_init
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:467    .text.logger_init:0000002c $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:477    .bss.buff:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:484    .rodata.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:500    .data.colors:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:526    .rodata.log_level_strings:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:536    .data.serial_write:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc52wcey.s:542    .data.LOG_LEVEL:00000000 $d
 
 UNDEFINED SYMBOLS
 printf

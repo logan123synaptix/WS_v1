@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
   15:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     layer before escalating one level up) but is a service-layer constant of
   16:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     its own, since this layer must not include any driver header (a7677s.h)
   17:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     to get it — see modem_ops_t's design note on the service layer only
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 2
 
 
   18:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     ever knowing modem_ops.h. */
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
   72:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** }
   73:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** 
   74:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** static void cb_disconnect_done(modem_ops_result_t result, void *ctx)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 3
 
 
   75:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** {
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  129:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** {
   37              		.loc 1 129 1 view -0
   38              		.cfi_startproc
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 4
 
 
   39              		@ args = 0, pretend = 0, frame = 0
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
   85 0024 00000000 		.word	s_instance
   86 0028 00000000 		.word	.LC0
   87 002c 18000000 		.word	.LC1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 5
 
 
   88              		.cfi_endproc
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  130              		.loc 1 122 8 is_stmt 0 view .LVU26
  131 0008 76B1     		cbz	r6, .L6
  132 000a 0446     		mov	r4, r0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 6
 
 
  133 000c 1546     		mov	r5, r2
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  178              		.align	2
  179              	.LC3:
  180 0000 5057524B 		.ascii	"PWRKEY power-cycle recovery failed %u times in a ro"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 7
 
 
  180      45592070 
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  202              		.loc 1 152 9 is_stmt 0 view .LVU39
  203 0000 90F83830 		ldrb	r3, [r0, #56]	@ zero_extendqisi2
  204              		.loc 1 152 26 view .LVU40
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 8
 
 
  205 0004 0133     		adds	r3, r3, #1
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  248 0038 84F83930 		strb	r3, [r4, #57]
  163:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****             mqtt->modem->ops->hard_reset(mqtt->modem->ctx);
  249              		.loc 1 163 13 is_stmt 1 view .LVU55
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 9
 
 
  250              		.loc 1 163 17 is_stmt 0 view .LVU56
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  286 005a 1A68     		ldr	r2, [r3]
  171:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****             mqtt->modem->ops->power_on_start(mqtt->modem->ctx);
  287              		.loc 1 171 29 view .LVU66
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 10
 
 
  288 005c 5268     		ldr	r2, [r2, #4]
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  331              		.cfi_endproc
  332              	.LFE18:
  334              		.section	.rodata.do_error.str1.4,"aMS",%progbits,1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 11
 
 
  335              		.align	2
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  376 0016 FFF7FEFF 		bl	escalate_recovery
  377              	.LVL27:
  187:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 12
 
 
  188:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     log_warn(TAG, "Error — reconnect after: %lu ms (retry #%d)",
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  422              		.syntax unified
  423              		.thumb
  424              		.thumb_func
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 13
 
 
  426              	cb_connect_done:
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  465              		.loc 1 71 5 is_stmt 1 view .LVU111
   71:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** }
  466              		.loc 1 71 13 is_stmt 0 view .LVU112
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 14
 
 
  467 001a E36B     		ldr	r3, [r4, #60]
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  510 002a 63696E67 		.ascii	"cing disconnect\000"
  510      20646973 
  510      636F6E6E 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 15
 
 
  510      65637400 
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  551 0010 FFF7FEFF 		bl	log_func
  552              	.LVL45:
   84:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     if (mqtt->on_disconnected) mqtt->on_disconnected(mqtt);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 16
 
 
  553              		.loc 1 84 5 view .LVU131
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  597 000b 00       		.align	2
  598              	.LC11:
  599 000c 5075626C 		.ascii	"Publish failed (result=%d)\000"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 17
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 17
 
 
  599      69736820 
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
   95:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     else    log_error(TAG, "Publish failed (result=%d)", result);
  640              		.loc 1 95 13 is_stmt 1 discriminator 1 view .LVU152
  641 0012 0A4A     		ldr	r2, .L44+4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 18
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 18
 
 
  642 0014 0A49     		ldr	r1, .L44+8
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  686              	.LFE14:
  688              		.section	.rodata.cb_subscribe_done.str1.4,"aMS",%progbits,1
  689              		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 19
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 19
 
 
  690              	.LC12:
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  729              		.loc 1 108 1 view .LVU171
  730 000e 08BD     		pop	{r3, pc}
  731              	.LVL66:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 20
 
 
  732              	.L47:
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  775 0000 70B5     		push	{r4, r5, r6, lr}
  776              	.LCFI16:
  777              		.cfi_def_cfa_offset 16
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 21
 
 
  778              		.cfi_offset 4, -16
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  821              		.loc 1 209 1 view .LVU192
  822 002e 00BF     		.align	2
  823              	.L54:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 22
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 22
 
 
  824 0030 00000000 		.word	s_instance
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  854              		.cfi_def_cfa_offset 8
  855              		.cfi_offset 4, -8
  856              		.cfi_offset 14, -4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 23
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 23
 
 
  857 0002 0446     		mov	r4, r0
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  903              		.cfi_def_cfa_offset 8
  904              		.cfi_offset 4, -8
  905              		.cfi_offset 14, -4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 24
 
 
  906 0002 82B0     		sub	sp, sp, #8
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  956      6563743A 
  956      206D6F64 
  956      656D206E 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 25
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 25
 
 
  956      6F742072 
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
    5:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** #endif
    6:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** 
    7:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** #include <stdint.h>
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 26
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 26
 
 
    8:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** #include <stdbool.h>
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
   62:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** /* Callback used for enter_low_power / exit_low_power, since these are also
   63:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****  * asynchronous operations (waiting for the AT+CFUN=0/1 response via
   64:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****  * poll()). */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 27
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 27
 
 
   65:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** typedef void (*power_mode_cb_t)(modem_ops_result_t result, void *ctx);
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  119:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      * any higher-level session/connection state. Needed specifically
  120:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      * because power-cycling (power_off_start()/power_on_start()/hard_reset())
  121:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      * does NOT by itself clear this state — only the driver's one-time
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 28
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 28
 
 
  122:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      * boot-time init function does, which callers outside the driver cannot
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  176:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      *   1 = TLS (broker URI built as "ssl://host:port"); the driver runs the
  177:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      *   AT+CSSLCFG/AT+CCERTDOWN sequence before AT+CMQTTCONNECT.
  178:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      * ca_cert/client_cert/client_key: only consulted when use_ssl is 1.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 29
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 29
 
 
  179:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      *   PEM text (NUL-terminated), or NULL/"" if not used:
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  233:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****      * for the lifetime of ctx. */
  234:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****     const char *(*get_ip)(void *ctx);
  235:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 30
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 30
 
 
  236:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h ****     /* --- Mandatory poll, called continuously from the main loop --- */
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1021 001c 2BD1     		bne	.L70
  1022              	.L67:
  249:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****         mqtt->state != SX_MQTT_STATE_ERROR)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 31
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 31
 
 
  250:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     {
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1062 005a 2389     		ldrh	r3, [r4, #8]
  1063 005c 6268     		ldr	r2, [r4, #4]
  1064 005e E168     		ldr	r1, [r4, #12]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 32
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 32
 
 
  1065 0060 A847     		blx	r5
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1107 0098 1C000000 		.word	.LC18
  1108              		.cfi_endproc
  1109              	.LFE23:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 33
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 33
 
 
  1111              		.section	.rodata.sx_mqtt_disconnect.str1.4,"aMS",%progbits,1
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
   19:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
   20:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** /* NOTE: driver-level states (CMQTTSTART, cert upload, CSSLCFG, ACCQ,
   21:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * CMQTTCFG version, CMQTTCONNECT...) all now live inside the concrete modem
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 34
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 34
 
 
   22:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * driver's own state machine (e.g. a7677s_mqtt_state_t in a7677s.c), reached
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
   76:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     modem_handle_t *modem;
   77:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_config_t config;
   78:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_state_t state;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 35
 
 
   79:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1159              		.loc 1 278 23 view .LVU255
  1160 0012 1A68     		ldr	r2, [r3]
  1161              		.loc 1 278 28 view .LVU256
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 36
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 36
 
 
  1162 0014 126B     		ldr	r2, [r2, #48]
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1209              	.LFB25:
  280:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** 
  281:SynaptiX_FDK/services/mqtt/sx_mqtt.c **** int sx_mqtt_publish(sx_mqtt_t *mqtt, const char *topic, const char *message,
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 37
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 37
 
 
  282:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****                      uint8_t qos, uint8_t retain)
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1255 001a 0B4D     		ldr	r5, .L87
  1256 001c 0195     		str	r5, [sp, #4]
  1257 001e 9DF81850 		ldrb	r5, [sp, #24]	@ zero_extendqisi2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 38
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 38
 
 
  1258 0022 0095     		str	r5, [sp]
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  288:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     return mqtt->modem->ops->mqtt_publish(mqtt->modem->ctx, topic, message,
  1301              		.loc 1 288 36 discriminator 3 view .LVU290
  1302 0044 EFE7     		b	.L80
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 39
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 39
 
 
  1303              	.L88:
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1350 0006 022B     		cmp	r3, #2
  1351 0008 07D1     		bne	.L94
  296:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****         log_warn(TAG, "subscribe: not connected");
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 40
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 40
 
 
  297:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****         return -1;
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1393              	.LVL129:
  299:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     return mqtt->modem->ops->mqtt_subscribe(mqtt->modem->ctx, topic, qos,
  1394              		.loc 1 299 24 discriminator 1 view .LVU314
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 41
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 41
 
 
  1395 002e F3E7     		b	.L89
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  255:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** }
  1441              		.loc 2 255 6 is_stmt 0 view .LVU320
  1442 0008 1A68     		ldr	r2, [r3]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 42
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 42
 
 
  255:SynaptiX_FDK/components/modules/modem_ops/modem_ops.h **** }
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  310:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****     {
  311:SynaptiX_FDK/services/mqtt/sx_mqtt.c ****         mqtt->reconnect_elapsed += ts;
  1488              		.loc 1 311 9 is_stmt 1 view .LVU339
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 43
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 43
 
 
  1489              		.loc 1 311 13 is_stmt 0 view .LVU340
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1518 0048 0949     		ldr	r1, .L104+4
  1519 004a 0320     		movs	r0, #3
  1520 004c FFF7FEFF 		bl	log_func
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 44
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 44
 
 
  1521              	.LVL137:
@@ -2626,80 +2626,80 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 1
  1559              		.file 6 "SynaptiX_FDK/services/logger/logger.h"
  1560              		.file 7 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  1561              		.file 8 "<built-in>"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 45
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 45
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 sx_mqtt.c
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:22     .rodata.on_connlost.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:29     .text.on_connlost:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:34     .text.on_connlost:00000000 on_connlost
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:85     .text.on_connlost:00000024 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1553   .bss.s_instance:00000000 s_instance
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:92     .rodata.on_incoming.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:96     .text.on_incoming:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:101    .text.on_incoming:00000000 on_incoming
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:171    .text.on_incoming:0000002c $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:178    .rodata.escalate_recovery.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:189    .text.escalate_recovery:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:194    .text.escalate_recovery:00000000 escalate_recovery
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:328    .text.escalate_recovery:0000007c $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:335    .rodata.do_error.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:340    .text.do_error:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:345    .text.do_error:00000000 do_error
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:408    .text.do_error:00000038 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:414    .rodata.cb_connect_done.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:421    .text.cb_connect_done:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:426    .text.cb_connect_done:00000000 cb_connect_done
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:499    .text.cb_connect_done:00000038 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:507    .rodata.cb_disconnect_done.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:515    .text.cb_disconnect_done:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:520    .text.cb_disconnect_done:00000000 cb_disconnect_done
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:586    .text.cb_disconnect_done:00000034 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:594    .rodata.cb_publish_done.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:601    .text.cb_publish_done:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:606    .text.cb_publish_done:00000000 cb_publish_done
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:681    .text.cb_publish_done:00000038 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:689    .rodata.cb_subscribe_done.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:696    .text.cb_subscribe_done:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:701    .text.cb_subscribe_done:00000000 cb_subscribe_done
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:750    .text.cb_subscribe_done:00000020 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:757    .rodata.sx_mqtt_init.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:761    .text.sx_mqtt_init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:767    .text.sx_mqtt_init:00000000 sx_mqtt_init
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:824    .text.sx_mqtt_init:00000030 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:833    .rodata.sx_mqtt_report_failure.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:838    .text.sx_mqtt_report_failure:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:844    .text.sx_mqtt_report_failure:00000000 sx_mqtt_report_failure
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:877    .text.sx_mqtt_report_failure:00000018 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:883    .rodata.sx_mqtt_set_config.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:887    .text.sx_mqtt_set_config:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:893    .text.sx_mqtt_set_config:00000000 sx_mqtt_set_config
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:948    .text.sx_mqtt_set_config:0000003c $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:954    .rodata.sx_mqtt_connect.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:964    .text.sx_mqtt_connect:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:970    .text.sx_mqtt_connect:00000000 sx_mqtt_connect
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1103   .text.sx_mqtt_connect:00000088 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1112   .rodata.sx_mqtt_disconnect.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1116   .text.sx_mqtt_disconnect:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1122   .text.sx_mqtt_disconnect:00000000 sx_mqtt_disconnect
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1190   .text.sx_mqtt_disconnect:00000030 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1197   .rodata.sx_mqtt_publish.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1201   .text.sx_mqtt_publish:00000000 $t
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s 			page 46
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:22     .rodata.on_connlost.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:29     .text.on_connlost:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:34     .text.on_connlost:00000000 on_connlost
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:85     .text.on_connlost:00000024 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1553   .bss.s_instance:00000000 s_instance
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:92     .rodata.on_incoming.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:96     .text.on_incoming:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:101    .text.on_incoming:00000000 on_incoming
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:171    .text.on_incoming:0000002c $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:178    .rodata.escalate_recovery.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:189    .text.escalate_recovery:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:194    .text.escalate_recovery:00000000 escalate_recovery
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:328    .text.escalate_recovery:0000007c $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:335    .rodata.do_error.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:340    .text.do_error:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:345    .text.do_error:00000000 do_error
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:408    .text.do_error:00000038 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:414    .rodata.cb_connect_done.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:421    .text.cb_connect_done:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:426    .text.cb_connect_done:00000000 cb_connect_done
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:499    .text.cb_connect_done:00000038 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:507    .rodata.cb_disconnect_done.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:515    .text.cb_disconnect_done:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:520    .text.cb_disconnect_done:00000000 cb_disconnect_done
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:586    .text.cb_disconnect_done:00000034 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:594    .rodata.cb_publish_done.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:601    .text.cb_publish_done:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:606    .text.cb_publish_done:00000000 cb_publish_done
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:681    .text.cb_publish_done:00000038 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:689    .rodata.cb_subscribe_done.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:696    .text.cb_subscribe_done:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:701    .text.cb_subscribe_done:00000000 cb_subscribe_done
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:750    .text.cb_subscribe_done:00000020 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:757    .rodata.sx_mqtt_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:761    .text.sx_mqtt_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:767    .text.sx_mqtt_init:00000000 sx_mqtt_init
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:824    .text.sx_mqtt_init:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:833    .rodata.sx_mqtt_report_failure.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:838    .text.sx_mqtt_report_failure:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:844    .text.sx_mqtt_report_failure:00000000 sx_mqtt_report_failure
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:877    .text.sx_mqtt_report_failure:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:883    .rodata.sx_mqtt_set_config.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:887    .text.sx_mqtt_set_config:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:893    .text.sx_mqtt_set_config:00000000 sx_mqtt_set_config
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:948    .text.sx_mqtt_set_config:0000003c $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:954    .rodata.sx_mqtt_connect.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:964    .text.sx_mqtt_connect:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:970    .text.sx_mqtt_connect:00000000 sx_mqtt_connect
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1103   .text.sx_mqtt_connect:00000088 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1112   .rodata.sx_mqtt_disconnect.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1116   .text.sx_mqtt_disconnect:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1122   .text.sx_mqtt_disconnect:00000000 sx_mqtt_disconnect
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1190   .text.sx_mqtt_disconnect:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1197   .rodata.sx_mqtt_publish.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1201   .text.sx_mqtt_publish:00000000 $t
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s 			page 46
 
 
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1207   .text.sx_mqtt_publish:00000000 sx_mqtt_publish
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1306   .text.sx_mqtt_publish:00000048 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1313   .rodata.sx_mqtt_subscribe.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1317   .text.sx_mqtt_subscribe:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1323   .text.sx_mqtt_subscribe:00000000 sx_mqtt_subscribe
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1399   .text.sx_mqtt_subscribe:00000030 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1406   .rodata.sx_mqtt_poll.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1410   .text.sx_mqtt_poll:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1416   .text.sx_mqtt_poll:00000000 sx_mqtt_poll
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1544   .text.sx_mqtt_poll:0000006c $d
-C:\Users\DELL\AppData\Local\Temp\cc9BUkws.s:1550   .bss.s_instance:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1207   .text.sx_mqtt_publish:00000000 sx_mqtt_publish
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1306   .text.sx_mqtt_publish:00000048 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1313   .rodata.sx_mqtt_subscribe.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1317   .text.sx_mqtt_subscribe:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1323   .text.sx_mqtt_subscribe:00000000 sx_mqtt_subscribe
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1399   .text.sx_mqtt_subscribe:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1406   .rodata.sx_mqtt_poll.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1410   .text.sx_mqtt_poll:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1416   .text.sx_mqtt_poll:00000000 sx_mqtt_poll
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1544   .text.sx_mqtt_poll:0000006c $d
+C:\Users\DELL\AppData\Local\Temp\ccitbtwj.s:1550   .bss.s_instance:00000000 $d
 
 UNDEFINED SYMBOLS
 log_func

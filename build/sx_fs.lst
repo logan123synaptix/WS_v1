@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
   26:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** typedef struct {
   27:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     sx_ext_flash_ops_t  *ops;
   28:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     sx_ext_flash_info_t  info;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 2
 
 
   29:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** } sx_ext_flash_t;
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
   71              	.LVL7:
   40:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
   72              		.loc 2 40 12 view .LVU13
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 3
 
 
   73 001c FBE7     		b	.L1
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  123              		.loc 2 45 16 is_stmt 0 view .LVU26
  124 0014 9847     		blx	r3
  125              	.LVL15:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 4
 
 
  126              	.L6:
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  172              		.loc 2 51 20 discriminator 1 view .LVU38
  173 0008 2BB1     		cbz	r3, .L14
   52:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****         return flash->ops->erase_sector(addr);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 5
 
 
  174              		.loc 2 52 9 is_stmt 1 view .LVU39
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  213              		@ frame_needed = 0, uses_anonymous_args = 0
  214              		.loc 1 11 1 is_stmt 0 view .LVU48
  215 0000 08B5     		push	{r3, lr}
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 6
 
 
  216              	.LCFI3:
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
   21:SynaptiX_FDK/services/filesystem/sx_fs.c **** static int lfs_flash_write(const struct lfs_config *c,
   22:SynaptiX_FDK/services/filesystem/sx_fs.c ****                            lfs_block_t block, lfs_off_t off,
   23:SynaptiX_FDK/services/filesystem/sx_fs.c ****                            const void *buf, lfs_size_t size)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 7
 
 
   24:SynaptiX_FDK/services/filesystem/sx_fs.c **** {
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  290              		.loc 1 50 1 view .LVU68
  291 0014 08BD     		pop	{r3, pc}
  292              	.L23:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 8
 
 
  293 0016 00BF     		.align	2
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  327              		.loc 1 24 1 is_stmt 1 view -0
  328              		.cfi_startproc
  329              		@ args = 4, pretend = 0, frame = 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 9
 
 
  330              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
   29:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "write FAILED ret=%d", ret);
  372              		.loc 1 29 8 is_stmt 0 view .LVU82
  373 0022 0746     		mov	r7, r0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 10
 
 
  374 0024 0028     		cmp	r0, #0
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  419 006c 98F80120 		ldrb	r2, [r8, #1]	@ zero_extendqisi2
  420 0070 98F80210 		ldrb	r1, [r8, #2]	@ zero_extendqisi2
  421 0074 98F80300 		ldrb	r0, [r8, #3]	@ zero_extendqisi2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 11
 
 
  422 0078 0290     		str	r0, [sp, #8]
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  471 00bc 3C000000 		.word	.LC3
  472 00c0 5C000000 		.word	.LC4
  473 00c4 00000000 		.word	.LC0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 12
 
 
  474 00c8 7C000000 		.word	.LC5
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  521 0018 4366     		str	r3, [r0, #100]
   60:SynaptiX_FDK/services/filesystem/sx_fs.c ****     s_config.file_function.write = lfs_flash_write;
  522              		.loc 1 60 5 is_stmt 1 view .LVU111
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 13
 
 
  523              		.loc 1 60 34 is_stmt 0 view .LVU112
@@ -774,36 +774,36 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
  570              		.file 6 "SynaptiX_FDK/services/filesystem/file_io.h"
  571              		.file 7 "SynaptiX_FDK/services/logger/logger.h"
  572              		.file 8 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s 			page 14
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 sx_fs.c
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:22     .text.sx_ext_flash_read:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:27     .text.sx_ext_flash_read:00000000 sx_ext_flash_read
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:85     .text.sx_ext_flash_write:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:90     .text.sx_ext_flash_write:00000000 sx_ext_flash_write
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:147    .text.sx_ext_flash_erase_sector:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:152    .text.sx_ext_flash_erase_sector:00000000 sx_ext_flash_erase_sector
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:202    .text.lfs_flash_read:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:207    .text.lfs_flash_read:00000000 lfs_flash_read
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:250    .text.lfs_flash_read:0000001c $d
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:563    .bss.s_flash:00000000 s_flash
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:255    .text.lfs_flash_erase:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:260    .text.lfs_flash_erase:00000000 lfs_flash_erase
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:295    .text.lfs_flash_erase:00000018 $d
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:300    .rodata.lfs_flash_write.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:319    .text.lfs_flash_write:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:324    .text.lfs_flash_write:00000000 lfs_flash_write
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:468    .text.lfs_flash_write:000000b0 $d
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:551    .bss.verify_buf.0:00000000 verify_buf.0
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:480    .text.sx_fs_init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:486    .text.sx_fs_init:00000000 sx_fs_init
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:539    .text.sx_fs_init:00000028 $d
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:557    .bss.s_config:00000000 s_config
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:548    .bss.verify_buf.0:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:554    .bss.s_config:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:560    .bss.s_flash:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:22     .text.sx_ext_flash_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:27     .text.sx_ext_flash_read:00000000 sx_ext_flash_read
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:85     .text.sx_ext_flash_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:90     .text.sx_ext_flash_write:00000000 sx_ext_flash_write
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:147    .text.sx_ext_flash_erase_sector:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:152    .text.sx_ext_flash_erase_sector:00000000 sx_ext_flash_erase_sector
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:202    .text.lfs_flash_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:207    .text.lfs_flash_read:00000000 lfs_flash_read
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:250    .text.lfs_flash_read:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:563    .bss.s_flash:00000000 s_flash
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:255    .text.lfs_flash_erase:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:260    .text.lfs_flash_erase:00000000 lfs_flash_erase
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:295    .text.lfs_flash_erase:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:300    .rodata.lfs_flash_write.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:319    .text.lfs_flash_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:324    .text.lfs_flash_write:00000000 lfs_flash_write
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:468    .text.lfs_flash_write:000000b0 $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:551    .bss.verify_buf.0:00000000 verify_buf.0
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:480    .text.sx_fs_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:486    .text.sx_fs_init:00000000 sx_fs_init
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:539    .text.sx_fs_init:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:557    .bss.s_config:00000000 s_config
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:548    .bss.verify_buf.0:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:554    .bss.s_config:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDUBV5V.s:560    .bss.s_flash:00000000 $d
 
 UNDEFINED SYMBOLS
 memcmp

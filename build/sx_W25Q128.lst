@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
   26:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline void sx_spi_init(sx_spi_t *spi, sx_spi_ops_t *ops, void *pDriver, sx_gpio_t *cs){
   27:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->ops = ops;
   28:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->pDriver = pDriver;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 2
 
 
   29:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->cs = cs;
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
   72              	.LFE10:
   74              		.section	.text.sx_spi_write_read,"ax",%progbits
   75              		.align	1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 3
 
 
   76              		.syntax unified
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  115 0012 FBE7     		b	.L6
  116              	.LVL10:
  117              	.L9:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 4
 
 
   50:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** }
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  144              		.cfi_def_cfa_offset 16
   29:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     uint8_t cmd = W25Q128_CMD_WRITE_ENABLE;
  145              		.loc 1 29 5 view .LVU29
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 5
 
 
  146              		.loc 1 29 13 is_stmt 0 view .LVU30
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
   49:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     sx_spi_write_read(s_dev->spi, tx, rx, 2);
   50:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     if (rx[1] & W25Q128_STATUS1_BUSY) {
   51:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         log_error("W25Q128", "still BUSY after confirm, STATUS=0x%02X", rx[1]);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 6
 
 
   52:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         timeout = 500;
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  106:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c **** 
  107:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     if (rx[1] != 0xEF || rx[2] != 0x40 || rx[3] != 0x18) {
  108:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         log_error(TAG, "JEDEC ID mismatch: %02X %02X %02X", rx[1], rx[2], rx[3]);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 7
 
 
  109:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         return false;
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  219 0014 ADF80430 		strh	r3, [sp, #4]	@ movhi
  121:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     sx_spi_write_read(s_dev->spi, tx, rx, 2);
  220              		.loc 1 121 5 is_stmt 1 view .LVU44
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 8
 
 
  121:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     sx_spi_write_read(s_dev->spi, tx, rx, 2);
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  260      5F627573 
  260      79205449 
  260      4D454F55 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 9
 
 
  260      54322053 
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  304 001e 01A9     		add	r1, sp, #4
  305 0020 0068     		ldr	r0, [r0]
  306 0022 FFF7FEFF 		bl	sx_spi_write_read
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 10
 
 
  307              	.LVL17:
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  347              		@ sp needed
  348 0056 10BD     		pop	{r4, pc}
  349              	.LVL21:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 11
 
 
  350              	.L31:
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  392 008c 013C     		subs	r4, r4, #1
  393              	.LVL27:
   56:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****                 log_error("W25Q128", "wait_busy TIMEOUT2 STATUS=0x%02X", rx[1]);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 12
 
 
  394              		.loc 1 56 16 view .LVU88
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  128:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     if (!s_dev || !s_dev->initialized) return -1;
  129:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     if (buf == NULL || len == 0)        return -1;
  130:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 13
 
 
  131:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     uint32_t offset = 0;
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  185:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c **** 
  186:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         uint8_t stx2[2] = { W25Q128_CMD_READ_STATUS1, 0x00 };
  187:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         uint8_t srx2[2] = { 0 };
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 14
 
 
  188:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         sx_spi_write_read(s_dev->spi, stx2, srx2, 2);
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  471              		.loc 1 208 8 discriminator 1 view .LVU105
  472 001a 50B3     		cbz	r0, .L40
  209:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 15
 
 
  210:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     uint8_t cmd[4] = {
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  512 0058 0B49     		ldr	r1, .L43+8
  513 005a 0320     		movs	r0, #3
  514 005c FFF7FEFF 		bl	log_func
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 16
 
 
  515              	.LVL35:
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  560      5F627573 
  560      795F6C6F 
  560      6E672064 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 17
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 17
 
 
  560      6F6E6520 
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  604 0016 6434     		adds	r4, r4, #100
  605              	.LVL42:
   73:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         if (elapsed >= timeout_ms) {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 18
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 18
 
 
  606              		.loc 1 73 9 is_stmt 1 view .LVU137
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  649              		@ sp needed
  650 0054 70BD     		pop	{r4, r5, r6, pc}
  651              	.LVL46:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 19
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 19
 
 
  652              	.L52:
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  698              		.cfi_offset 10, -8
  699              		.cfi_offset 14, -4
  700 000c ADF5047D 		sub	sp, sp, #528
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 20
 
 
  701              	.LCFI21:
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  142:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         tx[3] = (uint8_t)(cur_addr >>  0);
  740              		.loc 1 142 9 is_stmt 1 view .LVU170
  142:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         tx[3] = (uint8_t)(cur_addr >>  0);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 21
 
 
  741              		.loc 1 142 17 is_stmt 0 view .LVU171
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  782 0074 11D2     		bcs	.L69
  783              	.LBB3:
  133:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         if (chunk > W25Q128_MAX_READ_LEN) chunk = W25Q128_MAX_READ_LEN;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 22
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 22
 
 
  784              		.loc 1 133 9 view .LVU185
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  827              	.LCFI23:
  828              		.cfi_def_cfa_offset 0
  829              		.cfi_restore 4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 23
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 23
 
 
  830              		.cfi_restore 5
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  876 00bc 00000000 		.word	s_dev
  877 00c0 00000000 		.word	.LC7
  878 00c4 20000000 		.word	.LC1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 24
 
 
  879              		.cfi_endproc
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  917              		.cfi_offset 8, -20
  918              		.cfi_offset 9, -16
  919              		.cfi_offset 10, -12
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 25
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 25
 
 
  920              		.cfi_offset 11, -8
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  173:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         uint8_t srx[2] = { 0 };
  961              		.loc 1 173 17 is_stmt 0 view .LVU220
  962 0038 07A9     		add	r1, sp, #28
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 26
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 26
 
 
  963 003a 4FF0050B 		mov	fp, #5
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1003              		.loc 1 182 9 is_stmt 1 view .LVU234
  182:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         tx[3] = (uint8_t)(cur_addr >>  0);
  1004              		.loc 1 182 17 is_stmt 0 view .LVU235
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 27
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 27
 
 
  1005 0084 C4F30723 		ubfx	r3, r4, #8, #8
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  191:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****             log_error(TAG, "spi_write FAILED");
  1045              		.loc 1 191 31 is_stmt 0 view .LVU250
  1046 00c4 3B68     		ldr	r3, [r7]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 28
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 28
 
 
  191:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****             log_error(TAG, "spi_write FAILED");
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1086 00f0 9E42     		cmp	r6, r3
  1087 00f2 9DD3     		bcc	.L75
  165:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         if (chunk > (len - offset)) chunk = len - offset;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 29
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 29
 
 
  1088              		.loc 1 165 18 view .LVU266
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1132              		.loc 1 199 12 view .LVU276
  1133 0118 0020     		movs	r0, #0
  1134 011a F4E7     		b	.L72
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 30
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 30
 
 
  1135              	.LVL88:
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1178      683A2025 
  1179 0022 0000     		.align	2
  1180              	.LC13:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 31
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 31
 
 
  1181 0024 57323551 		.ascii	"W25Q128 OK (16MB)\000"
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1222 0012 AB23     		movs	r3, #171
  1223 0014 8DF81730 		strb	r3, [sp, #23]
   99:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     sx_delay_ms(1);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 32
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 32
 
 
  1224              		.loc 1 99 5 is_stmt 1 view .LVU295
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1264 004e 9DF80F20 		ldrb	r2, [sp, #15]	@ zero_extendqisi2
  107:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****         log_error(TAG, "JEDEC ID mismatch: %02X %02X %02X", rx[1], rx[2], rx[3]);
  1265              		.loc 1 107 40 discriminator 2 view .LVU310
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 33
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 33
 
 
  1266 0052 182A     		cmp	r2, #24
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1311 0084 00000000 		.word	s_dev
  1312 0088 00000000 		.word	.LC12
  1313 008c 20000000 		.word	.LC1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 34
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 34
 
 
  1314 0090 24000000 		.word	.LC13
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1360 001a 2068     		ldr	r0, [r4]
  1361 001c FFF7FEFF 		bl	sx_spi_write
  1362              	.LVL108:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 35
 
 
  231:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     w25q_wait_busy_long(200000);    
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1414 0004 0446     		mov	r4, r0
  236:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     uint8_t cmd = W25Q128_CMD_POWER_DOWN;
  1415              		.loc 1 236 5 is_stmt 1 view .LVU334
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 36
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 36
 
 
  1416              		.loc 1 236 13 is_stmt 0 view .LVU335
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1466              		.loc 1 242 13 is_stmt 0 view .LVU345
  1467 0006 AB23     		movs	r3, #171
  1468 0008 8DF80730 		strb	r3, [sp, #7]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 37
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 37
 
 
  243:SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.c ****     sx_spi_write(dev->spi, &cmd, 1);
@@ -2218,65 +2218,65 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 1
  1526              		.file 6 "SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h"
  1527              		.file 7 "SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.h"
  1528              		.file 8 "SynaptiX_FDK/services/logger/logger.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 38
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 38
 
 
  1529              		.file 9 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  1530              		.file 10 "SynaptiX_FDK/utils/delay/sx_delay.h"
  1531              		.file 11 "<built-in>"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s 			page 39
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s 			page 39
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 sx_W25Q128.c
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:22     .text.sx_spi_write:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:27     .text.sx_spi_write:00000000 sx_spi_write
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:75     .text.sx_spi_write_read:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:80     .text.sx_spi_write_read:00000000 sx_spi_write_read
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:127    .text.w25q_write_enable:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:132    .text.w25q_write_enable:00000000 w25q_write_enable
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:170    .text.w25q_write_enable:00000024 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1519   .bss.s_dev:00000000 s_dev
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:175    .text.sx_W25Q128_is_busy:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:181    .text.sx_W25Q128_is_busy:00000000 sx_W25Q128_is_busy
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:244    .text.sx_W25Q128_is_busy:00000038 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:249    .rodata.w25q_wait_busy.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:262    .text.w25q_wait_busy:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:267    .text.w25q_wait_busy:00000000 w25q_wait_busy
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:416    .text.w25q_wait_busy:000000ac $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:425    .rodata.sx_W25Q128_erase_sector.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:429    .text.sx_W25Q128_erase_sector:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:435    .text.sx_W25Q128_erase_sector:00000000 sx_W25Q128_erase_sector
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:548    .text.sx_W25Q128_erase_sector:00000080 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:555    .rodata.w25q_wait_busy_long.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:562    .text.w25q_wait_busy_long:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:567    .text.w25q_wait_busy_long:00000000 w25q_wait_busy_long
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:656    .text.w25q_wait_busy_long:00000058 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:664    .rodata.sx_W25Q128_read.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:668    .text.sx_W25Q128_read:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:674    .text.sx_W25Q128_read:00000000 sx_W25Q128_read
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:876    .text.sx_W25Q128_read:000000bc $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:883    .rodata.sx_W25Q128_write.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:896    .text.sx_W25Q128_write:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:902    .text.sx_W25Q128_write:00000000 sx_W25Q128_write
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1166   .text.sx_W25Q128_write:00000134 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1176   .rodata.sx_W25Q128_init.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1183   .text.sx_W25Q128_init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1189   .text.sx_W25Q128_init:00000000 sx_W25Q128_init
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1311   .text.sx_W25Q128_init:00000084 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1319   .rodata.sx_W25Q128_chip_erase.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1323   .text.sx_W25Q128_chip_erase:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1329   .text.sx_W25Q128_chip_erase:00000000 sx_W25Q128_chip_erase
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1384   .text.sx_W25Q128_chip_erase:00000034 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1392   .text.sx_W25Q128_sleep_on:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1398   .text.sx_W25Q128_sleep_on:00000000 sx_W25Q128_sleep_on
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1442   .text.sx_W25Q128_sleep_off:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1448   .text.sx_W25Q128_sleep_off:00000000 sx_W25Q128_sleep_off
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1500   .data.sx_W25Q128_info:00000000 sx_W25Q128_info
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1497   .data.sx_W25Q128_info:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1510   .data.sx_W25Q128_ops:00000000 sx_W25Q128_ops
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1507   .data.sx_W25Q128_ops:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccTkG1WX.s:1516   .bss.s_dev:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:22     .text.sx_spi_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:27     .text.sx_spi_write:00000000 sx_spi_write
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:75     .text.sx_spi_write_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:80     .text.sx_spi_write_read:00000000 sx_spi_write_read
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:127    .text.w25q_write_enable:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:132    .text.w25q_write_enable:00000000 w25q_write_enable
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:170    .text.w25q_write_enable:00000024 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1519   .bss.s_dev:00000000 s_dev
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:175    .text.sx_W25Q128_is_busy:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:181    .text.sx_W25Q128_is_busy:00000000 sx_W25Q128_is_busy
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:244    .text.sx_W25Q128_is_busy:00000038 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:249    .rodata.w25q_wait_busy.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:262    .text.w25q_wait_busy:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:267    .text.w25q_wait_busy:00000000 w25q_wait_busy
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:416    .text.w25q_wait_busy:000000ac $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:425    .rodata.sx_W25Q128_erase_sector.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:429    .text.sx_W25Q128_erase_sector:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:435    .text.sx_W25Q128_erase_sector:00000000 sx_W25Q128_erase_sector
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:548    .text.sx_W25Q128_erase_sector:00000080 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:555    .rodata.w25q_wait_busy_long.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:562    .text.w25q_wait_busy_long:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:567    .text.w25q_wait_busy_long:00000000 w25q_wait_busy_long
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:656    .text.w25q_wait_busy_long:00000058 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:664    .rodata.sx_W25Q128_read.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:668    .text.sx_W25Q128_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:674    .text.sx_W25Q128_read:00000000 sx_W25Q128_read
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:876    .text.sx_W25Q128_read:000000bc $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:883    .rodata.sx_W25Q128_write.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:896    .text.sx_W25Q128_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:902    .text.sx_W25Q128_write:00000000 sx_W25Q128_write
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1166   .text.sx_W25Q128_write:00000134 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1176   .rodata.sx_W25Q128_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1183   .text.sx_W25Q128_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1189   .text.sx_W25Q128_init:00000000 sx_W25Q128_init
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1311   .text.sx_W25Q128_init:00000084 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1319   .rodata.sx_W25Q128_chip_erase.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1323   .text.sx_W25Q128_chip_erase:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1329   .text.sx_W25Q128_chip_erase:00000000 sx_W25Q128_chip_erase
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1384   .text.sx_W25Q128_chip_erase:00000034 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1392   .text.sx_W25Q128_sleep_on:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1398   .text.sx_W25Q128_sleep_on:00000000 sx_W25Q128_sleep_on
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1442   .text.sx_W25Q128_sleep_off:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1448   .text.sx_W25Q128_sleep_off:00000000 sx_W25Q128_sleep_off
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1500   .data.sx_W25Q128_info:00000000 sx_W25Q128_info
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1497   .data.sx_W25Q128_info:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1510   .data.sx_W25Q128_ops:00000000 sx_W25Q128_ops
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1507   .data.sx_W25Q128_ops:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cck5XDKB.s:1516   .bss.s_dev:00000000 $d
 
 UNDEFINED SYMBOLS
 sx_delay_ms

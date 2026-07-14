@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -28,7 +28,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
   25              		.thumb_func
   27              	_cache_load:
   28              	.LVL0:
-  29              	.LFB339:
+  29              	.LFB337:
    1:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** #include "sx_diskio.h"
    2:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** #include "sx_board.h"
    3:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** #include "sx_flash.h"
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
   27:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     return (int32_t)(lba / FAT_BLOCKS_PER_SECTOR);
   28:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
   29:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 2
 
 
   30:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** /** Load a flash sector into the RAM cache */
@@ -115,10 +115,10 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
   73 0028 00000000 		.word	s_cache_sector
   74 002c 00000000 		.word	s_cache_dirty
   75              		.cfi_endproc
-  76              	.LFE339:
+  76              	.LFE337:
   78              		.section	.rodata._cache_flush.str1.4,"aMS",%progbits,1
   79              		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 3
 
 
   80              	.LC0:
@@ -161,7 +161,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
  100              		.thumb
  101              		.thumb_func
  103              	_cache_flush:
- 104              	.LFB340:
+ 104              	.LFB338:
   38:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   39:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** static void _cache_flush(void)
   40:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
  114 0004 002B     		cmp	r3, #0
  115 0006 3BD0     		beq	.L8
  116              		.loc 1 41 42 discriminator 2 view .LVU17
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 4
 
 
  117 0008 1F4B     		ldr	r3, .L11+4
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
  161 0040 2946     		mov	r1, r5
  162 0042 0320     		movs	r0, #3
  163 0044 FFF7FEFF 		bl	log_func
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 5
 
 
  164              	.LVL10:
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
  210 0080 7047     		bx	lr
  211              	.L12:
  212 0082 00BF     		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 6
 
 
  213              	.L11:
@@ -312,696 +312,475 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
  221 00a0 00000000 		.word	s_cache_buf
  222 00a4 74000000 		.word	.LC5
  223              		.cfi_endproc
- 224              	.LFE340:
- 226              		.section	.text.sx_gettick,"ax",%progbits
+ 224              	.LFE338:
+ 226              		.section	.text.sx_diskio_get_block_count,"ax",%progbits
  227              		.align	1
- 228              		.global	sx_gettick
+ 228              		.global	sx_diskio_get_block_count
  229              		.syntax unified
  230              		.thumb
  231              		.thumb_func
- 233              	sx_gettick:
- 234              	.LFB336:
- 235              		.file 2 "SynaptiX_FDK/board/sx_board.h"
-   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
-   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
-   3:SynaptiX_FDK/board/sx_board.h **** 
-   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
-   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
-   6:SynaptiX_FDK/board/sx_board.h **** #endif
-   7:SynaptiX_FDK/board/sx_board.h **** 
-   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
-   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
-  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
-  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
-  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
-  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
-  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
-  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
-  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
-  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
-  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
-  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
-  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
-  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
-  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
-  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
-  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
-  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
-  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
-  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
-  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
-  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
-  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
-  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
-  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
-  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
-  34:SynaptiX_FDK/board/sx_board.h **** 
-  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
-  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 7
-
-
-  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
-  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
-  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
-  40:SynaptiX_FDK/board/sx_board.h **** 
-  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
-  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
-  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
-  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
-  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
-  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
-  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
-  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
-  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
-  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
-  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
-  53:SynaptiX_FDK/board/sx_board.h ****     #endif
-  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
-  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
-  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
-  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
-  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
-  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
-  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
-  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
-  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
-  64:SynaptiX_FDK/board/sx_board.h ****     #endif
-  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
-  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
-  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
-  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
-  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
-  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
-  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
-  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
-  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
-  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
-  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
-  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
-  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
-  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
-  79:SynaptiX_FDK/board/sx_board.h ****      *
-  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
-  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
-  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
-  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
-  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
-  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
-  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
-  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
-  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
-  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
-  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
-  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
-  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
-  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 8
-
-
-  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
-  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
-  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
-  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
-  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
-  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
- 100:SynaptiX_FDK/board/sx_board.h ****      *
- 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
- 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
- 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
- 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
- 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
- 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
- 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
- 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
- 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
- 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
- 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
- 112:SynaptiX_FDK/board/sx_board.h **** 
- 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
- 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
- 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
- 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
- 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
- 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
- 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
- 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
- 121:SynaptiX_FDK/board/sx_board.h **** 
- 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
- 123:SynaptiX_FDK/board/sx_board.h **** 
- 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
- 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
- 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
- 127:SynaptiX_FDK/board/sx_board.h **** 
- 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
- 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
- 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
- 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
- 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
- 133:SynaptiX_FDK/board/sx_board.h **** 
- 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
- 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
- 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
- 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
- 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
- 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
- 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
- 141:SynaptiX_FDK/board/sx_board.h **** 
- 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
- 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
- 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
- 145:SynaptiX_FDK/board/sx_board.h **** 
- 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
- 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
- 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
- 149:SynaptiX_FDK/board/sx_board.h **** 
- 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 9
-
-
- 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
- 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
- 153:SynaptiX_FDK/board/sx_board.h **** 
- 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
- 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
- 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
- 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
- 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
- 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
- 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
- 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
- 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
- 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
- 164:SynaptiX_FDK/board/sx_board.h **** 
- 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
- 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
- 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
- 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
- 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
- 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
- 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
- 172:SynaptiX_FDK/board/sx_board.h **** 
- 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
- 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
- 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
- 176:SynaptiX_FDK/board/sx_board.h **** 
- 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
- 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
- 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
- 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
- 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
- 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
- 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
- 184:SynaptiX_FDK/board/sx_board.h **** 
- 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
- 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
- 236              		.loc 2 186 33 is_stmt 1 view -0
- 237              		.cfi_startproc
- 238              		@ args = 0, pretend = 0, frame = 0
- 239              		@ frame_needed = 0, uses_anonymous_args = 0
- 240 0000 08B5     		push	{r3, lr}
- 241              	.LCFI5:
- 242              		.cfi_def_cfa_offset 8
- 243              		.cfi_offset 3, -8
- 244              		.cfi_offset 14, -4
- 245              		.loc 2 186 34 view .LVU37
- 246              		.loc 2 186 41 is_stmt 0 view .LVU38
- 247 0002 FFF7FEFF 		bl	HAL_GetTick
- 248              	.LVL17:
- 249              		.loc 2 186 55 view .LVU39
- 250 0006 08BD     		pop	{r3, pc}
- 251              		.cfi_endproc
- 252              	.LFE336:
- 254              		.section	.text.sx_diskio_get_block_count,"ax",%progbits
- 255              		.align	1
- 256              		.global	sx_diskio_get_block_count
- 257              		.syntax unified
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 10
-
-
- 258              		.thumb
- 259              		.thumb_func
- 261              	sx_diskio_get_block_count:
- 262              	.LFB341:
+ 233              	sx_diskio_get_block_count:
+ 234              	.LFB339:
   59:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   60:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** uint32_t sx_diskio_get_block_count(void)
   61:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 263              		.loc 1 61 1 is_stmt 1 view -0
- 264              		.cfi_startproc
- 265              		@ args = 0, pretend = 0, frame = 0
- 266              		@ frame_needed = 0, uses_anonymous_args = 0
- 267              		@ link register save eliminated.
+ 235              		.loc 1 61 1 is_stmt 1 view -0
+ 236              		.cfi_startproc
+ 237              		@ args = 0, pretend = 0, frame = 0
+ 238              		@ frame_needed = 0, uses_anonymous_args = 0
+ 239              		@ link register save eliminated.
   62:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     return SX_FLASHDISK_BLOCK_COUNT;
- 268              		.loc 1 62 5 view .LVU41
+ 240              		.loc 1 62 5 view .LVU37
   63:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 269              		.loc 1 63 1 is_stmt 0 view .LVU42
- 270 0000 4FF40070 		mov	r0, #512
- 271 0004 7047     		bx	lr
- 272              		.cfi_endproc
- 273              	.LFE341:
- 275              		.section	.text.sx_diskio_get_buffer,"ax",%progbits
- 276              		.align	1
- 277              		.global	sx_diskio_get_buffer
- 278              		.syntax unified
- 279              		.thumb
- 280              		.thumb_func
- 282              	sx_diskio_get_buffer:
- 283              	.LFB342:
+ 241              		.loc 1 63 1 is_stmt 0 view .LVU38
+ 242 0000 4FF40070 		mov	r0, #512
+ 243 0004 7047     		bx	lr
+ 244              		.cfi_endproc
+ 245              	.LFE339:
+ 247              		.section	.text.sx_diskio_get_buffer,"ax",%progbits
+ 248              		.align	1
+ 249              		.global	sx_diskio_get_buffer
+ 250              		.syntax unified
+ 251              		.thumb
+ 252              		.thumb_func
+ 254              	sx_diskio_get_buffer:
+ 255              	.LFB340:
   64:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   65:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** uint8_t *sx_diskio_get_buffer(void)
   66:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 284              		.loc 1 66 1 is_stmt 1 view -0
- 285              		.cfi_startproc
- 286              		@ args = 0, pretend = 0, frame = 0
- 287              		@ frame_needed = 0, uses_anonymous_args = 0
- 288              		@ link register save eliminated.
+ 256              		.loc 1 66 1 is_stmt 1 view -0
+ 257              		.cfi_startproc
+ 258              		@ args = 0, pretend = 0, frame = 0
+ 259              		@ frame_needed = 0, uses_anonymous_args = 0
+ 260              		@ link register save eliminated.
   67:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     return NULL;
- 289              		.loc 1 67 5 view .LVU44
+ 261              		.loc 1 67 5 view .LVU40
   68:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 290              		.loc 1 68 1 is_stmt 0 view .LVU45
- 291 0000 0020     		movs	r0, #0
- 292 0002 7047     		bx	lr
- 293              		.cfi_endproc
- 294              	.LFE342:
- 296              		.section	.text.disk_initialize,"ax",%progbits
- 297              		.align	1
- 298              		.global	disk_initialize
- 299              		.syntax unified
- 300              		.thumb
- 301              		.thumb_func
- 303              	disk_initialize:
- 304              	.LVL18:
- 305              	.LFB343:
+ 262              		.loc 1 68 1 is_stmt 0 view .LVU41
+ 263 0000 0020     		movs	r0, #0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 7
+
+
+ 264 0002 7047     		bx	lr
+ 265              		.cfi_endproc
+ 266              	.LFE340:
+ 268              		.section	.text.disk_initialize,"ax",%progbits
+ 269              		.align	1
+ 270              		.global	disk_initialize
+ 271              		.syntax unified
+ 272              		.thumb
+ 273              		.thumb_func
+ 275              	disk_initialize:
+ 276              	.LVL17:
+ 277              	.LFB341:
   69:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   70:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   71:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** DSTATUS disk_initialize(BYTE pdrv)
   72:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 11
-
-
- 306              		.loc 1 72 1 is_stmt 1 view -0
- 307              		.cfi_startproc
- 308              		@ args = 0, pretend = 0, frame = 0
- 309              		@ frame_needed = 0, uses_anonymous_args = 0
- 310              		@ link register save eliminated.
+ 278              		.loc 1 72 1 is_stmt 1 view -0
+ 279              		.cfi_startproc
+ 280              		@ args = 0, pretend = 0, frame = 0
+ 281              		@ frame_needed = 0, uses_anonymous_args = 0
+ 282              		@ link register save eliminated.
   73:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0) return STA_NOINIT;
- 311              		.loc 1 73 5 view .LVU47
- 312              		.loc 1 73 8 is_stmt 0 view .LVU48
- 313 0000 50B9     		cbnz	r0, .L19
+ 283              		.loc 1 73 5 view .LVU43
+ 284              		.loc 1 73 8 is_stmt 0 view .LVU44
+ 285 0000 50B9     		cbnz	r0, .L17
   74:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_cache_sector = -1;
- 314              		.loc 1 74 5 is_stmt 1 view .LVU49
- 315              		.loc 1 74 20 is_stmt 0 view .LVU50
- 316 0002 064A     		ldr	r2, .L20
- 317 0004 4FF0FF31 		mov	r1, #-1
- 318 0008 1160     		str	r1, [r2]
+ 286              		.loc 1 74 5 is_stmt 1 view .LVU45
+ 287              		.loc 1 74 20 is_stmt 0 view .LVU46
+ 288 0002 064A     		ldr	r2, .L18
+ 289 0004 4FF0FF31 		mov	r1, #-1
+ 290 0008 1160     		str	r1, [r2]
   75:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_cache_dirty  = false;
- 319              		.loc 1 75 5 is_stmt 1 view .LVU51
- 320              		.loc 1 75 20 is_stmt 0 view .LVU52
- 321 000a 054A     		ldr	r2, .L20+4
- 322 000c 0021     		movs	r1, #0
- 323 000e 1170     		strb	r1, [r2]
+ 291              		.loc 1 75 5 is_stmt 1 view .LVU47
+ 292              		.loc 1 75 20 is_stmt 0 view .LVU48
+ 293 000a 054A     		ldr	r2, .L18+4
+ 294 000c 0021     		movs	r1, #0
+ 295 000e 1170     		strb	r1, [r2]
   76:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_initialized  = true;
- 324              		.loc 1 76 5 is_stmt 1 view .LVU53
- 325              		.loc 1 76 20 is_stmt 0 view .LVU54
- 326 0010 044A     		ldr	r2, .L20+8
- 327 0012 0121     		movs	r1, #1
- 328 0014 1170     		strb	r1, [r2]
+ 296              		.loc 1 76 5 is_stmt 1 view .LVU49
+ 297              		.loc 1 76 20 is_stmt 0 view .LVU50
+ 298 0010 044A     		ldr	r2, .L18+8
+ 299 0012 0121     		movs	r1, #1
+ 300 0014 1170     		strb	r1, [r2]
   77:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     return 0;
- 329              		.loc 1 77 5 is_stmt 1 view .LVU55
- 330              		.loc 1 77 12 is_stmt 0 view .LVU56
- 331 0016 7047     		bx	lr
- 332              	.L19:
+ 301              		.loc 1 77 5 is_stmt 1 view .LVU51
+ 302              		.loc 1 77 12 is_stmt 0 view .LVU52
+ 303 0016 7047     		bx	lr
+ 304              	.L17:
   73:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_cache_sector = -1;
- 333              		.loc 1 73 27 discriminator 1 view .LVU57
- 334 0018 0120     		movs	r0, #1
- 335              	.LVL19:
+ 305              		.loc 1 73 27 discriminator 1 view .LVU53
+ 306 0018 0120     		movs	r0, #1
+ 307              	.LVL18:
   78:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 336              		.loc 1 78 1 view .LVU58
- 337 001a 7047     		bx	lr
- 338              	.L21:
- 339              		.align	2
- 340              	.L20:
- 341 001c 00000000 		.word	s_cache_sector
- 342 0020 00000000 		.word	s_cache_dirty
- 343 0024 00000000 		.word	s_initialized
- 344              		.cfi_endproc
- 345              	.LFE343:
- 347              		.section	.text.disk_status,"ax",%progbits
- 348              		.align	1
- 349              		.global	disk_status
- 350              		.syntax unified
- 351              		.thumb
- 352              		.thumb_func
- 354              	disk_status:
- 355              	.LVL20:
- 356              	.LFB344:
+ 308              		.loc 1 78 1 view .LVU54
+ 309 001a 7047     		bx	lr
+ 310              	.L19:
+ 311              		.align	2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 8
+
+
+ 312              	.L18:
+ 313 001c 00000000 		.word	s_cache_sector
+ 314 0020 00000000 		.word	s_cache_dirty
+ 315 0024 00000000 		.word	s_initialized
+ 316              		.cfi_endproc
+ 317              	.LFE341:
+ 319              		.section	.text.disk_status,"ax",%progbits
+ 320              		.align	1
+ 321              		.global	disk_status
+ 322              		.syntax unified
+ 323              		.thumb
+ 324              		.thumb_func
+ 326              	disk_status:
+ 327              	.LVL19:
+ 328              	.LFB342:
   79:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 12
-
-
   80:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** DSTATUS disk_status(BYTE pdrv)
   81:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 357              		.loc 1 81 1 is_stmt 1 view -0
- 358              		.cfi_startproc
- 359              		@ args = 0, pretend = 0, frame = 0
- 360              		@ frame_needed = 0, uses_anonymous_args = 0
- 361              		@ link register save eliminated.
+ 329              		.loc 1 81 1 is_stmt 1 view -0
+ 330              		.cfi_startproc
+ 331              		@ args = 0, pretend = 0, frame = 0
+ 332              		@ frame_needed = 0, uses_anonymous_args = 0
+ 333              		@ link register save eliminated.
   82:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0) return STA_NOINIT;
- 362              		.loc 1 82 5 view .LVU60
- 363              		.loc 1 82 8 is_stmt 0 view .LVU61
- 364 0000 20B9     		cbnz	r0, .L24
+ 334              		.loc 1 82 5 view .LVU56
+ 335              		.loc 1 82 8 is_stmt 0 view .LVU57
+ 336 0000 20B9     		cbnz	r0, .L22
   83:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     return s_initialized ? 0 : STA_NOINIT;
- 365              		.loc 1 83 5 is_stmt 1 view .LVU62
- 366              		.loc 1 83 30 is_stmt 0 view .LVU63
- 367 0002 034B     		ldr	r3, .L25
- 368 0004 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
- 369              	.LVL21:
- 370              		.loc 1 83 30 view .LVU64
- 371 0006 80F00100 		eor	r0, r0, #1
- 372 000a 7047     		bx	lr
- 373              	.LVL22:
- 374              	.L24:
+ 337              		.loc 1 83 5 is_stmt 1 view .LVU58
+ 338              		.loc 1 83 30 is_stmt 0 view .LVU59
+ 339 0002 034B     		ldr	r3, .L23
+ 340 0004 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 341              	.LVL20:
+ 342              		.loc 1 83 30 view .LVU60
+ 343 0006 80F00100 		eor	r0, r0, #1
+ 344 000a 7047     		bx	lr
+ 345              	.LVL21:
+ 346              	.L22:
   82:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0) return STA_NOINIT;
- 375              		.loc 1 82 27 discriminator 1 view .LVU65
- 376 000c 0120     		movs	r0, #1
- 377              	.LVL23:
+ 347              		.loc 1 82 27 discriminator 1 view .LVU61
+ 348 000c 0120     		movs	r0, #1
+ 349              	.LVL22:
   84:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 378              		.loc 1 84 1 view .LVU66
- 379 000e 7047     		bx	lr
- 380              	.L26:
- 381              		.align	2
- 382              	.L25:
- 383 0010 00000000 		.word	s_initialized
- 384              		.cfi_endproc
- 385              	.LFE344:
- 387              		.section	.text.disk_read,"ax",%progbits
- 388              		.align	1
- 389              		.global	disk_read
- 390              		.syntax unified
- 391              		.thumb
- 392              		.thumb_func
- 394              	disk_read:
- 395              	.LVL24:
- 396              	.LFB345:
+ 350              		.loc 1 84 1 view .LVU62
+ 351 000e 7047     		bx	lr
+ 352              	.L24:
+ 353              		.align	2
+ 354              	.L23:
+ 355 0010 00000000 		.word	s_initialized
+ 356              		.cfi_endproc
+ 357              	.LFE342:
+ 359              		.section	.text.disk_read,"ax",%progbits
+ 360              		.align	1
+ 361              		.global	disk_read
+ 362              		.syntax unified
+ 363              		.thumb
+ 364              		.thumb_func
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 9
+
+
+ 366              	disk_read:
+ 367              	.LVL23:
+ 368              	.LFB343:
   85:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   86:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** DRESULT disk_read(BYTE pdrv, BYTE *buff, LBA_t sector, UINT count)
   87:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 397              		.loc 1 87 1 is_stmt 1 view -0
- 398              		.cfi_startproc
- 399              		@ args = 0, pretend = 0, frame = 0
- 400              		@ frame_needed = 0, uses_anonymous_args = 0
+ 369              		.loc 1 87 1 is_stmt 1 view -0
+ 370              		.cfi_startproc
+ 371              		@ args = 0, pretend = 0, frame = 0
+ 372              		@ frame_needed = 0, uses_anonymous_args = 0
   88:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0)                                   return RES_PARERR;
- 401              		.loc 1 88 5 view .LVU68
- 402              		.loc 1 88 8 is_stmt 0 view .LVU69
- 403 0000 A0BB     		cbnz	r0, .L33
+ 373              		.loc 1 88 5 view .LVU64
+ 374              		.loc 1 88 8 is_stmt 0 view .LVU65
+ 375 0000 A0BB     		cbnz	r0, .L31
   87:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0)                                   return RES_PARERR;
- 404              		.loc 1 87 1 view .LVU70
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 13
-
-
- 405 0002 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
- 406              	.LCFI6:
- 407              		.cfi_def_cfa_offset 24
- 408              		.cfi_offset 4, -24
- 409              		.cfi_offset 5, -20
- 410              		.cfi_offset 6, -16
- 411              		.cfi_offset 7, -12
- 412              		.cfi_offset 8, -8
- 413              		.cfi_offset 14, -4
- 414 0006 0F46     		mov	r7, r1
- 415 0008 1646     		mov	r6, r2
- 416 000a 1D46     		mov	r5, r3
- 417 000c 8046     		mov	r8, r0
+ 376              		.loc 1 87 1 view .LVU66
+ 377 0002 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 378              	.LCFI5:
+ 379              		.cfi_def_cfa_offset 24
+ 380              		.cfi_offset 4, -24
+ 381              		.cfi_offset 5, -20
+ 382              		.cfi_offset 6, -16
+ 383              		.cfi_offset 7, -12
+ 384              		.cfi_offset 8, -8
+ 385              		.cfi_offset 14, -4
+ 386 0006 0F46     		mov	r7, r1
+ 387 0008 1646     		mov	r6, r2
+ 388 000a 1D46     		mov	r5, r3
+ 389 000c 8046     		mov	r8, r0
   89:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_initialized)                              return RES_NOTRDY;
- 418              		.loc 1 89 5 is_stmt 1 view .LVU71
- 419              		.loc 1 89 9 is_stmt 0 view .LVU72
- 420 000e 1A4B     		ldr	r3, .L42
- 421              	.LVL25:
- 422              		.loc 1 89 9 view .LVU73
- 423 0010 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
- 424              		.loc 1 89 8 view .LVU74
- 425 0012 6BB3     		cbz	r3, .L34
+ 390              		.loc 1 89 5 is_stmt 1 view .LVU67
+ 391              		.loc 1 89 9 is_stmt 0 view .LVU68
+ 392 000e 1A4B     		ldr	r3, .L40
+ 393              	.LVL24:
+ 394              		.loc 1 89 9 view .LVU69
+ 395 0010 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 396              		.loc 1 89 8 view .LVU70
+ 397 0012 6BB3     		cbz	r3, .L32
   90:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
- 426              		.loc 1 90 5 is_stmt 1 view .LVU75
- 427              		.loc 1 90 16 is_stmt 0 view .LVU76
- 428 0014 5319     		adds	r3, r2, r5
- 429              		.loc 1 90 8 view .LVU77
- 430 0016 B3F5007F 		cmp	r3, #512
- 431 001a 2BD8     		bhi	.L35
- 432              	.LBB12:
+ 398              		.loc 1 90 5 is_stmt 1 view .LVU71
+ 399              		.loc 1 90 16 is_stmt 0 view .LVU72
+ 400 0014 5319     		adds	r3, r2, r5
+ 401              		.loc 1 90 8 view .LVU73
+ 402 0016 B3F5007F 		cmp	r3, #512
+ 403 001a 2BD8     		bhi	.L33
+ 404              	.LBB12:
   91:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   92:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     for (UINT i = 0; i < count; i++) {
- 433              		.loc 1 92 15 view .LVU78
- 434 001c 0024     		movs	r4, #0
- 435 001e 08E0     		b	.L29
- 436              	.LVL26:
- 437              	.L41:
- 438              	.LBB13:
+ 405              		.loc 1 92 15 view .LVU74
+ 406 001c 0024     		movs	r4, #0
+ 407 001e 08E0     		b	.L27
+ 408              	.LVL25:
+ 409              	.L39:
+ 410              	.LBB13:
   93:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
   94:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         int32_t  fsect      = _lba_to_flash_sector(lba);
   95:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         uint32_t buf_offset = (uint32_t)(lba % FAT_BLOCKS_PER_SECTOR) * SX_FLASHDISK_BLOCK_SIZE;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 10
+
+
   96:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
   97:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         if (s_cache_sector == fsect) {
   98:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             /* Cache hit */
   99:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             memcpy(buff + i * SX_FLASHDISK_BLOCK_SIZE,
- 439              		.loc 1 99 13 is_stmt 1 view .LVU79
- 440 0020 4FF40072 		mov	r2, #512
- 441 0024 1549     		ldr	r1, .L42+4
- 442 0026 7144     		add	r1, r1, lr
- 443 0028 07EB4420 		add	r0, r7, r4, lsl #9
- 444 002c FFF7FEFF 		bl	memcpy
- 445              	.LVL27:
- 446              	.L31:
- 447              		.loc 1 99 13 is_stmt 0 view .LVU80
- 448              	.LBE13:
+ 411              		.loc 1 99 13 is_stmt 1 view .LVU75
+ 412 0020 4FF40072 		mov	r2, #512
+ 413 0024 1549     		ldr	r1, .L40+4
+ 414 0026 7144     		add	r1, r1, lr
+ 415 0028 07EB4420 		add	r0, r7, r4, lsl #9
+ 416 002c FFF7FEFF 		bl	memcpy
+ 417              	.LVL26:
+ 418              	.L29:
+ 419              		.loc 1 99 13 is_stmt 0 view .LVU76
+ 420              	.LBE13:
   92:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 449              		.loc 1 92 34 is_stmt 1 discriminator 2 view .LVU81
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 14
-
-
- 450 0030 0134     		adds	r4, r4, #1
- 451              	.LVL28:
- 452              	.L29:
+ 421              		.loc 1 92 34 is_stmt 1 discriminator 2 view .LVU77
+ 422 0030 0134     		adds	r4, r4, #1
+ 423              	.LVL27:
+ 424              	.L27:
   92:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 453              		.loc 1 92 24 discriminator 1 view .LVU82
- 454 0032 AC42     		cmp	r4, r5
- 455 0034 17D2     		bcs	.L40
- 456              	.LBB18:
+ 425              		.loc 1 92 24 discriminator 1 view .LVU78
+ 426 0032 AC42     		cmp	r4, r5
+ 427 0034 17D2     		bcs	.L38
+ 428              	.LBB18:
   93:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 457              		.loc 1 93 9 view .LVU83
+ 429              		.loc 1 93 9 view .LVU79
   93:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 458              		.loc 1 93 18 is_stmt 0 view .LVU84
- 459 0036 04EB060C 		add	ip, r4, r6
- 460              	.LVL29:
+ 430              		.loc 1 93 18 is_stmt 0 view .LVU80
+ 431 0036 04EB060C 		add	ip, r4, r6
+ 432              	.LVL28:
   94:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         uint32_t buf_offset = (uint32_t)(lba % FAT_BLOCKS_PER_SECTOR) * SX_FLASHDISK_BLOCK_SIZE;
- 461              		.loc 1 94 9 is_stmt 1 view .LVU85
- 462              	.LBB14:
- 463              	.LBI14:
+ 433              		.loc 1 94 9 is_stmt 1 view .LVU81
+ 434              	.LBB14:
+ 435              	.LBI14:
   25:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 464              		.loc 1 25 23 view .LVU86
- 465              	.LBB15:
+ 436              		.loc 1 25 23 view .LVU82
+ 437              	.LBB15:
   27:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 466              		.loc 1 27 5 view .LVU87
+ 438              		.loc 1 27 5 view .LVU83
   27:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 467              		.loc 1 27 5 is_stmt 0 view .LVU88
- 468              	.LBE15:
- 469              	.LBE14:
+ 439              		.loc 1 27 5 is_stmt 0 view .LVU84
+ 440              	.LBE15:
+ 441              	.LBE14:
   95:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 470              		.loc 1 95 9 is_stmt 1 view .LVU89
+ 442              		.loc 1 95 9 is_stmt 1 view .LVU85
   95:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 471              		.loc 1 95 31 is_stmt 0 view .LVU90
- 472 003a 0CF00F0E 		and	lr, ip, #15
+ 443              		.loc 1 95 31 is_stmt 0 view .LVU86
+ 444 003a 0CF00F0E 		and	lr, ip, #15
   95:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 473              		.loc 1 95 18 view .LVU91
- 474 003e 4FEA4E2E 		lsl	lr, lr, #9
- 475              	.LVL30:
+ 445              		.loc 1 95 18 view .LVU87
+ 446 003e 4FEA4E2E 		lsl	lr, lr, #9
+ 447              	.LVL29:
   97:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             /* Cache hit */
- 476              		.loc 1 97 9 is_stmt 1 view .LVU92
+ 448              		.loc 1 97 9 is_stmt 1 view .LVU88
   97:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             /* Cache hit */
- 477              		.loc 1 97 28 is_stmt 0 view .LVU93
- 478 0042 0F4B     		ldr	r3, .L42+8
- 479 0044 1B68     		ldr	r3, [r3]
+ 449              		.loc 1 97 28 is_stmt 0 view .LVU89
+ 450 0042 0F4B     		ldr	r3, .L40+8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 11
+
+
+ 451 0044 1B68     		ldr	r3, [r3]
   97:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             /* Cache hit */
- 480              		.loc 1 97 12 view .LVU94
- 481 0046 B3EB1C1F 		cmp	r3, ip, lsr #4
- 482 004a E9D0     		beq	.L41
+ 452              		.loc 1 97 12 view .LVU90
+ 453 0046 B3EB1C1F 		cmp	r3, ip, lsr #4
+ 454 004a E9D0     		beq	.L39
  100:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****                    s_cache_buf + buf_offset,
  101:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****                    SX_FLASHDISK_BLOCK_SIZE);
  102:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         } else {
  103:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             sx_flash_read(_lba_to_addr(lba),
- 483              		.loc 1 103 13 is_stmt 1 view .LVU95
- 484              	.LVL31:
- 485              	.LBB16:
- 486              	.LBI16:
+ 455              		.loc 1 103 13 is_stmt 1 view .LVU91
+ 456              	.LVL30:
+ 457              	.LBB16:
+ 458              	.LBI16:
   20:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 487              		.loc 1 20 24 view .LVU96
- 488              	.LBB17:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 15
-
-
+ 459              		.loc 1 20 24 view .LVU92
+ 460              	.LBB17:
   22:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 489              		.loc 1 22 5 view .LVU97
+ 461              		.loc 1 22 5 view .LVU93
   22:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 490              		.loc 1 22 31 is_stmt 0 view .LVU98
- 491 004c 0CF5812C 		add	ip, ip, #264192
- 492              	.LVL32:
+ 462              		.loc 1 22 31 is_stmt 0 view .LVU94
+ 463 004c 0CF5812C 		add	ip, ip, #264192
+ 464              	.LVL31:
   22:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 493              		.loc 1 22 31 view .LVU99
- 494 0050 0CF5C06C 		add	ip, ip, #1536
- 495              	.LVL33:
+ 465              		.loc 1 22 31 view .LVU95
+ 466 0050 0CF5C06C 		add	ip, ip, #1536
+ 467              	.LVL32:
   22:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 496              		.loc 1 22 31 view .LVU100
- 497              	.LBE17:
- 498              	.LBE16:
- 499              		.loc 1 103 13 view .LVU101
- 500 0054 4FF40072 		mov	r2, #512
- 501 0058 07EB4421 		add	r1, r7, r4, lsl #9
- 502 005c 4FEA4C20 		lsl	r0, ip, #9
- 503 0060 FFF7FEFF 		bl	sx_flash_read
- 504              	.LVL34:
- 505              		.loc 1 103 13 view .LVU102
- 506 0064 E4E7     		b	.L31
- 507              	.LVL35:
- 508              	.L40:
- 509              		.loc 1 103 13 view .LVU103
- 510              	.LBE18:
- 511              	.LBE12:
+ 468              		.loc 1 22 31 view .LVU96
+ 469              	.LBE17:
+ 470              	.LBE16:
+ 471              		.loc 1 103 13 view .LVU97
+ 472 0054 4FF40072 		mov	r2, #512
+ 473 0058 07EB4421 		add	r1, r7, r4, lsl #9
+ 474 005c 4FEA4C20 		lsl	r0, ip, #9
+ 475 0060 FFF7FEFF 		bl	sx_flash_read
+ 476              	.LVL33:
+ 477              		.loc 1 103 13 view .LVU98
+ 478 0064 E4E7     		b	.L29
+ 479              	.LVL34:
+ 480              	.L38:
+ 481              		.loc 1 103 13 view .LVU99
+ 482              	.LBE18:
+ 483              	.LBE12:
  104:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****                           buff + i * SX_FLASHDISK_BLOCK_SIZE,
  105:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****                           SX_FLASHDISK_BLOCK_SIZE);
  106:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         }
  107:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     }
  108:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     return RES_OK;
- 512              		.loc 1 108 12 view .LVU104
- 513 0066 4046     		mov	r0, r8
- 514              	.LVL36:
- 515              	.L28:
+ 484              		.loc 1 108 12 view .LVU100
+ 485 0066 4046     		mov	r0, r8
+ 486              	.LVL35:
+ 487              	.L26:
  109:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 516              		.loc 1 109 1 view .LVU105
- 517 0068 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
- 518              	.LVL37:
- 519              	.L33:
- 520              	.LCFI7:
- 521              		.cfi_def_cfa_offset 0
- 522              		.cfi_restore 4
- 523              		.cfi_restore 5
- 524              		.cfi_restore 6
- 525              		.cfi_restore 7
- 526              		.cfi_restore 8
- 527              		.cfi_restore 14
+ 488              		.loc 1 109 1 view .LVU101
+ 489 0068 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 490              	.LVL36:
+ 491              	.L31:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 12
+
+
+ 492              	.LCFI6:
+ 493              		.cfi_def_cfa_offset 0
+ 494              		.cfi_restore 4
+ 495              		.cfi_restore 5
+ 496              		.cfi_restore 6
+ 497              		.cfi_restore 7
+ 498              		.cfi_restore 8
+ 499              		.cfi_restore 14
   88:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_initialized)                              return RES_NOTRDY;
- 528              		.loc 1 88 61 discriminator 1 view .LVU106
- 529 006c 0420     		movs	r0, #4
- 530              	.LVL38:
- 531              		.loc 1 109 1 view .LVU107
- 532 006e 7047     		bx	lr
- 533              	.LVL39:
- 534              	.L34:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 16
+ 500              		.loc 1 88 61 discriminator 1 view .LVU102
+ 501 006c 0420     		movs	r0, #4
+ 502              	.LVL37:
+ 503              		.loc 1 109 1 view .LVU103
+ 504 006e 7047     		bx	lr
+ 505              	.LVL38:
+ 506              	.L32:
+ 507              	.LCFI7:
+ 508              		.cfi_def_cfa_offset 24
+ 509              		.cfi_offset 4, -24
+ 510              		.cfi_offset 5, -20
+ 511              		.cfi_offset 6, -16
+ 512              		.cfi_offset 7, -12
+ 513              		.cfi_offset 8, -8
+ 514              		.cfi_offset 14, -4
+  89:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
+ 515              		.loc 1 89 61 discriminator 1 view .LVU104
+ 516 0070 0320     		movs	r0, #3
+ 517              	.LVL39:
+  89:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
+ 518              		.loc 1 89 61 discriminator 1 view .LVU105
+ 519 0072 F9E7     		b	.L26
+ 520              	.LVL40:
+ 521              	.L33:
+  90:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
+ 522              		.loc 1 90 61 discriminator 1 view .LVU106
+ 523 0074 0420     		movs	r0, #4
+ 524              	.LVL41:
+  90:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
+ 525              		.loc 1 90 61 discriminator 1 view .LVU107
+ 526 0076 F7E7     		b	.L26
+ 527              	.L41:
+ 528              		.align	2
+ 529              	.L40:
+ 530 0078 00000000 		.word	s_initialized
+ 531 007c 00000000 		.word	s_cache_buf
+ 532 0080 00000000 		.word	s_cache_sector
+ 533              		.cfi_endproc
+ 534              	.LFE343:
+ 536              		.section	.text.disk_write,"ax",%progbits
+ 537              		.align	1
+ 538              		.global	disk_write
+ 539              		.syntax unified
+ 540              		.thumb
+ 541              		.thumb_func
+ 543              	disk_write:
+ 544              	.LVL42:
+ 545              	.LFB344:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 13
 
 
- 535              	.LCFI8:
- 536              		.cfi_def_cfa_offset 24
- 537              		.cfi_offset 4, -24
- 538              		.cfi_offset 5, -20
- 539              		.cfi_offset 6, -16
- 540              		.cfi_offset 7, -12
- 541              		.cfi_offset 8, -8
- 542              		.cfi_offset 14, -4
-  89:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
- 543              		.loc 1 89 61 discriminator 1 view .LVU108
- 544 0070 0320     		movs	r0, #3
- 545              	.LVL40:
-  89:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
- 546              		.loc 1 89 61 discriminator 1 view .LVU109
- 547 0072 F9E7     		b	.L28
- 548              	.LVL41:
- 549              	.L35:
-  90:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 550              		.loc 1 90 61 discriminator 1 view .LVU110
- 551 0074 0420     		movs	r0, #4
- 552              	.LVL42:
-  90:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 553              		.loc 1 90 61 discriminator 1 view .LVU111
- 554 0076 F7E7     		b	.L28
- 555              	.L43:
- 556              		.align	2
- 557              	.L42:
- 558 0078 00000000 		.word	s_initialized
- 559 007c 00000000 		.word	s_cache_buf
- 560 0080 00000000 		.word	s_cache_sector
- 561              		.cfi_endproc
- 562              	.LFE345:
- 564              		.section	.text.disk_write,"ax",%progbits
- 565              		.align	1
- 566              		.global	disk_write
- 567              		.syntax unified
- 568              		.thumb
- 569              		.thumb_func
- 571              	disk_write:
- 572              	.LVL43:
- 573              	.LFB346:
  110:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  111:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** DRESULT disk_write(BYTE pdrv, const BYTE *buff, LBA_t sector, UINT count)
  112:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 574              		.loc 1 112 1 is_stmt 1 view -0
- 575              		.cfi_startproc
- 576              		@ args = 0, pretend = 0, frame = 0
- 577              		@ frame_needed = 0, uses_anonymous_args = 0
+ 546              		.loc 1 112 1 is_stmt 1 view -0
+ 547              		.cfi_startproc
+ 548              		@ args = 0, pretend = 0, frame = 0
+ 549              		@ frame_needed = 0, uses_anonymous_args = 0
  113:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0)                                   return RES_PARERR;
- 578              		.loc 1 113 5 view .LVU113
- 579              		.loc 1 113 8 is_stmt 0 view .LVU114
- 580 0000 0028     		cmp	r0, #0
- 581 0002 38D1     		bne	.L49
+ 550              		.loc 1 113 5 view .LVU109
+ 551              		.loc 1 113 8 is_stmt 0 view .LVU110
+ 552 0000 0028     		cmp	r0, #0
+ 553 0002 38D1     		bne	.L47
  112:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0)                                   return RES_PARERR;
- 582              		.loc 1 112 1 view .LVU115
- 583 0004 2DE9F047 		push	{r4, r5, r6, r7, r8, r9, r10, lr}
- 584              	.LCFI9:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 17
-
-
- 585              		.cfi_def_cfa_offset 32
- 586              		.cfi_offset 4, -32
- 587              		.cfi_offset 5, -28
- 588              		.cfi_offset 6, -24
- 589              		.cfi_offset 7, -20
- 590              		.cfi_offset 8, -16
- 591              		.cfi_offset 9, -12
- 592              		.cfi_offset 10, -8
- 593              		.cfi_offset 14, -4
- 594 0008 8846     		mov	r8, r1
- 595 000a 1746     		mov	r7, r2
- 596 000c 1E46     		mov	r6, r3
- 597 000e 8146     		mov	r9, r0
+ 554              		.loc 1 112 1 view .LVU111
+ 555 0004 2DE9F047 		push	{r4, r5, r6, r7, r8, r9, r10, lr}
+ 556              	.LCFI8:
+ 557              		.cfi_def_cfa_offset 32
+ 558              		.cfi_offset 4, -32
+ 559              		.cfi_offset 5, -28
+ 560              		.cfi_offset 6, -24
+ 561              		.cfi_offset 7, -20
+ 562              		.cfi_offset 8, -16
+ 563              		.cfi_offset 9, -12
+ 564              		.cfi_offset 10, -8
+ 565              		.cfi_offset 14, -4
+ 566 0008 8846     		mov	r8, r1
+ 567 000a 1746     		mov	r7, r2
+ 568 000c 1E46     		mov	r6, r3
+ 569 000e 8146     		mov	r9, r0
  114:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_initialized)                              return RES_NOTRDY;
- 598              		.loc 1 114 5 is_stmt 1 view .LVU116
- 599              		.loc 1 114 9 is_stmt 0 view .LVU117
- 600 0010 1C4B     		ldr	r3, .L57
- 601              	.LVL44:
- 602              		.loc 1 114 9 view .LVU118
- 603 0012 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
- 604              		.loc 1 114 8 view .LVU119
- 605 0014 8BB3     		cbz	r3, .L50
+ 570              		.loc 1 114 5 is_stmt 1 view .LVU112
+ 571              		.loc 1 114 9 is_stmt 0 view .LVU113
+ 572 0010 1C4B     		ldr	r3, .L55
+ 573              	.LVL43:
+ 574              		.loc 1 114 9 view .LVU114
+ 575 0012 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 576              		.loc 1 114 8 view .LVU115
+ 577 0014 8BB3     		cbz	r3, .L48
  115:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
- 606              		.loc 1 115 5 is_stmt 1 view .LVU120
- 607              		.loc 1 115 16 is_stmt 0 view .LVU121
- 608 0016 9319     		adds	r3, r2, r6
- 609              		.loc 1 115 8 view .LVU122
- 610 0018 B3F5007F 		cmp	r3, #512
- 611 001c 2FD8     		bhi	.L51
- 612              	.LBB19:
+ 578              		.loc 1 115 5 is_stmt 1 view .LVU116
+ 579              		.loc 1 115 16 is_stmt 0 view .LVU117
+ 580 0016 9319     		adds	r3, r2, r6
+ 581              		.loc 1 115 8 view .LVU118
+ 582 0018 B3F5007F 		cmp	r3, #512
+ 583 001c 2FD8     		bhi	.L49
+ 584              	.LBB19:
  116:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  117:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     for (UINT i = 0; i < count; i++) {
- 613              		.loc 1 117 15 view .LVU123
- 614 001e 0024     		movs	r4, #0
- 615 0020 0BE0     		b	.L46
- 616              	.LVL45:
- 617              	.L47:
- 618              	.LBB20:
+ 585              		.loc 1 117 15 view .LVU119
+ 586 001e 0024     		movs	r4, #0
+ 587 0020 0BE0     		b	.L44
+ 588              	.LVL44:
+ 589              	.L45:
+ 590              	.LBB20:
  118:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
  119:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         int32_t  fsect      = _lba_to_flash_sector(lba);
  120:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         uint32_t buf_offset = (uint32_t)(lba % FAT_BLOCKS_PER_SECTOR) * SX_FLASHDISK_BLOCK_SIZE;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 14
+
+
  121:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  122:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         if (s_cache_sector != fsect) {
  123:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
@@ -1009,494 +788,489 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 1
  125:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         }
  126:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  127:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         memcpy(s_cache_buf + buf_offset,
- 619              		.loc 1 127 9 is_stmt 1 view .LVU124
- 620 0022 4FF40072 		mov	r2, #512
- 621 0026 08EB4421 		add	r1, r8, r4, lsl #9
- 622 002a 1748     		ldr	r0, .L57+4
- 623 002c 2844     		add	r0, r0, r5
- 624 002e FFF7FEFF 		bl	memcpy
- 625              	.LVL46:
+ 591              		.loc 1 127 9 is_stmt 1 view .LVU120
+ 592 0022 4FF40072 		mov	r2, #512
+ 593 0026 08EB4421 		add	r1, r8, r4, lsl #9
+ 594 002a 1748     		ldr	r0, .L55+4
+ 595 002c 2844     		add	r0, r0, r5
+ 596 002e FFF7FEFF 		bl	memcpy
+ 597              	.LVL45:
  128:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****                buff + i * SX_FLASHDISK_BLOCK_SIZE,
  129:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****                SX_FLASHDISK_BLOCK_SIZE);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 18
-
-
  130:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         s_cache_dirty = true;
- 626              		.loc 1 130 9 view .LVU125
- 627              		.loc 1 130 23 is_stmt 0 view .LVU126
- 628 0032 164B     		ldr	r3, .L57+8
- 629 0034 0122     		movs	r2, #1
- 630 0036 1A70     		strb	r2, [r3]
- 631              	.LBE20:
+ 598              		.loc 1 130 9 view .LVU121
+ 599              		.loc 1 130 23 is_stmt 0 view .LVU122
+ 600 0032 164B     		ldr	r3, .L55+8
+ 601 0034 0122     		movs	r2, #1
+ 602 0036 1A70     		strb	r2, [r3]
+ 603              	.LBE20:
  117:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 632              		.loc 1 117 34 is_stmt 1 discriminator 2 view .LVU127
- 633 0038 1444     		add	r4, r4, r2
- 634              	.LVL47:
- 635              	.L46:
+ 604              		.loc 1 117 34 is_stmt 1 discriminator 2 view .LVU123
+ 605 0038 1444     		add	r4, r4, r2
+ 606              	.LVL46:
+ 607              	.L44:
  117:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 636              		.loc 1 117 24 discriminator 1 view .LVU128
- 637 003a B442     		cmp	r4, r6
- 638 003c 11D2     		bcs	.L56
- 639              	.LBB23:
+ 608              		.loc 1 117 24 discriminator 1 view .LVU124
+ 609 003a B442     		cmp	r4, r6
+ 610 003c 11D2     		bcs	.L54
+ 611              	.LBB23:
  118:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 640              		.loc 1 118 9 view .LVU129
+ 612              		.loc 1 118 9 view .LVU125
  118:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         LBA_t    lba        = sector + i;
- 641              		.loc 1 118 18 is_stmt 0 view .LVU130
- 642 003e 04EB070C 		add	ip, r4, r7
- 643              	.LVL48:
+ 613              		.loc 1 118 18 is_stmt 0 view .LVU126
+ 614 003e 04EB070C 		add	ip, r4, r7
+ 615              	.LVL47:
  119:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         uint32_t buf_offset = (uint32_t)(lba % FAT_BLOCKS_PER_SECTOR) * SX_FLASHDISK_BLOCK_SIZE;
- 644              		.loc 1 119 9 is_stmt 1 view .LVU131
- 645              	.LBB21:
- 646              	.LBI21:
+ 616              		.loc 1 119 9 is_stmt 1 view .LVU127
+ 617              	.LBB21:
+ 618              	.LBI21:
   25:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 647              		.loc 1 25 23 view .LVU132
- 648              	.LBB22:
+ 619              		.loc 1 25 23 view .LVU128
+ 620              	.LBB22:
   27:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 649              		.loc 1 27 5 view .LVU133
+ 621              		.loc 1 27 5 view .LVU129
   27:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 650              		.loc 1 27 26 is_stmt 0 view .LVU134
- 651 0042 4FEA1C1A 		lsr	r10, ip, #4
- 652              	.LVL49:
+ 622              		.loc 1 27 26 is_stmt 0 view .LVU130
+ 623 0042 4FEA1C1A 		lsr	r10, ip, #4
+ 624              	.LVL48:
   27:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 653              		.loc 1 27 26 view .LVU135
- 654              	.LBE22:
- 655              	.LBE21:
+ 625              		.loc 1 27 26 view .LVU131
+ 626              	.LBE22:
+ 627              	.LBE21:
  120:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 656              		.loc 1 120 9 is_stmt 1 view .LVU136
- 120:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 657              		.loc 1 120 31 is_stmt 0 view .LVU137
- 658 0046 0CF00F05 		and	r5, ip, #15
- 120:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 659              		.loc 1 120 18 view .LVU138
- 660 004a 6D02     		lsls	r5, r5, #9
- 661              	.LVL50:
- 122:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
- 662              		.loc 1 122 9 is_stmt 1 view .LVU139
- 122:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
- 663              		.loc 1 122 28 is_stmt 0 view .LVU140
- 664 004c 104B     		ldr	r3, .L57+12
- 665 004e 1B68     		ldr	r3, [r3]
- 122:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
- 666              		.loc 1 122 12 view .LVU141
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 19
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 15
 
 
- 667 0050 B3EB1C1F 		cmp	r3, ip, lsr #4
- 668 0054 E5D0     		beq	.L47
+ 628              		.loc 1 120 9 is_stmt 1 view .LVU132
+ 120:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
+ 629              		.loc 1 120 31 is_stmt 0 view .LVU133
+ 630 0046 0CF00F05 		and	r5, ip, #15
+ 120:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
+ 631              		.loc 1 120 18 view .LVU134
+ 632 004a 6D02     		lsls	r5, r5, #9
+ 633              	.LVL49:
+ 122:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
+ 634              		.loc 1 122 9 is_stmt 1 view .LVU135
+ 122:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
+ 635              		.loc 1 122 28 is_stmt 0 view .LVU136
+ 636 004c 104B     		ldr	r3, .L55+12
+ 637 004e 1B68     		ldr	r3, [r3]
+ 122:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
+ 638              		.loc 1 122 12 view .LVU137
+ 639 0050 B3EB1C1F 		cmp	r3, ip, lsr #4
+ 640 0054 E5D0     		beq	.L45
  123:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_load(fsect);
- 669              		.loc 1 123 13 is_stmt 1 view .LVU142
- 670 0056 FFF7FEFF 		bl	_cache_flush
- 671              	.LVL51:
+ 641              		.loc 1 123 13 is_stmt 1 view .LVU138
+ 642 0056 FFF7FEFF 		bl	_cache_flush
+ 643              	.LVL50:
  124:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         }
- 672              		.loc 1 124 13 view .LVU143
- 673 005a 5046     		mov	r0, r10
- 674 005c FFF7FEFF 		bl	_cache_load
- 675              	.LVL52:
- 676 0060 DFE7     		b	.L47
- 677              	.LVL53:
- 678              	.L56:
+ 644              		.loc 1 124 13 view .LVU139
+ 645 005a 5046     		mov	r0, r10
+ 646 005c FFF7FEFF 		bl	_cache_load
+ 647              	.LVL51:
+ 648 0060 DFE7     		b	.L45
+ 649              	.LVL52:
+ 650              	.L54:
  124:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         }
- 679              		.loc 1 124 13 is_stmt 0 view .LVU144
- 680              	.LBE23:
- 681              	.LBE19:
+ 651              		.loc 1 124 13 is_stmt 0 view .LVU140
+ 652              	.LBE23:
+ 653              	.LBE19:
  131:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     }
  132:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_pending_flush   = true;        
- 682              		.loc 1 132 5 is_stmt 1 view .LVU145
- 683              		.loc 1 132 23 is_stmt 0 view .LVU146
- 684 0062 0C4B     		ldr	r3, .L57+16
- 685 0064 0122     		movs	r2, #1
- 686 0066 1A70     		strb	r2, [r3]
+ 654              		.loc 1 132 5 is_stmt 1 view .LVU141
+ 655              		.loc 1 132 23 is_stmt 0 view .LVU142
+ 656 0062 0C4B     		ldr	r3, .L55+16
+ 657 0064 0122     		movs	r2, #1
+ 658 0066 1A70     		strb	r2, [r3]
  133:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_last_write_tick = HAL_GetTick();
- 687              		.loc 1 133 5 is_stmt 1 view .LVU147
- 688              		.loc 1 133 25 is_stmt 0 view .LVU148
- 689 0068 FFF7FEFF 		bl	HAL_GetTick
- 690              	.LVL54:
- 691              		.loc 1 133 23 discriminator 1 view .LVU149
- 692 006c 0A4B     		ldr	r3, .L57+20
- 693 006e 1860     		str	r0, [r3]
+ 659              		.loc 1 133 5 is_stmt 1 view .LVU143
+ 660              		.loc 1 133 25 is_stmt 0 view .LVU144
+ 661 0068 FFF7FEFF 		bl	HAL_GetTick
+ 662              	.LVL53:
+ 663              		.loc 1 133 23 discriminator 1 view .LVU145
+ 664 006c 0A4B     		ldr	r3, .L55+20
+ 665 006e 1860     		str	r0, [r3]
  134:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     return RES_OK;
- 694              		.loc 1 134 5 is_stmt 1 view .LVU150
- 695              		.loc 1 134 12 is_stmt 0 view .LVU151
- 696 0070 4846     		mov	r0, r9
- 697              	.LVL55:
- 698              	.L45:
+ 666              		.loc 1 134 5 is_stmt 1 view .LVU146
+ 667              		.loc 1 134 12 is_stmt 0 view .LVU147
+ 668 0070 4846     		mov	r0, r9
+ 669              	.LVL54:
+ 670              	.L43:
  135:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 699              		.loc 1 135 1 view .LVU152
- 700 0072 BDE8F087 		pop	{r4, r5, r6, r7, r8, r9, r10, pc}
- 701              	.LVL56:
- 702              	.L49:
- 703              	.LCFI10:
- 704              		.cfi_def_cfa_offset 0
- 705              		.cfi_restore 4
- 706              		.cfi_restore 5
- 707              		.cfi_restore 6
- 708              		.cfi_restore 7
- 709              		.cfi_restore 8
- 710              		.cfi_restore 9
- 711              		.cfi_restore 10
- 712              		.cfi_restore 14
+ 671              		.loc 1 135 1 view .LVU148
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 16
+
+
+ 672 0072 BDE8F087 		pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+ 673              	.LVL55:
+ 674              	.L47:
+ 675              	.LCFI9:
+ 676              		.cfi_def_cfa_offset 0
+ 677              		.cfi_restore 4
+ 678              		.cfi_restore 5
+ 679              		.cfi_restore 6
+ 680              		.cfi_restore 7
+ 681              		.cfi_restore 8
+ 682              		.cfi_restore 9
+ 683              		.cfi_restore 10
+ 684              		.cfi_restore 14
  113:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_initialized)                              return RES_NOTRDY;
- 713              		.loc 1 113 61 discriminator 1 view .LVU153
- 714 0076 0420     		movs	r0, #4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 20
+ 685              		.loc 1 113 61 discriminator 1 view .LVU149
+ 686 0076 0420     		movs	r0, #4
+ 687              	.LVL56:
+ 688              		.loc 1 135 1 view .LVU150
+ 689 0078 7047     		bx	lr
+ 690              	.LVL57:
+ 691              	.L48:
+ 692              	.LCFI10:
+ 693              		.cfi_def_cfa_offset 32
+ 694              		.cfi_offset 4, -32
+ 695              		.cfi_offset 5, -28
+ 696              		.cfi_offset 6, -24
+ 697              		.cfi_offset 7, -20
+ 698              		.cfi_offset 8, -16
+ 699              		.cfi_offset 9, -12
+ 700              		.cfi_offset 10, -8
+ 701              		.cfi_offset 14, -4
+ 114:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
+ 702              		.loc 1 114 61 discriminator 1 view .LVU151
+ 703 007a 0320     		movs	r0, #3
+ 704              	.LVL58:
+ 114:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
+ 705              		.loc 1 114 61 discriminator 1 view .LVU152
+ 706 007c F9E7     		b	.L43
+ 707              	.LVL59:
+ 708              	.L49:
+ 115:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
+ 709              		.loc 1 115 61 discriminator 1 view .LVU153
+ 710 007e 0420     		movs	r0, #4
+ 711              	.LVL60:
+ 115:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
+ 712              		.loc 1 115 61 discriminator 1 view .LVU154
+ 713 0080 F7E7     		b	.L43
+ 714              	.L56:
+ 715 0082 00BF     		.align	2
+ 716              	.L55:
+ 717 0084 00000000 		.word	s_initialized
+ 718 0088 00000000 		.word	s_cache_buf
+ 719 008c 00000000 		.word	s_cache_dirty
+ 720 0090 00000000 		.word	s_cache_sector
+ 721 0094 00000000 		.word	s_pending_flush
+ 722 0098 00000000 		.word	s_last_write_tick
+ 723              		.cfi_endproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 17
 
 
- 715              	.LVL57:
- 716              		.loc 1 135 1 view .LVU154
- 717 0078 7047     		bx	lr
- 718              	.LVL58:
- 719              	.L50:
- 720              	.LCFI11:
- 721              		.cfi_def_cfa_offset 32
- 722              		.cfi_offset 4, -32
- 723              		.cfi_offset 5, -28
- 724              		.cfi_offset 6, -24
- 725              		.cfi_offset 7, -20
- 726              		.cfi_offset 8, -16
- 727              		.cfi_offset 9, -12
- 728              		.cfi_offset 10, -8
- 729              		.cfi_offset 14, -4
- 114:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
- 730              		.loc 1 114 61 discriminator 1 view .LVU155
- 731 007a 0320     		movs	r0, #3
- 732              	.LVL59:
- 114:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (sector + count > SX_FLASHDISK_BLOCK_COUNT)   return RES_PARERR;
- 733              		.loc 1 114 61 discriminator 1 view .LVU156
- 734 007c F9E7     		b	.L45
- 735              	.LVL60:
- 736              	.L51:
- 115:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 737              		.loc 1 115 61 discriminator 1 view .LVU157
- 738 007e 0420     		movs	r0, #4
- 739              	.LVL61:
- 115:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
- 740              		.loc 1 115 61 discriminator 1 view .LVU158
- 741 0080 F7E7     		b	.L45
- 742              	.L58:
- 743 0082 00BF     		.align	2
- 744              	.L57:
- 745 0084 00000000 		.word	s_initialized
- 746 0088 00000000 		.word	s_cache_buf
- 747 008c 00000000 		.word	s_cache_dirty
- 748 0090 00000000 		.word	s_cache_sector
- 749 0094 00000000 		.word	s_pending_flush
- 750 0098 00000000 		.word	s_last_write_tick
- 751              		.cfi_endproc
- 752              	.LFE346:
- 754              		.section	.text.sx_diskio_process,"ax",%progbits
- 755              		.align	1
- 756              		.global	sx_diskio_process
- 757              		.syntax unified
- 758              		.thumb
- 759              		.thumb_func
- 761              	sx_diskio_process:
- 762              	.LFB347:
+ 724              	.LFE344:
+ 726              		.section	.text.sx_diskio_process,"ax",%progbits
+ 727              		.align	1
+ 728              		.global	sx_diskio_process
+ 729              		.syntax unified
+ 730              		.thumb
+ 731              		.thumb_func
+ 733              	sx_diskio_process:
+ 734              	.LFB345:
  136:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  137:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** void sx_diskio_process(void)
  138:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 763              		.loc 1 138 1 is_stmt 1 view -0
- 764              		.cfi_startproc
- 765              		@ args = 0, pretend = 0, frame = 0
- 766              		@ frame_needed = 0, uses_anonymous_args = 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 21
-
-
- 767 0000 08B5     		push	{r3, lr}
- 768              	.LCFI12:
- 769              		.cfi_def_cfa_offset 8
- 770              		.cfi_offset 3, -8
- 771              		.cfi_offset 14, -4
+ 735              		.loc 1 138 1 is_stmt 1 view -0
+ 736              		.cfi_startproc
+ 737              		@ args = 0, pretend = 0, frame = 0
+ 738              		@ frame_needed = 0, uses_anonymous_args = 0
+ 739 0000 08B5     		push	{r3, lr}
+ 740              	.LCFI11:
+ 741              		.cfi_def_cfa_offset 8
+ 742              		.cfi_offset 3, -8
+ 743              		.cfi_offset 14, -4
  139:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_pending_flush) return;
- 772              		.loc 1 139 5 view .LVU160
- 773              		.loc 1 139 9 is_stmt 0 view .LVU161
- 774 0002 094B     		ldr	r3, .L63
- 775 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
- 776              		.loc 1 139 8 view .LVU162
- 777 0006 03B9     		cbnz	r3, .L62
- 778              	.L59:
+ 744              		.loc 1 139 5 view .LVU156
+ 745              		.loc 1 139 9 is_stmt 0 view .LVU157
+ 746 0002 094B     		ldr	r3, .L61
+ 747 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 748              		.loc 1 139 8 view .LVU158
+ 749 0006 03B9     		cbnz	r3, .L60
+ 750              	.L57:
  140:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if ((HAL_GetTick() - s_last_write_tick) < 500) return; 
  141:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  142:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     _cache_flush();
  143:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_pending_flush = false;
  144:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 779              		.loc 1 144 1 view .LVU163
- 780 0008 08BD     		pop	{r3, pc}
- 781              	.L62:
+ 751              		.loc 1 144 1 view .LVU159
+ 752 0008 08BD     		pop	{r3, pc}
+ 753              	.L60:
  140:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if ((HAL_GetTick() - s_last_write_tick) < 500) return; 
- 782              		.loc 1 140 5 is_stmt 1 view .LVU164
+ 754              		.loc 1 140 5 is_stmt 1 view .LVU160
  140:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if ((HAL_GetTick() - s_last_write_tick) < 500) return; 
- 783              		.loc 1 140 10 is_stmt 0 view .LVU165
- 784 000a FFF7FEFF 		bl	HAL_GetTick
- 785              	.LVL62:
+ 755              		.loc 1 140 10 is_stmt 0 view .LVU161
+ 756 000a FFF7FEFF 		bl	HAL_GetTick
+ 757              	.LVL61:
  140:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if ((HAL_GetTick() - s_last_write_tick) < 500) return; 
- 786              		.loc 1 140 24 discriminator 1 view .LVU166
- 787 000e 074B     		ldr	r3, .L63+4
- 788 0010 1B68     		ldr	r3, [r3]
- 789 0012 C01A     		subs	r0, r0, r3
+ 758              		.loc 1 140 24 discriminator 1 view .LVU162
+ 759 000e 074B     		ldr	r3, .L61+4
+ 760 0010 1B68     		ldr	r3, [r3]
+ 761 0012 C01A     		subs	r0, r0, r3
  140:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if ((HAL_GetTick() - s_last_write_tick) < 500) return; 
- 790              		.loc 1 140 8 discriminator 1 view .LVU167
- 791 0014 B0F5FA7F 		cmp	r0, #500
- 792 0018 F6D3     		bcc	.L59
+ 762              		.loc 1 140 8 discriminator 1 view .LVU163
+ 763 0014 B0F5FA7F 		cmp	r0, #500
+ 764 0018 F6D3     		bcc	.L57
  142:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     s_pending_flush = false;
- 793              		.loc 1 142 5 is_stmt 1 view .LVU168
- 794 001a FFF7FEFF 		bl	_cache_flush
- 795              	.LVL63:
+ 765              		.loc 1 142 5 is_stmt 1 view .LVU164
+ 766 001a FFF7FEFF 		bl	_cache_flush
+ 767              	.LVL62:
  143:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 796              		.loc 1 143 5 view .LVU169
- 143:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
- 797              		.loc 1 143 21 is_stmt 0 view .LVU170
- 798 001e 024B     		ldr	r3, .L63
- 799 0020 0022     		movs	r2, #0
- 800 0022 1A70     		strb	r2, [r3]
- 801 0024 F0E7     		b	.L59
- 802              	.L64:
- 803 0026 00BF     		.align	2
- 804              	.L63:
- 805 0028 00000000 		.word	s_pending_flush
- 806 002c 00000000 		.word	s_last_write_tick
- 807              		.cfi_endproc
- 808              	.LFE347:
- 810              		.section	.text.disk_ioctl,"ax",%progbits
- 811              		.align	1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 22
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 18
 
 
- 812              		.global	disk_ioctl
- 813              		.syntax unified
- 814              		.thumb
- 815              		.thumb_func
- 817              	disk_ioctl:
- 818              	.LVL64:
- 819              	.LFB348:
+ 768              		.loc 1 143 5 view .LVU165
+ 143:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }
+ 769              		.loc 1 143 21 is_stmt 0 view .LVU166
+ 770 001e 024B     		ldr	r3, .L61
+ 771 0020 0022     		movs	r2, #0
+ 772 0022 1A70     		strb	r2, [r3]
+ 773 0024 F0E7     		b	.L57
+ 774              	.L62:
+ 775 0026 00BF     		.align	2
+ 776              	.L61:
+ 777 0028 00000000 		.word	s_pending_flush
+ 778 002c 00000000 		.word	s_last_write_tick
+ 779              		.cfi_endproc
+ 780              	.LFE345:
+ 782              		.section	.text.disk_ioctl,"ax",%progbits
+ 783              		.align	1
+ 784              		.global	disk_ioctl
+ 785              		.syntax unified
+ 786              		.thumb
+ 787              		.thumb_func
+ 789              	disk_ioctl:
+ 790              	.LVL63:
+ 791              	.LFB346:
  145:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  146:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff)
  147:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** {
- 820              		.loc 1 147 1 is_stmt 1 view -0
- 821              		.cfi_startproc
- 822              		@ args = 0, pretend = 0, frame = 0
- 823              		@ frame_needed = 0, uses_anonymous_args = 0
+ 792              		.loc 1 147 1 is_stmt 1 view -0
+ 793              		.cfi_startproc
+ 794              		@ args = 0, pretend = 0, frame = 0
+ 795              		@ frame_needed = 0, uses_anonymous_args = 0
  148:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0)      return RES_PARERR;
- 824              		.loc 1 148 5 view .LVU172
- 825              		.loc 1 148 8 is_stmt 0 view .LVU173
- 826 0000 C8B9     		cbnz	r0, .L72
+ 796              		.loc 1 148 5 view .LVU168
+ 797              		.loc 1 148 8 is_stmt 0 view .LVU169
+ 798 0000 C8B9     		cbnz	r0, .L70
  147:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (pdrv != 0)      return RES_PARERR;
- 827              		.loc 1 147 1 view .LVU174
- 828 0002 10B5     		push	{r4, lr}
- 829              	.LCFI13:
- 830              		.cfi_def_cfa_offset 8
- 831              		.cfi_offset 4, -8
- 832              		.cfi_offset 14, -4
- 833 0004 0C46     		mov	r4, r1
+ 799              		.loc 1 147 1 view .LVU170
+ 800 0002 10B5     		push	{r4, lr}
+ 801              	.LCFI12:
+ 802              		.cfi_def_cfa_offset 8
+ 803              		.cfi_offset 4, -8
+ 804              		.cfi_offset 14, -4
+ 805 0004 0C46     		mov	r4, r1
  149:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_initialized) return RES_NOTRDY;
- 834              		.loc 1 149 5 is_stmt 1 view .LVU175
- 835              		.loc 1 149 9 is_stmt 0 view .LVU176
- 836 0006 0F49     		ldr	r1, .L79
- 837              	.LVL65:
- 838              		.loc 1 149 9 view .LVU177
- 839 0008 0978     		ldrb	r1, [r1]	@ zero_extendqisi2
- 840              		.loc 1 149 8 view .LVU178
- 841 000a B1B1     		cbz	r1, .L73
+ 806              		.loc 1 149 5 is_stmt 1 view .LVU171
+ 807              		.loc 1 149 9 is_stmt 0 view .LVU172
+ 808 0006 0F49     		ldr	r1, .L77
+ 809              	.LVL64:
+ 810              		.loc 1 149 9 view .LVU173
+ 811 0008 0978     		ldrb	r1, [r1]	@ zero_extendqisi2
+ 812              		.loc 1 149 8 view .LVU174
+ 813 000a B1B1     		cbz	r1, .L71
  150:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  151:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     switch (cmd) {
- 842              		.loc 1 151 5 is_stmt 1 view .LVU179
- 843 000c 032C     		cmp	r4, #3
- 844 000e 16D8     		bhi	.L74
- 845 0010 DFE804F0 		tbb	[pc, r4]
- 846              	.L68:
- 847 0014 02       		.byte	(.L71-.L68)/2
- 848 0015 06       		.byte	(.L70-.L68)/2
- 849 0016 0A       		.byte	(.L69-.L68)/2
- 850 0017 0E       		.byte	(.L67-.L68)/2
- 851              		.p2align 1
- 852              	.L71:
+ 814              		.loc 1 151 5 is_stmt 1 view .LVU175
+ 815 000c 032C     		cmp	r4, #3
+ 816 000e 16D8     		bhi	.L72
+ 817 0010 DFE804F0 		tbb	[pc, r4]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 19
+
+
+ 818              	.L66:
+ 819 0014 02       		.byte	(.L69-.L66)/2
+ 820 0015 06       		.byte	(.L68-.L66)/2
+ 821 0016 0A       		.byte	(.L67-.L66)/2
+ 822 0017 0E       		.byte	(.L65-.L66)/2
+ 823              		.p2align 1
+ 824              	.L69:
  152:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         case CTRL_SYNC:
  153:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             _cache_flush();
- 853              		.loc 1 153 13 view .LVU180
- 854 0018 FFF7FEFF 		bl	_cache_flush
- 855              	.LVL66:
+ 825              		.loc 1 153 13 view .LVU176
+ 826 0018 FFF7FEFF 		bl	_cache_flush
+ 827              	.LVL65:
  154:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             return RES_OK;
- 856              		.loc 1 154 13 view .LVU181
- 857              		.loc 1 154 20 is_stmt 0 view .LVU182
- 858 001c 2046     		mov	r0, r4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 23
-
-
- 859 001e 0DE0     		b	.L66
- 860              	.LVL67:
- 861              	.L70:
+ 828              		.loc 1 154 13 view .LVU177
+ 829              		.loc 1 154 20 is_stmt 0 view .LVU178
+ 830 001c 2046     		mov	r0, r4
+ 831 001e 0DE0     		b	.L64
+ 832              	.LVL66:
+ 833              	.L68:
  155:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  156:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         case GET_SECTOR_COUNT:
  157:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             *(LBA_t *)buff = SX_FLASHDISK_BLOCK_COUNT;
- 862              		.loc 1 157 13 is_stmt 1 view .LVU183
- 863              		.loc 1 157 28 is_stmt 0 view .LVU184
- 864 0020 4FF40071 		mov	r1, #512
- 865 0024 1160     		str	r1, [r2]
+ 834              		.loc 1 157 13 is_stmt 1 view .LVU179
+ 835              		.loc 1 157 28 is_stmt 0 view .LVU180
+ 836 0020 4FF40071 		mov	r1, #512
+ 837 0024 1160     		str	r1, [r2]
  158:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             return RES_OK;
- 866              		.loc 1 158 13 is_stmt 1 view .LVU185
- 867              		.loc 1 158 20 is_stmt 0 view .LVU186
- 868 0026 09E0     		b	.L66
- 869              	.L69:
+ 838              		.loc 1 158 13 is_stmt 1 view .LVU181
+ 839              		.loc 1 158 20 is_stmt 0 view .LVU182
+ 840 0026 09E0     		b	.L64
+ 841              	.L67:
  159:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  160:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         case GET_SECTOR_SIZE:
  161:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             *(WORD *)buff = SX_FLASHDISK_BLOCK_SIZE;
- 870              		.loc 1 161 13 is_stmt 1 view .LVU187
- 871              		.loc 1 161 27 is_stmt 0 view .LVU188
- 872 0028 4FF40071 		mov	r1, #512
- 873 002c 1180     		strh	r1, [r2]	@ movhi
+ 842              		.loc 1 161 13 is_stmt 1 view .LVU183
+ 843              		.loc 1 161 27 is_stmt 0 view .LVU184
+ 844 0028 4FF40071 		mov	r1, #512
+ 845 002c 1180     		strh	r1, [r2]	@ movhi
  162:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             return RES_OK;
- 874              		.loc 1 162 13 is_stmt 1 view .LVU189
- 875              		.loc 1 162 20 is_stmt 0 view .LVU190
- 876 002e 05E0     		b	.L66
- 877              	.L67:
+ 846              		.loc 1 162 13 is_stmt 1 view .LVU185
+ 847              		.loc 1 162 20 is_stmt 0 view .LVU186
+ 848 002e 05E0     		b	.L64
+ 849              	.L65:
  163:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  164:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         case GET_BLOCK_SIZE:
  165:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             *(DWORD *)buff = FAT_BLOCKS_PER_SECTOR;
- 878              		.loc 1 165 13 is_stmt 1 view .LVU191
- 879              		.loc 1 165 28 is_stmt 0 view .LVU192
- 880 0030 1021     		movs	r1, #16
- 881 0032 1160     		str	r1, [r2]
+ 850              		.loc 1 165 13 is_stmt 1 view .LVU187
+ 851              		.loc 1 165 28 is_stmt 0 view .LVU188
+ 852 0030 1021     		movs	r1, #16
+ 853 0032 1160     		str	r1, [r2]
  166:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             return RES_OK;
- 882              		.loc 1 166 13 is_stmt 1 view .LVU193
- 883              		.loc 1 166 20 is_stmt 0 view .LVU194
- 884 0034 02E0     		b	.L66
- 885              	.LVL68:
- 886              	.L72:
- 887              	.LCFI14:
- 888              		.cfi_def_cfa_offset 0
- 889              		.cfi_restore 4
- 890              		.cfi_restore 14
+ 854              		.loc 1 166 13 is_stmt 1 view .LVU189
+ 855              		.loc 1 166 20 is_stmt 0 view .LVU190
+ 856 0034 02E0     		b	.L64
+ 857              	.LVL67:
+ 858              	.L70:
+ 859              	.LCFI13:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 20
+
+
+ 860              		.cfi_def_cfa_offset 0
+ 861              		.cfi_restore 4
+ 862              		.cfi_restore 14
  148:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_initialized) return RES_NOTRDY;
- 891              		.loc 1 148 32 discriminator 1 view .LVU195
- 892 0036 0420     		movs	r0, #4
- 893              	.LVL69:
+ 863              		.loc 1 148 32 discriminator 1 view .LVU191
+ 864 0036 0420     		movs	r0, #4
+ 865              	.LVL68:
  167:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** 
  168:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****         default:
  169:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****             return RES_PARERR;
  170:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     }
  171:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c **** }...
- 894              		.loc 1 171 1 view .LVU196
- 895 0038 7047     		bx	lr
- 896              	.LVL70:
- 897              	.L73:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 24
-
-
- 898              	.LCFI15:
- 899              		.cfi_def_cfa_offset 8
- 900              		.cfi_offset 4, -8
- 901              		.cfi_offset 14, -4
+ 866              		.loc 1 171 1 view .LVU192
+ 867 0038 7047     		bx	lr
+ 868              	.LVL69:
+ 869              	.L71:
+ 870              	.LCFI14:
+ 871              		.cfi_def_cfa_offset 8
+ 872              		.cfi_offset 4, -8
+ 873              		.cfi_offset 14, -4
  149:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     if (!s_initialized) return RES_NOTRDY;
- 902              		.loc 1 149 32 discriminator 1 view .LVU197
- 903 003a 0320     		movs	r0, #3
- 904              	.LVL71:
- 905              	.L66:
- 906              		.loc 1 171 1 view .LVU198
- 907 003c 10BD     		pop	{r4, pc}
- 908              	.LVL72:
- 909              	.L74:
+ 874              		.loc 1 149 32 discriminator 1 view .LVU193
+ 875 003a 0320     		movs	r0, #3
+ 876              	.LVL70:
+ 877              	.L64:
+ 878              		.loc 1 171 1 view .LVU194
+ 879 003c 10BD     		pop	{r4, pc}
+ 880              	.LVL71:
+ 881              	.L72:
  151:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     switch (cmd) {
- 910              		.loc 1 151 5 view .LVU199
- 911 003e 0420     		movs	r0, #4
- 912              	.LVL73:
+ 882              		.loc 1 151 5 view .LVU195
+ 883 003e 0420     		movs	r0, #4
+ 884              	.LVL72:
  151:SynaptiX_FDK/services/sx_fatfs/sx_diskio.c ****     switch (cmd) {
- 913              		.loc 1 151 5 view .LVU200
- 914 0040 FCE7     		b	.L66
- 915              	.L80:
- 916 0042 00BF     		.align	2
- 917              	.L79:
- 918 0044 00000000 		.word	s_initialized
- 919              		.cfi_endproc
- 920              	.LFE348:
- 922              		.section	.bss.s_pending_flush,"aw",%nobits
- 925              	s_pending_flush:
- 926 0000 00       		.space	1
- 927              		.section	.bss.s_last_write_tick,"aw",%nobits
- 928              		.align	2
- 931              	s_last_write_tick:
- 932 0000 00000000 		.space	4
- 933              		.section	.bss.s_initialized,"aw",%nobits
- 936              	s_initialized:
- 937 0000 00       		.space	1
- 938              		.section	.bss.s_cache_dirty,"aw",%nobits
- 941              	s_cache_dirty:
- 942 0000 00       		.space	1
- 943              		.section	.data.s_cache_sector,"aw"
- 944              		.align	2
- 947              	s_cache_sector:
- 948 0000 FFFFFFFF 		.word	-1
- 949              		.section	.bss.s_cache_buf,"aw",%nobits
- 950              		.align	2
- 953              	s_cache_buf:
- 954 0000 00000000 		.space	8192
- 954      00000000 
- 954      00000000 
- 954      00000000 
- 954      00000000 
- 955              		.text
- 956              	.Letext0:
- 957              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 958              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 959              		.file 5 "SynaptiX_FDK/services/fatfs/ff.h"
- 960              		.file 6 "SynaptiX_FDK/services/fatfs/diskio.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 25
+ 885              		.loc 1 151 5 view .LVU196
+ 886 0040 FCE7     		b	.L64
+ 887              	.L78:
+ 888 0042 00BF     		.align	2
+ 889              	.L77:
+ 890 0044 00000000 		.word	s_initialized
+ 891              		.cfi_endproc
+ 892              	.LFE346:
+ 894              		.section	.bss.s_pending_flush,"aw",%nobits
+ 897              	s_pending_flush:
+ 898 0000 00       		.space	1
+ 899              		.section	.bss.s_last_write_tick,"aw",%nobits
+ 900              		.align	2
+ 903              	s_last_write_tick:
+ 904 0000 00000000 		.space	4
+ 905              		.section	.bss.s_initialized,"aw",%nobits
+ 908              	s_initialized:
+ 909 0000 00       		.space	1
+ 910              		.section	.bss.s_cache_dirty,"aw",%nobits
+ 913              	s_cache_dirty:
+ 914 0000 00       		.space	1
+ 915              		.section	.data.s_cache_sector,"aw"
+ 916              		.align	2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 21
 
 
- 961              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
- 962              		.file 8 "SynaptiX_FDK/services/logger/logger.h"
- 963              		.file 9 "SynaptiX_FDK/components/peripherals/flash/sx_flash.h"
- 964              		.file 10 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
- 965              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
- 966              		.file 12 "<built-in>"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 26
+ 919              	s_cache_sector:
+ 920 0000 FFFFFFFF 		.word	-1
+ 921              		.section	.bss.s_cache_buf,"aw",%nobits
+ 922              		.align	2
+ 925              	s_cache_buf:
+ 926 0000 00000000 		.space	8192
+ 926      00000000 
+ 926      00000000 
+ 926      00000000 
+ 926      00000000 
+ 927              		.text
+ 928              	.Letext0:
+ 929              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 930              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 931              		.file 4 "SynaptiX_FDK/services/fatfs/ff.h"
+ 932              		.file 5 "SynaptiX_FDK/services/fatfs/diskio.h"
+ 933              		.file 6 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 934              		.file 7 "SynaptiX_FDK/services/logger/logger.h"
+ 935              		.file 8 "SynaptiX_FDK/components/peripherals/flash/sx_flash.h"
+ 936              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ 937              		.file 10 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 938              		.file 11 "<built-in>"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s 			page 22
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 sx_diskio.c
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:22     .text._cache_load:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:27     .text._cache_load:00000000 _cache_load
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:72     .text._cache_load:00000024 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:953    .bss.s_cache_buf:00000000 s_cache_buf
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:947    .data.s_cache_sector:00000000 s_cache_sector
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:941    .bss.s_cache_dirty:00000000 s_cache_dirty
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:79     .rodata._cache_flush.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:98     .text._cache_flush:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:103    .text._cache_flush:00000000 _cache_flush
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:214    .text._cache_flush:00000084 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:227    .text.sx_gettick:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:233    .text.sx_gettick:00000000 sx_gettick
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:255    .text.sx_diskio_get_block_count:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:261    .text.sx_diskio_get_block_count:00000000 sx_diskio_get_block_count
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:276    .text.sx_diskio_get_buffer:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:282    .text.sx_diskio_get_buffer:00000000 sx_diskio_get_buffer
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:297    .text.disk_initialize:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:303    .text.disk_initialize:00000000 disk_initialize
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:341    .text.disk_initialize:0000001c $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:936    .bss.s_initialized:00000000 s_initialized
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:348    .text.disk_status:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:354    .text.disk_status:00000000 disk_status
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:383    .text.disk_status:00000010 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:388    .text.disk_read:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:394    .text.disk_read:00000000 disk_read
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:558    .text.disk_read:00000078 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:565    .text.disk_write:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:571    .text.disk_write:00000000 disk_write
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:745    .text.disk_write:00000084 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:925    .bss.s_pending_flush:00000000 s_pending_flush
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:931    .bss.s_last_write_tick:00000000 s_last_write_tick
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:755    .text.sx_diskio_process:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:761    .text.sx_diskio_process:00000000 sx_diskio_process
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:805    .text.sx_diskio_process:00000028 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:811    .text.disk_ioctl:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:817    .text.disk_ioctl:00000000 disk_ioctl
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:847    .text.disk_ioctl:00000014 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:851    .text.disk_ioctl:00000018 $t
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:918    .text.disk_ioctl:00000044 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:926    .bss.s_pending_flush:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:928    .bss.s_last_write_tick:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:937    .bss.s_initialized:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:942    .bss.s_cache_dirty:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:944    .data.s_cache_sector:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s:950    .bss.s_cache_buf:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:22     .text._cache_load:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:27     .text._cache_load:00000000 _cache_load
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:72     .text._cache_load:00000024 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:925    .bss.s_cache_buf:00000000 s_cache_buf
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:919    .data.s_cache_sector:00000000 s_cache_sector
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:913    .bss.s_cache_dirty:00000000 s_cache_dirty
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:79     .rodata._cache_flush.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:98     .text._cache_flush:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:103    .text._cache_flush:00000000 _cache_flush
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:214    .text._cache_flush:00000084 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:227    .text.sx_diskio_get_block_count:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:233    .text.sx_diskio_get_block_count:00000000 sx_diskio_get_block_count
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:248    .text.sx_diskio_get_buffer:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:254    .text.sx_diskio_get_buffer:00000000 sx_diskio_get_buffer
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:269    .text.disk_initialize:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:275    .text.disk_initialize:00000000 disk_initialize
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:313    .text.disk_initialize:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:908    .bss.s_initialized:00000000 s_initialized
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:320    .text.disk_status:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:326    .text.disk_status:00000000 disk_status
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:355    .text.disk_status:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:360    .text.disk_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:366    .text.disk_read:00000000 disk_read
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:530    .text.disk_read:00000078 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:537    .text.disk_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:543    .text.disk_write:00000000 disk_write
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:717    .text.disk_write:00000084 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:897    .bss.s_pending_flush:00000000 s_pending_flush
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:903    .bss.s_last_write_tick:00000000 s_last_write_tick
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:727    .text.sx_diskio_process:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:733    .text.sx_diskio_process:00000000 sx_diskio_process
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:777    .text.sx_diskio_process:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:783    .text.disk_ioctl:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:789    .text.disk_ioctl:00000000 disk_ioctl
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:819    .text.disk_ioctl:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:823    .text.disk_ioctl:00000018 $t
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:890    .text.disk_ioctl:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:898    .bss.s_pending_flush:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:900    .bss.s_last_write_tick:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:909    .bss.s_initialized:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:914    .bss.s_cache_dirty:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:916    .data.s_cache_sector:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccDIjahM.s:922    .bss.s_cache_buf:00000000 $d
 
 UNDEFINED SYMBOLS
 sx_flash_read
@@ -1505,8 +1279,5 @@ sx_flash_unlock
 sx_flash_erase
 sx_flash_write
 sx_flash_lock
-HAL_GetTick
 memcpy
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0npQ5Q.s 			page 27
-
-
+HAL_GetTick

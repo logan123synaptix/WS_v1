@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
   26:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
   27:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio{
   28:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     sx_gpio_ops_t *ops;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 2
 
 
   29:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void *pDriver;
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
   68              		.loc 2 45 9 is_stmt 0 view .LVU14
   69              	.LBE7:
   46:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 3
 
 
   47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     return -1;
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
   23:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static gas_sensor_rx_state_t s_rx_state;
   24:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static uint8_t s_rx_buf[9];
   25:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static uint8_t s_rx_count;             /* bytes collected so far into s_rx_buf */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 4
 
 
   26:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  135 0012 F8D9     		bls	.L9
  136              	.LBE9:
   39:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 5
 
 
   40:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     return (uint8_t)(~sum + 1);
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  184 001a 00BF     		.align	2
  185              	.L12:
  186 001c 00000000 		.word	s_mux_s0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 6
 
 
  187 0020 00000000 		.word	s_mux_s1
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
   65:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].unitPPB = 0;
   66:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].timeout = 0;
   67:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         memset(&gas_sensor[i].Frame, 0, sizeof(gas_sensor[i].Frame));
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 7
 
 
   68:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  233              		.loc 1 101 5 is_stmt 1 view .LVU48
  234              		.loc 1 101 21 is_stmt 0 view .LVU49
  235 000a 237A     		ldrb	r3, [r4, #8]	@ zero_extendqisi2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 8
 
 
  236              		.loc 1 101 8 view .LVU50
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  278              	.L21:
  109:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].type == type) {
  279              		.loc 1 109 48 discriminator 2 view .LVU67
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 9
 
 
  280              	.LBE10:
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  325 006e 0B4A     		ldr	r2, .L24+16
  326 0070 0949     		ldr	r1, .L24+12
  327 0072 0320     		movs	r0, #3
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 10
 
 
  328 0074 FFF7FEFF 		bl	log_func
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  374      69616C69 
  374      7A696E67 
  374      00
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 11
 
 
  375              		.section	.text.gas_sensor_init,"ax",%progbits
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  421 001a 4FF0000C 		mov	ip, #0
   61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
  422              		.loc 1 61 5 view .LVU101
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 12
 
 
  423 001e 1AE0     		b	.L27
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  461              	.L27:
   61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
  462              		.loc 1 61 27 is_stmt 1 discriminator 1 view .LVU118
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 13
 
 
  463 0056 BCF1040F 		cmp	ip, #4
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  502              		.loc 2 35 5 is_stmt 1 view .LVU133
   35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
  503              		.loc 2 35 19 is_stmt 0 view .LVU134
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 14
 
 
  504 0078 5F60     		str	r7, [r3, #4]
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
   85:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
  543              		.loc 1 85 1 is_stmt 0 view .LVU150
  544 00a2 02B0     		add	sp, sp, #8
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 15
 
 
  545              	.LCFI7:
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  594 000a 0020     		movs	r0, #0
   90:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
  595              		.loc 1 90 1 view .LVU158
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 16
 
 
  596 000c 7047     		bx	lr
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  139:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint8_t byte;
  634              		.loc 1 139 10 is_stmt 0 view .LVU164
  635 0006 0025     		movs	r5, #0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 17
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 17
 
 
  636              		.loc 1 141 11 view .LVU165
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  663 0022 0023     		movs	r3, #0
  664 0024 384A     		ldr	r2, .L56+8
  665 0026 1370     		strb	r3, [r2]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 18
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 18
 
 
  169:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             s_rx_count = 0;
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  708 0062 2749     		ldr	r1, .L56
  709 0064 8854     		strb	r0, [r1, r2]
  158:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 if (ze12a_handle_frame(s_rx_buf)) {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 19
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 19
 
 
  710              		.loc 1 158 13 is_stmt 1 view .LVU190
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  746 008c 15B9     		cbnz	r5, .L46
  747              		.loc 1 180 25 discriminator 1 view .LVU203
  748 008e B3F5FA6F 		cmp	r3, #2000
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 20
 
 
  749 0092 11D3     		bcc	.L47
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  195:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].timeout > time_stamp_ms) {
  196:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout -= time_stamp_ms;
  197:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         } else {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 21
 
 
  198:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout = 0;
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  200:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         }
  201:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
  202:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 22
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 22
 
 
  831              		.loc 1 202 1 view .LVU230
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  882              		.align	1
  883              		.global	gas_sensor_start_calibration
  884              		.syntax unified
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 23
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 23
 
 
  885              		.thumb
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  941              		.section	.bss.s_mux_s0,"aw",%nobits
  942              		.align	2
  945              	s_mux_s0:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 24
 
 
  946 0000 00000000 		.space	12
@@ -1420,57 +1420,57 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
  976              		.file 8 "SynaptiX_FDK/components/modules/ze12a/ze12a.h"
  977              		.file 9 "SynaptiX_FDK/services/logger/logger.h"
  978              		.file 10 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 25
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s 			page 25
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 ze12a.c
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:22     .text.sx_gpio_write:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:27     .text.sx_gpio_write:00000000 sx_gpio_write
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:90     .text.ze12a_checksum:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:95     .text.ze12a_checksum:00000000 ze12a_checksum
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:148    .text.ze12a_select_mux_channel:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:153    .text.ze12a_select_mux_channel:00000000 ze12a_select_mux_channel
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:186    .text.ze12a_select_mux_channel:0000001c $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:945    .bss.s_mux_s0:00000000 s_mux_s0
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:939    .bss.s_mux_s1:00000000 s_mux_s1
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:192    .rodata.ze12a_handle_frame.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:205    .text.ze12a_handle_frame:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:210    .text.ze12a_handle_frame:00000000 ze12a_handle_frame
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:362    .text.ze12a_handle_frame:0000008c $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:958    .bss.gas_sensor:00000000 gas_sensor
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:928    .bss.s_mux_channel:00000000 s_mux_channel
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:372    .rodata.gas_sensor_init.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:376    .text.gas_sensor_init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:382    .text.gas_sensor_init:00000000 gas_sensor_init
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:554    .text.gas_sensor_init:000000a8 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:951    .bss.s_comm:00000000 s_comm
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:923    .bss.s_channel_dwell_ms:00000000 s_channel_dwell_ms
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:917    .bss.s_rx_state:00000000 s_rx_state
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:906    .bss.s_rx_count:00000000 s_rx_count
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:933    .bss.s_initialized:00000000 s_initialized
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:570    .text.gas_sensor_get_uart:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:576    .text.gas_sensor_get_uart:00000000 gas_sensor_get_uart
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:600    .text.gas_sensor_get_uart:00000010 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:606    .text.gas_sensor_poll:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:612    .text.gas_sensor_poll:00000000 gas_sensor_poll
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:842    .text.gas_sensor_poll:00000100 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:912    .bss.s_rx_buf:00000000 s_rx_buf
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:853    .text.gas_sensor_read_value:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:859    .text.gas_sensor_read_value:00000000 gas_sensor_read_value
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:882    .text.gas_sensor_start_calibration:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:888    .text.gas_sensor_start_calibration:00000000 gas_sensor_start_calibration
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:907    .bss.s_rx_count:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:909    .bss.s_rx_buf:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:918    .bss.s_rx_state:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:920    .bss.s_channel_dwell_ms:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:929    .bss.s_mux_channel:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:934    .bss.s_initialized:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:936    .bss.s_mux_s1:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:942    .bss.s_mux_s0:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:948    .bss.s_comm:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:955    .bss.gas_sensor:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:961    .rodata:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:22     .text.sx_gpio_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:27     .text.sx_gpio_write:00000000 sx_gpio_write
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:90     .text.ze12a_checksum:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:95     .text.ze12a_checksum:00000000 ze12a_checksum
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:148    .text.ze12a_select_mux_channel:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:153    .text.ze12a_select_mux_channel:00000000 ze12a_select_mux_channel
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:186    .text.ze12a_select_mux_channel:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:945    .bss.s_mux_s0:00000000 s_mux_s0
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:939    .bss.s_mux_s1:00000000 s_mux_s1
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:192    .rodata.ze12a_handle_frame.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:205    .text.ze12a_handle_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:210    .text.ze12a_handle_frame:00000000 ze12a_handle_frame
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:362    .text.ze12a_handle_frame:0000008c $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:958    .bss.gas_sensor:00000000 gas_sensor
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:928    .bss.s_mux_channel:00000000 s_mux_channel
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:372    .rodata.gas_sensor_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:376    .text.gas_sensor_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:382    .text.gas_sensor_init:00000000 gas_sensor_init
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:554    .text.gas_sensor_init:000000a8 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:951    .bss.s_comm:00000000 s_comm
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:923    .bss.s_channel_dwell_ms:00000000 s_channel_dwell_ms
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:917    .bss.s_rx_state:00000000 s_rx_state
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:906    .bss.s_rx_count:00000000 s_rx_count
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:933    .bss.s_initialized:00000000 s_initialized
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:570    .text.gas_sensor_get_uart:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:576    .text.gas_sensor_get_uart:00000000 gas_sensor_get_uart
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:600    .text.gas_sensor_get_uart:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:606    .text.gas_sensor_poll:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:612    .text.gas_sensor_poll:00000000 gas_sensor_poll
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:842    .text.gas_sensor_poll:00000100 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:912    .bss.s_rx_buf:00000000 s_rx_buf
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:853    .text.gas_sensor_read_value:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:859    .text.gas_sensor_read_value:00000000 gas_sensor_read_value
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:882    .text.gas_sensor_start_calibration:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:888    .text.gas_sensor_start_calibration:00000000 gas_sensor_start_calibration
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:907    .bss.s_rx_count:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:909    .bss.s_rx_buf:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:918    .bss.s_rx_state:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:920    .bss.s_channel_dwell_ms:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:929    .bss.s_mux_channel:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:934    .bss.s_initialized:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:936    .bss.s_mux_s1:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:942    .bss.s_mux_s0:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:948    .bss.s_comm:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:955    .bss.gas_sensor:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccBsEfSd.s:961    .rodata:00000000 $d
 
 UNDEFINED SYMBOLS
 log_func

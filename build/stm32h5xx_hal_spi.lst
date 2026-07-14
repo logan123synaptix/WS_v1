@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
   27:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   ==============================================================================
   28:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     [..]
   29:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       The SPI HAL driver can be used as follows:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 2
 
 
   30:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
   84:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           This function allows to reset following callbacks:
   85:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****             (+) TxCpltCallback        : SPI Tx Completed callback
   86:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****             (+) RxCpltCallback        : SPI Rx Completed callback
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 3
 
 
   87:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****             (+) TxRxCpltCallback      : SPI TxRx Completed callback
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  141:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  142:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** /** @defgroup SPI SPI
  143:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @brief SPI HAL module driver
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 4
 
 
  144:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @{
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  198:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** /** @defgroup SPI_Exported_Functions_Group1 Initialization and de-initialization functions
  199:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   *  @brief    Initialization and Configuration functions
  200:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   *
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 5
 
 
  201:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** @verbatim
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  255:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Check the parameters */
  256:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   assert_param(IS_SPI_ALL_INSTANCE(hspi->Instance));
  257:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   assert_param(IS_SPI_MODE(hspi->Init.Mode));
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 6
 
 
  258:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   assert_param(IS_SPI_DIRECTION(hspi->Init.Direction));
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  312:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       ((IS_SPI_FULL_INSTANCE(hspi->Instance)) && (packet_length > SPI_HIGHEND_FIFO_SIZE)))
  313:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  314:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     return HAL_ERROR;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 7
 
 
  315:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  369:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       hspi->MspInitCallback = HAL_SPI_MspInit; /* Legacy weak MspInit  */
  370:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
  371:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 8
 
 
  372:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     /* Init the low level hardware : GPIO, CLOCK, NVIC... */
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  426:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #if (USE_SPI_CRC != 0UL)
  427:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /*---------------------------- SPIx CRCPOLY Configuration ------------------*/
  428:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Configure : CRC Polynomial */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 9
 
 
  429:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if (hspi->Init.CRCCalculation == SPI_CRCCALCULATION_ENABLE)
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  483:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   CLEAR_BIT(hspi->Instance->I2SCFGR, SPI_I2SCFGR_I2SMOD);
  484:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #endif /* SPI_I2SCFGR_I2SMOD */
  485:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 10
 
 
  486:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Insure that AFCNTR is managed only by Master */
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  540:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   return HAL_OK;
  541:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** }
  542:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 11
 
 
  543:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** /**
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  597:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     return HAL_ERROR;
  598:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  599:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 12
 
 
  600:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if (HAL_SPI_STATE_READY == hspi->State)
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  654:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         break;
  655:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
  656:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 13
 
 
  657:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   else if (HAL_SPI_STATE_RESET == hspi->State)
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  711:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  712:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       case HAL_SPI_RX_COMPLETE_CB_ID :
  713:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->RxCpltCallback = HAL_SPI_RxCpltCallback;             /* Legacy weak RxCpltCallback   
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 14
 
 
  714:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         break;
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  768:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  769:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       case HAL_SPI_MSPDEINIT_CB_ID :
  770:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->MspDeInitCallback = HAL_SPI_MspDeInit;               /* Legacy weak MspDeInit        
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 15
 
 
  771:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         break;
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  825:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         exist for 1Line (simplex) and 2Lines (full duplex) modes.
  826:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  827:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** @endverbatim
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 16
 
 
  828:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @{
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  882:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->TxXferCount = Size;
  883:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  884:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /*Init field not used in handle to zero */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 17
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 17
 
 
  885:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->pRxBuffPtr  = NULL;
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  939:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  940:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           return HAL_TIMEOUT;
  941:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 18
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 18
 
 
  942:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       }
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  996:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       if (__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_TXP))
  997:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
  998:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         if ((hspi->TxXferCount > 3UL) && (hspi->Init.FifoThreshold > SPI_FIFO_THRESHOLD_03DATA))
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 19
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 19
 
 
  999:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1053:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   __HAL_UNLOCK(hspi);
 1054:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 1055:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if (hspi->ErrorCode != HAL_SPI_ERROR_NONE)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 20
 
 
 1056:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1110:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Lock the process */
 1111:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   __HAL_LOCK(hspi);
 1112:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 21
 
 
 1113:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Set the transaction information */
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1167:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
 1168:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         *((uint32_t *)hspi->pRxBuffPtr) = *((__IO uint32_t *)&hspi->Instance->RXDR);
 1169:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->pRxBuffPtr += sizeof(uint32_t);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 22
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 22
 
 
 1170:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->RxXferCount--;
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1224:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #endif /* __GNUC__ */
 1225:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->pRxBuffPtr += sizeof(uint16_t);
 1226:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->RxXferCount -= (uint16_t)2UL;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 23
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 23
 
 
 1227:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       }
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1281:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         *((uint8_t *)hspi->pRxBuffPtr) = *((__IO uint8_t *)&hspi->Instance->RXDR);
 1282:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->pRxBuffPtr += sizeof(uint8_t);
 1283:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         *((uint8_t *)hspi->pRxBuffPtr) = *((__IO uint8_t *)&hspi->Instance->RXDR);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 24
 
 
 1284:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->pRxBuffPtr += sizeof(uint8_t);
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1338:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   else
 1339:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
 1340:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     return HAL_OK;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 25
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 25
 
 
 1341:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1395:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
 1396:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     return HAL_ERROR;
 1397:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 26
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 26
 
 
 1398:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1452:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         *((__IO uint32_t *)&hspi->Instance->TXDR) = *((const uint32_t *)hspi->pTxBuffPtr);
 1453:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->pTxBuffPtr += sizeof(uint32_t);
 1454:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->TxXferCount --;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 27
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 27
 
 
 1455:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         initial_TxXferCount = hspi->TxXferCount;
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1509:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           (initial_RxXferCount  < (initial_TxXferCount + fifo_length)))
 1510:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
 1511:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #if defined (__GNUC__)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 28
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 28
 
 
 1512:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         *ptxdr_16bits = *((const uint16_t *)hspi->pTxBuffPtr);
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1566:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           initial_RxXferCount = hspi->RxXferCount;
 1567:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
 1568:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         else
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 29
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 29
 
 
 1569:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1623:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           *((uint8_t *)hspi->pRxBuffPtr) = *((__IO uint8_t *)&hspi->Instance->RXDR);
 1624:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           hspi->pRxBuffPtr += sizeof(uint8_t);
 1625:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           *((uint8_t *)hspi->pRxBuffPtr) = *((__IO uint8_t *)&hspi->Instance->RXDR);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 30
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 30
 
 
 1626:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           hspi->pRxBuffPtr += sizeof(uint8_t);
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1680:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
 1681:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** }
 1682:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 31
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 31
 
 
 1683:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** /**
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1737:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   else if (hspi->Init.DataSize > SPI_DATASIZE_8BIT)
 1738:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
 1739:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     hspi->TxISR = SPI_TxISR_16BIT;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 32
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 32
 
 
 1740:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1794:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
 1795:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   else
 1796:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 33
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 33
 
 
 1797:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     assert_param(IS_SPI_TRANSFER_SIZE(Size));
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1851:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****             to avoid the risk of SPI interrupt handle execution before current
 1852:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****             process unlock */
 1853:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 34
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 34
 
 
 1854:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Set the number of data at current transfer */
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1908:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
 1909:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 1910:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if ((pTxData == NULL) || (pRxData == NULL) || (Size == 0UL))
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 35
 
 
 1911:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1965:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
 1966:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     /* Transmit data in 16 Bit mode */
 1967:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     else if (hspi->Init.DataSize > SPI_DATASIZE_8BIT)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 36
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 36
 
 
 1968:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2022:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Check transfer size parameter */
 2023:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if (IS_SPI_LIMITED_INSTANCE(hspi->Instance))
 2024:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 37
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 37
 
 
 2025:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     assert_param(IS_SPI_LIMITED_TRANSFER_SIZE(Size));
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2079:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Adjust XferCount according to DMA alignment / Data size */
 2080:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if (hspi->Init.DataSize <= SPI_DATASIZE_8BIT)
 2081:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 38
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 38
 
 
 2082:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     if (hspi->hdmatx->Init.SrcDataWidth == DMA_SRC_DATAWIDTH_HALFWORD)
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2136:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       /* Set DMA data size */
 2137:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       hspi->hdmatx->LinkedListQueue->Head->LinkRegisters[NODE_CBR1_DEFAULT_OFFSET] = hspi->TxXferCo
 2138:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 39
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 39
 
 
 2139:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       /* Set DMA source address */
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2193:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     SET_BIT(hspi->Instance->CR1, SPI_CR1_CSTART);
 2194:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
 2195:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 40
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 40
 
 
 2196:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Unlock the process */
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2250:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /*Init field not used in handle to zero */
 2251:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxISR       = NULL;
 2252:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->TxISR       = NULL;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 41
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 41
 
 
 2253:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->TxXferSize  = (uint16_t) 0UL;
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2307:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->hdmarx->XferCpltCallback = SPI_DMAReceiveCplt;
 2308:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 2309:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Set the DMA error callback */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 42
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 42
 
 
 2310:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->hdmarx->XferErrorCallback = SPI_DMAError;
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2364:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 2365:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     return HAL_ERROR;
 2366:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 43
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 43
 
 
 2367:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2421:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
 2422:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   else
 2423:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 44
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 44
 
 
 2424:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     assert_param(IS_SPI_TRANSFER_SIZE(Size));
@@ -2638,7 +2638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2478:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     if (hspi->hdmatx->Init.SrcDataWidth == DMA_SRC_DATAWIDTH_HALFWORD)
 2479:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
 2480:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       hspi->TxXferCount = (hspi->TxXferCount + (uint16_t) 1UL) >> 1UL;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 45
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 45
 
 
 2481:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
@@ -2698,7 +2698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2535:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
 2536:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     if (hspi->hdmarx->LinkedListQueue != NULL)
 2537:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 46
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 46
 
 
 2538:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       /* Set DMA data size */
@@ -2758,7 +2758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2592:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
 2593:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   else
 2594:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 47
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 47
 
 
 2595:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     hspi->TxXferCount = Size * 4U;
@@ -2818,7 +2818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2649:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 2650:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Enable Tx DMA Request */
 2651:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   SET_BIT(hspi->Instance->CFG1, SPI_CFG1_TXDMAEN);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 48
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 48
 
 
 2652:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -2878,7 +2878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2706:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     do
 2707:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
 2708:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       count--;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 49
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 49
 
 
 2709:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       if (count == 0UL)
@@ -2938,7 +2938,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2763:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
 2764:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     if (hspi->hdmarx != NULL)
 2765:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 50
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 50
 
 
 2766:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       /* Abort the SPI DMA Rx Stream/Channel : use blocking DMA Abort API (no callback) */
@@ -2998,7 +2998,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2820:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** HAL_StatusTypeDef HAL_SPI_Abort_IT(SPI_HandleTypeDef *hspi)
 2821:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** {
 2822:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   HAL_StatusTypeDef errorcode;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 51
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 51
 
 
 2823:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   __IO uint32_t count;
@@ -3058,7 +3058,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2877:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* If DMA Tx and/or DMA Rx Handles are associated to SPI Handle, DMA Abort complete callbacks sho
 2878:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****      before any call to DMA Abort functions */
 2879:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 52
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 52
 
 
 2880:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if (hspi->hdmarx != NULL)
@@ -3118,7 +3118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2934:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
 2935:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       hspi->hdmarx->XferAbortCallback = NULL;
 2936:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 53
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 53
 
 
 2937:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -3178,7 +3178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2991:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @brief  Resume the DMA Transfer.
 2992:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   *         This API is not supported, it is maintained for backward compatibility.
 2993:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 54
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 54
 
 
 2994:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   *               the configuration information for the specified SPI module.
@@ -3238,7 +3238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3048:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     hspi->SuspendCallback(hspi);
 3049:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #else
 3050:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     HAL_SPI_SuspendCallback(hspi);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 55
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 55
 
 
 3051:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
@@ -3298,7 +3298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3105:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           *((uint32_t *)hspi->pRxBuffPtr) = *((__IO uint32_t *)&hspi->Instance->RXDR);
 3106:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           hspi->pRxBuffPtr += sizeof(uint32_t);
 3107:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 56
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 56
 
 
 3108:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         /* Receive data in 16 Bit mode */
@@ -3358,7 +3358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3162:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
 3163:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     else if (State == HAL_SPI_STATE_BUSY_RX)
 3164:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 57
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 57
 
 
 3165:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       HAL_SPI_RxCpltCallback(hspi);
@@ -3418,7 +3418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3219:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 3220:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #if defined(HAL_DMA_MODULE_ENABLED)
 3221:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       /* Disable the SPI DMA requests if enabled */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 58
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 58
 
 
 3222:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       if (HAL_IS_BIT_SET(cfg1, SPI_CFG1_TXDMAEN | SPI_CFG1_RXDMAEN))
@@ -3478,7 +3478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3276:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** __weak void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) /* Derogation MISRAC2012-Rule-8.13 */
 3277:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** {
 3278:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Prevent unused argument(s) compilation warning */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 59
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 59
 
 
 3279:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   UNUSED(hspi);
@@ -3538,7 +3538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3333:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 3334:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** /**
 3335:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @brief Rx Half Transfer completed callback.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 60
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 60
 
 
 3336:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
@@ -3598,7 +3598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3390:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** __weak void HAL_SPI_AbortCpltCallback(SPI_HandleTypeDef *hspi) /* Derogation MISRAC2012-Rule-8.13 *
 3391:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** {
 3392:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Prevent unused argument(s) compilation warning */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 61
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 61
 
 
 3393:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   UNUSED(hspi);
@@ -3658,7 +3658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3447:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @brief  Return the SPI error code.
 3448:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
 3449:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   *               the configuration information for SPI module.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 62
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 62
 
 
 3450:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @retval SPI error code in bitmap format
@@ -3718,7 +3718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3504:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @retval None
 3505:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   */
 3506:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** static void SPI_DMAReceiveCplt(DMA_HandleTypeDef *hdma)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 63
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 63
 
 
 3507:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** {
@@ -3778,7 +3778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3561:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @retval None
 3562:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   */
 3563:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** static void SPI_DMAHalfTransmitCplt(DMA_HandleTypeDef *hdma) /* Derogation MISRAC2012-Rule-8.13 */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 64
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 64
 
 
 3564:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** {
@@ -3838,7 +3838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3618:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** {
 3619:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   SPI_HandleTypeDef *hspi = (SPI_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
 3620:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 65
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 65
 
 
 3621:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* if DMA error is FIFO error ignore it */
@@ -3898,7 +3898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3675:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
 3676:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     if (hspi->hdmarx->XferAbortCallback != NULL)
 3677:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 66
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 66
 
 
 3678:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       return;
@@ -3958,7 +3958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3732:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #endif /* HAL_DMA_MODULE_ENABLED */
 3733:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 3734:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** /**
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 67
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 67
 
 
 3735:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   * @brief  Manage the receive 8-bit in Interrupt context.
@@ -4018,7 +4018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
   67 002a 23F00103 		bic	r3, r3, #1
   68 002e 1361     		str	r3, [r2, #16]
   69              	.L1:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 68
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 68
 
 
 3752:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -4078,7 +4078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  105              		.loc 1 3772 20 view .LVU26
  106 000a 0233     		adds	r3, r3, #2
  107 000c C366     		str	r3, [r0, #108]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 69
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 69
 
 
 3773:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxXferCount--;
@@ -4138,7 +4138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  145              		@ frame_needed = 0, uses_anonymous_args = 0
  146              		@ link register save eliminated.
 3792:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Receive data in 32 Bit mode */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 70
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 70
 
 
 3793:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   *((uint32_t *)hspi->pRxBuffPtr) = (*(__IO uint32_t *)&hspi->Instance->RXDR);
@@ -4198,7 +4198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  191              		.thumb_func
  193              	SPI_TxISR_8BIT:
  194              	.LVL6:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 71
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 71
 
 
  195              	.LFB340:
@@ -4258,7 +4258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3823:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     __HAL_SPI_DISABLE_IT(hspi, SPI_IT_TXP);
  230              		.loc 1 3823 5 is_stmt 1 view .LVU67
  231 0026 0268     		ldr	r2, [r0]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 72
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 72
 
 
  232 0028 1369     		ldr	r3, [r2, #16]
@@ -4318,7 +4318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  268 0008 436E     		ldr	r3, [r0, #100]
  269              	.LVL9:
  270              		.loc 1 3843 20 view .LVU78
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 73
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 73
 
 
  271 000a 0233     		adds	r3, r3, #2
@@ -4378,7 +4378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  309              		@ args = 0, pretend = 0, frame = 0
  310              		@ frame_needed = 0, uses_anonymous_args = 0
  311              		@ link register save eliminated.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 74
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 74
 
 
 3862:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Transmit data in 32 Bit mode */
@@ -4438,7 +4438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  355              		.thumb
  356              		.thumb_func
  358              	SPI_AbortTransfer:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 75
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 75
 
 
  359              	.LVL11:
@@ -4498,7 +4498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  391 0034 9360     		str	r3, [r2, #8]
 3896:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 3897:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Clear the Error flags in the SR register */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 76
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 76
 
 
 3898:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   __HAL_SPI_CLEAR_OVRFLAG(hspi);
@@ -4558,7 +4558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  434              		.thumb_func
  436              	SPI_CloseTransfer:
  437              	.LVL12:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 77
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 77
 
 
  438              	.LFB344:
@@ -4618,7 +4618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3933:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
 3934:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Disable Tx DMA Request */
 3935:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   CLEAR_BIT(hspi->Instance->CFG1, SPI_CFG1_TXDMAEN | SPI_CFG1_RXDMAEN);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 78
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 78
 
 
  470              		.loc 1 3935 3 view .LVU129
@@ -4678,7 +4678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  507 006e 43F00403 		orr	r3, r3, #4
  508 0072 C0F88C30 		str	r3, [r0, #140]
 3953:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       __HAL_SPI_CLEAR_OVRFLAG(hspi);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 79
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 79
 
 
  509              		.loc 1 3953 7 view .LVU143
@@ -4738,7 +4738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  537 00aa C0F88C30 		str	r3, [r0, #140]
 3980:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     __HAL_SPI_CLEAR_FREFLAG(hspi);
  538              		.loc 1 3980 5 view .LVU152
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 80
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 80
 
 
  539 00ae 0268     		ldr	r2, [r0]
@@ -4798,7 +4798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 4009:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   return HAL_OK;
 4010:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** }
 4011:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 81
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 81
 
 
 4012:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** /**
@@ -4858,7 +4858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3999:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Wait until flag is set */
  607              		.loc 1 3999 1 is_stmt 1 view -0
  608              		.cfi_startproc
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 82
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 82
 
 
  609              		@ args = 4, pretend = 0, frame = 0
@@ -4918,7 +4918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  652              		.loc 1 4004 26 discriminator 1 view .LVU182
  653 002c A0EB0900 		sub	r0, r0, r9
 4004:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 83
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 83
 
 
  654              		.loc 1 4004 8 discriminator 1 view .LVU183
@@ -4978,7 +4978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  703              		.thumb_func
  705              	HAL_SPI_Init:
  706              	.LVL26:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 84
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 84
 
 
  707              	.LFB297:
@@ -5038,7 +5038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  741              		.loc 1 276 5 view .LVU211
  277:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  742              		.loc 1 277 5 view .LVU212
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 85
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 85
 
 
  296:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #endif /* USE_SPI_CRC */
@@ -5098,7 +5098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  782              		.loc 1 310 3 is_stmt 1 view .LVU227
  310:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   if (((IS_SPI_LIMITED_INSTANCE(hspi->Instance)) && (packet_length > SPI_LOWEND_FIFO_SIZE)) ||
  783              		.loc 1 310 19 is_stmt 0 view .LVU228
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 86
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 86
 
 
  784 0042 2046     		mov	r0, r4
@@ -5158,7 +5158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  312:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  827              		.loc 1 312 9 discriminator 2 view .LVU240
  828 0086 4F4B     		ldr	r3, .L56+16
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 87
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 87
 
 
  829 0088 9D42     		cmp	r5, r3
@@ -5218,7 +5218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  869              		.loc 1 387 14 view .LVU254
  870 00c2 02F4F812 		and	r2, r2, #2031616
  871              	.LVL30:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 88
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 88
 
 
  395:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****                                             (hspi->Init.NSSPolarity == SPI_NSS_POLARITY_LOW)) || \
@@ -5278,7 +5278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  912              		.loc 1 395 56 discriminator 1 view .LVU268
  913 00f8 6168     		ldr	r1, [r4, #4]
  395:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****                                             (hspi->Init.NSSPolarity == SPI_NSS_POLARITY_LOW)) || \
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 89
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 89
 
 
  914              		.loc 1 395 40 discriminator 1 view .LVU269
@@ -5338,7 +5338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  418:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****                                    hspi->Init.NSSPolarity             | hspi->Init.NSS       |
  959              		.loc 1 418 3 is_stmt 1 view .LVU279
  960 013c 636B     		ldr	r3, [r4, #52]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 90
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 90
 
 
  961 013e 626A     		ldr	r2, [r4, #36]
@@ -5398,7 +5398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1008 0194 D360     		str	r3, [r2, #12]
  1009              	.L44:
  493:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->State     = HAL_SPI_STATE_READY;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 91
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 91
 
 
  1010              		.loc 1 493 3 view .LVU287
@@ -5458,7 +5458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  314:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  1054              		.loc 1 314 12 view .LVU298
  1055 01ae F8E7     		b	.L31
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 92
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 92
 
 
  1056              	.LVL43:
@@ -5518,7 +5518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1108              		@ args = 0, pretend = 0, frame = 0
  1109              		@ frame_needed = 0, uses_anonymous_args = 0
  508:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 93
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 93
 
 
  1110              		.loc 1 508 3 view .LVU305
@@ -5578,7 +5578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1148              	.L61:
  1149              	.LCFI5:
  1150              		.cfi_def_cfa_offset 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 94
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 94
 
 
  1151              		.cfi_restore 4
@@ -5638,7 +5638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1199              		.loc 1 849 3 view .LVU329
  852:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  1200              		.loc 1 852 3 view .LVU330
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 95
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 95
 
 
  854:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -5698,7 +5698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1237 004a 0023     		movs	r3, #0
  1238 004c C4F88C30 		str	r3, [r4, #140]
  880:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->TxXferSize  = Size;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 96
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 96
 
 
  1239              		.loc 1 880 3 is_stmt 1 view .LVU349
@@ -5758,7 +5758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1274 007e D360     		str	r3, [r2, #12]
  1275              	.L69:
  902:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 97
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 97
 
 
  1276              		.loc 1 902 3 view .LVU369
@@ -5818,7 +5818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  914:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  1318              		.loc 1 914 54 discriminator 5 view .LVU382
  1319 00c4 8C49     		ldr	r1, .L102+8
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 98
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 98
 
 
  1320 00c6 8A42     		cmp	r2, r1
@@ -5878,7 +5878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1363              	.L77:
  917:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
  1364              		.loc 1 917 30 is_stmt 1 view .LVU394
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 99
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 99
 
 
  917:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
@@ -5938,7 +5938,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1403 0136 FFF7FEFF 		bl	SPI_CloseTransfer
  1404              	.LVL55:
  934:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           hspi->State = HAL_SPI_STATE_READY;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 100
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 100
 
 
  1405              		.loc 1 934 11 view .LVU411
@@ -5998,7 +5998,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1442 016c 9BB2     		uxth	r3, r3
  1443 016e A4F86A30 		strh	r3, [r4, #106]	@ movhi
  1444              	.L80:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 101
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 101
 
 
  949:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
@@ -6058,7 +6058,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1481              		.loc 1 957 28 view .LVU446
  1482 01a0 0433     		adds	r3, r3, #4
  1483 01a2 6366     		str	r3, [r4, #100]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 102
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 102
 
 
  958:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
@@ -6118,7 +6118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  983:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  1524              		.loc 1 983 11 view .LVU461
  1525 01e0 0023     		movs	r3, #0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 103
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 103
 
 
  1526 01e2 84F88830 		strb	r3, [r4, #136]
@@ -6178,7 +6178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1562 020c 023B     		subs	r3, r3, #2
  1563 020e 9BB2     		uxth	r3, r3
  1564 0210 A4F86A30 		strh	r3, [r4, #106]	@ movhi
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 104
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 104
 
 
  1565 0214 0DE0     		b	.L81
@@ -6238,7 +6238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  998:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
  1603              		.loc 1 998 9 is_stmt 1 view .LVU496
  998:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 105
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 105
 
 
  1604              		.loc 1 998 18 is_stmt 0 view .LVU497
@@ -6298,7 +6298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1642              		.loc 1 1024 30 discriminator 1 view .LVU513
  1643 0276 801B     		subs	r0, r0, r6
 1024:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 106
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 106
 
 
  1644              		.loc 1 1024 12 discriminator 1 view .LVU514
@@ -6358,7 +6358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1685              	.LVL60:
 1042:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  1686              		.loc 1 1042 6 discriminator 1 view .LVU528
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 107
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 107
 
 
  1687 02b6 28B1     		cbz	r0, .L95
@@ -6418,7 +6418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1728              	.LVL64:
  1729              	.L97:
  1730              	.LCFI9:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 108
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 108
 
 
  1731              		.cfi_restore_state
@@ -6478,7 +6478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1079:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #if defined (__GNUC__)
  1780              		.loc 1 1079 50 is_stmt 0 view .LVU549
  1781 000c C56B     		ldr	r5, [r0, #60]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 109
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 109
 
 
 1079:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #if defined (__GNUC__)
@@ -6538,7 +6538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1818              		.loc 1 1111 3 is_stmt 1 view .LVU567
 1111:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  1819              		.loc 1 1111 3 view .LVU568
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 110
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 110
 
 
  1820 003e 94F88830 		ldrb	r3, [r4, #136]	@ zero_extendqisi2
@@ -6598,7 +6598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1854              		.loc 1 1124 21 is_stmt 0 view .LVU588
  1855 0070 A367     		str	r3, [r4, #120]
 1125:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 111
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 111
 
 
  1856              		.loc 1 1125 3 is_stmt 1 view .LVU589
@@ -6658,7 +6658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1896              		.loc 1 1150 54 discriminator 1 view .LVU603
  1897 00b0 2268     		ldr	r2, [r4]
 1150:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 112
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 112
 
 
  1898              		.loc 1 1150 50 discriminator 1 view .LVU604
@@ -6718,7 +6718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  1943              	.L111:
 1166:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
  1944              		.loc 1 1166 12 view .LVU614
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 113
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 113
 
 
 1166:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
@@ -6778,7 +6778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1175:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
  1983              		.loc 1 1175 12 discriminator 1 view .LVU631
  1984 012e B042     		cmp	r0, r6
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 114
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 114
 
 
  1985 0130 02D3     		bcc	.L114
@@ -6838,7 +6838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2022 0158 E36E     		ldr	r3, [r4, #108]
 1162:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->RxXferCount--;
  2023              		.loc 1 1162 26 view .LVU649
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 115
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 115
 
 
  2024 015a 0433     		adds	r3, r3, #4
@@ -6898,7 +6898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1212:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
  2064              		.loc 1 1212 15 view .LVU664
  2065 0198 AB42     		cmp	r3, r5
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 116
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 116
 
 
  2066 019a 17D2     		bcs	.L123
@@ -6958,7 +6958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2103 01ca 1FE0     		b	.L119
  2104              	.LVL79:
  2105              	.L123:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 117
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 117
 
 
 1229:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
@@ -7018,7 +7018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2144              	.LVL82:
 1242:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
  2145              		.loc 1 1242 30 discriminator 1 view .LVU698
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 118
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 118
 
 
  2146 01fe C01B     		subs	r0, r0, r7
@@ -7078,7 +7078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2184 022a 1A80     		strh	r2, [r3]	@ movhi
 1208:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->RxXferCount--;
  2185              		.loc 1 1208 9 is_stmt 1 view .LVU715
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 119
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 119
 
 
 1208:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->RxXferCount--;
@@ -7138,7 +7138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1275:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
  2225              		.loc 1 1275 21 is_stmt 0 view .LVU731
  2226 0266 B4F87220 		ldrh	r2, [r4, #114]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 120
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 120
 
 
  2227 026a 92B2     		uxth	r2, r2
@@ -7198,7 +7198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1281:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->pRxBuffPtr += sizeof(uint8_t);
  2263              		.loc 1 1281 42 view .LVU750
  2264 0294 92F83020 		ldrb	r2, [r2, #48]	@ zero_extendqisi2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 121
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 121
 
 
 1281:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         hspi->pRxBuffPtr += sizeof(uint8_t);
@@ -7258,7 +7258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2302 02c6 11D8     		bhi	.L131
 1288:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
  2303              		.loc 1 1288 42 discriminator 1 view .LVU768
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 122
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 122
 
 
  2304 02c8 11F4C04F 		tst	r1, #24576
@@ -7318,7 +7318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2342              		.loc 1 1297 87 discriminator 3 view .LVU784
  2343 02fc C6B1     		cbz	r6, .L133
  2344              	.LVL89:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 123
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 123
 
 
  2345              	.L120:
@@ -7378,7 +7378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1272:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       }
  2381              		.loc 1 1272 26 view .LVU803
  2382 0326 013B     		subs	r3, r3, #1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 124
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 124
 
 
  2383 0328 9BB2     		uxth	r3, r3
@@ -7438,7 +7438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1331:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  2425              		.loc 1 1331 3 is_stmt 1 view .LVU816
 1331:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 125
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 125
 
 
  2426              		.loc 1 1331 3 view .LVU817
@@ -7498,7 +7498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2472              		.cfi_def_cfa_offset 36
  2473              		.cfi_offset 4, -36
  2474              		.cfi_offset 5, -32
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 126
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 126
 
 
  2475              		.cfi_offset 6, -28
@@ -7558,7 +7558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1384:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  2512              		.loc 1 1384 15 is_stmt 0 view .LVU845
  2513 001a FFF7FEFF 		bl	HAL_GetTick
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 127
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 127
 
 
  2514              	.LVL101:
@@ -7618,7 +7618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1403:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->ErrorCode   = HAL_SPI_ERROR_NONE;
  2552              		.loc 1 1403 21 is_stmt 0 view .LVU862
  2553 0058 0523     		movs	r3, #5
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 128
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 128
 
 
  2554 005a 84F88930 		strb	r3, [r4, #137]
@@ -7678,7 +7678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2588              		.loc 1 1420 3 view .LVU882
 1420:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  2589              		.loc 1 1420 7 is_stmt 0 view .LVU883
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 129
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 129
 
 
  2590 0088 2268     		ldr	r2, [r4]
@@ -7738,7 +7738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1430:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  2633              		.loc 1 1430 3 is_stmt 1 view .LVU895
  2634 00c4 5368     		ldr	r3, [r2, #4]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 130
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 130
 
 
  2635 00c6 6FF30F03 		bfc	r3, #0, #16
@@ -7798,7 +7798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2676 0106 8A42     		cmp	r2, r1
  2677 0108 1DD0     		beq	.L148
 1441:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 131
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 131
 
 
  2678              		.loc 1 1441 54 discriminator 6 view .LVU909
@@ -7858,7 +7858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2719              	.L183:
 1422:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  2720              		.loc 1 1422 17 view .LVU923
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 132
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 132
 
 
  2721 0134 4FF01009 		mov	r9, #16
@@ -7918,7 +7918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2760 015e 31D0     		beq	.L152
 1466:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           hspi->pRxBuffPtr += sizeof(uint32_t);
  2761              		.loc 1 1466 11 is_stmt 1 view .LVU939
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 133
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 133
 
 
 1466:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           hspi->pRxBuffPtr += sizeof(uint32_t);
@@ -7978,7 +7978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2800 018e 5A69     		ldr	r2, [r3, #20]
 1449:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           (initial_RxXferCount  < (initial_TxXferCount + fifo_length)))
  2801              		.loc 1 1449 10 view .LVU956
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 134
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 134
 
 
  2802 0190 12F0020F 		tst	r2, #2
@@ -8038,7 +8038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2840              	.LVL126:
  2841              	.L152:
 1472:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 135
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 135
 
 
  2842              		.loc 1 1472 14 is_stmt 1 view .LVU973
@@ -8098,7 +8098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2880              	.LVL130:
  2881              	.L153:
 1482:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 136
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 136
 
 
  2882              		.loc 1 1482 11 is_stmt 1 view .LVU990
@@ -8158,7 +8158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1522:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  2922              		.loc 1 1522 7 is_stmt 1 view .LVU1005
 1522:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 137
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 137
 
 
  2923              		.loc 1 1522 25 is_stmt 0 view .LVU1006
@@ -8218,7 +8218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  2960              		.loc 1 1536 11 is_stmt 1 view .LVU1023
 1536:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
  2961              		.loc 1 1536 31 is_stmt 0 view .LVU1024
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 138
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 138
 
 
  2962 025a B4F87290 		ldrh	r9, [r4, #114]
@@ -8278,7 +8278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3000              		.loc 1 1516 26 view .LVU1040
  3001 028c 0233     		adds	r3, r3, #2
  3002 028e 6366     		str	r3, [r4, #100]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 139
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 139
 
 
 1517:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         initial_TxXferCount = hspi->TxXferCount;
@@ -8338,7 +8338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1548:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #else
  3041              		.loc 1 1548 11 is_stmt 1 view .LVU1057
 1548:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #else
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 140
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 140
 
 
  3042              		.loc 1 1548 45 is_stmt 0 view .LVU1058
@@ -8398,7 +8398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3080 02ee E36E     		ldr	r3, [r4, #108]
 1560:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #else
  3081              		.loc 1 1560 45 view .LVU1075
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 141
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 141
 
 
  3082 02f0 BBF83020 		ldrh	r2, [fp, #48]
@@ -8458,7 +8458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3122 0324 A0EB0800 		sub	r0, r0, r8
 1571:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           {
  3123              		.loc 1 1571 14 discriminator 1 view .LVU1090
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 142
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 142
 
 
  3124 0328 B842     		cmp	r0, r7
@@ -8518,7 +8518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3163              		.loc 1 1606 7 is_stmt 1 view .LVU1105
 1606:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
  3164              		.loc 1 1606 10 is_stmt 0 view .LVU1106
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 143
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 143
 
 
  3165 035e BBF1000F 		cmp	fp, #0
@@ -8578,7 +8578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1591:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
  3203              		.loc 1 1591 40 is_stmt 1 view .LVU1123
  3204 0390 1DB9     		cbnz	r5, .L175
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 144
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 144
 
 
 1591:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
@@ -8638,7 +8638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3242 03c4 013B     		subs	r3, r3, #1
  3243 03c6 9BB2     		uxth	r3, r3
  3244 03c8 A4F86A30 		strh	r3, [r4, #106]	@ movhi
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 145
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 145
 
 
 1600:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       }
@@ -8698,7 +8698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1622:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           *((uint8_t *)hspi->pRxBuffPtr) = *((__IO uint8_t *)&hspi->Instance->RXDR);
  3282              		.loc 1 1622 11 is_stmt 1 view .LVU1158
 1622:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           *((uint8_t *)hspi->pRxBuffPtr) = *((__IO uint8_t *)&hspi->Instance->RXDR);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 146
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 146
 
 
  3283              		.loc 1 1622 15 is_stmt 0 view .LVU1159
@@ -8758,7 +8758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3319 041c 043B     		subs	r3, r3, #4
  3320 041e 9BB2     		uxth	r3, r3
  3321 0420 A4F87230 		strh	r3, [r4, #114]	@ movhi
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 147
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 147
 
 
 1628:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
@@ -8818,7 +8818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3359 044e 013B     		subs	r3, r3, #1
  3360 0450 9BB2     		uxth	r3, r3
  3361 0452 A4F87230 		strh	r3, [r4, #114]	@ movhi
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 148
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 148
 
 
 1636:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
@@ -8878,7 +8878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1650:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  3402              		.loc 1 1650 13 is_stmt 1 view .LVU1209
 1650:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 149
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 149
 
 
  3403              		.loc 1 1650 13 view .LVU1210
@@ -8938,7 +8938,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3444              		.loc 1 1671 3 is_stmt 1 view .LVU1223
 1671:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  3445              		.loc 1 1671 3 view .LVU1224
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 150
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 150
 
 
  3446 04c8 0023     		movs	r3, #0
@@ -8998,7 +8998,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3493              		@ args = 0, pretend = 0, frame = 0
  3494              		@ frame_needed = 0, uses_anonymous_args = 0
  3495              		@ link register save eliminated.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 151
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 151
 
 
 1694:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -9058,7 +9058,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3532              		.loc 1 1720 21 is_stmt 0 view .LVU1251
  3533 0024 0321     		movs	r1, #3
  3534 0026 80F88910 		strb	r1, [r0, #137]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 152
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 152
 
 
 1721:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->pTxBuffPtr  = (const uint8_t *)pData;
@@ -9118,7 +9118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1733:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  3569              		.loc 1 1733 50 discriminator 1 view .LVU1272
  3570 004e A342     		cmp	r3, r4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 153
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 153
 
 
  3571 0050 16D0     		beq	.L195
@@ -9178,7 +9178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3611              		.loc 1 1747 6 view .LVU1286
  3612 0086 B1F5C02F 		cmp	r1, #393216
  3613 008a 23D0     		beq	.L209
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 154
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 154
 
 
 1753:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -9238,7 +9238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3655 00cc 11E0     		b	.L193
  3656              	.LVL181:
  3657              	.L197:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 155
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 155
 
 
 1743:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -9298,7 +9298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1775:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  3702              		.loc 1 1775 1 view .LVU1310
  3703 00f2 5DF8044B 		ldr	r4, [sp], #4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 156
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 156
 
 
  3704 00f6 7047     		bx	lr
@@ -9358,7 +9358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3752              		.loc 1 1791 3 view .LVU1318
 1791:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  3753              		.loc 1 1791 7 is_stmt 0 view .LVU1319
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 157
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 157
 
 
  3754 0002 0468     		ldr	r4, [r0]
@@ -9418,7 +9418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1816:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxXferSize  = Size;
  3791              		.loc 1 1816 21 is_stmt 0 view .LVU1337
  3792 0036 D966     		str	r1, [r3, #108]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 158
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 158
 
 
 1817:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxXferCount = Size;
@@ -9478,7 +9478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3829 0064 0FD0     		beq	.L216
 1827:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  3830              		.loc 1 1827 54 discriminator 4 view .LVU1356
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 159
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 159
 
 
  3831 0066 00F18050 		add	r0, r0, #268435456
@@ -9538,7 +9538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3872 009e 1868     		ldr	r0, [r3]
  3873 00a0 4168     		ldr	r1, [r0, #4]
  3874 00a2 6FF30F01 		bfc	r1, #0, #16
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 160
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 160
 
 
  3875 00a6 0A43     		orrs	r2, r2, r1
@@ -9598,7 +9598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3916              	.LVL199:
 1843:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  3917              		.loc 1 1843 5 is_stmt 0 view .LVU1383
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 161
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 161
 
 
  3918 00e2 DCE7     		b	.L220
@@ -9658,7 +9658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  3967              		.loc 1 1886 1 is_stmt 1 view -0
  3968              		.cfi_startproc
  3969              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 162
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 162
 
 
  3970              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -9718,7 +9718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4007 0028 9CF88800 		ldrb	r0, [ip, #136]	@ zero_extendqisi2
  4008 002c 0128     		cmp	r0, #1
  4009 002e 00F0BA80 		beq	.L242
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 163
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 163
 
 
 1916:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -9778,7 +9778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1927:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  4044              		.loc 1 1927 27 view .LVU1428
  4045 0060 92B2     		uxth	r2, r2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 164
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 164
 
 
  4046              	.LVL209:
@@ -9838,7 +9838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1938:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  4087              		.loc 1 1938 5 is_stmt 1 view .LVU1442
 1938:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 165
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 165
 
 
  4088              		.loc 1 1938 21 is_stmt 0 view .LVU1443
@@ -9898,7 +9898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4129              		.loc 1 1943 5 is_stmt 1 view .LVU1456
 1943:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  4130              		.loc 1 1943 21 is_stmt 0 view .LVU1457
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 166
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 166
 
 
  4131 00dc 3B49     		ldr	r1, .L246+32
@@ -9958,7 +9958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4169 010e DCF80030 		ldr	r3, [ip]
  4170 0112 5969     		ldr	r1, [r3, #20]
 1956:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 167
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 167
 
 
  4171              		.loc 1 1956 51 view .LVU1474
@@ -10018,7 +10018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 1964:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
  4209              		.loc 1 1964 29 view .LVU1491
  4210 014a E0E7     		b	.L235
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 168
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 168
 
 
  4211              	.LVL218:
@@ -10078,7 +10078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4248              		.loc 1 1992 3 view .LVU1508
  4249 017c 1A69     		ldr	r2, [r3, #16]
  4250 017e 42F45B72 		orr	r2, r2, #876
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 169
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 169
 
 
  4251 0182 1A61     		str	r2, [r3, #16]
@@ -10138,7 +10138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4296              	.LFE306:
  4298              		.section	.text.HAL_SPI_Transmit_DMA,"ax",%progbits
  4299              		.align	1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 170
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 170
 
 
  4300              		.global	HAL_SPI_Transmit_DMA
@@ -10198,7 +10198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4341              		.loc 1 2037 23 discriminator 1 view .LVU1531
  4342 001a 002D     		cmp	r5, #0
  4343 001c 00F00B81 		beq	.L249
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 171
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 171
 
 
 2043:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -10258,7 +10258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4378 004a 8367     		str	r3, [r0, #120]
 2056:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxXferCount = (uint16_t)0UL;
  4379              		.loc 1 2056 3 is_stmt 1 view .LVU1552
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 172
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 172
 
 
 2056:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxXferCount = (uint16_t)0UL;
@@ -10318,7 +10318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2071:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       ((hspi->Init.DataSize > SPI_DATASIZE_8BIT)  && (hspi->hdmatx->Init.SrcDataWidth ==  DMA_SRC_D
  4418              		.loc 1 2071 9 view .LVU1569
  4419 0084 01F18051 		add	r1, r1, #268435456
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 173
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 173
 
 
  4420 0088 8A42     		cmp	r2, r1
@@ -10378,7 +10378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4460 00c2 012A     		cmp	r2, #1
  4461 00c4 69D0     		beq	.L272
  4462              	.L256:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 174
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 174
 
 
 2086:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
@@ -10438,7 +10438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2118:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  4500              		.loc 1 2118 3 view .LVU1601
 2118:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 175
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 175
 
 
  4501              		.loc 1 2118 17 is_stmt 0 view .LVU1602
@@ -10498,7 +10498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2140:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  4538              		.loc 1 2140 19 view .LVU1620
  4539 0122 5B6F     		ldr	r3, [r3, #116]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 176
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 176
 
 
 2140:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -10558,7 +10558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4576 014c 2268     		ldr	r2, [r4]
  4577 014e 5368     		ldr	r3, [r2, #4]
  4578 0150 6FF30F03 		bfc	r3, #0, #16
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 177
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 177
 
 
  4579 0154 1D43     		orrs	r5, r5, r3
@@ -10618,7 +10618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4620 018e 1360     		str	r3, [r2]
  4621 0190 6BE7     		b	.L251
  4622              	.LVL231:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 178
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 178
 
 
  4623              	.L253:
@@ -10678,7 +10678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4660              		.loc 1 2093 13 is_stmt 0 view .LVU1668
  4661 01be D4F88030 		ldr	r3, [r4, #128]
 2093:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 179
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 179
 
 
  4662              		.loc 1 2093 27 view .LVU1669
@@ -10738,7 +10738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4701 01f0 2268     		ldr	r2, [r4]
 2155:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  4702              		.loc 1 2155 35 view .LVU1685
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 180
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 180
 
 
  4703 01f2 B4F86A30 		ldrh	r3, [r4, #106]
@@ -10798,7 +10798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4745              		.loc 1 2034 12 is_stmt 0 view .LVU1697
  4746 0234 0226     		movs	r6, #2
  4747              	.LVL236:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 181
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 181
 
 
  4748              	.L249:
@@ -10858,7 +10858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4796              		.loc 1 2219 7 is_stmt 0 view .LVU1705
  4797 0006 0268     		ldr	r2, [r0]
  4798              	.LVL239:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 182
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 182
 
 
 2221:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -10918,7 +10918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2247:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxXferCount = Size;
  4835              		.loc 1 2247 3 is_stmt 1 view .LVU1724
 2247:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->RxXferCount = Size;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 183
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 183
 
 
  4836              		.loc 1 2247 21 is_stmt 0 view .LVU1725
@@ -10978,7 +10978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4872 006e D4F88420 		ldr	r2, [r4, #132]
 2267:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****        (IS_SPI_FULL_INSTANCE(hspi->Instance))) || \
  4873              		.loc 1 2267 73 discriminator 1 view .LVU1744
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 184
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 184
 
 
  4874 0072 D269     		ldr	r2, [r2, #28]
@@ -11038,7 +11038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4915 00bc 002B     		cmp	r3, #0
  4916 00be 7BD0     		beq	.L286
  4917              	.L287:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 185
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 185
 
 
 2277:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -11098,7 +11098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2307:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  4955              		.loc 1 2307 34 view .LVU1775
  4956 00f2 604A     		ldr	r2, .L309+16
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 186
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 186
 
 
  4957 00f4 1A66     		str	r2, [r3, #96]
@@ -11158,7 +11158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  4993 011e 002A     		cmp	r2, #0
  4994 0120 00F08480 		beq	.L295
 2334:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 187
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 187
 
 
  4995              		.loc 1 2334 7 is_stmt 1 view .LVU1794
@@ -11218,7 +11218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5031              	.LVL242:
  5032              	.L296:
 2356:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 188
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 188
 
 
  5033              		.loc 1 2356 3 is_stmt 1 view .LVU1813
@@ -11278,7 +11278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5074 018e 60D0     		beq	.L308
  5075              	.L300:
 2394:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 189
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 189
 
 
  5076              		.loc 1 2394 3 is_stmt 1 view .LVU1827
@@ -11338,7 +11338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5114 01b4 1360     		str	r3, [r2]
  5115 01b6 57E7     		b	.L284
  5116              	.LVL247:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 190
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 190
 
 
  5117              	.L286:
@@ -11398,7 +11398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5154              		.loc 1 2293 13 is_stmt 0 view .LVU1860
  5155 01e4 D4F88430 		ldr	r3, [r4, #132]
 2293:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 191
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 191
 
 
  5156              		.loc 1 2293 27 view .LVU1861
@@ -11458,7 +11458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5195 021a 2168     		ldr	r1, [r4]
 2352:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  5196              		.loc 1 2352 35 view .LVU1877
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 192
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 192
 
 
  5197 021c B4F87230 		ldrh	r3, [r4, #114]
@@ -11518,7 +11518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5239              		.loc 1 2241 3 is_stmt 0 discriminator 1 view .LVU1889
  5240 025e 0226     		movs	r6, #2
  5241 0260 9FE7     		b	.L280
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 193
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 193
 
 
  5242              	.L310:
@@ -11578,7 +11578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5288 0008 94F88930 		ldrb	r3, [r4, #137]	@ zero_extendqisi2
  5289              	.LVL254:
 2427:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 194
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 194
 
 
  5290              		.loc 1 2427 6 view .LVU1900
@@ -11638,7 +11638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5327              		.loc 1 2445 3 is_stmt 1 view .LVU1917
 2445:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   hspi->pRxBuffPtr  = (uint8_t *)pRxData;
  5328              		.loc 1 2445 21 is_stmt 0 view .LVU1918
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 195
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 195
 
 
  5329 0048 A4F86A50 		strh	r5, [r4, #106]	@ movhi
@@ -11698,7 +11698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5365 0076 D269     		ldr	r2, [r2, #28]
 2461:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****        ((hspi->hdmarx->Init.DestDataWidth != DMA_DEST_DATAWIDTH_WORD) || \
  5366              		.loc 1 2461 51 discriminator 1 view .LVU1937
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 196
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 196
 
 
  5367 0078 B2F5003F 		cmp	r2, #131072
@@ -11758,7 +11758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2467:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  5409              		.loc 1 2467 14 view .LVU1950
  5410 00c8 D4F88020 		ldr	r2, [r4, #128]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 197
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 197
 
 
 2467:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
@@ -11818,7 +11818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5448 00fc DB69     		ldr	r3, [r3, #28]
 2490:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
  5449              		.loc 1 2490 8 view .LVU1968
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 198
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 198
 
 
  5450 00fe B3F5003F 		cmp	r3, #131072
@@ -11878,7 +11878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5486 012e A4F87250 		strh	r5, [r4, #114]	@ movhi
  5487              	.L324:
 2534:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 199
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 199
 
 
  5488              		.loc 1 2534 3 is_stmt 1 view .LVU1987
@@ -11938,7 +11938,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2545:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  5524              		.loc 1 2545 100 is_stmt 0 view .LVU2006
  5525 0160 E26E     		ldr	r2, [r4, #108]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 200
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 200
 
 
 2545:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -11998,7 +11998,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2580:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  5563              		.loc 1 2580 38 view .LVU2024
  5564 0196 D366     		str	r3, [r2, #108]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 201
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 201
 
 
 2583:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -12058,7 +12058,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5601 01c8 1268     		ldr	r2, [r2]
 2604:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  5602              		.loc 1 2604 84 view .LVU2043
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 202
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 202
 
 
  5603 01ca 9360     		str	r3, [r2, #8]
@@ -12118,7 +12118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2641:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  5639              		.loc 1 2641 12 is_stmt 0 view .LVU2062
  5640 01f4 D4F88430 		ldr	r3, [r4, #132]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 203
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 203
 
 
 2641:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
@@ -12178,7 +12178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5682              		.loc 1 2666 3 view .LVU2075
 2668:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** }
  5683              		.loc 1 2668 3 view .LVU2076
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 204
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 204
 
 
 2668:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** }
@@ -12238,7 +12238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2484:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
  5723              		.loc 1 2484 46 view .LVU2092
  5724 026a 0333     		adds	r3, r3, #3
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 205
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 205
 
 
 2484:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
@@ -12298,7 +12298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5764              	.L322:
 2501:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
  5765              		.loc 1 2501 5 is_stmt 1 view .LVU2108
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 206
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 206
 
 
 2501:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
@@ -12358,7 +12358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5804 02da A4F87230 		strh	r3, [r4, #114]	@ movhi
  5805 02de 28E7     		b	.L324
  5806              	.L325:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 207
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 207
 
 
 2531:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
@@ -12418,7 +12418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2589:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  5846              		.loc 1 2589 8 is_stmt 1 view .LVU2140
 2589:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 208
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 208
 
 
  5847              		.loc 1 2589 11 is_stmt 0 view .LVU2141
@@ -12478,7 +12478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5888 034c 43F01003 		orr	r3, r3, #16
  5889 0350 C4F88C30 		str	r3, [r4, #140]
 2633:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 209
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 209
 
 
  5890              		.loc 1 2633 5 view .LVU2155
@@ -12538,7 +12538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5933              	.LVL270:
  5934              	.L340:
 2429:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 210
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 210
 
 
  5935              		.loc 1 2429 12 is_stmt 0 view .LVU2167
@@ -12598,7 +12598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  5982 0010 0123     		movs	r3, #1
  5983 0012 80F88830 		strb	r3, [r0, #136]
 2692:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 211
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 211
 
 
  5984              		.loc 1 2692 3 view .LVU2177
@@ -12658,7 +12658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6022              		.loc 1 2709 17 is_stmt 0 view .LVU2193
  6023 0048 019B     		ldr	r3, [sp, #4]
 2709:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 212
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 212
 
 
  6024              		.loc 1 2709 10 view .LVU2194
@@ -12718,7 +12718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6066 008c C4F88C30 		str	r3, [r4, #140]
 2724:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       }
  6067              		.loc 1 2724 9 view .LVU2207
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 213
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 213
 
 
  6068              	.L360:
@@ -12778,7 +12778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6107              		.loc 1 2745 13 is_stmt 0 view .LVU2222
  6108 00c6 D4F88030 		ldr	r3, [r4, #128]
 2745:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 214
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 214
 
 
  6109              		.loc 1 2745 8 view .LVU2223
@@ -12838,7 +12838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6146              		.loc 1 2770 10 discriminator 1 view .LVU2240
  6147 00f6 E0B9     		cbnz	r0, .L377
  6148              	.L365:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 215
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 215
 
 
 2782:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -12898,7 +12898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6188 011e D4F88000 		ldr	r0, [r4, #128]
  6189 0122 FFF7FEFF 		bl	HAL_DMA_GetError
  6190              	.LVL281:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 216
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 216
 
 
 2753:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         {
@@ -12958,7 +12958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6234              	.LFE310:
  6236              		.section	.text.HAL_SPI_DMAPause,"ax",%progbits
  6237              		.align	1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 217
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 217
 
 
  6238              		.global	HAL_SPI_DMAPause
@@ -13018,7 +13018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6286              	.LVL288:
 3003:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  6287              		.loc 1 3003 1 view .LVU2276
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 218
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 218
 
 
  6288 000e 7047     		bx	lr
@@ -13078,7 +13078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6338              		.cfi_endproc
  6339              	.LFE316:
  6341              		.section	.text.SPI_DMATransmitCplt,"ax",%progbits
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 219
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 219
 
 
  6342              		.align	1
@@ -13138,7 +13138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3498:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  6385              		.loc 1 3498 1 is_stmt 0 view .LVU2297
  6386 0020 08BD     		pop	{r3, pc}
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 220
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 220
 
 
  6387              	.LVL295:
@@ -13198,7 +13198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6437              		.loc 1 3508 3 is_stmt 1 view .LVU2305
 3508:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  6438              		.loc 1 3508 22 is_stmt 0 view .LVU2306
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 221
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 221
 
 
  6439 0002 C06D     		ldr	r0, [r0, #92]
@@ -13258,7 +13258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3309:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   /* Prevent unused argument(s) compilation warning */
  6484              		.loc 1 3309 1 is_stmt 1 view -0
  6485              		.cfi_startproc
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 222
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 222
 
 
  6486              		@ args = 0, pretend = 0, frame = 0
@@ -13318,7 +13318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6529              		.loc 1 3540 8 view .LVU2331
  6530 0012 812B     		cmp	r3, #129
  6531 0014 05D0     		beq	.L400
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 223
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 223
 
 
  6532              	.L398:
@@ -13378,7 +13378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6578              	.LFE319:
  6580              		.section	.text.SPI_DMAHalfTransmitCplt,"ax",%progbits
  6581              		.align	1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 224
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 224
 
 
  6582              		.syntax unified
@@ -13438,7 +13438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6630              		.cfi_endproc
  6631              	.LFE320:
  6633              		.section	.text.SPI_DMAHalfReceiveCplt,"ax",%progbits
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 225
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 225
 
 
  6634              		.align	1
@@ -13498,7 +13498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6682 0000 7047     		bx	lr
  6683              		.cfi_endproc
  6684              	.LFE321:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 226
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 226
 
 
  6686              		.section	.text.SPI_DMAHalfTransmitReceiveCplt,"ax",%progbits
@@ -13558,7 +13558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6734              		.loc 1 3383 1 is_stmt 0 view .LVU2368
  6735 0000 7047     		bx	lr
  6736              		.cfi_endproc
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 227
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 227
 
 
  6737              	.LFE322:
@@ -13618,7 +13618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3628:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #if (USE_HAL_SPI_REGISTER_CALLBACKS == 1UL)
  6782              		.loc 1 3628 17 is_stmt 0 view .LVU2380
  6783 001e 0123     		movs	r3, #1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 228
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 228
 
 
  6784 0020 84F88930 		strb	r3, [r4, #137]
@@ -13678,7 +13678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3655:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #endif /* USE_HAL_SPI_REGISTER_CALLBACKS */
  6828              		.loc 1 3655 3 is_stmt 1 view .LVU2393
  6829 0014 FFF7FEFF 		bl	HAL_SPI_ErrorCallback
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 229
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 229
 
 
  6830              	.LVL333:
@@ -13738,7 +13738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2822:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   __IO uint32_t count;
  6882              		.loc 1 2822 3 is_stmt 1 view .LVU2400
 2823:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** #if defined(HAL_DMA_MODULE_ENABLED)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 230
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 230
 
 
  6883              		.loc 1 2823 3 view .LVU2401
@@ -13798,7 +13798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6921 0034 013B     		subs	r3, r3, #1
  6922 0036 0193     		str	r3, [sp, #4]
 2844:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 231
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 231
 
 
  6923              		.loc 1 2844 7 is_stmt 1 view .LVU2418
@@ -13858,7 +13858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  6964              	.L446:
 2858:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         break;
  6965              		.loc 1 2858 9 view .LVU2432
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 232
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 232
 
 
  6966 0074 D4F88C30 		ldr	r3, [r4, #140]
@@ -13918,7 +13918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2882:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
  7006              		.loc 1 2882 5 is_stmt 1 view .LVU2447
 2882:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 233
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 233
 
 
  7007              		.loc 1 2882 9 is_stmt 0 view .LVU2448
@@ -13978,7 +13978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 2916:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
  7045              		.loc 1 2916 9 is_stmt 0 view .LVU2465
  7046 00de 2268     		ldr	r2, [r4]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 234
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 234
 
 
  7047 00e0 9268     		ldr	r2, [r2, #8]
@@ -14038,7 +14038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7087 00fc D4F88000 		ldr	r0, [r4, #128]
  7088              	.LVL343:
 2899:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 235
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 235
 
 
  7089              		.loc 1 2899 11 view .LVU2480
@@ -14098,7 +14098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7129              		.loc 1 2919 39 is_stmt 0 view .LVU2494
  7130 012a 1A4A     		ldr	r2, .L456+8
  7131 012c DA66     		str	r2, [r3, #108]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 236
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 236
 
 
 2921:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
@@ -14158,7 +14158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7171 015a C8E7     		b	.L431
  7172              	.LVL353:
  7173              	.L450:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 237
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 237
 
 
 2940:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
@@ -14218,7 +14218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7214              	.LVL361:
 2950:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     }
  7215              		.loc 1 2950 17 view .LVU2524
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 238
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 238
 
 
  7216 0188 F6E7     		b	.L434
@@ -14278,7 +14278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7261              		.loc 1 3676 5 is_stmt 1 view .LVU2535
 3676:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
  7262              		.loc 1 3676 21 is_stmt 0 view .LVU2536
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 239
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 239
 
 
  7263 0012 DB6E     		ldr	r3, [r3, #108]
@@ -14338,7 +14338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3706:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c **** 
  7308              		.loc 1 3706 22 is_stmt 0 view .LVU2548
  7309 0002 C46D     		ldr	r4, [r0, #92]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 240
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 240
 
 
  7310              	.LVL368:
@@ -14398,7 +14398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7349              		.section	.text.HAL_SPI_SuspendCallback,"ax",%progbits
  7350              		.align	1
  7351              		.weak	HAL_SPI_SuspendCallback
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 241
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 241
 
 
  7352              		.syntax unified
@@ -14458,7 +14458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7401 0008 3269     		ldr	r2, [r6, #16]
  7402              	.LVL374:
 3030:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   uint32_t trigger  = itsource & itflag;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 242
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 242
 
 
  7403              		.loc 1 3030 3 is_stmt 1 view .LVU2573
@@ -14518,7 +14518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3065:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       HAL_IS_BIT_CLR(trigger, SPI_FLAG_DXP))
  7441              		.loc 1 3065 3 is_stmt 1 view .LVU2590
 3065:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****       HAL_IS_BIT_CLR(trigger, SPI_FLAG_DXP))
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 243
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 243
 
 
  7442              		.loc 1 3065 86 is_stmt 0 view .LVU2591
@@ -14578,7 +14578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7483 006e 23F00803 		bic	r3, r3, #8
  7484 0072 1361     		str	r3, [r2, #16]
 3097:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 244
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 244
 
 
  7485              		.loc 1 3097 5 view .LVU2605
@@ -14638,7 +14638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7523              		.loc 1 3175 5 view .LVU2621
 3177:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   }
  7524              		.loc 1 3177 5 view .LVU2622
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 245
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 245
 
 
  7525 00a4 16E0     		b	.L467
@@ -14698,7 +14698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7564              		.loc 1 3068 9 is_stmt 0 view .LVU2637
  7565 00c4 A36F     		ldr	r3, [r4, #120]
  7566              	.LVL393:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 246
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 246
 
 
 3068:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****     handled = 1UL;
@@ -14758,7 +14758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7604              		.loc 1 3116 15 is_stmt 0 view .LVU2654
  7605 00e2 E36E     		ldr	r3, [r4, #108]
 3116:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 247
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 247
 
 
  7606              		.loc 1 3116 28 view .LVU2655
@@ -14818,7 +14818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3106:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****         }
  7644              		.loc 1 3106 28 view .LVU2672
  7645 0110 0433     		adds	r3, r3, #4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 248
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 248
 
 
  7646 0112 E366     		str	r3, [r4, #108]
@@ -14878,7 +14878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3181:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****   {
  7687              		.loc 1 3181 6 is_stmt 0 view .LVU2686
  7688 0140 15F4587F 		tst	r5, #864
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 249
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 249
 
 
  7689 0144 C6D0     		beq	.L467
@@ -14938,7 +14938,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7729              		.loc 1 3201 7 view .LVU2700
  7730 0190 2268     		ldr	r2, [r4]
  7731 0192 9369     		ldr	r3, [r2, #24]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 250
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 250
 
 
  7732 0194 43F48073 		orr	r3, r3, #256
@@ -14998,7 +14998,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7773              		.loc 1 3225 9 is_stmt 1 view .LVU2713
  7774 01e0 2268     		ldr	r2, [r4]
  7775 01e2 9368     		ldr	r3, [r2, #8]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 251
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 251
 
 
  7776 01e4 23F44043 		bic	r3, r3, #49152
@@ -15058,7 +15058,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
 3244:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_spi.c ****           {
  7814              		.loc 1 3244 14 discriminator 1 view .LVU2730
  7815 0220 0028     		cmp	r0, #0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 252
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 252
 
 
  7816 0222 3FF457AF 		beq	.L467
@@ -15118,7 +15118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7864              		.section	.text.HAL_SPI_GetError,"ax",%progbits
  7865              		.align	1
  7866              		.global	HAL_SPI_GetError
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 253
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 253
 
 
  7867              		.syntax unified
@@ -15157,133 +15157,133 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 1
  7898              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_spi.h"
  7899              		.file 11 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/system_stm32h5xx.h"
  7900              		.file 12 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 254
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 254
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32h5xx_hal_spi.c
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:22     .text.SPI_RxISR_8BIT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:27     .text.SPI_RxISR_8BIT:00000000 SPI_RxISR_8BIT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:76     .text.SPI_RxISR_16BIT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:81     .text.SPI_RxISR_16BIT:00000000 SPI_RxISR_16BIT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:134    .text.SPI_RxISR_32BIT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:139    .text.SPI_RxISR_32BIT:00000000 SPI_RxISR_32BIT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:188    .text.SPI_TxISR_8BIT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:193    .text.SPI_TxISR_8BIT:00000000 SPI_TxISR_8BIT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:242    .text.SPI_TxISR_16BIT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:247    .text.SPI_TxISR_16BIT:00000000 SPI_TxISR_16BIT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:299    .text.SPI_TxISR_32BIT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:304    .text.SPI_TxISR_32BIT:00000000 SPI_TxISR_32BIT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:353    .text.SPI_AbortTransfer:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:358    .text.SPI_AbortTransfer:00000000 SPI_AbortTransfer
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:431    .text.SPI_CloseTransfer:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:436    .text.SPI_CloseTransfer:00000000 SPI_CloseTransfer
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:559    .text.SPI_GetPacketSize:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:564    .text.SPI_GetPacketSize:00000000 SPI_GetPacketSize
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:599    .text.SPI_WaitOnFlagUntilTimeout:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:604    .text.SPI_WaitOnFlagUntilTimeout:00000000 SPI_WaitOnFlagUntilTimeout
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:678    .text.HAL_SPI_MspInit:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:684    .text.HAL_SPI_MspInit:00000000 HAL_SPI_MspInit
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:699    .text.HAL_SPI_Init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:705    .text.HAL_SPI_Init:00000000 HAL_SPI_Init
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1066   .text.HAL_SPI_Init:000001b4 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1076   .text.HAL_SPI_MspDeInit:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1082   .text.HAL_SPI_MspDeInit:00000000 HAL_SPI_MspDeInit
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1097   .text.HAL_SPI_DeInit:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1103   .text.HAL_SPI_DeInit:00000000 HAL_SPI_DeInit
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1162   .text.HAL_SPI_Transmit:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1168   .text.HAL_SPI_Transmit:00000000 HAL_SPI_Transmit
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1738   .text.HAL_SPI_Transmit:000002f0 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1745   .text.HAL_SPI_Receive:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:1751   .text.HAL_SPI_Receive:00000000 HAL_SPI_Receive
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:2412   .text.HAL_SPI_Receive:00000354 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:2418   .text.HAL_SPI_Receive:00000360 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:2456   .text.HAL_SPI_TransmitReceive:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:2462   .text.HAL_SPI_TransmitReceive:00000000 HAL_SPI_TransmitReceive
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3112   .text.HAL_SPI_TransmitReceive:00000314 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3119   .text.HAL_SPI_TransmitReceive:00000320 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3482   .text.HAL_SPI_Transmit_IT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3488   .text.HAL_SPI_Transmit_IT:00000000 HAL_SPI_Transmit_IT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3722   .text.HAL_SPI_Transmit_IT:00000100 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3732   .text.HAL_SPI_Receive_IT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3738   .text.HAL_SPI_Receive_IT:00000000 HAL_SPI_Receive_IT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3948   .text.HAL_SPI_Receive_IT:00000100 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3958   .text.HAL_SPI_TransmitReceive_IT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:3964   .text.HAL_SPI_TransmitReceive_IT:00000000 HAL_SPI_TransmitReceive_IT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:4286   .text.HAL_SPI_TransmitReceive_IT:000001ac $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:4299   .text.HAL_SPI_Transmit_DMA:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:4305   .text.HAL_SPI_Transmit_DMA:00000000 HAL_SPI_Transmit_DMA
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:4760   .text.HAL_SPI_Transmit_DMA:00000240 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6586   .text.SPI_DMAHalfTransmitCplt:00000000 SPI_DMAHalfTransmitCplt
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6347   .text.SPI_DMATransmitCplt:00000000 SPI_DMATransmitCplt
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6745   .text.SPI_DMAError:00000000 SPI_DMAError
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 255
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:22     .text.SPI_RxISR_8BIT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:27     .text.SPI_RxISR_8BIT:00000000 SPI_RxISR_8BIT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:76     .text.SPI_RxISR_16BIT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:81     .text.SPI_RxISR_16BIT:00000000 SPI_RxISR_16BIT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:134    .text.SPI_RxISR_32BIT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:139    .text.SPI_RxISR_32BIT:00000000 SPI_RxISR_32BIT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:188    .text.SPI_TxISR_8BIT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:193    .text.SPI_TxISR_8BIT:00000000 SPI_TxISR_8BIT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:242    .text.SPI_TxISR_16BIT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:247    .text.SPI_TxISR_16BIT:00000000 SPI_TxISR_16BIT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:299    .text.SPI_TxISR_32BIT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:304    .text.SPI_TxISR_32BIT:00000000 SPI_TxISR_32BIT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:353    .text.SPI_AbortTransfer:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:358    .text.SPI_AbortTransfer:00000000 SPI_AbortTransfer
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:431    .text.SPI_CloseTransfer:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:436    .text.SPI_CloseTransfer:00000000 SPI_CloseTransfer
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:559    .text.SPI_GetPacketSize:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:564    .text.SPI_GetPacketSize:00000000 SPI_GetPacketSize
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:599    .text.SPI_WaitOnFlagUntilTimeout:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:604    .text.SPI_WaitOnFlagUntilTimeout:00000000 SPI_WaitOnFlagUntilTimeout
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:678    .text.HAL_SPI_MspInit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:684    .text.HAL_SPI_MspInit:00000000 HAL_SPI_MspInit
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:699    .text.HAL_SPI_Init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:705    .text.HAL_SPI_Init:00000000 HAL_SPI_Init
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1066   .text.HAL_SPI_Init:000001b4 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1076   .text.HAL_SPI_MspDeInit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1082   .text.HAL_SPI_MspDeInit:00000000 HAL_SPI_MspDeInit
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1097   .text.HAL_SPI_DeInit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1103   .text.HAL_SPI_DeInit:00000000 HAL_SPI_DeInit
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1162   .text.HAL_SPI_Transmit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1168   .text.HAL_SPI_Transmit:00000000 HAL_SPI_Transmit
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1738   .text.HAL_SPI_Transmit:000002f0 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1745   .text.HAL_SPI_Receive:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:1751   .text.HAL_SPI_Receive:00000000 HAL_SPI_Receive
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:2412   .text.HAL_SPI_Receive:00000354 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:2418   .text.HAL_SPI_Receive:00000360 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:2456   .text.HAL_SPI_TransmitReceive:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:2462   .text.HAL_SPI_TransmitReceive:00000000 HAL_SPI_TransmitReceive
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3112   .text.HAL_SPI_TransmitReceive:00000314 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3119   .text.HAL_SPI_TransmitReceive:00000320 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3482   .text.HAL_SPI_Transmit_IT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3488   .text.HAL_SPI_Transmit_IT:00000000 HAL_SPI_Transmit_IT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3722   .text.HAL_SPI_Transmit_IT:00000100 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3732   .text.HAL_SPI_Receive_IT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3738   .text.HAL_SPI_Receive_IT:00000000 HAL_SPI_Receive_IT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3948   .text.HAL_SPI_Receive_IT:00000100 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3958   .text.HAL_SPI_TransmitReceive_IT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:3964   .text.HAL_SPI_TransmitReceive_IT:00000000 HAL_SPI_TransmitReceive_IT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:4286   .text.HAL_SPI_TransmitReceive_IT:000001ac $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:4299   .text.HAL_SPI_Transmit_DMA:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:4305   .text.HAL_SPI_Transmit_DMA:00000000 HAL_SPI_Transmit_DMA
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:4760   .text.HAL_SPI_Transmit_DMA:00000240 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6586   .text.SPI_DMAHalfTransmitCplt:00000000 SPI_DMAHalfTransmitCplt
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6347   .text.SPI_DMATransmitCplt:00000000 SPI_DMATransmitCplt
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6745   .text.SPI_DMAError:00000000 SPI_DMAError
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 255
 
 
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:4770   .text.HAL_SPI_Receive_DMA:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:4776   .text.HAL_SPI_Receive_DMA:00000000 HAL_SPI_Receive_DMA
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:5245   .text.HAL_SPI_Receive_DMA:00000264 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6639   .text.SPI_DMAHalfReceiveCplt:00000000 SPI_DMAHalfReceiveCplt
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6424   .text.SPI_DMAReceiveCplt:00000000 SPI_DMAReceiveCplt
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:5255   .text.HAL_SPI_TransmitReceive_DMA:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:5261   .text.HAL_SPI_TransmitReceive_DMA:00000000 HAL_SPI_TransmitReceive_DMA
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:5905   .text.HAL_SPI_TransmitReceive_DMA:00000364 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6692   .text.SPI_DMAHalfTransmitReceiveCplt:00000000 SPI_DMAHalfTransmitReceiveCplt
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6501   .text.SPI_DMATransmitReceiveCplt:00000000 SPI_DMATransmitReceiveCplt
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:5914   .text.HAL_SPI_TransmitReceive_DMA:0000037c $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:5951   .text.HAL_SPI_Abort:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:5957   .text.HAL_SPI_Abort:00000000 HAL_SPI_Abort
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6231   .text.HAL_SPI_Abort:00000150 $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6237   .text.HAL_SPI_DMAPause:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6243   .text.HAL_SPI_DMAPause:00000000 HAL_SPI_DMAPause
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6265   .text.HAL_SPI_DMAResume:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6271   .text.HAL_SPI_DMAResume:00000000 HAL_SPI_DMAResume
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6293   .text.HAL_SPI_DMAStop:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6299   .text.HAL_SPI_DMAStop:00000000 HAL_SPI_DMAStop
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6321   .text.HAL_SPI_TxCpltCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6327   .text.HAL_SPI_TxCpltCallback:00000000 HAL_SPI_TxCpltCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6342   .text.SPI_DMATransmitCplt:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6398   .text.HAL_SPI_RxCpltCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6404   .text.HAL_SPI_RxCpltCallback:00000000 HAL_SPI_RxCpltCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6419   .text.SPI_DMAReceiveCplt:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6475   .text.HAL_SPI_TxRxCpltCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6481   .text.HAL_SPI_TxRxCpltCallback:00000000 HAL_SPI_TxRxCpltCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6496   .text.SPI_DMATransmitReceiveCplt:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6560   .text.HAL_SPI_TxHalfCpltCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6566   .text.HAL_SPI_TxHalfCpltCallback:00000000 HAL_SPI_TxHalfCpltCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6581   .text.SPI_DMAHalfTransmitCplt:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6613   .text.HAL_SPI_RxHalfCpltCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6619   .text.HAL_SPI_RxHalfCpltCallback:00000000 HAL_SPI_RxHalfCpltCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6634   .text.SPI_DMAHalfReceiveCplt:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6666   .text.HAL_SPI_TxRxHalfCpltCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6672   .text.HAL_SPI_TxRxHalfCpltCallback:00000000 HAL_SPI_TxRxHalfCpltCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6687   .text.SPI_DMAHalfTransmitReceiveCplt:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6719   .text.HAL_SPI_ErrorCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6725   .text.HAL_SPI_ErrorCallback:00000000 HAL_SPI_ErrorCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6740   .text.SPI_DMAError:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6795   .text.SPI_DMAAbortOnError:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6800   .text.SPI_DMAAbortOnError:00000000 SPI_DMAAbortOnError
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6837   .text.HAL_SPI_AbortCpltCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6843   .text.HAL_SPI_AbortCpltCallback:00000000 HAL_SPI_AbortCpltCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6858   .text.HAL_SPI_Abort_IT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:6864   .text.HAL_SPI_Abort_IT:00000000 HAL_SPI_Abort_IT
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7220   .text.HAL_SPI_Abort_IT:0000018c $d
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7294   .text.SPI_DMARxAbortCallback:00000000 SPI_DMARxAbortCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7233   .text.SPI_DMATxAbortCallback:00000000 SPI_DMATxAbortCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7228   .text.SPI_DMATxAbortCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7289   .text.SPI_DMARxAbortCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7350   .text.HAL_SPI_SuspendCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7356   .text.HAL_SPI_SuspendCallback:00000000 HAL_SPI_SuspendCallback
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7371   .text.HAL_SPI_IRQHandler:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7377   .text.HAL_SPI_IRQHandler:00000000 HAL_SPI_IRQHandler
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7836   .text.HAL_SPI_IRQHandler:00000244 $d
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s 			page 256
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:4770   .text.HAL_SPI_Receive_DMA:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:4776   .text.HAL_SPI_Receive_DMA:00000000 HAL_SPI_Receive_DMA
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:5245   .text.HAL_SPI_Receive_DMA:00000264 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6639   .text.SPI_DMAHalfReceiveCplt:00000000 SPI_DMAHalfReceiveCplt
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6424   .text.SPI_DMAReceiveCplt:00000000 SPI_DMAReceiveCplt
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:5255   .text.HAL_SPI_TransmitReceive_DMA:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:5261   .text.HAL_SPI_TransmitReceive_DMA:00000000 HAL_SPI_TransmitReceive_DMA
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:5905   .text.HAL_SPI_TransmitReceive_DMA:00000364 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6692   .text.SPI_DMAHalfTransmitReceiveCplt:00000000 SPI_DMAHalfTransmitReceiveCplt
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6501   .text.SPI_DMATransmitReceiveCplt:00000000 SPI_DMATransmitReceiveCplt
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:5914   .text.HAL_SPI_TransmitReceive_DMA:0000037c $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:5951   .text.HAL_SPI_Abort:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:5957   .text.HAL_SPI_Abort:00000000 HAL_SPI_Abort
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6231   .text.HAL_SPI_Abort:00000150 $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6237   .text.HAL_SPI_DMAPause:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6243   .text.HAL_SPI_DMAPause:00000000 HAL_SPI_DMAPause
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6265   .text.HAL_SPI_DMAResume:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6271   .text.HAL_SPI_DMAResume:00000000 HAL_SPI_DMAResume
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6293   .text.HAL_SPI_DMAStop:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6299   .text.HAL_SPI_DMAStop:00000000 HAL_SPI_DMAStop
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6321   .text.HAL_SPI_TxCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6327   .text.HAL_SPI_TxCpltCallback:00000000 HAL_SPI_TxCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6342   .text.SPI_DMATransmitCplt:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6398   .text.HAL_SPI_RxCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6404   .text.HAL_SPI_RxCpltCallback:00000000 HAL_SPI_RxCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6419   .text.SPI_DMAReceiveCplt:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6475   .text.HAL_SPI_TxRxCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6481   .text.HAL_SPI_TxRxCpltCallback:00000000 HAL_SPI_TxRxCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6496   .text.SPI_DMATransmitReceiveCplt:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6560   .text.HAL_SPI_TxHalfCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6566   .text.HAL_SPI_TxHalfCpltCallback:00000000 HAL_SPI_TxHalfCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6581   .text.SPI_DMAHalfTransmitCplt:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6613   .text.HAL_SPI_RxHalfCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6619   .text.HAL_SPI_RxHalfCpltCallback:00000000 HAL_SPI_RxHalfCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6634   .text.SPI_DMAHalfReceiveCplt:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6666   .text.HAL_SPI_TxRxHalfCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6672   .text.HAL_SPI_TxRxHalfCpltCallback:00000000 HAL_SPI_TxRxHalfCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6687   .text.SPI_DMAHalfTransmitReceiveCplt:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6719   .text.HAL_SPI_ErrorCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6725   .text.HAL_SPI_ErrorCallback:00000000 HAL_SPI_ErrorCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6740   .text.SPI_DMAError:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6795   .text.SPI_DMAAbortOnError:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6800   .text.SPI_DMAAbortOnError:00000000 SPI_DMAAbortOnError
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6837   .text.HAL_SPI_AbortCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6843   .text.HAL_SPI_AbortCpltCallback:00000000 HAL_SPI_AbortCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6858   .text.HAL_SPI_Abort_IT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:6864   .text.HAL_SPI_Abort_IT:00000000 HAL_SPI_Abort_IT
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7220   .text.HAL_SPI_Abort_IT:0000018c $d
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7294   .text.SPI_DMARxAbortCallback:00000000 SPI_DMARxAbortCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7233   .text.SPI_DMATxAbortCallback:00000000 SPI_DMATxAbortCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7228   .text.SPI_DMATxAbortCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7289   .text.SPI_DMARxAbortCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7350   .text.HAL_SPI_SuspendCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7356   .text.HAL_SPI_SuspendCallback:00000000 HAL_SPI_SuspendCallback
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7371   .text.HAL_SPI_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7377   .text.HAL_SPI_IRQHandler:00000000 HAL_SPI_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7836   .text.HAL_SPI_IRQHandler:00000244 $d
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s 			page 256
 
 
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7841   .text.HAL_SPI_GetState:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7847   .text.HAL_SPI_GetState:00000000 HAL_SPI_GetState
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7865   .text.HAL_SPI_GetError:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc0Zm0Np.s:7871   .text.HAL_SPI_GetError:00000000 HAL_SPI_GetError
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7841   .text.HAL_SPI_GetState:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7847   .text.HAL_SPI_GetState:00000000 HAL_SPI_GetState
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7865   .text.HAL_SPI_GetError:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccIrIWWN.s:7871   .text.HAL_SPI_GetError:00000000 HAL_SPI_GetError
 
 UNDEFINED SYMBOLS
 HAL_GetTick

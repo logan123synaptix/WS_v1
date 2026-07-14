@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -21,238 +21,14 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   18              	.Ltext0:
   19              		.cfi_sections	.debug_frame
   20              		.file 1 "Core/Src/main.c"
-  21              		.section	.text.sx_gettick,"ax",%progbits
+  21              		.section	.text.Error_Handler,"ax",%progbits
   22              		.align	1
-  23              		.global	sx_gettick
+  23              		.global	Error_Handler
   24              		.syntax unified
   25              		.thumb
   26              		.thumb_func
-  28              	sx_gettick:
-  29              	.LFB336:
-  30              		.file 2 "SynaptiX_FDK/board/sx_board.h"
-   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
-   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
-   3:SynaptiX_FDK/board/sx_board.h **** 
-   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
-   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
-   6:SynaptiX_FDK/board/sx_board.h **** #endif
-   7:SynaptiX_FDK/board/sx_board.h **** 
-   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
-   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
-  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
-  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
-  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
-  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
-  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
-  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
-  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
-  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
-  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
-  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
-  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
-  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
-  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
-  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
-  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
-  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
-  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
-  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
-  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 2
-
-
-  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
-  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
-  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
-  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
-  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
-  34:SynaptiX_FDK/board/sx_board.h **** 
-  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
-  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
-  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
-  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
-  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
-  40:SynaptiX_FDK/board/sx_board.h **** 
-  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
-  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
-  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
-  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
-  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
-  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
-  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
-  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
-  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
-  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
-  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
-  53:SynaptiX_FDK/board/sx_board.h ****     #endif
-  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
-  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
-  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
-  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
-  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
-  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
-  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
-  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
-  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
-  64:SynaptiX_FDK/board/sx_board.h ****     #endif
-  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
-  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
-  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
-  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
-  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
-  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
-  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
-  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
-  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
-  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
-  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
-  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
-  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
-  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
-  79:SynaptiX_FDK/board/sx_board.h ****      *
-  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
-  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
-  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
-  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
-  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
-  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 3
-
-
-  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
-  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
-  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
-  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
-  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
-  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
-  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
-  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
-  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
-  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
-  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
-  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
-  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
-  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
- 100:SynaptiX_FDK/board/sx_board.h ****      *
- 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
- 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
- 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
- 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
- 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
- 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
- 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
- 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
- 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
- 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
- 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
- 112:SynaptiX_FDK/board/sx_board.h **** 
- 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
- 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
- 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
- 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
- 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
- 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
- 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
- 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
- 121:SynaptiX_FDK/board/sx_board.h **** 
- 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
- 123:SynaptiX_FDK/board/sx_board.h **** 
- 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
- 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
- 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
- 127:SynaptiX_FDK/board/sx_board.h **** 
- 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
- 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
- 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
- 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
- 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
- 133:SynaptiX_FDK/board/sx_board.h **** 
- 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
- 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
- 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
- 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
- 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
- 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
- 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
- 141:SynaptiX_FDK/board/sx_board.h **** 
- 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 4
-
-
- 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
- 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
- 145:SynaptiX_FDK/board/sx_board.h **** 
- 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
- 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
- 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
- 149:SynaptiX_FDK/board/sx_board.h **** 
- 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
- 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
- 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
- 153:SynaptiX_FDK/board/sx_board.h **** 
- 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
- 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
- 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
- 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
- 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
- 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
- 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
- 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
- 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
- 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
- 164:SynaptiX_FDK/board/sx_board.h **** 
- 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
- 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
- 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
- 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
- 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
- 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
- 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
- 172:SynaptiX_FDK/board/sx_board.h **** 
- 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
- 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
- 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
- 176:SynaptiX_FDK/board/sx_board.h **** 
- 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
- 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
- 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
- 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
- 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
- 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
- 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
- 184:SynaptiX_FDK/board/sx_board.h **** 
- 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
- 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
-  31              		.loc 2 186 33 view -0
-  32              		.cfi_startproc
-  33              		@ args = 0, pretend = 0, frame = 0
-  34              		@ frame_needed = 0, uses_anonymous_args = 0
-  35 0000 08B5     		push	{r3, lr}
-  36              	.LCFI0:
-  37              		.cfi_def_cfa_offset 8
-  38              		.cfi_offset 3, -8
-  39              		.cfi_offset 14, -4
-  40              		.loc 2 186 34 view .LVU1
-  41              		.loc 2 186 41 is_stmt 0 view .LVU2
-  42 0002 FFF7FEFF 		bl	HAL_GetTick
-  43              	.LVL0:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 5
-
-
-  44              		.loc 2 186 55 view .LVU3
-  45 0006 08BD     		pop	{r3, pc}
-  46              		.cfi_endproc
-  47              	.LFE336:
-  49              		.section	.text.Error_Handler,"ax",%progbits
-  50              		.align	1
-  51              		.global	Error_Handler
-  52              		.syntax unified
-  53              		.thumb
-  54              		.thumb_func
-  56              	Error_Handler:
-  57              	.LFB340:
+  28              	Error_Handler:
+  29              	.LFB338:
    1:Core/Src/main.c **** /* USER CODE BEGIN Header */
    2:Core/Src/main.c **** /**
    3:Core/Src/main.c ****   ******************************************************************************
@@ -282,6 +58,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   27:Core/Src/main.c **** #include "usart.h"
   28:Core/Src/main.c **** #include "usb.h"
   29:Core/Src/main.c **** #include "gpio.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 2
+
+
   30:Core/Src/main.c **** 
   31:Core/Src/main.c **** /* Private includes ----------------------------------------------------------*/
   32:Core/Src/main.c **** /* USER CODE BEGIN Includes */
@@ -298,9 +77,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   43:Core/Src/main.c **** /* USER CODE BEGIN PD */
   44:Core/Src/main.c **** 
   45:Core/Src/main.c **** /* USER CODE END PD */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 6
-
-
   46:Core/Src/main.c **** 
   47:Core/Src/main.c **** /* Private macro -------------------------------------------------------------*/
   48:Core/Src/main.c **** /* USER CODE BEGIN PM */
@@ -342,6 +118,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   84:Core/Src/main.c ****   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   85:Core/Src/main.c ****   HAL_Init();
   86:Core/Src/main.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 3
+
+
   87:Core/Src/main.c ****   /* USER CODE BEGIN Init */
   88:Core/Src/main.c **** 
   89:Core/Src/main.c ****   /* USER CODE END Init */
@@ -358,9 +137,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  100:Core/Src/main.c **** 
  101:Core/Src/main.c ****   /* Initialize all configured peripherals */
  102:Core/Src/main.c ****   MX_GPIO_Init();
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 7
-
-
  103:Core/Src/main.c ****   MX_I2C1_Init();
  104:Core/Src/main.c ****   MX_SPI1_Init();
  105:Core/Src/main.c ****   MX_USART1_UART_Init();
@@ -402,6 +178,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  141:Core/Src/main.c **** 
  142:Core/Src/main.c **** /**
  143:Core/Src/main.c ****   * @brief System Clock Configuration
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 4
+
+
  144:Core/Src/main.c ****   * @retval None
  145:Core/Src/main.c ****   */
  146:Core/Src/main.c **** void SystemClock_Config(void)
@@ -418,9 +197,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  157:Core/Src/main.c ****   /** Initializes the RCC Oscillators according to the specified parameters
  158:Core/Src/main.c ****   * in the RCC_OscInitTypeDef structure.
  159:Core/Src/main.c ****   */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 8
-
-
  160:Core/Src/main.c ****   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_LSI
  161:Core/Src/main.c ****                               |RCC_OSCILLATORTYPE_HSE;
  162:Core/Src/main.c ****   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -462,6 +238,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  198:Core/Src/main.c ****   __HAL_FLASH_SET_PROGRAM_DELAY(FLASH_PROGRAMMING_DELAY_1);
  199:Core/Src/main.c **** }
  200:Core/Src/main.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 5
+
+
  201:Core/Src/main.c **** /**
  202:Core/Src/main.c ****   * @brief Peripherals Common Clock Configuration
  203:Core/Src/main.c ****   * @retval None
@@ -478,9 +257,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  214:Core/Src/main.c ****   {
  215:Core/Src/main.c ****     Error_Handler();
  216:Core/Src/main.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 9
-
-
  217:Core/Src/main.c **** }
  218:Core/Src/main.c **** 
  219:Core/Src/main.c **** /* USER CODE BEGIN 4 */
@@ -493,19 +269,19 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  226:Core/Src/main.c ****   */
  227:Core/Src/main.c **** void Error_Handler(void)
  228:Core/Src/main.c **** {
-  58              		.loc 1 228 1 is_stmt 1 view -0
-  59              		.cfi_startproc
-  60              		@ Volatile: function does not return.
-  61              		@ args = 0, pretend = 0, frame = 0
-  62              		@ frame_needed = 0, uses_anonymous_args = 0
-  63              		@ link register save eliminated.
+  30              		.loc 1 228 1 view -0
+  31              		.cfi_startproc
+  32              		@ Volatile: function does not return.
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		@ link register save eliminated.
  229:Core/Src/main.c ****   /* USER CODE BEGIN Error_Handler_Debug */
  230:Core/Src/main.c ****   /* User can add his own implementation to report the HAL error return state */
  231:Core/Src/main.c ****   __disable_irq();
-  64              		.loc 1 231 3 view .LVU5
-  65              	.LBB4:
-  66              	.LBI4:
-  67              		.file 3 "Drivers/CMSIS/Include/cmsis_gcc.h"
+  36              		.loc 1 231 3 view .LVU1
+  37              	.LBB4:
+  38              	.LBI4:
+  39              		.file 2 "Drivers/CMSIS/Include/cmsis_gcc.h"
    1:Drivers/CMSIS/Include/cmsis_gcc.h **** /**************************************************************************//**
    2:Drivers/CMSIS/Include/cmsis_gcc.h ****  * @file     cmsis_gcc.h
    3:Drivers/CMSIS/Include/cmsis_gcc.h ****  * @brief    CMSIS compiler GCC header file
@@ -522,6 +298,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   14:Drivers/CMSIS/Include/cmsis_gcc.h ****  * You may obtain a copy of the License at
   15:Drivers/CMSIS/Include/cmsis_gcc.h ****  *
   16:Drivers/CMSIS/Include/cmsis_gcc.h ****  * www.apache.org/licenses/LICENSE-2.0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 6
+
+
   17:Drivers/CMSIS/Include/cmsis_gcc.h ****  *
   18:Drivers/CMSIS/Include/cmsis_gcc.h ****  * Unless required by applicable law or agreed to in writing, software
   19:Drivers/CMSIS/Include/cmsis_gcc.h ****  * distributed under the License is distributed on an AS IS BASIS, WITHOUT
@@ -538,9 +317,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   30:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wsign-conversion"
   31:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wconversion"
   32:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wunused-parameter"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 10
-
-
   33:Drivers/CMSIS/Include/cmsis_gcc.h **** 
   34:Drivers/CMSIS/Include/cmsis_gcc.h **** /* Fallback for __has_builtin */
   35:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __has_builtin
@@ -582,6 +358,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   71:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
   72:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
   73:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 7
+
+
   74:Drivers/CMSIS/Include/cmsis_gcc.h ****   struct __attribute__((packed)) T_UINT32 { uint32_t v; };
   75:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
   76:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT32(x)                  (((struct T_UINT32 *)(x))->v)
@@ -598,9 +377,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
   87:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
   88:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
   89:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 11
-
-
   90:Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT16_READ { uint16_t v; };
   91:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
   92:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_READ(addr)          (((const struct T_UINT16_READ *)(const void *)(add
@@ -642,6 +418,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  128:Drivers/CMSIS/Include/cmsis_gcc.h ****            in the used linker script.
  129:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  130:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 8
+
+
  131:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
  132:Drivers/CMSIS/Include/cmsis_gcc.h **** {
  133:Drivers/CMSIS/Include/cmsis_gcc.h ****   extern void _start(void) __NO_RETURN;
@@ -658,9 +437,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  144:Drivers/CMSIS/Include/cmsis_gcc.h ****   } __zero_table_t;
  145:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  146:Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __copy_table_t __copy_table_start__;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 12
-
-
  147:Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __copy_table_t __copy_table_end__;
  148:Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __zero_table_t __zero_table_start__;
  149:Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __zero_table_t __zero_table_end__;
@@ -702,6 +478,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  185:Drivers/CMSIS/Include/cmsis_gcc.h **** #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
  186:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __STACK_SEAL
  187:Drivers/CMSIS/Include/cmsis_gcc.h **** #define __STACK_SEAL              __StackSeal
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 9
+
+
  188:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
  189:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  190:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __TZ_STACK_SEAL_SIZE
@@ -718,9 +497,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  201:Drivers/CMSIS/Include/cmsis_gcc.h **** }
  202:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
  203:Drivers/CMSIS/Include/cmsis_gcc.h **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 13
-
-
  204:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  205:Drivers/CMSIS/Include/cmsis_gcc.h **** /* ##########################  Core Instruction Access  ######################### */
  206:Drivers/CMSIS/Include/cmsis_gcc.h **** /** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
@@ -762,6 +538,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  242:Drivers/CMSIS/Include/cmsis_gcc.h **** #define __WFE()                             __ASM volatile ("wfe":::"memory")
  243:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  244:Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 10
+
+
  245:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  246:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Send Event
  247:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Send Event is a hint instruction. It causes an event to be signaled to the CPU.
@@ -778,9 +557,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  258:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __ISB(void)
  259:Drivers/CMSIS/Include/cmsis_gcc.h **** {
  260:Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM volatile ("isb 0xF":::"memory");
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 14
-
-
  261:Drivers/CMSIS/Include/cmsis_gcc.h **** }
  262:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  263:Drivers/CMSIS/Include/cmsis_gcc.h **** 
@@ -822,6 +598,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  299:Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM ("rev %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
  300:Drivers/CMSIS/Include/cmsis_gcc.h ****   return result;
  301:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 11
+
+
  302:Drivers/CMSIS/Include/cmsis_gcc.h **** }
  303:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  304:Drivers/CMSIS/Include/cmsis_gcc.h **** 
@@ -838,9 +617,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  315:Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM ("rev16 %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
  316:Drivers/CMSIS/Include/cmsis_gcc.h ****   return result;
  317:Drivers/CMSIS/Include/cmsis_gcc.h **** }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 15
-
-
  318:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  319:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  320:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
@@ -882,6 +658,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  356:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  357:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  358:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Breakpoint
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 12
+
+
  359:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Causes the processor to enter Debug state.
  360:Drivers/CMSIS/Include/cmsis_gcc.h ****            Debug tools can use this to investigate system state when the instruction at a particula
  361:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    value  is ignored by the processor.
@@ -898,9 +677,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  372:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
  373:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE uint32_t __RBIT(uint32_t value)
  374:Drivers/CMSIS/Include/cmsis_gcc.h **** {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 16
-
-
  375:Drivers/CMSIS/Include/cmsis_gcc.h ****   uint32_t result;
  376:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  377:Drivers/CMSIS/Include/cmsis_gcc.h **** #if ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) || \
@@ -942,6 +718,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  413:Drivers/CMSIS/Include/cmsis_gcc.h ****    */
  414:Drivers/CMSIS/Include/cmsis_gcc.h ****   if (value == 0U)
  415:Drivers/CMSIS/Include/cmsis_gcc.h ****   {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 13
+
+
  416:Drivers/CMSIS/Include/cmsis_gcc.h ****     return 32U;
  417:Drivers/CMSIS/Include/cmsis_gcc.h ****   }
  418:Drivers/CMSIS/Include/cmsis_gcc.h ****   return __builtin_clz(value);
@@ -958,9 +737,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  429:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to data
  430:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return             value of type uint8_t at (*ptr)
  431:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 17
-
-
  432:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE uint8_t __LDREXB(volatile uint8_t *addr)
  433:Drivers/CMSIS/Include/cmsis_gcc.h **** {
  434:Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t result;
@@ -1002,6 +778,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  470:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  471:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   LDR Exclusive (32 bit)
  472:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Executes a exclusive LDR instruction for 32 bit values.
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 14
+
+
  473:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to data
  474:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return        value of type uint32_t at (*ptr)
  475:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
@@ -1018,9 +797,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  486:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   STR Exclusive (8 bit)
  487:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Executes a exclusive STR instruction for 8 bit values.
  488:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]  value  Value to store
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 18
-
-
  489:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to location
  490:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return          0  Function succeeded
  491:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return          1  Function failed
@@ -1062,6 +838,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  527:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE uint32_t __STREXW(uint32_t value, volatile uint32_t *addr)
  528:Drivers/CMSIS/Include/cmsis_gcc.h **** {
  529:Drivers/CMSIS/Include/cmsis_gcc.h ****    uint32_t result;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 15
+
+
  530:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  531:Drivers/CMSIS/Include/cmsis_gcc.h ****    __ASM volatile ("strex %0, %2, %1" : "=&r" (result), "=Q" (*addr) : "r" (value) );
  532:Drivers/CMSIS/Include/cmsis_gcc.h ****    return(result);
@@ -1078,9 +857,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  543:Drivers/CMSIS/Include/cmsis_gcc.h **** }
  544:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  545:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif /* ((defined (__ARM_ARCH_7M__      ) && (__ARM_ARCH_7M__      == 1)) || \
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 19
-
-
  546:Drivers/CMSIS/Include/cmsis_gcc.h ****            (defined (__ARM_ARCH_7EM__     ) && (__ARM_ARCH_7EM__     == 1)) || \
  547:Drivers/CMSIS/Include/cmsis_gcc.h ****            (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1)) || \
  548:Drivers/CMSIS/Include/cmsis_gcc.h ****            (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1))    ) */
@@ -1122,6 +898,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  584:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  585:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  586:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 16
+
+
  587:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Rotate Right with Extend (32 bit)
  588:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Moves each bit of a bitstring right by one bit.
  589:Drivers/CMSIS/Include/cmsis_gcc.h ****            The carry input is shifted in at the left end of the bitstring.
@@ -1138,9 +917,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  600:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  601:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  602:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 20
-
-
  603:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   LDRT Unprivileged (8 bit)
  604:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Executes a Unprivileged LDRT instruction for 8 bit value.
  605:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to data
@@ -1182,6 +958,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  641:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
  642:Drivers/CMSIS/Include/cmsis_gcc.h ****    return ((uint16_t) result);    /* Add explicit type cast here */
  643:Drivers/CMSIS/Include/cmsis_gcc.h **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 17
+
+
  644:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  645:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  646:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
@@ -1198,9 +977,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  657:Drivers/CMSIS/Include/cmsis_gcc.h ****    return(result);
  658:Drivers/CMSIS/Include/cmsis_gcc.h **** }
  659:Drivers/CMSIS/Include/cmsis_gcc.h **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 21
-
-
  660:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  661:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  662:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   STRT Unprivileged (8 bit)
@@ -1242,6 +1018,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  698:Drivers/CMSIS/Include/cmsis_gcc.h ****            (defined (__ARM_ARCH_8M_MAIN__ ) && (__ARM_ARCH_8M_MAIN__ == 1))    ) */
  699:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  700:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 18
+
+
  701:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Signed Saturate
  702:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Saturates a signed value.
  703:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]  value  Value to be saturated
@@ -1258,9 +1037,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  714:Drivers/CMSIS/Include/cmsis_gcc.h ****     {
  715:Drivers/CMSIS/Include/cmsis_gcc.h ****       return max;
  716:Drivers/CMSIS/Include/cmsis_gcc.h ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 22
-
-
  717:Drivers/CMSIS/Include/cmsis_gcc.h ****     else if (val < min)
  718:Drivers/CMSIS/Include/cmsis_gcc.h ****     {
  719:Drivers/CMSIS/Include/cmsis_gcc.h ****       return min;
@@ -1302,6 +1078,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  755:Drivers/CMSIS/Include/cmsis_gcc.h ****      (defined (__ARM_ARCH_8M_BASE__ ) && (__ARM_ARCH_8M_BASE__ == 1))    )
  756:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  757:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Load-Acquire (8 bit)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 19
+
+
  758:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Executes a LDAB instruction for 8 bit value.
  759:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to data
  760:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return             value of type uint8_t at (*ptr)
@@ -1318,9 +1097,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  771:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  772:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Load-Acquire (16 bit)
  773:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Executes a LDAH instruction for 16 bit values.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 23
-
-
  774:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to data
  775:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return        value of type uint16_t at (*ptr)
  776:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
@@ -1362,6 +1138,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  812:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  813:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  814:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Store-Release (16 bit)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 20
+
+
  815:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Executes a STLH instruction for 16 bit values.
  816:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]  value  Value to store
  817:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to location
@@ -1378,9 +1157,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  828:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]  value  Value to store
  829:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to location
  830:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 24
-
-
  831:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __STL(uint32_t value, volatile uint32_t *ptr)
  832:Drivers/CMSIS/Include/cmsis_gcc.h **** {
  833:Drivers/CMSIS/Include/cmsis_gcc.h ****    __ASM volatile ("stl %1, %0" : "=Q" (*ptr) : "r" ((uint32_t)value) : "memory" );
@@ -1422,6 +1198,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  869:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Executes a LDA exclusive instruction for 32 bit values.
  870:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to data
  871:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return        value of type uint32_t at (*ptr)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 21
+
+
  872:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
  873:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE uint32_t __LDAEX(volatile uint32_t *ptr)
  874:Drivers/CMSIS/Include/cmsis_gcc.h **** {
@@ -1438,9 +1217,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  885:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]  value  Value to store
  886:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    ptr  Pointer to location
  887:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return          0  Function succeeded
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 25
-
-
  888:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return          1  Function failed
  889:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
  890:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE uint32_t __STLEXB(uint8_t value, volatile uint8_t *ptr)
@@ -1482,6 +1258,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  926:Drivers/CMSIS/Include/cmsis_gcc.h ****    uint32_t result;
  927:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  928:Drivers/CMSIS/Include/cmsis_gcc.h ****    __ASM volatile ("stlex %0, %2, %1" : "=&r" (result), "=Q" (*ptr) : "r" ((uint32_t)value) : "memo
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 22
+
+
  929:Drivers/CMSIS/Include/cmsis_gcc.h ****    return(result);
  930:Drivers/CMSIS/Include/cmsis_gcc.h **** }
  931:Drivers/CMSIS/Include/cmsis_gcc.h **** 
@@ -1498,9 +1277,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  942:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
  943:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  944:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 26
-
-
  945:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Enable IRQ Interrupts
  946:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Enables IRQ interrupts by clearing special-purpose register PRIMASK.
  947:Drivers/CMSIS/Include/cmsis_gcc.h ****            Can only be executed in Privileged modes.
@@ -1517,558 +1293,556 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 1
  958:Drivers/CMSIS/Include/cmsis_gcc.h ****            Can only be executed in Privileged modes.
  959:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
  960:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __disable_irq(void)
-  68              		.loc 3 960 27 view .LVU6
-  69              	.LBB5:
+  40              		.loc 2 960 27 view .LVU2
+  41              	.LBB5:
  961:Drivers/CMSIS/Include/cmsis_gcc.h **** {
  962:Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
-  70              		.loc 3 962 3 view .LVU7
-  71              		.syntax unified
-  72              	@ 962 "Drivers/CMSIS/Include/cmsis_gcc.h" 1
-  73 0000 72B6     		cpsid i
-  74              	@ 0 "" 2
-  75              		.thumb
-  76              		.syntax unified
-  77              	.L4:
-  78              	.LBE5:
-  79              	.LBE4:
+  42              		.loc 2 962 3 view .LVU3
+  43              		.syntax unified
+  44              	@ 962 "Drivers/CMSIS/Include/cmsis_gcc.h" 1
+  45 0000 72B6     		cpsid i
+  46              	@ 0 "" 2
+  47              		.thumb
+  48              		.syntax unified
+  49              	.L2:
+  50              	.LBE5:
+  51              	.LBE4:
  232:Core/Src/main.c ****   while (1)
-  80              		.loc 1 232 3 view .LVU8
+  52              		.loc 1 232 3 view .LVU4
  233:Core/Src/main.c ****   {
  234:Core/Src/main.c ****   }
-  81              		.loc 1 234 3 view .LVU9
+  53              		.loc 1 234 3 view .LVU5
  232:Core/Src/main.c ****   while (1)
-  82              		.loc 1 232 9 view .LVU10
-  83 0002 FEE7     		b	.L4
-  84              		.cfi_endproc
-  85              	.LFE340:
-  87              		.section	.text.SystemClock_Config,"ax",%progbits
-  88              		.align	1
-  89              		.global	SystemClock_Config
-  90              		.syntax unified
-  91              		.thumb
-  92              		.thumb_func
-  94              	SystemClock_Config:
-  95              	.LFB338:
+  54              		.loc 1 232 9 view .LVU6
+  55 0002 FEE7     		b	.L2
+  56              		.cfi_endproc
+  57              	.LFE338:
+  59              		.section	.text.SystemClock_Config,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 23
+
+
+  60              		.align	1
+  61              		.global	SystemClock_Config
+  62              		.syntax unified
+  63              		.thumb
+  64              		.thumb_func
+  66              	SystemClock_Config:
+  67              	.LFB336:
  147:Core/Src/main.c ****   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  96              		.loc 1 147 1 view -0
-  97              		.cfi_startproc
-  98              		@ args = 0, pretend = 0, frame = 112
-  99              		@ frame_needed = 0, uses_anonymous_args = 0
- 100 0000 00B5     		push	{lr}
- 101              	.LCFI1:
- 102              		.cfi_def_cfa_offset 4
- 103              		.cfi_offset 14, -4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 27
-
-
- 104 0002 9DB0     		sub	sp, sp, #116
- 105              	.LCFI2:
- 106              		.cfi_def_cfa_offset 120
+  68              		.loc 1 147 1 view -0
+  69              		.cfi_startproc
+  70              		@ args = 0, pretend = 0, frame = 112
+  71              		@ frame_needed = 0, uses_anonymous_args = 0
+  72 0000 00B5     		push	{lr}
+  73              	.LCFI0:
+  74              		.cfi_def_cfa_offset 4
+  75              		.cfi_offset 14, -4
+  76 0002 9DB0     		sub	sp, sp, #116
+  77              	.LCFI1:
+  78              		.cfi_def_cfa_offset 120
  148:Core/Src/main.c ****   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
- 107              		.loc 1 148 3 view .LVU12
+  79              		.loc 1 148 3 view .LVU8
  148:Core/Src/main.c ****   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
- 108              		.loc 1 148 22 is_stmt 0 view .LVU13
- 109 0004 5022     		movs	r2, #80
- 110 0006 0021     		movs	r1, #0
- 111 0008 08A8     		add	r0, sp, #32
- 112 000a FFF7FEFF 		bl	memset
- 113              	.LVL1:
+  80              		.loc 1 148 22 is_stmt 0 view .LVU9
+  81 0004 5022     		movs	r2, #80
+  82 0006 0021     		movs	r1, #0
+  83 0008 08A8     		add	r0, sp, #32
+  84 000a FFF7FEFF 		bl	memset
+  85              	.LVL0:
  149:Core/Src/main.c **** 
- 114              		.loc 1 149 3 is_stmt 1 view .LVU14
+  86              		.loc 1 149 3 is_stmt 1 view .LVU10
  149:Core/Src/main.c **** 
- 115              		.loc 1 149 22 is_stmt 0 view .LVU15
- 116 000e 0023     		movs	r3, #0
- 117 0010 0293     		str	r3, [sp, #8]
- 118 0012 0393     		str	r3, [sp, #12]
- 119 0014 0493     		str	r3, [sp, #16]
- 120 0016 0593     		str	r3, [sp, #20]
- 121 0018 0693     		str	r3, [sp, #24]
- 122 001a 0793     		str	r3, [sp, #28]
+  87              		.loc 1 149 22 is_stmt 0 view .LVU11
+  88 000e 0023     		movs	r3, #0
+  89 0010 0293     		str	r3, [sp, #8]
+  90 0012 0393     		str	r3, [sp, #12]
+  91 0014 0493     		str	r3, [sp, #16]
+  92 0016 0593     		str	r3, [sp, #20]
+  93 0018 0693     		str	r3, [sp, #24]
+  94 001a 0793     		str	r3, [sp, #28]
  153:Core/Src/main.c **** 
- 123              		.loc 1 153 3 is_stmt 1 view .LVU16
- 124              	.LBB6:
+  95              		.loc 1 153 3 is_stmt 1 view .LVU12
+  96              	.LBB6:
  153:Core/Src/main.c **** 
- 125              		.loc 1 153 3 view .LVU17
+  97              		.loc 1 153 3 view .LVU13
  153:Core/Src/main.c **** 
- 126              		.loc 1 153 3 view .LVU18
- 127 001c 244B     		ldr	r3, .L12
- 128 001e 1A69     		ldr	r2, [r3, #16]
- 129 0020 22F03002 		bic	r2, r2, #48
- 130 0024 1A61     		str	r2, [r3, #16]
+  98              		.loc 1 153 3 view .LVU14
+  99 001c 244B     		ldr	r3, .L10
+ 100 001e 1A69     		ldr	r2, [r3, #16]
+ 101 0020 22F03002 		bic	r2, r2, #48
+ 102 0024 1A61     		str	r2, [r3, #16]
  153:Core/Src/main.c **** 
- 131              		.loc 1 153 3 view .LVU19
- 132 0026 1B69     		ldr	r3, [r3, #16]
- 133 0028 03F03003 		and	r3, r3, #48
- 134 002c 0193     		str	r3, [sp, #4]
+ 103              		.loc 1 153 3 view .LVU15
+ 104 0026 1B69     		ldr	r3, [r3, #16]
+ 105 0028 03F03003 		and	r3, r3, #48
+ 106 002c 0193     		str	r3, [sp, #4]
  153:Core/Src/main.c **** 
- 135              		.loc 1 153 3 view .LVU20
- 136 002e 019B     		ldr	r3, [sp, #4]
- 137              	.LBE6:
- 153:Core/Src/main.c **** 
- 138              		.loc 1 153 3 view .LVU21
- 155:Core/Src/main.c **** 
- 139              		.loc 1 155 3 view .LVU22
- 140              	.L6:
- 155:Core/Src/main.c **** 
- 141              		.loc 1 155 48 discriminator 1 view .LVU23
- 155:Core/Src/main.c **** 
- 142              		.loc 1 155 9 discriminator 1 view .LVU24
- 155:Core/Src/main.c **** 
- 143              		.loc 1 155 10 is_stmt 0 discriminator 1 view .LVU25
- 144 0030 1F4B     		ldr	r3, .L12
- 145 0032 5B69     		ldr	r3, [r3, #20]
- 155:Core/Src/main.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 28
+ 107              		.loc 1 153 3 view .LVU16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 24
 
 
- 146              		.loc 1 155 9 discriminator 1 view .LVU26
- 147 0034 13F0080F 		tst	r3, #8
- 148 0038 FAD0     		beq	.L6
+ 108 002e 019B     		ldr	r3, [sp, #4]
+ 109              	.LBE6:
+ 153:Core/Src/main.c **** 
+ 110              		.loc 1 153 3 view .LVU17
+ 155:Core/Src/main.c **** 
+ 111              		.loc 1 155 3 view .LVU18
+ 112              	.L4:
+ 155:Core/Src/main.c **** 
+ 113              		.loc 1 155 48 discriminator 1 view .LVU19
+ 155:Core/Src/main.c **** 
+ 114              		.loc 1 155 9 discriminator 1 view .LVU20
+ 155:Core/Src/main.c **** 
+ 115              		.loc 1 155 10 is_stmt 0 discriminator 1 view .LVU21
+ 116 0030 1F4B     		ldr	r3, .L10
+ 117 0032 5B69     		ldr	r3, [r3, #20]
+ 155:Core/Src/main.c **** 
+ 118              		.loc 1 155 9 discriminator 1 view .LVU22
+ 119 0034 13F0080F 		tst	r3, #8
+ 120 0038 FAD0     		beq	.L4
  160:Core/Src/main.c ****                               |RCC_OSCILLATORTYPE_HSE;
- 149              		.loc 1 160 3 is_stmt 1 view .LVU27
+ 121              		.loc 1 160 3 is_stmt 1 view .LVU23
  160:Core/Src/main.c ****                               |RCC_OSCILLATORTYPE_HSE;
- 150              		.loc 1 160 36 is_stmt 0 view .LVU28
- 151 003a 2923     		movs	r3, #41
- 152 003c 0893     		str	r3, [sp, #32]
+ 122              		.loc 1 160 36 is_stmt 0 view .LVU24
+ 123 003a 2923     		movs	r3, #41
+ 124 003c 0893     		str	r3, [sp, #32]
  162:Core/Src/main.c ****   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
- 153              		.loc 1 162 3 is_stmt 1 view .LVU29
+ 125              		.loc 1 162 3 is_stmt 1 view .LVU25
  162:Core/Src/main.c ****   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
- 154              		.loc 1 162 30 is_stmt 0 view .LVU30
- 155 003e 4FF48033 		mov	r3, #65536
- 156 0042 0993     		str	r3, [sp, #36]
+ 126              		.loc 1 162 30 is_stmt 0 view .LVU26
+ 127 003e 4FF48033 		mov	r3, #65536
+ 128 0042 0993     		str	r3, [sp, #36]
  163:Core/Src/main.c ****   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
- 157              		.loc 1 163 3 is_stmt 1 view .LVU31
+ 129              		.loc 1 163 3 is_stmt 1 view .LVU27
  163:Core/Src/main.c ****   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
- 158              		.loc 1 163 30 is_stmt 0 view .LVU32
- 159 0044 4FF08063 		mov	r3, #67108864
- 160 0048 0E93     		str	r3, [sp, #56]
+ 130              		.loc 1 163 30 is_stmt 0 view .LVU28
+ 131 0044 4FF08063 		mov	r3, #67108864
+ 132 0048 0E93     		str	r3, [sp, #56]
  164:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
- 161              		.loc 1 164 3 is_stmt 1 view .LVU33
+ 133              		.loc 1 164 3 is_stmt 1 view .LVU29
  164:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
- 162              		.loc 1 164 32 is_stmt 0 view .LVU34
- 163 004a 4FF48053 		mov	r3, #4096
- 164 004e 1193     		str	r3, [sp, #68]
+ 134              		.loc 1 164 32 is_stmt 0 view .LVU30
+ 135 004a 4FF48053 		mov	r3, #4096
+ 136 004e 1193     		str	r3, [sp, #68]
  165:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLSource = RCC_PLL1_SOURCE_HSE;
- 165              		.loc 1 165 3 is_stmt 1 view .LVU35
+ 137              		.loc 1 165 3 is_stmt 1 view .LVU31
  165:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLSource = RCC_PLL1_SOURCE_HSE;
- 166              		.loc 1 165 34 is_stmt 0 view .LVU36
- 167 0050 0223     		movs	r3, #2
- 168 0052 1293     		str	r3, [sp, #72]
+ 138              		.loc 1 165 34 is_stmt 0 view .LVU32
+ 139 0050 0223     		movs	r3, #2
+ 140 0052 1293     		str	r3, [sp, #72]
  166:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLM = 1;
- 169              		.loc 1 166 3 is_stmt 1 view .LVU37
+ 141              		.loc 1 166 3 is_stmt 1 view .LVU33
  166:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLM = 1;
- 170              		.loc 1 166 35 is_stmt 0 view .LVU38
- 171 0054 0322     		movs	r2, #3
- 172 0056 1392     		str	r2, [sp, #76]
+ 142              		.loc 1 166 35 is_stmt 0 view .LVU34
+ 143 0054 0322     		movs	r2, #3
+ 144 0056 1392     		str	r2, [sp, #76]
  167:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLN = 16;
- 173              		.loc 1 167 3 is_stmt 1 view .LVU39
+ 145              		.loc 1 167 3 is_stmt 1 view .LVU35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 25
+
+
  167:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLN = 16;
- 174              		.loc 1 167 30 is_stmt 0 view .LVU40
- 175 0058 0122     		movs	r2, #1
- 176 005a 1492     		str	r2, [sp, #80]
+ 146              		.loc 1 167 30 is_stmt 0 view .LVU36
+ 147 0058 0122     		movs	r2, #1
+ 148 005a 1492     		str	r2, [sp, #80]
  168:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLP = 2;
- 177              		.loc 1 168 3 is_stmt 1 view .LVU41
+ 149              		.loc 1 168 3 is_stmt 1 view .LVU37
  168:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLP = 2;
- 178              		.loc 1 168 30 is_stmt 0 view .LVU42
- 179 005c 1022     		movs	r2, #16
- 180 005e 1592     		str	r2, [sp, #84]
+ 150              		.loc 1 168 30 is_stmt 0 view .LVU38
+ 151 005c 1022     		movs	r2, #16
+ 152 005e 1592     		str	r2, [sp, #84]
  169:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLQ = 2;
- 181              		.loc 1 169 3 is_stmt 1 view .LVU43
+ 153              		.loc 1 169 3 is_stmt 1 view .LVU39
  169:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLQ = 2;
- 182              		.loc 1 169 30 is_stmt 0 view .LVU44
- 183 0060 1693     		str	r3, [sp, #88]
+ 154              		.loc 1 169 30 is_stmt 0 view .LVU40
+ 155 0060 1693     		str	r3, [sp, #88]
  170:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLR = 2;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 29
-
-
- 184              		.loc 1 170 3 is_stmt 1 view .LVU45
+ 156              		.loc 1 170 3 is_stmt 1 view .LVU41
  170:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLR = 2;
- 185              		.loc 1 170 30 is_stmt 0 view .LVU46
- 186 0062 1793     		str	r3, [sp, #92]
+ 157              		.loc 1 170 30 is_stmt 0 view .LVU42
+ 158 0062 1793     		str	r3, [sp, #92]
  171:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1_VCIRANGE_3;
- 187              		.loc 1 171 3 is_stmt 1 view .LVU47
+ 159              		.loc 1 171 3 is_stmt 1 view .LVU43
  171:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1_VCIRANGE_3;
- 188              		.loc 1 171 30 is_stmt 0 view .LVU48
- 189 0064 1893     		str	r3, [sp, #96]
+ 160              		.loc 1 171 30 is_stmt 0 view .LVU44
+ 161 0064 1893     		str	r3, [sp, #96]
  172:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1_VCORANGE_WIDE;
- 190              		.loc 1 172 3 is_stmt 1 view .LVU49
+ 162              		.loc 1 172 3 is_stmt 1 view .LVU45
  172:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1_VCORANGE_WIDE;
- 191              		.loc 1 172 32 is_stmt 0 view .LVU50
- 192 0066 0C23     		movs	r3, #12
- 193 0068 1993     		str	r3, [sp, #100]
+ 163              		.loc 1 172 32 is_stmt 0 view .LVU46
+ 164 0066 0C23     		movs	r3, #12
+ 165 0068 1993     		str	r3, [sp, #100]
  173:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLFRACN = 0;
- 194              		.loc 1 173 3 is_stmt 1 view .LVU51
+ 166              		.loc 1 173 3 is_stmt 1 view .LVU47
  173:Core/Src/main.c ****   RCC_OscInitStruct.PLL.PLLFRACN = 0;
- 195              		.loc 1 173 35 is_stmt 0 view .LVU52
- 196 006a 0023     		movs	r3, #0
- 197 006c 1A93     		str	r3, [sp, #104]
+ 167              		.loc 1 173 35 is_stmt 0 view .LVU48
+ 168 006a 0023     		movs	r3, #0
+ 169 006c 1A93     		str	r3, [sp, #104]
  174:Core/Src/main.c ****   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
- 198              		.loc 1 174 3 is_stmt 1 view .LVU53
+ 170              		.loc 1 174 3 is_stmt 1 view .LVU49
  174:Core/Src/main.c ****   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
- 199              		.loc 1 174 34 is_stmt 0 view .LVU54
- 200 006e 1B93     		str	r3, [sp, #108]
+ 171              		.loc 1 174 34 is_stmt 0 view .LVU50
+ 172 006e 1B93     		str	r3, [sp, #108]
  175:Core/Src/main.c ****   {
- 201              		.loc 1 175 3 is_stmt 1 view .LVU55
+ 173              		.loc 1 175 3 is_stmt 1 view .LVU51
  175:Core/Src/main.c ****   {
- 202              		.loc 1 175 7 is_stmt 0 view .LVU56
- 203 0070 08A8     		add	r0, sp, #32
- 204 0072 FFF7FEFF 		bl	HAL_RCC_OscConfig
- 205              	.LVL2:
+ 174              		.loc 1 175 7 is_stmt 0 view .LVU52
+ 175 0070 08A8     		add	r0, sp, #32
+ 176 0072 FFF7FEFF 		bl	HAL_RCC_OscConfig
+ 177              	.LVL1:
  175:Core/Src/main.c ****   {
- 206              		.loc 1 175 6 discriminator 1 view .LVU57
- 207 0076 B0B9     		cbnz	r0, .L10
+ 178              		.loc 1 175 6 discriminator 1 view .LVU53
+ 179 0076 B0B9     		cbnz	r0, .L8
  182:Core/Src/main.c ****                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
- 208              		.loc 1 182 3 is_stmt 1 view .LVU58
+ 180              		.loc 1 182 3 is_stmt 1 view .LVU54
  182:Core/Src/main.c ****                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
- 209              		.loc 1 182 31 is_stmt 0 view .LVU59
- 210 0078 1F23     		movs	r3, #31
- 211 007a 0293     		str	r3, [sp, #8]
- 185:Core/Src/main.c ****   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
- 212              		.loc 1 185 3 is_stmt 1 view .LVU60
- 185:Core/Src/main.c ****   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
- 213              		.loc 1 185 34 is_stmt 0 view .LVU61
- 214 007c 0321     		movs	r1, #3
- 215 007e 0391     		str	r1, [sp, #12]
- 186:Core/Src/main.c ****   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
- 216              		.loc 1 186 3 is_stmt 1 view .LVU62
- 186:Core/Src/main.c ****   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
- 217              		.loc 1 186 35 is_stmt 0 view .LVU63
- 218 0080 0823     		movs	r3, #8
- 219 0082 0493     		str	r3, [sp, #16]
- 187:Core/Src/main.c ****   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
- 220              		.loc 1 187 3 is_stmt 1 view .LVU64
- 187:Core/Src/main.c ****   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 30
+ 181              		.loc 1 182 31 is_stmt 0 view .LVU55
+ 182 0078 1F23     		movs	r3, #31
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 26
 
 
- 221              		.loc 1 187 36 is_stmt 0 view .LVU65
- 222 0084 0023     		movs	r3, #0
- 223 0086 0593     		str	r3, [sp, #20]
+ 183 007a 0293     		str	r3, [sp, #8]
+ 185:Core/Src/main.c ****   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
+ 184              		.loc 1 185 3 is_stmt 1 view .LVU56
+ 185:Core/Src/main.c ****   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
+ 185              		.loc 1 185 34 is_stmt 0 view .LVU57
+ 186 007c 0321     		movs	r1, #3
+ 187 007e 0391     		str	r1, [sp, #12]
+ 186:Core/Src/main.c ****   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+ 188              		.loc 1 186 3 is_stmt 1 view .LVU58
+ 186:Core/Src/main.c ****   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+ 189              		.loc 1 186 35 is_stmt 0 view .LVU59
+ 190 0080 0823     		movs	r3, #8
+ 191 0082 0493     		str	r3, [sp, #16]
+ 187:Core/Src/main.c ****   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+ 192              		.loc 1 187 3 is_stmt 1 view .LVU60
+ 187:Core/Src/main.c ****   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+ 193              		.loc 1 187 36 is_stmt 0 view .LVU61
+ 194 0084 0023     		movs	r3, #0
+ 195 0086 0593     		str	r3, [sp, #20]
  188:Core/Src/main.c ****   RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV1;
- 224              		.loc 1 188 3 is_stmt 1 view .LVU66
+ 196              		.loc 1 188 3 is_stmt 1 view .LVU62
  188:Core/Src/main.c ****   RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV1;
- 225              		.loc 1 188 36 is_stmt 0 view .LVU67
- 226 0088 0693     		str	r3, [sp, #24]
+ 197              		.loc 1 188 36 is_stmt 0 view .LVU63
+ 198 0088 0693     		str	r3, [sp, #24]
  189:Core/Src/main.c **** 
- 227              		.loc 1 189 3 is_stmt 1 view .LVU68
+ 199              		.loc 1 189 3 is_stmt 1 view .LVU64
  189:Core/Src/main.c **** 
- 228              		.loc 1 189 36 is_stmt 0 view .LVU69
- 229 008a 0793     		str	r3, [sp, #28]
+ 200              		.loc 1 189 36 is_stmt 0 view .LVU65
+ 201 008a 0793     		str	r3, [sp, #28]
  191:Core/Src/main.c ****   {
- 230              		.loc 1 191 3 is_stmt 1 view .LVU70
+ 202              		.loc 1 191 3 is_stmt 1 view .LVU66
  191:Core/Src/main.c ****   {
- 231              		.loc 1 191 7 is_stmt 0 view .LVU71
- 232 008c 02A8     		add	r0, sp, #8
- 233 008e FFF7FEFF 		bl	HAL_RCC_ClockConfig
- 234              	.LVL3:
+ 203              		.loc 1 191 7 is_stmt 0 view .LVU67
+ 204 008c 02A8     		add	r0, sp, #8
+ 205 008e FFF7FEFF 		bl	HAL_RCC_ClockConfig
+ 206              	.LVL2:
  191:Core/Src/main.c ****   {
- 235              		.loc 1 191 6 discriminator 1 view .LVU72
- 236 0092 50B9     		cbnz	r0, .L11
+ 207              		.loc 1 191 6 discriminator 1 view .LVU68
+ 208 0092 50B9     		cbnz	r0, .L9
  198:Core/Src/main.c **** }
- 237              		.loc 1 198 3 is_stmt 1 view .LVU73
- 238 0094 074A     		ldr	r2, .L12+4
- 239 0096 1368     		ldr	r3, [r2]
- 240 0098 23F03003 		bic	r3, r3, #48
- 241 009c 43F01003 		orr	r3, r3, #16
- 242 00a0 1360     		str	r3, [r2]
+ 209              		.loc 1 198 3 is_stmt 1 view .LVU69
+ 210 0094 074A     		ldr	r2, .L10+4
+ 211 0096 1368     		ldr	r3, [r2]
+ 212 0098 23F03003 		bic	r3, r3, #48
+ 213 009c 43F01003 		orr	r3, r3, #16
+ 214 00a0 1360     		str	r3, [r2]
  199:Core/Src/main.c **** 
- 243              		.loc 1 199 1 is_stmt 0 view .LVU74
- 244 00a2 1DB0     		add	sp, sp, #116
- 245              	.LCFI3:
- 246              		.cfi_remember_state
- 247              		.cfi_def_cfa_offset 4
- 248              		@ sp needed
- 249 00a4 00BD     		pop	{pc}
- 250              	.L10:
- 251              	.LCFI4:
- 252              		.cfi_restore_state
+ 215              		.loc 1 199 1 is_stmt 0 view .LVU70
+ 216 00a2 1DB0     		add	sp, sp, #116
+ 217              	.LCFI2:
+ 218              		.cfi_remember_state
+ 219              		.cfi_def_cfa_offset 4
+ 220              		@ sp needed
+ 221 00a4 00BD     		pop	{pc}
+ 222              	.L8:
+ 223              	.LCFI3:
+ 224              		.cfi_restore_state
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 27
+
+
  177:Core/Src/main.c ****   }
- 253              		.loc 1 177 5 is_stmt 1 view .LVU75
- 254 00a6 FFF7FEFF 		bl	Error_Handler
- 255              	.LVL4:
- 256              	.L11:
+ 225              		.loc 1 177 5 is_stmt 1 view .LVU71
+ 226 00a6 FFF7FEFF 		bl	Error_Handler
+ 227              	.LVL3:
+ 228              	.L9:
  193:Core/Src/main.c ****   }
- 257              		.loc 1 193 5 view .LVU76
- 258 00aa FFF7FEFF 		bl	Error_Handler
- 259              	.LVL5:
- 260              	.L13:
- 261 00ae 00BF     		.align	2
- 262              	.L12:
- 263 00b0 00080244 		.word	1140983808
- 264 00b4 00200240 		.word	1073881088
- 265              		.cfi_endproc
- 266              	.LFE338:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 31
-
-
- 268              		.section	.text.PeriphCommonClock_Config,"ax",%progbits
- 269              		.align	1
- 270              		.global	PeriphCommonClock_Config
- 271              		.syntax unified
- 272              		.thumb
- 273              		.thumb_func
- 275              	PeriphCommonClock_Config:
- 276              	.LFB339:
+ 229              		.loc 1 193 5 view .LVU72
+ 230 00aa FFF7FEFF 		bl	Error_Handler
+ 231              	.LVL4:
+ 232              	.L11:
+ 233 00ae 00BF     		.align	2
+ 234              	.L10:
+ 235 00b0 00080244 		.word	1140983808
+ 236 00b4 00200240 		.word	1073881088
+ 237              		.cfi_endproc
+ 238              	.LFE336:
+ 240              		.section	.text.PeriphCommonClock_Config,"ax",%progbits
+ 241              		.align	1
+ 242              		.global	PeriphCommonClock_Config
+ 243              		.syntax unified
+ 244              		.thumb
+ 245              		.thumb_func
+ 247              	PeriphCommonClock_Config:
+ 248              	.LFB337:
  206:Core/Src/main.c ****   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
- 277              		.loc 1 206 1 view -0
- 278              		.cfi_startproc
- 279              		@ args = 0, pretend = 0, frame = 264
- 280              		@ frame_needed = 0, uses_anonymous_args = 0
- 281 0000 10B5     		push	{r4, lr}
- 282              	.LCFI5:
- 283              		.cfi_def_cfa_offset 8
- 284              		.cfi_offset 4, -8
- 285              		.cfi_offset 14, -4
- 286 0002 C2B0     		sub	sp, sp, #264
- 287              	.LCFI6:
- 288              		.cfi_def_cfa_offset 272
+ 249              		.loc 1 206 1 view -0
+ 250              		.cfi_startproc
+ 251              		@ args = 0, pretend = 0, frame = 264
+ 252              		@ frame_needed = 0, uses_anonymous_args = 0
+ 253 0000 10B5     		push	{r4, lr}
+ 254              	.LCFI4:
+ 255              		.cfi_def_cfa_offset 8
+ 256              		.cfi_offset 4, -8
+ 257              		.cfi_offset 14, -4
+ 258 0002 C2B0     		sub	sp, sp, #264
+ 259              	.LCFI5:
+ 260              		.cfi_def_cfa_offset 272
  207:Core/Src/main.c **** 
- 289              		.loc 1 207 3 view .LVU78
+ 261              		.loc 1 207 3 view .LVU74
  207:Core/Src/main.c **** 
- 290              		.loc 1 207 28 is_stmt 0 view .LVU79
- 291 0004 4FF48472 		mov	r2, #264
- 292 0008 0021     		movs	r1, #0
- 293 000a 6846     		mov	r0, sp
- 294 000c FFF7FEFF 		bl	memset
- 295              	.LVL6:
+ 262              		.loc 1 207 28 is_stmt 0 view .LVU75
+ 263 0004 4FF48472 		mov	r2, #264
+ 264 0008 0021     		movs	r1, #0
+ 265 000a 6846     		mov	r0, sp
+ 266 000c FFF7FEFF 		bl	memset
+ 267              	.LVL5:
  211:Core/Src/main.c ****   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
- 296              		.loc 1 211 3 is_stmt 1 view .LVU80
+ 268              		.loc 1 211 3 is_stmt 1 view .LVU76
  211:Core/Src/main.c ****   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
- 297              		.loc 1 211 44 is_stmt 0 view .LVU81
- 298 0010 4FF08072 		mov	r2, #16777216
- 299 0014 0023     		movs	r3, #0
- 300 0016 CDE90023 		strd	r2, [sp]
+ 269              		.loc 1 211 44 is_stmt 0 view .LVU77
+ 270 0010 4FF08072 		mov	r2, #16777216
+ 271 0014 0023     		movs	r3, #0
+ 272 0016 CDE90023 		strd	r2, [sp]
  212:Core/Src/main.c ****   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
- 301              		.loc 1 212 3 is_stmt 1 view .LVU82
+ 273              		.loc 1 212 3 is_stmt 1 view .LVU78
  213:Core/Src/main.c ****   {
- 302              		.loc 1 213 3 view .LVU83
+ 274              		.loc 1 213 3 view .LVU79
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 28
+
+
  213:Core/Src/main.c ****   {
- 303              		.loc 1 213 7 is_stmt 0 view .LVU84
- 304 001a 6846     		mov	r0, sp
- 305 001c FFF7FEFF 		bl	HAL_RCCEx_PeriphCLKConfig
- 306              	.LVL7:
+ 275              		.loc 1 213 7 is_stmt 0 view .LVU80
+ 276 001a 6846     		mov	r0, sp
+ 277 001c FFF7FEFF 		bl	HAL_RCCEx_PeriphCLKConfig
+ 278              	.LVL6:
  213:Core/Src/main.c ****   {
- 307              		.loc 1 213 6 discriminator 1 view .LVU85
- 308 0020 08B9     		cbnz	r0, .L17
+ 279              		.loc 1 213 6 discriminator 1 view .LVU81
+ 280 0020 08B9     		cbnz	r0, .L15
  217:Core/Src/main.c **** 
- 309              		.loc 1 217 1 view .LVU86
- 310 0022 42B0     		add	sp, sp, #264
- 311              	.LCFI7:
- 312              		.cfi_remember_state
- 313              		.cfi_def_cfa_offset 8
- 314              		@ sp needed
- 315 0024 10BD     		pop	{r4, pc}
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 32
-
-
- 316              	.L17:
- 317              	.LCFI8:
- 318              		.cfi_restore_state
+ 281              		.loc 1 217 1 view .LVU82
+ 282 0022 42B0     		add	sp, sp, #264
+ 283              	.LCFI6:
+ 284              		.cfi_remember_state
+ 285              		.cfi_def_cfa_offset 8
+ 286              		@ sp needed
+ 287 0024 10BD     		pop	{r4, pc}
+ 288              	.L15:
+ 289              	.LCFI7:
+ 290              		.cfi_restore_state
  215:Core/Src/main.c ****   }
- 319              		.loc 1 215 5 is_stmt 1 view .LVU87
- 320 0026 FFF7FEFF 		bl	Error_Handler
- 321              	.LVL8:
- 322              		.cfi_endproc
- 323              	.LFE339:
- 325              		.section	.text.main,"ax",%progbits
- 326              		.align	1
- 327              		.global	main
- 328              		.syntax unified
- 329              		.thumb
- 330              		.thumb_func
- 332              	main:
- 333              	.LFB337:
+ 291              		.loc 1 215 5 is_stmt 1 view .LVU83
+ 292 0026 FFF7FEFF 		bl	Error_Handler
+ 293              	.LVL7:
+ 294              		.cfi_endproc
+ 295              	.LFE337:
+ 297              		.section	.text.main,"ax",%progbits
+ 298              		.align	1
+ 299              		.global	main
+ 300              		.syntax unified
+ 301              		.thumb
+ 302              		.thumb_func
+ 304              	main:
+ 305              	.LFB335:
   76:Core/Src/main.c **** 
- 334              		.loc 1 76 1 view -0
- 335              		.cfi_startproc
- 336              		@ args = 0, pretend = 0, frame = 0
- 337              		@ frame_needed = 0, uses_anonymous_args = 0
- 338 0000 38B5     		push	{r3, r4, r5, lr}
- 339              	.LCFI9:
- 340              		.cfi_def_cfa_offset 16
- 341              		.cfi_offset 3, -16
- 342              		.cfi_offset 4, -12
- 343              		.cfi_offset 5, -8
- 344              		.cfi_offset 14, -4
+ 306              		.loc 1 76 1 view -0
+ 307              		.cfi_startproc
+ 308              		@ args = 0, pretend = 0, frame = 0
+ 309              		@ frame_needed = 0, uses_anonymous_args = 0
+ 310 0000 38B5     		push	{r3, r4, r5, lr}
+ 311              	.LCFI8:
+ 312              		.cfi_def_cfa_offset 16
+ 313              		.cfi_offset 3, -16
+ 314              		.cfi_offset 4, -12
+ 315              		.cfi_offset 5, -8
+ 316              		.cfi_offset 14, -4
   85:Core/Src/main.c **** 
- 345              		.loc 1 85 3 view .LVU89
- 346 0002 FFF7FEFF 		bl	HAL_Init
- 347              	.LVL9:
+ 317              		.loc 1 85 3 view .LVU85
+ 318 0002 FFF7FEFF 		bl	HAL_Init
+ 319              	.LVL8:
   92:Core/Src/main.c **** 
- 348              		.loc 1 92 3 view .LVU90
- 349 0006 FFF7FEFF 		bl	SystemClock_Config
- 350              	.LVL10:
+ 320              		.loc 1 92 3 view .LVU86
+ 321 0006 FFF7FEFF 		bl	SystemClock_Config
+ 322              	.LVL9:
   95:Core/Src/main.c **** 
- 351              		.loc 1 95 3 view .LVU91
- 352 000a FFF7FEFF 		bl	PeriphCommonClock_Config
- 353              	.LVL11:
+ 323              		.loc 1 95 3 view .LVU87
+ 324 000a FFF7FEFF 		bl	PeriphCommonClock_Config
+ 325              	.LVL10:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 29
+
+
  102:Core/Src/main.c ****   MX_I2C1_Init();
- 354              		.loc 1 102 3 view .LVU92
- 355 000e FFF7FEFF 		bl	MX_GPIO_Init
- 356              	.LVL12:
+ 326              		.loc 1 102 3 view .LVU88
+ 327 000e FFF7FEFF 		bl	MX_GPIO_Init
+ 328              	.LVL11:
  103:Core/Src/main.c ****   MX_SPI1_Init();
- 357              		.loc 1 103 3 view .LVU93
- 358 0012 FFF7FEFF 		bl	MX_I2C1_Init
- 359              	.LVL13:
+ 329              		.loc 1 103 3 view .LVU89
+ 330 0012 FFF7FEFF 		bl	MX_I2C1_Init
+ 331              	.LVL12:
  104:Core/Src/main.c ****   MX_USART1_UART_Init();
- 360              		.loc 1 104 3 view .LVU94
- 361 0016 FFF7FEFF 		bl	MX_SPI1_Init
- 362              	.LVL14:
+ 332              		.loc 1 104 3 view .LVU90
+ 333 0016 FFF7FEFF 		bl	MX_SPI1_Init
+ 334              	.LVL13:
  105:Core/Src/main.c ****   MX_USART2_UART_Init();
- 363              		.loc 1 105 3 view .LVU95
- 364 001a FFF7FEFF 		bl	MX_USART1_UART_Init
- 365              	.LVL15:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 33
-
-
+ 335              		.loc 1 105 3 view .LVU91
+ 336 001a FFF7FEFF 		bl	MX_USART1_UART_Init
+ 337              	.LVL14:
  106:Core/Src/main.c ****   MX_USART3_UART_Init();
- 366              		.loc 1 106 3 view .LVU96
- 367 001e FFF7FEFF 		bl	MX_USART2_UART_Init
- 368              	.LVL16:
+ 338              		.loc 1 106 3 view .LVU92
+ 339 001e FFF7FEFF 		bl	MX_USART2_UART_Init
+ 340              	.LVL15:
  107:Core/Src/main.c ****   MX_ICACHE_Init();
- 369              		.loc 1 107 3 view .LVU97
- 370 0022 FFF7FEFF 		bl	MX_USART3_UART_Init
- 371              	.LVL17:
+ 341              		.loc 1 107 3 view .LVU93
+ 342 0022 FFF7FEFF 		bl	MX_USART3_UART_Init
+ 343              	.LVL16:
  108:Core/Src/main.c ****   MX_LPTIM1_Init();
- 372              		.loc 1 108 3 view .LVU98
- 373 0026 FFF7FEFF 		bl	MX_ICACHE_Init
- 374              	.LVL18:
+ 344              		.loc 1 108 3 view .LVU94
+ 345 0026 FFF7FEFF 		bl	MX_ICACHE_Init
+ 346              	.LVL17:
  109:Core/Src/main.c ****   MX_RTC_Init();
- 375              		.loc 1 109 3 view .LVU99
- 376 002a FFF7FEFF 		bl	MX_LPTIM1_Init
- 377              	.LVL19:
+ 347              		.loc 1 109 3 view .LVU95
+ 348 002a FFF7FEFF 		bl	MX_LPTIM1_Init
+ 349              	.LVL18:
  110:Core/Src/main.c ****   MX_TIM1_Init();
- 378              		.loc 1 110 3 view .LVU100
- 379 002e FFF7FEFF 		bl	MX_RTC_Init
- 380              	.LVL20:
+ 350              		.loc 1 110 3 view .LVU96
+ 351 002e FFF7FEFF 		bl	MX_RTC_Init
+ 352              	.LVL19:
  111:Core/Src/main.c ****   MX_UART4_Init();
- 381              		.loc 1 111 3 view .LVU101
- 382 0032 FFF7FEFF 		bl	MX_TIM1_Init
- 383              	.LVL21:
+ 353              		.loc 1 111 3 view .LVU97
+ 354 0032 FFF7FEFF 		bl	MX_TIM1_Init
+ 355              	.LVL20:
  112:Core/Src/main.c ****   MX_UART5_Init();
- 384              		.loc 1 112 3 view .LVU102
- 385 0036 FFF7FEFF 		bl	MX_UART4_Init
- 386              	.LVL22:
+ 356              		.loc 1 112 3 view .LVU98
+ 357 0036 FFF7FEFF 		bl	MX_UART4_Init
+ 358              	.LVL21:
  113:Core/Src/main.c ****   MX_USART6_UART_Init();
- 387              		.loc 1 113 3 view .LVU103
- 388 003a FFF7FEFF 		bl	MX_UART5_Init
- 389              	.LVL23:
+ 359              		.loc 1 113 3 view .LVU99
+ 360 003a FFF7FEFF 		bl	MX_UART5_Init
+ 361              	.LVL22:
  114:Core/Src/main.c ****   /* USER CODE BEGIN 2 */
- 390              		.loc 1 114 3 view .LVU104
- 391 003e FFF7FEFF 		bl	MX_USART6_UART_Init
- 392              	.LVL24:
+ 362              		.loc 1 114 3 view .LVU100
+ 363 003e FFF7FEFF 		bl	MX_USART6_UART_Init
+ 364              	.LVL23:
  116:Core/Src/main.c ****   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
- 393              		.loc 1 116 3 view .LVU105
+ 365              		.loc 1 116 3 view .LVU101
  117:Core/Src/main.c ****   sx_board_init();
- 394              		.loc 1 117 3 view .LVU106
- 395 0042 0848     		ldr	r0, .L22
- 396 0044 FFF7FEFF 		bl	HAL_RTCEx_DeactivateWakeUpTimer
- 397              	.LVL25:
+ 366              		.loc 1 117 3 view .LVU102
+ 367 0042 0848     		ldr	r0, .L20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 30
+
+
+ 368 0044 FFF7FEFF 		bl	HAL_RTCEx_DeactivateWakeUpTimer
+ 369              	.LVL24:
  118:Core/Src/main.c ****   app_init();
- 398              		.loc 1 118 3 view .LVU107
- 399 0048 FFF7FEFF 		bl	sx_board_init
- 400              	.LVL26:
+ 370              		.loc 1 118 3 view .LVU103
+ 371 0048 FFF7FEFF 		bl	sx_board_init
+ 372              	.LVL25:
  119:Core/Src/main.c ****   /* USER CODE END 2 */
- 401              		.loc 1 119 3 view .LVU108
- 402 004c FFF7FEFF 		bl	app_init
- 403              	.LVL27:
+ 373              		.loc 1 119 3 view .LVU104
+ 374 004c FFF7FEFF 		bl	app_init
+ 375              	.LVL26:
  116:Core/Src/main.c ****   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
- 404              		.loc 1 116 12 is_stmt 0 view .LVU109
- 405 0050 0024     		movs	r4, #0
- 406              	.LVL28:
- 407              	.L20:
+ 376              		.loc 1 116 12 is_stmt 0 view .LVU105
+ 377 0050 0024     		movs	r4, #0
+ 378              	.LVL27:
+ 379              	.L18:
  116:Core/Src/main.c ****   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 34
-
-
- 408              		.loc 1 116 12 view .LVU110
- 409 0052 2546     		mov	r5, r4
- 410              	.L19:
- 411              	.LVL29:
+ 380              		.loc 1 116 12 view .LVU106
+ 381 0052 2546     		mov	r5, r4
+ 382              	.L17:
+ 383              	.LVL28:
  124:Core/Src/main.c ****   {
- 412              		.loc 1 124 3 is_stmt 1 view .LVU111
- 413              	.LBB7:
+ 384              		.loc 1 124 3 is_stmt 1 view .LVU107
+ 385              	.LBB7:
  129:Core/Src/main.c ****     uint32_t delta = now - last_tick;
- 414              		.loc 1 129 5 view .LVU112
+ 386              		.loc 1 129 5 view .LVU108
  129:Core/Src/main.c ****     uint32_t delta = now - last_tick;
- 415              		.loc 1 129 20 is_stmt 0 view .LVU113
- 416 0054 FFF7FEFF 		bl	HAL_GetTick
- 417              	.LVL30:
- 418 0058 0446     		mov	r4, r0
- 419              	.LVL31:
+ 387              		.loc 1 129 20 is_stmt 0 view .LVU109
+ 388 0054 FFF7FEFF 		bl	HAL_GetTick
+ 389              	.LVL29:
+ 390 0058 0446     		mov	r4, r0
+ 391              	.LVL30:
  130:Core/Src/main.c ****     
- 420              		.loc 1 130 5 is_stmt 1 view .LVU114
+ 392              		.loc 1 130 5 is_stmt 1 view .LVU110
  132:Core/Src/main.c ****     {
- 421              		.loc 1 132 5 view .LVU115
+ 393              		.loc 1 132 5 view .LVU111
  132:Core/Src/main.c ****     {
- 422              		.loc 1 132 8 is_stmt 0 view .LVU116
- 423 005a 401B     		subs	r0, r0, r5
- 424              	.LVL32:
+ 394              		.loc 1 132 8 is_stmt 0 view .LVU112
+ 395 005a 401B     		subs	r0, r0, r5
+ 396              	.LVL31:
  132:Core/Src/main.c ****     {
- 425              		.loc 1 132 8 view .LVU117
- 426 005c FAD0     		beq	.L19
+ 397              		.loc 1 132 8 view .LVU113
+ 398 005c FAD0     		beq	.L17
  134:Core/Src/main.c ****         app_process(delta);
- 427              		.loc 1 134 9 is_stmt 1 view .LVU118
- 428              	.LVL33:
+ 399              		.loc 1 134 9 is_stmt 1 view .LVU114
+ 400              	.LVL32:
  135:Core/Src/main.c ****     }
- 429              		.loc 1 135 9 view .LVU119
- 430 005e FFF7FEFF 		bl	app_process
- 431              	.LVL34:
+ 401              		.loc 1 135 9 view .LVU115
+ 402 005e FFF7FEFF 		bl	app_process
+ 403              	.LVL33:
  135:Core/Src/main.c ****     }
- 432              		.loc 1 135 9 is_stmt 0 view .LVU120
- 433 0062 F6E7     		b	.L20
- 434              	.L23:
- 435              		.align	2
- 436              	.L22:
- 437 0064 00000000 		.word	hrtc
- 438              	.LBE7:
- 439              		.cfi_endproc
- 440              	.LFE337:
- 442              		.text
- 443              	.Letext0:
- 444              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 445              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 446              		.file 6 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
- 447              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
- 448              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rcc.h"
- 449              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rcc_ex.h"
- 450              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
- 451              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc.h"
- 452              		.file 12 "SynaptiX_FDK/app/app.h"
- 453              		.file 13 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc_ex.h"
- 454              		.file 14 "Core/Inc/usart.h"
- 455              		.file 15 "Core/Inc/tim.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 35
+ 404              		.loc 1 135 9 is_stmt 0 view .LVU116
+ 405 0062 F6E7     		b	.L18
+ 406              	.L21:
+ 407              		.align	2
+ 408              	.L20:
+ 409 0064 00000000 		.word	hrtc
+ 410              	.LBE7:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 31
 
 
- 456              		.file 16 "Core/Inc/rtc.h"
- 457              		.file 17 "Core/Inc/lptim.h"
- 458              		.file 18 "Core/Inc/icache.h"
- 459              		.file 19 "Core/Inc/spi.h"
- 460              		.file 20 "Core/Inc/i2c.h"
- 461              		.file 21 "Core/Inc/gpio.h"
- 462              		.file 22 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
- 463              		.file 23 "<built-in>"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc840pnU.s 			page 36
+ 411              		.cfi_endproc
+ 412              	.LFE335:
+ 414              		.text
+ 415              	.Letext0:
+ 416              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 417              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 418              		.file 5 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 419              		.file 6 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 420              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rcc.h"
+ 421              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rcc_ex.h"
+ 422              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 423              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc.h"
+ 424              		.file 11 "SynaptiX_FDK/app/app.h"
+ 425              		.file 12 "SynaptiX_FDK/board/sx_board.h"
+ 426              		.file 13 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc_ex.h"
+ 427              		.file 14 "Core/Inc/usart.h"
+ 428              		.file 15 "Core/Inc/tim.h"
+ 429              		.file 16 "Core/Inc/rtc.h"
+ 430              		.file 17 "Core/Inc/lptim.h"
+ 431              		.file 18 "Core/Inc/icache.h"
+ 432              		.file 19 "Core/Inc/spi.h"
+ 433              		.file 20 "Core/Inc/i2c.h"
+ 434              		.file 21 "Core/Inc/gpio.h"
+ 435              		.file 22 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ 436              		.file 23 "<built-in>"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s 			page 32
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 main.c
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:22     .text.sx_gettick:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:28     .text.sx_gettick:00000000 sx_gettick
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:50     .text.Error_Handler:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:56     .text.Error_Handler:00000000 Error_Handler
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:88     .text.SystemClock_Config:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:94     .text.SystemClock_Config:00000000 SystemClock_Config
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:263    .text.SystemClock_Config:000000b0 $d
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:269    .text.PeriphCommonClock_Config:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:275    .text.PeriphCommonClock_Config:00000000 PeriphCommonClock_Config
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:326    .text.main:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:332    .text.main:00000000 main
-C:\Users\DELL\AppData\Local\Temp\cc840pnU.s:437    .text.main:00000064 $d
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:22     .text.Error_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:28     .text.Error_Handler:00000000 Error_Handler
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:60     .text.SystemClock_Config:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:66     .text.SystemClock_Config:00000000 SystemClock_Config
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:235    .text.SystemClock_Config:000000b0 $d
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:241    .text.PeriphCommonClock_Config:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:247    .text.PeriphCommonClock_Config:00000000 PeriphCommonClock_Config
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:298    .text.main:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:304    .text.main:00000000 main
+C:\Users\DELL\AppData\Local\Temp\cccI9R9h.s:409    .text.main:00000064 $d
 
 UNDEFINED SYMBOLS
-HAL_GetTick
 memset
 HAL_RCC_OscConfig
 HAL_RCC_ClockConfig
@@ -2090,5 +1864,6 @@ MX_USART6_UART_Init
 HAL_RTCEx_DeactivateWakeUpTimer
 sx_board_init
 app_init
+HAL_GetTick
 app_process
 hrtc

@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
   26:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** /* Includes ------------------------------------------------------------------*/
   27:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** #include "stm32h5xx_hal.h"
   28:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 2
 
 
   29:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** /** @addtogroup STM32H5xx_HAL_Driver
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
   83:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   * @{
   84:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   */
   85:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 3
 
 
   86:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** /** @defgroup PWREx_Exported_Functions_Group1 Power Supply Control Functions
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  127:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****       if ((HAL_GetTick() - tickstart) > PWR_FLAG_SETTING_DELAY)
  128:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****       {
  129:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****         return HAL_ERROR;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 4
 
 
  130:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****       }
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
   81              		.loc 1 127 12 is_stmt 0 view .LVU18
   82 0030 FFF7FEFF 		bl	HAL_GetTick
   83              	.LVL5:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 5
 
 
  127:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****       {
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  127 0008 8005     		lsls	r0, r0, #22
  128 000a 800D     		lsrs	r0, r0, #22
  129 000c 7047     		bx	lr
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 6
 
 
  130              	.L17:
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  167:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   assert_param(IS_PWR_VOLTAGE_SCALING_RANGE(VoltageScaling));
  164              		.loc 1 167 3 is_stmt 1 view .LVU33
  168:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 7
 
 
  169:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   /* Get the voltage scaling  */
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  203              	.L25:
  185:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****     }
  186:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 8
 
 
  187:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  244 0008 7047     		bx	lr
  245              	.L30:
  246 000a 00BF     		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 9
 
 
  247              	.L29:
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  230:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   return HAL_OK;
  274              		.loc 1 230 3 view .LVU59
  231:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 10
 
 
  275              		.loc 1 231 1 is_stmt 0 view .LVU60
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  323              	.LVL16:
  324              	.LFB303:
  242:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** /**
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 11
 
 
  243:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   * @}
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  343 0018 C3F88420 		str	r2, [r3, #132]
  279:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   __HAL_PWR_AVD_EXTI_DISABLE_IT();
  344              		.loc 1 279 3 view .LVU71
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 12
 
 
  345 001c D3F88020 		ldr	r2, [r3, #128]
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  382 0064 4368     		ldr	r3, [r0, #4]
  383              		.loc 1 296 6 view .LVU84
  384 0066 13F0010F 		tst	r3, #1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 13
 
 
  385 006a 04D0     		beq	.L40
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  424              		.cfi_startproc
  425              		@ args = 0, pretend = 0, frame = 0
  426              		@ frame_needed = 0, uses_anonymous_args = 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 14
 
 
  427              		@ link register save eliminated.
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  471              		.align	1
  472              		.global	HAL_PWREx_EnableUSBVoltageDetector
  473              		.syntax unified
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 15
 
 
  474              		.thumb
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  346:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   CLEAR_BIT(PWR->USBSCR, PWR_USBSCR_USB33DEN);
  512              		.loc 1 346 3 view .LVU101
  513 0000 024A     		ldr	r2, .L54
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 16
 
 
  514 0002 936B     		ldr	r3, [r2, #56]
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  559              		.thumb_func
  561              	HAL_PWREx_DisableVddUSB:
  562              	.LFB309:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 17
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 17
 
 
  359:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  377:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** }
  601              		.loc 1 377 1 is_stmt 0 view .LVU111
  602 000a 7047     		bx	lr
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 18
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 18
 
 
  603              	.L64:
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  392:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   */
  393:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** void HAL_PWREx_EnableUCPDStandbyMode(void)
  394:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 19
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 19
 
 
  647              		.loc 1 394 1 is_stmt 1 view -0
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  690 000c 00080244 		.word	1140983808
  691              		.cfi_endproc
  692              	.LFE313:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 20
 
 
  694              		.section	.text.HAL_PWREx_EnableUCPDDeadBattery,"ax",%progbits
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  428:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *         enabled, which may have a pull-down effect on CC1 and CC2 pins.
  429:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *         It is recommended to disable it in all cases, either to stop this
  430:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *         pull-down or to handover control to the UCPD (the UCPD must be
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 21
 
 
  431:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *         initialized before doing the disable).
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  453:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   assert_param(IS_PWR_BATTERY_RESISTOR_SELECT(ResistorValue));
  765              		.loc 1 453 3 view .LVU128
  454:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 22
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 22
 
 
  455:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   /* Specify the charging resistor */
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  807              		.align	2
  808              	.L84:
  809 000c 00080244 		.word	1140983808
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 23
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 23
 
 
  810              		.cfi_endproc
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  852              	HAL_PWREx_DisableAnalogBooster:
  853              	.LFB319:
  486:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 24
 
 
  487:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** /**
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  511:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****     /* Clear PWR PVD AVD EXTI Rising pending bit */
  512:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****     WRITE_REG(EXTI->RPR1, PWR_EXTI_LINE_AVD);
  513:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 25
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 25
 
 
  514:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****     /* PWR PVD AVD Rising interrupt user callback */
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  546:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   /* NOTE : This function should not be modified, when the callback is needed,
  547:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****             the HAL_PWR_AVDCallback can be implemented in the user file
  548:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 26
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 26
 
 
  549:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** }
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  515:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   }
  956              		.loc 1 515 5 view .LVU156
  957 0020 FFF7FEFF 		bl	HAL_PWREx_PVD_AVD_Rising_Callback
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 27
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 27
 
 
  958              	.LVL18:
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  574:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** {
  987              		.loc 1 574 1 is_stmt 1 view -0
  988              		.cfi_startproc
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 28
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 28
 
 
  989              		@ args = 0, pretend = 0, frame = 0
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
   26:Drivers/CMSIS/Include/cmsis_gcc.h **** #define __CMSIS_GCC_H
   27:Drivers/CMSIS/Include/cmsis_gcc.h **** 
   28:Drivers/CMSIS/Include/cmsis_gcc.h **** /* ignore some GCC warnings */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 29
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 29
 
 
   29:Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic push
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
   83:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
   84:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_WRITE(addr, val)    (void)((((struct T_UINT16_WRITE *)(void *)(addr))-
   85:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 30
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 30
 
 
   86:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT16_READ
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  140:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  141:Drivers/CMSIS/Include/cmsis_gcc.h ****   typedef struct {
  142:Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t* dest;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 31
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 31
 
 
  143:Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t  wlen;
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  197:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  198:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  199:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __TZ_set_STACKSEAL_S (uint32_t* stackTop) {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 32
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 32
 
 
  200:Drivers/CMSIS/Include/cmsis_gcc.h ****   *((uint64_t *)stackTop) = __TZ_STACK_SEAL_VALUE;
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  254:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Instruction Synchronization Barrier flushes the pipeline in the processor,
  255:Drivers/CMSIS/Include/cmsis_gcc.h ****            so that all instructions following the ISB are fetched from cache or memory,
  256:Drivers/CMSIS/Include/cmsis_gcc.h ****            after the instruction has been completed.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 33
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 33
 
 
  257:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  311:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE uint32_t __REV16(uint32_t value)
  312:Drivers/CMSIS/Include/cmsis_gcc.h **** {
  313:Drivers/CMSIS/Include/cmsis_gcc.h ****   uint32_t result;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 34
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 34
 
 
  314:Drivers/CMSIS/Include/cmsis_gcc.h **** 
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  368:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Reverse bit order of value
  369:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Reverses the bit order of the given value.
  370:Drivers/CMSIS/Include/cmsis_gcc.h ****   \param [in]    value  Value to reverse
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 35
 
 
  371:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return               Reversed value
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  406:Drivers/CMSIS/Include/cmsis_gcc.h ****      __builtin_clz(0) is undefined behaviour, so handle this case specially.
  407:Drivers/CMSIS/Include/cmsis_gcc.h ****      This guarantees ARM-compatible results if happening to compile on a non-ARM
  408:Drivers/CMSIS/Include/cmsis_gcc.h ****      target, and ensures the compiler doesn't decide to activate any
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 36
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 36
 
 
  409:Drivers/CMSIS/Include/cmsis_gcc.h ****      optimisations using the logic "value was passed to __builtin_clz, so it
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1063              	.LBE24:
  1064              	.LBE23:
  1065              	.LBB25:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 37
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 37
 
 
  1066              	.LBI25:
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1107              	.LBE28:
  1108              	.LBB30:
  1109              	.LBI30:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 38
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 38
 
 
  403:Drivers/CMSIS/Include/cmsis_gcc.h **** {
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1152              		.loc 2 414 3 view .LVU222
  414:Drivers/CMSIS/Include/cmsis_gcc.h ****   {
  1153              		.loc 2 414 6 is_stmt 0 view .LVU223
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 39
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 39
 
 
  1154 0050 B3B1     		cbz	r3, .L110
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1198              	.LBB27:
  1199 0078 2022     		movs	r2, #32
  1200              	.LVL38:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 40
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 40
 
 
  416:Drivers/CMSIS/Include/cmsis_gcc.h ****   }
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  605:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *           @arg PWR_WAKEUP_PIN4
  606:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *           @arg PWR_WAKEUP_PIN5
  607:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *           @arg PWR_WAKEUP_PIN6
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 41
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 41
 
 
  608:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *           @arg PWR_WAKEUP_PIN7
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  632:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****                      ##### Memories Retention Functions #####
  633:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****  ===============================================================================
  634:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****     [..]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 42
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 42
 
 
  635:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** @endverbatim
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1304              		.loc 1 662 1 is_stmt 1 view -0
  1305              		.cfi_startproc
  1306              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 43
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 43
 
 
  1307              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  693:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   */
  694:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** void HAL_PWREx_EnableMemoryShutOff(uint32_t MemoryBlock)
  695:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 44
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 44
 
 
  1333              		.loc 1 695 1 is_stmt 1 view -0
@@ -2638,7 +2638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  722:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *            @arg PWR_RAM2_MEMORY_BLOCK          PWR_PMCR_SRAM2SO       : RAM2 shut-off control i
  723:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   *            @arg PWR_RAM1_MEMORY_BLOCK          PWR_PMCR_SRAM1SO       : RAM1 shut-off control i
  724:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   * @retval None.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 45
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 45
 
 
  725:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   */
@@ -2698,7 +2698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1399 0002 136A     		ldr	r3, [r2, #32]
  1400 0004 43F00103 		orr	r3, r3, #1
  1401 0008 1362     		str	r3, [r2, #32]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 46
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 46
 
 
  745:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c **** 
@@ -2758,7 +2758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1444              		.syntax unified
  1445              		.thumb
  1446              		.thumb_func
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 47
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 47
 
 
  1448              	HAL_PWREx_EnableStandbyIORetention:
@@ -2818,7 +2818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1466              		.cfi_endproc
  1467              	.LFE331:
  1469              		.section	.text.HAL_PWREx_DisableStandbyIORetention,"ax",%progbits
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 48
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 48
 
 
  1470              		.align	1
@@ -2878,7 +2878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1508              		@ args = 0, pretend = 0, frame = 0
  1509              		@ frame_needed = 0, uses_anonymous_args = 0
  1510              		@ link register save eliminated.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 49
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 49
 
 
  815:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_pwr_ex.c ****   /* Enable JTAG IOs state retention */
@@ -2938,134 +2938,134 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 1
  1555              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  1556              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
  1557              		.file 5 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 50
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 50
 
 
  1558              		.file 6 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
  1559              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
  1560              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_pwr_ex.h"
  1561              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 51
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 51
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32h5xx_hal_pwr_ex.c
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:22     .text.HAL_PWREx_ConfigSupply:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:28     .text.HAL_PWREx_ConfigSupply:00000000 HAL_PWREx_ConfigSupply
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:103    .text.HAL_PWREx_ConfigSupply:00000044 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:108    .text.HAL_PWREx_GetSupplyConfig:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:114    .text.HAL_PWREx_GetSupplyConfig:00000000 HAL_PWREx_GetSupplyConfig
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:133    .text.HAL_PWREx_GetSupplyConfig:00000010 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:138    .text.HAL_PWREx_ControlVoltageScaling:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:144    .text.HAL_PWREx_ControlVoltageScaling:00000000 HAL_PWREx_ControlVoltageScaling
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:220    .text.HAL_PWREx_ControlVoltageScaling:00000044 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:225    .text.HAL_PWREx_GetVoltageRange:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:231    .text.HAL_PWREx_GetVoltageRange:00000000 HAL_PWREx_GetVoltageRange
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:248    .text.HAL_PWREx_GetVoltageRange:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:253    .text.HAL_PWREx_ControlStopModeVoltageScaling:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:259    .text.HAL_PWREx_ControlStopModeVoltageScaling:00000000 HAL_PWREx_ControlStopModeVoltageScaling
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:283    .text.HAL_PWREx_ControlStopModeVoltageScaling:00000010 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:288    .text.HAL_PWREx_GetStopModeVoltageRange:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:294    .text.HAL_PWREx_GetStopModeVoltageRange:00000000 HAL_PWREx_GetStopModeVoltageRange
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:311    .text.HAL_PWREx_GetStopModeVoltageRange:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:316    .text.HAL_PWREx_ConfigAVD:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:322    .text.HAL_PWREx_ConfigAVD:00000000 HAL_PWREx_ConfigAVD
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:409    .text.HAL_PWREx_ConfigAVD:0000008c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:415    .text.HAL_PWREx_EnableAVD:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:421    .text.HAL_PWREx_EnableAVD:00000000 HAL_PWREx_EnableAVD
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:438    .text.HAL_PWREx_EnableAVD:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:443    .text.HAL_PWREx_DisableAVD:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:449    .text.HAL_PWREx_DisableAVD:00000000 HAL_PWREx_DisableAVD
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:466    .text.HAL_PWREx_DisableAVD:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:471    .text.HAL_PWREx_EnableUSBVoltageDetector:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:477    .text.HAL_PWREx_EnableUSBVoltageDetector:00000000 HAL_PWREx_EnableUSBVoltageDetector
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:494    .text.HAL_PWREx_EnableUSBVoltageDetector:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:499    .text.HAL_PWREx_DisableUSBVoltageDetector:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:505    .text.HAL_PWREx_DisableUSBVoltageDetector:00000000 HAL_PWREx_DisableUSBVoltageDetector
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:522    .text.HAL_PWREx_DisableUSBVoltageDetector:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:527    .text.HAL_PWREx_EnableVddUSB:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:533    .text.HAL_PWREx_EnableVddUSB:00000000 HAL_PWREx_EnableVddUSB
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:550    .text.HAL_PWREx_EnableVddUSB:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:555    .text.HAL_PWREx_DisableVddUSB:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:561    .text.HAL_PWREx_DisableVddUSB:00000000 HAL_PWREx_DisableVddUSB
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:578    .text.HAL_PWREx_DisableVddUSB:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:583    .text.HAL_PWREx_EnableMonitoring:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:589    .text.HAL_PWREx_EnableMonitoring:00000000 HAL_PWREx_EnableMonitoring
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:606    .text.HAL_PWREx_EnableMonitoring:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:611    .text.HAL_PWREx_DisableMonitoring:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:617    .text.HAL_PWREx_DisableMonitoring:00000000 HAL_PWREx_DisableMonitoring
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:634    .text.HAL_PWREx_DisableMonitoring:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:639    .text.HAL_PWREx_EnableUCPDStandbyMode:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:645    .text.HAL_PWREx_EnableUCPDStandbyMode:00000000 HAL_PWREx_EnableUCPDStandbyMode
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:662    .text.HAL_PWREx_EnableUCPDStandbyMode:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:667    .text.HAL_PWREx_DisableUCPDStandbyMode:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:673    .text.HAL_PWREx_DisableUCPDStandbyMode:00000000 HAL_PWREx_DisableUCPDStandbyMode
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:690    .text.HAL_PWREx_DisableUCPDStandbyMode:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:695    .text.HAL_PWREx_EnableUCPDDeadBattery:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:701    .text.HAL_PWREx_EnableUCPDDeadBattery:00000000 HAL_PWREx_EnableUCPDDeadBattery
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:718    .text.HAL_PWREx_EnableUCPDDeadBattery:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:723    .text.HAL_PWREx_DisableUCPDDeadBattery:00000000 $t
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 52
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:22     .text.HAL_PWREx_ConfigSupply:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:28     .text.HAL_PWREx_ConfigSupply:00000000 HAL_PWREx_ConfigSupply
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:103    .text.HAL_PWREx_ConfigSupply:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:108    .text.HAL_PWREx_GetSupplyConfig:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:114    .text.HAL_PWREx_GetSupplyConfig:00000000 HAL_PWREx_GetSupplyConfig
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:133    .text.HAL_PWREx_GetSupplyConfig:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:138    .text.HAL_PWREx_ControlVoltageScaling:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:144    .text.HAL_PWREx_ControlVoltageScaling:00000000 HAL_PWREx_ControlVoltageScaling
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:220    .text.HAL_PWREx_ControlVoltageScaling:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:225    .text.HAL_PWREx_GetVoltageRange:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:231    .text.HAL_PWREx_GetVoltageRange:00000000 HAL_PWREx_GetVoltageRange
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:248    .text.HAL_PWREx_GetVoltageRange:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:253    .text.HAL_PWREx_ControlStopModeVoltageScaling:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:259    .text.HAL_PWREx_ControlStopModeVoltageScaling:00000000 HAL_PWREx_ControlStopModeVoltageScaling
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:283    .text.HAL_PWREx_ControlStopModeVoltageScaling:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:288    .text.HAL_PWREx_GetStopModeVoltageRange:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:294    .text.HAL_PWREx_GetStopModeVoltageRange:00000000 HAL_PWREx_GetStopModeVoltageRange
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:311    .text.HAL_PWREx_GetStopModeVoltageRange:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:316    .text.HAL_PWREx_ConfigAVD:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:322    .text.HAL_PWREx_ConfigAVD:00000000 HAL_PWREx_ConfigAVD
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:409    .text.HAL_PWREx_ConfigAVD:0000008c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:415    .text.HAL_PWREx_EnableAVD:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:421    .text.HAL_PWREx_EnableAVD:00000000 HAL_PWREx_EnableAVD
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:438    .text.HAL_PWREx_EnableAVD:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:443    .text.HAL_PWREx_DisableAVD:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:449    .text.HAL_PWREx_DisableAVD:00000000 HAL_PWREx_DisableAVD
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:466    .text.HAL_PWREx_DisableAVD:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:471    .text.HAL_PWREx_EnableUSBVoltageDetector:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:477    .text.HAL_PWREx_EnableUSBVoltageDetector:00000000 HAL_PWREx_EnableUSBVoltageDetector
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:494    .text.HAL_PWREx_EnableUSBVoltageDetector:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:499    .text.HAL_PWREx_DisableUSBVoltageDetector:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:505    .text.HAL_PWREx_DisableUSBVoltageDetector:00000000 HAL_PWREx_DisableUSBVoltageDetector
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:522    .text.HAL_PWREx_DisableUSBVoltageDetector:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:527    .text.HAL_PWREx_EnableVddUSB:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:533    .text.HAL_PWREx_EnableVddUSB:00000000 HAL_PWREx_EnableVddUSB
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:550    .text.HAL_PWREx_EnableVddUSB:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:555    .text.HAL_PWREx_DisableVddUSB:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:561    .text.HAL_PWREx_DisableVddUSB:00000000 HAL_PWREx_DisableVddUSB
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:578    .text.HAL_PWREx_DisableVddUSB:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:583    .text.HAL_PWREx_EnableMonitoring:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:589    .text.HAL_PWREx_EnableMonitoring:00000000 HAL_PWREx_EnableMonitoring
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:606    .text.HAL_PWREx_EnableMonitoring:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:611    .text.HAL_PWREx_DisableMonitoring:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:617    .text.HAL_PWREx_DisableMonitoring:00000000 HAL_PWREx_DisableMonitoring
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:634    .text.HAL_PWREx_DisableMonitoring:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:639    .text.HAL_PWREx_EnableUCPDStandbyMode:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:645    .text.HAL_PWREx_EnableUCPDStandbyMode:00000000 HAL_PWREx_EnableUCPDStandbyMode
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:662    .text.HAL_PWREx_EnableUCPDStandbyMode:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:667    .text.HAL_PWREx_DisableUCPDStandbyMode:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:673    .text.HAL_PWREx_DisableUCPDStandbyMode:00000000 HAL_PWREx_DisableUCPDStandbyMode
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:690    .text.HAL_PWREx_DisableUCPDStandbyMode:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:695    .text.HAL_PWREx_EnableUCPDDeadBattery:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:701    .text.HAL_PWREx_EnableUCPDDeadBattery:00000000 HAL_PWREx_EnableUCPDDeadBattery
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:718    .text.HAL_PWREx_EnableUCPDDeadBattery:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:723    .text.HAL_PWREx_DisableUCPDDeadBattery:00000000 $t
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 52
 
 
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:729    .text.HAL_PWREx_DisableUCPDDeadBattery:00000000 HAL_PWREx_DisableUCPDDeadBattery
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:746    .text.HAL_PWREx_DisableUCPDDeadBattery:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:751    .text.HAL_PWREx_EnableBatteryCharging:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:757    .text.HAL_PWREx_EnableBatteryCharging:00000000 HAL_PWREx_EnableBatteryCharging
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:781    .text.HAL_PWREx_EnableBatteryCharging:00000018 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:786    .text.HAL_PWREx_DisableBatteryCharging:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:792    .text.HAL_PWREx_DisableBatteryCharging:00000000 HAL_PWREx_DisableBatteryCharging
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:809    .text.HAL_PWREx_DisableBatteryCharging:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:814    .text.HAL_PWREx_EnableAnalogBooster:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:820    .text.HAL_PWREx_EnableAnalogBooster:00000000 HAL_PWREx_EnableAnalogBooster
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:841    .text.HAL_PWREx_EnableAnalogBooster:00000014 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:846    .text.HAL_PWREx_DisableAnalogBooster:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:852    .text.HAL_PWREx_DisableAnalogBooster:00000000 HAL_PWREx_DisableAnalogBooster
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:873    .text.HAL_PWREx_DisableAnalogBooster:00000014 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:878    .text.HAL_PWREx_PVD_AVD_Rising_Callback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:884    .text.HAL_PWREx_PVD_AVD_Rising_Callback:00000000 HAL_PWREx_PVD_AVD_Rising_Callback
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:897    .text.HAL_PWREx_PVD_AVD_Falling_Callback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:903    .text.HAL_PWREx_PVD_AVD_Falling_Callback:00000000 HAL_PWREx_PVD_AVD_Falling_Callback
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:916    .text.HAL_PWREx_PVD_AVD_IRQHandler:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:922    .text.HAL_PWREx_PVD_AVD_IRQHandler:00000000 HAL_PWREx_PVD_AVD_IRQHandler
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:973    .text.HAL_PWREx_PVD_AVD_IRQHandler:00000034 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:978    .text.HAL_PWREx_EnableWakeUpPin:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:984    .text.HAL_PWREx_EnableWakeUpPin:00000000 HAL_PWREx_EnableWakeUpPin
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1228   .text.HAL_PWREx_EnableWakeUpPin:00000084 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1235   .text.HAL_PWREx_DisableWakeUpPin:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1241   .text.HAL_PWREx_DisableWakeUpPin:00000000 HAL_PWREx_DisableWakeUpPin
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1263   .text.HAL_PWREx_DisableWakeUpPin:00000010 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1268   .text.HAL_PWREx_EnableFlashPowerDown:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1274   .text.HAL_PWREx_EnableFlashPowerDown:00000000 HAL_PWREx_EnableFlashPowerDown
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1291   .text.HAL_PWREx_EnableFlashPowerDown:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1296   .text.HAL_PWREx_DisableFlashPowerDown:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1302   .text.HAL_PWREx_DisableFlashPowerDown:00000000 HAL_PWREx_DisableFlashPowerDown
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1319   .text.HAL_PWREx_DisableFlashPowerDown:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1324   .text.HAL_PWREx_EnableMemoryShutOff:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1330   .text.HAL_PWREx_EnableMemoryShutOff:00000000 HAL_PWREx_EnableMemoryShutOff
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1349   .text.HAL_PWREx_EnableMemoryShutOff:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1354   .text.HAL_PWREx_DisableMemoryShutOff:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1360   .text.HAL_PWREx_DisableMemoryShutOff:00000000 HAL_PWREx_DisableMemoryShutOff
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1379   .text.HAL_PWREx_DisableMemoryShutOff:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1384   .text.HAL_PWREx_EnableBkupRAMRetention:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1390   .text.HAL_PWREx_EnableBkupRAMRetention:00000000 HAL_PWREx_EnableBkupRAMRetention
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1409   .text.HAL_PWREx_EnableBkupRAMRetention:00000010 $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1414   .text.HAL_PWREx_DisableBkupRAMRetention:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1420   .text.HAL_PWREx_DisableBkupRAMRetention:00000000 HAL_PWREx_DisableBkupRAMRetention
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1437   .text.HAL_PWREx_DisableBkupRAMRetention:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1442   .text.HAL_PWREx_EnableStandbyIORetention:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1448   .text.HAL_PWREx_EnableStandbyIORetention:00000000 HAL_PWREx_EnableStandbyIORetention
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1465   .text.HAL_PWREx_EnableStandbyIORetention:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1470   .text.HAL_PWREx_DisableStandbyIORetention:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1476   .text.HAL_PWREx_DisableStandbyIORetention:00000000 HAL_PWREx_DisableStandbyIORetention
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1493   .text.HAL_PWREx_DisableStandbyIORetention:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1498   .text.HAL_PWREx_EnableStandbyJTAGIORetention:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1504   .text.HAL_PWREx_EnableStandbyJTAGIORetention:00000000 HAL_PWREx_EnableStandbyJTAGIORetention
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1521   .text.HAL_PWREx_EnableStandbyJTAGIORetention:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1526   .text.HAL_PWREx_DisableStandbyJTAGIORetention:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1532   .text.HAL_PWREx_DisableStandbyJTAGIORetention:00000000 HAL_PWREx_DisableStandbyJTAGIORetention
-C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s:1549   .text.HAL_PWREx_DisableStandbyJTAGIORetention:0000000c $d
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccrVgCDP.s 			page 53
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:729    .text.HAL_PWREx_DisableUCPDDeadBattery:00000000 HAL_PWREx_DisableUCPDDeadBattery
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:746    .text.HAL_PWREx_DisableUCPDDeadBattery:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:751    .text.HAL_PWREx_EnableBatteryCharging:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:757    .text.HAL_PWREx_EnableBatteryCharging:00000000 HAL_PWREx_EnableBatteryCharging
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:781    .text.HAL_PWREx_EnableBatteryCharging:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:786    .text.HAL_PWREx_DisableBatteryCharging:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:792    .text.HAL_PWREx_DisableBatteryCharging:00000000 HAL_PWREx_DisableBatteryCharging
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:809    .text.HAL_PWREx_DisableBatteryCharging:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:814    .text.HAL_PWREx_EnableAnalogBooster:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:820    .text.HAL_PWREx_EnableAnalogBooster:00000000 HAL_PWREx_EnableAnalogBooster
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:841    .text.HAL_PWREx_EnableAnalogBooster:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:846    .text.HAL_PWREx_DisableAnalogBooster:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:852    .text.HAL_PWREx_DisableAnalogBooster:00000000 HAL_PWREx_DisableAnalogBooster
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:873    .text.HAL_PWREx_DisableAnalogBooster:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:878    .text.HAL_PWREx_PVD_AVD_Rising_Callback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:884    .text.HAL_PWREx_PVD_AVD_Rising_Callback:00000000 HAL_PWREx_PVD_AVD_Rising_Callback
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:897    .text.HAL_PWREx_PVD_AVD_Falling_Callback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:903    .text.HAL_PWREx_PVD_AVD_Falling_Callback:00000000 HAL_PWREx_PVD_AVD_Falling_Callback
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:916    .text.HAL_PWREx_PVD_AVD_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:922    .text.HAL_PWREx_PVD_AVD_IRQHandler:00000000 HAL_PWREx_PVD_AVD_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:973    .text.HAL_PWREx_PVD_AVD_IRQHandler:00000034 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:978    .text.HAL_PWREx_EnableWakeUpPin:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:984    .text.HAL_PWREx_EnableWakeUpPin:00000000 HAL_PWREx_EnableWakeUpPin
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1228   .text.HAL_PWREx_EnableWakeUpPin:00000084 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1235   .text.HAL_PWREx_DisableWakeUpPin:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1241   .text.HAL_PWREx_DisableWakeUpPin:00000000 HAL_PWREx_DisableWakeUpPin
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1263   .text.HAL_PWREx_DisableWakeUpPin:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1268   .text.HAL_PWREx_EnableFlashPowerDown:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1274   .text.HAL_PWREx_EnableFlashPowerDown:00000000 HAL_PWREx_EnableFlashPowerDown
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1291   .text.HAL_PWREx_EnableFlashPowerDown:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1296   .text.HAL_PWREx_DisableFlashPowerDown:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1302   .text.HAL_PWREx_DisableFlashPowerDown:00000000 HAL_PWREx_DisableFlashPowerDown
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1319   .text.HAL_PWREx_DisableFlashPowerDown:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1324   .text.HAL_PWREx_EnableMemoryShutOff:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1330   .text.HAL_PWREx_EnableMemoryShutOff:00000000 HAL_PWREx_EnableMemoryShutOff
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1349   .text.HAL_PWREx_EnableMemoryShutOff:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1354   .text.HAL_PWREx_DisableMemoryShutOff:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1360   .text.HAL_PWREx_DisableMemoryShutOff:00000000 HAL_PWREx_DisableMemoryShutOff
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1379   .text.HAL_PWREx_DisableMemoryShutOff:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1384   .text.HAL_PWREx_EnableBkupRAMRetention:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1390   .text.HAL_PWREx_EnableBkupRAMRetention:00000000 HAL_PWREx_EnableBkupRAMRetention
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1409   .text.HAL_PWREx_EnableBkupRAMRetention:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1414   .text.HAL_PWREx_DisableBkupRAMRetention:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1420   .text.HAL_PWREx_DisableBkupRAMRetention:00000000 HAL_PWREx_DisableBkupRAMRetention
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1437   .text.HAL_PWREx_DisableBkupRAMRetention:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1442   .text.HAL_PWREx_EnableStandbyIORetention:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1448   .text.HAL_PWREx_EnableStandbyIORetention:00000000 HAL_PWREx_EnableStandbyIORetention
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1465   .text.HAL_PWREx_EnableStandbyIORetention:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1470   .text.HAL_PWREx_DisableStandbyIORetention:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1476   .text.HAL_PWREx_DisableStandbyIORetention:00000000 HAL_PWREx_DisableStandbyIORetention
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1493   .text.HAL_PWREx_DisableStandbyIORetention:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1498   .text.HAL_PWREx_EnableStandbyJTAGIORetention:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1504   .text.HAL_PWREx_EnableStandbyJTAGIORetention:00000000 HAL_PWREx_EnableStandbyJTAGIORetention
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1521   .text.HAL_PWREx_EnableStandbyJTAGIORetention:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1526   .text.HAL_PWREx_DisableStandbyJTAGIORetention:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1532   .text.HAL_PWREx_DisableStandbyJTAGIORetention:00000000 HAL_PWREx_DisableStandbyJTAGIORetention
+C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s:1549   .text.HAL_PWREx_DisableStandbyJTAGIORetention:0000000c $d
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccVJgh0c.s 			page 53
 
 
 

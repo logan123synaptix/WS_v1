@@ -1,6 +1,7 @@
 #include "sht3x.h"
 #include "sx_board.h"
 #include <string.h>
+#include "sx_delay.h"
 
 static uint8_t calculate_crc(const uint8_t *data, uint8_t length)
 {
@@ -38,7 +39,7 @@ SHT3X_STATUS_T sht3x_init(SHT3X_T *sht3x, sx_i2c_t *i2c)
         return SHT3X_ERR;
     }
 
-    sx_delay(20);  
+    sx_delay_ms(20);  
 
     return SHT3X_OK;
 }
@@ -55,7 +56,7 @@ SHT3X_STATUS_T sht3x_read_status(SHT3X_T *sht3x, uint16_t *status)
         return SHT3X_ERR;
     }
 
-    sx_delay(1);
+    sx_delay_ms(1);
 
     if (sx_i2c_read(sht3x->i2c, SHT3X_DEVICE_ADDR, buf, 3) != 0) {
         return SHT3X_ERR;

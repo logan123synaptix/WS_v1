@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
   26:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * If no LICENSE file comes with this software, it is provided AS-IS.
   27:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *
   28:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   ******************************************************************************
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 2
 
 
   29:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   @verbatim
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
   83:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   [..] The MCU can be woken up from a low power mode by an RTC alternate
   84:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****        function.
   85:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   [..] The RTC alternate functions are the RTC alarms (Alarm A and Alarm B),
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 3
 
 
   86:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****        RTC wakeup, RTC tamper event detection and RTC time stamp event detection.
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  140:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   Use function HAL_RTC_UnRegisterCallback() to reset a callback to the default
  141:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   weak function.
  142:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   HAL_RTC_UnRegisterCallback() takes as parameters the HAL peripheral handle,
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 4
 
 
  143:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   and the Callback ID.
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  197:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  198:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** /* Includes ------------------------------------------------------------------*/
  199:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #include "stm32h5xx_hal.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 5
 
 
  200:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  254:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** @endverbatim
  255:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @{
  256:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 6
 
 
  257:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  311:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       /* Legacy weak Tamper5EventCallback */
  312:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       hrtc->Tamper5EventCallback          = HAL_RTCEx_Tamper5EventCallback;
  313:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       /* Legacy weak Tamper6EventCallback */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 7
 
 
  314:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       hrtc->Tamper6EventCallback          = HAL_RTCEx_Tamper6EventCallback;
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  368:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  369:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* Set RTC state */
  370:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     hrtc->State = HAL_RTC_STATE_BUSY;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 8
 
 
  371:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  425:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     else
  426:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     {
  427:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       /* Calendar is already initialized */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 9
 
 
  428:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       /* Set flag to OK */
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  482:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #endif /* RTC_PRIVCFGR_ALRAPRIV */
  483:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  484:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* Exit initialization mode */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 10
 
 
  485:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     status = RTC_ExitInitMode(hrtc);
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  539:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *          @arg @ref HAL_RTC_ALARM_A_EVENT_CB_ID            Alarm A Event Callback ID
  540:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *          @arg @ref HAL_RTC_ALARM_B_EVENT_CB_ID            Alarm B Event Callback ID
  541:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *          @arg @ref HAL_RTC_TIMESTAMP_EVENT_CB_ID          TimeStamp Event Callback ID
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 11
 
 
  542:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *          @arg @ref HAL_RTC_WAKEUPTIMER_EVENT_CB_ID        WakeUp Timer Event Callback ID
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  596:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  597:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       case HAL_RTC_WAKEUPTIMER_EVENT_CB_ID :
  598:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         hrtc->WakeUpTimerEventCallback = pCallback;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 12
 
 
  599:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         break;
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  653:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       case HAL_RTC_INTERNAL_TAMPER5_EVENT_CB_ID :
  654:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         hrtc->InternalTamper5EventCallback = pCallback;
  655:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         break;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 13
 
 
  656:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  710:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  711:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       case HAL_RTC_MSPDEINIT_CB_ID :
  712:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         hrtc->MspDeInitCallback = pCallback;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 14
 
 
  713:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         break;
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  767:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @retval HAL status
  768:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   */
  769:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** HAL_StatusTypeDef HAL_RTC_UnRegisterCallback(RTC_HandleTypeDef *hrtc, HAL_RTC_CallbackIDTypeDef Cal
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 15
 
 
  770:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** {
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  824:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         hrtc->Tamper5EventCallback = HAL_RTCEx_Tamper5EventCallback;
  825:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         break;
  826:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 16
 
 
  827:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       case HAL_RTC_TAMPER6_EVENT_CB_ID :
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  881:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  882:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       case HAL_RTC_INTERNAL_TAMPER9_EVENT_CB_ID :
  883:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         /* Legacy weak InternalTamper9EventCallback */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 17
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 17
 
 
  884:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         hrtc->InternalTamper9EventCallback = HAL_RTCEx_InternalTamper9EventCallback;
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  938:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   }
  939:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   else
  940:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 18
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 18
 
 
  941:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* Return error status */
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  971:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   /* Prevent unused argument(s) compilation warning */
  972:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   UNUSED(hrtc);
   57              		.loc 1 972 3 view .LVU4
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 19
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 19
 
 
  973:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1014:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   uint32_t tmpreg;
 1015:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   HAL_StatusTypeDef status;
 1016:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 20
 
 
 1017:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #ifdef USE_FULL_ASSERT
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1071:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****           sTime->TimeFormat = 0x00U;
 1072:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****           assert_param(IS_RTC_HOUR24(RTC_Bcd2ToByte(sTime->Hours)));
 1073:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 21
 
 
 1074:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         assert_param(IS_RTC_MINUTES(RTC_Bcd2ToByte(sTime->Minutes)));
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1128:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *          else this parameter can be one of the following values:
 1129:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *            @arg RTC_FORMAT_BIN: Binary format
 1130:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *            @arg RTC_FORMAT_BCD: BCD format
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 22
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 22
 
 
 1131:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @retval HAL status
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1185:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   uint32_t datetmpreg;
 1186:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   HAL_StatusTypeDef status;
 1187:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 23
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 23
 
 
 1188:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   /* Check the parameters */
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1242:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   __HAL_RTC_WRITEPROTECTION_ENABLE(hrtc);
 1243:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 1244:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   if (status == HAL_OK)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 24
 
 
 1245:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1299:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** /**
 1300:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @brief  Daylight Saving Time, Add one hour to the calendar in one single operation
 1301:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *         without going through the initialization procedure.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 25
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 25
 
 
 1302:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @param  hrtc RTC handle
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  111              		.thumb_func
  113              	HAL_RTC_DST_Sub1Hour:
  114              	.LVL3:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 26
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 26
 
 
  115              	.LFB306:
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  149              		.section	.text.HAL_RTC_DST_SetStoreOperation,"ax",%progbits
  150              		.align	1
  151              		.global	HAL_RTC_DST_SetStoreOperation
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 27
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 27
 
 
  152              		.syntax unified
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1360:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   */
 1361:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** void HAL_RTC_DST_ClearStoreOperation(const RTC_HandleTypeDef *hrtc)
 1362:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 28
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 28
 
 
  189              		.loc 1 1362 1 is_stmt 1 view -0
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  226              		.loc 1 1381 10 is_stmt 0 view .LVU39
  227 0000 024B     		ldr	r3, .L16
  228 0002 9869     		ldr	r0, [r3, #24]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 29
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 29
 
 
  229              	.LVL7:
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1417:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** HAL_StatusTypeDef HAL_RTC_SetAlarm(RTC_HandleTypeDef *hrtc, RTC_AlarmTypeDef *sAlarm, uint32_t Form
 1418:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** {
 1419:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   uint32_t tmpreg = 0;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 30
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 30
 
 
 1420:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   uint32_t binary_mode;
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1474:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       assert_param(IS_RTC_MINUTES(sAlarm->AlarmTime.Minutes));
 1475:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       assert_param(IS_RTC_SECONDS(sAlarm->AlarmTime.Seconds));
 1476:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 31
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 31
 
 
 1477:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       if (sAlarm->AlarmDateWeekDaySel == RTC_ALARMDATEWEEKDAYSEL_DATE)
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1531:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   if (sAlarm->Alarm == RTC_ALARM_A)
 1532:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
 1533:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* Disable the Alarm A interrupt */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 32
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 32
 
 
 1534:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1588:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 1589:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     if (sAlarm->FlagAutoClr == ALARM_FLAG_AUTOCLR_ENABLE)
 1590:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 33
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 33
 
 
 1591:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       /* Configure the  Alarm B output clear */
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1645:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     assert_param(IS_RTC_ALARM(sAlarm->Alarm));
 1646:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     assert_param(IS_RTC_ALARM_MASK(sAlarm->AlarmMask));
 1647:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     assert_param(IS_RTC_ALARM_DATE_WEEKDAY_SEL(sAlarm->AlarmDateWeekDaySel));
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 34
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 34
 
 
 1648:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     assert_param(IS_RTC_ALARM_SUB_SECOND_VALUE(sAlarm->AlarmTime.SubSeconds));
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1702:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****                 ((uint32_t)sAlarm->AlarmDateWeekDaySel) | \
 1703:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****                 ((uint32_t)sAlarm->AlarmMask));
 1704:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 35
 
 
 1705:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     else /* Format BCD */
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1759:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 1760:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       WRITE_REG(RTC->ALRMASSR, sAlarm->AlarmSubSecondMask);
 1761:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 36
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 36
 
 
 1762:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1816:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   hrtc->State = HAL_RTC_STATE_READY;
 1817:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 1818:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   /* Process Unlocked */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 37
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 37
 
 
 1819:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   __HAL_UNLOCK(hrtc);
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1848:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 1849:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* AlarmA, Clear SSCLR */
 1850:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     CLEAR_BIT(RTC->ALRMASSR, RTC_ALRMASSR_SSCLR);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 38
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 38
 
 
 1851:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   }
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  310              		.loc 1 1850 5 is_stmt 1 view .LVU65
  311 0046 516C     		ldr	r1, [r2, #68]
  312 0048 21F00041 		bic	r1, r1, #-2147483648
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 39
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 39
 
 
  313 004c 5164     		str	r1, [r2, #68]
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1896:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   if (Alarm == RTC_ALARM_A)
 1897:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
 1898:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* AlarmA */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 40
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 40
 
 
 1899:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     sAlarm->Alarm = RTC_ALARM_A;
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1953:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 1954:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   if ((tmp & RTC_SMISR_ALRAMF) != 0U)
 1955:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 41
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 41
 
 
 1956:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* Clear the AlarmA interrupt pending bit */
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 2010:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 2011:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   if ((tmp & RTC_MISR_ALRBMF) != 0U)
 2012:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 42
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 42
 
 
 2013:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     /* Clear the AlarmB interrupt pending bit */
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1994:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   /* Get interrupt status */
  364              		.loc 1 1994 1 is_stmt 0 view .LVU72
  365 0000 38B5     		push	{r3, r4, r5, lr}
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 43
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 43
 
 
  366              	.LCFI0:
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  407 0026 034B     		ldr	r3, .L33
  408 0028 0222     		movs	r2, #2
  409 002a DA65     		str	r2, [r3, #92]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 44
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 44
 
 
 2020:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #endif /* USE_HAL_RTC_REGISTER_CALLBACKS */
@@ -2638,7 +2638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  452              	.LVL24:
 2056:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
 2057:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   while (READ_BIT(RTC->SR, RTC_SR_ALRAF) == 0U)
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 45
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 45
 
 
  453              		.loc 1 2057 3 is_stmt 1 view .LVU93
@@ -2698,7 +2698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  487              		.loc 1 2077 3 is_stmt 1 view .LVU107
  488 0032 034B     		ldr	r3, .L45
  489 0034 0122     		movs	r2, #1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 46
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 46
 
 
  490 0036 DA65     		str	r2, [r3, #92]
@@ -2758,7 +2758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 2104:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @note   The RTC Resynchronization mode is write protected, use the
 2105:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *         __HAL_RTC_WRITEPROTECTION_DISABLE() before calling this function.
 2106:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @note   To read the calendar through the shadow registers after Calendar
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 47
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 47
 
 
 2107:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   *         initialization, calendar update or after wakeup from low power modes
@@ -2818,7 +2818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 2126:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
 2127:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     if ((HAL_GetTick() - tickstart) > RTC_TIMEOUT_VALUE)
  554              		.loc 1 2127 5 is_stmt 1 view .LVU123
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 48
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 48
 
 
  555              		.loc 1 2127 10 is_stmt 0 view .LVU124
@@ -2878,7 +2878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  588              	.L56:
  589              		.loc 1 2144 1 view .LVU137
  590              		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 49
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 49
 
 
  591              	.L55:
@@ -2938,7 +2938,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  618              	.LFE318:
  620              		.section	.text.RTC_EnterInitMode,"ax",%progbits
  621              		.align	1
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 50
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 50
 
 
  622              		.global	RTC_EnterInitMode
@@ -2998,7 +2998,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 2195:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   HAL_StatusTypeDef status = HAL_OK;
  652              		.loc 1 2195 21 view .LVU149
  653 000c 0024     		movs	r4, #0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 51
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 51
 
 
  654              	.LVL36:
@@ -3058,7 +3058,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 2205:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     {
  676              		.loc 1 2205 5 is_stmt 1 view .LVU157
 2195:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 52
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 52
 
 
  677              		.loc 1 2195 21 is_stmt 0 view .LVU158
@@ -3118,7 +3118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  717 0054 00780044 		.word	1140881408
  718              		.cfi_endproc
  719              	.LFE319:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 53
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 53
 
 
  721              		.section	.text.RTC_ExitInitMode,"ax",%progbits
@@ -3178,7 +3178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  759              		.loc 1 2243 8 discriminator 1 view .LVU182
  760 001a 98B1     		cbz	r0, .L70
 2244:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 54
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 54
 
 
 2245:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       /* Change RTC state */
@@ -3238,7 +3238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  796              		.loc 1 2263 3 view .LVU195
 2264:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** }
  797              		.loc 1 2264 1 is_stmt 0 view .LVU196
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 55
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 55
 
 
  798 0044 10BD     		pop	{r4, pc}
@@ -3298,7 +3298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  841              		.loc 1 279 5 view .LVU210
  282:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #endif /* RTC_CR_OUT2EN */
  842              		.loc 1 282 5 view .LVU211
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 56
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 56
 
 
  284:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     assert_param(IS_RTC_BINARY_MIX_BCDU(hrtc->Init.BinMixBcdU));
@@ -3358,7 +3358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  880              		.loc 1 365 7 is_stmt 1 view .LVU228
  881 002c FFF7FEFF 		bl	HAL_RTC_MspInit
  882              	.LVL57:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 57
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 57
 
 
  365:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     }
@@ -3418,7 +3418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  922              	.LVL59:
  387:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #else
  923              		.loc 1 387 9 is_stmt 0 view .LVU244
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 58
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 58
 
 
  924 0060 0243     		orrs	r2, r2, r0
@@ -3478,7 +3478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  966              		.loc 1 409 11 is_stmt 0 view .LVU256
  967 00a0 0243     		orrs	r2, r2, r0
  968 00a2 6069     		ldr	r0, [r4, #20]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 59
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 59
 
 
  969 00a4 0243     		orrs	r2, r2, r0
@@ -3538,7 +3538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1016              		.cfi_offset 4, -16
  1017              		.cfi_offset 5, -12
  1018              		.cfi_offset 6, -8
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 60
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 60
 
 
  1019              		.cfi_offset 14, -4
@@ -3598,7 +3598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  527:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  1056              		.loc 1 527 3 view .LVU283
  529:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 61
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 61
 
 
  1057              		.loc 1 529 3 view .LVU284
@@ -3658,7 +3658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  481:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #endif /* RTC_PRIVCFGR_ALRAPRIV */
  1097              		.loc 1 481 5 view .LVU299
  1098 005c DA61     		str	r2, [r3, #28]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 62
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 62
 
 
  485:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     if (status == HAL_OK)
@@ -3718,7 +3718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1137 0084 DE61     		str	r6, [r3, #28]
  496:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** #if defined (TAMP_PRIVCFGR_TAMPPRIV)
  1138              		.loc 1 496 7 view .LVU316
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 63
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 63
 
 
  1139 0086 1E62     		str	r6, [r3, #32]
@@ -3778,7 +3778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1179              		@ args = 0, pretend = 0, frame = 0
  1180              		@ frame_needed = 0, uses_anonymous_args = 0
  1181              		@ link register save eliminated.
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 64
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 64
 
 
 2273:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   uint32_t bcd_high = 0U;
@@ -3838,7 +3838,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1224              		.thumb
  1225              		.thumb_func
  1227              	HAL_RTC_SetTime:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 65
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 65
 
 
  1228              	.LVL81:
@@ -3898,7 +3898,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1268 0022 5322     		movs	r2, #83
  1269 0024 5A62     		str	r2, [r3, #36]
 1033:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 66
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 66
 
 
  1270              		.loc 1 1033 3 view .LVU356
@@ -3958,7 +3958,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1042:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       {
  1308              		.loc 1 1042 7 is_stmt 1 view .LVU373
 1042:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 67
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 67
 
 
  1309              		.loc 1 1042 10 is_stmt 0 view .LVU374
@@ -4018,7 +4018,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1347 0074 46EA0003 		orr	r3, r6, r0
 1060:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       }
  1348              		.loc 1 1060 46 view .LVU391
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 68
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 68
 
 
  1349 0078 EA78     		ldrb	r2, [r5, #3]	@ zero_extendqisi2
@@ -4078,7 +4078,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1064:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         {
  1390              		.loc 1 1064 9 is_stmt 1 view .LVU405
 1064:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****         {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 69
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 69
 
 
  1391              		.loc 1 1064 13 is_stmt 0 view .LVU406
@@ -4138,7 +4138,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1430              		.cfi_restore 14
 1027:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  1431              		.loc 1 1027 3 discriminator 1 view .LVU422
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 70
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 70
 
 
  1432 00d0 0223     		movs	r3, #2
@@ -4198,7 +4198,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1478 000e 0123     		movs	r3, #1
  1479 0010 80F82C30 		strb	r3, [r0, #44]
 1192:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 71
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 71
 
 
  1480              		.loc 1 1192 3 view .LVU433
@@ -4258,7 +4258,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1514 0030 1D4B     		ldr	r3, .L128
  1515 0032 CA22     		movs	r2, #202
  1516 0034 5A62     		str	r2, [r3, #36]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 72
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 72
 
 
 1228:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -4318,7 +4318,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1553              		.loc 1 1199 5 is_stmt 1 view .LVU471
 1199:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   }
  1554              		.loc 1 1199 44 is_stmt 0 view .LVU472
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 73
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 73
 
 
  1555 0058 03F0EF03 		and	r3, r3, #239
@@ -4378,7 +4378,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1592              	.LVL108:
  1593              	.L121:
 1235:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 74
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 74
 
 
  1594              		.loc 1 1235 5 is_stmt 1 view .LVU490
@@ -4438,7 +4438,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1254:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  1635              		.loc 1 1254 1 view .LVU504
  1636 00a6 7047     		bx	lr
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 75
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 75
 
 
  1637              	.L129:
@@ -4498,7 +4498,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1683              		.loc 1 1426 15 is_stmt 0 view .LVU514
  1684 0016 0223     		movs	r3, #2
  1685 0018 80F82D30 		strb	r3, [r0, #45]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 76
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 76
 
 
 1458:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -4558,7 +4558,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1720              	.LVL118:
 1485:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****                 ((uint32_t)RTC_ByteToBcd2(sAlarm->AlarmTime.Minutes) << RTC_ALRMAR_MNU_Pos) | \
  1721              		.loc 1 1485 28 view .LVU535
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 77
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 77
 
 
  1722 003a FFF7FEFF 		bl	RTC_ByteToBcd2
@@ -4618,7 +4618,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1761              		.loc 1 1495 7 is_stmt 1 view .LVU550
 1495:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       {
  1762              		.loc 1 1495 11 is_stmt 0 view .LVU551
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 78
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 78
 
 
  1763 006e 3E4B     		ldr	r3, .L154
@@ -4678,7 +4678,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1799 0098 226A     		ldr	r2, [r4, #32]
 1524:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****                 ((uint32_t)sAlarm->AlarmDateWeekDaySel) | \
  1800              		.loc 1 1524 77 view .LVU570
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 79
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 79
 
 
  1801 009a 1343     		orrs	r3, r3, r2
@@ -4738,7 +4738,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1841              	.LVL130:
  1842              	.L143:
 1587:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 80
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 80
 
 
  1843              		.loc 1 1587 5 is_stmt 1 view .LVU585
@@ -4798,7 +4798,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1884 00fa 21F48851 		bic	r1, r1, #4352
  1885 00fe 9161     		str	r1, [r2, #24]
 1539:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 81
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 81
 
 
  1886              		.loc 1 1539 5 view .LVU599
@@ -4858,7 +4858,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1928 0134 A369     		ldr	r3, [r4, #24]
  1929              	.LVL136:
 1543:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 82
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 82
 
 
  1930              		.loc 1 1543 7 is_stmt 0 view .LVU612
@@ -4918,7 +4918,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  1979              		.thumb
  1980              		.thumb_func
  1982              	HAL_RTC_SetAlarm_IT:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 83
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 83
 
 
  1983              	.LVL141:
@@ -4978,7 +4978,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1672:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
  2024              		.loc 1 1672 3 is_stmt 1 view .LVU632
 1672:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 84
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 84
 
 
  2025              		.loc 1 1672 6 is_stmt 0 view .LVU633
@@ -5038,7 +5038,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1697:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****                 ((uint32_t)RTC_ByteToBcd2(sAlarm->AlarmTime.Minutes) << RTC_ALRMAR_MNU_Pos) | \
  2061              		.loc 1 1697 90 view .LVU652
  2062 0046 47EA0027 		orr	r7, r7, r0, lsl #8
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 85
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 85
 
 
 1699:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****                 ((uint32_t)(sAlarm->AlarmTime.TimeFormat) << RTC_ALRMAR_PM_Pos) | \
@@ -5098,7 +5098,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2101 0078 0023     		movs	r3, #0
  2102 007a CB70     		strb	r3, [r1, #3]
  2103              	.L161:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 86
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 86
 
 
 1715:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****       }
@@ -5158,7 +5158,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2139 00a0 00E0     		b	.L158
  2140              	.LVL153:
  2141              	.L173:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 87
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 87
 
 
 1631:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   uint32_t binary_mode;
@@ -5218,7 +5218,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2181              		.loc 1 1800 8 view .LVU702
  2182 00d0 012B     		cmp	r3, #1
  2183 00d2 41D0     		beq	.L177
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 88
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 88
 
 
 1808:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     }
@@ -5278,7 +5278,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2224              		.loc 1 1758 7 is_stmt 1 view .LVU716
  2225 010a 174A     		ldr	r2, .L180
  2226 010c 1364     		str	r3, [r2, #64]
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 89
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 89
 
 
 1760:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     }
@@ -5338,7 +5338,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2268 013c 5364     		str	r3, [r2, #68]
  2269 013e E8E7     		b	.L164
  2270              	.L179:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 90
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 90
 
 
 1768:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     }
@@ -5398,7 +5398,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 2286:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @brief  Convert from 2 digit BCD to Binary.
 2287:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @param  Value BCD value to be converted
 2288:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   * @retval Converted word
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 91
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 91
 
 
 2289:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   */
@@ -5458,7 +5458,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2364              		.cfi_offset 14, -4
  2365 0002 0C46     		mov	r4, r1
 1135:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 92
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 92
 
 
  2366              		.loc 1 1135 3 is_stmt 1 view .LVU747
@@ -5518,7 +5518,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1156:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     sTime->Seconds = (uint8_t)((tmpreg & (RTC_TR_ST | RTC_TR_SU)) >> RTC_TR_SU_Pos);
  2402              		.loc 1 1156 22 is_stmt 0 view .LVU766
  2403 0028 C3F30626 		ubfx	r6, r3, #8, #7
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 93
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 93
 
 
 1156:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     sTime->Seconds = (uint8_t)((tmpreg & (RTC_TR_ST | RTC_TR_SU)) >> RTC_TR_SU_Pos);
@@ -5578,7 +5578,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2440              	.LVL178:
  2441              	.L184:
 1170:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 94
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 94
 
 
  2442              		.loc 1 1170 3 is_stmt 1 view .LVU785
@@ -5638,7 +5638,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2487 0006 C3F30740 		ubfx	r0, r3, #16, #8
  2488              	.LVL182:
 1283:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   sDate->Month = (uint8_t)((datetmpreg & (RTC_DR_MT | RTC_DR_MU)) >> RTC_DR_MU_Pos);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 95
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 95
 
 
  2489              		.loc 1 1283 15 view .LVU797
@@ -5698,7 +5698,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1294:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   }
  2525              		.loc 1 1294 28 is_stmt 0 view .LVU816
  2526 0030 2846     		mov	r0, r5
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 96
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 96
 
 
  2527 0032 FFF7FEFF 		bl	RTC_Bcd2ToByte
@@ -5758,7 +5758,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2571              		.loc 1 1896 6 is_stmt 0 view .LVU828
  2572 0004 B2F5807F 		cmp	r2, #256
  2573 0008 33D0     		beq	.L198
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 97
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 97
 
 
 1916:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
@@ -5818,7 +5818,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2609              		.loc 1 1925 5 is_stmt 1 view .LVU847
 1925:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     sAlarm->AlarmTime.SubSeconds = (uint32_t) subsecondtmpreg;
  2610              		.loc 1 1925 36 is_stmt 0 view .LVU848
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 98
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 98
 
 
  2611 002c C2F38050 		ubfx	r0, r2, #22, #1
@@ -5878,7 +5878,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1935:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****     sAlarm->AlarmTime.Seconds = RTC_Bcd2ToByte(sAlarm->AlarmTime.Seconds);
  2647              		.loc 1 1935 33 is_stmt 0 view .LVU867
  2648 0052 6078     		ldrb	r0, [r4, #1]	@ zero_extendqisi2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 99
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 99
 
 
  2649 0054 FFF7FEFF 		bl	RTC_Bcd2ToByte
@@ -5938,7 +5938,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
 1902:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c **** 
  2687              		.loc 1 1902 21 view .LVU884
  2688 007a C1F30E01 		ubfx	r1, r1, #0, #15
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 100
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 100
 
 
  2689              	.LVL204:
@@ -5998,7 +5998,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2723              		.loc 1 1911 33 view .LVU904
  2724 00a4 2162     		str	r1, [r4, #32]
 1912:Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rtc.c ****   }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 101
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 101
 
 
  2725              		.loc 1 1912 5 is_stmt 1 view .LVU905
@@ -6026,86 +6026,86 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 1
  2746              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc.h"
  2747              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
  2748              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc_ex.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 102
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 102
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32h5xx_hal_rtc.c
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:22     .text.HAL_RTC_MspInit:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:28     .text.HAL_RTC_MspInit:00000000 HAL_RTC_MspInit
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:43     .text.HAL_RTC_MspDeInit:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:49     .text.HAL_RTC_MspDeInit:00000000 HAL_RTC_MspDeInit
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:64     .text.HAL_RTC_DST_Add1Hour:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:70     .text.HAL_RTC_DST_Add1Hour:00000000 HAL_RTC_DST_Add1Hour
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:102    .text.HAL_RTC_DST_Add1Hour:00000018 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:107    .text.HAL_RTC_DST_Sub1Hour:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:113    .text.HAL_RTC_DST_Sub1Hour:00000000 HAL_RTC_DST_Sub1Hour
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:145    .text.HAL_RTC_DST_Sub1Hour:00000018 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:150    .text.HAL_RTC_DST_SetStoreOperation:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:156    .text.HAL_RTC_DST_SetStoreOperation:00000000 HAL_RTC_DST_SetStoreOperation
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:175    .text.HAL_RTC_DST_SetStoreOperation:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:180    .text.HAL_RTC_DST_ClearStoreOperation:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:186    .text.HAL_RTC_DST_ClearStoreOperation:00000000 HAL_RTC_DST_ClearStoreOperation
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:205    .text.HAL_RTC_DST_ClearStoreOperation:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:210    .text.HAL_RTC_DST_ReadStoreOperation:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:216    .text.HAL_RTC_DST_ReadStoreOperation:00000000 HAL_RTC_DST_ReadStoreOperation
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:236    .text.HAL_RTC_DST_ReadStoreOperation:0000000c $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:241    .text.HAL_RTC_DeactivateAlarm:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:247    .text.HAL_RTC_DeactivateAlarm:00000000 HAL_RTC_DeactivateAlarm
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:325    .text.HAL_RTC_DeactivateAlarm:00000054 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:330    .text.HAL_RTC_AlarmAEventCallback:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:336    .text.HAL_RTC_AlarmAEventCallback:00000000 HAL_RTC_AlarmAEventCallback
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:351    .text.HAL_RTC_AlarmIRQHandler:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:357    .text.HAL_RTC_AlarmIRQHandler:00000000 HAL_RTC_AlarmIRQHandler
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:418    .text.HAL_RTC_AlarmIRQHandler:00000034 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:423    .text.HAL_RTC_PollForAlarmAEvent:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:429    .text.HAL_RTC_PollForAlarmAEvent:00000000 HAL_RTC_PollForAlarmAEvent
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:505    .text.HAL_RTC_PollForAlarmAEvent:00000040 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:510    .text.HAL_RTC_WaitForSynchro:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:516    .text.HAL_RTC_WaitForSynchro:00000000 HAL_RTC_WaitForSynchro
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:592    .text.HAL_RTC_WaitForSynchro:00000044 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:597    .text.HAL_RTC_GetState:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:603    .text.HAL_RTC_GetState:00000000 HAL_RTC_GetState
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:621    .text.RTC_EnterInitMode:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:627    .text.RTC_EnterInitMode:00000000 RTC_EnterInitMode
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:717    .text.RTC_EnterInitMode:00000054 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:722    .text.RTC_ExitInitMode:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:728    .text.RTC_ExitInitMode:00000000 RTC_ExitInitMode
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:804    .text.RTC_ExitInitMode:00000048 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:809    .text.HAL_RTC_Init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:815    .text.HAL_RTC_Init:00000000 HAL_RTC_Init
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:994    .text.HAL_RTC_Init:000000b4 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:999    .text.HAL_RTC_DeInit:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1005   .text.HAL_RTC_DeInit:00000000 HAL_RTC_DeInit
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1161   .text.HAL_RTC_DeInit:000000a0 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1168   .text.RTC_ByteToBcd2:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1174   .text.RTC_ByteToBcd2:00000000 RTC_ByteToBcd2
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1221   .text.HAL_RTC_SetTime:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1227   .text.HAL_RTC_SetTime:00000000 HAL_RTC_SetTime
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1441   .text.HAL_RTC_SetTime:000000d8 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1446   .text.HAL_RTC_SetDate:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1452   .text.HAL_RTC_SetDate:00000000 HAL_RTC_SetDate
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1640   .text.HAL_RTC_SetDate:000000a8 $d
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s 			page 103
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:22     .text.HAL_RTC_MspInit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:28     .text.HAL_RTC_MspInit:00000000 HAL_RTC_MspInit
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:43     .text.HAL_RTC_MspDeInit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:49     .text.HAL_RTC_MspDeInit:00000000 HAL_RTC_MspDeInit
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:64     .text.HAL_RTC_DST_Add1Hour:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:70     .text.HAL_RTC_DST_Add1Hour:00000000 HAL_RTC_DST_Add1Hour
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:102    .text.HAL_RTC_DST_Add1Hour:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:107    .text.HAL_RTC_DST_Sub1Hour:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:113    .text.HAL_RTC_DST_Sub1Hour:00000000 HAL_RTC_DST_Sub1Hour
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:145    .text.HAL_RTC_DST_Sub1Hour:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:150    .text.HAL_RTC_DST_SetStoreOperation:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:156    .text.HAL_RTC_DST_SetStoreOperation:00000000 HAL_RTC_DST_SetStoreOperation
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:175    .text.HAL_RTC_DST_SetStoreOperation:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:180    .text.HAL_RTC_DST_ClearStoreOperation:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:186    .text.HAL_RTC_DST_ClearStoreOperation:00000000 HAL_RTC_DST_ClearStoreOperation
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:205    .text.HAL_RTC_DST_ClearStoreOperation:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:210    .text.HAL_RTC_DST_ReadStoreOperation:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:216    .text.HAL_RTC_DST_ReadStoreOperation:00000000 HAL_RTC_DST_ReadStoreOperation
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:236    .text.HAL_RTC_DST_ReadStoreOperation:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:241    .text.HAL_RTC_DeactivateAlarm:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:247    .text.HAL_RTC_DeactivateAlarm:00000000 HAL_RTC_DeactivateAlarm
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:325    .text.HAL_RTC_DeactivateAlarm:00000054 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:330    .text.HAL_RTC_AlarmAEventCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:336    .text.HAL_RTC_AlarmAEventCallback:00000000 HAL_RTC_AlarmAEventCallback
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:351    .text.HAL_RTC_AlarmIRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:357    .text.HAL_RTC_AlarmIRQHandler:00000000 HAL_RTC_AlarmIRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:418    .text.HAL_RTC_AlarmIRQHandler:00000034 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:423    .text.HAL_RTC_PollForAlarmAEvent:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:429    .text.HAL_RTC_PollForAlarmAEvent:00000000 HAL_RTC_PollForAlarmAEvent
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:505    .text.HAL_RTC_PollForAlarmAEvent:00000040 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:510    .text.HAL_RTC_WaitForSynchro:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:516    .text.HAL_RTC_WaitForSynchro:00000000 HAL_RTC_WaitForSynchro
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:592    .text.HAL_RTC_WaitForSynchro:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:597    .text.HAL_RTC_GetState:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:603    .text.HAL_RTC_GetState:00000000 HAL_RTC_GetState
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:621    .text.RTC_EnterInitMode:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:627    .text.RTC_EnterInitMode:00000000 RTC_EnterInitMode
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:717    .text.RTC_EnterInitMode:00000054 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:722    .text.RTC_ExitInitMode:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:728    .text.RTC_ExitInitMode:00000000 RTC_ExitInitMode
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:804    .text.RTC_ExitInitMode:00000048 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:809    .text.HAL_RTC_Init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:815    .text.HAL_RTC_Init:00000000 HAL_RTC_Init
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:994    .text.HAL_RTC_Init:000000b4 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:999    .text.HAL_RTC_DeInit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1005   .text.HAL_RTC_DeInit:00000000 HAL_RTC_DeInit
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1161   .text.HAL_RTC_DeInit:000000a0 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1168   .text.RTC_ByteToBcd2:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1174   .text.RTC_ByteToBcd2:00000000 RTC_ByteToBcd2
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1221   .text.HAL_RTC_SetTime:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1227   .text.HAL_RTC_SetTime:00000000 HAL_RTC_SetTime
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1441   .text.HAL_RTC_SetTime:000000d8 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1446   .text.HAL_RTC_SetDate:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1452   .text.HAL_RTC_SetDate:00000000 HAL_RTC_SetDate
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1640   .text.HAL_RTC_SetDate:000000a8 $d
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s 			page 103
 
 
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1645   .text.HAL_RTC_SetAlarm:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1651   .text.HAL_RTC_SetAlarm:00000000 HAL_RTC_SetAlarm
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1971   .text.HAL_RTC_SetAlarm:00000168 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1976   .text.HAL_RTC_SetAlarm_IT:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:1982   .text.HAL_RTC_SetAlarm_IT:00000000 HAL_RTC_SetAlarm_IT
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2305   .text.HAL_RTC_SetAlarm_IT:00000168 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2310   .text.RTC_Bcd2ToByte:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2316   .text.RTC_Bcd2ToByte:00000000 RTC_Bcd2ToByte
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2344   .text.HAL_RTC_GetTime:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2350   .text.HAL_RTC_GetTime:00000000 HAL_RTC_GetTime
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2451   .text.HAL_RTC_GetTime:00000058 $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2456   .text.HAL_RTC_GetDate:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2462   .text.HAL_RTC_GetDate:00000000 HAL_RTC_GetDate
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2540   .text.HAL_RTC_GetDate:0000003c $d
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2545   .text.HAL_RTC_GetAlarm:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2551   .text.HAL_RTC_GetAlarm:00000000 HAL_RTC_GetAlarm
-C:\Users\DELL\AppData\Local\Temp\cc3KX8xf.s:2735   .text.HAL_RTC_GetAlarm:000000b0 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1645   .text.HAL_RTC_SetAlarm:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1651   .text.HAL_RTC_SetAlarm:00000000 HAL_RTC_SetAlarm
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1971   .text.HAL_RTC_SetAlarm:00000168 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1976   .text.HAL_RTC_SetAlarm_IT:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:1982   .text.HAL_RTC_SetAlarm_IT:00000000 HAL_RTC_SetAlarm_IT
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2305   .text.HAL_RTC_SetAlarm_IT:00000168 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2310   .text.RTC_Bcd2ToByte:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2316   .text.RTC_Bcd2ToByte:00000000 RTC_Bcd2ToByte
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2344   .text.HAL_RTC_GetTime:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2350   .text.HAL_RTC_GetTime:00000000 HAL_RTC_GetTime
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2451   .text.HAL_RTC_GetTime:00000058 $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2456   .text.HAL_RTC_GetDate:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2462   .text.HAL_RTC_GetDate:00000000 HAL_RTC_GetDate
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2540   .text.HAL_RTC_GetDate:0000003c $d
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2545   .text.HAL_RTC_GetAlarm:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2551   .text.HAL_RTC_GetAlarm:00000000 HAL_RTC_GetAlarm
+C:\Users\DELL\AppData\Local\Temp\cc4T5Hun.s:2735   .text.HAL_RTC_GetAlarm:000000b0 $d
 
 UNDEFINED SYMBOLS
 HAL_RTCEx_AlarmBEventCallback

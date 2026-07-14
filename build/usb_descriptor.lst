@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -21,238 +21,14 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
   18              	.Ltext0:
   19              		.cfi_sections	.debug_frame
   20              		.file 1 "SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c"
-  21              		.section	.text.sx_gettick,"ax",%progbits
+  21              		.section	.text.tud_descriptor_device_cb,"ax",%progbits
   22              		.align	1
-  23              		.global	sx_gettick
+  23              		.global	tud_descriptor_device_cb
   24              		.syntax unified
   25              		.thumb
   26              		.thumb_func
-  28              	sx_gettick:
-  29              	.LFB336:
-  30              		.file 2 "SynaptiX_FDK/board/sx_board.h"
-   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
-   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
-   3:SynaptiX_FDK/board/sx_board.h **** 
-   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
-   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
-   6:SynaptiX_FDK/board/sx_board.h **** #endif
-   7:SynaptiX_FDK/board/sx_board.h **** 
-   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
-   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
-  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
-  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
-  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
-  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
-  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
-  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
-  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
-  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
-  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
-  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
-  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
-  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
-  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
-  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
-  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
-  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
-  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
-  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
-  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 2
-
-
-  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
-  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
-  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
-  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
-  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
-  34:SynaptiX_FDK/board/sx_board.h **** 
-  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
-  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
-  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
-  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
-  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
-  40:SynaptiX_FDK/board/sx_board.h **** 
-  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
-  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
-  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
-  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
-  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
-  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
-  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
-  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
-  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
-  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
-  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
-  53:SynaptiX_FDK/board/sx_board.h ****     #endif
-  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
-  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
-  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
-  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
-  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
-  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
-  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
-  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
-  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
-  64:SynaptiX_FDK/board/sx_board.h ****     #endif
-  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
-  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
-  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
-  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
-  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
-  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
-  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
-  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
-  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
-  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
-  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
-  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
-  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
-  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
-  79:SynaptiX_FDK/board/sx_board.h ****      *
-  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
-  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
-  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
-  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
-  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
-  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 3
-
-
-  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
-  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
-  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
-  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
-  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
-  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
-  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
-  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
-  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
-  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
-  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
-  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
-  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
-  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
- 100:SynaptiX_FDK/board/sx_board.h ****      *
- 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
- 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
- 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
- 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
- 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
- 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
- 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
- 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
- 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
- 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
- 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
- 112:SynaptiX_FDK/board/sx_board.h **** 
- 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
- 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
- 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
- 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
- 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
- 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
- 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
- 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
- 121:SynaptiX_FDK/board/sx_board.h **** 
- 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
- 123:SynaptiX_FDK/board/sx_board.h **** 
- 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
- 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
- 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
- 127:SynaptiX_FDK/board/sx_board.h **** 
- 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
- 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
- 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
- 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
- 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
- 133:SynaptiX_FDK/board/sx_board.h **** 
- 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
- 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
- 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
- 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
- 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
- 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
- 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
- 141:SynaptiX_FDK/board/sx_board.h **** 
- 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 4
-
-
- 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
- 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
- 145:SynaptiX_FDK/board/sx_board.h **** 
- 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
- 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
- 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
- 149:SynaptiX_FDK/board/sx_board.h **** 
- 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
- 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
- 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
- 153:SynaptiX_FDK/board/sx_board.h **** 
- 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
- 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
- 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
- 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
- 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
- 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
- 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
- 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
- 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
- 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
- 164:SynaptiX_FDK/board/sx_board.h **** 
- 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
- 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
- 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
- 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
- 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
- 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
- 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
- 172:SynaptiX_FDK/board/sx_board.h **** 
- 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
- 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
- 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
- 176:SynaptiX_FDK/board/sx_board.h **** 
- 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
- 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
- 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
- 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
- 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
- 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
- 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
- 184:SynaptiX_FDK/board/sx_board.h **** 
- 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
- 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
-  31              		.loc 2 186 33 view -0
-  32              		.cfi_startproc
-  33              		@ args = 0, pretend = 0, frame = 0
-  34              		@ frame_needed = 0, uses_anonymous_args = 0
-  35 0000 08B5     		push	{r3, lr}
-  36              	.LCFI0:
-  37              		.cfi_def_cfa_offset 8
-  38              		.cfi_offset 3, -8
-  39              		.cfi_offset 14, -4
-  40              		.loc 2 186 34 view .LVU1
-  41              		.loc 2 186 41 is_stmt 0 view .LVU2
-  42 0002 FFF7FEFF 		bl	HAL_GetTick
-  43              	.LVL0:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 5
-
-
-  44              		.loc 2 186 55 view .LVU3
-  45 0006 08BD     		pop	{r3, pc}
-  46              		.cfi_endproc
-  47              	.LFE336:
-  49              		.section	.text.tud_descriptor_device_cb,"ax",%progbits
-  50              		.align	1
-  51              		.global	tud_descriptor_device_cb
-  52              		.syntax unified
-  53              		.thumb
-  54              		.thumb_func
-  56              	tud_descriptor_device_cb:
-  57              	.LFB433:
+  28              	tud_descriptor_device_cb:
+  29              	.LFB431:
    1:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #include "tusb.h"
    2:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #include <string.h>
    3:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
@@ -282,6 +58,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
   27:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** /* ── Device Descriptor ── */
   28:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** static tusb_desc_device_t const desc_device = {
   29:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     .bLength            = sizeof(tusb_desc_device_t),
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 2
+
+
   30:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     .bDescriptorType    = TUSB_DESC_DEVICE,
   31:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     .bcdUSB             = USB_BCD,
   32:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     .bDeviceClass       = TUSB_CLASS_MISC,
@@ -298,35 +77,32 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
   43:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** };
   44:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
   45:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** uint8_t const *tud_descriptor_device_cb(void) {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 6
-
-
-  58              		.loc 1 45 47 is_stmt 1 view -0
-  59              		.cfi_startproc
-  60              		@ args = 0, pretend = 0, frame = 0
-  61              		@ frame_needed = 0, uses_anonymous_args = 0
-  62              		@ link register save eliminated.
+  30              		.loc 1 45 47 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
   46:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     return (uint8_t const *)&desc_device;
-  63              		.loc 1 46 5 view .LVU5
+  35              		.loc 1 46 5 view .LVU1
   47:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** }
-  64              		.loc 1 47 1 is_stmt 0 view .LVU6
-  65 0000 0048     		ldr	r0, .L4
-  66 0002 7047     		bx	lr
-  67              	.L5:
-  68              		.align	2
-  69              	.L4:
-  70 0004 00000000 		.word	desc_device
-  71              		.cfi_endproc
-  72              	.LFE433:
-  74              		.section	.text.tud_descriptor_configuration_cb,"ax",%progbits
-  75              		.align	1
-  76              		.global	tud_descriptor_configuration_cb
-  77              		.syntax unified
-  78              		.thumb
-  79              		.thumb_func
-  81              	tud_descriptor_configuration_cb:
-  82              	.LVL1:
-  83              	.LFB434:
+  36              		.loc 1 47 1 is_stmt 0 view .LVU2
+  37 0000 0048     		ldr	r0, .L2
+  38 0002 7047     		bx	lr
+  39              	.L3:
+  40              		.align	2
+  41              	.L2:
+  42 0004 00000000 		.word	desc_device
+  43              		.cfi_endproc
+  44              	.LFE431:
+  46              		.section	.text.tud_descriptor_configuration_cb,"ax",%progbits
+  47              		.align	1
+  48              		.global	tud_descriptor_configuration_cb
+  49              		.syntax unified
+  50              		.thumb
+  51              		.thumb_func
+  53              	tud_descriptor_configuration_cb:
+  54              	.LVL0:
+  55              	.LFB432:
   48:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
   49:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** /* ── HID Report Descriptor (chỉ compile khi CFG_TUD_HID = 1) ── */
   50:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #if CFG_TUD_HID
@@ -342,6 +118,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
   60:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #endif
   61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
   62:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** /* ── Interface Numbers ── */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 3
+
+
   63:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** enum {
   64:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     ITF_NUM_CDC_0 = 0,
   65:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     ITF_NUM_CDC_0_DATA,
@@ -358,9 +137,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
   76:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #define EPNUM_CDC_0_NOTIF   0x81   // EP1 IN  – CDC notification
   77:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #define EPNUM_CDC_0_OUT     0x02   // EP2 OUT – CDC data
   78:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #define EPNUM_CDC_0_IN      0x82   // EP2 IN  – CDC data
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 7
-
-
   79:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
   80:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** /*  MSC  */
   81:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #if CFG_TUD_MSC
@@ -401,46 +177,46 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
  116:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** };
  117:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
  118:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
-  84              		.loc 1 118 63 is_stmt 1 view -0
-  85              		.cfi_startproc
-  86              		@ args = 0, pretend = 0, frame = 0
-  87              		@ frame_needed = 0, uses_anonymous_args = 0
-  88              		@ link register save eliminated.
+  56              		.loc 1 118 63 is_stmt 1 view -0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 4
+
+
+  57              		.cfi_startproc
+  58              		@ args = 0, pretend = 0, frame = 0
+  59              		@ frame_needed = 0, uses_anonymous_args = 0
+  60              		@ link register save eliminated.
  119:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     (void)index;
-  89              		.loc 1 119 5 view .LVU8
+  61              		.loc 1 119 5 view .LVU4
  120:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     return desc_fs_configuration;
-  90              		.loc 1 120 5 view .LVU9
+  62              		.loc 1 120 5 view .LVU5
  121:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** }
-  91              		.loc 1 121 1 is_stmt 0 view .LVU10
-  92 0000 0048     		ldr	r0, .L7
-  93              	.LVL2:
-  94              		.loc 1 121 1 view .LVU11
-  95 0002 7047     		bx	lr
-  96              	.L8:
-  97              		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 8
-
-
-  98              	.L7:
-  99 0004 00000000 		.word	desc_fs_configuration
- 100              		.cfi_endproc
- 101              	.LFE434:
- 103              		.section	.rodata.tud_descriptor_string_cb.str1.4,"aMS",%progbits,1
- 104              		.align	2
- 105              	.LC0:
- 106 0000 53544D33 		.ascii	"STM32H563_Logan\000"
- 106      32483536 
- 106      335F4C6F 
- 106      67616E00 
- 107              		.section	.text.tud_descriptor_string_cb,"ax",%progbits
- 108              		.align	1
- 109              		.global	tud_descriptor_string_cb
- 110              		.syntax unified
- 111              		.thumb
- 112              		.thumb_func
- 114              	tud_descriptor_string_cb:
- 115              	.LVL3:
- 116              	.LFB435:
+  63              		.loc 1 121 1 is_stmt 0 view .LVU6
+  64 0000 0048     		ldr	r0, .L5
+  65              	.LVL1:
+  66              		.loc 1 121 1 view .LVU7
+  67 0002 7047     		bx	lr
+  68              	.L6:
+  69              		.align	2
+  70              	.L5:
+  71 0004 00000000 		.word	desc_fs_configuration
+  72              		.cfi_endproc
+  73              	.LFE432:
+  75              		.section	.rodata.tud_descriptor_string_cb.str1.4,"aMS",%progbits,1
+  76              		.align	2
+  77              	.LC0:
+  78 0000 53544D33 		.ascii	"STM32H563_Logan\000"
+  78      32483536 
+  78      335F4C6F 
+  78      67616E00 
+  79              		.section	.text.tud_descriptor_string_cb,"ax",%progbits
+  80              		.align	1
+  81              		.global	tud_descriptor_string_cb
+  82              		.syntax unified
+  83              		.thumb
+  84              		.thumb_func
+  86              	tud_descriptor_string_cb:
+  87              	.LVL2:
+  88              	.LFB433:
  122:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
  123:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** /* ── String Descriptors ── */
  124:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** enum {
@@ -462,6 +238,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
  140:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           "+HID"
  141:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           #endif
  142:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           " Demo",
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 5
+
+
  143:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     [3] = NULL,                    // Serial từ UID
  144:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     [4] = "TinyUSB CDC Port",
  145:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** #if CFG_TUD_HID
@@ -475,30 +254,27 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
  153:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** static uint16_t _desc_str[33];
  154:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
  155:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
- 117              		.loc 1 155 74 is_stmt 1 view -0
- 118              		.cfi_startproc
- 119              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 9
-
-
- 120              		@ frame_needed = 0, uses_anonymous_args = 0
- 121              		.loc 1 155 74 is_stmt 0 view .LVU13
- 122 0000 10B5     		push	{r4, lr}
- 123              	.LCFI1:
- 124              		.cfi_def_cfa_offset 8
- 125              		.cfi_offset 4, -8
- 126              		.cfi_offset 14, -4
+  89              		.loc 1 155 74 is_stmt 1 view -0
+  90              		.cfi_startproc
+  91              		@ args = 0, pretend = 0, frame = 0
+  92              		@ frame_needed = 0, uses_anonymous_args = 0
+  93              		.loc 1 155 74 is_stmt 0 view .LVU9
+  94 0000 10B5     		push	{r4, lr}
+  95              	.LCFI0:
+  96              		.cfi_def_cfa_offset 8
+  97              		.cfi_offset 4, -8
+  98              		.cfi_offset 14, -4
  156:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     (void)langid;
- 127              		.loc 1 156 5 is_stmt 1 view .LVU14
+  99              		.loc 1 156 5 is_stmt 1 view .LVU10
  157:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     size_t chr_count;
- 128              		.loc 1 157 5 view .LVU15
+ 100              		.loc 1 157 5 view .LVU11
  158:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
  159:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     switch (index) {
- 129              		.loc 1 159 5 view .LVU16
- 130 0002 78B1     		cbz	r0, .L10
- 131 0004 0328     		cmp	r0, #3
- 132 0006 25D0     		beq	.L19
- 133              	.LBB2:
+ 101              		.loc 1 159 5 view .LVU12
+ 102 0002 78B1     		cbz	r0, .L8
+ 103 0004 0328     		cmp	r0, #3
+ 104 0006 25D0     		beq	.L17
+ 105              	.LBB2:
  160:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****         case STRID_LANGID:
  161:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             memcpy(&_desc_str[1], string_desc_arr[0], 2);
  162:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             chr_count = 1;
@@ -514,332 +290,328 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 1
  172:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
  173:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****         default: {
  174:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             size_t arr_len = sizeof(string_desc_arr) / sizeof(string_desc_arr[0]);
- 134              		.loc 1 174 13 view .LVU17
- 135              	.LVL4:
+ 106              		.loc 1 174 13 view .LVU13
+ 107              	.LVL3:
  175:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             if (index >= arr_len || string_desc_arr[index] == NULL)
- 136              		.loc 1 175 13 view .LVU18
- 137              		.loc 1 175 16 is_stmt 0 view .LVU19
- 138 0008 0628     		cmp	r0, #6
- 139 000a 2DD8     		bhi	.L20
- 140              		.loc 1 175 52 discriminator 1 view .LVU20
- 141 000c 174A     		ldr	r2, .L24
- 142 000e 52F82040 		ldr	r4, [r2, r0, lsl #2]
- 143              		.loc 1 175 34 discriminator 1 view .LVU21
- 144 0012 9CB1     		cbz	r4, .L9
+ 108              		.loc 1 175 13 view .LVU14
+ 109              		.loc 1 175 16 is_stmt 0 view .LVU15
+ 110 0008 0628     		cmp	r0, #6
+ 111 000a 2DD8     		bhi	.L18
+ 112              		.loc 1 175 52 discriminator 1 view .LVU16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 6
+
+
+ 113 000c 174A     		ldr	r2, .L22
+ 114 000e 52F82040 		ldr	r4, [r2, r0, lsl #2]
+ 115              		.loc 1 175 34 discriminator 1 view .LVU17
+ 116 0012 9CB1     		cbz	r4, .L7
  176:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****                 return NULL;
  177:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             const char *str = string_desc_arr[index];
- 145              		.loc 1 177 13 is_stmt 1 view .LVU22
- 146              	.LVL5:
+ 117              		.loc 1 177 13 is_stmt 1 view .LVU18
+ 118              	.LVL4:
  178:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             chr_count = strlen(str);
- 147              		.loc 1 178 13 view .LVU23
- 148              		.loc 1 178 25 is_stmt 0 view .LVU24
- 149 0014 2046     		mov	r0, r4
- 150              	.LVL6:
- 151              		.loc 1 178 25 view .LVU25
- 152 0016 FFF7FEFF 		bl	strlen
- 153              	.LVL7:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 10
-
-
+ 119              		.loc 1 178 13 view .LVU19
+ 120              		.loc 1 178 25 is_stmt 0 view .LVU20
+ 121 0014 2046     		mov	r0, r4
+ 122              	.LVL5:
+ 123              		.loc 1 178 25 view .LVU21
+ 124 0016 FFF7FEFF 		bl	strlen
+ 125              	.LVL6:
  179:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             if (chr_count > 32) chr_count = 32;
- 154              		.loc 1 179 13 is_stmt 1 view .LVU26
- 155              		.loc 1 179 16 is_stmt 0 view .LVU27
- 156 001a 2028     		cmp	r0, #32
- 157 001c 00D9     		bls	.L16
- 158              		.loc 1 179 43 discriminator 1 view .LVU28
- 159 001e 2020     		movs	r0, #32
- 160              	.LVL8:
- 161              	.L16:
+ 126              		.loc 1 179 13 is_stmt 1 view .LVU22
+ 127              		.loc 1 179 16 is_stmt 0 view .LVU23
+ 128 001a 2028     		cmp	r0, #32
+ 129 001c 00D9     		bls	.L14
+ 130              		.loc 1 179 43 discriminator 1 view .LVU24
+ 131 001e 2020     		movs	r0, #32
+ 132              	.LVL7:
+ 133              	.L14:
  180:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             for (size_t i = 0; i < chr_count; i++)
- 162              		.loc 1 180 13 is_stmt 1 view .LVU29
- 163              	.LBB3:
- 164              		.loc 1 180 18 view .LVU30
- 165              		.loc 1 180 25 is_stmt 0 view .LVU31
- 166 0020 0023     		movs	r3, #0
- 167              		.loc 1 180 13 view .LVU32
- 168 0022 1EE0     		b	.L17
- 169              	.LVL9:
- 170              	.L10:
- 171              		.loc 1 180 13 view .LVU33
- 172              	.LBE3:
- 173              	.LBE2:
+ 134              		.loc 1 180 13 is_stmt 1 view .LVU25
+ 135              	.LBB3:
+ 136              		.loc 1 180 18 view .LVU26
+ 137              		.loc 1 180 25 is_stmt 0 view .LVU27
+ 138 0020 0023     		movs	r3, #0
+ 139              		.loc 1 180 13 view .LVU28
+ 140 0022 1EE0     		b	.L15
+ 141              	.LVL8:
+ 142              	.L8:
+ 143              		.loc 1 180 13 view .LVU29
+ 144              	.LBE3:
+ 145              	.LBE2:
  161:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             chr_count = 1;
- 174              		.loc 1 161 13 is_stmt 1 view .LVU34
- 175 0024 124B     		ldr	r3, .L24+4
- 176 0026 40F20942 		movw	r2, #1033
- 177 002a 5A80     		strh	r2, [r3, #2]	@ movhi
+ 146              		.loc 1 161 13 is_stmt 1 view .LVU30
+ 147 0024 124B     		ldr	r3, .L22+4
+ 148 0026 40F20942 		movw	r2, #1033
+ 149 002a 5A80     		strh	r2, [r3, #2]	@ movhi
  162:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             break;
- 178              		.loc 1 162 13 view .LVU35
- 179              	.LVL10:
+ 150              		.loc 1 162 13 view .LVU31
+ 151              	.LVL9:
  163:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
- 180              		.loc 1 163 13 view .LVU36
+ 152              		.loc 1 163 13 view .LVU32
  162:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             break;
- 181              		.loc 1 162 23 is_stmt 0 view .LVU37
- 182 002c 0120     		movs	r0, #1
- 183              	.LVL11:
- 184              	.L13:
+ 153              		.loc 1 162 23 is_stmt 0 view .LVU33
+ 154 002c 0120     		movs	r0, #1
+ 155              	.LVL10:
+ 156              	.L11:
  181:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****                 _desc_str[1 + i] = (uint16_t)str[i];
  182:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             break;
  183:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****         }
  184:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 7
+
+
  185:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** 
  186:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     _desc_str[0] = (uint16_t)((TUSB_DESC_STRING << 8) | (2 * chr_count + 2));
- 185              		.loc 1 186 5 is_stmt 1 view .LVU38
- 186              		.loc 1 186 72 is_stmt 0 view .LVU39
- 187 002e 431C     		adds	r3, r0, #1
- 188 0030 5B00     		lsls	r3, r3, #1
- 189 0032 9BB2     		uxth	r3, r3
- 190              		.loc 1 186 20 view .LVU40
- 191 0034 43F44073 		orr	r3, r3, #768
- 192              		.loc 1 186 18 view .LVU41
- 193 0038 0D4C     		ldr	r4, .L24+4
- 194 003a 2380     		strh	r3, [r4]	@ movhi
+ 157              		.loc 1 186 5 is_stmt 1 view .LVU34
+ 158              		.loc 1 186 72 is_stmt 0 view .LVU35
+ 159 002e 431C     		adds	r3, r0, #1
+ 160 0030 5B00     		lsls	r3, r3, #1
+ 161 0032 9BB2     		uxth	r3, r3
+ 162              		.loc 1 186 20 view .LVU36
+ 163 0034 43F44073 		orr	r3, r3, #768
+ 164              		.loc 1 186 18 view .LVU37
+ 165 0038 0D4C     		ldr	r4, .L22+4
+ 166 003a 2380     		strh	r3, [r4]	@ movhi
  187:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     return _desc_str;
- 195              		.loc 1 187 5 is_stmt 1 view .LVU42
- 196              	.LVL12:
- 197              	.L9:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 11
-
-
+ 167              		.loc 1 187 5 is_stmt 1 view .LVU38
+ 168              	.LVL11:
+ 169              	.L7:
  188:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c **** }...
- 198              		.loc 1 188 1 is_stmt 0 view .LVU43
- 199 003c 2046     		mov	r0, r4
- 200 003e 10BD     		pop	{r4, pc}
- 201              	.LVL13:
- 202              	.L14:
- 203              	.LBB5:
- 204              	.LBB6:
+ 170              		.loc 1 188 1 is_stmt 0 view .LVU39
+ 171 003c 2046     		mov	r0, r4
+ 172 003e 10BD     		pop	{r4, pc}
+ 173              	.LVL12:
+ 174              	.L12:
+ 175              	.LBB5:
+ 176              	.LBB6:
  169:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****               _desc_str[1 + i] = (uint16_t)ser[i];
- 205              		.loc 1 169 15 is_stmt 1 view .LVU44
+ 177              		.loc 1 169 15 is_stmt 1 view .LVU40
  169:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****               _desc_str[1 + i] = (uint16_t)ser[i];
- 206              		.loc 1 169 47 is_stmt 0 view .LVU45
- 207 0040 0C4A     		ldr	r2, .L24+8
- 208 0042 D15C     		ldrb	r1, [r2, r3]	@ zero_extendqisi2
+ 178              		.loc 1 169 47 is_stmt 0 view .LVU41
+ 179 0040 0C4A     		ldr	r2, .L22+8
+ 180 0042 D15C     		ldrb	r1, [r2, r3]	@ zero_extendqisi2
  169:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****               _desc_str[1 + i] = (uint16_t)ser[i];
- 209              		.loc 1 169 27 view .LVU46
- 210 0044 0133     		adds	r3, r3, #1
- 211              	.LVL14:
+ 181              		.loc 1 169 27 view .LVU42
+ 182 0044 0133     		adds	r3, r3, #1
+ 183              	.LVL13:
  169:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****               _desc_str[1 + i] = (uint16_t)ser[i];
- 212              		.loc 1 169 32 view .LVU47
- 213 0046 0A4A     		ldr	r2, .L24+4
- 214 0048 22F81310 		strh	r1, [r2, r3, lsl #1]	@ movhi
+ 184              		.loc 1 169 32 view .LVU43
+ 185 0046 0A4A     		ldr	r2, .L22+4
+ 186 0048 22F81310 		strh	r1, [r2, r3, lsl #1]	@ movhi
  168:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           for (size_t i = 0; i < chr_count; i++)
- 215              		.loc 1 168 46 is_stmt 1 discriminator 3 view .LVU48
- 216              	.LVL15:
- 217              	.L11:
+ 187              		.loc 1 168 46 is_stmt 1 discriminator 3 view .LVU44
+ 188              	.LVL14:
+ 189              	.L9:
  168:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           for (size_t i = 0; i < chr_count; i++)
- 218              		.loc 1 168 32 discriminator 1 view .LVU49
- 219 004c 0E2B     		cmp	r3, #14
- 220 004e F7D9     		bls	.L14
- 221              	.LBE6:
+ 190              		.loc 1 168 32 discriminator 1 view .LVU45
+ 191 004c 0E2B     		cmp	r3, #14
+ 192 004e F7D9     		bls	.L12
+ 193              	.LBE6:
  167:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           chr_count = strlen(ser);
- 222              		.loc 1 167 23 is_stmt 0 view .LVU50
- 223 0050 0F20     		movs	r0, #15
- 224              	.LVL16:
+ 194              		.loc 1 167 23 is_stmt 0 view .LVU46
+ 195 0050 0F20     		movs	r0, #15
+ 196              	.LVL15:
  167:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           chr_count = strlen(ser);
- 225              		.loc 1 167 23 view .LVU51
- 226 0052 ECE7     		b	.L13
- 227              	.LVL17:
- 228              	.L19:
+ 197              		.loc 1 167 23 view .LVU47
+ 198 0052 ECE7     		b	.L11
+ 199              	.LVL16:
+ 200              	.L17:
  167:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****           chr_count = strlen(ser);
- 229              		.loc 1 167 23 view .LVU52
- 230              	.LBE5:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 8
+
+
+ 201              		.loc 1 167 23 view .LVU48
+ 202              	.LBE5:
  159:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****     switch (index) {
- 231              		.loc 1 159 5 view .LVU53
- 232 0054 0023     		movs	r3, #0
- 233 0056 F9E7     		b	.L11
- 234              	.LVL18:
- 235              	.L18:
- 236              	.LBB7:
- 237              	.LBB4:
+ 203              		.loc 1 159 5 view .LVU49
+ 204 0054 0023     		movs	r3, #0
+ 205 0056 F9E7     		b	.L9
+ 206              	.LVL17:
+ 207              	.L16:
+ 208              	.LBB7:
+ 209              	.LBB4:
  181:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****                 _desc_str[1 + i] = (uint16_t)str[i];
- 238              		.loc 1 181 17 is_stmt 1 view .LVU54
+ 210              		.loc 1 181 17 is_stmt 1 view .LVU50
  181:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****                 _desc_str[1 + i] = (uint16_t)str[i];
- 239              		.loc 1 181 49 is_stmt 0 view .LVU55
- 240 0058 E15C     		ldrb	r1, [r4, r3]	@ zero_extendqisi2
+ 211              		.loc 1 181 49 is_stmt 0 view .LVU51
+ 212 0058 E15C     		ldrb	r1, [r4, r3]	@ zero_extendqisi2
  181:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****                 _desc_str[1 + i] = (uint16_t)str[i];
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 12
-
-
- 241              		.loc 1 181 29 view .LVU56
- 242 005a 0133     		adds	r3, r3, #1
- 243              	.LVL19:
+ 213              		.loc 1 181 29 view .LVU52
+ 214 005a 0133     		adds	r3, r3, #1
+ 215              	.LVL18:
  181:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****                 _desc_str[1 + i] = (uint16_t)str[i];
- 244              		.loc 1 181 34 view .LVU57
- 245 005c 044A     		ldr	r2, .L24+4
- 246 005e 22F81310 		strh	r1, [r2, r3, lsl #1]	@ movhi
+ 216              		.loc 1 181 34 view .LVU53
+ 217 005c 044A     		ldr	r2, .L22+4
+ 218 005e 22F81310 		strh	r1, [r2, r3, lsl #1]	@ movhi
  180:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             for (size_t i = 0; i < chr_count; i++)
- 247              		.loc 1 180 48 is_stmt 1 discriminator 3 view .LVU58
- 248              	.LVL20:
- 249              	.L17:
+ 219              		.loc 1 180 48 is_stmt 1 discriminator 3 view .LVU54
+ 220              	.LVL19:
+ 221              	.L15:
  180:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             for (size_t i = 0; i < chr_count; i++)
- 250              		.loc 1 180 34 discriminator 1 view .LVU59
- 251 0062 9842     		cmp	r0, r3
- 252 0064 F8D8     		bhi	.L18
- 253 0066 E2E7     		b	.L13
- 254              	.LVL21:
- 255              	.L20:
+ 222              		.loc 1 180 34 discriminator 1 view .LVU55
+ 223 0062 9842     		cmp	r0, r3
+ 224 0064 F8D8     		bhi	.L16
+ 225 0066 E2E7     		b	.L11
+ 226              	.LVL20:
+ 227              	.L18:
  180:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****             for (size_t i = 0; i < chr_count; i++)
- 256              		.loc 1 180 34 is_stmt 0 discriminator 1 view .LVU60
- 257              	.LBE4:
+ 228              		.loc 1 180 34 is_stmt 0 discriminator 1 view .LVU56
+ 229              	.LBE4:
  176:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/usb_descriptor.c ****                 return NULL;
- 258              		.loc 1 176 24 view .LVU61
- 259 0068 0024     		movs	r4, #0
- 260 006a E7E7     		b	.L9
- 261              	.L25:
- 262              		.align	2
- 263              	.L24:
- 264 006c 00000000 		.word	string_desc_arr
- 265 0070 00000000 		.word	_desc_str
- 266 0074 00000000 		.word	.LC0
- 267              	.LBE7:
- 268              		.cfi_endproc
- 269              	.LFE435:
- 271              		.section	.bss._desc_str,"aw",%nobits
- 272              		.align	2
- 275              	_desc_str:
- 276 0000 00000000 		.space	66
- 276      00000000 
- 276      00000000 
- 276      00000000 
- 276      00000000 
- 277              		.section	.rodata.str1.4,"aMS",%progbits,1
- 278              		.align	2
- 279              	.LC1:
- 280 0000 53544D69 		.ascii	"STMicroelectronics\000"
- 280      63726F65 
- 280      6C656374 
- 280      726F6E69 
- 280      637300
- 281 0013 00       		.align	2
- 282              	.LC2:
- 283 0014 53544D33 		.ascii	"STM32H563 CDC Demo\000"
- 283      32483536 
- 283      33204344 
- 283      43204465 
- 283      6D6F00
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 13
+ 230              		.loc 1 176 24 view .LVU57
+ 231 0068 0024     		movs	r4, #0
+ 232 006a E7E7     		b	.L7
+ 233              	.L23:
+ 234              		.align	2
+ 235              	.L22:
+ 236 006c 00000000 		.word	string_desc_arr
+ 237 0070 00000000 		.word	_desc_str
+ 238 0074 00000000 		.word	.LC0
+ 239              	.LBE7:
+ 240              		.cfi_endproc
+ 241              	.LFE433:
+ 243              		.section	.bss._desc_str,"aw",%nobits
+ 244              		.align	2
+ 247              	_desc_str:
+ 248 0000 00000000 		.space	66
+ 248      00000000 
+ 248      00000000 
+ 248      00000000 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 9
 
 
- 284 0027 00       		.align	2
- 285              	.LC3:
- 286 0028 54696E79 		.ascii	"TinyUSB CDC Port\000"
- 286      55534220 
- 286      43444320 
- 286      506F7274 
- 286      00
- 287 0039 000000   		.align	2
- 288              	.LC4:
- 289 003c 54524143 		.ascii	"TRACKINGFW MSC Storage\000"
- 289      4B494E47 
- 289      4657204D 
- 289      53432053 
- 289      746F7261 
- 290              		.section	.rodata.string_desc_arr,"a"
- 291              		.align	2
- 294              	string_desc_arr:
- 295 0000 00000000 		.word	__compound_literal.0
- 296 0004 00000000 		.word	.LC1
- 297 0008 14000000 		.word	.LC2
- 298 000c 00000000 		.word	0
- 299 0010 28000000 		.word	.LC3
- 300 0014 00000000 		.space	4
- 301 0018 3C000000 		.word	.LC4
- 302              		.section	.rodata.__compound_literal.0,"a"
- 303              		.align	2
- 306              	__compound_literal.0:
- 307 0000 09       		.byte	9
- 308 0001 04       		.byte	4
- 309              		.section	.rodata.desc_fs_configuration,"a"
- 310              		.align	2
- 313              	desc_fs_configuration:
- 314 0000 09026200 		.ascii	"\011\002b\000\003\001\000\2002\010\013\000\002\002\002"
- 314      03010080 
- 314      32080B00 
- 314      020202
- 315 000f 00000904 		.ascii	"\000\000\011\004\000\000\001\002\002\000\004\005$\000"
- 315      00000102 
- 315      02000405 
- 315      2400
- 316 001d 20010524 		.ascii	" \001\005$\001\000\001\004$\002\006\005$\006\000\001"
- 316      01000104 
- 316      24020605 
- 316      24060001 
- 317 002d 07058103 		.ascii	"\007\005\201\003\010\000\001\011\004\001\000\002\012"
- 317      08000109 
- 317      04010002 
- 317      0A
- 318 003a 00000007 		.ascii	"\000\000\000\007\005\002\002@\000\000\007\005\202\002"
- 318      05020240 
- 318      00000705 
- 318      8202
- 319 0048 40000009 		.ascii	"@\000\000\011\004\002\000\002\010\006P\006\007\005\003"
- 319      04020002 
- 319      08065006 
- 319      070503
- 320 0057 02400000 		.ascii	"\002@\000\000\007\005\203\002@\000\000"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 14
+ 248      00000000 
+ 249              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 250              		.align	2
+ 251              	.LC1:
+ 252 0000 53544D69 		.ascii	"STMicroelectronics\000"
+ 252      63726F65 
+ 252      6C656374 
+ 252      726F6E69 
+ 252      637300
+ 253 0013 00       		.align	2
+ 254              	.LC2:
+ 255 0014 53544D33 		.ascii	"STM32H563 CDC Demo\000"
+ 255      32483536 
+ 255      33204344 
+ 255      43204465 
+ 255      6D6F00
+ 256 0027 00       		.align	2
+ 257              	.LC3:
+ 258 0028 54696E79 		.ascii	"TinyUSB CDC Port\000"
+ 258      55534220 
+ 258      43444320 
+ 258      506F7274 
+ 258      00
+ 259 0039 000000   		.align	2
+ 260              	.LC4:
+ 261 003c 54524143 		.ascii	"TRACKINGFW MSC Storage\000"
+ 261      4B494E47 
+ 261      4657204D 
+ 261      53432053 
+ 261      746F7261 
+ 262              		.section	.rodata.string_desc_arr,"a"
+ 263              		.align	2
+ 266              	string_desc_arr:
+ 267 0000 00000000 		.word	__compound_literal.0
+ 268 0004 00000000 		.word	.LC1
+ 269 0008 14000000 		.word	.LC2
+ 270 000c 00000000 		.word	0
+ 271 0010 28000000 		.word	.LC3
+ 272 0014 00000000 		.space	4
+ 273 0018 3C000000 		.word	.LC4
+ 274              		.section	.rodata.__compound_literal.0,"a"
+ 275              		.align	2
+ 278              	__compound_literal.0:
+ 279 0000 09       		.byte	9
+ 280 0001 04       		.byte	4
+ 281              		.section	.rodata.desc_fs_configuration,"a"
+ 282              		.align	2
+ 285              	desc_fs_configuration:
+ 286 0000 09026200 		.ascii	"\011\002b\000\003\001\000\2002\010\013\000\002\002\002"
+ 286      03010080 
+ 286      32080B00 
+ 286      020202
+ 287 000f 00000904 		.ascii	"\000\000\011\004\000\000\001\002\002\000\004\005$\000"
+ 287      00000102 
+ 287      02000405 
+ 287      2400
+ 288 001d 20010524 		.ascii	" \001\005$\001\000\001\004$\002\006\005$\006\000\001"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 10
 
 
- 320      07058302 
- 320      400000
- 321              		.section	.rodata.desc_device,"a"
- 322              		.align	2
- 325              	desc_device:
- 326 0000 12       		.byte	18
- 327 0001 01       		.byte	1
- 328 0002 0002     		.short	512
- 329 0004 EF       		.byte	-17
- 330 0005 02       		.byte	2
- 331 0006 01       		.byte	1
- 332 0007 40       		.byte	64
- 333 0008 FECA     		.short	-13570
- 334 000a 0340     		.short	16387
- 335 000c 0001     		.short	256
- 336 000e 01       		.byte	1
- 337 000f 02       		.byte	2
- 338 0010 03       		.byte	3
- 339 0011 01       		.byte	1
- 340              		.text
- 341              	.Letext0:
- 342              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 343              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 344              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 345              		.file 6 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
- 346              		.file 7 "SynaptiX_FDK/lib/tinyusb/src/common/tusb_types.h"
- 347              		.file 8 "SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc.h"
- 348              		.file 9 "SynaptiX_FDK/lib/tinyusb/src/class/msc/msc.h"
- 349              		.file 10 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
- 350              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s 			page 15
+ 288      01000104 
+ 288      24020605 
+ 288      24060001 
+ 289 002d 07058103 		.ascii	"\007\005\201\003\010\000\001\011\004\001\000\002\012"
+ 289      08000109 
+ 289      04010002 
+ 289      0A
+ 290 003a 00000007 		.ascii	"\000\000\000\007\005\002\002@\000\000\007\005\202\002"
+ 290      05020240 
+ 290      00000705 
+ 290      8202
+ 291 0048 40000009 		.ascii	"@\000\000\011\004\002\000\002\010\006P\006\007\005\003"
+ 291      04020002 
+ 291      08065006 
+ 291      070503
+ 292 0057 02400000 		.ascii	"\002@\000\000\007\005\203\002@\000\000"
+ 292      07058302 
+ 292      400000
+ 293              		.section	.rodata.desc_device,"a"
+ 294              		.align	2
+ 297              	desc_device:
+ 298 0000 12       		.byte	18
+ 299 0001 01       		.byte	1
+ 300 0002 0002     		.short	512
+ 301 0004 EF       		.byte	-17
+ 302 0005 02       		.byte	2
+ 303 0006 01       		.byte	1
+ 304 0007 40       		.byte	64
+ 305 0008 FECA     		.short	-13570
+ 306 000a 0340     		.short	16387
+ 307 000c 0001     		.short	256
+ 308 000e 01       		.byte	1
+ 309 000f 02       		.byte	2
+ 310 0010 03       		.byte	3
+ 311 0011 01       		.byte	1
+ 312              		.text
+ 313              	.Letext0:
+ 314              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 315              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 316              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 317              		.file 5 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 318              		.file 6 "SynaptiX_FDK/lib/tinyusb/src/common/tusb_types.h"
+ 319              		.file 7 "SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc.h"
+ 320              		.file 8 "SynaptiX_FDK/lib/tinyusb/src/class/msc/msc.h"
+ 321              		.file 9 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s 			page 11
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 usb_descriptor.c
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:22     .text.sx_gettick:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:28     .text.sx_gettick:00000000 sx_gettick
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:50     .text.tud_descriptor_device_cb:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:56     .text.tud_descriptor_device_cb:00000000 tud_descriptor_device_cb
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:70     .text.tud_descriptor_device_cb:00000004 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:325    .rodata.desc_device:00000000 desc_device
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:75     .text.tud_descriptor_configuration_cb:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:81     .text.tud_descriptor_configuration_cb:00000000 tud_descriptor_configuration_cb
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:99     .text.tud_descriptor_configuration_cb:00000004 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:313    .rodata.desc_fs_configuration:00000000 desc_fs_configuration
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:104    .rodata.tud_descriptor_string_cb.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:108    .text.tud_descriptor_string_cb:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:114    .text.tud_descriptor_string_cb:00000000 tud_descriptor_string_cb
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:264    .text.tud_descriptor_string_cb:0000006c $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:294    .rodata.string_desc_arr:00000000 string_desc_arr
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:275    .bss._desc_str:00000000 _desc_str
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:272    .bss._desc_str:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:278    .rodata.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:291    .rodata.string_desc_arr:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:306    .rodata.__compound_literal.0:00000000 __compound_literal.0
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:303    .rodata.__compound_literal.0:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:310    .rodata.desc_fs_configuration:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\cc8eypyf.s:322    .rodata.desc_device:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:22     .text.tud_descriptor_device_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:28     .text.tud_descriptor_device_cb:00000000 tud_descriptor_device_cb
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:42     .text.tud_descriptor_device_cb:00000004 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:297    .rodata.desc_device:00000000 desc_device
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:47     .text.tud_descriptor_configuration_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:53     .text.tud_descriptor_configuration_cb:00000000 tud_descriptor_configuration_cb
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:71     .text.tud_descriptor_configuration_cb:00000004 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:285    .rodata.desc_fs_configuration:00000000 desc_fs_configuration
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:76     .rodata.tud_descriptor_string_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:80     .text.tud_descriptor_string_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:86     .text.tud_descriptor_string_cb:00000000 tud_descriptor_string_cb
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:236    .text.tud_descriptor_string_cb:0000006c $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:266    .rodata.string_desc_arr:00000000 string_desc_arr
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:247    .bss._desc_str:00000000 _desc_str
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:244    .bss._desc_str:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:250    .rodata.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:263    .rodata.string_desc_arr:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:278    .rodata.__compound_literal.0:00000000 __compound_literal.0
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:275    .rodata.__compound_literal.0:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:282    .rodata.desc_fs_configuration:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccxUMlHQ.s:294    .rodata.desc_device:00000000 $d
 
 UNDEFINED SYMBOLS
-HAL_GetTick
 strlen

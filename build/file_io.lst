@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
   14:SynaptiX_FDK/services/filesystem/file_io.c ****         log_error(TAG, "Invalid block size or block count");
   15:SynaptiX_FDK/services/filesystem/file_io.c ****         return -2; // Invalid block size or count
   16:SynaptiX_FDK/services/filesystem/file_io.c ****     }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 2
 
 
   17:SynaptiX_FDK/services/filesystem/file_io.c ****     // Initialize the LittleFS configuration
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
   71:SynaptiX_FDK/services/filesystem/file_io.c ****         err = lfs_dir_read(CONFIG_LITTLEFS, &dir, &info);
   72:SynaptiX_FDK/services/filesystem/file_io.c ****         if (err < 0) {
   73:SynaptiX_FDK/services/filesystem/file_io.c ****             log_error(TAG,"Read dir error %d", err);
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 3
 
 
   74:SynaptiX_FDK/services/filesystem/file_io.c ****             break;
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
   66 000c 08BD     		pop	{r3, pc}
   67              	.LVL4:
   68              	.L2:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 4
 
 
   94:SynaptiX_FDK/services/filesystem/file_io.c ****         log_error(TAG, "Invalid file system configuration or LittleFS object");
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  106              	.LC7:
  107 0064 4661696C 		.ascii	"Failed to mount LittleFS\000"
  107      65642074 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 5
 
 
  107      6F206D6F 
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  147 000c 49D0     		beq	.L10
   13:SynaptiX_FDK/services/filesystem/file_io.c ****     if(config->block_size == 0 || config->block_count == 0) {
  148              		.loc 1 13 41 discriminator 1 view .LVU21
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 6
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 6
 
 
  149 000e C16D     		ldr	r1, [r0, #92]
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  184              		.loc 1 25 5 is_stmt 1 view .LVU40
   25:SynaptiX_FDK/services/filesystem/file_io.c ****     config->cfg.lookahead_size = 16;
  185              		.loc 1 25 32 is_stmt 0 view .LVU41
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 7
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 7
 
 
  186 0030 C362     		str	r3, [r0, #44]
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  222 0052 FFF7FEFF 		bl	lfs_mount
  223              	.LVL10:
   38:SynaptiX_FDK/services/filesystem/file_io.c ****     if (lfs_status != LFS_ERR_OK) {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 8
 
 
  224              		.loc 1 38 5 is_stmt 1 view .LVU60
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
   52:SynaptiX_FDK/services/filesystem/file_io.c ****     log_info(TAG,"mounted!");
  266              		.loc 1 52 5 is_stmt 0 view .LVU73
  267 008a 1A4A     		ldr	r2, .L22+28
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 9
 
 
  268 008c 2146     		mov	r1, r4
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  311              	.L21:
   47:SynaptiX_FDK/services/filesystem/file_io.c ****             log_error(TAG, "Failed to mount LittleFS");
  312              		.loc 1 47 13 is_stmt 1 view .LVU85
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 10
 
 
  313 00c2 104A     		ldr	r2, .L22+44
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  357      63746F72 
  357      793A2025 
  358 0036 0000     		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 11
 
 
  359              	.LC13:
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  397 0008 45A9     		add	r1, sp, #276
  398 000a 1F48     		ldr	r0, .L36
  399              	.LVL30:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 12
 
 
   62:SynaptiX_FDK/services/filesystem/file_io.c ****     err = lfs_dir_open(CONFIG_LITTLEFS, &dir, path);
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
   74:SynaptiX_FDK/services/filesystem/file_io.c ****             break;
  443              		.loc 1 74 13 is_stmt 1 view .LVU108
  444              	.L29:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 13
 
 
   88:SynaptiX_FDK/services/filesystem/file_io.c ****     lfs_dir_close(CONFIG_LITTLEFS, &dir);
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  487 0064 0028     		cmp	r0, #0
  488 0066 EAD0     		beq	.L29
   82:SynaptiX_FDK/services/filesystem/file_io.c ****         if (info.type == LFS_TYPE_DIR) {
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 14
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 14
 
 
  489              		.loc 1 82 9 is_stmt 1 view .LVU121
@@ -837,25 +837,25 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 1
  535              		.file 4 "SynaptiX_FDK/services/littlefs/lfs.h"
  536              		.file 5 "SynaptiX_FDK/services/filesystem/file_io.h"
  537              		.file 6 "SynaptiX_FDK/services/logger/logger.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s 			page 15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s 			page 15
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 file_io.c
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:22     .rodata.littlefs_flash_sync.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:30     .text.littlefs_flash_sync:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:36     .text.littlefs_flash_sync:00000000 littlefs_flash_sync
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:84     .text.littlefs_flash_sync:00000020 $d
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:90     .rodata.file_system_init.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:118    .text.file_system_init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:124    .text.file_system_init:00000000 file_system_init
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:336    .text.file_system_init:000000d8 $d
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:529    .bss.lfs:00000000 lfs
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:352    .rodata.fs_list_dir.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:368    .text.fs_list_dir:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:374    .text.fs_list_dir:00000000 fs_list_dir
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:514    .text.fs_list_dir:00000088 $d
-C:\Users\DELL\AppData\Local\Temp\ccPQk62T.s:526    .bss.lfs:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:22     .rodata.littlefs_flash_sync.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:30     .text.littlefs_flash_sync:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:36     .text.littlefs_flash_sync:00000000 littlefs_flash_sync
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:84     .text.littlefs_flash_sync:00000020 $d
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:90     .rodata.file_system_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:118    .text.file_system_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:124    .text.file_system_init:00000000 file_system_init
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:336    .text.file_system_init:000000d8 $d
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:529    .bss.lfs:00000000 lfs
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:352    .rodata.fs_list_dir.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:368    .text.fs_list_dir:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:374    .text.fs_list_dir:00000000 fs_list_dir
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:514    .text.fs_list_dir:00000088 $d
+C:\Users\DELL\AppData\Local\Temp\ccpDFwJu.s:526    .bss.lfs:00000000 $d
 
 UNDEFINED SYMBOLS
 log_func

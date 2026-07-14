@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 1
 
 
    1              		.cpu cortex-m33
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
   26:SynaptiX_FDK/components/peripherals/sleep/sx_sleep.h ****     void                   *pDriver;
   27:SynaptiX_FDK/components/peripherals/sleep/sx_sleep.h ****     wake_reason_t           wake_reason;
   28:SynaptiX_FDK/components/peripherals/sleep/sx_sleep.h **** };
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 2
 
 
   29:SynaptiX_FDK/components/peripherals/sleep/sx_sleep.h **** 
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
   68              		.loc 2 47 1 is_stmt 1 view -0
   69              		.cfi_startproc
   70              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 3
 
 
   71              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
  120              		.loc 2 54 29 discriminator 1 view .LVU23
  121 0006 9B68     		ldr	r3, [r3, #8]
  122              		.loc 2 54 18 discriminator 1 view .LVU24
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 4
 
 
  123 0008 03B1     		cbz	r3, .L7
@@ -192,253 +192,29 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
  129 000c 08BD     		pop	{r3, pc}
  130              		.cfi_endproc
  131              	.LFE300:
- 133              		.section	.text.sx_gettick,"ax",%progbits
- 134              		.align	1
- 135              		.global	sx_gettick
- 136              		.syntax unified
- 137              		.thumb
- 138              		.thumb_func
- 140              	sx_gettick:
- 141              	.LFB342:
- 142              		.file 3 "SynaptiX_FDK/board/sx_board.h"
-   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
-   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
-   3:SynaptiX_FDK/board/sx_board.h **** 
-   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
-   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
-   6:SynaptiX_FDK/board/sx_board.h **** #endif
-   7:SynaptiX_FDK/board/sx_board.h **** 
-   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
-   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
-  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
-  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
-  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
-  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
-  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
-  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
-  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
-  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
-  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
-  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
-  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
-  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
-  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
-  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
-  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
-  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
-  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
-  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
-  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
-  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
-  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
-  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
-  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
-  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
-  34:SynaptiX_FDK/board/sx_board.h **** 
-  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
-  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
-  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 5
-
-
-  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
-  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
-  40:SynaptiX_FDK/board/sx_board.h **** 
-  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
-  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
-  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
-  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
-  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
-  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
-  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
-  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
-  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
-  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
-  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
-  53:SynaptiX_FDK/board/sx_board.h ****     #endif
-  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
-  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
-  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
-  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
-  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
-  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
-  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
-  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
-  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
-  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
-  64:SynaptiX_FDK/board/sx_board.h ****     #endif
-  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
-  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
-  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
-  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
-  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
-  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
-  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
-  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
-  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
-  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
-  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
-  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
-  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
-  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
-  79:SynaptiX_FDK/board/sx_board.h ****      *
-  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
-  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
-  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
-  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
-  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
-  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
-  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
-  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
-  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
-  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
-  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
-  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
-  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
-  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
-  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 6
-
-
-  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
-  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
-  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
-  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
-  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
- 100:SynaptiX_FDK/board/sx_board.h ****      *
- 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
- 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
- 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
- 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
- 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
- 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
- 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
- 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
- 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
- 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
- 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
- 112:SynaptiX_FDK/board/sx_board.h **** 
- 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
- 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
- 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
- 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
- 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
- 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
- 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
- 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
- 121:SynaptiX_FDK/board/sx_board.h **** 
- 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
- 123:SynaptiX_FDK/board/sx_board.h **** 
- 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
- 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
- 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
- 127:SynaptiX_FDK/board/sx_board.h **** 
- 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
- 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
- 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
- 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
- 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
- 133:SynaptiX_FDK/board/sx_board.h **** 
- 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
- 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
- 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
- 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
- 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
- 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
- 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
- 141:SynaptiX_FDK/board/sx_board.h **** 
- 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
- 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
- 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
- 145:SynaptiX_FDK/board/sx_board.h **** 
- 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
- 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
- 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
- 149:SynaptiX_FDK/board/sx_board.h **** 
- 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
- 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 7
-
-
- 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
- 153:SynaptiX_FDK/board/sx_board.h **** 
- 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
- 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
- 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
- 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
- 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
- 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
- 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
- 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
- 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
- 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
- 164:SynaptiX_FDK/board/sx_board.h **** 
- 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
- 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
- 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
- 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
- 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
- 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
- 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
- 172:SynaptiX_FDK/board/sx_board.h **** 
- 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
- 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
- 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
- 176:SynaptiX_FDK/board/sx_board.h **** 
- 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
- 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
- 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
- 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
- 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
- 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
- 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
- 184:SynaptiX_FDK/board/sx_board.h **** 
- 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
- 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
- 143              		.loc 3 186 33 is_stmt 1 view -0
- 144              		.cfi_startproc
- 145              		@ args = 0, pretend = 0, frame = 0
- 146              		@ frame_needed = 0, uses_anonymous_args = 0
- 147 0000 08B5     		push	{r3, lr}
- 148              	.LCFI3:
- 149              		.cfi_def_cfa_offset 8
- 150              		.cfi_offset 3, -8
- 151              		.cfi_offset 14, -4
- 152              		.loc 3 186 34 view .LVU28
- 153              		.loc 3 186 41 is_stmt 0 view .LVU29
- 154 0002 FFF7FEFF 		bl	HAL_GetTick
- 155              	.LVL6:
- 156              		.loc 3 186 55 view .LVU30
- 157 0006 08BD     		pop	{r3, pc}
- 158              		.cfi_endproc
- 159              	.LFE342:
- 161              		.section	.rodata.sx_sleep_manager_init.str1.4,"aMS",%progbits,1
- 162              		.align	2
- 163              	.LC0:
- 164 0000 696E6974 		.ascii	"init OK \342\200\224 waiting for config values\000"
- 164      204F4B20 
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 8
-
-
- 164      E2809420 
- 164      77616974 
- 164      696E6720 
- 165 0026 0000     		.align	2
- 166              	.LC1:
- 167 0028 53585F53 		.ascii	"SX_SLEEP_MGR\000"
- 167      4C454550 
- 167      5F4D4752 
- 167      00
- 168              		.section	.text.sx_sleep_manager_init,"ax",%progbits
- 169              		.align	1
- 170              		.global	sx_sleep_manager_init
- 171              		.syntax unified
- 172              		.thumb
- 173              		.thumb_func
- 175              	sx_sleep_manager_init:
- 176              	.LVL7:
- 177              	.LFB343:
+ 133              		.section	.rodata.sx_sleep_manager_init.str1.4,"aMS",%progbits,1
+ 134              		.align	2
+ 135              	.LC0:
+ 136 0000 696E6974 		.ascii	"init OK \342\200\224 waiting for config values\000"
+ 136      204F4B20 
+ 136      E2809420 
+ 136      77616974 
+ 136      696E6720 
+ 137 0026 0000     		.align	2
+ 138              	.LC1:
+ 139 0028 53585F53 		.ascii	"SX_SLEEP_MGR\000"
+ 139      4C454550 
+ 139      5F4D4752 
+ 139      00
+ 140              		.section	.text.sx_sleep_manager_init,"ax",%progbits
+ 141              		.align	1
+ 142              		.global	sx_sleep_manager_init
+ 143              		.syntax unified
+ 144              		.thumb
+ 145              		.thumb_func
+ 147              	sx_sleep_manager_init:
+ 148              	.LVL6:
+ 149              	.LFB341:
    1:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** #include "sx_sleep_manager.h"
    2:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** #include "sx_user_mqtt.h"
    3:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** #include "sx_board.h"
@@ -452,415 +228,415 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
   11:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****                            modem_handle_t     *modem,
   12:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****                            sx_gps_t           *gps)
   13:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** {
- 178              		.loc 1 13 1 is_stmt 1 view -0
- 179              		.cfi_startproc
- 180              		@ args = 0, pretend = 0, frame = 0
- 181              		@ frame_needed = 0, uses_anonymous_args = 0
- 182              		.loc 1 13 1 is_stmt 0 view .LVU32
- 183 0000 08B5     		push	{r3, lr}
- 184              	.LCFI4:
- 185              		.cfi_def_cfa_offset 8
- 186              		.cfi_offset 3, -8
- 187              		.cfi_offset 14, -4
+ 150              		.loc 1 13 1 is_stmt 1 view -0
+ 151              		.cfi_startproc
+ 152              		@ args = 0, pretend = 0, frame = 0
+ 153              		@ frame_needed = 0, uses_anonymous_args = 0
+ 154              		.loc 1 13 1 is_stmt 0 view .LVU28
+ 155 0000 08B5     		push	{r3, lr}
+ 156              	.LCFI3:
+ 157              		.cfi_def_cfa_offset 8
+ 158              		.cfi_offset 3, -8
+ 159              		.cfi_offset 14, -4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 5
+
+
   14:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->sleep              = sleep;
- 188              		.loc 1 14 5 is_stmt 1 view .LVU33
- 189              		.loc 1 14 29 is_stmt 0 view .LVU34
- 190 0002 0160     		str	r1, [r0]
+ 160              		.loc 1 14 5 is_stmt 1 view .LVU29
+ 161              		.loc 1 14 29 is_stmt 0 view .LVU30
+ 162 0002 0160     		str	r1, [r0]
   15:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->module.modem       = modem;
- 191              		.loc 1 15 5 is_stmt 1 view .LVU35
- 192              		.loc 1 15 29 is_stmt 0 view .LVU36
- 193 0004 4260     		str	r2, [r0, #4]
+ 163              		.loc 1 15 5 is_stmt 1 view .LVU31
+ 164              		.loc 1 15 29 is_stmt 0 view .LVU32
+ 165 0004 4260     		str	r2, [r0, #4]
   16:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->module.gps         = gps;
- 194              		.loc 1 16 5 is_stmt 1 view .LVU37
- 195              		.loc 1 16 29 is_stmt 0 view .LVU38
- 196 0006 8360     		str	r3, [r0, #8]
+ 166              		.loc 1 16 5 is_stmt 1 view .LVU33
+ 167              		.loc 1 16 29 is_stmt 0 view .LVU34
+ 168 0006 8360     		str	r3, [r0, #8]
   17:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->wake_step          = SX_WAKE_STEP_IDLE;
- 197              		.loc 1 17 5 is_stmt 1 view .LVU39
- 198              		.loc 1 17 29 is_stmt 0 view .LVU40
- 199 0008 0023     		movs	r3, #0
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 9
-
-
- 200              	.LVL8:
- 201              		.loc 1 17 29 view .LVU41
- 202 000a 0377     		strb	r3, [r0, #28]
+ 169              		.loc 1 17 5 is_stmt 1 view .LVU35
+ 170              		.loc 1 17 29 is_stmt 0 view .LVU36
+ 171 0008 0023     		movs	r3, #0
+ 172              	.LVL7:
+ 173              		.loc 1 17 29 view .LVU37
+ 174 000a 0377     		strb	r3, [r0, #28]
   18:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->published          = 0;
- 203              		.loc 1 18 5 is_stmt 1 view .LVU42
- 204              		.loc 1 18 29 is_stmt 0 view .LVU43
- 205 000c 4377     		strb	r3, [r0, #29]
+ 175              		.loc 1 18 5 is_stmt 1 view .LVU38
+ 176              		.loc 1 18 29 is_stmt 0 view .LVU39
+ 177 000c 4377     		strb	r3, [r0, #29]
   19:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->elapsed.wake_elapsed_ms = 0;
- 206              		.loc 1 19 5 is_stmt 1 view .LVU44
- 207              		.loc 1 19 34 is_stmt 0 view .LVU45
- 208 000e 0361     		str	r3, [r0, #16]
+ 178              		.loc 1 19 5 is_stmt 1 view .LVU40
+ 179              		.loc 1 19 34 is_stmt 0 view .LVU41
+ 180 000e 0361     		str	r3, [r0, #16]
   20:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->elapsed.gps_elapsed_ms  = 0;
- 209              		.loc 1 20 5 is_stmt 1 view .LVU46
- 210              		.loc 1 20 34 is_stmt 0 view .LVU47
- 211 0010 4361     		str	r3, [r0, #20]
+ 181              		.loc 1 20 5 is_stmt 1 view .LVU42
+ 182              		.loc 1 20 34 is_stmt 0 view .LVU43
+ 183 0010 4361     		str	r3, [r0, #20]
   21:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->elapsed.sim_elapsed_ms  = 0;
- 212              		.loc 1 21 5 is_stmt 1 view .LVU48
- 213              		.loc 1 21 34 is_stmt 0 view .LVU49
- 214 0012 8361     		str	r3, [r0, #24]
+ 184              		.loc 1 21 5 is_stmt 1 view .LVU44
+ 185              		.loc 1 21 34 is_stmt 0 view .LVU45
+ 186 0012 8361     		str	r3, [r0, #24]
   22:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->sleep_ms        = 0;   
- 215              		.loc 1 22 5 is_stmt 1 view .LVU50
- 216              		.loc 1 22 26 is_stmt 0 view .LVU51
- 217 0014 0362     		str	r3, [r0, #32]
+ 187              		.loc 1 22 5 is_stmt 1 view .LVU46
+ 188              		.loc 1 22 26 is_stmt 0 view .LVU47
+ 189 0014 0362     		str	r3, [r0, #32]
   23:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->wake_timeout_ms = 0;
- 218              		.loc 1 23 5 is_stmt 1 view .LVU52
- 219              		.loc 1 23 26 is_stmt 0 view .LVU53
- 220 0016 4362     		str	r3, [r0, #36]
+ 190              		.loc 1 23 5 is_stmt 1 view .LVU48
+ 191              		.loc 1 23 26 is_stmt 0 view .LVU49
+ 192 0016 4362     		str	r3, [r0, #36]
   24:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->sim_start_sent  = 0;
- 221              		.loc 1 24 5 is_stmt 1 view .LVU54
- 222              		.loc 1 24 26 is_stmt 0 view .LVU55
- 223 0018 80F82830 		strb	r3, [r0, #40]
+ 193              		.loc 1 24 5 is_stmt 1 view .LVU50
+ 194              		.loc 1 24 26 is_stmt 0 view .LVU51
+ 195 0018 80F82830 		strb	r3, [r0, #40]
   25:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   26:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     log_info(TAG, "init OK — waiting for config values");
- 224              		.loc 1 26 5 is_stmt 1 view .LVU56
- 225 001c 024A     		ldr	r2, .L14
- 226              	.LVL9:
- 227              		.loc 1 26 5 is_stmt 0 view .LVU57
- 228 001e 0349     		ldr	r1, .L14+4
- 229              	.LVL10:
- 230              		.loc 1 26 5 view .LVU58
- 231 0020 0320     		movs	r0, #3
- 232              	.LVL11:
- 233              		.loc 1 26 5 view .LVU59
- 234 0022 FFF7FEFF 		bl	log_func
- 235              	.LVL12:
+ 196              		.loc 1 26 5 is_stmt 1 view .LVU52
+ 197 001c 024A     		ldr	r2, .L12
+ 198              	.LVL8:
+ 199              		.loc 1 26 5 is_stmt 0 view .LVU53
+ 200 001e 0349     		ldr	r1, .L12+4
+ 201              	.LVL9:
+ 202              		.loc 1 26 5 view .LVU54
+ 203 0020 0320     		movs	r0, #3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 6
+
+
+ 204              	.LVL10:
+ 205              		.loc 1 26 5 view .LVU55
+ 206 0022 FFF7FEFF 		bl	log_func
+ 207              	.LVL11:
   27:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** }
- 236              		.loc 1 27 1 view .LVU60
- 237 0026 08BD     		pop	{r3, pc}
- 238              	.L15:
- 239              		.align	2
- 240              	.L14:
- 241 0028 00000000 		.word	.LC0
- 242 002c 28000000 		.word	.LC1
- 243              		.cfi_endproc
- 244              	.LFE343:
- 246              		.section	.rodata.sx_sleep_manager_enter.str1.4,"aMS",%progbits,1
- 247              		.align	2
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 10
-
-
- 248              	.LC2:
- 249 0000 456E7465 		.ascii	"Entering sleep for %lu ms (%lu sec)\000"
- 249      72696E67 
- 249      20736C65 
- 249      65702066 
- 249      6F722025 
- 250              		.align	2
- 251              	.LC3:
- 252 0024 53657474 		.ascii	"Setting RTC wakeup = %lu sec\000"
- 252      696E6720 
- 252      52544320 
- 252      77616B65 
- 252      7570203D 
- 253 0041 000000   		.align	2
- 254              	.LC4:
- 255 0044 3E3E3E20 		.ascii	">>> Entering STOP mode NOW\000"
- 255      456E7465 
- 255      72696E67 
- 255      2053544F 
- 255      50206D6F 
- 256 005f 00       		.align	2
- 257              	.LC5:
- 258 0060 3C3C3C20 		.ascii	"<<< Woke from STOP mode\000"
- 258      576F6B65 
- 258      2066726F 
- 258      6D205354 
- 258      4F50206D 
- 259              		.section	.text.sx_sleep_manager_enter,"ax",%progbits
- 260              		.align	1
- 261              		.global	sx_sleep_manager_enter
- 262              		.syntax unified
- 263              		.thumb
- 264              		.thumb_func
- 266              	sx_sleep_manager_enter:
- 267              	.LVL13:
- 268              	.LFB344:
+ 208              		.loc 1 27 1 view .LVU56
+ 209 0026 08BD     		pop	{r3, pc}
+ 210              	.L13:
+ 211              		.align	2
+ 212              	.L12:
+ 213 0028 00000000 		.word	.LC0
+ 214 002c 28000000 		.word	.LC1
+ 215              		.cfi_endproc
+ 216              	.LFE341:
+ 218              		.section	.rodata.sx_sleep_manager_enter.str1.4,"aMS",%progbits,1
+ 219              		.align	2
+ 220              	.LC2:
+ 221 0000 456E7465 		.ascii	"Entering sleep for %lu ms (%lu sec)\000"
+ 221      72696E67 
+ 221      20736C65 
+ 221      65702066 
+ 221      6F722025 
+ 222              		.align	2
+ 223              	.LC3:
+ 224 0024 53657474 		.ascii	"Setting RTC wakeup = %lu sec\000"
+ 224      696E6720 
+ 224      52544320 
+ 224      77616B65 
+ 224      7570203D 
+ 225 0041 000000   		.align	2
+ 226              	.LC4:
+ 227 0044 3E3E3E20 		.ascii	">>> Entering STOP mode NOW\000"
+ 227      456E7465 
+ 227      72696E67 
+ 227      2053544F 
+ 227      50206D6F 
+ 228 005f 00       		.align	2
+ 229              	.LC5:
+ 230 0060 3C3C3C20 		.ascii	"<<< Woke from STOP mode\000"
+ 230      576F6B65 
+ 230      2066726F 
+ 230      6D205354 
+ 230      4F50206D 
+ 231              		.section	.text.sx_sleep_manager_enter,"ax",%progbits
+ 232              		.align	1
+ 233              		.global	sx_sleep_manager_enter
+ 234              		.syntax unified
+ 235              		.thumb
+ 236              		.thumb_func
+ 238              	sx_sleep_manager_enter:
+ 239              	.LVL12:
+ 240              	.LFB342:
   28:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   29:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** void sx_sleep_manager_enter(sx_sleep_manager_t *mgr)
   30:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** {
- 269              		.loc 1 30 1 is_stmt 1 view -0
- 270              		.cfi_startproc
- 271              		@ args = 0, pretend = 0, frame = 0
- 272              		@ frame_needed = 0, uses_anonymous_args = 0
- 273              		.loc 1 30 1 is_stmt 0 view .LVU62
- 274 0000 70B5     		push	{r4, r5, r6, lr}
- 275              	.LCFI5:
- 276              		.cfi_def_cfa_offset 16
- 277              		.cfi_offset 4, -16
- 278              		.cfi_offset 5, -12
- 279              		.cfi_offset 6, -8
- 280              		.cfi_offset 14, -4
- 281 0002 82B0     		sub	sp, sp, #8
- 282              	.LCFI6:
- 283              		.cfi_def_cfa_offset 24
- 284 0004 0446     		mov	r4, r0
+ 241              		.loc 1 30 1 is_stmt 1 view -0
+ 242              		.cfi_startproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 7
+
+
+ 243              		@ args = 0, pretend = 0, frame = 0
+ 244              		@ frame_needed = 0, uses_anonymous_args = 0
+ 245              		.loc 1 30 1 is_stmt 0 view .LVU58
+ 246 0000 70B5     		push	{r4, r5, r6, lr}
+ 247              	.LCFI4:
+ 248              		.cfi_def_cfa_offset 16
+ 249              		.cfi_offset 4, -16
+ 250              		.cfi_offset 5, -12
+ 251              		.cfi_offset 6, -8
+ 252              		.cfi_offset 14, -4
+ 253 0002 82B0     		sub	sp, sp, #8
+ 254              	.LCFI5:
+ 255              		.cfi_def_cfa_offset 24
+ 256 0004 0446     		mov	r4, r0
   31:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     uint32_t sleep_ms  = (mgr->sleep_ms > 0) ? mgr->sleep_ms : SX_TIME_IN_SLEEP;
- 285              		.loc 1 31 5 is_stmt 1 view .LVU63
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 11
-
-
- 286              		.loc 1 31 30 is_stmt 0 view .LVU64
- 287 0006 036A     		ldr	r3, [r0, #32]
- 288              		.loc 1 31 62 view .LVU65
- 289 0008 43B1     		cbz	r3, .L18
- 290              	.LVL14:
+ 257              		.loc 1 31 5 is_stmt 1 view .LVU59
+ 258              		.loc 1 31 30 is_stmt 0 view .LVU60
+ 259 0006 036A     		ldr	r3, [r0, #32]
+ 260              		.loc 1 31 62 view .LVU61
+ 261 0008 43B1     		cbz	r3, .L16
+ 262              	.LVL13:
   32:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     uint32_t sleep_sec = sleep_ms / 1000U;
- 291              		.loc 1 32 5 is_stmt 1 view .LVU66
- 292              		.loc 1 32 14 is_stmt 0 view .LVU67
- 293 000a 234D     		ldr	r5, .L21
- 294 000c A5FB0325 		umull	r2, r5, r5, r3
- 295 0010 AD09     		lsrs	r5, r5, #6
- 296              	.LVL15:
+ 263              		.loc 1 32 5 is_stmt 1 view .LVU62
+ 264              		.loc 1 32 14 is_stmt 0 view .LVU63
+ 265 000a 234D     		ldr	r5, .L19
+ 266 000c A5FB0325 		umull	r2, r5, r5, r3
+ 267 0010 AD09     		lsrs	r5, r5, #6
+ 268              	.LVL14:
   33:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     if (sleep_sec == 0) sleep_sec = 1;
- 297              		.loc 1 33 5 is_stmt 1 view .LVU68
- 298              		.loc 1 33 8 is_stmt 0 view .LVU69
- 299 0012 B3F57A7F 		cmp	r3, #1000
- 300 0016 04D2     		bcs	.L17
- 301              		.loc 1 33 35 discriminator 1 view .LVU70
- 302 0018 0125     		movs	r5, #1
- 303              	.LVL16:
- 304              		.loc 1 33 35 discriminator 1 view .LVU71
- 305 001a 02E0     		b	.L17
- 306              	.LVL17:
- 307              	.L18:
+ 269              		.loc 1 33 5 is_stmt 1 view .LVU64
+ 270              		.loc 1 33 8 is_stmt 0 view .LVU65
+ 271 0012 B3F57A7F 		cmp	r3, #1000
+ 272 0016 04D2     		bcs	.L15
+ 273              		.loc 1 33 35 discriminator 1 view .LVU66
+ 274 0018 0125     		movs	r5, #1
+ 275              	.LVL15:
+ 276              		.loc 1 33 35 discriminator 1 view .LVU67
+ 277 001a 02E0     		b	.L15
+ 278              	.LVL16:
+ 279              	.L16:
   31:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     uint32_t sleep_ms  = (mgr->sleep_ms > 0) ? mgr->sleep_ms : SX_TIME_IN_SLEEP;
- 308              		.loc 1 31 62 discriminator 2 view .LVU72
- 309 001c 4EF66023 		movw	r3, #60000
+ 280              		.loc 1 31 62 discriminator 2 view .LVU68
+ 281 001c 4EF66023 		movw	r3, #60000
   32:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     uint32_t sleep_sec = sleep_ms / 1000U;
- 310              		.loc 1 32 14 view .LVU73
- 311 0020 3C25     		movs	r5, #60
- 312              	.L17:
- 313              	.LVL18:
+ 282              		.loc 1 32 14 view .LVU69
+ 283 0020 3C25     		movs	r5, #60
+ 284              	.L15:
+ 285              	.LVL17:
   34:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   35:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     log_info(TAG, "Entering sleep for %lu ms (%lu sec)", sleep_ms, sleep_sec);
- 314              		.loc 1 35 5 is_stmt 1 view .LVU74
- 315 0022 1E4E     		ldr	r6, .L21+4
- 316 0024 0095     		str	r5, [sp]
- 317 0026 1E4A     		ldr	r2, .L21+8
- 318 0028 3146     		mov	r1, r6
- 319 002a 0320     		movs	r0, #3
- 320              	.LVL19:
- 321              		.loc 1 35 5 is_stmt 0 view .LVU75
- 322 002c FFF7FEFF 		bl	log_func
- 323              	.LVL20:
+ 286              		.loc 1 35 5 is_stmt 1 view .LVU70
+ 287 0022 1E4E     		ldr	r6, .L19+4
+ 288 0024 0095     		str	r5, [sp]
+ 289 0026 1E4A     		ldr	r2, .L19+8
+ 290 0028 3146     		mov	r1, r6
+ 291 002a 0320     		movs	r0, #3
+ 292              	.LVL18:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 8
+
+
+ 293              		.loc 1 35 5 is_stmt 0 view .LVU71
+ 294 002c FFF7FEFF 		bl	log_func
+ 295              	.LVL19:
   36:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   37:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     gps_power_off(mgr->module.gps);
- 324              		.loc 1 37 5 is_stmt 1 view .LVU76
- 325 0030 A068     		ldr	r0, [r4, #8]
- 326 0032 FFF7FEFF 		bl	gps_power_off
- 327              	.LVL21:
+ 296              		.loc 1 37 5 is_stmt 1 view .LVU72
+ 297 0030 A068     		ldr	r0, [r4, #8]
+ 298 0032 FFF7FEFF 		bl	gps_power_off
+ 299              	.LVL20:
   38:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     sx_delay_ms(100);
- 328              		.loc 1 38 5 view .LVU77
- 329 0036 6420     		movs	r0, #100
- 330 0038 FFF7FEFF 		bl	sx_delay_ms
- 331              	.LVL22:
+ 300              		.loc 1 38 5 view .LVU73
+ 301 0036 6420     		movs	r0, #100
+ 302 0038 FFF7FEFF 		bl	sx_delay_ms
+ 303              	.LVL21:
   39:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->module.gps->latitude   = 0.0f;
- 332              		.loc 1 39 5 view .LVU78
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 12
-
-
- 333              		.loc 1 39 16 is_stmt 0 view .LVU79
- 334 003c A268     		ldr	r2, [r4, #8]
- 335              		.loc 1 39 33 view .LVU80
- 336 003e 0023     		movs	r3, #0
- 337 0040 1366     		str	r3, [r2, #96]	@ float
+ 304              		.loc 1 39 5 view .LVU74
+ 305              		.loc 1 39 16 is_stmt 0 view .LVU75
+ 306 003c A268     		ldr	r2, [r4, #8]
+ 307              		.loc 1 39 33 view .LVU76
+ 308 003e 0023     		movs	r3, #0
+ 309 0040 1366     		str	r3, [r2, #96]	@ float
   40:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->module.gps->longtitude = 0.0f;
- 338              		.loc 1 40 5 is_stmt 1 view .LVU81
- 339              		.loc 1 40 16 is_stmt 0 view .LVU82
- 340 0042 A268     		ldr	r2, [r4, #8]
- 341              		.loc 1 40 33 view .LVU83
- 342 0044 5366     		str	r3, [r2, #100]	@ float
+ 310              		.loc 1 40 5 is_stmt 1 view .LVU77
+ 311              		.loc 1 40 16 is_stmt 0 view .LVU78
+ 312 0042 A268     		ldr	r2, [r4, #8]
+ 313              		.loc 1 40 33 view .LVU79
+ 314 0044 5366     		str	r3, [r2, #100]	@ float
   41:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->module.modem->ops->power_off_start(mgr->module.modem->ctx);
- 343              		.loc 1 41 5 is_stmt 1 view .LVU84
- 344              		.loc 1 41 16 is_stmt 0 view .LVU85
- 345 0046 6368     		ldr	r3, [r4, #4]
- 346              		.loc 1 41 22 view .LVU86
- 347 0048 1A68     		ldr	r2, [r3]
- 348              		.loc 1 41 27 view .LVU87
- 349 004a 5268     		ldr	r2, [r2, #4]
- 350              		.loc 1 41 5 view .LVU88
- 351 004c 5868     		ldr	r0, [r3, #4]
- 352 004e 9047     		blx	r2
- 353              	.LVL23:
+ 315              		.loc 1 41 5 is_stmt 1 view .LVU80
+ 316              		.loc 1 41 16 is_stmt 0 view .LVU81
+ 317 0046 6368     		ldr	r3, [r4, #4]
+ 318              		.loc 1 41 22 view .LVU82
+ 319 0048 1A68     		ldr	r2, [r3]
+ 320              		.loc 1 41 27 view .LVU83
+ 321 004a 5268     		ldr	r2, [r2, #4]
+ 322              		.loc 1 41 5 view .LVU84
+ 323 004c 5868     		ldr	r0, [r3, #4]
+ 324 004e 9047     		blx	r2
+ 325              	.LVL22:
   42:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     sx_delay_ms(500);
- 354              		.loc 1 42 5 is_stmt 1 view .LVU89
- 355 0050 4FF4FA70 		mov	r0, #500
- 356 0054 FFF7FEFF 		bl	sx_delay_ms
- 357              	.LVL24:
+ 326              		.loc 1 42 5 is_stmt 1 view .LVU85
+ 327 0050 4FF4FA70 		mov	r0, #500
+ 328 0054 FFF7FEFF 		bl	sx_delay_ms
+ 329              	.LVL23:
   43:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   44:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     log_info(TAG, "Setting RTC wakeup = %lu sec", sleep_sec);  
- 358              		.loc 1 44 5 view .LVU90
- 359 0058 2B46     		mov	r3, r5
- 360 005a 124A     		ldr	r2, .L21+12
- 361 005c 3146     		mov	r1, r6
- 362 005e 0320     		movs	r0, #3
- 363 0060 FFF7FEFF 		bl	log_func
- 364              	.LVL25:
+ 330              		.loc 1 44 5 view .LVU86
+ 331 0058 2B46     		mov	r3, r5
+ 332 005a 124A     		ldr	r2, .L19+12
+ 333 005c 3146     		mov	r1, r6
+ 334 005e 0320     		movs	r0, #3
+ 335 0060 FFF7FEFF 		bl	log_func
+ 336              	.LVL24:
   45:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     sx_sleep_set_rtc_wake(mgr->sleep, sleep_sec);
- 365              		.loc 1 45 5 view .LVU91
- 366 0064 2946     		mov	r1, r5
- 367 0066 2068     		ldr	r0, [r4]
- 368 0068 FFF7FEFF 		bl	sx_sleep_set_rtc_wake
- 369              	.LVL26:
+ 337              		.loc 1 45 5 view .LVU87
+ 338 0064 2946     		mov	r1, r5
+ 339 0066 2068     		ldr	r0, [r4]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 9
+
+
+ 340 0068 FFF7FEFF 		bl	sx_sleep_set_rtc_wake
+ 341              	.LVL25:
   46:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     
   47:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     log_info(TAG, ">>> Entering STOP mode NOW");                
- 370              		.loc 1 47 5 view .LVU92
- 371 006c 0E4A     		ldr	r2, .L21+16
- 372 006e 3146     		mov	r1, r6
- 373 0070 0320     		movs	r0, #3
- 374 0072 FFF7FEFF 		bl	log_func
- 375              	.LVL27:
+ 342              		.loc 1 47 5 view .LVU88
+ 343 006c 0E4A     		ldr	r2, .L19+16
+ 344 006e 3146     		mov	r1, r6
+ 345 0070 0320     		movs	r0, #3
+ 346 0072 FFF7FEFF 		bl	log_func
+ 347              	.LVL26:
   48:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     sx_delay_ms(10);  
- 376              		.loc 1 48 5 view .LVU93
- 377 0076 0A20     		movs	r0, #10
- 378 0078 FFF7FEFF 		bl	sx_delay_ms
- 379              	.LVL28:
+ 348              		.loc 1 48 5 view .LVU89
+ 349 0076 0A20     		movs	r0, #10
+ 350 0078 FFF7FEFF 		bl	sx_delay_ms
+ 351              	.LVL27:
   49:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 13
-
-
   50:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     sx_sleep_enter_stop(mgr->sleep);
- 380              		.loc 1 50 5 view .LVU94
- 381 007c 2068     		ldr	r0, [r4]
- 382 007e FFF7FEFF 		bl	sx_sleep_enter_stop
- 383              	.LVL29:
+ 352              		.loc 1 50 5 view .LVU90
+ 353 007c 2068     		ldr	r0, [r4]
+ 354 007e FFF7FEFF 		bl	sx_sleep_enter_stop
+ 355              	.LVL28:
   51:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     
   52:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     log_info(TAG, "<<< Woke from STOP mode");                  
- 384              		.loc 1 52 5 view .LVU95
- 385 0082 0A4A     		ldr	r2, .L21+20
- 386 0084 3146     		mov	r1, r6
- 387 0086 0320     		movs	r0, #3
- 388 0088 FFF7FEFF 		bl	log_func
- 389              	.LVL30:
+ 356              		.loc 1 52 5 view .LVU91
+ 357 0082 0A4A     		ldr	r2, .L19+20
+ 358 0084 3146     		mov	r1, r6
+ 359 0086 0320     		movs	r0, #3
+ 360 0088 FFF7FEFF 		bl	log_func
+ 361              	.LVL29:
   53:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     sx_sleep_cancel_rtc(mgr->sleep);
- 390              		.loc 1 53 5 view .LVU96
- 391 008c 2068     		ldr	r0, [r4]
- 392 008e FFF7FEFF 		bl	sx_sleep_cancel_rtc
- 393              	.LVL31:
+ 362              		.loc 1 53 5 view .LVU92
+ 363 008c 2068     		ldr	r0, [r4]
+ 364 008e FFF7FEFF 		bl	sx_sleep_cancel_rtc
+ 365              	.LVL30:
   54:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** }
- 394              		.loc 1 54 1 is_stmt 0 view .LVU97
- 395 0092 02B0     		add	sp, sp, #8
- 396              	.LCFI7:
- 397              		.cfi_def_cfa_offset 16
- 398              		@ sp needed
- 399 0094 70BD     		pop	{r4, r5, r6, pc}
- 400              	.LVL32:
- 401              	.L22:
- 402              		.loc 1 54 1 view .LVU98
- 403 0096 00BF     		.align	2
- 404              	.L21:
- 405 0098 D34D6210 		.word	274877907
- 406 009c 28000000 		.word	.LC1
- 407 00a0 00000000 		.word	.LC2
- 408 00a4 24000000 		.word	.LC3
- 409 00a8 44000000 		.word	.LC4
- 410 00ac 60000000 		.word	.LC5
- 411              		.cfi_endproc
- 412              	.LFE344:
- 414              		.section	.rodata.sx_sleep_manager_wake_process.str1.4,"aMS",%progbits,1
- 415              		.align	2
- 416              	.LC6:
- 417 0000 506F7765 		.ascii	"Power on GPS first\000"
- 417      72206F6E 
- 417      20475053 
- 417      20666972 
- 417      737400
- 418 0013 00       		.align	2
- 419              	.LC7:
- 420 0014 47505320 		.ascii	"GPS fix OK after %lu ms \342\200\224 now starting S"
- 420      66697820 
- 420      4F4B2061 
- 420      66746572 
- 420      20256C75 
- 421 003e 494D00   		.ascii	"IM\000"
- 422 0041 000000   		.align	2
- 423              	.LC8:
- 424 0044 47505320 		.ascii	"GPS timeout \342\200\224 proceed without fix, start"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 14
+ 366              		.loc 1 54 1 is_stmt 0 view .LVU93
+ 367 0092 02B0     		add	sp, sp, #8
+ 368              	.LCFI6:
+ 369              		.cfi_def_cfa_offset 16
+ 370              		@ sp needed
+ 371 0094 70BD     		pop	{r4, r5, r6, pc}
+ 372              	.LVL31:
+ 373              	.L20:
+ 374              		.loc 1 54 1 view .LVU94
+ 375 0096 00BF     		.align	2
+ 376              	.L19:
+ 377 0098 D34D6210 		.word	274877907
+ 378 009c 28000000 		.word	.LC1
+ 379 00a0 00000000 		.word	.LC2
+ 380 00a4 24000000 		.word	.LC3
+ 381 00a8 44000000 		.word	.LC4
+ 382 00ac 60000000 		.word	.LC5
+ 383              		.cfi_endproc
+ 384              	.LFE342:
+ 386              		.section	.rodata.sx_sleep_manager_wake_process.str1.4,"aMS",%progbits,1
+ 387              		.align	2
+ 388              	.LC6:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 10
 
 
- 424      74696D65 
- 424      6F757420 
- 424      E2809420 
- 424      70726F63 
- 425 006e 696E6720 		.ascii	"ing SIM\000"
- 425      53494D00 
- 426 0076 0000     		.align	2
- 427              	.LC9:
- 428 0078 52657375 		.ascii	"Resume UART + Power on SIM\000"
- 428      6D652055 
- 428      41525420 
- 428      2B20506F 
- 428      77657220 
- 429 0093 00       		.align	2
- 430              	.LC10:
- 431 0094 53494D20 		.ascii	"SIM ready after wake\000"
- 431      72656164 
- 431      79206166 
- 431      74657220 
- 431      77616B65 
- 432 00a9 000000   		.align	2
- 433              	.LC11:
- 434 00ac 53494D20 		.ascii	"SIM timeout \342\200\224 hard reset (RST pin)\000"
- 434      74696D65 
- 434      6F757420 
- 434      E2809420 
- 434      68617264 
- 435              		.section	.text.sx_sleep_manager_wake_process,"ax",%progbits
- 436              		.align	1
- 437              		.global	sx_sleep_manager_wake_process
- 438              		.syntax unified
- 439              		.thumb
- 440              		.thumb_func
- 442              	sx_sleep_manager_wake_process:
- 443              	.LVL33:
- 444              	.LFB345:
+ 389 0000 506F7765 		.ascii	"Power on GPS first\000"
+ 389      72206F6E 
+ 389      20475053 
+ 389      20666972 
+ 389      737400
+ 390 0013 00       		.align	2
+ 391              	.LC7:
+ 392 0014 47505320 		.ascii	"GPS fix OK after %lu ms \342\200\224 now starting S"
+ 392      66697820 
+ 392      4F4B2061 
+ 392      66746572 
+ 392      20256C75 
+ 393 003e 494D00   		.ascii	"IM\000"
+ 394 0041 000000   		.align	2
+ 395              	.LC8:
+ 396 0044 47505320 		.ascii	"GPS timeout \342\200\224 proceed without fix, start"
+ 396      74696D65 
+ 396      6F757420 
+ 396      E2809420 
+ 396      70726F63 
+ 397 006e 696E6720 		.ascii	"ing SIM\000"
+ 397      53494D00 
+ 398 0076 0000     		.align	2
+ 399              	.LC9:
+ 400 0078 52657375 		.ascii	"Resume UART + Power on SIM\000"
+ 400      6D652055 
+ 400      41525420 
+ 400      2B20506F 
+ 400      77657220 
+ 401 0093 00       		.align	2
+ 402              	.LC10:
+ 403 0094 53494D20 		.ascii	"SIM ready after wake\000"
+ 403      72656164 
+ 403      79206166 
+ 403      74657220 
+ 403      77616B65 
+ 404 00a9 000000   		.align	2
+ 405              	.LC11:
+ 406 00ac 53494D20 		.ascii	"SIM timeout \342\200\224 hard reset (RST pin)\000"
+ 406      74696D65 
+ 406      6F757420 
+ 406      E2809420 
+ 406      68617264 
+ 407              		.section	.text.sx_sleep_manager_wake_process,"ax",%progbits
+ 408              		.align	1
+ 409              		.global	sx_sleep_manager_wake_process
+ 410              		.syntax unified
+ 411              		.thumb
+ 412              		.thumb_func
+ 414              	sx_sleep_manager_wake_process:
+ 415              	.LVL32:
+ 416              	.LFB343:
   55:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   56:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** void sx_sleep_manager_wake_process(sx_sleep_manager_t *mgr, uint32_t delta_ms)
   57:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** {
- 445              		.loc 1 57 1 is_stmt 1 view -0
- 446              		.cfi_startproc
- 447              		@ args = 0, pretend = 0, frame = 0
- 448              		@ frame_needed = 0, uses_anonymous_args = 0
- 449              		.loc 1 57 1 is_stmt 0 view .LVU100
- 450 0000 10B5     		push	{r4, lr}
- 451              	.LCFI8:
- 452              		.cfi_def_cfa_offset 8
- 453              		.cfi_offset 4, -8
- 454              		.cfi_offset 14, -4
- 455 0002 0446     		mov	r4, r0
+ 417              		.loc 1 57 1 is_stmt 1 view -0
+ 418              		.cfi_startproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 11
+
+
+ 419              		@ args = 0, pretend = 0, frame = 0
+ 420              		@ frame_needed = 0, uses_anonymous_args = 0
+ 421              		.loc 1 57 1 is_stmt 0 view .LVU96
+ 422 0000 10B5     		push	{r4, lr}
+ 423              	.LCFI7:
+ 424              		.cfi_def_cfa_offset 8
+ 425              		.cfi_offset 4, -8
+ 426              		.cfi_offset 14, -4
+ 427 0002 0446     		mov	r4, r0
   58:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     switch (mgr->wake_step)
- 456              		.loc 1 58 5 is_stmt 1 view .LVU101
- 457              		.loc 1 58 16 is_stmt 0 view .LVU102
- 458 0004 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
- 459              		.loc 1 58 5 view .LVU103
- 460 0006 042B     		cmp	r3, #4
- 461 0008 06D8     		bhi	.L23
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 15
-
-
- 462 000a DFE803F0 		tbb	[pc, r3]
- 463              	.L26:
- 464 000e 03       		.byte	(.L30-.L26)/2
- 465 000f 06       		.byte	(.L29-.L26)/2
- 466 0010 15       		.byte	(.L28-.L26)/2
- 467 0011 3A       		.byte	(.L27-.L26)/2
- 468 0012 52       		.byte	(.L25-.L26)/2
- 469 0013 00       		.p2align 1
- 470              	.L30:
+ 428              		.loc 1 58 5 is_stmt 1 view .LVU97
+ 429              		.loc 1 58 16 is_stmt 0 view .LVU98
+ 430 0004 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 431              		.loc 1 58 5 view .LVU99
+ 432 0006 042B     		cmp	r3, #4
+ 433 0008 06D8     		bhi	.L21
+ 434 000a DFE803F0 		tbb	[pc, r3]
+ 435              	.L24:
+ 436 000e 03       		.byte	(.L28-.L24)/2
+ 437 000f 06       		.byte	(.L27-.L24)/2
+ 438 0010 15       		.byte	(.L26-.L24)/2
+ 439 0011 3A       		.byte	(.L25-.L24)/2
+ 440 0012 52       		.byte	(.L23-.L24)/2
+ 441 0013 00       		.p2align 1
+ 442              	.L28:
   59:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     {
   60:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     case SX_WAKE_STEP_IDLE:
   61:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->wake_step = SX_WAKE_STEP_GPS_ON_FIRST;
- 471              		.loc 1 61 9 is_stmt 1 view .LVU104
- 472              		.loc 1 61 24 is_stmt 0 view .LVU105
- 473 0014 0123     		movs	r3, #1
- 474 0016 0377     		strb	r3, [r0, #28]
+ 443              		.loc 1 61 9 is_stmt 1 view .LVU100
+ 444              		.loc 1 61 24 is_stmt 0 view .LVU101
+ 445 0014 0123     		movs	r3, #1
+ 446 0016 0377     		strb	r3, [r0, #28]
   62:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         break;
- 475              		.loc 1 62 9 is_stmt 1 view .LVU106
- 476              	.LVL34:
- 477              	.L23:
+ 447              		.loc 1 62 9 is_stmt 1 view .LVU102
+ 448              	.LVL33:
+ 449              	.L21:
   63:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   64:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     case SX_WAKE_STEP_GPS_ON_FIRST:
   65:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         board_gps_uart_resume_it();
@@ -882,6 +658,9 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
   81:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->wake_step = SX_WAKE_STEP_UART_RESUME;
   82:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         }
   83:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         else if (mgr->elapsed.gps_elapsed_ms >= GPS_TIMEOUT_MS)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 12
+
+
   84:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         {
   85:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_warn(TAG, "GPS timeout — proceed without fix, starting SIM");
   86:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->wake_step = SX_WAKE_STEP_UART_RESUME;
@@ -898,9 +677,6 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
   97:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
   98:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->elapsed.sim_elapsed_ms = 0;
   99:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->sim_start_sent         = 0;
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 16
-
-
  100:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->wake_step = SX_WAKE_STEP_SIM_WAKE;
  101:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         break;
  102:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
@@ -942,580 +718,577 @@ ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 1
  138:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         break;
  139:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     }
  140:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** }
- 478              		.loc 1 140 1 is_stmt 0 view .LVU107
- 479 0018 10BD     		pop	{r4, pc}
- 480              	.LVL35:
- 481              	.L29:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 13
+
+
+ 450              		.loc 1 140 1 is_stmt 0 view .LVU103
+ 451 0018 10BD     		pop	{r4, pc}
+ 452              	.LVL34:
+ 453              	.L27:
   65:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         log_info(TAG, "Power on GPS first");
- 482              		.loc 1 65 9 is_stmt 1 view .LVU108
- 483 001a FFF7FEFF 		bl	board_gps_uart_resume_it
- 484              	.LVL36:
+ 454              		.loc 1 65 9 is_stmt 1 view .LVU104
+ 455 001a FFF7FEFF 		bl	board_gps_uart_resume_it
+ 456              	.LVL35:
   66:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         gps_power_on(mgr->module.gps);
- 485              		.loc 1 66 9 view .LVU109
- 486 001e 3F4A     		ldr	r2, .L38
- 487 0020 3F49     		ldr	r1, .L38+4
- 488 0022 0320     		movs	r0, #3
- 489 0024 FFF7FEFF 		bl	log_func
- 490              	.LVL37:
+ 457              		.loc 1 66 9 view .LVU105
+ 458 001e 3F4A     		ldr	r2, .L36
+ 459 0020 3F49     		ldr	r1, .L36+4
+ 460 0022 0320     		movs	r0, #3
+ 461 0024 FFF7FEFF 		bl	log_func
+ 462              	.LVL36:
   67:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         //board_gps_uart_resume_it();
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 17
-
-
- 491              		.loc 1 67 9 view .LVU110
- 492 0028 A068     		ldr	r0, [r4, #8]
- 493 002a FFF7FEFF 		bl	gps_power_on
- 494              	.LVL38:
+ 463              		.loc 1 67 9 view .LVU106
+ 464 0028 A068     		ldr	r0, [r4, #8]
+ 465 002a FFF7FEFF 		bl	gps_power_on
+ 466              	.LVL37:
   69:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->wake_step = SX_WAKE_STEP_GPS_WAIT;
- 495              		.loc 1 69 9 view .LVU111
+ 467              		.loc 1 69 9 view .LVU107
   69:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->wake_step = SX_WAKE_STEP_GPS_WAIT;
- 496              		.loc 1 69 37 is_stmt 0 view .LVU112
- 497 002e 0023     		movs	r3, #0
- 498 0030 6361     		str	r3, [r4, #20]
+ 468              		.loc 1 69 37 is_stmt 0 view .LVU108
+ 469 002e 0023     		movs	r3, #0
+ 470 0030 6361     		str	r3, [r4, #20]
   70:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         break;
- 499              		.loc 1 70 9 is_stmt 1 view .LVU113
+ 471              		.loc 1 70 9 is_stmt 1 view .LVU109
   70:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         break;
- 500              		.loc 1 70 24 is_stmt 0 view .LVU114
- 501 0032 0223     		movs	r3, #2
- 502 0034 2377     		strb	r3, [r4, #28]
+ 472              		.loc 1 70 24 is_stmt 0 view .LVU110
+ 473 0032 0223     		movs	r3, #2
+ 474 0034 2377     		strb	r3, [r4, #28]
   71:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 503              		.loc 1 71 9 is_stmt 1 view .LVU115
- 504 0036 EFE7     		b	.L23
- 505              	.LVL39:
- 506              	.L28:
+ 475              		.loc 1 71 9 is_stmt 1 view .LVU111
+ 476 0036 EFE7     		b	.L21
+ 477              	.LVL38:
+ 478              	.L26:
   74:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 507              		.loc 1 74 9 view .LVU116
+ 479              		.loc 1 74 9 view .LVU112
   74:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 508              		.loc 1 74 21 is_stmt 0 view .LVU117
- 509 0038 4369     		ldr	r3, [r0, #20]
+ 480              		.loc 1 74 21 is_stmt 0 view .LVU113
+ 481 0038 4369     		ldr	r3, [r0, #20]
   74:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 510              		.loc 1 74 37 view .LVU118
- 511 003a 0B44     		add	r3, r3, r1
- 512 003c 4361     		str	r3, [r0, #20]
+ 482              		.loc 1 74 37 view .LVU114
+ 483 003a 0B44     		add	r3, r3, r1
+ 484 003c 4361     		str	r3, [r0, #20]
   76:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.gps->longtitude != 0.0f)
- 513              		.loc 1 76 9 is_stmt 1 view .LVU119
+ 485              		.loc 1 76 9 is_stmt 1 view .LVU115
   76:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.gps->longtitude != 0.0f)
- 514              		.loc 1 76 24 is_stmt 0 view .LVU120
- 515 003e 8268     		ldr	r2, [r0, #8]
+ 486              		.loc 1 76 24 is_stmt 0 view .LVU116
+ 487 003e 8268     		ldr	r2, [r0, #8]
   76:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.gps->longtitude != 0.0f)
- 516              		.loc 1 76 28 view .LVU121
- 517 0040 D2ED187A 		vldr.32	s15, [r2, #96]
+ 488              		.loc 1 76 28 view .LVU117
+ 489 0040 D2ED187A 		vldr.32	s15, [r2, #96]
   76:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.gps->longtitude != 0.0f)
- 518              		.loc 1 76 12 view .LVU122
- 519 0044 F5EE407A 		vcmp.f32	s15, #0
- 520 0048 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
- 521 004c 06D0     		beq	.L31
+ 490              		.loc 1 76 12 view .LVU118
+ 491 0044 F5EE407A 		vcmp.f32	s15, #0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 14
+
+
+ 492 0048 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 493 004c 06D0     		beq	.L29
   77:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         {
- 522              		.loc 1 77 28 view .LVU123
- 523 004e D2ED197A 		vldr.32	s15, [r2, #100]
+ 494              		.loc 1 77 28 view .LVU119
+ 495 004e D2ED197A 		vldr.32	s15, [r2, #100]
   76:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.gps->longtitude != 0.0f)
- 524              		.loc 1 76 48 discriminator 1 view .LVU124
- 525 0052 F5EE407A 		vcmp.f32	s15, #0
- 526 0056 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
- 527 005a 0AD1     		bne	.L36
- 528              	.L31:
+ 496              		.loc 1 76 48 discriminator 1 view .LVU120
+ 497 0052 F5EE407A 		vcmp.f32	s15, #0
+ 498 0056 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 499 005a 0AD1     		bne	.L34
+ 500              	.L29:
   83:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         {
- 529              		.loc 1 83 14 is_stmt 1 view .LVU125
+ 501              		.loc 1 83 14 is_stmt 1 view .LVU121
   83:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         {
- 530              		.loc 1 83 17 is_stmt 0 view .LVU126
- 531 005c 314A     		ldr	r2, .L38+8
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 18
-
-
- 532 005e 9342     		cmp	r3, r2
- 533 0060 DAD9     		bls	.L23
+ 502              		.loc 1 83 17 is_stmt 0 view .LVU122
+ 503 005c 314A     		ldr	r2, .L36+8
+ 504 005e 9342     		cmp	r3, r2
+ 505 0060 DAD9     		bls	.L21
   85:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->wake_step = SX_WAKE_STEP_UART_RESUME;
- 534              		.loc 1 85 13 is_stmt 1 view .LVU127
- 535 0062 314A     		ldr	r2, .L38+12
- 536 0064 2E49     		ldr	r1, .L38+4
- 537              	.LVL40:
+ 506              		.loc 1 85 13 is_stmt 1 view .LVU123
+ 507 0062 314A     		ldr	r2, .L36+12
+ 508 0064 2E49     		ldr	r1, .L36+4
+ 509              	.LVL39:
   85:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->wake_step = SX_WAKE_STEP_UART_RESUME;
- 538              		.loc 1 85 13 is_stmt 0 view .LVU128
- 539 0066 0220     		movs	r0, #2
- 540              	.LVL41:
+ 510              		.loc 1 85 13 is_stmt 0 view .LVU124
+ 511 0066 0220     		movs	r0, #2
+ 512              	.LVL40:
   85:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->wake_step = SX_WAKE_STEP_UART_RESUME;
- 541              		.loc 1 85 13 view .LVU129
- 542 0068 FFF7FEFF 		bl	log_func
- 543              	.LVL42:
+ 513              		.loc 1 85 13 view .LVU125
+ 514 0068 FFF7FEFF 		bl	log_func
+ 515              	.LVL41:
   86:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         }
- 544              		.loc 1 86 13 is_stmt 1 view .LVU130
+ 516              		.loc 1 86 13 is_stmt 1 view .LVU126
   86:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         }
- 545              		.loc 1 86 28 is_stmt 0 view .LVU131
- 546 006c 0323     		movs	r3, #3
- 547 006e 2377     		strb	r3, [r4, #28]
- 548 0070 D2E7     		b	.L23
- 549              	.LVL43:
- 550              	.L36:
+ 517              		.loc 1 86 28 is_stmt 0 view .LVU127
+ 518 006c 0323     		movs	r3, #3
+ 519 006e 2377     		strb	r3, [r4, #28]
+ 520 0070 D2E7     		b	.L21
+ 521              	.LVL42:
+ 522              	.L34:
   79:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****                      mgr->elapsed.gps_elapsed_ms);
- 551              		.loc 1 79 13 is_stmt 1 view .LVU132
- 552 0072 2E4A     		ldr	r2, .L38+16
- 553 0074 2A49     		ldr	r1, .L38+4
- 554              	.LVL44:
+ 523              		.loc 1 79 13 is_stmt 1 view .LVU128
+ 524 0072 2E4A     		ldr	r2, .L36+16
+ 525 0074 2A49     		ldr	r1, .L36+4
+ 526              	.LVL43:
   79:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****                      mgr->elapsed.gps_elapsed_ms);
- 555              		.loc 1 79 13 is_stmt 0 view .LVU133
- 556 0076 0320     		movs	r0, #3
- 557              	.LVL45:
+ 527              		.loc 1 79 13 is_stmt 0 view .LVU129
+ 528 0076 0320     		movs	r0, #3
+ 529              	.LVL44:
   79:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****                      mgr->elapsed.gps_elapsed_ms);
- 558              		.loc 1 79 13 view .LVU134
- 559 0078 FFF7FEFF 		bl	log_func
- 560              	.LVL46:
+ 530              		.loc 1 79 13 view .LVU130
+ 531 0078 FFF7FEFF 		bl	log_func
+ 532              	.LVL45:
   81:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         }
- 561              		.loc 1 81 13 is_stmt 1 view .LVU135
+ 533              		.loc 1 81 13 is_stmt 1 view .LVU131
   81:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         }
- 562              		.loc 1 81 28 is_stmt 0 view .LVU136
- 563 007c 0323     		movs	r3, #3
- 564 007e 2377     		strb	r3, [r4, #28]
- 565 0080 CAE7     		b	.L23
- 566              	.LVL47:
- 567              	.L27:
-  91:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 568              		.loc 1 91 9 is_stmt 1 view .LVU137
- 569 0082 2B4A     		ldr	r2, .L38+20
- 570 0084 2649     		ldr	r1, .L38+4
- 571              	.LVL48:
-  91:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 572              		.loc 1 91 9 is_stmt 0 view .LVU138
- 573 0086 0320     		movs	r0, #3
- 574              	.LVL49:
-  91:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 575              		.loc 1 91 9 view .LVU139
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 19
+ 534              		.loc 1 81 28 is_stmt 0 view .LVU132
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 15
 
 
- 576 0088 FFF7FEFF 		bl	log_func
- 577              	.LVL50:
+ 535 007c 0323     		movs	r3, #3
+ 536 007e 2377     		strb	r3, [r4, #28]
+ 537 0080 CAE7     		b	.L21
+ 538              	.LVL46:
+ 539              	.L25:
+  91:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
+ 540              		.loc 1 91 9 is_stmt 1 view .LVU133
+ 541 0082 2B4A     		ldr	r2, .L36+20
+ 542 0084 2649     		ldr	r1, .L36+4
+ 543              	.LVL47:
+  91:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
+ 544              		.loc 1 91 9 is_stmt 0 view .LVU134
+ 545 0086 0320     		movs	r0, #3
+ 546              	.LVL48:
+  91:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
+ 547              		.loc 1 91 9 view .LVU135
+ 548 0088 FFF7FEFF 		bl	log_func
+ 549              	.LVL49:
   93:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 578              		.loc 1 93 9 is_stmt 1 view .LVU140
- 579 008c FFF7FEFF 		bl	sx_board_uart_resume_it
- 580              	.LVL51:
+ 550              		.loc 1 93 9 is_stmt 1 view .LVU136
+ 551 008c FFF7FEFF 		bl	sx_board_uart_resume_it
+ 552              	.LVL50:
   95:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->module.modem->ops->power_on_start(mgr->module.modem->ctx);
- 581              		.loc 1 95 9 view .LVU141
+ 553              		.loc 1 95 9 view .LVU137
   95:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->module.modem->ops->power_on_start(mgr->module.modem->ctx);
- 582              		.loc 1 95 20 is_stmt 0 view .LVU142
- 583 0090 6368     		ldr	r3, [r4, #4]
+ 554              		.loc 1 95 20 is_stmt 0 view .LVU138
+ 555 0090 6368     		ldr	r3, [r4, #4]
   95:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->module.modem->ops->power_on_start(mgr->module.modem->ctx);
- 584              		.loc 1 95 26 view .LVU143
- 585 0092 1A68     		ldr	r2, [r3]
+ 556              		.loc 1 95 26 view .LVU139
+ 557 0092 1A68     		ldr	r2, [r3]
   95:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->module.modem->ops->power_on_start(mgr->module.modem->ctx);
- 586              		.loc 1 95 31 view .LVU144
- 587 0094 1269     		ldr	r2, [r2, #16]
+ 558              		.loc 1 95 31 view .LVU140
+ 559 0094 1269     		ldr	r2, [r2, #16]
   95:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->module.modem->ops->power_on_start(mgr->module.modem->ctx);
- 588              		.loc 1 95 9 view .LVU145
- 589 0096 5868     		ldr	r0, [r3, #4]
- 590 0098 9047     		blx	r2
- 591              	.LVL52:
+ 560              		.loc 1 95 9 view .LVU141
+ 561 0096 5868     		ldr	r0, [r3, #4]
+ 562 0098 9047     		blx	r2
+ 563              	.LVL51:
   96:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 592              		.loc 1 96 9 is_stmt 1 view .LVU146
+ 564              		.loc 1 96 9 is_stmt 1 view .LVU142
   96:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 593              		.loc 1 96 20 is_stmt 0 view .LVU147
- 594 009a 6368     		ldr	r3, [r4, #4]
+ 565              		.loc 1 96 20 is_stmt 0 view .LVU143
+ 566 009a 6368     		ldr	r3, [r4, #4]
   96:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 595              		.loc 1 96 26 view .LVU148
- 596 009c 1A68     		ldr	r2, [r3]
+ 567              		.loc 1 96 26 view .LVU144
+ 568 009c 1A68     		ldr	r2, [r3]
   96:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 597              		.loc 1 96 31 view .LVU149
- 598 009e 1268     		ldr	r2, [r2]
+ 569              		.loc 1 96 31 view .LVU145
+ 570 009e 1268     		ldr	r2, [r2]
   96:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 599              		.loc 1 96 9 view .LVU150
- 600 00a0 5868     		ldr	r0, [r3, #4]
- 601 00a2 9047     		blx	r2
- 602              	.LVL53:
+ 571              		.loc 1 96 9 view .LVU146
+ 572 00a0 5868     		ldr	r0, [r3, #4]
+ 573 00a2 9047     		blx	r2
+ 574              	.LVL52:
   98:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->sim_start_sent         = 0;
- 603              		.loc 1 98 9 is_stmt 1 view .LVU151
+ 575              		.loc 1 98 9 is_stmt 1 view .LVU147
   98:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->sim_start_sent         = 0;
- 604              		.loc 1 98 37 is_stmt 0 view .LVU152
- 605 00a4 0023     		movs	r3, #0
- 606 00a6 A361     		str	r3, [r4, #24]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 16
+
+
+ 576              		.loc 1 98 37 is_stmt 0 view .LVU148
+ 577 00a4 0023     		movs	r3, #0
+ 578 00a6 A361     		str	r3, [r4, #24]
   99:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->wake_step = SX_WAKE_STEP_SIM_WAKE;
- 607              		.loc 1 99 9 is_stmt 1 view .LVU153
+ 579              		.loc 1 99 9 is_stmt 1 view .LVU149
   99:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         mgr->wake_step = SX_WAKE_STEP_SIM_WAKE;
- 608              		.loc 1 99 37 is_stmt 0 view .LVU154
- 609 00a8 84F82830 		strb	r3, [r4, #40]
+ 580              		.loc 1 99 37 is_stmt 0 view .LVU150
+ 581 00a8 84F82830 		strb	r3, [r4, #40]
  100:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         break;
- 610              		.loc 1 100 9 is_stmt 1 view .LVU155
+ 582              		.loc 1 100 9 is_stmt 1 view .LVU151
  100:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         break;
- 611              		.loc 1 100 24 is_stmt 0 view .LVU156
- 612 00ac 0423     		movs	r3, #4
- 613 00ae 2377     		strb	r3, [r4, #28]
+ 583              		.loc 1 100 24 is_stmt 0 view .LVU152
+ 584 00ac 0423     		movs	r3, #4
+ 585 00ae 2377     		strb	r3, [r4, #28]
  101:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 614              		.loc 1 101 9 is_stmt 1 view .LVU157
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 20
+ 586              		.loc 1 101 9 is_stmt 1 view .LVU153
+ 587 00b0 B2E7     		b	.L21
+ 588              	.LVL53:
+ 589              	.L23:
+ 104:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
+ 590              		.loc 1 104 9 view .LVU154
+ 104:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
+ 591              		.loc 1 104 21 is_stmt 0 view .LVU155
+ 592 00b2 8369     		ldr	r3, [r0, #24]
+ 104:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
+ 593              		.loc 1 104 37 view .LVU156
+ 594 00b4 0B44     		add	r3, r3, r1
+ 595 00b6 8361     		str	r3, [r0, #24]
+ 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
+ 596              		.loc 1 112 9 is_stmt 1 view .LVU157
+ 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
+ 597              		.loc 1 112 17 is_stmt 0 view .LVU158
+ 598 00b8 90F82830 		ldrb	r3, [r0, #40]	@ zero_extendqisi2
+ 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
+ 599              		.loc 1 112 12 view .LVU159
+ 600 00bc 6BB9     		cbnz	r3, .L30
+ 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
+ 601              		.loc 1 113 25 view .LVU160
+ 602 00be 4368     		ldr	r3, [r0, #4]
+ 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
+ 603              		.loc 1 113 31 view .LVU161
+ 604 00c0 1A68     		ldr	r2, [r3]
+ 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
+ 605              		.loc 1 113 36 view .LVU162
+ 606 00c2 9268     		ldr	r2, [r2, #8]
+ 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
+ 607              		.loc 1 113 14 view .LVU163
+ 608 00c4 5868     		ldr	r0, [r3, #4]
+ 609              	.LVL54:
+ 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
+ 610              		.loc 1 113 14 view .LVU164
+ 611 00c6 9047     		blx	r2
+ 612              	.LVL55:
+ 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
+ 613              		.loc 1 112 34 discriminator 1 view .LVU165
+ 614 00c8 38B9     		cbnz	r0, .L30
+ 114:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent = 1;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 17
 
 
- 615 00b0 B2E7     		b	.L23
- 616              	.LVL54:
- 617              	.L25:
- 104:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 618              		.loc 1 104 9 view .LVU158
- 104:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 619              		.loc 1 104 21 is_stmt 0 view .LVU159
- 620 00b2 8369     		ldr	r3, [r0, #24]
- 104:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
- 621              		.loc 1 104 37 view .LVU160
- 622 00b4 0B44     		add	r3, r3, r1
- 623 00b6 8361     		str	r3, [r0, #24]
- 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
- 624              		.loc 1 112 9 is_stmt 1 view .LVU161
- 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
- 625              		.loc 1 112 17 is_stmt 0 view .LVU162
- 626 00b8 90F82830 		ldrb	r3, [r0, #40]	@ zero_extendqisi2
- 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
- 627              		.loc 1 112 12 view .LVU163
- 628 00bc 6BB9     		cbnz	r3, .L32
- 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
- 629              		.loc 1 113 25 view .LVU164
- 630 00be 4368     		ldr	r3, [r0, #4]
- 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
- 631              		.loc 1 113 31 view .LVU165
- 632 00c0 1A68     		ldr	r2, [r3]
- 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
- 633              		.loc 1 113 36 view .LVU166
- 634 00c2 9268     		ldr	r2, [r2, #8]
- 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
- 635              		.loc 1 113 14 view .LVU167
- 636 00c4 5868     		ldr	r0, [r3, #4]
- 637              	.LVL55:
- 113:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->start(mgr->module.modem->ctx);
- 638              		.loc 1 113 14 view .LVU168
- 639 00c6 9047     		blx	r2
- 640              	.LVL56:
- 112:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             !mgr->module.modem->ops->power_is_busy(mgr->module.modem->ctx)) {
- 641              		.loc 1 112 34 discriminator 1 view .LVU169
- 642 00c8 38B9     		cbnz	r0, .L32
+ 615              		.loc 1 114 13 is_stmt 1 view .LVU166
  114:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent = 1;
- 643              		.loc 1 114 13 is_stmt 1 view .LVU170
+ 616              		.loc 1 114 24 is_stmt 0 view .LVU167
+ 617 00ca 6368     		ldr	r3, [r4, #4]
  114:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent = 1;
- 644              		.loc 1 114 24 is_stmt 0 view .LVU171
- 645 00ca 6368     		ldr	r3, [r4, #4]
+ 618              		.loc 1 114 30 view .LVU168
+ 619 00cc 1A68     		ldr	r2, [r3]
  114:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent = 1;
- 646              		.loc 1 114 30 view .LVU172
- 647 00cc 1A68     		ldr	r2, [r3]
+ 620              		.loc 1 114 35 view .LVU169
+ 621 00ce 5269     		ldr	r2, [r2, #20]
  114:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent = 1;
- 648              		.loc 1 114 35 view .LVU173
- 649 00ce 5269     		ldr	r2, [r2, #20]
- 114:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent = 1;
- 650              		.loc 1 114 13 view .LVU174
- 651 00d0 5868     		ldr	r0, [r3, #4]
- 652 00d2 9047     		blx	r2
- 653              	.LVL57:
+ 622              		.loc 1 114 13 view .LVU170
+ 623 00d0 5868     		ldr	r0, [r3, #4]
+ 624 00d2 9047     		blx	r2
+ 625              	.LVL56:
  115:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         }
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 21
-
-
- 654              		.loc 1 115 13 is_stmt 1 view .LVU175
+ 626              		.loc 1 115 13 is_stmt 1 view .LVU171
  115:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         }
- 655              		.loc 1 115 33 is_stmt 0 view .LVU176
- 656 00d4 0123     		movs	r3, #1
- 657 00d6 84F82830 		strb	r3, [r4, #40]
- 658              	.L32:
+ 627              		.loc 1 115 33 is_stmt 0 view .LVU172
+ 628 00d4 0123     		movs	r3, #1
+ 629 00d6 84F82830 		strb	r3, [r4, #40]
+ 630              	.L30:
  118:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_info(TAG, "SIM ready after wake");
- 659              		.loc 1 118 9 is_stmt 1 view .LVU177
+ 631              		.loc 1 118 9 is_stmt 1 view .LVU173
  118:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_info(TAG, "SIM ready after wake");
- 660              		.loc 1 118 24 is_stmt 0 view .LVU178
- 661 00da 6368     		ldr	r3, [r4, #4]
+ 632              		.loc 1 118 24 is_stmt 0 view .LVU174
+ 633 00da 6368     		ldr	r3, [r4, #4]
  118:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_info(TAG, "SIM ready after wake");
- 662              		.loc 1 118 30 view .LVU179
- 663 00dc 1A68     		ldr	r2, [r3]
+ 634              		.loc 1 118 30 view .LVU175
+ 635 00dc 1A68     		ldr	r2, [r3]
  118:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_info(TAG, "SIM ready after wake");
- 664              		.loc 1 118 35 view .LVU180
- 665 00de 9269     		ldr	r2, [r2, #24]
+ 636              		.loc 1 118 35 view .LVU176
+ 637 00de 9269     		ldr	r2, [r2, #24]
  118:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_info(TAG, "SIM ready after wake");
- 666              		.loc 1 118 13 view .LVU181
- 667 00e0 5868     		ldr	r0, [r3, #4]
- 668 00e2 9047     		blx	r2
- 669              	.LVL58:
+ 638              		.loc 1 118 13 view .LVU177
+ 639 00e0 5868     		ldr	r0, [r3, #4]
+ 640 00e2 9047     		blx	r2
+ 641              	.LVL57:
  118:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_info(TAG, "SIM ready after wake");
- 670              		.loc 1 118 12 discriminator 1 view .LVU182
- 671 00e4 90B9     		cbnz	r0, .L37
+ 642              		.loc 1 118 12 discriminator 1 view .LVU178
+ 643 00e4 90B9     		cbnz	r0, .L35
  121:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_warn(TAG, "SIM timeout — hard reset (RST pin)");
- 672              		.loc 1 121 16 is_stmt 1 view .LVU183
+ 644              		.loc 1 121 16 is_stmt 1 view .LVU179
  121:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_warn(TAG, "SIM timeout — hard reset (RST pin)");
- 673              		.loc 1 121 32 is_stmt 0 view .LVU184
- 674 00e6 A269     		ldr	r2, [r4, #24]
+ 645              		.loc 1 121 32 is_stmt 0 view .LVU180
+ 646 00e6 A269     		ldr	r2, [r4, #24]
  121:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             log_warn(TAG, "SIM timeout — hard reset (RST pin)");
- 675              		.loc 1 121 19 view .LVU185
- 676 00e8 124B     		ldr	r3, .L38+24
- 677 00ea 9A42     		cmp	r2, r3
- 678 00ec 94D9     		bls	.L23
+ 647              		.loc 1 121 19 view .LVU181
+ 648 00e8 124B     		ldr	r3, .L36+24
+ 649 00ea 9A42     		cmp	r2, r3
+ 650 00ec 94D9     		bls	.L21
  122:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->elapsed.sim_elapsed_ms = 0;
- 679              		.loc 1 122 13 is_stmt 1 view .LVU186
- 680 00ee 124A     		ldr	r2, .L38+28
- 681 00f0 0B49     		ldr	r1, .L38+4
- 682 00f2 0220     		movs	r0, #2
- 683 00f4 FFF7FEFF 		bl	log_func
- 684              	.LVL59:
- 123:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent         = 0;
- 685              		.loc 1 123 13 view .LVU187
- 123:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent         = 0;
- 686              		.loc 1 123 41 is_stmt 0 view .LVU188
- 687 00f8 0023     		movs	r3, #0
- 688 00fa A361     		str	r3, [r4, #24]
- 124:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->hard_reset(mgr->module.modem->ctx);
- 689              		.loc 1 124 13 is_stmt 1 view .LVU189
- 124:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->hard_reset(mgr->module.modem->ctx);
- 690              		.loc 1 124 41 is_stmt 0 view .LVU190
- 691 00fc 84F82830 		strb	r3, [r4, #40]
- 125:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             /* hard_reset() re-enters the same async power sequence as
- 692              		.loc 1 125 13 is_stmt 1 view .LVU191
- 125:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             /* hard_reset() re-enters the same async power sequence as
- 693              		.loc 1 125 24 is_stmt 0 view .LVU192
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 22
+ 651              		.loc 1 122 13 is_stmt 1 view .LVU182
+ 652 00ee 124A     		ldr	r2, .L36+28
+ 653 00f0 0B49     		ldr	r1, .L36+4
+ 654 00f2 0220     		movs	r0, #2
+ 655 00f4 FFF7FEFF 		bl	log_func
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 18
 
 
- 694 0100 6368     		ldr	r3, [r4, #4]
+ 656              	.LVL58:
+ 123:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent         = 0;
+ 657              		.loc 1 123 13 view .LVU183
+ 123:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->sim_start_sent         = 0;
+ 658              		.loc 1 123 41 is_stmt 0 view .LVU184
+ 659 00f8 0023     		movs	r3, #0
+ 660 00fa A361     		str	r3, [r4, #24]
+ 124:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->hard_reset(mgr->module.modem->ctx);
+ 661              		.loc 1 124 13 is_stmt 1 view .LVU185
+ 124:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->module.modem->ops->hard_reset(mgr->module.modem->ctx);
+ 662              		.loc 1 124 41 is_stmt 0 view .LVU186
+ 663 00fc 84F82830 		strb	r3, [r4, #40]
  125:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             /* hard_reset() re-enters the same async power sequence as
- 695              		.loc 1 125 30 view .LVU193
- 696 0102 1A68     		ldr	r2, [r3]
+ 664              		.loc 1 125 13 is_stmt 1 view .LVU187
  125:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             /* hard_reset() re-enters the same async power sequence as
- 697              		.loc 1 125 35 view .LVU194
- 698 0104 D268     		ldr	r2, [r2, #12]
+ 665              		.loc 1 125 24 is_stmt 0 view .LVU188
+ 666 0100 6368     		ldr	r3, [r4, #4]
  125:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             /* hard_reset() re-enters the same async power sequence as
- 699              		.loc 1 125 13 view .LVU195
- 700 0106 5868     		ldr	r0, [r3, #4]
- 701 0108 9047     		blx	r2
- 702              	.LVL60:
- 703              		.loc 1 140 1 view .LVU196
- 704 010a 85E7     		b	.L23
- 705              	.L37:
+ 667              		.loc 1 125 30 view .LVU189
+ 668 0102 1A68     		ldr	r2, [r3]
+ 125:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             /* hard_reset() re-enters the same async power sequence as
+ 669              		.loc 1 125 35 view .LVU190
+ 670 0104 D268     		ldr	r2, [r2, #12]
+ 125:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             /* hard_reset() re-enters the same async power sequence as
+ 671              		.loc 1 125 13 view .LVU191
+ 672 0106 5868     		ldr	r0, [r3, #4]
+ 673 0108 9047     		blx	r2
+ 674              	.LVL59:
+ 675              		.loc 1 140 1 view .LVU192
+ 676 010a 85E7     		b	.L21
+ 677              	.L35:
  119:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****             mgr->wake_step = SX_WAKE_STEP_DONE;
- 706              		.loc 1 119 13 is_stmt 1 view .LVU197
- 707 010c 0B4A     		ldr	r2, .L38+32
- 708 010e 0449     		ldr	r1, .L38+4
- 709 0110 0320     		movs	r0, #3
- 710 0112 FFF7FEFF 		bl	log_func
- 711              	.LVL61:
+ 678              		.loc 1 119 13 is_stmt 1 view .LVU193
+ 679 010c 0B4A     		ldr	r2, .L36+32
+ 680 010e 0449     		ldr	r1, .L36+4
+ 681 0110 0320     		movs	r0, #3
+ 682 0112 FFF7FEFF 		bl	log_func
+ 683              	.LVL60:
  120:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         } else if (mgr->elapsed.sim_elapsed_ms >= 90000U) {
- 712              		.loc 1 120 13 view .LVU198
+ 684              		.loc 1 120 13 view .LVU194
  120:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         } else if (mgr->elapsed.sim_elapsed_ms >= 90000U) {
- 713              		.loc 1 120 28 is_stmt 0 view .LVU199
- 714 0116 0523     		movs	r3, #5
- 715 0118 2377     		strb	r3, [r4, #28]
- 716 011a 7DE7     		b	.L23
- 717              	.L39:
- 718              		.align	2
- 719              	.L38:
- 720 011c 00000000 		.word	.LC6
- 721 0120 28000000 		.word	.LC1
- 722 0124 CFFB0100 		.word	129999
- 723 0128 44000000 		.word	.LC8
- 724 012c 14000000 		.word	.LC7
- 725 0130 78000000 		.word	.LC9
- 726 0134 8F5F0100 		.word	89999
- 727 0138 AC000000 		.word	.LC11
- 728 013c 94000000 		.word	.LC10
- 729              		.cfi_endproc
- 730              	.LFE345:
- 732              		.section	.text.sx_sleep_manager_is_wake_done,"ax",%progbits
- 733              		.align	1
- 734              		.global	sx_sleep_manager_is_wake_done
- 735              		.syntax unified
- 736              		.thumb
- 737              		.thumb_func
- 739              	sx_sleep_manager_is_wake_done:
- 740              	.LVL62:
- 741              	.LFB346:
+ 685              		.loc 1 120 28 is_stmt 0 view .LVU195
+ 686 0116 0523     		movs	r3, #5
+ 687 0118 2377     		strb	r3, [r4, #28]
+ 688 011a 7DE7     		b	.L21
+ 689              	.L37:
+ 690              		.align	2
+ 691              	.L36:
+ 692 011c 00000000 		.word	.LC6
+ 693 0120 28000000 		.word	.LC1
+ 694 0124 CFFB0100 		.word	129999
+ 695 0128 44000000 		.word	.LC8
+ 696 012c 14000000 		.word	.LC7
+ 697 0130 78000000 		.word	.LC9
+ 698 0134 8F5F0100 		.word	89999
+ 699 0138 AC000000 		.word	.LC11
+ 700 013c 94000000 		.word	.LC10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 19
+
+
+ 701              		.cfi_endproc
+ 702              	.LFE343:
+ 704              		.section	.text.sx_sleep_manager_is_wake_done,"ax",%progbits
+ 705              		.align	1
+ 706              		.global	sx_sleep_manager_is_wake_done
+ 707              		.syntax unified
+ 708              		.thumb
+ 709              		.thumb_func
+ 711              	sx_sleep_manager_is_wake_done:
+ 712              	.LVL61:
+ 713              	.LFB344:
  141:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
  142:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** uint8_t sx_sleep_manager_is_wake_done(sx_sleep_manager_t *mgr)
  143:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** {
- 742              		.loc 1 143 1 is_stmt 1 view -0
- 743              		.cfi_startproc
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 23
-
-
- 744              		@ args = 0, pretend = 0, frame = 0
- 745              		@ frame_needed = 0, uses_anonymous_args = 0
- 746              		@ link register save eliminated.
+ 714              		.loc 1 143 1 is_stmt 1 view -0
+ 715              		.cfi_startproc
+ 716              		@ args = 0, pretend = 0, frame = 0
+ 717              		@ frame_needed = 0, uses_anonymous_args = 0
+ 718              		@ link register save eliminated.
  144:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     return (mgr->wake_step == SX_WAKE_STEP_DONE);
- 747              		.loc 1 144 5 view .LVU201
- 748              		.loc 1 144 16 is_stmt 0 view .LVU202
- 749 0000 007F     		ldrb	r0, [r0, #28]	@ zero_extendqisi2
- 750              	.LVL63:
+ 719              		.loc 1 144 5 view .LVU197
+ 720              		.loc 1 144 16 is_stmt 0 view .LVU198
+ 721 0000 007F     		ldrb	r0, [r0, #28]	@ zero_extendqisi2
+ 722              	.LVL62:
  145:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** }
- 751              		.loc 1 145 1 view .LVU203
- 752 0002 0528     		cmp	r0, #5
- 753 0004 14BF     		ite	ne
- 754 0006 0020     		movne	r0, #0
- 755 0008 0120     		moveq	r0, #1
- 756 000a 7047     		bx	lr
- 757              		.cfi_endproc
- 758              	.LFE346:
- 760              		.section	.text.sx_sleep_manager_wake_tick,"ax",%progbits
- 761              		.align	1
- 762              		.global	sx_sleep_manager_wake_tick
- 763              		.syntax unified
- 764              		.thumb
- 765              		.thumb_func
- 767              	sx_sleep_manager_wake_tick:
- 768              	.LVL64:
- 769              	.LFB347:
+ 723              		.loc 1 145 1 view .LVU199
+ 724 0002 0528     		cmp	r0, #5
+ 725 0004 14BF     		ite	ne
+ 726 0006 0020     		movne	r0, #0
+ 727 0008 0120     		moveq	r0, #1
+ 728 000a 7047     		bx	lr
+ 729              		.cfi_endproc
+ 730              	.LFE344:
+ 732              		.section	.text.sx_sleep_manager_wake_tick,"ax",%progbits
+ 733              		.align	1
+ 734              		.global	sx_sleep_manager_wake_tick
+ 735              		.syntax unified
+ 736              		.thumb
+ 737              		.thumb_func
+ 739              	sx_sleep_manager_wake_tick:
+ 740              	.LVL63:
+ 741              	.LFB345:
  146:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
  147:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** uint8_t sx_sleep_manager_wake_tick(sx_sleep_manager_t *mgr, uint32_t delta_ms)
  148:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** {
- 770              		.loc 1 148 1 is_stmt 1 view -0
- 771              		.cfi_startproc
- 772              		@ args = 0, pretend = 0, frame = 0
- 773              		@ frame_needed = 0, uses_anonymous_args = 0
- 774              		@ link register save eliminated.
+ 742              		.loc 1 148 1 is_stmt 1 view -0
+ 743              		.cfi_startproc
+ 744              		@ args = 0, pretend = 0, frame = 0
+ 745              		@ frame_needed = 0, uses_anonymous_args = 0
+ 746              		@ link register save eliminated.
  149:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     uint32_t timeout_ms = (mgr->wake_timeout_ms > 0)
- 775              		.loc 1 149 5 view .LVU205
- 776              		.loc 1 149 31 is_stmt 0 view .LVU206
- 777 0000 426A     		ldr	r2, [r0, #36]
+ 747              		.loc 1 149 5 view .LVU201
+ 748              		.loc 1 149 31 is_stmt 0 view .LVU202
+ 749 0000 426A     		ldr	r2, [r0, #36]
  150:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****                           ? mgr->wake_timeout_ms
  151:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****                           : SX_TIME_IN_WAKE;
- 778              		.loc 1 151 27 view .LVU207
- 779 0002 02B9     		cbnz	r2, .L42
- 780              		.loc 1 151 27 discriminator 2 view .LVU208
- 781 0004 044A     		ldr	r2, .L45
- 782              	.L42:
- 783              	.LVL65:
+ 750              		.loc 1 151 27 view .LVU203
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 20
+
+
+ 751 0002 02B9     		cbnz	r2, .L40
+ 752              		.loc 1 151 27 discriminator 2 view .LVU204
+ 753 0004 044A     		ldr	r2, .L43
+ 754              	.L40:
+ 755              	.LVL64:
  152:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
  153:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->elapsed.wake_elapsed_ms += delta_ms;
- 784              		.loc 1 153 5 is_stmt 1 view .LVU209
- 785              		.loc 1 153 17 is_stmt 0 view .LVU210
- 786 0006 0369     		ldr	r3, [r0, #16]
- 787              		.loc 1 153 34 view .LVU211
- 788 0008 1944     		add	r1, r1, r3
- 789              	.LVL66:
- 790              		.loc 1 153 34 view .LVU212
- 791 000a 0161     		str	r1, [r0, #16]
+ 756              		.loc 1 153 5 is_stmt 1 view .LVU205
+ 757              		.loc 1 153 17 is_stmt 0 view .LVU206
+ 758 0006 0369     		ldr	r3, [r0, #16]
+ 759              		.loc 1 153 34 view .LVU207
+ 760 0008 1944     		add	r1, r1, r3
+ 761              	.LVL65:
+ 762              		.loc 1 153 34 view .LVU208
+ 763 000a 0161     		str	r1, [r0, #16]
  154:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 24
-
-
  155:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     if (mgr->elapsed.wake_elapsed_ms >= timeout_ms) {  
- 792              		.loc 1 155 5 is_stmt 1 view .LVU213
- 793              		.loc 1 155 8 is_stmt 0 view .LVU214
- 794 000c 9142     		cmp	r1, r2
- 795 000e 01D2     		bcs	.L44
+ 764              		.loc 1 155 5 is_stmt 1 view .LVU209
+ 765              		.loc 1 155 8 is_stmt 0 view .LVU210
+ 766 000c 9142     		cmp	r1, r2
+ 767 000e 01D2     		bcs	.L42
  156:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         return 1;
  157:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     }
  158:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     return 0;
- 796              		.loc 1 158 12 view .LVU215
- 797 0010 0020     		movs	r0, #0
- 798              	.LVL67:
- 799              		.loc 1 158 12 view .LVU216
- 800 0012 7047     		bx	lr
- 801              	.LVL68:
- 802              	.L44:
+ 768              		.loc 1 158 12 view .LVU211
+ 769 0010 0020     		movs	r0, #0
+ 770              	.LVL66:
+ 771              		.loc 1 158 12 view .LVU212
+ 772 0012 7047     		bx	lr
+ 773              	.LVL67:
+ 774              	.L42:
  156:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****         return 1;
- 803              		.loc 1 156 16 view .LVU217
- 804 0014 0120     		movs	r0, #1
- 805              	.LVL69:
+ 775              		.loc 1 156 16 view .LVU213
+ 776 0014 0120     		movs	r0, #1
+ 777              	.LVL68:
  159:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** }
- 806              		.loc 1 159 1 view .LVU218
- 807 0016 7047     		bx	lr
- 808              	.L46:
- 809              		.align	2
- 810              	.L45:
- 811 0018 00710200 		.word	160000
- 812              		.cfi_endproc
- 813              	.LFE347:
- 815              		.section	.text.sx_sleep_manager_reset_wake,"ax",%progbits
- 816              		.align	1
- 817              		.global	sx_sleep_manager_reset_wake
- 818              		.syntax unified
- 819              		.thumb
- 820              		.thumb_func
- 822              	sx_sleep_manager_reset_wake:
- 823              	.LVL70:
- 824              	.LFB348:
+ 778              		.loc 1 159 1 view .LVU214
+ 779 0016 7047     		bx	lr
+ 780              	.L44:
+ 781              		.align	2
+ 782              	.L43:
+ 783 0018 00710200 		.word	160000
+ 784              		.cfi_endproc
+ 785              	.LFE345:
+ 787              		.section	.text.sx_sleep_manager_reset_wake,"ax",%progbits
+ 788              		.align	1
+ 789              		.global	sx_sleep_manager_reset_wake
+ 790              		.syntax unified
+ 791              		.thumb
+ 792              		.thumb_func
+ 794              	sx_sleep_manager_reset_wake:
+ 795              	.LVL69:
+ 796              	.LFB346:
  160:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** 
  161:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr)
  162:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** {
- 825              		.loc 1 162 1 is_stmt 1 view -0
- 826              		.cfi_startproc
- 827              		@ args = 0, pretend = 0, frame = 0
- 828              		@ frame_needed = 0, uses_anonymous_args = 0
- 829              		@ link register save eliminated.
+ 797              		.loc 1 162 1 is_stmt 1 view -0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 21
+
+
+ 798              		.cfi_startproc
+ 799              		@ args = 0, pretend = 0, frame = 0
+ 800              		@ frame_needed = 0, uses_anonymous_args = 0
+ 801              		@ link register save eliminated.
  163:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->wake_step                   = SX_WAKE_STEP_IDLE;
- 830              		.loc 1 163 5 view .LVU220
- 831              		.loc 1 163 38 is_stmt 0 view .LVU221
- 832 0000 0023     		movs	r3, #0
- 833 0002 0377     		strb	r3, [r0, #28]
+ 802              		.loc 1 163 5 view .LVU216
+ 803              		.loc 1 163 38 is_stmt 0 view .LVU217
+ 804 0000 0023     		movs	r3, #0
+ 805 0002 0377     		strb	r3, [r0, #28]
  164:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->published                   = 0;
- 834              		.loc 1 164 5 is_stmt 1 view .LVU222
- 835              		.loc 1 164 38 is_stmt 0 view .LVU223
- 836 0004 4377     		strb	r3, [r0, #29]
+ 806              		.loc 1 164 5 is_stmt 1 view .LVU218
+ 807              		.loc 1 164 38 is_stmt 0 view .LVU219
+ 808 0004 4377     		strb	r3, [r0, #29]
  165:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->elapsed.wake_elapsed_ms     = 0;
- 837              		.loc 1 165 5 is_stmt 1 view .LVU224
- 838              		.loc 1 165 38 is_stmt 0 view .LVU225
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 25
-
-
- 839 0006 0361     		str	r3, [r0, #16]
+ 809              		.loc 1 165 5 is_stmt 1 view .LVU220
+ 810              		.loc 1 165 38 is_stmt 0 view .LVU221
+ 811 0006 0361     		str	r3, [r0, #16]
  166:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->elapsed.gps_elapsed_ms      = 0;
- 840              		.loc 1 166 5 is_stmt 1 view .LVU226
- 841              		.loc 1 166 38 is_stmt 0 view .LVU227
- 842 0008 4361     		str	r3, [r0, #20]
+ 812              		.loc 1 166 5 is_stmt 1 view .LVU222
+ 813              		.loc 1 166 38 is_stmt 0 view .LVU223
+ 814 0008 4361     		str	r3, [r0, #20]
  167:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->elapsed.sim_elapsed_ms      = 0;
- 843              		.loc 1 167 5 is_stmt 1 view .LVU228
- 844              		.loc 1 167 38 is_stmt 0 view .LVU229
- 845 000a 8361     		str	r3, [r0, #24]
+ 815              		.loc 1 167 5 is_stmt 1 view .LVU224
+ 816              		.loc 1 167 38 is_stmt 0 view .LVU225
+ 817 000a 8361     		str	r3, [r0, #24]
  168:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c ****     mgr->sim_start_sent              = 0;
- 846              		.loc 1 168 5 is_stmt 1 view .LVU230
- 847              		.loc 1 168 38 is_stmt 0 view .LVU231
- 848 000c 80F82830 		strb	r3, [r0, #40]
+ 818              		.loc 1 168 5 is_stmt 1 view .LVU226
+ 819              		.loc 1 168 38 is_stmt 0 view .LVU227
+ 820 000c 80F82830 		strb	r3, [r0, #40]
  169:SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.c **** }...
- 849              		.loc 1 169 1 view .LVU232
- 850 0010 7047     		bx	lr
- 851              		.cfi_endproc
- 852              	.LFE348:
- 854              		.text
- 855              	.Letext0:
- 856              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 857              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 858              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
- 859              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
- 860              		.file 8 "SynaptiX_FDK/components/modules/modem_ops/modem_ops.h"
- 861              		.file 9 "SynaptiX_FDK/utils/cqueue/cqueue.h"
- 862              		.file 10 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
- 863              		.file 11 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
- 864              		.file 12 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
- 865              		.file 13 "SynaptiX_FDK/components/modules/gps/minmea.h"
- 866              		.file 14 "SynaptiX_FDK/components/modules/gps/gps.h"
- 867              		.file 15 "SynaptiX_FDK/components/peripherals/spi/sx_spi.h"
- 868              		.file 16 "SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.h"
- 869              		.file 17 "SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.h"
- 870              		.file 18 "SynaptiX_FDK/services/logger/logger.h"
- 871              		.file 19 "SynaptiX_FDK/utils/delay/sx_delay.h"
- 872              		.file 20 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
-ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s 			page 26
+ 821              		.loc 1 169 1 view .LVU228
+ 822 0010 7047     		bx	lr
+ 823              		.cfi_endproc
+ 824              	.LFE346:
+ 826              		.text
+ 827              	.Letext0:
+ 828              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 829              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 830              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 831              		.file 6 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 832              		.file 7 "SynaptiX_FDK/components/modules/modem_ops/modem_ops.h"
+ 833              		.file 8 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 834              		.file 9 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
+ 835              		.file 10 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+ 836              		.file 11 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 837              		.file 12 "SynaptiX_FDK/components/modules/gps/minmea.h"
+ 838              		.file 13 "SynaptiX_FDK/components/modules/gps/gps.h"
+ 839              		.file 14 "SynaptiX_FDK/components/peripherals/spi/sx_spi.h"
+ 840              		.file 15 "SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.h"
+ 841              		.file 16 "SynaptiX_FDK/services/sleepmanager/sx_sleep_manager.h"
+ 842              		.file 17 "SynaptiX_FDK/services/logger/logger.h"
+ 843              		.file 18 "SynaptiX_FDK/board/sx_board.h"
+ 844              		.file 19 "SynaptiX_FDK/utils/delay/sx_delay.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s 			page 22
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 sx_sleep_manager.c
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:22     .text.sx_sleep_enter_stop:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:27     .text.sx_sleep_enter_stop:00000000 sx_sleep_enter_stop
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:60     .text.sx_sleep_set_rtc_wake:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:65     .text.sx_sleep_set_rtc_wake:00000000 sx_sleep_set_rtc_wake
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:97     .text.sx_sleep_cancel_rtc:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:102    .text.sx_sleep_cancel_rtc:00000000 sx_sleep_cancel_rtc
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:134    .text.sx_gettick:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:140    .text.sx_gettick:00000000 sx_gettick
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:162    .rodata.sx_sleep_manager_init.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:169    .text.sx_sleep_manager_init:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:175    .text.sx_sleep_manager_init:00000000 sx_sleep_manager_init
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:241    .text.sx_sleep_manager_init:00000028 $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:247    .rodata.sx_sleep_manager_enter.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:260    .text.sx_sleep_manager_enter:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:266    .text.sx_sleep_manager_enter:00000000 sx_sleep_manager_enter
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:405    .text.sx_sleep_manager_enter:00000098 $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:415    .rodata.sx_sleep_manager_wake_process.str1.4:00000000 $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:436    .text.sx_sleep_manager_wake_process:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:442    .text.sx_sleep_manager_wake_process:00000000 sx_sleep_manager_wake_process
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:464    .text.sx_sleep_manager_wake_process:0000000e $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:720    .text.sx_sleep_manager_wake_process:0000011c $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:733    .text.sx_sleep_manager_is_wake_done:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:739    .text.sx_sleep_manager_is_wake_done:00000000 sx_sleep_manager_is_wake_done
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:761    .text.sx_sleep_manager_wake_tick:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:767    .text.sx_sleep_manager_wake_tick:00000000 sx_sleep_manager_wake_tick
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:811    .text.sx_sleep_manager_wake_tick:00000018 $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:816    .text.sx_sleep_manager_reset_wake:00000000 $t
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:822    .text.sx_sleep_manager_reset_wake:00000000 sx_sleep_manager_reset_wake
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:469    .text.sx_sleep_manager_wake_process:00000013 $d
-C:\Users\DELL\AppData\Local\Temp\ccbpmLHH.s:469    .text.sx_sleep_manager_wake_process:00000014 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:22     .text.sx_sleep_enter_stop:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:27     .text.sx_sleep_enter_stop:00000000 sx_sleep_enter_stop
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:60     .text.sx_sleep_set_rtc_wake:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:65     .text.sx_sleep_set_rtc_wake:00000000 sx_sleep_set_rtc_wake
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:97     .text.sx_sleep_cancel_rtc:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:102    .text.sx_sleep_cancel_rtc:00000000 sx_sleep_cancel_rtc
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:134    .rodata.sx_sleep_manager_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:141    .text.sx_sleep_manager_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:147    .text.sx_sleep_manager_init:00000000 sx_sleep_manager_init
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:213    .text.sx_sleep_manager_init:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:219    .rodata.sx_sleep_manager_enter.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:232    .text.sx_sleep_manager_enter:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:238    .text.sx_sleep_manager_enter:00000000 sx_sleep_manager_enter
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:377    .text.sx_sleep_manager_enter:00000098 $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:387    .rodata.sx_sleep_manager_wake_process.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:408    .text.sx_sleep_manager_wake_process:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:414    .text.sx_sleep_manager_wake_process:00000000 sx_sleep_manager_wake_process
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:436    .text.sx_sleep_manager_wake_process:0000000e $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:692    .text.sx_sleep_manager_wake_process:0000011c $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:705    .text.sx_sleep_manager_is_wake_done:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:711    .text.sx_sleep_manager_is_wake_done:00000000 sx_sleep_manager_is_wake_done
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:733    .text.sx_sleep_manager_wake_tick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:739    .text.sx_sleep_manager_wake_tick:00000000 sx_sleep_manager_wake_tick
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:783    .text.sx_sleep_manager_wake_tick:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:788    .text.sx_sleep_manager_reset_wake:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:794    .text.sx_sleep_manager_reset_wake:00000000 sx_sleep_manager_reset_wake
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:441    .text.sx_sleep_manager_wake_process:00000013 $d
+C:\Users\DELL\AppData\Local\Temp\cc2EPZqA.s:441    .text.sx_sleep_manager_wake_process:00000014 $t
 
 UNDEFINED SYMBOLS
-HAL_GetTick
 log_func
 gps_power_off
 sx_delay_ms

@@ -29,6 +29,10 @@ extern "C" {
  * before a given gas type is considered disconnected. */
 #define GAS_SENSOR_TIMEOUT_MS 10000U
 
+/*QA mode*/
+const uint8_t CMD_SWITCH_TO_QA[] = {0xFF, 0x01, 0x78, 0x41, 0x00, 0x00, 0x00, 0x00, 0x46};
+const uint8_t CMD_READ_GAS[]    = {0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79};
+
 typedef enum GasSensorType{
     GAS_SENSOR_CO = 0x04,
     GAS_SENSOR_SO2 = 0x2B,
@@ -75,6 +79,10 @@ void gas_sensor_start_calibration(GasSensor_t *sensor, bool isZeroCalib);
  * static, only its address is exposed. Only valid to call after
  * gas_sensor_init() has run; returns NULL before that. */
 sx_uart_t *gas_sensor_get_uart(void);
+
+void gas_sensor_switch_to_qa_mode(void);
+
+void gas_sensor_request_reading(void);
 
 extern GasSensor_t gas_sensor[GAS_SENSOR_COUNT];
 

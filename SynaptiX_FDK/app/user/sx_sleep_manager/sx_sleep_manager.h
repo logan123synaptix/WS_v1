@@ -25,7 +25,8 @@ extern "C" {
 typedef struct {
     modem_handle_t *modem;
     sx_gps_t       *gps;
-
+    sx_gpio_t      pump_io;
+    SHT3X_T        *sht3x
     sx_sleep_service_t svc;
 
     /* Elapsed time for the currently-running GPS-fix-wait step; owned by

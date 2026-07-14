@@ -1,7 +1,6 @@
 #include "sx_sleep.h"
 #include "sx_config.h"
 #include "rtc.h"
-#include "usart.h"
 #include "logger.h"
 
 #if SX_PLATFORM == SX_PLATFORM_STM32H5
@@ -46,15 +45,13 @@ sx_sleep_ops_t sx_sleep_ops = {
     .cancel_rtc   = _cancel_rtc,
 };
 
-// static void _enter_stop(sx_sleep_t *mgr){
-//     s_instance = mgr;
-//     SX_SUSPEND_TICS();
-//     s_enter_stop(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-//     extern void SystemClock_Config(void);
-//     SystemClock_Config();
-//     SX_RESUME_TICS();
-// }
-
+/* Generic STOP-mode entry: this module knows nothing about which
+ * peripherals exist on a given board (UART, USB, DMA, ...). Anything that
+ * needs quiescing before STOP / restoring after wake is delegated to the
+ * caller-supplied pre_stop_hook/post_wake_hook (see sx_sleep.h) — this
+ * function only handles the power-mode + tick-suspend sequence and the
+ * pending-SysTick-exception clear, which are intrinsic to STOP mode itself
+ * on every board, not board-specific. */
 static void _enter_stop(sx_sleep_t *mgr)
 {
     s_instance = mgr;
@@ -62,34 +59,9 @@ static void _enter_stop(sx_sleep_t *mgr)
         s_instance->wake_reason = WAKE_REASON_UNKNOWN;
     }
 
-    /* Generic: abort whichever UARTs the caller registered via
-     * sx_sleep_init() (board-specific — this module doesn't know or care
-     * which UARTs those are). Uses sx_uart_abort() (sx_uart.c), which
-     * itself calls HAL_UART_Abort() on the underlying HAL handle, so no
-     * huartN symbol is referenced here. */
-    if (mgr->uarts_to_abort) {
-        for (uint8_t i = 0; i < mgr->uarts_to_abort_count; i++) {
-            if (mgr->uarts_to_abort[i]) {
-                sx_uart_abort(mgr->uarts_to_abort[i]);
-            }
-        }
+    if (mgr->pre_stop_hook) {
+        mgr->pre_stop_hook(mgr->hook_ctx);
     }
-
-    /* NOT YET GENERIC: clearing UART error flags and pending NVIC IRQs
-     * still needs the concrete IRQn (USART1_IRQn/USART2_IRQn), which
-     * can't be derived from a generic sx_uart_t* without adding an
-     * IRQn lookup mechanism this module doesn't have yet. Left
-     * hard-coded to this board's LTE (USART1) + GPS (USART2) UARTs for
-     * now — a board reusing this module for a different UART pair will
-     * need to adjust these two lines (or extend uarts_to_abort with an
-     * IRQn field) rather than getting this for free. */
-    __HAL_UART_CLEAR_IT(&huart1, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
-    __HAL_UART_CLEAR_IT(&huart2, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
-    HAL_NVIC_ClearPendingIRQ(USART1_IRQn);
-    HAL_NVIC_ClearPendingIRQ(USART2_IRQn);
-
-    HAL_NVIC_DisableIRQ(USB_DRD_FS_IRQn);
-    HAL_NVIC_ClearPendingIRQ(USB_DRD_FS_IRQn);
 
     SCB->ICSR = SCB_ICSR_PENDSTCLR_Msk;
 
@@ -99,12 +71,14 @@ static void _enter_stop(sx_sleep_t *mgr)
     SX_SUSPEND_TICS();
     s_enter_stop(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
-    /* ── Sau wake: restore ── */
+    /* ── After wake ── */
     extern void SystemClock_Config(void);
     SystemClock_Config();
     SX_RESUME_TICS();
 
-    HAL_NVIC_EnableIRQ(USB_DRD_FS_IRQn);
+    if (mgr->post_wake_hook) {
+        mgr->post_wake_hook(mgr->hook_ctx);
+    }
 }
 static void _set_rtc_wake(sx_sleep_t *mgr, uint32_t period_sec){
     // (void)mgr;

@@ -22,6 +22,12 @@ static uint8_t uart_rx_char[6];
 static void set_enter_sleep_mode(void);
 static void set_enter_full_mode(void);
 
+/* sx_sleep_t hooks (see components/peripherals/sleep/sx_sleep.h) — this
+ * board's plug-in for what needs quiescing before STOP mode / restoring
+ * after waking. sx_sleep.c itself has no knowledge of UART/USB. */
+static void board_sleep_pre_stop_hook(void *hook_ctx);
+static void board_sleep_post_wake_hook(void *hook_ctx);
+
 void dcd_fs_msp_init(uint8_t rhport)
 {
     (void)rhport;
@@ -258,6 +264,12 @@ void sx_board_init(void)
     // Pump init
     pump_init(&s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin);
     pump_off(&s_en_pw_pump);
+
+    // Tier-1 generic sleep driver — this board's pre_stop/post_wake hooks
+    // (defined below) are what actually know about LTE (USART1) + GPS
+    // (USART2) UARTs and USB; sx_sleep.c itself has no such knowledge.
+    sx_sleep_init(&board.sleep, &sx_sleep_ops, NULL,
+                  board_sleep_pre_stop_hook, board_sleep_post_wake_hook, NULL);
 }
 
 static void sx_lte_uart_abort(void) {
@@ -266,6 +278,39 @@ static void sx_lte_uart_abort(void) {
 
 static void sx_gps_uart_abort(){
     HAL_UART_Abort(hal_uart[UART_GPS]);
+}
+
+/* Called by sx_sleep.c's _enter_stop() right before actually entering STOP
+ * mode. This board's own knowledge of what needs quiescing: LTE (USART1)
+ * and GPS (USART2) UARTs, plus USB. Moved here (out of
+ * components/peripherals/sleep) since that module must not know these
+ * peripherals exist — a board without USB/these UARTs would just supply a
+ * different hook, without touching sx_sleep.c at all. */
+static void board_sleep_pre_stop_hook(void *hook_ctx)
+{
+    (void)hook_ctx;
+
+    sx_lte_uart_abort();
+    sx_gps_uart_abort();
+    __HAL_UART_CLEAR_IT(&huart1, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
+    __HAL_UART_CLEAR_IT(&huart2, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
+    HAL_NVIC_ClearPendingIRQ(USART1_IRQn);
+    HAL_NVIC_ClearPendingIRQ(USART2_IRQn);
+
+    HAL_NVIC_DisableIRQ(USB_DRD_FS_IRQn);
+    HAL_NVIC_ClearPendingIRQ(USB_DRD_FS_IRQn);
+}
+
+/* Mirror of board_sleep_pre_stop_hook(), called right after waking +
+ * SystemClock_Config() + tick resume. Only USB needs restoring here — LTE
+ * and GPS UARTs are re-armed later, on demand, via
+ * board_sim_uart_resume_it()/board_gps_uart_resume_it() (called from the
+ * app-layer wake sequencing), not unconditionally on every wake. */
+static void board_sleep_post_wake_hook(void *hook_ctx)
+{
+    (void)hook_ctx;
+
+    HAL_NVIC_EnableIRQ(USB_DRD_FS_IRQn);
 }
 
 void gps_it_handle(){

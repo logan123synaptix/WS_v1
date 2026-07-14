@@ -109,6 +109,13 @@ typedef struct Board{
      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
      *   this range well. */
     ADS1115_T   ads1115;
+
+    /* Tier-1 generic sleep/STOP-mode driver (components/peripherals/sleep).
+     * Knows nothing about UART/USB/any peripheral — board_sleep_pre_stop_hook()
+     * and board_sleep_post_wake_hook() (sx_board.c) are this board's plug-in
+     * for whatever needs quiescing/restoring around STOP mode, wired in via
+     * sx_sleep_init() in sx_board_init(). */
+    sx_sleep_t  sleep;
 }Board_t;
 
 typedef enum{

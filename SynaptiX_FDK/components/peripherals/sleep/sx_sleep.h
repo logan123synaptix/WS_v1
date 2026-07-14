@@ -6,6 +6,7 @@ extern "C" {
 #endif
  
 #include <stdint.h>
+#include "sx_uart.h"
 
 typedef enum {
     WAKE_REASON_UNKNOWN = 0,
@@ -25,15 +26,28 @@ struct sx_sleep {
     sx_sleep_ops_t *ops;
     void                   *pDriver;
     wake_reason_t           wake_reason;
+
+    /* UARTs to abort (HAL_UART_Abort + clear pending IRQ, via
+     * sx_uart_abort()) right before entering STOP mode. Generic by
+     * design: this module knows nothing about which UARTs a given board
+     * has (LTE/GPS/dust/gas/...) — the caller (board bring-up code)
+     * populates this list with whichever sx_uart_t instances need a
+     * clean abort before sleep. NULL/0 is valid (no UARTs to abort). */
+    sx_uart_t             **uarts_to_abort;
+    uint8_t                 uarts_to_abort_count;
 };
 
 static inline void sx_sleep_init(sx_sleep_t *mgr,
                                           sx_sleep_ops_t *ops,
-                                          void *pDriver)
+                                          void *pDriver,
+                                          sx_uart_t **uarts_to_abort,
+                                          uint8_t uarts_to_abort_count)
 {
     mgr->ops         = ops;
     mgr->pDriver     = pDriver;
     mgr->wake_reason = WAKE_REASON_UNKNOWN;
+    mgr->uarts_to_abort       = uarts_to_abort;
+    mgr->uarts_to_abort_count = uarts_to_abort_count;
 }
 
 static inline void sx_sleep_enter_stop(sx_sleep_t *mgr)
@@ -42,8 +56,7 @@ static inline void sx_sleep_enter_stop(sx_sleep_t *mgr)
         mgr->ops->enter_stop(mgr);
 }
 
-static inline void sx_sleep_set_rtc_wake(sx_sleep_t *mgr,
-                                                   uint32_t period_sec)
+static inline void sx_sleep_set_rtc_wake(sx_sleep_t *mgr, uint32_t period_sec)
 {
     if (mgr->ops && mgr->ops->set_rtc_wake)
         mgr->ops->set_rtc_wake(mgr, period_sec);

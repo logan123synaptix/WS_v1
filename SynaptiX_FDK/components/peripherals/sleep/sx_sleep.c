@@ -62,8 +62,27 @@ static void _enter_stop(sx_sleep_t *mgr)
         s_instance->wake_reason = WAKE_REASON_UNKNOWN;
     }
 
-    HAL_UART_Abort(&huart1);   // LTE
-    HAL_UART_Abort(&huart2);   // GPS
+    /* Generic: abort whichever UARTs the caller registered via
+     * sx_sleep_init() (board-specific — this module doesn't know or care
+     * which UARTs those are). Uses sx_uart_abort() (sx_uart.c), which
+     * itself calls HAL_UART_Abort() on the underlying HAL handle, so no
+     * huartN symbol is referenced here. */
+    if (mgr->uarts_to_abort) {
+        for (uint8_t i = 0; i < mgr->uarts_to_abort_count; i++) {
+            if (mgr->uarts_to_abort[i]) {
+                sx_uart_abort(mgr->uarts_to_abort[i]);
+            }
+        }
+    }
+
+    /* NOT YET GENERIC: clearing UART error flags and pending NVIC IRQs
+     * still needs the concrete IRQn (USART1_IRQn/USART2_IRQn), which
+     * can't be derived from a generic sx_uart_t* without adding an
+     * IRQn lookup mechanism this module doesn't have yet. Left
+     * hard-coded to this board's LTE (USART1) + GPS (USART2) UARTs for
+     * now — a board reusing this module for a different UART pair will
+     * need to adjust these two lines (or extend uarts_to_abort with an
+     * IRQn field) rather than getting this for free. */
     __HAL_UART_CLEAR_IT(&huart1, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
     __HAL_UART_CLEAR_IT(&huart2, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
     HAL_NVIC_ClearPendingIRQ(USART1_IRQn);

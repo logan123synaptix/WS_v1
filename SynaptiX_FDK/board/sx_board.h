@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct Board{
     /* Concrete driver instance + the modem_ops_t handle service/app layers
-     * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+     * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_service.c — see
      * modem_ops.h). Swapping to a different modem module later means
      * replacing a7677s below with the new driver's type and pointing
      * modem.ops/modem.ctx at it — nothing outside this file changes. */

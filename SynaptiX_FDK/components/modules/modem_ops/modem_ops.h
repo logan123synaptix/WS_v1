@@ -12,7 +12,7 @@ extern "C" {
  *
  * Common interface (VTABLE) for every modem driver (sim76xx, a7677s, ...).
  * This is the only contract that the service layer (sx_mqtt.c,
- * sx_sleep_manager.c, sx_user_mqtt.c) is allowed to know about. The service
+ * sx_sleep_service.c, sx_user_mqtt.c) is allowed to know about. The service
  * layer must NOT include sim76xx.h or a7677s.h directly — every operation
  * must go through modem_ops_t.
  *

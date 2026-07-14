@@ -6,7 +6,6 @@ extern "C" {
 #endif
  
 #include <stdint.h>
-#include "sx_uart.h"
 
 typedef enum {
     WAKE_REASON_UNKNOWN = 0,
@@ -22,32 +21,49 @@ typedef struct sx_sleep_ops {
     void (*cancel_rtc)  (sx_sleep_t *mgr);
 } sx_sleep_ops_t;
 
+/* This module (components/peripherals/sleep) only knows about the STOP-mode
+ * power sequence + RTC wakeup timer. It has ZERO knowledge of what
+ * peripherals a given board has (UART, USB, SPI/I2C DMA, ADC, ...) — that
+ * is entirely board-specific and does not belong here. Anything that must
+ * be quiesced before STOP mode and restored after waking is the caller's
+ * job, plugged in via the two hooks below:
+ *
+ *   pre_stop_hook  — called right before actually entering STOP (after
+ *                    wake_reason is reset, before ticks are suspended).
+ *                    Board code puts whatever it needs here: abort UARTs,
+ *                    disable USB IRQ, halt DMA, etc.
+ *   post_wake_hook — called right after waking + SystemClock_Config() +
+ *                    tick resume. Mirror of pre_stop_hook, for restoring
+ *                    whatever it disabled (e.g. re-enable USB IRQ).
+ *
+ * Both receive hook_ctx as-is; this module never dereferences it. NULL
+ * hook = nothing to do, which is a fully valid configuration (e.g. a board
+ * with no peripherals needing special handling before sleep). */
+typedef void (*sx_sleep_hook_t)(void *hook_ctx);
+
 struct sx_sleep {
     sx_sleep_ops_t *ops;
     void                   *pDriver;
     wake_reason_t           wake_reason;
 
-    /* UARTs to abort (HAL_UART_Abort + clear pending IRQ, via
-     * sx_uart_abort()) right before entering STOP mode. Generic by
-     * design: this module knows nothing about which UARTs a given board
-     * has (LTE/GPS/dust/gas/...) — the caller (board bring-up code)
-     * populates this list with whichever sx_uart_t instances need a
-     * clean abort before sleep. NULL/0 is valid (no UARTs to abort). */
-    sx_uart_t             **uarts_to_abort;
-    uint8_t                 uarts_to_abort_count;
+    sx_sleep_hook_t         pre_stop_hook;
+    sx_sleep_hook_t         post_wake_hook;
+    void                   *hook_ctx;
 };
 
 static inline void sx_sleep_init(sx_sleep_t *mgr,
                                           sx_sleep_ops_t *ops,
                                           void *pDriver,
-                                          sx_uart_t **uarts_to_abort,
-                                          uint8_t uarts_to_abort_count)
+                                          sx_sleep_hook_t pre_stop_hook,
+                                          sx_sleep_hook_t post_wake_hook,
+                                          void *hook_ctx)
 {
     mgr->ops         = ops;
     mgr->pDriver     = pDriver;
     mgr->wake_reason = WAKE_REASON_UNKNOWN;
-    mgr->uarts_to_abort       = uarts_to_abort;
-    mgr->uarts_to_abort_count = uarts_to_abort_count;
+    mgr->pre_stop_hook  = pre_stop_hook;
+    mgr->post_wake_hook = post_wake_hook;
+    mgr->hook_ctx       = hook_ctx;
 }
 
 static inline void sx_sleep_enter_stop(sx_sleep_t *mgr)

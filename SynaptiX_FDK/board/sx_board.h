@@ -31,6 +31,7 @@ extern "C" {
 #include "sht3x.h"
 #include "ze12a.h"
 #include "ads1115.h"
+#include "pump.h"
 
 typedef struct {
     volatile uint32_t raw_adc;

@@ -256,7 +256,8 @@ void sx_board_init(void)
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
 
     // Pump init
-    sx_gpio_init(&s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin);
+    pump_init(&s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin);
+    pump_off(&s_en_pw_pump);
 }
 
 static void sx_lte_uart_abort(void) {

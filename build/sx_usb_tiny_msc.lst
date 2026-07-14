@@ -1,0 +1,1786 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_usb_tiny_msc.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c"
+  21              		.section	.text.sx_gettick,"ax",%progbits
+  22              		.align	1
+  23              		.global	sx_gettick
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	sx_gettick:
+  29              	.LFB336:
+  30              		.file 2 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 2
+
+
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 3
+
+
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 4
+
+
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+  31              		.loc 2 186 33 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35 0000 08B5     		push	{r3, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 3, -8
+  39              		.cfi_offset 14, -4
+  40              		.loc 2 186 34 view .LVU1
+  41              		.loc 2 186 41 is_stmt 0 view .LVU2
+  42 0002 FFF7FEFF 		bl	HAL_GetTick
+  43              	.LVL0:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 5
+
+
+  44              		.loc 2 186 55 view .LVU3
+  45 0006 08BD     		pop	{r3, pc}
+  46              		.cfi_endproc
+  47              	.LFE336:
+  49              		.section	.rodata.sx_usb_tiny_msc_init.str1.4,"aMS",%progbits,1
+  50              		.align	2
+  51              	.LC0:
+  52 0000 4D534320 		.ascii	"MSC Initialized\000"
+  52      496E6974 
+  52      69616C69 
+  52      7A656400 
+  53              		.align	2
+  54              	.LC1:
+  55 0010 53585F4D 		.ascii	"SX_MSC\000"
+  55      534300
+  56              		.section	.text.sx_usb_tiny_msc_init,"ax",%progbits
+  57              		.align	1
+  58              		.global	sx_usb_tiny_msc_init
+  59              		.syntax unified
+  60              		.thumb
+  61              		.thumb_func
+  63              	sx_usb_tiny_msc_init:
+  64              	.LVL1:
+  65              	.LFB433:
+   1:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #include "sx_usb_tiny_msc.h"
+   2:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #include "sx_config.h"
+   3:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #include "logger.h"
+   4:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #include "ff.h"
+   5:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #include "diskio.h"
+   6:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #include <string.h>
+   7:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #include "stdio.h"
+   8:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+   9:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #if (SX_PLATFORM == SX_PLATFORM_STM32H5)
+  10:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     #include "stm32h5xx_hal.h"
+  11:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     #include "tusb.h"
+  12:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #endif
+  13:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  14:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** #if CFG_TUD_MSC
+  15:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  16:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** static const char* TAG = "SX_MSC";
+  17:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** static sx_usb_tiny_msc_t *s_msc = NULL;
+  18:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  19:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** static uint8_t  s_write_tmp[SX_MSC_BLOCK_SIZE];
+  20:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** static uint32_t s_write_tmp_lba = 0xFFFFFFFF;
+  21:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  22:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void sx_usb_tiny_msc_init(sx_usb_tiny_msc_t *msc)
+  23:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+  66              		.loc 1 23 1 is_stmt 1 view -0
+  67              		.cfi_startproc
+  68              		@ args = 0, pretend = 0, frame = 0
+  69              		@ frame_needed = 0, uses_anonymous_args = 0
+  70              		.loc 1 23 1 is_stmt 0 view .LVU5
+  71 0000 08B5     		push	{r3, lr}
+  72              	.LCFI1:
+  73              		.cfi_def_cfa_offset 8
+  74              		.cfi_offset 3, -8
+  75              		.cfi_offset 14, -4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 6
+
+
+  24:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     memset(msc, 0x00, sizeof(sx_usb_tiny_msc_t));
+  76              		.loc 1 24 5 is_stmt 1 view .LVU6
+  77 0002 0023     		movs	r3, #0
+  78 0004 0360     		str	r3, [r0]	@ unaligned
+  79 0006 4360     		str	r3, [r0, #4]	@ unaligned
+  25:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->state         = SX_MSC_STATE_IDLE;
+  80              		.loc 1 25 5 view .LVU7
+  26:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->media_changed = false;
+  81              		.loc 1 26 5 view .LVU8
+  27:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->block_count   = 0;
+  82              		.loc 1 27 5 view .LVU9
+  28:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     s_msc = msc;
+  83              		.loc 1 28 5 view .LVU10
+  84              		.loc 1 28 11 is_stmt 0 view .LVU11
+  85 0008 034B     		ldr	r3, .L5
+  86 000a 1860     		str	r0, [r3]
+  29:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     log_info(TAG, "MSC Initialized");
+  87              		.loc 1 29 5 is_stmt 1 view .LVU12
+  88 000c 034A     		ldr	r2, .L5+4
+  89 000e 0449     		ldr	r1, .L5+8
+  90 0010 0320     		movs	r0, #3
+  91              	.LVL2:
+  92              		.loc 1 29 5 is_stmt 0 view .LVU13
+  93 0012 FFF7FEFF 		bl	log_func
+  94              	.LVL3:
+  30:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+  95              		.loc 1 30 1 view .LVU14
+  96 0016 08BD     		pop	{r3, pc}
+  97              	.L6:
+  98              		.align	2
+  99              	.L5:
+ 100 0018 00000000 		.word	s_msc
+ 101 001c 00000000 		.word	.LC0
+ 102 0020 10000000 		.word	.LC1
+ 103              		.cfi_endproc
+ 104              	.LFE433:
+ 106              		.section	.rodata.sx_usb_tiny_msc_enter.str1.4,"aMS",%progbits,1
+ 107              		.align	2
+ 108              	.LC2:
+ 109 0000 416C7265 		.ascii	"Already in MSC mode\000"
+ 109      61647920 
+ 109      696E204D 
+ 109      5343206D 
+ 109      6F646500 
+ 110              		.align	2
+ 111              	.LC3:
+ 112 0014 4E6F2062 		.ascii	"No block count set \342\200\224 call sx_usb_tiny_ms"
+ 112      6C6F636B 
+ 112      20636F75 
+ 112      6E742073 
+ 112      657420E2 
+ 113 003e 635F6C6F 		.ascii	"c_load() first\000"
+ 113      61642829 
+ 113      20666972 
+ 113      737400
+ 114 004d 000000   		.align	2
+ 115              	.LC4:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 7
+
+
+ 116 0050 4D534320 		.ascii	"MSC active: %lu blocks\000"
+ 116      61637469 
+ 116      76653A20 
+ 116      256C7520 
+ 116      626C6F63 
+ 117              		.section	.text.sx_usb_tiny_msc_enter,"ax",%progbits
+ 118              		.align	1
+ 119              		.global	sx_usb_tiny_msc_enter
+ 120              		.syntax unified
+ 121              		.thumb
+ 122              		.thumb_func
+ 124              	sx_usb_tiny_msc_enter:
+ 125              	.LVL4:
+ 126              	.LFB434:
+  31:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  32:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void sx_usb_tiny_msc_enter(sx_usb_tiny_msc_t *msc)
+  33:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 127              		.loc 1 33 1 is_stmt 1 view -0
+ 128              		.cfi_startproc
+ 129              		@ args = 0, pretend = 0, frame = 0
+ 130              		@ frame_needed = 0, uses_anonymous_args = 0
+ 131              		.loc 1 33 1 is_stmt 0 view .LVU16
+ 132 0000 08B5     		push	{r3, lr}
+ 133              	.LCFI2:
+ 134              		.cfi_def_cfa_offset 8
+ 135              		.cfi_offset 3, -8
+ 136              		.cfi_offset 14, -4
+  34:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (msc->state == SX_MSC_STATE_ACTIVE || msc->state == SX_MSC_STATE_BUILDING) {
+ 137              		.loc 1 34 5 is_stmt 1 view .LVU17
+ 138              		.loc 1 34 12 is_stmt 0 view .LVU18
+ 139 0002 0379     		ldrb	r3, [r0, #4]	@ zero_extendqisi2
+ 140              		.loc 1 34 43 view .LVU19
+ 141 0004 013B     		subs	r3, r3, #1
+ 142 0006 DBB2     		uxtb	r3, r3
+ 143              		.loc 1 34 8 view .LVU20
+ 144 0008 012B     		cmp	r3, #1
+ 145 000a 0BD9     		bls	.L12
+  35:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         log_warn(TAG, "Already in MSC mode");
+  36:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+  37:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+  38:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (msc->block_count == 0) {
+ 146              		.loc 1 38 5 is_stmt 1 view .LVU21
+ 147              		.loc 1 38 12 is_stmt 0 view .LVU22
+ 148 000c 0368     		ldr	r3, [r0]
+ 149              		.loc 1 38 8 view .LVU23
+ 150 000e 7BB1     		cbz	r3, .L13
+  39:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         log_error(TAG, "No block count set — call sx_usb_tiny_msc_load() first");
+  40:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+  41:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+  42:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->state         = SX_MSC_STATE_ACTIVE;
+ 151              		.loc 1 42 5 is_stmt 1 view .LVU24
+ 152              		.loc 1 42 24 is_stmt 0 view .LVU25
+ 153 0010 0222     		movs	r2, #2
+ 154 0012 0271     		strb	r2, [r0, #4]
+  43:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->media_changed = true;
+ 155              		.loc 1 43 5 is_stmt 1 view .LVU26
+ 156              		.loc 1 43 24 is_stmt 0 view .LVU27
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 8
+
+
+ 157 0014 0122     		movs	r2, #1
+ 158 0016 4271     		strb	r2, [r0, #5]
+  44:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     log_info(TAG, "MSC active: %lu blocks", msc->block_count);
+ 159              		.loc 1 44 5 is_stmt 1 view .LVU28
+ 160 0018 084A     		ldr	r2, .L14
+ 161 001a 0949     		ldr	r1, .L14+4
+ 162 001c 0320     		movs	r0, #3
+ 163              	.LVL5:
+ 164              		.loc 1 44 5 is_stmt 0 view .LVU29
+ 165 001e FFF7FEFF 		bl	log_func
+ 166              	.LVL6:
+ 167              	.L7:
+  45:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 168              		.loc 1 45 1 view .LVU30
+ 169 0022 08BD     		pop	{r3, pc}
+ 170              	.LVL7:
+ 171              	.L12:
+  35:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 172              		.loc 1 35 9 is_stmt 1 view .LVU31
+ 173 0024 074A     		ldr	r2, .L14+8
+ 174 0026 0649     		ldr	r1, .L14+4
+ 175 0028 0220     		movs	r0, #2
+ 176              	.LVL8:
+  35:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 177              		.loc 1 35 9 is_stmt 0 view .LVU32
+ 178 002a FFF7FEFF 		bl	log_func
+ 179              	.LVL9:
+  36:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 180              		.loc 1 36 9 is_stmt 1 view .LVU33
+ 181 002e F8E7     		b	.L7
+ 182              	.LVL10:
+ 183              	.L13:
+  39:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 184              		.loc 1 39 9 view .LVU34
+ 185 0030 054A     		ldr	r2, .L14+12
+ 186 0032 0349     		ldr	r1, .L14+4
+ 187 0034 0120     		movs	r0, #1
+ 188              	.LVL11:
+  39:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 189              		.loc 1 39 9 is_stmt 0 view .LVU35
+ 190 0036 FFF7FEFF 		bl	log_func
+ 191              	.LVL12:
+  40:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 192              		.loc 1 40 9 is_stmt 1 view .LVU36
+ 193 003a F2E7     		b	.L7
+ 194              	.L15:
+ 195              		.align	2
+ 196              	.L14:
+ 197 003c 50000000 		.word	.LC4
+ 198 0040 10000000 		.word	.LC1
+ 199 0044 00000000 		.word	.LC2
+ 200 0048 14000000 		.word	.LC3
+ 201              		.cfi_endproc
+ 202              	.LFE434:
+ 204              		.section	.rodata.sx_usb_tiny_msc_exit.str1.4,"aMS",%progbits,1
+ 205              		.align	2
+ 206              	.LC5:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 9
+
+
+ 207 0000 4D534320 		.ascii	"MSC not active\000"
+ 207      6E6F7420 
+ 207      61637469 
+ 207      766500
+ 208 000f 00       		.align	2
+ 209              	.LC6:
+ 210 0010 4D534320 		.ascii	"MSC exited\000"
+ 210      65786974 
+ 210      656400
+ 211              		.section	.text.sx_usb_tiny_msc_exit,"ax",%progbits
+ 212              		.align	1
+ 213              		.global	sx_usb_tiny_msc_exit
+ 214              		.syntax unified
+ 215              		.thumb
+ 216              		.thumb_func
+ 218              	sx_usb_tiny_msc_exit:
+ 219              	.LVL13:
+ 220              	.LFB435:
+  46:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  47:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void sx_usb_tiny_msc_exit(sx_usb_tiny_msc_t *msc)
+  48:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 221              		.loc 1 48 1 view -0
+ 222              		.cfi_startproc
+ 223              		@ args = 0, pretend = 0, frame = 0
+ 224              		@ frame_needed = 0, uses_anonymous_args = 0
+ 225              		.loc 1 48 1 is_stmt 0 view .LVU38
+ 226 0000 08B5     		push	{r3, lr}
+ 227              	.LCFI3:
+ 228              		.cfi_def_cfa_offset 8
+ 229              		.cfi_offset 3, -8
+ 230              		.cfi_offset 14, -4
+  49:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (msc->state == SX_MSC_STATE_IDLE) {
+ 231              		.loc 1 49 5 is_stmt 1 view .LVU39
+ 232              		.loc 1 49 12 is_stmt 0 view .LVU40
+ 233 0002 0379     		ldrb	r3, [r0, #4]	@ zero_extendqisi2
+ 234              		.loc 1 49 8 view .LVU41
+ 235 0004 43B1     		cbz	r3, .L20
+  50:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         log_warn(TAG, "MSC not active");
+  51:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+  52:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+  53:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->state         = SX_MSC_STATE_IDLE;
+ 236              		.loc 1 53 5 is_stmt 1 view .LVU42
+ 237              		.loc 1 53 24 is_stmt 0 view .LVU43
+ 238 0006 0023     		movs	r3, #0
+ 239 0008 0371     		strb	r3, [r0, #4]
+  54:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->media_changed = false;
+ 240              		.loc 1 54 5 is_stmt 1 view .LVU44
+ 241              		.loc 1 54 24 is_stmt 0 view .LVU45
+ 242 000a 4371     		strb	r3, [r0, #5]
+  55:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     log_info(TAG, "MSC exited");
+ 243              		.loc 1 55 5 is_stmt 1 view .LVU46
+ 244 000c 054A     		ldr	r2, .L21
+ 245 000e 0649     		ldr	r1, .L21+4
+ 246 0010 0320     		movs	r0, #3
+ 247              	.LVL14:
+ 248              		.loc 1 55 5 is_stmt 0 view .LVU47
+ 249 0012 FFF7FEFF 		bl	log_func
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 10
+
+
+ 250              	.LVL15:
+ 251              	.L16:
+  56:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 252              		.loc 1 56 1 view .LVU48
+ 253 0016 08BD     		pop	{r3, pc}
+ 254              	.LVL16:
+ 255              	.L20:
+  50:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 256              		.loc 1 50 9 is_stmt 1 view .LVU49
+ 257 0018 044A     		ldr	r2, .L21+8
+ 258 001a 0349     		ldr	r1, .L21+4
+ 259 001c 0220     		movs	r0, #2
+ 260              	.LVL17:
+  50:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 261              		.loc 1 50 9 is_stmt 0 view .LVU50
+ 262 001e FFF7FEFF 		bl	log_func
+ 263              	.LVL18:
+  51:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 264              		.loc 1 51 9 is_stmt 1 view .LVU51
+ 265 0022 F8E7     		b	.L16
+ 266              	.L22:
+ 267              		.align	2
+ 268              	.L21:
+ 269 0024 10000000 		.word	.LC6
+ 270 0028 10000000 		.word	.LC1
+ 271 002c 00000000 		.word	.LC5
+ 272              		.cfi_endproc
+ 273              	.LFE435:
+ 275              		.section	.text.sx_usb_tiny_msc_get_state,"ax",%progbits
+ 276              		.align	1
+ 277              		.global	sx_usb_tiny_msc_get_state
+ 278              		.syntax unified
+ 279              		.thumb
+ 280              		.thumb_func
+ 282              	sx_usb_tiny_msc_get_state:
+ 283              	.LVL19:
+ 284              	.LFB436:
+  57:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  58:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** sx_msc_state_t sx_usb_tiny_msc_get_state(sx_usb_tiny_msc_t *msc)  { return msc->state; }
+ 285              		.loc 1 58 67 view -0
+ 286              		.cfi_startproc
+ 287              		@ args = 0, pretend = 0, frame = 0
+ 288              		@ frame_needed = 0, uses_anonymous_args = 0
+ 289              		@ link register save eliminated.
+ 290              		.loc 1 58 69 view .LVU53
+ 291              		.loc 1 58 88 is_stmt 0 view .LVU54
+ 292 0000 0079     		ldrb	r0, [r0, #4]	@ zero_extendqisi2
+ 293              	.LVL20:
+ 294              		.loc 1 58 88 view .LVU55
+ 295 0002 7047     		bx	lr
+ 296              		.cfi_endproc
+ 297              	.LFE436:
+ 299              		.section	.text.sx_usb_tiny_msc_is_active,"ax",%progbits
+ 300              		.align	1
+ 301              		.global	sx_usb_tiny_msc_is_active
+ 302              		.syntax unified
+ 303              		.thumb
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 11
+
+
+ 304              		.thumb_func
+ 306              	sx_usb_tiny_msc_is_active:
+ 307              	.LVL21:
+ 308              	.LFB437:
+  59:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** bool           sx_usb_tiny_msc_is_active(sx_usb_tiny_msc_t *msc)
+  60:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 309              		.loc 1 60 1 is_stmt 1 view -0
+ 310              		.cfi_startproc
+ 311              		@ args = 0, pretend = 0, frame = 0
+ 312              		@ frame_needed = 0, uses_anonymous_args = 0
+ 313              		@ link register save eliminated.
+  61:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     return (msc->state == SX_MSC_STATE_ACTIVE || msc->state == SX_MSC_STATE_BUILDING);
+ 314              		.loc 1 61 5 view .LVU57
+ 315              		.loc 1 61 16 is_stmt 0 view .LVU58
+ 316 0000 0079     		ldrb	r0, [r0, #4]	@ zero_extendqisi2
+ 317              	.LVL22:
+ 318              		.loc 1 61 47 view .LVU59
+ 319 0002 0138     		subs	r0, r0, #1
+ 320 0004 C0B2     		uxtb	r0, r0
+  62:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 321              		.loc 1 62 1 view .LVU60
+ 322 0006 0128     		cmp	r0, #1
+ 323 0008 8CBF     		ite	hi
+ 324 000a 0020     		movhi	r0, #0
+ 325 000c 0120     		movls	r0, #1
+ 326 000e 7047     		bx	lr
+ 327              		.cfi_endproc
+ 328              	.LFE437:
+ 330              		.section	.rodata.sx_usb_tiny_msc_set_media_changed.str1.4,"aMS",%progbits,1
+ 331              		.align	2
+ 332              	.LC7:
+ 333 0000 4D656469 		.ascii	"Media changed flagged\000"
+ 333      61206368 
+ 333      616E6765 
+ 333      6420666C 
+ 333      61676765 
+ 334              		.section	.text.sx_usb_tiny_msc_set_media_changed,"ax",%progbits
+ 335              		.align	1
+ 336              		.global	sx_usb_tiny_msc_set_media_changed
+ 337              		.syntax unified
+ 338              		.thumb
+ 339              		.thumb_func
+ 341              	sx_usb_tiny_msc_set_media_changed:
+ 342              	.LVL23:
+ 343              	.LFB438:
+  63:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  64:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void sx_usb_tiny_msc_set_media_changed(sx_usb_tiny_msc_t *msc)
+  65:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 344              		.loc 1 65 1 is_stmt 1 view -0
+ 345              		.cfi_startproc
+ 346              		@ args = 0, pretend = 0, frame = 0
+ 347              		@ frame_needed = 0, uses_anonymous_args = 0
+ 348              		.loc 1 65 1 is_stmt 0 view .LVU62
+ 349 0000 08B5     		push	{r3, lr}
+ 350              	.LCFI4:
+ 351              		.cfi_def_cfa_offset 8
+ 352              		.cfi_offset 3, -8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 12
+
+
+ 353              		.cfi_offset 14, -4
+  66:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->media_changed = true;
+ 354              		.loc 1 66 5 is_stmt 1 view .LVU63
+ 355              		.loc 1 66 24 is_stmt 0 view .LVU64
+ 356 0002 0123     		movs	r3, #1
+ 357 0004 4371     		strb	r3, [r0, #5]
+  67:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     log_info(TAG, "Media changed flagged");
+ 358              		.loc 1 67 5 is_stmt 1 view .LVU65
+ 359 0006 034A     		ldr	r2, .L27
+ 360 0008 0349     		ldr	r1, .L27+4
+ 361 000a 0320     		movs	r0, #3
+ 362              	.LVL24:
+ 363              		.loc 1 67 5 is_stmt 0 view .LVU66
+ 364 000c FFF7FEFF 		bl	log_func
+ 365              	.LVL25:
+  68:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 366              		.loc 1 68 1 view .LVU67
+ 367 0010 08BD     		pop	{r3, pc}
+ 368              	.L28:
+ 369 0012 00BF     		.align	2
+ 370              	.L27:
+ 371 0014 00000000 		.word	.LC7
+ 372 0018 10000000 		.word	.LC1
+ 373              		.cfi_endproc
+ 374              	.LFE438:
+ 376              		.section	.rodata.sx_usb_tiny_msc_load.str1.4,"aMS",%progbits,1
+ 377              		.align	2
+ 378              	.LC8:
+ 379 0000 496E7661 		.ascii	"Invalid block count\000"
+ 379      6C696420 
+ 379      626C6F63 
+ 379      6B20636F 
+ 379      756E7400 
+ 380              		.align	2
+ 381              	.LC9:
+ 382 0014 4469736B 		.ascii	"Disk loaded: %lu blocks (%lu bytes)\000"
+ 382      206C6F61 
+ 382      6465643A 
+ 382      20256C75 
+ 382      20626C6F 
+ 383              		.section	.text.sx_usb_tiny_msc_load,"ax",%progbits
+ 384              		.align	1
+ 385              		.global	sx_usb_tiny_msc_load
+ 386              		.syntax unified
+ 387              		.thumb
+ 388              		.thumb_func
+ 390              	sx_usb_tiny_msc_load:
+ 391              	.LVL26:
+ 392              	.LFB439:
+  69:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  70:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void sx_usb_tiny_msc_load(sx_usb_tiny_msc_t *msc, uint32_t block_count)
+  71:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 393              		.loc 1 71 1 is_stmt 1 view -0
+ 394              		.cfi_startproc
+ 395              		@ args = 0, pretend = 0, frame = 0
+ 396              		@ frame_needed = 0, uses_anonymous_args = 0
+ 397              		.loc 1 71 1 is_stmt 0 view .LVU69
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 13
+
+
+ 398 0000 00B5     		push	{lr}
+ 399              	.LCFI5:
+ 400              		.cfi_def_cfa_offset 4
+ 401              		.cfi_offset 14, -4
+ 402 0002 83B0     		sub	sp, sp, #12
+ 403              	.LCFI6:
+ 404              		.cfi_def_cfa_offset 16
+  72:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (block_count == 0) {
+ 405              		.loc 1 72 5 is_stmt 1 view .LVU70
+ 406              		.loc 1 72 8 is_stmt 0 view .LVU71
+ 407 0004 51B1     		cbz	r1, .L33
+ 408 0006 0B46     		mov	r3, r1
+  73:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         log_error(TAG, "Invalid block count");
+  74:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+  75:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+  76:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     msc->block_count = block_count;
+ 409              		.loc 1 76 5 is_stmt 1 view .LVU72
+ 410              		.loc 1 76 22 is_stmt 0 view .LVU73
+ 411 0008 0160     		str	r1, [r0]
+  77:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     log_info(TAG, "Disk loaded: %lu blocks (%lu bytes)",
+ 412              		.loc 1 77 5 is_stmt 1 view .LVU74
+ 413 000a 4A02     		lsls	r2, r1, #9
+ 414 000c 0092     		str	r2, [sp]
+ 415 000e 064A     		ldr	r2, .L34
+ 416 0010 0649     		ldr	r1, .L34+4
+ 417              	.LVL27:
+ 418              		.loc 1 77 5 is_stmt 0 view .LVU75
+ 419 0012 0320     		movs	r0, #3
+ 420              	.LVL28:
+ 421              		.loc 1 77 5 view .LVU76
+ 422 0014 FFF7FEFF 		bl	log_func
+ 423              	.LVL29:
+ 424              	.L29:
+  78:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****              block_count, block_count * SX_MSC_BLOCK_SIZE);
+  79:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 425              		.loc 1 79 1 view .LVU77
+ 426 0018 03B0     		add	sp, sp, #12
+ 427              	.LCFI7:
+ 428              		.cfi_remember_state
+ 429              		.cfi_def_cfa_offset 4
+ 430              		@ sp needed
+ 431 001a 00BD     		pop	{pc}
+ 432              	.LVL30:
+ 433              	.L33:
+ 434              	.LCFI8:
+ 435              		.cfi_restore_state
+  73:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 436              		.loc 1 73 9 is_stmt 1 view .LVU78
+ 437 001c 044A     		ldr	r2, .L34+8
+ 438 001e 0349     		ldr	r1, .L34+4
+ 439              	.LVL31:
+  73:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 440              		.loc 1 73 9 is_stmt 0 view .LVU79
+ 441 0020 0120     		movs	r0, #1
+ 442              	.LVL32:
+  73:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return;
+ 443              		.loc 1 73 9 view .LVU80
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 14
+
+
+ 444 0022 FFF7FEFF 		bl	log_func
+ 445              	.LVL33:
+  74:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 446              		.loc 1 74 9 is_stmt 1 view .LVU81
+ 447 0026 F7E7     		b	.L29
+ 448              	.L35:
+ 449              		.align	2
+ 450              	.L34:
+ 451 0028 14000000 		.word	.LC9
+ 452 002c 10000000 		.word	.LC1
+ 453 0030 00000000 		.word	.LC8
+ 454              		.cfi_endproc
+ 455              	.LFE439:
+ 457              		.section	.text.sx_usb_tiny_msc_disconnect,"ax",%progbits
+ 458              		.align	1
+ 459              		.global	sx_usb_tiny_msc_disconnect
+ 460              		.syntax unified
+ 461              		.thumb
+ 462              		.thumb_func
+ 464              	sx_usb_tiny_msc_disconnect:
+ 465              	.LFB440:
+  80:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  81:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void sx_usb_tiny_msc_disconnect(void) { tud_disconnect(); }
+ 466              		.loc 1 81 39 view -0
+ 467              		.cfi_startproc
+ 468              		@ args = 0, pretend = 0, frame = 0
+ 469              		@ frame_needed = 0, uses_anonymous_args = 0
+ 470 0000 08B5     		push	{r3, lr}
+ 471              	.LCFI9:
+ 472              		.cfi_def_cfa_offset 8
+ 473              		.cfi_offset 3, -8
+ 474              		.cfi_offset 14, -4
+ 475              		.loc 1 81 41 view .LVU83
+ 476 0002 FFF7FEFF 		bl	tud_disconnect
+ 477              	.LVL34:
+ 478              		.loc 1 81 59 is_stmt 0 view .LVU84
+ 479 0006 08BD     		pop	{r3, pc}
+ 480              		.cfi_endproc
+ 481              	.LFE440:
+ 483              		.section	.text.sx_usb_tiny_msc_connect,"ax",%progbits
+ 484              		.align	1
+ 485              		.global	sx_usb_tiny_msc_connect
+ 486              		.syntax unified
+ 487              		.thumb
+ 488              		.thumb_func
+ 490              	sx_usb_tiny_msc_connect:
+ 491              	.LFB441:
+  82:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void sx_usb_tiny_msc_connect(void)    { tud_connect();    }
+ 492              		.loc 1 82 39 is_stmt 1 view -0
+ 493              		.cfi_startproc
+ 494              		@ args = 0, pretend = 0, frame = 0
+ 495              		@ frame_needed = 0, uses_anonymous_args = 0
+ 496 0000 08B5     		push	{r3, lr}
+ 497              	.LCFI10:
+ 498              		.cfi_def_cfa_offset 8
+ 499              		.cfi_offset 3, -8
+ 500              		.cfi_offset 14, -4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 15
+
+
+ 501              		.loc 1 82 41 view .LVU86
+ 502 0002 FFF7FEFF 		bl	tud_connect
+ 503              	.LVL35:
+ 504              		.loc 1 82 59 is_stmt 0 view .LVU87
+ 505 0006 08BD     		pop	{r3, pc}
+ 506              		.cfi_endproc
+ 507              	.LFE441:
+ 509              		.section	.rodata.tud_msc_inquiry2_cb.str1.4,"aMS",%progbits,1
+ 510              		.align	2
+ 511              	.LC10:
+ 512 0000 53796E61 		.ascii	"SynaptiX\000"
+ 512      70746958 
+ 512      00
+ 513 0009 000000   		.align	2
+ 514              	.LC11:
+ 515 000c 54726163 		.ascii	"Tracking Storage\000"
+ 515      6B696E67 
+ 515      2053746F 
+ 515      72616765 
+ 515      00
+ 516 001d 000000   		.align	2
+ 517              	.LC12:
+ 518 0020 312E3020 		.ascii	"1.0 \000"
+ 518      00
+ 519              		.section	.text.tud_msc_inquiry2_cb,"ax",%progbits
+ 520              		.align	1
+ 521              		.global	tud_msc_inquiry2_cb
+ 522              		.syntax unified
+ 523              		.thumb
+ 524              		.thumb_func
+ 526              	tud_msc_inquiry2_cb:
+ 527              	.LVL36:
+ 528              	.LFB442:
+  83:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  84:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  85:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** uint32_t tud_msc_inquiry2_cb(uint8_t lun, scsi_inquiry_resp_t *resp, uint32_t bufsize)
+  86:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 529              		.loc 1 86 1 is_stmt 1 view -0
+ 530              		.cfi_startproc
+ 531              		@ args = 0, pretend = 0, frame = 0
+ 532              		@ frame_needed = 0, uses_anonymous_args = 0
+ 533              		@ link register save eliminated.
+ 534              		.loc 1 86 1 is_stmt 0 view .LVU89
+ 535 0000 10B4     		push	{r4}
+ 536              	.LCFI11:
+ 537              		.cfi_def_cfa_offset 4
+ 538              		.cfi_offset 4, -4
+ 539 0002 8C46     		mov	ip, r1
+  87:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun; (void)bufsize;
+ 540              		.loc 1 87 5 is_stmt 1 view .LVU90
+ 541              		.loc 1 87 16 view .LVU91
+  88:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     memcpy(resp->vendor_id,   "SynaptiX",         8);
+ 542              		.loc 1 88 5 view .LVU92
+ 543 0004 0B4B     		ldr	r3, .L42
+ 544 0006 03CB     		ldmia	r3!, {r0, r1}
+ 545              	.LVL37:
+ 546              		.loc 1 88 5 is_stmt 0 view .LVU93
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 16
+
+
+ 547 0008 CCF80800 		str	r0, [ip, #8]	@ unaligned
+ 548 000c CCF80C10 		str	r1, [ip, #12]	@ unaligned
+  89:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     memcpy(resp->product_id,  "Tracking Storage", 16);
+ 549              		.loc 1 89 5 is_stmt 1 view .LVU94
+ 550 0010 094C     		ldr	r4, .L42+4
+ 551 0012 0FCC     		ldmia	r4!, {r0, r1, r2, r3}
+ 552              	.LVL38:
+ 553              		.loc 1 89 5 is_stmt 0 view .LVU95
+ 554 0014 CCF81000 		str	r0, [ip, #16]	@ unaligned
+ 555 0018 CCF81410 		str	r1, [ip, #20]	@ unaligned
+ 556 001c CCF81820 		str	r2, [ip, #24]	@ unaligned
+ 557 0020 CCF81C30 		str	r3, [ip, #28]	@ unaligned
+  90:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     memcpy(resp->product_rev, "1.0 ",              4);
+ 558              		.loc 1 90 5 is_stmt 1 view .LVU96
+ 559 0024 054B     		ldr	r3, .L42+8
+ 560 0026 1868     		ldr	r0, [r3]
+ 561 0028 CCF82000 		str	r0, [ip, #32]	@ unaligned
+  91:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     return sizeof(scsi_inquiry_resp_t);
+ 562              		.loc 1 91 5 view .LVU97
+  92:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 563              		.loc 1 92 1 is_stmt 0 view .LVU98
+ 564 002c 2420     		movs	r0, #36
+ 565 002e 5DF8044B 		ldr	r4, [sp], #4
+ 566 0032 7047     		bx	lr
+ 567              	.L43:
+ 568              		.align	2
+ 569              	.L42:
+ 570 0034 00000000 		.word	.LC10
+ 571 0038 0C000000 		.word	.LC11
+ 572 003c 20000000 		.word	.LC12
+ 573              		.cfi_endproc
+ 574              	.LFE442:
+ 576              		.section	.rodata.tud_msc_test_unit_ready_cb.str1.4,"aMS",%progbits,1
+ 577              		.align	2
+ 578              	.LC13:
+ 579 0000 554E4954 		.ascii	"UNIT_ATTENTION: media changed\000"
+ 579      5F415454 
+ 579      454E5449 
+ 579      4F4E3A20 
+ 579      6D656469 
+ 580              		.section	.text.tud_msc_test_unit_ready_cb,"ax",%progbits
+ 581              		.align	1
+ 582              		.global	tud_msc_test_unit_ready_cb
+ 583              		.syntax unified
+ 584              		.thumb
+ 585              		.thumb_func
+ 587              	tud_msc_test_unit_ready_cb:
+ 588              	.LVL39:
+ 589              	.LFB443:
+  93:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+  94:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** bool tud_msc_test_unit_ready_cb(uint8_t lun)
+  95:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 590              		.loc 1 95 1 is_stmt 1 view -0
+ 591              		.cfi_startproc
+ 592              		@ args = 0, pretend = 0, frame = 0
+ 593              		@ frame_needed = 0, uses_anonymous_args = 0
+ 594              		.loc 1 95 1 is_stmt 0 view .LVU100
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 17
+
+
+ 595 0000 70B5     		push	{r4, r5, r6, lr}
+ 596              	.LCFI12:
+ 597              		.cfi_def_cfa_offset 16
+ 598              		.cfi_offset 4, -16
+ 599              		.cfi_offset 5, -12
+ 600              		.cfi_offset 6, -8
+ 601              		.cfi_offset 14, -4
+ 602 0002 0546     		mov	r5, r0
+  96:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun;
+ 603              		.loc 1 96 5 is_stmt 1 view .LVU101
+  97:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (s_msc == NULL || !sx_usb_tiny_msc_is_active(s_msc))
+ 604              		.loc 1 97 5 view .LVU102
+ 605              		.loc 1 97 15 is_stmt 0 view .LVU103
+ 606 0004 134B     		ldr	r3, .L52
+ 607 0006 1C68     		ldr	r4, [r3]
+ 608              		.loc 1 97 8 view .LVU104
+ 609 0008 4CB1     		cbz	r4, .L45
+ 610              		.loc 1 97 27 discriminator 1 view .LVU105
+ 611 000a 2046     		mov	r0, r4
+ 612              	.LVL40:
+ 613              		.loc 1 97 27 discriminator 1 view .LVU106
+ 614 000c FFF7FEFF 		bl	sx_usb_tiny_msc_is_active
+ 615              	.LVL41:
+ 616              		.loc 1 97 23 discriminator 1 view .LVU107
+ 617 0010 28B1     		cbz	r0, .L45
+  98:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return tud_msc_set_sense(lun, SCSI_SENSE_NOT_READY, 0x3A, 0x00);
+  99:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 100:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (s_msc->state == SX_MSC_STATE_BUILDING)
+ 618              		.loc 1 100 5 is_stmt 1 view .LVU108
+ 619              		.loc 1 100 14 is_stmt 0 view .LVU109
+ 620 0012 2379     		ldrb	r3, [r4, #4]	@ zero_extendqisi2
+ 621              		.loc 1 100 8 view .LVU110
+ 622 0014 012B     		cmp	r3, #1
+ 623 0016 09D0     		beq	.L50
+ 101:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return tud_msc_set_sense(lun, SCSI_SENSE_NOT_READY, 0x04, 0x01);
+ 102:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 103:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (s_msc->media_changed) {
+ 624              		.loc 1 103 5 is_stmt 1 view .LVU111
+ 625              		.loc 1 103 14 is_stmt 0 view .LVU112
+ 626 0018 6379     		ldrb	r3, [r4, #5]	@ zero_extendqisi2
+ 627              		.loc 1 103 8 view .LVU113
+ 628 001a 6BB9     		cbnz	r3, .L51
+ 629              	.L47:
+ 104:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_msc->media_changed = false;
+ 105:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         log_info(TAG, "UNIT_ATTENTION: media changed");
+ 106:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return tud_msc_set_sense(lun, SCSI_SENSE_UNIT_ATTENTION, 0x28, 0x00);
+ 107:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 108:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     return true;
+ 109:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 630              		.loc 1 109 1 view .LVU114
+ 631 001c 70BD     		pop	{r4, r5, r6, pc}
+ 632              	.LVL42:
+ 633              	.L45:
+  98:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 634              		.loc 1 98 9 is_stmt 1 view .LVU115
+  98:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 635              		.loc 1 98 16 is_stmt 0 view .LVU116
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 18
+
+
+ 636 001e 0023     		movs	r3, #0
+ 637 0020 3A22     		movs	r2, #58
+ 638 0022 0221     		movs	r1, #2
+ 639 0024 2846     		mov	r0, r5
+ 640 0026 FFF7FEFF 		bl	tud_msc_set_sense
+ 641              	.LVL43:
+ 642 002a F7E7     		b	.L47
+ 643              	.L50:
+ 101:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return tud_msc_set_sense(lun, SCSI_SENSE_NOT_READY, 0x04, 0x01);
+ 644              		.loc 1 101 9 is_stmt 1 view .LVU117
+ 101:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return tud_msc_set_sense(lun, SCSI_SENSE_NOT_READY, 0x04, 0x01);
+ 645              		.loc 1 101 16 is_stmt 0 view .LVU118
+ 646 002c 0422     		movs	r2, #4
+ 647 002e 0221     		movs	r1, #2
+ 648 0030 2846     		mov	r0, r5
+ 649 0032 FFF7FEFF 		bl	tud_msc_set_sense
+ 650              	.LVL44:
+ 651 0036 F1E7     		b	.L47
+ 652              	.L51:
+ 104:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_msc->media_changed = false;
+ 653              		.loc 1 104 9 is_stmt 1 view .LVU119
+ 104:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_msc->media_changed = false;
+ 654              		.loc 1 104 30 is_stmt 0 view .LVU120
+ 655 0038 0026     		movs	r6, #0
+ 656 003a 6671     		strb	r6, [r4, #5]
+ 105:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         return tud_msc_set_sense(lun, SCSI_SENSE_UNIT_ATTENTION, 0x28, 0x00);
+ 657              		.loc 1 105 9 is_stmt 1 view .LVU121
+ 658 003c 064A     		ldr	r2, .L52+4
+ 659 003e 0749     		ldr	r1, .L52+8
+ 660 0040 0320     		movs	r0, #3
+ 661 0042 FFF7FEFF 		bl	log_func
+ 662              	.LVL45:
+ 106:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 663              		.loc 1 106 9 view .LVU122
+ 106:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 664              		.loc 1 106 16 is_stmt 0 view .LVU123
+ 665 0046 3346     		mov	r3, r6
+ 666 0048 2822     		movs	r2, #40
+ 667 004a 0621     		movs	r1, #6
+ 668 004c 2846     		mov	r0, r5
+ 669 004e FFF7FEFF 		bl	tud_msc_set_sense
+ 670              	.LVL46:
+ 671 0052 E3E7     		b	.L47
+ 672              	.L53:
+ 673              		.align	2
+ 674              	.L52:
+ 675 0054 00000000 		.word	s_msc
+ 676 0058 00000000 		.word	.LC13
+ 677 005c 10000000 		.word	.LC1
+ 678              		.cfi_endproc
+ 679              	.LFE443:
+ 681              		.section	.text.tud_msc_capacity_cb,"ax",%progbits
+ 682              		.align	1
+ 683              		.global	tud_msc_capacity_cb
+ 684              		.syntax unified
+ 685              		.thumb
+ 686              		.thumb_func
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 19
+
+
+ 688              	tud_msc_capacity_cb:
+ 689              	.LVL47:
+ 690              	.LFB444:
+ 110:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 111:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** void tud_msc_capacity_cb(uint8_t lun, uint32_t *block_count, uint16_t *block_size)
+ 112:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 691              		.loc 1 112 1 is_stmt 1 view -0
+ 692              		.cfi_startproc
+ 693              		@ args = 0, pretend = 0, frame = 0
+ 694              		@ frame_needed = 0, uses_anonymous_args = 0
+ 695              		@ link register save eliminated.
+ 113:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun;
+ 696              		.loc 1 113 5 view .LVU125
+ 114:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     *block_count = (s_msc != NULL) ? s_msc->block_count : 0;
+ 697              		.loc 1 114 5 view .LVU126
+ 698              		.loc 1 114 27 is_stmt 0 view .LVU127
+ 699 0000 054B     		ldr	r3, .L57
+ 700 0002 1B68     		ldr	r3, [r3]
+ 701              		.loc 1 114 57 view .LVU128
+ 702 0004 2BB1     		cbz	r3, .L56
+ 703              		.loc 1 114 57 discriminator 1 view .LVU129
+ 704 0006 1B68     		ldr	r3, [r3]
+ 705              	.L55:
+ 706              		.loc 1 114 18 discriminator 4 view .LVU130
+ 707 0008 0B60     		str	r3, [r1]
+ 115:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     *block_size  = SX_MSC_BLOCK_SIZE;
+ 708              		.loc 1 115 5 is_stmt 1 view .LVU131
+ 709              		.loc 1 115 18 is_stmt 0 view .LVU132
+ 710 000a 4FF40073 		mov	r3, #512
+ 711 000e 1380     		strh	r3, [r2]	@ movhi
+ 116:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 712              		.loc 1 116 1 view .LVU133
+ 713 0010 7047     		bx	lr
+ 714              	.L56:
+ 114:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     *block_count = (s_msc != NULL) ? s_msc->block_count : 0;
+ 715              		.loc 1 114 57 discriminator 2 view .LVU134
+ 716 0012 0023     		movs	r3, #0
+ 717 0014 F8E7     		b	.L55
+ 718              	.L58:
+ 719 0016 00BF     		.align	2
+ 720              	.L57:
+ 721 0018 00000000 		.word	s_msc
+ 722              		.cfi_endproc
+ 723              	.LFE444:
+ 725              		.section	.text.tud_msc_is_writable_cb,"ax",%progbits
+ 726              		.align	1
+ 727              		.global	tud_msc_is_writable_cb
+ 728              		.syntax unified
+ 729              		.thumb
+ 730              		.thumb_func
+ 732              	tud_msc_is_writable_cb:
+ 733              	.LVL48:
+ 734              	.LFB445:
+ 117:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 118:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** bool tud_msc_is_writable_cb(uint8_t lun)  { (void)lun; return true; }
+ 735              		.loc 1 118 43 is_stmt 1 view -0
+ 736              		.cfi_startproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 20
+
+
+ 737              		@ args = 0, pretend = 0, frame = 0
+ 738              		@ frame_needed = 0, uses_anonymous_args = 0
+ 739              		@ link register save eliminated.
+ 740              		.loc 1 118 45 view .LVU136
+ 741              		.loc 1 118 56 view .LVU137
+ 742              		.loc 1 118 69 is_stmt 0 view .LVU138
+ 743 0000 0120     		movs	r0, #1
+ 744              	.LVL49:
+ 745              		.loc 1 118 69 view .LVU139
+ 746 0002 7047     		bx	lr
+ 747              		.cfi_endproc
+ 748              	.LFE445:
+ 750              		.section	.rodata.tud_msc_start_stop_cb.str1.4,"aMS",%progbits,1
+ 751              		.align	2
+ 752              	.LC14:
+ 753 0000 486F7374 		.ascii	"Host ejected disk \342\200\224 cache flushed\000"
+ 753      20656A65 
+ 753      63746564 
+ 753      20646973 
+ 753      6B20E280 
+ 754              		.section	.text.tud_msc_start_stop_cb,"ax",%progbits
+ 755              		.align	1
+ 756              		.global	tud_msc_start_stop_cb
+ 757              		.syntax unified
+ 758              		.thumb
+ 759              		.thumb_func
+ 761              	tud_msc_start_stop_cb:
+ 762              	.LVL50:
+ 763              	.LFB446:
+ 119:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 120:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, bool load_eject)
+ 121:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 764              		.loc 1 121 1 is_stmt 1 view -0
+ 765              		.cfi_startproc
+ 766              		@ args = 0, pretend = 0, frame = 0
+ 767              		@ frame_needed = 0, uses_anonymous_args = 0
+ 122:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun; (void)power_condition;
+ 768              		.loc 1 122 5 view .LVU141
+ 769              		.loc 1 122 16 view .LVU142
+ 123:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (load_eject && !start && s_msc != NULL) {
+ 770              		.loc 1 123 5 view .LVU143
+ 771              		.loc 1 123 8 is_stmt 0 view .LVU144
+ 772 0000 93B1     		cbz	r3, .L63
+ 773              		.loc 1 123 20 discriminator 1 view .LVU145
+ 774 0002 8AB9     		cbnz	r2, .L63
+ 121:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun; (void)power_condition;
+ 775              		.loc 1 121 1 view .LVU146
+ 776 0004 08B5     		push	{r3, lr}
+ 777              	.LCFI13:
+ 778              		.cfi_def_cfa_offset 8
+ 779              		.cfi_offset 3, -8
+ 780              		.cfi_offset 14, -4
+ 781              		.loc 1 123 39 discriminator 2 view .LVU147
+ 782 0006 094B     		ldr	r3, .L66
+ 783              	.LVL51:
+ 784              		.loc 1 123 39 discriminator 2 view .LVU148
+ 785 0008 1B68     		ldr	r3, [r3]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 21
+
+
+ 786              		.loc 1 123 30 discriminator 2 view .LVU149
+ 787 000a 5BB1     		cbz	r3, .L61
+ 124:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         /* Host ejected — flush any pending write cache */
+ 125:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         disk_ioctl(0, CTRL_SYNC, NULL);
+ 788              		.loc 1 125 9 is_stmt 1 view .LVU150
+ 789 000c 1146     		mov	r1, r2
+ 790              	.LVL52:
+ 791              		.loc 1 125 9 is_stmt 0 view .LVU151
+ 792 000e 1046     		mov	r0, r2
+ 793              	.LVL53:
+ 794              		.loc 1 125 9 view .LVU152
+ 795 0010 FFF7FEFF 		bl	disk_ioctl
+ 796              	.LVL54:
+ 126:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_msc->state = SX_MSC_STATE_EJECTED;
+ 797              		.loc 1 126 9 is_stmt 1 view .LVU153
+ 798              		.loc 1 126 14 is_stmt 0 view .LVU154
+ 799 0014 054B     		ldr	r3, .L66
+ 800 0016 1B68     		ldr	r3, [r3]
+ 801              		.loc 1 126 22 view .LVU155
+ 802 0018 0320     		movs	r0, #3
+ 803 001a 1871     		strb	r0, [r3, #4]
+ 127:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         log_info(TAG, "Host ejected disk — cache flushed");
+ 804              		.loc 1 127 9 is_stmt 1 view .LVU156
+ 805 001c 044A     		ldr	r2, .L66+4
+ 806 001e 0549     		ldr	r1, .L66+8
+ 807 0020 FFF7FEFF 		bl	log_func
+ 808              	.LVL55:
+ 809              	.L61:
+ 128:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 129:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     return true;
+ 810              		.loc 1 129 5 view .LVU157
+ 130:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 811              		.loc 1 130 1 is_stmt 0 view .LVU158
+ 812 0024 0120     		movs	r0, #1
+ 813 0026 08BD     		pop	{r3, pc}
+ 814              	.LVL56:
+ 815              	.L63:
+ 816              	.LCFI14:
+ 817              		.cfi_def_cfa_offset 0
+ 818              		.cfi_restore 3
+ 819              		.cfi_restore 14
+ 129:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 820              		.loc 1 129 5 is_stmt 1 view .LVU159
+ 821              		.loc 1 130 1 is_stmt 0 view .LVU160
+ 822 0028 0120     		movs	r0, #1
+ 823              	.LVL57:
+ 824              		.loc 1 130 1 view .LVU161
+ 825 002a 7047     		bx	lr
+ 826              	.L67:
+ 827              		.align	2
+ 828              	.L66:
+ 829 002c 00000000 		.word	s_msc
+ 830 0030 00000000 		.word	.LC14
+ 831 0034 10000000 		.word	.LC1
+ 832              		.cfi_endproc
+ 833              	.LFE446:
+ 835              		.section	.text.tud_msc_read10_cb,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 22
+
+
+ 836              		.align	1
+ 837              		.global	tud_msc_read10_cb
+ 838              		.syntax unified
+ 839              		.thumb
+ 840              		.thumb_func
+ 842              	tud_msc_read10_cb:
+ 843              	.LVL58:
+ 844              	.LFB447:
+ 131:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 132:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** /* READ: flash is memory-mapped, read directly via diskio */
+ 133:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset,
+ 134:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****                            void *buffer, uint32_t bufsize)
+ 135:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 845              		.loc 1 135 1 is_stmt 1 view -0
+ 846              		.cfi_startproc
+ 847              		@ args = 4, pretend = 0, frame = 512
+ 848              		@ frame_needed = 0, uses_anonymous_args = 0
+ 849              		.loc 1 135 1 is_stmt 0 view .LVU163
+ 850 0000 70B5     		push	{r4, r5, r6, lr}
+ 851              	.LCFI15:
+ 852              		.cfi_def_cfa_offset 16
+ 853              		.cfi_offset 4, -16
+ 854              		.cfi_offset 5, -12
+ 855              		.cfi_offset 6, -8
+ 856              		.cfi_offset 14, -4
+ 857 0002 ADF5007D 		sub	sp, sp, #512
+ 858              	.LCFI16:
+ 859              		.cfi_def_cfa_offset 528
+ 136:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun;
+ 860              		.loc 1 136 5 is_stmt 1 view .LVU164
+ 137:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (s_msc == NULL || s_msc->state != SX_MSC_STATE_ACTIVE) return -1;
+ 861              		.loc 1 137 5 view .LVU165
+ 862              		.loc 1 137 15 is_stmt 0 view .LVU166
+ 863 0006 144C     		ldr	r4, .L75
+ 864 0008 2468     		ldr	r4, [r4]
+ 865              		.loc 1 137 8 view .LVU167
+ 866 000a C4B1     		cbz	r4, .L70
+ 867 000c 1646     		mov	r6, r2
+ 868 000e 1D46     		mov	r5, r3
+ 869              		.loc 1 137 31 discriminator 2 view .LVU168
+ 870 0010 2379     		ldrb	r3, [r4, #4]	@ zero_extendqisi2
+ 871              	.LVL59:
+ 872              		.loc 1 137 23 discriminator 2 view .LVU169
+ 873 0012 022B     		cmp	r3, #2
+ 874 0014 16D1     		bne	.L71
+ 138:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 875              		.loc 1 138 5 is_stmt 1 view .LVU170
+ 876              		.loc 1 138 21 is_stmt 0 view .LVU171
+ 877 0016 2368     		ldr	r3, [r4]
+ 878              		.loc 1 138 8 view .LVU172
+ 879 0018 8B42     		cmp	r3, r1
+ 880 001a 16D9     		bls	.L72
+ 139:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 140:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     /* offset is always 0 in practice but handle it correctly */
+ 141:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     uint8_t  tmp[SX_MSC_BLOCK_SIZE];
+ 881              		.loc 1 141 5 is_stmt 1 view .LVU173
+ 142:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     DRESULT  res = disk_read(0, tmp, (LBA_t)lba, 1);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 23
+
+
+ 882              		.loc 1 142 5 view .LVU174
+ 883              		.loc 1 142 20 is_stmt 0 view .LVU175
+ 884 001c 0123     		movs	r3, #1
+ 885 001e 0A46     		mov	r2, r1
+ 886              	.LVL60:
+ 887              		.loc 1 142 20 view .LVU176
+ 888 0020 6946     		mov	r1, sp
+ 889              	.LVL61:
+ 890              		.loc 1 142 20 view .LVU177
+ 891 0022 0020     		movs	r0, #0
+ 892              	.LVL62:
+ 893              		.loc 1 142 20 view .LVU178
+ 894 0024 FFF7FEFF 		bl	disk_read
+ 895              	.LVL63:
+ 143:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (res != RES_OK) return -1;
+ 896              		.loc 1 143 5 is_stmt 1 view .LVU179
+ 897              		.loc 1 143 8 is_stmt 0 view .LVU180
+ 898 0028 90B9     		cbnz	r0, .L73
+ 144:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 145:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     memcpy(buffer, tmp + offset, bufsize);
+ 899              		.loc 1 145 5 is_stmt 1 view .LVU181
+ 900 002a 849A     		ldr	r2, [sp, #528]
+ 901 002c 6946     		mov	r1, sp
+ 902 002e 3144     		add	r1, r1, r6
+ 903 0030 2846     		mov	r0, r5
+ 904              	.LVL64:
+ 905              		.loc 1 145 5 is_stmt 0 view .LVU182
+ 906 0032 FFF7FEFF 		bl	memcpy
+ 907              	.LVL65:
+ 146:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     //log_debug(TAG, "READ  lba=%lu off=%lu size=%lu", lba, offset, bufsize);
+ 147:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     return (int32_t)bufsize;
+ 908              		.loc 1 147 5 is_stmt 1 view .LVU183
+ 909              		.loc 1 147 12 is_stmt 0 view .LVU184
+ 910 0036 8498     		ldr	r0, [sp, #528]
+ 911              	.LVL66:
+ 912              	.L68:
+ 148:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 913              		.loc 1 148 1 view .LVU185
+ 914 0038 0DF5007D 		add	sp, sp, #512
+ 915              	.LCFI17:
+ 916              		.cfi_remember_state
+ 917              		.cfi_def_cfa_offset 16
+ 918              		@ sp needed
+ 919 003c 70BD     		pop	{r4, r5, r6, pc}
+ 920              	.LVL67:
+ 921              	.L70:
+ 922              	.LCFI18:
+ 923              		.cfi_restore_state
+ 137:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 924              		.loc 1 137 70 discriminator 3 view .LVU186
+ 925 003e 4FF0FF30 		mov	r0, #-1
+ 926              	.LVL68:
+ 137:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 927              		.loc 1 137 70 discriminator 3 view .LVU187
+ 928 0042 F9E7     		b	.L68
+ 929              	.LVL69:
+ 930              	.L71:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 24
+
+
+ 137:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 931              		.loc 1 137 70 discriminator 3 view .LVU188
+ 932 0044 4FF0FF30 		mov	r0, #-1
+ 933              	.LVL70:
+ 137:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 934              		.loc 1 137 70 discriminator 3 view .LVU189
+ 935 0048 F6E7     		b	.L68
+ 936              	.LVL71:
+ 937              	.L72:
+ 138:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 938              		.loc 1 138 71 discriminator 1 view .LVU190
+ 939 004a 4FF0FF30 		mov	r0, #-1
+ 940              	.LVL72:
+ 138:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 941              		.loc 1 138 71 discriminator 1 view .LVU191
+ 942 004e F3E7     		b	.L68
+ 943              	.LVL73:
+ 944              	.L73:
+ 143:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 945              		.loc 1 143 31 discriminator 1 view .LVU192
+ 946 0050 4FF0FF30 		mov	r0, #-1
+ 947              	.LVL74:
+ 143:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 948              		.loc 1 143 31 discriminator 1 view .LVU193
+ 949 0054 F0E7     		b	.L68
+ 950              	.L76:
+ 951 0056 00BF     		.align	2
+ 952              	.L75:
+ 953 0058 00000000 		.word	s_msc
+ 954              		.cfi_endproc
+ 955              	.LFE447:
+ 957              		.section	.text.tud_msc_write10_cb,"ax",%progbits
+ 958              		.align	1
+ 959              		.global	tud_msc_write10_cb
+ 960              		.syntax unified
+ 961              		.thumb
+ 962              		.thumb_func
+ 964              	tud_msc_write10_cb:
+ 965              	.LVL75:
+ 966              	.LFB448:
+ 149:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 150:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset,
+ 151:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****                             uint8_t *buffer, uint32_t bufsize)
+ 152:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 967              		.loc 1 152 1 is_stmt 1 view -0
+ 968              		.cfi_startproc
+ 969              		@ args = 4, pretend = 0, frame = 0
+ 970              		@ frame_needed = 0, uses_anonymous_args = 0
+ 971              		.loc 1 152 1 is_stmt 0 view .LVU195
+ 972 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 973              	.LCFI19:
+ 974              		.cfi_def_cfa_offset 24
+ 975              		.cfi_offset 3, -24
+ 976              		.cfi_offset 4, -20
+ 977              		.cfi_offset 5, -16
+ 978              		.cfi_offset 6, -12
+ 979              		.cfi_offset 7, -8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 25
+
+
+ 980              		.cfi_offset 14, -4
+ 981 0002 1446     		mov	r4, r2
+ 982 0004 069D     		ldr	r5, [sp, #24]
+ 153:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun;
+ 983              		.loc 1 153 5 is_stmt 1 view .LVU196
+ 154:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (s_msc == NULL || s_msc->state != SX_MSC_STATE_ACTIVE) return -1;
+ 984              		.loc 1 154 5 view .LVU197
+ 985              		.loc 1 154 15 is_stmt 0 view .LVU198
+ 986 0006 1E4A     		ldr	r2, .L88
+ 987              	.LVL76:
+ 988              		.loc 1 154 15 view .LVU199
+ 989 0008 1268     		ldr	r2, [r2]
+ 990              		.loc 1 154 8 view .LVU200
+ 991 000a 7AB3     		cbz	r2, .L81
+ 992 000c 0E46     		mov	r6, r1
+ 993 000e 1F46     		mov	r7, r3
+ 994              		.loc 1 154 31 discriminator 2 view .LVU201
+ 995 0010 1379     		ldrb	r3, [r2, #4]	@ zero_extendqisi2
+ 996              	.LVL77:
+ 997              		.loc 1 154 23 discriminator 2 view .LVU202
+ 998 0012 022B     		cmp	r3, #2
+ 999 0014 2DD1     		bne	.L82
+ 155:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 1000              		.loc 1 155 5 is_stmt 1 view .LVU203
+ 1001              		.loc 1 155 21 is_stmt 0 view .LVU204
+ 1002 0016 1368     		ldr	r3, [r2]
+ 1003              		.loc 1 155 8 view .LVU205
+ 1004 0018 8B42     		cmp	r3, r1
+ 1005 001a 2DD9     		bls	.L83
+ 156:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 157:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba != s_write_tmp_lba) {
+ 1006              		.loc 1 157 5 is_stmt 1 view .LVU206
+ 1007              		.loc 1 157 13 is_stmt 0 view .LVU207
+ 1008 001c 194B     		ldr	r3, .L88+4
+ 1009 001e 1B68     		ldr	r3, [r3]
+ 1010              		.loc 1 157 8 view .LVU208
+ 1011 0020 8B42     		cmp	r3, r1
+ 1012 0022 0BD1     		bne	.L86
+ 1013              	.LVL78:
+ 1014              	.L79:
+ 158:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_write_tmp_lba = lba;
+ 159:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         disk_read(0, s_write_tmp, (LBA_t)lba, 1);
+ 160:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 161:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 162:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     memcpy(s_write_tmp + offset, buffer, bufsize);
+ 1015              		.loc 1 162 5 is_stmt 1 view .LVU209
+ 1016 0024 2A46     		mov	r2, r5
+ 1017 0026 3946     		mov	r1, r7
+ 1018 0028 1748     		ldr	r0, .L88+8
+ 1019 002a 2044     		add	r0, r0, r4
+ 1020 002c FFF7FEFF 		bl	memcpy
+ 1021              	.LVL79:
+ 163:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 164:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (offset + bufsize >= SX_MSC_BLOCK_SIZE) {
+ 1022              		.loc 1 164 5 view .LVU210
+ 1023              		.loc 1 164 16 is_stmt 0 view .LVU211
+ 1024 0030 2C44     		add	r4, r4, r5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 26
+
+
+ 1025              	.LVL80:
+ 1026              		.loc 1 164 8 view .LVU212
+ 1027 0032 B4F5007F 		cmp	r4, #512
+ 1028 0036 0AD2     		bcs	.L87
+ 1029              	.L80:
+ 165:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         DRESULT res = disk_write(0, s_write_tmp, (LBA_t)lba, 1);
+ 166:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_write_tmp_lba = 0xFFFFFFFF; // reset
+ 167:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         if (res != RES_OK) return -1;
+ 168:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 169:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 170:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     //log_debug(TAG, "WRITE lba=%lu off=%lu size=%lu", lba, offset, bufsize);
+ 171:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     return (int32_t)bufsize;
+ 1030              		.loc 1 171 5 is_stmt 1 view .LVU213
+ 1031              		.loc 1 171 12 is_stmt 0 view .LVU214
+ 1032 0038 2846     		mov	r0, r5
+ 1033              	.LVL81:
+ 1034              	.L77:
+ 172:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 1035              		.loc 1 172 1 view .LVU215
+ 1036 003a F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 1037              	.LVL82:
+ 1038              	.L86:
+ 158:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         disk_read(0, s_write_tmp, (LBA_t)lba, 1);
+ 1039              		.loc 1 158 9 is_stmt 1 view .LVU216
+ 158:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         disk_read(0, s_write_tmp, (LBA_t)lba, 1);
+ 1040              		.loc 1 158 25 is_stmt 0 view .LVU217
+ 1041 003c 114B     		ldr	r3, .L88+4
+ 1042 003e 1960     		str	r1, [r3]
+ 159:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1043              		.loc 1 159 9 is_stmt 1 view .LVU218
+ 1044 0040 0123     		movs	r3, #1
+ 1045 0042 0A46     		mov	r2, r1
+ 1046 0044 1049     		ldr	r1, .L88+8
+ 1047              	.LVL83:
+ 159:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1048              		.loc 1 159 9 is_stmt 0 view .LVU219
+ 1049 0046 0020     		movs	r0, #0
+ 1050              	.LVL84:
+ 159:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1051              		.loc 1 159 9 view .LVU220
+ 1052 0048 FFF7FEFF 		bl	disk_read
+ 1053              	.LVL85:
+ 1054 004c EAE7     		b	.L79
+ 1055              	.LVL86:
+ 1056              	.L87:
+ 1057              	.LBB2:
+ 165:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_write_tmp_lba = 0xFFFFFFFF; // reset
+ 1058              		.loc 1 165 9 is_stmt 1 view .LVU221
+ 165:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         s_write_tmp_lba = 0xFFFFFFFF; // reset
+ 1059              		.loc 1 165 23 is_stmt 0 view .LVU222
+ 1060 004e 0123     		movs	r3, #1
+ 1061 0050 3246     		mov	r2, r6
+ 1062 0052 0D49     		ldr	r1, .L88+8
+ 1063 0054 0020     		movs	r0, #0
+ 1064 0056 FFF7FEFF 		bl	disk_write
+ 1065              	.LVL87:
+ 166:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         if (res != RES_OK) return -1;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 27
+
+
+ 1066              		.loc 1 166 9 is_stmt 1 view .LVU223
+ 166:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****         if (res != RES_OK) return -1;
+ 1067              		.loc 1 166 25 is_stmt 0 view .LVU224
+ 1068 005a 0A4B     		ldr	r3, .L88+4
+ 1069 005c 4FF0FF32 		mov	r2, #-1
+ 1070 0060 1A60     		str	r2, [r3]
+ 167:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1071              		.loc 1 167 9 is_stmt 1 view .LVU225
+ 167:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1072              		.loc 1 167 12 is_stmt 0 view .LVU226
+ 1073 0062 0028     		cmp	r0, #0
+ 1074 0064 E8D0     		beq	.L80
+ 167:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1075              		.loc 1 167 35 discriminator 1 view .LVU227
+ 1076 0066 4FF0FF30 		mov	r0, #-1
+ 1077              	.LVL88:
+ 167:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1078              		.loc 1 167 35 discriminator 1 view .LVU228
+ 1079 006a E6E7     		b	.L77
+ 1080              	.LVL89:
+ 1081              	.L81:
+ 167:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     }
+ 1082              		.loc 1 167 35 discriminator 1 view .LVU229
+ 1083              	.LBE2:
+ 154:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 1084              		.loc 1 154 70 discriminator 3 view .LVU230
+ 1085 006c 4FF0FF30 		mov	r0, #-1
+ 1086              	.LVL90:
+ 154:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 1087              		.loc 1 154 70 discriminator 3 view .LVU231
+ 1088 0070 E3E7     		b	.L77
+ 1089              	.LVL91:
+ 1090              	.L82:
+ 154:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 1091              		.loc 1 154 70 discriminator 3 view .LVU232
+ 1092 0072 4FF0FF30 		mov	r0, #-1
+ 1093              	.LVL92:
+ 154:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     if (lba >= s_msc->block_count)                             return -1;
+ 1094              		.loc 1 154 70 discriminator 3 view .LVU233
+ 1095 0076 E0E7     		b	.L77
+ 1096              	.LVL93:
+ 1097              	.L83:
+ 155:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 1098              		.loc 1 155 71 discriminator 1 view .LVU234
+ 1099 0078 4FF0FF30 		mov	r0, #-1
+ 1100              	.LVL94:
+ 155:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 1101              		.loc 1 155 71 discriminator 1 view .LVU235
+ 1102 007c DDE7     		b	.L77
+ 1103              	.L89:
+ 1104 007e 00BF     		.align	2
+ 1105              	.L88:
+ 1106 0080 00000000 		.word	s_msc
+ 1107 0084 00000000 		.word	s_write_tmp_lba
+ 1108 0088 00000000 		.word	s_write_tmp
+ 1109              		.cfi_endproc
+ 1110              	.LFE448:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 28
+
+
+ 1112              		.section	.text.tud_msc_scsi_cb,"ax",%progbits
+ 1113              		.align	1
+ 1114              		.global	tud_msc_scsi_cb
+ 1115              		.syntax unified
+ 1116              		.thumb
+ 1117              		.thumb_func
+ 1119              	tud_msc_scsi_cb:
+ 1120              	.LVL95:
+ 1121              	.LFB449:
+ 173:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** 
+ 174:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** int32_t tud_msc_scsi_cb(uint8_t lun, uint8_t const scsi_cmd[16],
+ 175:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****                          void *buffer, uint16_t bufsize)
+ 176:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** {
+ 1122              		.loc 1 176 1 is_stmt 1 view -0
+ 1123              		.cfi_startproc
+ 1124              		@ args = 0, pretend = 0, frame = 0
+ 1125              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1126              		.loc 1 176 1 is_stmt 0 view .LVU237
+ 1127 0000 08B5     		push	{r3, lr}
+ 1128              	.LCFI20:
+ 1129              		.cfi_def_cfa_offset 8
+ 1130              		.cfi_offset 3, -8
+ 1131              		.cfi_offset 14, -4
+ 177:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     (void)lun; (void)scsi_cmd; (void)buffer; (void)bufsize;
+ 1132              		.loc 1 177 5 is_stmt 1 view .LVU238
+ 1133              		.loc 1 177 16 view .LVU239
+ 1134              		.loc 1 177 32 view .LVU240
+ 1135              		.loc 1 177 46 view .LVU241
+ 178:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     tud_msc_set_sense(lun, SCSI_SENSE_ILLEGAL_REQUEST, 0x20, 0x00);
+ 1136              		.loc 1 178 5 view .LVU242
+ 1137 0002 0023     		movs	r3, #0
+ 1138              	.LVL96:
+ 1139              		.loc 1 178 5 is_stmt 0 view .LVU243
+ 1140 0004 2022     		movs	r2, #32
+ 1141              	.LVL97:
+ 1142              		.loc 1 178 5 view .LVU244
+ 1143 0006 0521     		movs	r1, #5
+ 1144              	.LVL98:
+ 1145              		.loc 1 178 5 view .LVU245
+ 1146 0008 FFF7FEFF 		bl	tud_msc_set_sense
+ 1147              	.LVL99:
+ 179:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c ****     return -1;
+ 1148              		.loc 1 179 5 is_stmt 1 view .LVU246
+ 180:SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c **** }
+ 1149              		.loc 1 180 1 is_stmt 0 view .LVU247
+ 1150 000c 4FF0FF30 		mov	r0, #-1
+ 1151 0010 08BD     		pop	{r3, pc}
+ 1152              		.cfi_endproc
+ 1153              	.LFE449:
+ 1155              		.section	.data.s_write_tmp_lba,"aw"
+ 1156              		.align	2
+ 1159              	s_write_tmp_lba:
+ 1160 0000 FFFFFFFF 		.word	-1
+ 1161              		.section	.bss.s_write_tmp,"aw",%nobits
+ 1162              		.align	2
+ 1165              	s_write_tmp:
+ 1166 0000 00000000 		.space	512
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 29
+
+
+ 1166      00000000 
+ 1166      00000000 
+ 1166      00000000 
+ 1166      00000000 
+ 1167              		.section	.bss.s_msc,"aw",%nobits
+ 1168              		.align	2
+ 1171              	s_msc:
+ 1172 0000 00000000 		.space	4
+ 1173              		.text
+ 1174              	.Letext0:
+ 1175              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1176              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1177              		.file 5 "SynaptiX_FDK/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.h"
+ 1178              		.file 6 "SynaptiX_FDK/services/logger/logger.h"
+ 1179              		.file 7 "SynaptiX_FDK/services/fatfs/ff.h"
+ 1180              		.file 8 "SynaptiX_FDK/services/fatfs/diskio.h"
+ 1181              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 1182              		.file 10 "SynaptiX_FDK/lib/tinyusb/src/class/msc/msc.h"
+ 1183              		.file 11 "SynaptiX_FDK/lib/tinyusb/src/class/msc/msc_device.h"
+ 1184              		.file 12 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 1185              		.file 13 "SynaptiX_FDK/lib/tinyusb/src/device/usbd.h"
+ 1186              		.file 14 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ 1187              		.file 15 "<built-in>"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 30
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_usb_tiny_msc.c
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:22     .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:28     .text.sx_gettick:00000000 sx_gettick
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:50     .rodata.sx_usb_tiny_msc_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:57     .text.sx_usb_tiny_msc_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:63     .text.sx_usb_tiny_msc_init:00000000 sx_usb_tiny_msc_init
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:100    .text.sx_usb_tiny_msc_init:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1171   .bss.s_msc:00000000 s_msc
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:107    .rodata.sx_usb_tiny_msc_enter.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:118    .text.sx_usb_tiny_msc_enter:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:124    .text.sx_usb_tiny_msc_enter:00000000 sx_usb_tiny_msc_enter
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:197    .text.sx_usb_tiny_msc_enter:0000003c $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:205    .rodata.sx_usb_tiny_msc_exit.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:212    .text.sx_usb_tiny_msc_exit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:218    .text.sx_usb_tiny_msc_exit:00000000 sx_usb_tiny_msc_exit
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:269    .text.sx_usb_tiny_msc_exit:00000024 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:276    .text.sx_usb_tiny_msc_get_state:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:282    .text.sx_usb_tiny_msc_get_state:00000000 sx_usb_tiny_msc_get_state
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:300    .text.sx_usb_tiny_msc_is_active:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:306    .text.sx_usb_tiny_msc_is_active:00000000 sx_usb_tiny_msc_is_active
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:331    .rodata.sx_usb_tiny_msc_set_media_changed.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:335    .text.sx_usb_tiny_msc_set_media_changed:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:341    .text.sx_usb_tiny_msc_set_media_changed:00000000 sx_usb_tiny_msc_set_media_changed
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:371    .text.sx_usb_tiny_msc_set_media_changed:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:377    .rodata.sx_usb_tiny_msc_load.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:384    .text.sx_usb_tiny_msc_load:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:390    .text.sx_usb_tiny_msc_load:00000000 sx_usb_tiny_msc_load
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:451    .text.sx_usb_tiny_msc_load:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:458    .text.sx_usb_tiny_msc_disconnect:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:464    .text.sx_usb_tiny_msc_disconnect:00000000 sx_usb_tiny_msc_disconnect
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:484    .text.sx_usb_tiny_msc_connect:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:490    .text.sx_usb_tiny_msc_connect:00000000 sx_usb_tiny_msc_connect
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:510    .rodata.tud_msc_inquiry2_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:520    .text.tud_msc_inquiry2_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:526    .text.tud_msc_inquiry2_cb:00000000 tud_msc_inquiry2_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:570    .text.tud_msc_inquiry2_cb:00000034 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:577    .rodata.tud_msc_test_unit_ready_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:581    .text.tud_msc_test_unit_ready_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:587    .text.tud_msc_test_unit_ready_cb:00000000 tud_msc_test_unit_ready_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:675    .text.tud_msc_test_unit_ready_cb:00000054 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:682    .text.tud_msc_capacity_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:688    .text.tud_msc_capacity_cb:00000000 tud_msc_capacity_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:721    .text.tud_msc_capacity_cb:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:726    .text.tud_msc_is_writable_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:732    .text.tud_msc_is_writable_cb:00000000 tud_msc_is_writable_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:751    .rodata.tud_msc_start_stop_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:755    .text.tud_msc_start_stop_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:761    .text.tud_msc_start_stop_cb:00000000 tud_msc_start_stop_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:829    .text.tud_msc_start_stop_cb:0000002c $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:836    .text.tud_msc_read10_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:842    .text.tud_msc_read10_cb:00000000 tud_msc_read10_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:953    .text.tud_msc_read10_cb:00000058 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:958    .text.tud_msc_write10_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:964    .text.tud_msc_write10_cb:00000000 tud_msc_write10_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1106   .text.tud_msc_write10_cb:00000080 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1159   .data.s_write_tmp_lba:00000000 s_write_tmp_lba
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s 			page 31
+
+
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1165   .bss.s_write_tmp:00000000 s_write_tmp
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1113   .text.tud_msc_scsi_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1119   .text.tud_msc_scsi_cb:00000000 tud_msc_scsi_cb
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1156   .data.s_write_tmp_lba:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1162   .bss.s_write_tmp:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccXUwPXw.s:1168   .bss.s_msc:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_GetTick
+log_func
+tud_disconnect
+tud_connect
+tud_msc_set_sense
+disk_ioctl
+disk_read
+memcpy
+disk_write

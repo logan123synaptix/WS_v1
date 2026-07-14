@@ -1,0 +1,657 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sensirion_common.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/modules/sps30/sensirion_common.c"
+  21              		.section	.text.sensirion_common_bytes_to_uint16_t,"ax",%progbits
+  22              		.align	1
+  23              		.global	sensirion_common_bytes_to_uint16_t
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	sensirion_common_bytes_to_uint16_t:
+  29              	.LVL0:
+  30              	.LFB0:
+   1:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** /*
+   2:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * Copyright (c) 2018, Sensirion AG
+   3:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * All rights reserved.
+   4:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *
+   5:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * Redistribution and use in source and binary forms, with or without
+   6:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * modification, are permitted provided that the following conditions are met:
+   7:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *
+   8:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * * Redistributions of source code must retain the above copyright notice, this
+   9:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *   list of conditions and the following disclaimer.
+  10:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *
+  11:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * * Redistributions in binary form must reproduce the above copyright notice,
+  12:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *   this list of conditions and the following disclaimer in the documentation
+  13:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *   and/or other materials provided with the distribution.
+  14:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *
+  15:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * * Neither the name of Sensirion AG nor the names of its
+  16:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *   contributors may be used to endorse or promote products derived from
+  17:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *   this software without specific prior written permission.
+  18:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  *
+  19:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  20:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  21:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  22:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  23:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  24:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  25:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  26:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  27:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  28:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 2
+
+
+  29:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  * POSSIBILITY OF SUCH DAMAGE.
+  30:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****  */
+  31:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  32:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** #include "sensirion_common.h"
+  33:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** #include "sensirion_config.h"
+  34:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  35:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** uint16_t sensirion_common_bytes_to_uint16_t(const uint8_t* bytes) {
+  31              		.loc 1 35 67 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		@ link register save eliminated.
+  36:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     return (uint16_t)bytes[0] << 8 | (uint16_t)bytes[1];
+  36              		.loc 1 36 5 view .LVU1
+  37              		.loc 1 36 27 is_stmt 0 view .LVU2
+  38 0000 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+  39              		.loc 1 36 53 view .LVU3
+  40 0002 4078     		ldrb	r0, [r0, #1]	@ zero_extendqisi2
+  41              	.LVL1:
+  37:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+  42              		.loc 1 37 1 view .LVU4
+  43 0004 40EA0220 		orr	r0, r0, r2, lsl #8
+  44 0008 7047     		bx	lr
+  45              		.cfi_endproc
+  46              	.LFE0:
+  48              		.section	.text.sensirion_common_bytes_to_uint32_t,"ax",%progbits
+  49              		.align	1
+  50              		.global	sensirion_common_bytes_to_uint32_t
+  51              		.syntax unified
+  52              		.thumb
+  53              		.thumb_func
+  55              	sensirion_common_bytes_to_uint32_t:
+  56              	.LVL2:
+  57              	.LFB1:
+  38:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  39:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** uint32_t sensirion_common_bytes_to_uint32_t(const uint8_t* bytes) {
+  58              		.loc 1 39 67 is_stmt 1 view -0
+  59              		.cfi_startproc
+  60              		@ args = 0, pretend = 0, frame = 0
+  61              		@ frame_needed = 0, uses_anonymous_args = 0
+  62              		@ link register save eliminated.
+  40:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     return (uint32_t)bytes[0] << 24 | (uint32_t)bytes[1] << 16 |
+  63              		.loc 1 40 5 view .LVU6
+  64              		.loc 1 40 27 is_stmt 0 view .LVU7
+  65 0000 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+  66              		.loc 1 40 54 view .LVU8
+  67 0002 4378     		ldrb	r3, [r0, #1]	@ zero_extendqisi2
+  68              		.loc 1 40 58 view .LVU9
+  69 0004 1B04     		lsls	r3, r3, #16
+  70              		.loc 1 40 37 view .LVU10
+  71 0006 43EA0263 		orr	r3, r3, r2, lsl #24
+  41:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****            (uint32_t)bytes[2] << 8 | (uint32_t)bytes[3];
+  72              		.loc 1 41 27 view .LVU11
+  73 000a 8278     		ldrb	r2, [r0, #2]	@ zero_extendqisi2
+  40:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     return (uint32_t)bytes[0] << 24 | (uint32_t)bytes[1] << 16 |
+  74              		.loc 1 40 64 view .LVU12
+  75 000c 43EA0223 		orr	r3, r3, r2, lsl #8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 3
+
+
+  76              		.loc 1 41 53 view .LVU13
+  77 0010 C078     		ldrb	r0, [r0, #3]	@ zero_extendqisi2
+  78              	.LVL3:
+  42:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+  79              		.loc 1 42 1 view .LVU14
+  80 0012 1843     		orrs	r0, r0, r3
+  81 0014 7047     		bx	lr
+  82              		.cfi_endproc
+  83              	.LFE1:
+  85              		.section	.text.sensirion_common_bytes_to_int16_t,"ax",%progbits
+  86              		.align	1
+  87              		.global	sensirion_common_bytes_to_int16_t
+  88              		.syntax unified
+  89              		.thumb
+  90              		.thumb_func
+  92              	sensirion_common_bytes_to_int16_t:
+  93              	.LVL4:
+  94              	.LFB2:
+  43:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  44:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** int16_t sensirion_common_bytes_to_int16_t(const uint8_t* bytes) {
+  95              		.loc 1 44 65 is_stmt 1 view -0
+  96              		.cfi_startproc
+  97              		@ args = 0, pretend = 0, frame = 0
+  98              		@ frame_needed = 0, uses_anonymous_args = 0
+  99              		.loc 1 44 65 is_stmt 0 view .LVU16
+ 100 0000 08B5     		push	{r3, lr}
+ 101              	.LCFI0:
+ 102              		.cfi_def_cfa_offset 8
+ 103              		.cfi_offset 3, -8
+ 104              		.cfi_offset 14, -4
+  45:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     return (int16_t)sensirion_common_bytes_to_uint16_t(bytes);
+ 105              		.loc 1 45 5 is_stmt 1 view .LVU17
+ 106              		.loc 1 45 21 is_stmt 0 view .LVU18
+ 107 0002 FFF7FEFF 		bl	sensirion_common_bytes_to_uint16_t
+ 108              	.LVL5:
+  46:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 109              		.loc 1 46 1 view .LVU19
+ 110 0006 00B2     		sxth	r0, r0
+ 111 0008 08BD     		pop	{r3, pc}
+ 112              		.cfi_endproc
+ 113              	.LFE2:
+ 115              		.section	.text.sensirion_common_bytes_to_int32_t,"ax",%progbits
+ 116              		.align	1
+ 117              		.global	sensirion_common_bytes_to_int32_t
+ 118              		.syntax unified
+ 119              		.thumb
+ 120              		.thumb_func
+ 122              	sensirion_common_bytes_to_int32_t:
+ 123              	.LVL6:
+ 124              	.LFB3:
+  47:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  48:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** int32_t sensirion_common_bytes_to_int32_t(const uint8_t* bytes) {
+ 125              		.loc 1 48 65 is_stmt 1 view -0
+ 126              		.cfi_startproc
+ 127              		@ args = 0, pretend = 0, frame = 0
+ 128              		@ frame_needed = 0, uses_anonymous_args = 0
+ 129              		.loc 1 48 65 is_stmt 0 view .LVU21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 4
+
+
+ 130 0000 08B5     		push	{r3, lr}
+ 131              	.LCFI1:
+ 132              		.cfi_def_cfa_offset 8
+ 133              		.cfi_offset 3, -8
+ 134              		.cfi_offset 14, -4
+  49:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     return (int32_t)sensirion_common_bytes_to_uint32_t(bytes);
+ 135              		.loc 1 49 5 is_stmt 1 view .LVU22
+ 136              		.loc 1 49 21 is_stmt 0 view .LVU23
+ 137 0002 FFF7FEFF 		bl	sensirion_common_bytes_to_uint32_t
+ 138              	.LVL7:
+  50:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 139              		.loc 1 50 1 view .LVU24
+ 140 0006 08BD     		pop	{r3, pc}
+ 141              		.cfi_endproc
+ 142              	.LFE3:
+ 144              		.section	.text.sensirion_common_bytes_to_float,"ax",%progbits
+ 145              		.align	1
+ 146              		.global	sensirion_common_bytes_to_float
+ 147              		.syntax unified
+ 148              		.thumb
+ 149              		.thumb_func
+ 151              	sensirion_common_bytes_to_float:
+ 152              	.LVL8:
+ 153              	.LFB4:
+  51:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  52:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** float sensirion_common_bytes_to_float(const uint8_t* bytes) {
+ 154              		.loc 1 52 61 is_stmt 1 view -0
+ 155              		.cfi_startproc
+ 156              		@ args = 0, pretend = 0, frame = 0
+ 157              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158              		.loc 1 52 61 is_stmt 0 view .LVU26
+ 159 0000 08B5     		push	{r3, lr}
+ 160              	.LCFI2:
+ 161              		.cfi_def_cfa_offset 8
+ 162              		.cfi_offset 3, -8
+ 163              		.cfi_offset 14, -4
+  53:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     union {
+ 164              		.loc 1 53 5 is_stmt 1 view .LVU27
+  54:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         uint32_t u32_value;
+  55:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         float float32;
+  56:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     } tmp;
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  58:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     tmp.u32_value = sensirion_common_bytes_to_uint32_t(bytes);
+ 165              		.loc 1 58 5 view .LVU28
+ 166              		.loc 1 58 21 is_stmt 0 view .LVU29
+ 167 0002 FFF7FEFF 		bl	sensirion_common_bytes_to_uint32_t
+ 168              	.LVL9:
+  59:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     return tmp.float32;
+ 169              		.loc 1 59 5 is_stmt 1 view .LVU30
+ 170              		.loc 1 59 15 is_stmt 0 view .LVU31
+ 171 0006 00EE100A 		vmov	s0, r0
+  60:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 172              		.loc 1 60 1 view .LVU32
+ 173 000a 08BD     		pop	{r3, pc}
+ 174              		.cfi_endproc
+ 175              	.LFE4:
+ 177              		.section	.text.sensirion_common_uint32_t_to_bytes,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 5
+
+
+ 178              		.align	1
+ 179              		.global	sensirion_common_uint32_t_to_bytes
+ 180              		.syntax unified
+ 181              		.thumb
+ 182              		.thumb_func
+ 184              	sensirion_common_uint32_t_to_bytes:
+ 185              	.LVL10:
+ 186              	.LFB5:
+  61:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  62:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** void sensirion_common_uint32_t_to_bytes(const uint32_t value, uint8_t* bytes) {
+ 187              		.loc 1 62 79 is_stmt 1 view -0
+ 188              		.cfi_startproc
+ 189              		@ args = 0, pretend = 0, frame = 0
+ 190              		@ frame_needed = 0, uses_anonymous_args = 0
+ 191              		@ link register save eliminated.
+  63:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[0] = (uint8_t)(value >> 24);
+ 192              		.loc 1 63 5 view .LVU34
+ 193              		.loc 1 63 16 is_stmt 0 view .LVU35
+ 194 0000 030E     		lsrs	r3, r0, #24
+ 195              		.loc 1 63 14 view .LVU36
+ 196 0002 0B70     		strb	r3, [r1]
+  64:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[1] = (uint8_t)(value >> 16);
+ 197              		.loc 1 64 5 is_stmt 1 view .LVU37
+ 198              		.loc 1 64 16 is_stmt 0 view .LVU38
+ 199 0004 C0F30743 		ubfx	r3, r0, #16, #8
+ 200              		.loc 1 64 14 view .LVU39
+ 201 0008 4B70     		strb	r3, [r1, #1]
+  65:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[2] = (uint8_t)(value >> 8);
+ 202              		.loc 1 65 5 is_stmt 1 view .LVU40
+ 203              		.loc 1 65 16 is_stmt 0 view .LVU41
+ 204 000a C0F30723 		ubfx	r3, r0, #8, #8
+ 205              		.loc 1 65 14 view .LVU42
+ 206 000e 8B70     		strb	r3, [r1, #2]
+  66:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[3] = (uint8_t)(value);
+ 207              		.loc 1 66 5 is_stmt 1 view .LVU43
+ 208              		.loc 1 66 14 is_stmt 0 view .LVU44
+ 209 0010 C870     		strb	r0, [r1, #3]
+  67:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 210              		.loc 1 67 1 view .LVU45
+ 211 0012 7047     		bx	lr
+ 212              		.cfi_endproc
+ 213              	.LFE5:
+ 215              		.section	.text.sensirion_common_uint16_t_to_bytes,"ax",%progbits
+ 216              		.align	1
+ 217              		.global	sensirion_common_uint16_t_to_bytes
+ 218              		.syntax unified
+ 219              		.thumb
+ 220              		.thumb_func
+ 222              	sensirion_common_uint16_t_to_bytes:
+ 223              	.LVL11:
+ 224              	.LFB6:
+  68:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  69:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** void sensirion_common_uint16_t_to_bytes(const uint16_t value, uint8_t* bytes) {
+ 225              		.loc 1 69 79 is_stmt 1 view -0
+ 226              		.cfi_startproc
+ 227              		@ args = 0, pretend = 0, frame = 0
+ 228              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 6
+
+
+ 229              		@ link register save eliminated.
+  70:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[0] = (uint8_t)(value >> 8);
+ 230              		.loc 1 70 5 view .LVU47
+ 231              		.loc 1 70 16 is_stmt 0 view .LVU48
+ 232 0000 030A     		lsrs	r3, r0, #8
+ 233              		.loc 1 70 14 view .LVU49
+ 234 0002 0B70     		strb	r3, [r1]
+  71:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[1] = (uint8_t)value;
+ 235              		.loc 1 71 5 is_stmt 1 view .LVU50
+ 236              		.loc 1 71 14 is_stmt 0 view .LVU51
+ 237 0004 4870     		strb	r0, [r1, #1]
+  72:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 238              		.loc 1 72 1 view .LVU52
+ 239 0006 7047     		bx	lr
+ 240              		.cfi_endproc
+ 241              	.LFE6:
+ 243              		.section	.text.sensirion_common_int32_t_to_bytes,"ax",%progbits
+ 244              		.align	1
+ 245              		.global	sensirion_common_int32_t_to_bytes
+ 246              		.syntax unified
+ 247              		.thumb
+ 248              		.thumb_func
+ 250              	sensirion_common_int32_t_to_bytes:
+ 251              	.LVL12:
+ 252              	.LFB7:
+  73:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  74:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** void sensirion_common_int32_t_to_bytes(const int32_t value, uint8_t* bytes) {
+ 253              		.loc 1 74 77 is_stmt 1 view -0
+ 254              		.cfi_startproc
+ 255              		@ args = 0, pretend = 0, frame = 0
+ 256              		@ frame_needed = 0, uses_anonymous_args = 0
+ 257              		@ link register save eliminated.
+  75:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[0] = (uint8_t)(value >> 24);
+ 258              		.loc 1 75 5 view .LVU54
+ 259              		.loc 1 75 16 is_stmt 0 view .LVU55
+ 260 0000 030E     		lsrs	r3, r0, #24
+ 261              		.loc 1 75 14 view .LVU56
+ 262 0002 0B70     		strb	r3, [r1]
+  76:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[1] = (uint8_t)(value >> 16);
+ 263              		.loc 1 76 5 is_stmt 1 view .LVU57
+ 264              		.loc 1 76 16 is_stmt 0 view .LVU58
+ 265 0004 C0F30743 		ubfx	r3, r0, #16, #8
+ 266              		.loc 1 76 14 view .LVU59
+ 267 0008 4B70     		strb	r3, [r1, #1]
+  77:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[2] = (uint8_t)(value >> 8);
+ 268              		.loc 1 77 5 is_stmt 1 view .LVU60
+ 269              		.loc 1 77 16 is_stmt 0 view .LVU61
+ 270 000a C0F30723 		ubfx	r3, r0, #8, #8
+ 271              		.loc 1 77 14 view .LVU62
+ 272 000e 8B70     		strb	r3, [r1, #2]
+  78:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[3] = (uint8_t)value;
+ 273              		.loc 1 78 5 is_stmt 1 view .LVU63
+ 274              		.loc 1 78 14 is_stmt 0 view .LVU64
+ 275 0010 C870     		strb	r0, [r1, #3]
+  79:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 276              		.loc 1 79 1 view .LVU65
+ 277 0012 7047     		bx	lr
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 7
+
+
+ 278              		.cfi_endproc
+ 279              	.LFE7:
+ 281              		.section	.text.sensirion_common_int16_t_to_bytes,"ax",%progbits
+ 282              		.align	1
+ 283              		.global	sensirion_common_int16_t_to_bytes
+ 284              		.syntax unified
+ 285              		.thumb
+ 286              		.thumb_func
+ 288              	sensirion_common_int16_t_to_bytes:
+ 289              	.LVL13:
+ 290              	.LFB8:
+  80:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  81:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** void sensirion_common_int16_t_to_bytes(const int16_t value, uint8_t* bytes) {
+ 291              		.loc 1 81 77 is_stmt 1 view -0
+ 292              		.cfi_startproc
+ 293              		@ args = 0, pretend = 0, frame = 0
+ 294              		@ frame_needed = 0, uses_anonymous_args = 0
+ 295              		@ link register save eliminated.
+  82:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[0] = (uint8_t)(value >> 8);
+ 296              		.loc 1 82 5 view .LVU67
+ 297              		.loc 1 82 16 is_stmt 0 view .LVU68
+ 298 0000 C0F30723 		ubfx	r3, r0, #8, #8
+ 299              		.loc 1 82 14 view .LVU69
+ 300 0004 0B70     		strb	r3, [r1]
+  83:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     bytes[1] = (uint8_t)value;
+ 301              		.loc 1 83 5 is_stmt 1 view .LVU70
+ 302              		.loc 1 83 14 is_stmt 0 view .LVU71
+ 303 0006 4870     		strb	r0, [r1, #1]
+  84:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 304              		.loc 1 84 1 view .LVU72
+ 305 0008 7047     		bx	lr
+ 306              		.cfi_endproc
+ 307              	.LFE8:
+ 309              		.section	.text.sensirion_common_float_to_bytes,"ax",%progbits
+ 310              		.align	1
+ 311              		.global	sensirion_common_float_to_bytes
+ 312              		.syntax unified
+ 313              		.thumb
+ 314              		.thumb_func
+ 316              	sensirion_common_float_to_bytes:
+ 317              	.LVL14:
+ 318              	.LFB9:
+  85:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  86:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** void sensirion_common_float_to_bytes(const float value, uint8_t* bytes) {
+ 319              		.loc 1 86 73 is_stmt 1 view -0
+ 320              		.cfi_startproc
+ 321              		@ args = 0, pretend = 0, frame = 0
+ 322              		@ frame_needed = 0, uses_anonymous_args = 0
+ 323              		.loc 1 86 73 is_stmt 0 view .LVU74
+ 324 0000 08B5     		push	{r3, lr}
+ 325              	.LCFI3:
+ 326              		.cfi_def_cfa_offset 8
+ 327              		.cfi_offset 3, -8
+ 328              		.cfi_offset 14, -4
+ 329 0002 0146     		mov	r1, r0
+  87:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     union {
+ 330              		.loc 1 87 5 is_stmt 1 view .LVU75
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 8
+
+
+  88:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         uint32_t u32_value;
+  89:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         float float32;
+  90:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     } tmp;
+  91:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     tmp.float32 = value;
+ 331              		.loc 1 91 5 view .LVU76
+  92:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     sensirion_common_uint32_t_to_bytes(tmp.u32_value, bytes);
+ 332              		.loc 1 92 5 view .LVU77
+ 333 0004 10EE100A 		vmov	r0, s0	@ int
+ 334              	.LVL15:
+ 335              		.loc 1 92 5 is_stmt 0 view .LVU78
+ 336 0008 FFF7FEFF 		bl	sensirion_common_uint32_t_to_bytes
+ 337              	.LVL16:
+  93:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 338              		.loc 1 93 1 view .LVU79
+ 339 000c 08BD     		pop	{r3, pc}
+ 340              		.cfi_endproc
+ 341              	.LFE9:
+ 343              		.section	.text.sensirion_common_copy_bytes,"ax",%progbits
+ 344              		.align	1
+ 345              		.global	sensirion_common_copy_bytes
+ 346              		.syntax unified
+ 347              		.thumb
+ 348              		.thumb_func
+ 350              	sensirion_common_copy_bytes:
+ 351              	.LVL17:
+ 352              	.LFB10:
+  94:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+  95:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** void sensirion_common_copy_bytes(const uint8_t* source, uint8_t* destination,
+  96:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****                                  uint16_t data_length) {
+ 353              		.loc 1 96 56 is_stmt 1 view -0
+ 354              		.cfi_startproc
+ 355              		@ args = 0, pretend = 0, frame = 0
+ 356              		@ frame_needed = 0, uses_anonymous_args = 0
+ 357              		@ link register save eliminated.
+  97:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     uint16_t i;
+ 358              		.loc 1 97 5 view .LVU81
+  98:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (i = 0; i < data_length; i++) {
+ 359              		.loc 1 98 5 view .LVU82
+ 360              		.loc 1 98 12 is_stmt 0 view .LVU83
+ 361 0000 0023     		movs	r3, #0
+ 362              		.loc 1 98 5 view .LVU84
+ 363 0002 05E0     		b	.L16
+ 364              	.LVL18:
+ 365              	.L17:
+  99:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         destination[i] = source[i];
+ 366              		.loc 1 99 9 is_stmt 1 view .LVU85
+ 367              		.loc 1 99 32 is_stmt 0 view .LVU86
+ 368 0004 10F803C0 		ldrb	ip, [r0, r3]	@ zero_extendqisi2
+ 369              		.loc 1 99 24 view .LVU87
+ 370 0008 01F803C0 		strb	ip, [r1, r3]
+  98:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (i = 0; i < data_length; i++) {
+ 371              		.loc 1 98 35 is_stmt 1 discriminator 3 view .LVU88
+ 372 000c 0133     		adds	r3, r3, #1
+ 373              	.LVL19:
+  98:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (i = 0; i < data_length; i++) {
+ 374              		.loc 1 98 35 is_stmt 0 discriminator 3 view .LVU89
+ 375 000e 9BB2     		uxth	r3, r3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 9
+
+
+ 376              	.LVL20:
+ 377              	.L16:
+  98:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (i = 0; i < data_length; i++) {
+ 378              		.loc 1 98 19 is_stmt 1 discriminator 1 view .LVU90
+ 379 0010 9342     		cmp	r3, r2
+ 380 0012 F7D3     		bcc	.L17
+ 100:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     }
+ 101:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }
+ 381              		.loc 1 101 1 is_stmt 0 view .LVU91
+ 382 0014 7047     		bx	lr
+ 383              		.cfi_endproc
+ 384              	.LFE10:
+ 386              		.section	.text.sensirion_common_to_integer,"ax",%progbits
+ 387              		.align	1
+ 388              		.global	sensirion_common_to_integer
+ 389              		.syntax unified
+ 390              		.thumb
+ 391              		.thumb_func
+ 393              	sensirion_common_to_integer:
+ 394              	.LVL21:
+ 395              	.LFB11:
+ 102:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+ 103:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** void sensirion_common_to_integer(const uint8_t* source, uint8_t* destination,
+ 104:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****                                  INT_TYPE int_type, uint8_t data_length) {
+ 396              		.loc 1 104 74 is_stmt 1 view -0
+ 397              		.cfi_startproc
+ 398              		@ args = 0, pretend = 0, frame = 0
+ 399              		@ frame_needed = 0, uses_anonymous_args = 0
+ 400              		.loc 1 104 74 is_stmt 0 view .LVU93
+ 401 0000 30B5     		push	{r4, r5, lr}
+ 402              	.LCFI4:
+ 403              		.cfi_def_cfa_offset 12
+ 404              		.cfi_offset 4, -12
+ 405              		.cfi_offset 5, -8
+ 406              		.cfi_offset 14, -4
+ 105:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+ 106:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     if (data_length > int_type) {
+ 407              		.loc 1 106 5 is_stmt 1 view .LVU94
+ 408              		.loc 1 106 8 is_stmt 0 view .LVU95
+ 409 0002 9342     		cmp	r3, r2
+ 410 0004 00D9     		bls	.L19
+ 107:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         data_length = 0;  // we do not read at all if data_length is bigger than
+ 411              		.loc 1 107 21 view .LVU96
+ 412 0006 0023     		movs	r3, #0
+ 413              	.LVL22:
+ 414              	.L19:
+ 108:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****                           // the provided integer!
+ 109:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     }
+ 110:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+ 111:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     // pad missing bytes
+ 112:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     uint8_t offset = int_type - data_length;
+ 415              		.loc 1 112 5 is_stmt 1 view .LVU97
+ 416              		.loc 1 112 13 is_stmt 0 view .LVU98
+ 417 0008 D41A     		subs	r4, r2, r3
+ 418 000a E4B2     		uxtb	r4, r4
+ 419              	.LVL23:
+ 113:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (uint8_t i = 0; i < offset; i++) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 10
+
+
+ 420              		.loc 1 113 5 is_stmt 1 view .LVU99
+ 421              	.LBB2:
+ 422              		.loc 1 113 10 view .LVU100
+ 423              		.loc 1 113 18 is_stmt 0 view .LVU101
+ 424 000c 4FF0000C 		mov	ip, #0
+ 425              		.loc 1 113 5 view .LVU102
+ 426 0010 0AE0     		b	.L20
+ 427              	.LVL24:
+ 428              	.L21:
+ 114:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         destination[int_type - i - 1] = 0;
+ 429              		.loc 1 114 9 is_stmt 1 view .LVU103
+ 430              		.loc 1 114 30 is_stmt 0 view .LVU104
+ 431 0012 A2EB0C0E 		sub	lr, r2, ip
+ 432              		.loc 1 114 20 view .LVU105
+ 433 0016 0EF1FF3E 		add	lr, lr, #-1
+ 434              		.loc 1 114 39 view .LVU106
+ 435 001a 0025     		movs	r5, #0
+ 436 001c 01F80E50 		strb	r5, [r1, lr]
+ 113:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (uint8_t i = 0; i < offset; i++) {
+ 437              		.loc 1 113 38 is_stmt 1 discriminator 3 view .LVU107
+ 438 0020 0CF1010C 		add	ip, ip, #1
+ 439              	.LVL25:
+ 113:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (uint8_t i = 0; i < offset; i++) {
+ 440              		.loc 1 113 38 is_stmt 0 discriminator 3 view .LVU108
+ 441 0024 5FFA8CFC 		uxtb	ip, ip
+ 442              	.LVL26:
+ 443              	.L20:
+ 113:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (uint8_t i = 0; i < offset; i++) {
+ 444              		.loc 1 113 27 is_stmt 1 discriminator 1 view .LVU109
+ 445 0028 A445     		cmp	ip, r4
+ 446 002a F2D3     		bcc	.L21
+ 447              	.LBE2:
+ 448              	.LBB3:
+ 115:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     }
+ 116:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** 
+ 117:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     for (uint8_t i = 1; i <= data_length; i++) {
+ 449              		.loc 1 117 18 is_stmt 0 view .LVU110
+ 450 002c 4FF0010C 		mov	ip, #1
+ 451              	.LVL27:
+ 452              		.loc 1 117 18 view .LVU111
+ 453 0030 0DE0     		b	.L22
+ 454              	.LVL28:
+ 455              	.L23:
+ 118:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         destination[int_type - offset - i] = source[i - 1];
+ 456              		.loc 1 118 9 is_stmt 1 view .LVU112
+ 457              		.loc 1 118 30 is_stmt 0 view .LVU113
+ 458 0032 A2EB040E 		sub	lr, r2, r4
+ 459              		.loc 1 118 39 view .LVU114
+ 460 0036 AEEB0C0E 		sub	lr, lr, ip
+ 461              		.loc 1 118 52 view .LVU115
+ 462 003a 00EB0C05 		add	r5, r0, ip
+ 463 003e 15F8015C 		ldrb	r5, [r5, #-1]	@ zero_extendqisi2
+ 464              		.loc 1 118 44 view .LVU116
+ 465 0042 01F80E50 		strb	r5, [r1, lr]
+ 117:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         destination[int_type - offset - i] = source[i - 1];
+ 466              		.loc 1 117 44 is_stmt 1 discriminator 3 view .LVU117
+ 467 0046 0CF1010C 		add	ip, ip, #1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 11
+
+
+ 468              	.LVL29:
+ 117:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         destination[int_type - offset - i] = source[i - 1];
+ 469              		.loc 1 117 44 is_stmt 0 discriminator 3 view .LVU118
+ 470 004a 5FFA8CFC 		uxtb	ip, ip
+ 471              	.LVL30:
+ 472              	.L22:
+ 117:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****         destination[int_type - offset - i] = source[i - 1];
+ 473              		.loc 1 117 27 is_stmt 1 discriminator 1 view .LVU119
+ 474 004e 6345     		cmp	r3, ip
+ 475 0050 EFD2     		bcs	.L23
+ 476              	.LBE3:
+ 119:SynaptiX_FDK/components/modules/sps30/sensirion_common.c ****     }
+ 120:SynaptiX_FDK/components/modules/sps30/sensirion_common.c **** }...
+ 477              		.loc 1 120 1 is_stmt 0 view .LVU120
+ 478 0052 30BD     		pop	{r4, r5, pc}
+ 479              		.loc 1 120 1 view .LVU121
+ 480              		.cfi_endproc
+ 481              	.LFE11:
+ 483              		.text
+ 484              	.Letext0:
+ 485              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 486              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 487              		.file 4 "SynaptiX_FDK/components/modules/sps30/sensirion_common.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s 			page 12
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sensirion_common.c
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:22     .text.sensirion_common_bytes_to_uint16_t:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:28     .text.sensirion_common_bytes_to_uint16_t:00000000 sensirion_common_bytes_to_uint16_t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:49     .text.sensirion_common_bytes_to_uint32_t:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:55     .text.sensirion_common_bytes_to_uint32_t:00000000 sensirion_common_bytes_to_uint32_t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:86     .text.sensirion_common_bytes_to_int16_t:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:92     .text.sensirion_common_bytes_to_int16_t:00000000 sensirion_common_bytes_to_int16_t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:116    .text.sensirion_common_bytes_to_int32_t:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:122    .text.sensirion_common_bytes_to_int32_t:00000000 sensirion_common_bytes_to_int32_t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:145    .text.sensirion_common_bytes_to_float:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:151    .text.sensirion_common_bytes_to_float:00000000 sensirion_common_bytes_to_float
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:178    .text.sensirion_common_uint32_t_to_bytes:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:184    .text.sensirion_common_uint32_t_to_bytes:00000000 sensirion_common_uint32_t_to_bytes
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:216    .text.sensirion_common_uint16_t_to_bytes:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:222    .text.sensirion_common_uint16_t_to_bytes:00000000 sensirion_common_uint16_t_to_bytes
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:244    .text.sensirion_common_int32_t_to_bytes:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:250    .text.sensirion_common_int32_t_to_bytes:00000000 sensirion_common_int32_t_to_bytes
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:282    .text.sensirion_common_int16_t_to_bytes:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:288    .text.sensirion_common_int16_t_to_bytes:00000000 sensirion_common_int16_t_to_bytes
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:310    .text.sensirion_common_float_to_bytes:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:316    .text.sensirion_common_float_to_bytes:00000000 sensirion_common_float_to_bytes
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:344    .text.sensirion_common_copy_bytes:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:350    .text.sensirion_common_copy_bytes:00000000 sensirion_common_copy_bytes
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:387    .text.sensirion_common_to_integer:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccDZCrTf.s:393    .text.sensirion_common_to_integer:00000000 sensirion_common_to_integer
+
+NO UNDEFINED SYMBOLS

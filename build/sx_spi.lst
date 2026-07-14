@@ -1,0 +1,599 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_spi.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/peripherals/spi/sx_spi.c"
+  21              		.section	.text.sx_gpio_write,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sx_gpio_write:
+  28              	.LVL0:
+  29              	.LFB298:
+  30              		.file 2 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+   1:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifndef SX_GPIO_H
+   2:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #define SX_GPIO_H
+   3:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   7:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   9:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef enum SX_GPIO_VALUE{
+  10:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_LOW = 0,
+  11:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_HIGH = 1
+  12:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } SX_GPIO_VALUE;
+  13:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  14:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio sx_gpio_t;
+  15:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  16:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct {
+  17:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void    *port;
+  18:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     uint16_t pin;
+  19:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_pin_t;
+  20:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  21:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio_ops{
+  22:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*write)(sx_gpio_t *gpio, SX_GPIO_VALUE value);
+  23:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*read)(sx_gpio_t *gpio, SX_GPIO_VALUE *value);
+  24:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*toggle)(sx_gpio_t *gpio);
+  25:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_ops_t;
+  26:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  27:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio{
+  28:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     sx_gpio_ops_t *ops;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 2
+
+
+  29:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void *pDriver;
+  30:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_VALUE value;
+  31:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_t;
+  32:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline void sx_gpio_init(sx_gpio_t *gpio, sx_gpio_ops_t *ops, void *pDriver){
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+  37:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  38:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  39:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline int sx_gpio_write(sx_gpio_t *gpio, SX_GPIO_VALUE value){
+  31              		.loc 2 39 70 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 2 39 70 is_stmt 0 view .LVU1
+  36 0000 38B5     		push	{r3, r4, r5, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 16
+  39              		.cfi_offset 3, -16
+  40              		.cfi_offset 4, -12
+  41              		.cfi_offset 5, -8
+  42              		.cfi_offset 14, -4
+  40:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     if(gpio->ops && gpio->ops->write){
+  43              		.loc 2 40 5 is_stmt 1 view .LVU2
+  44              		.loc 2 40 12 is_stmt 0 view .LVU3
+  45 0002 0368     		ldr	r3, [r0]
+  46              		.loc 2 40 7 view .LVU4
+  47 0004 3BB1     		cbz	r3, .L4
+  48 0006 0446     		mov	r4, r0
+  49 0008 0D46     		mov	r5, r1
+  50              		.loc 2 40 30 discriminator 1 view .LVU5
+  51 000a 1B68     		ldr	r3, [r3]
+  52              		.loc 2 40 18 discriminator 1 view .LVU6
+  53 000c 33B1     		cbz	r3, .L5
+  54              	.LBB2:
+  41:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         int ret = gpio->ops->write(gpio, value);
+  55              		.loc 2 41 9 is_stmt 1 view .LVU7
+  56              		.loc 2 41 19 is_stmt 0 view .LVU8
+  57 000e 9847     		blx	r3
+  58              	.LVL1:
+  42:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         if(ret == 0){
+  59              		.loc 2 42 9 is_stmt 1 view .LVU9
+  60              		.loc 2 42 11 is_stmt 0 view .LVU10
+  61 0010 00B9     		cbnz	r0, .L1
+  43:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****             gpio->value = value;
+  62              		.loc 2 43 13 is_stmt 1 view .LVU11
+  63              		.loc 2 43 25 is_stmt 0 view .LVU12
+  64 0012 2572     		strb	r5, [r4, #8]
+  44:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         }
+  45:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         return ret;
+  65              		.loc 2 45 9 is_stmt 1 view .LVU13
+  66              	.LVL2:
+  67              	.L1:
+  68              		.loc 2 45 9 is_stmt 0 view .LVU14
+  69              	.LBE2:
+  46:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 3
+
+
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     return -1;
+  48:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  70              		.loc 2 48 1 view .LVU15
+  71 0014 38BD     		pop	{r3, r4, r5, pc}
+  72              	.LVL3:
+  73              	.L4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  74              		.loc 2 47 12 view .LVU16
+  75 0016 4FF0FF30 		mov	r0, #-1
+  76              	.LVL4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  77              		.loc 2 47 12 view .LVU17
+  78 001a FBE7     		b	.L1
+  79              	.LVL5:
+  80              	.L5:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  81              		.loc 2 47 12 view .LVU18
+  82 001c 4FF0FF30 		mov	r0, #-1
+  83              	.LVL6:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  84              		.loc 2 47 12 view .LVU19
+  85 0020 F8E7     		b	.L1
+  86              		.cfi_endproc
+  87              	.LFE298:
+  89              		.section	.text.sx_spi_cs_low,"ax",%progbits
+  90              		.align	1
+  91              		.syntax unified
+  92              		.thumb
+  93              		.thumb_func
+  95              	sx_spi_cs_low:
+  96              	.LVL7:
+  97              	.LFB305:
+  98              		.file 3 "SynaptiX_FDK/components/peripherals/spi/sx_spi.h"
+   1:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #ifndef SX_SPI_H
+   2:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #define SX_SPI_H
+   3:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+   7:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #include "sx_gpio.h"
+   9:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  10:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** typedef struct sx_spi sx_spi_t;
+  11:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  12:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** typedef struct sx_spi_ops{
+  13:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     int (*write)(sx_spi_t *spi, const uint8_t *data, uint32_t len);
+  14:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     int (*read)(sx_spi_t *spi, uint8_t *data, uint32_t len);
+  15:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     int (*write_read)(sx_spi_t *spi, const uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len);
+  16:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** } sx_spi_ops_t;
+  17:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  18:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** struct sx_spi
+  19:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** {
+  20:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     /* data */
+  21:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     sx_spi_ops_t *ops;
+  22:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     void *pDriver;
+  23:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     sx_gpio_t *cs;
+  24:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** };
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 4
+
+
+  25:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  26:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline void sx_spi_init(sx_spi_t *spi, sx_spi_ops_t *ops, void *pDriver, sx_gpio_t *cs){
+  27:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->ops = ops;
+  28:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->pDriver = pDriver;
+  29:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->cs = cs;
+  30:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** }
+  31:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  32:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline int sx_spi_write(sx_spi_t *spi, const uint8_t *data, uint32_t len){
+  33:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     if(spi->ops && spi->ops->write){
+  34:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****         return spi->ops->write(spi, data, len);
+  35:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     }
+  36:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     return -1;
+  37:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** }
+  38:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  39:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline int sx_spi_read(sx_spi_t *spi, uint8_t *data, uint32_t len){
+  40:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     if(spi->ops && spi->ops->read){
+  41:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****         return spi->ops->read(spi, data, len);
+  42:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     }
+  43:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     return -1;
+  44:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** }
+  45:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  46:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline int sx_spi_write_read(sx_spi_t *spi, const uint8_t *tx_buf, uint8_t *rx_buf, uint32_t
+  47:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     if(spi->ops && spi->ops->write_read){
+  48:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****         return spi->ops->write_read(spi, tx_buf, rx_buf, len);
+  49:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     }
+  50:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     return -1;
+  51:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** }
+  52:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  53:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline void sx_spi_cs_low(sx_spi_t *spi) {
+  99              		.loc 3 53 49 is_stmt 1 view -0
+ 100              		.cfi_startproc
+ 101              		@ args = 0, pretend = 0, frame = 0
+ 102              		@ frame_needed = 0, uses_anonymous_args = 0
+  54:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     if (spi->cs) sx_gpio_write(spi->cs, SX_GPIO_LOW);
+ 103              		.loc 3 54 5 view .LVU21
+ 104              		.loc 3 54 12 is_stmt 0 view .LVU22
+ 105 0000 8068     		ldr	r0, [r0, #8]
+ 106              	.LVL8:
+ 107              		.loc 3 54 8 view .LVU23
+ 108 0002 20B1     		cbz	r0, .L10
+  53:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     if (spi->cs) sx_gpio_write(spi->cs, SX_GPIO_LOW);
+ 109              		.loc 3 53 49 view .LVU24
+ 110 0004 08B5     		push	{r3, lr}
+ 111              	.LCFI1:
+ 112              		.cfi_def_cfa_offset 8
+ 113              		.cfi_offset 3, -8
+ 114              		.cfi_offset 14, -4
+ 115              		.loc 3 54 18 is_stmt 1 discriminator 1 view .LVU25
+ 116 0006 0021     		movs	r1, #0
+ 117 0008 FFF7FEFF 		bl	sx_gpio_write
+ 118              	.LVL9:
+  55:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** }
+ 119              		.loc 3 55 1 is_stmt 0 view .LVU26
+ 120 000c 08BD     		pop	{r3, pc}
+ 121              	.L10:
+ 122              	.LCFI2:
+ 123              		.cfi_def_cfa_offset 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 5
+
+
+ 124              		.cfi_restore 3
+ 125              		.cfi_restore 14
+ 126 000e 7047     		bx	lr
+ 127              		.cfi_endproc
+ 128              	.LFE305:
+ 130              		.section	.text.sx_spi_cs_high,"ax",%progbits
+ 131              		.align	1
+ 132              		.syntax unified
+ 133              		.thumb
+ 134              		.thumb_func
+ 136              	sx_spi_cs_high:
+ 137              	.LVL10:
+ 138              	.LFB306:
+  56:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline void sx_spi_cs_high(sx_spi_t *spi) {
+ 139              		.loc 3 56 50 is_stmt 1 view -0
+ 140              		.cfi_startproc
+ 141              		@ args = 0, pretend = 0, frame = 0
+ 142              		@ frame_needed = 0, uses_anonymous_args = 0
+  57:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     if (spi->cs) sx_gpio_write(spi->cs, SX_GPIO_HIGH);
+ 143              		.loc 3 57 5 view .LVU28
+ 144              		.loc 3 57 12 is_stmt 0 view .LVU29
+ 145 0000 8068     		ldr	r0, [r0, #8]
+ 146              	.LVL11:
+ 147              		.loc 3 57 8 view .LVU30
+ 148 0002 20B1     		cbz	r0, .L16
+  56:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline void sx_spi_cs_high(sx_spi_t *spi) {
+ 149              		.loc 3 56 50 view .LVU31
+ 150 0004 08B5     		push	{r3, lr}
+ 151              	.LCFI3:
+ 152              		.cfi_def_cfa_offset 8
+ 153              		.cfi_offset 3, -8
+ 154              		.cfi_offset 14, -4
+ 155              		.loc 3 57 18 is_stmt 1 discriminator 1 view .LVU32
+ 156 0006 0121     		movs	r1, #1
+ 157 0008 FFF7FEFF 		bl	sx_gpio_write
+ 158              	.LVL12:
+  58:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** }
+ 159              		.loc 3 58 1 is_stmt 0 view .LVU33
+ 160 000c 08BD     		pop	{r3, pc}
+ 161              	.L16:
+ 162              	.LCFI4:
+ 163              		.cfi_def_cfa_offset 0
+ 164              		.cfi_restore 3
+ 165              		.cfi_restore 14
+ 166 000e 7047     		bx	lr
+ 167              		.cfi_endproc
+ 168              	.LFE306:
+ 170              		.section	.text._sx_spi_write,"ax",%progbits
+ 171              		.align	1
+ 172              		.syntax unified
+ 173              		.thumb
+ 174              		.thumb_func
+ 176              	_sx_spi_write:
+ 177              	.LVL13:
+ 178              	.LFB307:
+   1:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #include "sx_config.h"
+   2:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #include "sx_delay.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 6
+
+
+   3:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+   4:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static const char *TAG = "SX_SPI";
+   5:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+   6:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 
+   7:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32h5xx_hal.h"
+   8:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32h5xx_hal_spi.h"
+   9:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32H7
+  10:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32h7xx_hal.h"
+  11:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32h7xx_hal_spi.h"
+  12:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32F7
+  13:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32f7xx_hal.h"
+  14:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32f7xx_hal_spi.h"
+  15:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32F4
+  16:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32f4xx_hal.h"
+  17:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32f4xx_hal_spi.h"
+  18:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32F1
+  19:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32f1xx_hal.h"
+  20:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     #include "stm32f1xx_hal_spi.h"
+  21:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #endif
+  22:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  23:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #include "sx_spi.h"
+  24:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  25:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** #define SX_SPI_TIMEOUT_MS   100U
+  26:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  27:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** typedef HAL_StatusTypeDef (*spi_write_fn_t) (SPI_HandleTypeDef *hspi, const uint8_t *pData, uint16_
+  28:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** typedef HAL_StatusTypeDef (*spi_read_fn_t) (SPI_HandleTypeDef *hspi, uint8_t *pData, uint16_t Size,
+  29:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** typedef HAL_StatusTypeDef (*spi_write_read_fn_t) (SPI_HandleTypeDef *hspi, const uint8_t *pTxData, 
+  30:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****                                                   uint16_t Size, uint32_t Timeout);
+  31:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  32:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static spi_write_fn_t   spi_write = HAL_SPI_Transmit;
+  33:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static spi_read_fn_t    spi_read = HAL_SPI_Receive;
+  34:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static spi_write_read_fn_t spi_write_read = HAL_SPI_TransmitReceive;
+  35:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  36:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static int _sx_spi_write(sx_spi_t *spi, const uint8_t *data, uint32_t len);
+  37:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static int _sx_spi_read(sx_spi_t *spi, uint8_t *data, uint32_t len);
+  38:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static int _sx_spi_write_read(sx_spi_t *spi, const uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len);
+  39:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  40:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** sx_spi_ops_t sx_spi_ops = {
+  41:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     .write      = _sx_spi_write,
+  42:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     .read       = _sx_spi_read,
+  43:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     .write_read = _sx_spi_write_read,
+  44:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** };
+  45:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  46:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static int _sx_spi_write(sx_spi_t *spi, const uint8_t *data, uint32_t len){
+ 179              		.loc 1 46 75 is_stmt 1 view -0
+ 180              		.cfi_startproc
+ 181              		@ args = 0, pretend = 0, frame = 0
+ 182              		@ frame_needed = 0, uses_anonymous_args = 0
+ 183              		.loc 1 46 75 is_stmt 0 view .LVU35
+ 184 0000 70B5     		push	{r4, r5, r6, lr}
+ 185              	.LCFI5:
+ 186              		.cfi_def_cfa_offset 16
+ 187              		.cfi_offset 4, -16
+ 188              		.cfi_offset 5, -12
+ 189              		.cfi_offset 6, -8
+ 190              		.cfi_offset 14, -4
+ 191 0002 0446     		mov	r4, r0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 7
+
+
+ 192 0004 0D46     		mov	r5, r1
+ 193 0006 1646     		mov	r6, r2
+  47:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_low(spi);
+ 194              		.loc 1 47 5 is_stmt 1 view .LVU36
+ 195 0008 FFF7FEFF 		bl	sx_spi_cs_low
+ 196              	.LVL14:
+  48:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     int ret = spi_write((SPI_HandleTypeDef *)spi->pDriver, (const uint8_t *)data, (uint16_t)len, SX
+ 197              		.loc 1 48 5 view .LVU37
+ 198              		.loc 1 48 15 is_stmt 0 view .LVU38
+ 199 000c 6423     		movs	r3, #100
+ 200 000e B2B2     		uxth	r2, r6
+ 201 0010 2946     		mov	r1, r5
+ 202 0012 6068     		ldr	r0, [r4, #4]
+ 203 0014 FFF7FEFF 		bl	HAL_SPI_Transmit
+ 204              	.LVL15:
+ 205              		.loc 1 48 131 discriminator 1 view .LVU39
+ 206 0018 28B9     		cbnz	r0, .L21
+ 207 001a 0025     		movs	r5, #0
+ 208              	.LVL16:
+ 209              	.L20:
+  49:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 210              		.loc 1 49 5 is_stmt 1 view .LVU40
+ 211 001c 2046     		mov	r0, r4
+ 212 001e FFF7FEFF 		bl	sx_spi_cs_high
+ 213              	.LVL17:
+  50:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     return ret;
+ 214              		.loc 1 50 5 view .LVU41
+  51:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** }
+ 215              		.loc 1 51 1 is_stmt 0 view .LVU42
+ 216 0022 2846     		mov	r0, r5
+ 217 0024 70BD     		pop	{r4, r5, r6, pc}
+ 218              	.LVL18:
+ 219              	.L21:
+  48:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 220              		.loc 1 48 131 discriminator 2 view .LVU43
+ 221 0026 4FF0FF35 		mov	r5, #-1
+ 222              	.LVL19:
+  48:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 223              		.loc 1 48 131 discriminator 2 view .LVU44
+ 224 002a F7E7     		b	.L20
+ 225              		.cfi_endproc
+ 226              	.LFE307:
+ 228              		.section	.text._sx_spi_read,"ax",%progbits
+ 229              		.align	1
+ 230              		.syntax unified
+ 231              		.thumb
+ 232              		.thumb_func
+ 234              	_sx_spi_read:
+ 235              	.LVL20:
+ 236              	.LFB308:
+  52:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  53:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static int _sx_spi_read(sx_spi_t *spi, uint8_t *data, uint32_t len){
+ 237              		.loc 1 53 68 is_stmt 1 view -0
+ 238              		.cfi_startproc
+ 239              		@ args = 0, pretend = 0, frame = 0
+ 240              		@ frame_needed = 0, uses_anonymous_args = 0
+ 241              		.loc 1 53 68 is_stmt 0 view .LVU46
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 8
+
+
+ 242 0000 70B5     		push	{r4, r5, r6, lr}
+ 243              	.LCFI6:
+ 244              		.cfi_def_cfa_offset 16
+ 245              		.cfi_offset 4, -16
+ 246              		.cfi_offset 5, -12
+ 247              		.cfi_offset 6, -8
+ 248              		.cfi_offset 14, -4
+ 249 0002 0446     		mov	r4, r0
+ 250 0004 0D46     		mov	r5, r1
+ 251 0006 1646     		mov	r6, r2
+  54:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_low(spi);
+ 252              		.loc 1 54 5 is_stmt 1 view .LVU47
+ 253 0008 FFF7FEFF 		bl	sx_spi_cs_low
+ 254              	.LVL21:
+  55:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     int ret = spi_read((SPI_HandleTypeDef *)spi->pDriver, data, (uint16_t) len, SX_SPI_TIMEOUT_MS) 
+ 255              		.loc 1 55 5 view .LVU48
+ 256              		.loc 1 55 15 is_stmt 0 view .LVU49
+ 257 000c 6423     		movs	r3, #100
+ 258 000e B2B2     		uxth	r2, r6
+ 259 0010 2946     		mov	r1, r5
+ 260 0012 6068     		ldr	r0, [r4, #4]
+ 261 0014 FFF7FEFF 		bl	HAL_SPI_Receive
+ 262              	.LVL22:
+ 263              		.loc 1 55 114 discriminator 1 view .LVU50
+ 264 0018 28B9     		cbnz	r0, .L25
+ 265 001a 0025     		movs	r5, #0
+ 266              	.LVL23:
+ 267              	.L24:
+  56:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 268              		.loc 1 56 5 is_stmt 1 view .LVU51
+ 269 001c 2046     		mov	r0, r4
+ 270 001e FFF7FEFF 		bl	sx_spi_cs_high
+ 271              	.LVL24:
+  57:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     return ret;
+ 272              		.loc 1 57 5 view .LVU52
+  58:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** }
+ 273              		.loc 1 58 1 is_stmt 0 view .LVU53
+ 274 0022 2846     		mov	r0, r5
+ 275 0024 70BD     		pop	{r4, r5, r6, pc}
+ 276              	.LVL25:
+ 277              	.L25:
+  55:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 278              		.loc 1 55 114 discriminator 2 view .LVU54
+ 279 0026 4FF0FF35 		mov	r5, #-1
+ 280              	.LVL26:
+  55:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 281              		.loc 1 55 114 discriminator 2 view .LVU55
+ 282 002a F7E7     		b	.L24
+ 283              		.cfi_endproc
+ 284              	.LFE308:
+ 286              		.section	.text._sx_spi_write_read,"ax",%progbits
+ 287              		.align	1
+ 288              		.syntax unified
+ 289              		.thumb
+ 290              		.thumb_func
+ 292              	_sx_spi_write_read:
+ 293              	.LVL27:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 9
+
+
+ 294              	.LFB309:
+  59:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** 
+  60:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** static int _sx_spi_write_read(sx_spi_t *spi, const uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len){
+ 295              		.loc 1 60 99 is_stmt 1 view -0
+ 296              		.cfi_startproc
+ 297              		@ args = 0, pretend = 0, frame = 0
+ 298              		@ frame_needed = 0, uses_anonymous_args = 0
+ 299              		.loc 1 60 99 is_stmt 0 view .LVU57
+ 300 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 301              	.LCFI7:
+ 302              		.cfi_def_cfa_offset 20
+ 303              		.cfi_offset 4, -20
+ 304              		.cfi_offset 5, -16
+ 305              		.cfi_offset 6, -12
+ 306              		.cfi_offset 7, -8
+ 307              		.cfi_offset 14, -4
+ 308 0002 83B0     		sub	sp, sp, #12
+ 309              	.LCFI8:
+ 310              		.cfi_def_cfa_offset 32
+ 311 0004 0446     		mov	r4, r0
+ 312 0006 0D46     		mov	r5, r1
+ 313 0008 1646     		mov	r6, r2
+ 314 000a 1F46     		mov	r7, r3
+  61:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_low(spi);
+ 315              		.loc 1 61 5 is_stmt 1 view .LVU58
+ 316 000c FFF7FEFF 		bl	sx_spi_cs_low
+ 317              	.LVL28:
+  62:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     int ret = spi_write_read((SPI_HandleTypeDef *)spi->pDriver, (const uint8_t *)tx_buf, rx_buf, (u
+ 318              		.loc 1 62 5 view .LVU59
+ 319              		.loc 1 62 15 is_stmt 0 view .LVU60
+ 320 0010 6423     		movs	r3, #100
+ 321 0012 0093     		str	r3, [sp]
+ 322 0014 BBB2     		uxth	r3, r7
+ 323 0016 3246     		mov	r2, r6
+ 324 0018 2946     		mov	r1, r5
+ 325 001a 6068     		ldr	r0, [r4, #4]
+ 326 001c FFF7FEFF 		bl	HAL_SPI_TransmitReceive
+ 327              	.LVL29:
+ 328              		.loc 1 62 146 discriminator 1 view .LVU61
+ 329 0020 30B9     		cbnz	r0, .L29
+ 330 0022 0025     		movs	r5, #0
+ 331              	.LVL30:
+ 332              	.L28:
+  63:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 333              		.loc 1 63 5 is_stmt 1 view .LVU62
+ 334 0024 2046     		mov	r0, r4
+ 335 0026 FFF7FEFF 		bl	sx_spi_cs_high
+ 336              	.LVL31:
+  64:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     return ret;
+ 337              		.loc 1 64 5 view .LVU63
+  65:SynaptiX_FDK/components/peripherals/spi/sx_spi.c **** }
+ 338              		.loc 1 65 1 is_stmt 0 view .LVU64
+ 339 002a 2846     		mov	r0, r5
+ 340 002c 03B0     		add	sp, sp, #12
+ 341              	.LCFI9:
+ 342              		.cfi_remember_state
+ 343              		.cfi_def_cfa_offset 20
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 10
+
+
+ 344              		@ sp needed
+ 345 002e F0BD     		pop	{r4, r5, r6, r7, pc}
+ 346              	.LVL32:
+ 347              	.L29:
+ 348              	.LCFI10:
+ 349              		.cfi_restore_state
+  62:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 350              		.loc 1 62 146 discriminator 2 view .LVU65
+ 351 0030 4FF0FF35 		mov	r5, #-1
+ 352              	.LVL33:
+  62:SynaptiX_FDK/components/peripherals/spi/sx_spi.c ****     sx_spi_cs_high(spi);
+ 353              		.loc 1 62 146 discriminator 2 view .LVU66
+ 354 0034 F6E7     		b	.L28
+ 355              		.cfi_endproc
+ 356              	.LFE309:
+ 358              		.global	sx_spi_ops
+ 359              		.section	.data.sx_spi_ops,"aw"
+ 360              		.align	2
+ 363              	sx_spi_ops:
+ 364 0000 00000000 		.word	_sx_spi_write
+ 365 0004 00000000 		.word	_sx_spi_read
+ 366 0008 00000000 		.word	_sx_spi_write_read
+ 367              		.text
+ 368              	.Letext0:
+ 369              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 370              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 371              		.file 6 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 372              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 373              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma.h"
+ 374              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma_ex.h"
+ 375              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 376              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_spi.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s 			page 11
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_spi.c
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:22     .text.sx_gpio_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:27     .text.sx_gpio_write:00000000 sx_gpio_write
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:90     .text.sx_spi_cs_low:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:95     .text.sx_spi_cs_low:00000000 sx_spi_cs_low
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:131    .text.sx_spi_cs_high:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:136    .text.sx_spi_cs_high:00000000 sx_spi_cs_high
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:171    .text._sx_spi_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:176    .text._sx_spi_write:00000000 _sx_spi_write
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:229    .text._sx_spi_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:234    .text._sx_spi_read:00000000 _sx_spi_read
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:287    .text._sx_spi_write_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:292    .text._sx_spi_write_read:00000000 _sx_spi_write_read
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:363    .data.sx_spi_ops:00000000 sx_spi_ops
+C:\Users\DELL\AppData\Local\Temp\ccJrqMIJ.s:360    .data.sx_spi_ops:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_SPI_Transmit
+HAL_SPI_Receive
+HAL_SPI_TransmitReceive

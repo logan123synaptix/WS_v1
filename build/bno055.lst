@@ -1,0 +1,2584 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"bno055.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/modules/imu/bno055.c"
+  21              		.section	.text.sx_i2c_mem_write,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sx_i2c_mem_write:
+  28              	.LVL0:
+  29              	.LFB3:
+  30              		.file 2 "SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h"
+   1:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #ifndef SX_I2C_H
+   2:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #define SX_I2C_H
+   3:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+   7:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+   9:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** typedef struct sx_i2c sx_i2c_t;
+  10:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  11:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** typedef struct sx_i2c_ops{
+  12:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*write)(sx_i2c_t *i2c, uint16_t dev_addr, const uint8_t *data, uint32_t len);
+  13:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*read)(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t *data, uint32_t len);
+  14:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*mem_write)(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t mem_addr_size, c
+  15:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*mem_read)(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t mem_addr_size, ui
+  16:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*is_device_ready)(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t num_trial, uint32_t timeout);
+  17:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** } sx_i2c_ops_t;
+  18:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  19:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** struct sx_i2c{
+  20:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     sx_i2c_ops_t *ops;
+  21:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     void *pDriver;
+  22:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** };
+  23:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  24:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline void sx_i2c_init(sx_i2c_t *i2c, sx_i2c_ops_t *ops, void *pDriver){
+  25:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     i2c->ops = ops;
+  26:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     i2c->pDriver = pDriver;
+  27:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+  28:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 2
+
+
+  29:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline int sx_i2c_write(sx_i2c_t *i2c, uint16_t dev_addr, const uint8_t *data, uint32_t len)
+  30:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     if(i2c->ops && i2c->ops->write)
+  31:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****         return i2c->ops->write(i2c, dev_addr, data, len);
+  32:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  33:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+  34:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  35:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline int sx_i2c_read(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t *data, uint32_t len){
+  36:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     if(i2c->ops && i2c->ops->read)
+  37:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****         return i2c->ops->read(i2c, dev_addr, data, len);
+  38:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  39:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+  40:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  41:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline int sx_i2c_mem_write(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t me
+  31              		.loc 2 41 147 view -0
+  32              		.cfi_startproc
+  33              		@ args = 8, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 2 41 147 is_stmt 0 view .LVU1
+  36 0000 30B5     		push	{r4, r5, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 12
+  39              		.cfi_offset 4, -12
+  40              		.cfi_offset 5, -8
+  41              		.cfi_offset 14, -4
+  42 0002 83B0     		sub	sp, sp, #12
+  43              	.LCFI1:
+  44              		.cfi_def_cfa_offset 24
+  42:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     if(i2c->ops && i2c->ops->mem_write)
+  45              		.loc 2 42 5 is_stmt 1 view .LVU2
+  46              		.loc 2 42 11 is_stmt 0 view .LVU3
+  47 0004 0468     		ldr	r4, [r0]
+  48              		.loc 2 42 7 view .LVU4
+  49 0006 44B1     		cbz	r4, .L3
+  50              		.loc 2 42 28 discriminator 1 view .LVU5
+  51 0008 A468     		ldr	r4, [r4, #8]
+  52              		.loc 2 42 17 discriminator 1 view .LVU6
+  53 000a 4CB1     		cbz	r4, .L4
+  43:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****         return i2c->ops->mem_write(i2c, dev_addr, mem_addr, mem_addr_size, data, len);
+  54              		.loc 2 43 9 is_stmt 1 view .LVU7
+  55              		.loc 2 43 16 is_stmt 0 view .LVU8
+  56 000c 079D     		ldr	r5, [sp, #28]
+  57 000e 0195     		str	r5, [sp, #4]
+  58 0010 069D     		ldr	r5, [sp, #24]
+  59 0012 0095     		str	r5, [sp]
+  60 0014 A047     		blx	r4
+  61              	.LVL1:
+  62              	.L1:
+  44:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  45:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+  63              		.loc 2 45 1 view .LVU9
+  64 0016 03B0     		add	sp, sp, #12
+  65              	.LCFI2:
+  66              		.cfi_remember_state
+  67              		.cfi_def_cfa_offset 12
+  68              		@ sp needed
+  69 0018 30BD     		pop	{r4, r5, pc}
+  70              	.LVL2:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 3
+
+
+  71              	.L3:
+  72              	.LCFI3:
+  73              		.cfi_restore_state
+  44:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  74              		.loc 2 44 12 view .LVU10
+  75 001a 4FF0FF30 		mov	r0, #-1
+  76              	.LVL3:
+  44:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  77              		.loc 2 44 12 view .LVU11
+  78 001e FAE7     		b	.L1
+  79              	.LVL4:
+  80              	.L4:
+  44:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  81              		.loc 2 44 12 view .LVU12
+  82 0020 4FF0FF30 		mov	r0, #-1
+  83              	.LVL5:
+  44:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  84              		.loc 2 44 12 view .LVU13
+  85 0024 F7E7     		b	.L1
+  86              		.cfi_endproc
+  87              	.LFE3:
+  89              		.section	.text.sx_i2c_mem_read,"ax",%progbits
+  90              		.align	1
+  91              		.syntax unified
+  92              		.thumb
+  93              		.thumb_func
+  95              	sx_i2c_mem_read:
+  96              	.LVL6:
+  97              	.LFB4:
+  46:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  47:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline int sx_i2c_mem_read(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t mem
+  98              		.loc 2 47 140 is_stmt 1 view -0
+  99              		.cfi_startproc
+ 100              		@ args = 8, pretend = 0, frame = 0
+ 101              		@ frame_needed = 0, uses_anonymous_args = 0
+ 102              		.loc 2 47 140 is_stmt 0 view .LVU15
+ 103 0000 30B5     		push	{r4, r5, lr}
+ 104              	.LCFI4:
+ 105              		.cfi_def_cfa_offset 12
+ 106              		.cfi_offset 4, -12
+ 107              		.cfi_offset 5, -8
+ 108              		.cfi_offset 14, -4
+ 109 0002 83B0     		sub	sp, sp, #12
+ 110              	.LCFI5:
+ 111              		.cfi_def_cfa_offset 24
+  48:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     if(i2c->ops && i2c->ops->mem_read)
+ 112              		.loc 2 48 5 is_stmt 1 view .LVU16
+ 113              		.loc 2 48 11 is_stmt 0 view .LVU17
+ 114 0004 0468     		ldr	r4, [r0]
+ 115              		.loc 2 48 7 view .LVU18
+ 116 0006 44B1     		cbz	r4, .L8
+ 117              		.loc 2 48 28 discriminator 1 view .LVU19
+ 118 0008 E468     		ldr	r4, [r4, #12]
+ 119              		.loc 2 48 17 discriminator 1 view .LVU20
+ 120 000a 4CB1     		cbz	r4, .L9
+  49:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****         return i2c->ops->mem_read(i2c, dev_addr, mem_addr, mem_addr_size, data, len);
+ 121              		.loc 2 49 9 is_stmt 1 view .LVU21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 4
+
+
+ 122              		.loc 2 49 16 is_stmt 0 view .LVU22
+ 123 000c 079D     		ldr	r5, [sp, #28]
+ 124 000e 0195     		str	r5, [sp, #4]
+ 125 0010 069D     		ldr	r5, [sp, #24]
+ 126 0012 0095     		str	r5, [sp]
+ 127 0014 A047     		blx	r4
+ 128              	.LVL7:
+ 129              	.L6:
+  50:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  51:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+ 130              		.loc 2 51 1 view .LVU23
+ 131 0016 03B0     		add	sp, sp, #12
+ 132              	.LCFI6:
+ 133              		.cfi_remember_state
+ 134              		.cfi_def_cfa_offset 12
+ 135              		@ sp needed
+ 136 0018 30BD     		pop	{r4, r5, pc}
+ 137              	.LVL8:
+ 138              	.L8:
+ 139              	.LCFI7:
+ 140              		.cfi_restore_state
+  50:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 141              		.loc 2 50 12 view .LVU24
+ 142 001a 4FF0FF30 		mov	r0, #-1
+ 143              	.LVL9:
+  50:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 144              		.loc 2 50 12 view .LVU25
+ 145 001e FAE7     		b	.L6
+ 146              	.LVL10:
+ 147              	.L9:
+  50:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 148              		.loc 2 50 12 view .LVU26
+ 149 0020 4FF0FF30 		mov	r0, #-1
+ 150              	.LVL11:
+  50:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 151              		.loc 2 50 12 view .LVU27
+ 152 0024 F7E7     		b	.L6
+ 153              		.cfi_endproc
+ 154              	.LFE4:
+ 156              		.section	.text.sx_gpio_write,"ax",%progbits
+ 157              		.align	1
+ 158              		.syntax unified
+ 159              		.thumb
+ 160              		.thumb_func
+ 162              	sx_gpio_write:
+ 163              	.LVL12:
+ 164              	.LFB8:
+ 165              		.file 3 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+   1:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifndef SX_GPIO_H
+   2:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #define SX_GPIO_H
+   3:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   7:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   9:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef enum SX_GPIO_VALUE{
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 5
+
+
+  10:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_LOW = 0,
+  11:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_HIGH = 1
+  12:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } SX_GPIO_VALUE;
+  13:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  14:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio sx_gpio_t;
+  15:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  16:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct {
+  17:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void    *port;
+  18:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     uint16_t pin;
+  19:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_pin_t;
+  20:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  21:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio_ops{
+  22:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*write)(sx_gpio_t *gpio, SX_GPIO_VALUE value);
+  23:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*read)(sx_gpio_t *gpio, SX_GPIO_VALUE *value);
+  24:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*toggle)(sx_gpio_t *gpio);
+  25:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_ops_t;
+  26:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  27:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio{
+  28:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     sx_gpio_ops_t *ops;
+  29:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void *pDriver;
+  30:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_VALUE value;
+  31:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_t;
+  32:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline void sx_gpio_init(sx_gpio_t *gpio, sx_gpio_ops_t *ops, void *pDriver){
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+  37:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  38:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  39:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline int sx_gpio_write(sx_gpio_t *gpio, SX_GPIO_VALUE value){
+ 166              		.loc 3 39 70 is_stmt 1 view -0
+ 167              		.cfi_startproc
+ 168              		@ args = 0, pretend = 0, frame = 0
+ 169              		@ frame_needed = 0, uses_anonymous_args = 0
+ 170              		.loc 3 39 70 is_stmt 0 view .LVU29
+ 171 0000 38B5     		push	{r3, r4, r5, lr}
+ 172              	.LCFI8:
+ 173              		.cfi_def_cfa_offset 16
+ 174              		.cfi_offset 3, -16
+ 175              		.cfi_offset 4, -12
+ 176              		.cfi_offset 5, -8
+ 177              		.cfi_offset 14, -4
+  40:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     if(gpio->ops && gpio->ops->write){
+ 178              		.loc 3 40 5 is_stmt 1 view .LVU30
+ 179              		.loc 3 40 12 is_stmt 0 view .LVU31
+ 180 0002 0368     		ldr	r3, [r0]
+ 181              		.loc 3 40 7 view .LVU32
+ 182 0004 3BB1     		cbz	r3, .L14
+ 183 0006 0446     		mov	r4, r0
+ 184 0008 0D46     		mov	r5, r1
+ 185              		.loc 3 40 30 discriminator 1 view .LVU33
+ 186 000a 1B68     		ldr	r3, [r3]
+ 187              		.loc 3 40 18 discriminator 1 view .LVU34
+ 188 000c 33B1     		cbz	r3, .L15
+ 189              	.LBB2:
+  41:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         int ret = gpio->ops->write(gpio, value);
+ 190              		.loc 3 41 9 is_stmt 1 view .LVU35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 6
+
+
+ 191              		.loc 3 41 19 is_stmt 0 view .LVU36
+ 192 000e 9847     		blx	r3
+ 193              	.LVL13:
+  42:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         if(ret == 0){
+ 194              		.loc 3 42 9 is_stmt 1 view .LVU37
+ 195              		.loc 3 42 11 is_stmt 0 view .LVU38
+ 196 0010 00B9     		cbnz	r0, .L11
+  43:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****             gpio->value = value;
+ 197              		.loc 3 43 13 is_stmt 1 view .LVU39
+ 198              		.loc 3 43 25 is_stmt 0 view .LVU40
+ 199 0012 2572     		strb	r5, [r4, #8]
+  44:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         }
+  45:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         return ret;
+ 200              		.loc 3 45 9 is_stmt 1 view .LVU41
+ 201              	.LVL14:
+ 202              	.L11:
+ 203              		.loc 3 45 9 is_stmt 0 view .LVU42
+ 204              	.LBE2:
+  46:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     }
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     return -1;
+  48:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 205              		.loc 3 48 1 view .LVU43
+ 206 0014 38BD     		pop	{r3, r4, r5, pc}
+ 207              	.LVL15:
+ 208              	.L14:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 209              		.loc 3 47 12 view .LVU44
+ 210 0016 4FF0FF30 		mov	r0, #-1
+ 211              	.LVL16:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 212              		.loc 3 47 12 view .LVU45
+ 213 001a FBE7     		b	.L11
+ 214              	.LVL17:
+ 215              	.L15:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 216              		.loc 3 47 12 view .LVU46
+ 217 001c 4FF0FF30 		mov	r0, #-1
+ 218              	.LVL18:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 219              		.loc 3 47 12 view .LVU47
+ 220 0020 F8E7     		b	.L11
+ 221              		.cfi_endproc
+ 222              	.LFE8:
+ 224              		.section	.text._reg_write,"ax",%progbits
+ 225              		.align	1
+ 226              		.syntax unified
+ 227              		.thumb
+ 228              		.thumb_func
+ 230              	_reg_write:
+ 231              	.LVL19:
+ 232              	.LFB11:
+   1:SynaptiX_FDK/components/modules/imu/bno055.c **** #include "bno055.h"
+   2:SynaptiX_FDK/components/modules/imu/bno055.c **** #include "sx_delay.h"
+   3:SynaptiX_FDK/components/modules/imu/bno055.c **** #include "logger.h"
+   4:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+   5:SynaptiX_FDK/components/modules/imu/bno055.c **** static const char* TAG = "IMU";
+   6:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 7
+
+
+   7:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_CHIP_ID          0x00U
+   8:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_PAGE_ID          0x07U
+   9:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_ACC_DATA_X_LSB   0x08U
+  10:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_MAG_DATA_X_LSB   0x0EU
+  11:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_GYR_DATA_X_LSB   0x14U
+  12:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_EUL_HEADING_LSB  0x1AU
+  13:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_QUA_DATA_W_LSB   0x20U
+  14:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_LIA_DATA_X_LSB   0x28U
+  15:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_GRV_DATA_X_LSB   0x2EU
+  16:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_CALIB_STAT       0x35U
+  17:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_SYS_STATUS       0x39U
+  18:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_SYS_ERR          0x3AU
+  19:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_UNIT_SEL         0x3BU
+  20:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_OPR_MODE         0x3DU
+  21:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_PWR_MODE         0x3EU
+  22:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_SYS_TRIGGER      0x3FU
+  23:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_ACC_OFFSET_X_LSB 0x55U
+  24:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_MAG_OFFSET_X_LSB 0x5BU
+  25:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_GYR_OFFSET_X_LSB 0x61U
+  26:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_ACC_RADIUS_LSB   0x67U
+  27:SynaptiX_FDK/components/modules/imu/bno055.c **** #define REG_MAG_RADIUS_LSB   0x69U
+  28:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  29:SynaptiX_FDK/components/modules/imu/bno055.c **** #define DELAY_RESET_MS       650U
+  30:SynaptiX_FDK/components/modules/imu/bno055.c **** #define DELAY_MODE_SWITCH_MS 20U
+  31:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  32:SynaptiX_FDK/components/modules/imu/bno055.c **** static int _reg_write(bno055_t *dev, uint8_t reg, uint8_t val)
+  33:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 233              		.loc 1 33 1 is_stmt 1 view -0
+ 234              		.cfi_startproc
+ 235              		@ args = 0, pretend = 0, frame = 8
+ 236              		@ frame_needed = 0, uses_anonymous_args = 0
+ 237              		.loc 1 33 1 is_stmt 0 view .LVU49
+ 238 0000 00B5     		push	{lr}
+ 239              	.LCFI9:
+ 240              		.cfi_def_cfa_offset 4
+ 241              		.cfi_offset 14, -4
+ 242 0002 85B0     		sub	sp, sp, #20
+ 243              	.LCFI10:
+ 244              		.cfi_def_cfa_offset 24
+ 245 0004 8DF80F20 		strb	r2, [sp, #15]
+  34:SynaptiX_FDK/components/modules/imu/bno055.c ****     return sx_i2c_mem_write(dev->i2c, dev->dev_addr, reg, 1, &val, 1);
+ 246              		.loc 1 34 5 is_stmt 1 view .LVU50
+ 247              		.loc 1 34 12 is_stmt 0 view .LVU51
+ 248 0008 0123     		movs	r3, #1
+ 249 000a 0193     		str	r3, [sp, #4]
+ 250 000c 0DF10F02 		add	r2, sp, #15
+ 251              	.LVL20:
+ 252              		.loc 1 34 12 view .LVU52
+ 253 0010 0092     		str	r2, [sp]
+ 254 0012 0A46     		mov	r2, r1
+ 255              	.LVL21:
+ 256              		.loc 1 34 12 view .LVU53
+ 257 0014 8188     		ldrh	r1, [r0, #4]
+ 258              	.LVL22:
+ 259              		.loc 1 34 12 view .LVU54
+ 260 0016 0068     		ldr	r0, [r0]
+ 261              	.LVL23:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 8
+
+
+ 262              		.loc 1 34 12 view .LVU55
+ 263 0018 FFF7FEFF 		bl	sx_i2c_mem_write
+ 264              	.LVL24:
+  35:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 265              		.loc 1 35 1 view .LVU56
+ 266 001c 05B0     		add	sp, sp, #20
+ 267              	.LCFI11:
+ 268              		.cfi_def_cfa_offset 4
+ 269              		@ sp needed
+ 270 001e 00BD     		pop	{pc}
+ 271              		.cfi_endproc
+ 272              	.LFE11:
+ 274              		.section	.text._reg_read,"ax",%progbits
+ 275              		.align	1
+ 276              		.syntax unified
+ 277              		.thumb
+ 278              		.thumb_func
+ 280              	_reg_read:
+ 281              	.LVL25:
+ 282              	.LFB12:
+  36:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  37:SynaptiX_FDK/components/modules/imu/bno055.c **** static int _reg_read(bno055_t *dev, uint8_t reg, uint8_t *buf, uint32_t len)
+  38:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 283              		.loc 1 38 1 is_stmt 1 view -0
+ 284              		.cfi_startproc
+ 285              		@ args = 0, pretend = 0, frame = 0
+ 286              		@ frame_needed = 0, uses_anonymous_args = 0
+ 287              		.loc 1 38 1 is_stmt 0 view .LVU58
+ 288 0000 00B5     		push	{lr}
+ 289              	.LCFI12:
+ 290              		.cfi_def_cfa_offset 4
+ 291              		.cfi_offset 14, -4
+ 292 0002 83B0     		sub	sp, sp, #12
+ 293              	.LCFI13:
+ 294              		.cfi_def_cfa_offset 16
+  39:SynaptiX_FDK/components/modules/imu/bno055.c ****     return sx_i2c_mem_read(dev->i2c, dev->dev_addr, reg, 1, buf, len);
+ 295              		.loc 1 39 5 is_stmt 1 view .LVU59
+ 296              		.loc 1 39 12 is_stmt 0 view .LVU60
+ 297 0004 0193     		str	r3, [sp, #4]
+ 298 0006 0092     		str	r2, [sp]
+ 299 0008 0123     		movs	r3, #1
+ 300              	.LVL26:
+ 301              		.loc 1 39 12 view .LVU61
+ 302 000a 0A46     		mov	r2, r1
+ 303              	.LVL27:
+ 304              		.loc 1 39 12 view .LVU62
+ 305 000c 8188     		ldrh	r1, [r0, #4]
+ 306              	.LVL28:
+ 307              		.loc 1 39 12 view .LVU63
+ 308 000e 0068     		ldr	r0, [r0]
+ 309              	.LVL29:
+ 310              		.loc 1 39 12 view .LVU64
+ 311 0010 FFF7FEFF 		bl	sx_i2c_mem_read
+ 312              	.LVL30:
+  40:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 313              		.loc 1 40 1 view .LVU65
+ 314 0014 03B0     		add	sp, sp, #12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 9
+
+
+ 315              	.LCFI14:
+ 316              		.cfi_def_cfa_offset 4
+ 317              		@ sp needed
+ 318 0016 00BD     		pop	{pc}
+ 319              		.cfi_endproc
+ 320              	.LFE12:
+ 322              		.section	.text._read_vec3,"ax",%progbits
+ 323              		.align	1
+ 324              		.syntax unified
+ 325              		.thumb
+ 326              		.thumb_func
+ 328              	_read_vec3:
+ 329              	.LVL31:
+ 330              	.LFB13:
+  41:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  42:SynaptiX_FDK/components/modules/imu/bno055.c **** static int _read_vec3(bno055_t *dev, uint8_t start_reg, bno055_vec3_t *out)
+  43:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 331              		.loc 1 43 1 is_stmt 1 view -0
+ 332              		.cfi_startproc
+ 333              		@ args = 0, pretend = 0, frame = 8
+ 334              		@ frame_needed = 0, uses_anonymous_args = 0
+ 335              		.loc 1 43 1 is_stmt 0 view .LVU67
+ 336 0000 10B5     		push	{r4, lr}
+ 337              	.LCFI15:
+ 338              		.cfi_def_cfa_offset 8
+ 339              		.cfi_offset 4, -8
+ 340              		.cfi_offset 14, -4
+ 341 0002 82B0     		sub	sp, sp, #8
+ 342              	.LCFI16:
+ 343              		.cfi_def_cfa_offset 16
+ 344 0004 1446     		mov	r4, r2
+  44:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[6];
+ 345              		.loc 1 44 5 is_stmt 1 view .LVU68
+  45:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, start_reg, buf, 6) != 0) return BNO055_ERR_I2C;
+ 346              		.loc 1 45 5 view .LVU69
+ 347              		.loc 1 45 9 is_stmt 0 view .LVU70
+ 348 0006 0623     		movs	r3, #6
+ 349 0008 6A46     		mov	r2, sp
+ 350              	.LVL32:
+ 351              		.loc 1 45 9 view .LVU71
+ 352 000a FFF7FEFF 		bl	_reg_read
+ 353              	.LVL33:
+ 354              		.loc 1 45 8 discriminator 1 view .LVU72
+ 355 000e B0B9     		cbnz	r0, .L23
+  46:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->x = (int16_t)(buf[0] | ((uint16_t)buf[1] << 8));
+ 356              		.loc 1 46 5 is_stmt 1 view .LVU73
+ 357              		.loc 1 46 27 is_stmt 0 view .LVU74
+ 358 0010 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
+ 359              		.loc 1 46 47 view .LVU75
+ 360 0014 9DF80120 		ldrb	r2, [sp, #1]	@ zero_extendqisi2
+ 361              		.loc 1 46 14 view .LVU76
+ 362 0018 43EA0223 		orr	r3, r3, r2, lsl #8
+ 363              		.loc 1 46 12 view .LVU77
+ 364 001c 2380     		strh	r3, [r4]	@ movhi
+  47:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->y = (int16_t)(buf[2] | ((uint16_t)buf[3] << 8));
+ 365              		.loc 1 47 5 is_stmt 1 view .LVU78
+ 366              		.loc 1 47 27 is_stmt 0 view .LVU79
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 10
+
+
+ 367 001e 9DF80230 		ldrb	r3, [sp, #2]	@ zero_extendqisi2
+ 368              		.loc 1 47 47 view .LVU80
+ 369 0022 9DF80320 		ldrb	r2, [sp, #3]	@ zero_extendqisi2
+ 370              		.loc 1 47 14 view .LVU81
+ 371 0026 43EA0223 		orr	r3, r3, r2, lsl #8
+ 372              		.loc 1 47 12 view .LVU82
+ 373 002a 6380     		strh	r3, [r4, #2]	@ movhi
+  48:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->z = (int16_t)(buf[4] | ((uint16_t)buf[5] << 8));
+ 374              		.loc 1 48 5 is_stmt 1 view .LVU83
+ 375              		.loc 1 48 27 is_stmt 0 view .LVU84
+ 376 002c 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 377              		.loc 1 48 47 view .LVU85
+ 378 0030 9DF80520 		ldrb	r2, [sp, #5]	@ zero_extendqisi2
+ 379              		.loc 1 48 14 view .LVU86
+ 380 0034 43EA0223 		orr	r3, r3, r2, lsl #8
+ 381              		.loc 1 48 12 view .LVU87
+ 382 0038 A380     		strh	r3, [r4, #4]	@ movhi
+  49:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 383              		.loc 1 49 5 is_stmt 1 view .LVU88
+ 384              	.L21:
+  50:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 385              		.loc 1 50 1 is_stmt 0 view .LVU89
+ 386 003a 02B0     		add	sp, sp, #8
+ 387              	.LCFI17:
+ 388              		.cfi_remember_state
+ 389              		.cfi_def_cfa_offset 8
+ 390              		@ sp needed
+ 391 003c 10BD     		pop	{r4, pc}
+ 392              	.LVL34:
+ 393              	.L23:
+ 394              	.LCFI18:
+ 395              		.cfi_restore_state
+  45:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->x = (int16_t)(buf[0] | ((uint16_t)buf[1] << 8));
+ 396              		.loc 1 45 56 discriminator 1 view .LVU90
+ 397 003e 4FF0FF30 		mov	r0, #-1
+ 398 0042 FAE7     		b	.L21
+ 399              		.cfi_endproc
+ 400              	.LFE13:
+ 402              		.section	.text.bno055_set_opr_mode,"ax",%progbits
+ 403              		.align	1
+ 404              		.global	bno055_set_opr_mode
+ 405              		.syntax unified
+ 406              		.thumb
+ 407              		.thumb_func
+ 409              	bno055_set_opr_mode:
+ 410              	.LVL35:
+ 411              	.LFB15:
+  51:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  52:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_init(bno055_t *dev, sx_i2c_t *i2c, uint16_t dev_addr,
+  53:SynaptiX_FDK/components/modules/imu/bno055.c ****                 sx_gpio_t *reset_gpio)
+  54:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+  55:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !i2c) return BNO055_ERR_PARAM;
+  56:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  57:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->i2c         = i2c;
+  58:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->dev_addr    = dev_addr;
+  59:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->reset_gpio  = reset_gpio;
+  60:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = false;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 11
+
+
+  61:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  62:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (dev->reset_gpio) {
+  63:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_gpio_write(dev->reset_gpio, SX_GPIO_LOW);
+  64:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(10);
+  65:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_gpio_write(dev->reset_gpio, SX_GPIO_HIGH);
+  66:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+  67:SynaptiX_FDK/components/modules/imu/bno055.c ****     } else {
+  68:SynaptiX_FDK/components/modules/imu/bno055.c ****         if (_reg_write(dev, REG_SYS_TRIGGER, 0x20) != 0) return BNO055_ERR_I2C;
+  69:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+  70:SynaptiX_FDK/components/modules/imu/bno055.c ****     }
+  71:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  72:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t chip_id = 0;
+  73:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, REG_CHIP_ID, &chip_id, 1) != 0) return BNO055_ERR_I2C;
+  74:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (chip_id != BNO055_CHIP_ID) return BNO055_ERR_CHIP_ID;
+  75:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  76:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_PAGE_ID, 0x00) != 0) return BNO055_ERR_I2C;
+  77:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_PWR_MODE, BNO055_PWR_MODE_NORMAL) != 0) return BNO055_ERR_I2C;
+  78:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_UNIT_SEL, 0x00) != 0) return BNO055_ERR_I2C;
+  79:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_SYS_TRIGGER, 0x80) != 0) return BNO055_ERR_I2C;
+  80:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(10);
+  81:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  82:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (bno055_set_opr_mode(dev, BNO055_OPR_MODE_NDOF) != 0) return BNO055_ERR_I2C;
+  83:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = true;
+  84:SynaptiX_FDK/components/modules/imu/bno055.c ****     log_info(TAG, "IMU init done");
+  85:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+  86:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+  87:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  88:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_set_opr_mode(bno055_t *dev, bno055_opr_mode_t mode)
+  89:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 412              		.loc 1 89 1 is_stmt 1 view -0
+ 413              		.cfi_startproc
+ 414              		@ args = 0, pretend = 0, frame = 0
+ 415              		@ frame_needed = 0, uses_anonymous_args = 0
+ 416              		.loc 1 89 1 is_stmt 0 view .LVU92
+ 417 0000 10B5     		push	{r4, lr}
+ 418              	.LCFI19:
+ 419              		.cfi_def_cfa_offset 8
+ 420              		.cfi_offset 4, -8
+ 421              		.cfi_offset 14, -4
+  90:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev) return BNO055_ERR_PARAM;
+ 422              		.loc 1 90 5 is_stmt 1 view .LVU93
+ 423              		.loc 1 90 8 is_stmt 0 view .LVU94
+ 424 0002 50B1     		cbz	r0, .L27
+ 425 0004 0A46     		mov	r2, r1
+  91:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_OPR_MODE, (uint8_t)mode) != 0) return BNO055_ERR_I2C;
+ 426              		.loc 1 91 5 is_stmt 1 view .LVU95
+ 427              		.loc 1 91 9 is_stmt 0 view .LVU96
+ 428 0006 3D21     		movs	r1, #61
+ 429              	.LVL36:
+ 430              		.loc 1 91 9 view .LVU97
+ 431 0008 FFF7FEFF 		bl	_reg_write
+ 432              	.LVL37:
+ 433              		.loc 1 91 8 discriminator 1 view .LVU98
+ 434 000c 0446     		mov	r4, r0
+ 435 000e 38B9     		cbnz	r0, .L28
+  92:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(DELAY_MODE_SWITCH_MS);
+ 436              		.loc 1 92 5 is_stmt 1 view .LVU99
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 12
+
+
+ 437 0010 1420     		movs	r0, #20
+ 438 0012 FFF7FEFF 		bl	sx_delay_ms
+ 439              	.LVL38:
+  93:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 440              		.loc 1 93 5 view .LVU100
+ 441              	.L25:
+  94:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 442              		.loc 1 94 1 is_stmt 0 view .LVU101
+ 443 0016 2046     		mov	r0, r4
+ 444 0018 10BD     		pop	{r4, pc}
+ 445              	.LVL39:
+ 446              	.L27:
+  90:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_OPR_MODE, (uint8_t)mode) != 0) return BNO055_ERR_I2C;
+ 447              		.loc 1 90 22 discriminator 1 view .LVU102
+ 448 001a 6FF00204 		mvn	r4, #2
+ 449 001e FAE7     		b	.L25
+ 450              	.LVL40:
+ 451              	.L28:
+  91:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(DELAY_MODE_SWITCH_MS);
+ 452              		.loc 1 91 67 discriminator 1 view .LVU103
+ 453 0020 4FF0FF34 		mov	r4, #-1
+ 454 0024 F7E7     		b	.L25
+ 455              		.cfi_endproc
+ 456              	.LFE15:
+ 458              		.section	.rodata.bno055_init.str1.4,"aMS",%progbits,1
+ 459              		.align	2
+ 460              	.LC0:
+ 461 0000 494D5520 		.ascii	"IMU init done\000"
+ 461      696E6974 
+ 461      20646F6E 
+ 461      6500
+ 462 000e 0000     		.align	2
+ 463              	.LC1:
+ 464 0010 494D5500 		.ascii	"IMU\000"
+ 465              		.section	.text.bno055_init,"ax",%progbits
+ 466              		.align	1
+ 467              		.global	bno055_init
+ 468              		.syntax unified
+ 469              		.thumb
+ 470              		.thumb_func
+ 472              	bno055_init:
+ 473              	.LVL41:
+ 474              	.LFB14:
+  54:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !i2c) return BNO055_ERR_PARAM;
+ 475              		.loc 1 54 1 is_stmt 1 view -0
+ 476              		.cfi_startproc
+ 477              		@ args = 0, pretend = 0, frame = 8
+ 478              		@ frame_needed = 0, uses_anonymous_args = 0
+  54:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !i2c) return BNO055_ERR_PARAM;
+ 479              		.loc 1 54 1 is_stmt 0 view .LVU105
+ 480 0000 30B5     		push	{r4, r5, lr}
+ 481              	.LCFI20:
+ 482              		.cfi_def_cfa_offset 12
+ 483              		.cfi_offset 4, -12
+ 484              		.cfi_offset 5, -8
+ 485              		.cfi_offset 14, -4
+ 486 0002 83B0     		sub	sp, sp, #12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 13
+
+
+ 487              	.LCFI21:
+ 488              		.cfi_def_cfa_offset 24
+  55:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 489              		.loc 1 55 5 is_stmt 1 view .LVU106
+  55:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 490              		.loc 1 55 8 is_stmt 0 view .LVU107
+ 491 0004 0028     		cmp	r0, #0
+ 492 0006 5DD0     		beq	.L34
+ 493 0008 0446     		mov	r4, r0
+  55:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 494              		.loc 1 55 14 discriminator 2 view .LVU108
+ 495 000a 0029     		cmp	r1, #0
+ 496 000c 5DD0     		beq	.L35
+  57:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->dev_addr    = dev_addr;
+ 497              		.loc 1 57 5 is_stmt 1 view .LVU109
+  57:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->dev_addr    = dev_addr;
+ 498              		.loc 1 57 22 is_stmt 0 view .LVU110
+ 499 000e 0160     		str	r1, [r0]
+  58:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->reset_gpio  = reset_gpio;
+ 500              		.loc 1 58 5 is_stmt 1 view .LVU111
+  58:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->reset_gpio  = reset_gpio;
+ 501              		.loc 1 58 22 is_stmt 0 view .LVU112
+ 502 0010 8280     		strh	r2, [r0, #4]	@ movhi
+  59:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = false;
+ 503              		.loc 1 59 5 is_stmt 1 view .LVU113
+  59:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = false;
+ 504              		.loc 1 59 22 is_stmt 0 view .LVU114
+ 505 0012 8360     		str	r3, [r0, #8]
+  60:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 506              		.loc 1 60 5 is_stmt 1 view .LVU115
+  60:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 507              		.loc 1 60 22 is_stmt 0 view .LVU116
+ 508 0014 0022     		movs	r2, #0
+ 509              	.LVL42:
+  60:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 510              		.loc 1 60 22 view .LVU117
+ 511 0016 0273     		strb	r2, [r0, #12]
+  62:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_gpio_write(dev->reset_gpio, SX_GPIO_LOW);
+ 512              		.loc 1 62 5 is_stmt 1 view .LVU118
+  62:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_gpio_write(dev->reset_gpio, SX_GPIO_LOW);
+ 513              		.loc 1 62 8 is_stmt 0 view .LVU119
+ 514 0018 002B     		cmp	r3, #0
+ 515 001a 49D0     		beq	.L32
+  63:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(10);
+ 516              		.loc 1 63 9 is_stmt 1 view .LVU120
+ 517 001c 1146     		mov	r1, r2
+ 518              	.LVL43:
+  63:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(10);
+ 519              		.loc 1 63 9 is_stmt 0 view .LVU121
+ 520 001e 1846     		mov	r0, r3
+ 521              	.LVL44:
+  63:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(10);
+ 522              		.loc 1 63 9 view .LVU122
+ 523 0020 FFF7FEFF 		bl	sx_gpio_write
+ 524              	.LVL45:
+  64:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_gpio_write(dev->reset_gpio, SX_GPIO_HIGH);
+ 525              		.loc 1 64 9 is_stmt 1 view .LVU123
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 14
+
+
+ 526 0024 0A20     		movs	r0, #10
+ 527 0026 FFF7FEFF 		bl	sx_delay_ms
+ 528              	.LVL46:
+  65:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+ 529              		.loc 1 65 9 view .LVU124
+ 530 002a 0121     		movs	r1, #1
+ 531 002c A068     		ldr	r0, [r4, #8]
+ 532 002e FFF7FEFF 		bl	sx_gpio_write
+ 533              	.LVL47:
+  66:SynaptiX_FDK/components/modules/imu/bno055.c ****     } else {
+ 534              		.loc 1 66 9 view .LVU125
+ 535 0032 40F28A20 		movw	r0, #650
+ 536 0036 FFF7FEFF 		bl	sx_delay_ms
+ 537              	.LVL48:
+ 538              	.L33:
+  72:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, REG_CHIP_ID, &chip_id, 1) != 0) return BNO055_ERR_I2C;
+ 539              		.loc 1 72 5 view .LVU126
+  72:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, REG_CHIP_ID, &chip_id, 1) != 0) return BNO055_ERR_I2C;
+ 540              		.loc 1 72 13 is_stmt 0 view .LVU127
+ 541 003a 0021     		movs	r1, #0
+ 542 003c 8DF80710 		strb	r1, [sp, #7]
+  73:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (chip_id != BNO055_CHIP_ID) return BNO055_ERR_CHIP_ID;
+ 543              		.loc 1 73 5 is_stmt 1 view .LVU128
+  73:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (chip_id != BNO055_CHIP_ID) return BNO055_ERR_CHIP_ID;
+ 544              		.loc 1 73 9 is_stmt 0 view .LVU129
+ 545 0040 0123     		movs	r3, #1
+ 546 0042 0DF10702 		add	r2, sp, #7
+ 547 0046 2046     		mov	r0, r4
+ 548 0048 FFF7FEFF 		bl	_reg_read
+ 549              	.LVL49:
+  73:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (chip_id != BNO055_CHIP_ID) return BNO055_ERR_CHIP_ID;
+ 550              		.loc 1 73 8 discriminator 1 view .LVU130
+ 551 004c 0028     		cmp	r0, #0
+ 552 004e 42D1     		bne	.L37
+  74:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 553              		.loc 1 74 5 is_stmt 1 view .LVU131
+  74:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 554              		.loc 1 74 17 is_stmt 0 view .LVU132
+ 555 0050 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+  74:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 556              		.loc 1 74 8 view .LVU133
+ 557 0054 A02B     		cmp	r3, #160
+ 558 0056 41D1     		bne	.L38
+  76:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_PWR_MODE, BNO055_PWR_MODE_NORMAL) != 0) return BNO055_ERR_I2C;
+ 559              		.loc 1 76 5 is_stmt 1 view .LVU134
+  76:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_PWR_MODE, BNO055_PWR_MODE_NORMAL) != 0) return BNO055_ERR_I2C;
+ 560              		.loc 1 76 9 is_stmt 0 view .LVU135
+ 561 0058 0022     		movs	r2, #0
+ 562 005a 0721     		movs	r1, #7
+ 563 005c 2046     		mov	r0, r4
+ 564 005e FFF7FEFF 		bl	_reg_write
+ 565              	.LVL50:
+  76:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_PWR_MODE, BNO055_PWR_MODE_NORMAL) != 0) return BNO055_ERR_I2C;
+ 566              		.loc 1 76 8 discriminator 1 view .LVU136
+ 567 0062 0028     		cmp	r0, #0
+ 568 0064 3DD1     		bne	.L39
+  77:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_UNIT_SEL, 0x00) != 0) return BNO055_ERR_I2C;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 15
+
+
+ 569              		.loc 1 77 5 is_stmt 1 view .LVU137
+  77:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_UNIT_SEL, 0x00) != 0) return BNO055_ERR_I2C;
+ 570              		.loc 1 77 9 is_stmt 0 view .LVU138
+ 571 0066 0022     		movs	r2, #0
+ 572 0068 3E21     		movs	r1, #62
+ 573 006a 2046     		mov	r0, r4
+ 574 006c FFF7FEFF 		bl	_reg_write
+ 575              	.LVL51:
+  77:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_UNIT_SEL, 0x00) != 0) return BNO055_ERR_I2C;
+ 576              		.loc 1 77 8 discriminator 1 view .LVU139
+ 577 0070 D0BB     		cbnz	r0, .L40
+  78:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_SYS_TRIGGER, 0x80) != 0) return BNO055_ERR_I2C;
+ 578              		.loc 1 78 5 is_stmt 1 view .LVU140
+  78:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_SYS_TRIGGER, 0x80) != 0) return BNO055_ERR_I2C;
+ 579              		.loc 1 78 9 is_stmt 0 view .LVU141
+ 580 0072 0022     		movs	r2, #0
+ 581 0074 3B21     		movs	r1, #59
+ 582 0076 2046     		mov	r0, r4
+ 583 0078 FFF7FEFF 		bl	_reg_write
+ 584              	.LVL52:
+  78:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_SYS_TRIGGER, 0x80) != 0) return BNO055_ERR_I2C;
+ 585              		.loc 1 78 8 discriminator 1 view .LVU142
+ 586 007c B8BB     		cbnz	r0, .L41
+  79:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(10);
+ 587              		.loc 1 79 5 is_stmt 1 view .LVU143
+  79:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(10);
+ 588              		.loc 1 79 9 is_stmt 0 view .LVU144
+ 589 007e 8022     		movs	r2, #128
+ 590 0080 3F21     		movs	r1, #63
+ 591 0082 2046     		mov	r0, r4
+ 592 0084 FFF7FEFF 		bl	_reg_write
+ 593              	.LVL53:
+  79:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(10);
+ 594              		.loc 1 79 8 discriminator 1 view .LVU145
+ 595 0088 A0BB     		cbnz	r0, .L42
+  80:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 596              		.loc 1 80 5 is_stmt 1 view .LVU146
+ 597 008a 0A20     		movs	r0, #10
+ 598 008c FFF7FEFF 		bl	sx_delay_ms
+ 599              	.LVL54:
+  82:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = true;
+ 600              		.loc 1 82 5 view .LVU147
+  82:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = true;
+ 601              		.loc 1 82 9 is_stmt 0 view .LVU148
+ 602 0090 0C21     		movs	r1, #12
+ 603 0092 2046     		mov	r0, r4
+ 604 0094 FFF7FEFF 		bl	bno055_set_opr_mode
+ 605              	.LVL55:
+  82:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = true;
+ 606              		.loc 1 82 8 discriminator 1 view .LVU149
+ 607 0098 0546     		mov	r5, r0
+ 608 009a 70BB     		cbnz	r0, .L43
+  83:SynaptiX_FDK/components/modules/imu/bno055.c ****     log_info(TAG, "IMU init done");
+ 609              		.loc 1 83 5 is_stmt 1 view .LVU150
+  83:SynaptiX_FDK/components/modules/imu/bno055.c ****     log_info(TAG, "IMU init done");
+ 610              		.loc 1 83 22 is_stmt 0 view .LVU151
+ 611 009c 0123     		movs	r3, #1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 16
+
+
+ 612 009e 2373     		strb	r3, [r4, #12]
+  84:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 613              		.loc 1 84 5 is_stmt 1 view .LVU152
+ 614 00a0 174A     		ldr	r2, .L45
+ 615 00a2 1849     		ldr	r1, .L45+4
+ 616 00a4 0320     		movs	r0, #3
+ 617 00a6 FFF7FEFF 		bl	log_func
+ 618              	.LVL56:
+  85:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 619              		.loc 1 85 5 view .LVU153
+ 620              	.L30:
+  86:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 621              		.loc 1 86 1 is_stmt 0 view .LVU154
+ 622 00aa 2846     		mov	r0, r5
+ 623 00ac 03B0     		add	sp, sp, #12
+ 624              	.LCFI22:
+ 625              		.cfi_remember_state
+ 626              		.cfi_def_cfa_offset 12
+ 627              		@ sp needed
+ 628 00ae 30BD     		pop	{r4, r5, pc}
+ 629              	.LVL57:
+ 630              	.L32:
+ 631              	.LCFI23:
+ 632              		.cfi_restore_state
+  68:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+ 633              		.loc 1 68 9 is_stmt 1 view .LVU155
+  68:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+ 634              		.loc 1 68 13 is_stmt 0 view .LVU156
+ 635 00b0 2022     		movs	r2, #32
+ 636 00b2 3F21     		movs	r1, #63
+ 637              	.LVL58:
+  68:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+ 638              		.loc 1 68 13 view .LVU157
+ 639 00b4 FFF7FEFF 		bl	_reg_write
+ 640              	.LVL59:
+  68:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+ 641              		.loc 1 68 12 discriminator 1 view .LVU158
+ 642 00b8 50B9     		cbnz	r0, .L36
+  69:SynaptiX_FDK/components/modules/imu/bno055.c ****     }
+ 643              		.loc 1 69 9 is_stmt 1 view .LVU159
+ 644 00ba 40F28A20 		movw	r0, #650
+ 645 00be FFF7FEFF 		bl	sx_delay_ms
+ 646              	.LVL60:
+ 647 00c2 BAE7     		b	.L33
+ 648              	.LVL61:
+ 649              	.L34:
+  55:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 650              		.loc 1 55 30 is_stmt 0 discriminator 3 view .LVU160
+ 651 00c4 6FF00205 		mvn	r5, #2
+ 652 00c8 EFE7     		b	.L30
+ 653              	.L35:
+  55:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 654              		.loc 1 55 30 discriminator 3 view .LVU161
+ 655 00ca 6FF00205 		mvn	r5, #2
+ 656 00ce ECE7     		b	.L30
+ 657              	.LVL62:
+ 658              	.L36:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 17
+
+
+  68:SynaptiX_FDK/components/modules/imu/bno055.c ****         sx_delay_ms(DELAY_RESET_MS);
+ 659              		.loc 1 68 65 discriminator 1 view .LVU162
+ 660 00d0 4FF0FF35 		mov	r5, #-1
+ 661 00d4 E9E7     		b	.L30
+ 662              	.L37:
+  73:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (chip_id != BNO055_CHIP_ID) return BNO055_ERR_CHIP_ID;
+ 663              		.loc 1 73 63 discriminator 1 view .LVU163
+ 664 00d6 4FF0FF35 		mov	r5, #-1
+ 665 00da E6E7     		b	.L30
+ 666              	.L38:
+  74:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 667              		.loc 1 74 43 discriminator 1 view .LVU164
+ 668 00dc 6FF00305 		mvn	r5, #3
+ 669 00e0 E3E7     		b	.L30
+ 670              	.L39:
+  76:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_PWR_MODE, BNO055_PWR_MODE_NORMAL) != 0) return BNO055_ERR_I2C;
+ 671              		.loc 1 76 57 discriminator 1 view .LVU165
+ 672 00e2 4FF0FF35 		mov	r5, #-1
+ 673 00e6 E0E7     		b	.L30
+ 674              	.L40:
+  77:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_UNIT_SEL, 0x00) != 0) return BNO055_ERR_I2C;
+ 675              		.loc 1 77 76 discriminator 1 view .LVU166
+ 676 00e8 4FF0FF35 		mov	r5, #-1
+ 677 00ec DDE7     		b	.L30
+ 678              	.L41:
+  78:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_SYS_TRIGGER, 0x80) != 0) return BNO055_ERR_I2C;
+ 679              		.loc 1 78 58 discriminator 1 view .LVU167
+ 680 00ee 4FF0FF35 		mov	r5, #-1
+ 681 00f2 DAE7     		b	.L30
+ 682              	.L42:
+  79:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(10);
+ 683              		.loc 1 79 61 discriminator 1 view .LVU168
+ 684 00f4 4FF0FF35 		mov	r5, #-1
+ 685 00f8 D7E7     		b	.L30
+ 686              	.L43:
+  82:SynaptiX_FDK/components/modules/imu/bno055.c ****     dev->initialized = true;
+ 687              		.loc 1 82 69 discriminator 1 view .LVU169
+ 688 00fa 4FF0FF35 		mov	r5, #-1
+ 689 00fe D4E7     		b	.L30
+ 690              	.L46:
+ 691              		.align	2
+ 692              	.L45:
+ 693 0100 00000000 		.word	.LC0
+ 694 0104 10000000 		.word	.LC1
+ 695              		.cfi_endproc
+ 696              	.LFE14:
+ 698              		.section	.text.bno055_set_pwr_mode,"ax",%progbits
+ 699              		.align	1
+ 700              		.global	bno055_set_pwr_mode
+ 701              		.syntax unified
+ 702              		.thumb
+ 703              		.thumb_func
+ 705              	bno055_set_pwr_mode:
+ 706              	.LVL63:
+ 707              	.LFB16:
+  95:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+  96:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_set_pwr_mode(bno055_t *dev, bno055_pwr_mode_t mode)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 18
+
+
+  97:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 708              		.loc 1 97 1 is_stmt 1 view -0
+ 709              		.cfi_startproc
+ 710              		@ args = 0, pretend = 0, frame = 0
+ 711              		@ frame_needed = 0, uses_anonymous_args = 0
+  98:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev) return BNO055_ERR_PARAM;
+ 712              		.loc 1 98 5 view .LVU171
+ 713              		.loc 1 98 8 is_stmt 0 view .LVU172
+ 714 0000 88B1     		cbz	r0, .L49
+  97:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev) return BNO055_ERR_PARAM;
+ 715              		.loc 1 97 1 view .LVU173
+ 716 0002 38B5     		push	{r3, r4, r5, lr}
+ 717              	.LCFI24:
+ 718              		.cfi_def_cfa_offset 16
+ 719              		.cfi_offset 3, -16
+ 720              		.cfi_offset 4, -12
+ 721              		.cfi_offset 5, -8
+ 722              		.cfi_offset 14, -4
+ 723 0004 0C46     		mov	r4, r1
+ 724 0006 0546     		mov	r5, r0
+  99:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_OPR_MODE, BNO055_OPR_MODE_CONFIGMODE) != 0) return BNO055_ERR_I2C;
+ 725              		.loc 1 99 5 is_stmt 1 view .LVU174
+ 726              		.loc 1 99 9 is_stmt 0 view .LVU175
+ 727 0008 0022     		movs	r2, #0
+ 728 000a 3D21     		movs	r1, #61
+ 729              	.LVL64:
+ 730              		.loc 1 99 9 view .LVU176
+ 731 000c FFF7FEFF 		bl	_reg_write
+ 732              	.LVL65:
+ 733              		.loc 1 99 8 discriminator 1 view .LVU177
+ 734 0010 60B9     		cbnz	r0, .L50
+ 100:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(DELAY_MODE_SWITCH_MS);
+ 735              		.loc 1 100 5 is_stmt 1 view .LVU178
+ 736 0012 1420     		movs	r0, #20
+ 737 0014 FFF7FEFF 		bl	sx_delay_ms
+ 738              	.LVL66:
+ 101:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_PWR_MODE, (uint8_t)mode) != 0) return BNO055_ERR_I2C;
+ 739              		.loc 1 101 5 view .LVU179
+ 740              		.loc 1 101 9 is_stmt 0 view .LVU180
+ 741 0018 2246     		mov	r2, r4
+ 742 001a 3E21     		movs	r1, #62
+ 743 001c 2846     		mov	r0, r5
+ 744 001e FFF7FEFF 		bl	_reg_write
+ 745              	.LVL67:
+ 746              		.loc 1 101 8 discriminator 1 view .LVU181
+ 747 0022 30B9     		cbnz	r0, .L56
+ 748              	.L47:
+ 102:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 103:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 749              		.loc 1 103 1 view .LVU182
+ 750 0024 38BD     		pop	{r3, r4, r5, pc}
+ 751              	.LVL68:
+ 752              	.L49:
+ 753              	.LCFI25:
+ 754              		.cfi_def_cfa_offset 0
+ 755              		.cfi_restore 3
+ 756              		.cfi_restore 4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 19
+
+
+ 757              		.cfi_restore 5
+ 758              		.cfi_restore 14
+  98:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_OPR_MODE, BNO055_OPR_MODE_CONFIGMODE) != 0) return BNO055_ERR_I2C;
+ 759              		.loc 1 98 22 discriminator 1 view .LVU183
+ 760 0026 6FF00200 		mvn	r0, #2
+ 761              	.LVL69:
+ 762              		.loc 1 103 1 view .LVU184
+ 763 002a 7047     		bx	lr
+ 764              	.LVL70:
+ 765              	.L50:
+ 766              	.LCFI26:
+ 767              		.cfi_def_cfa_offset 16
+ 768              		.cfi_offset 3, -16
+ 769              		.cfi_offset 4, -12
+ 770              		.cfi_offset 5, -8
+ 771              		.cfi_offset 14, -4
+  99:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(DELAY_MODE_SWITCH_MS);
+ 772              		.loc 1 99 80 discriminator 1 view .LVU185
+ 773 002c 4FF0FF30 		mov	r0, #-1
+ 774 0030 F8E7     		b	.L47
+ 775              	.L56:
+ 101:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 776              		.loc 1 101 67 discriminator 1 view .LVU186
+ 777 0032 4FF0FF30 		mov	r0, #-1
+ 778 0036 F5E7     		b	.L47
+ 779              		.cfi_endproc
+ 780              	.LFE16:
+ 782              		.section	.text.bno055_get_accel,"ax",%progbits
+ 783              		.align	1
+ 784              		.global	bno055_get_accel
+ 785              		.syntax unified
+ 786              		.thumb
+ 787              		.thumb_func
+ 789              	bno055_get_accel:
+ 790              	.LVL71:
+ 791              	.LFB17:
+ 104:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 105:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_accel(bno055_t *dev, bno055_vec3_t *out)
+ 106:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 792              		.loc 1 106 1 is_stmt 1 view -0
+ 793              		.cfi_startproc
+ 794              		@ args = 0, pretend = 0, frame = 0
+ 795              		@ frame_needed = 0, uses_anonymous_args = 0
+ 107:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 796              		.loc 1 107 5 view .LVU188
+ 797              		.loc 1 107 8 is_stmt 0 view .LVU189
+ 798 0000 40B1     		cbz	r0, .L59
+ 106:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 799              		.loc 1 106 1 view .LVU190
+ 800 0002 08B5     		push	{r3, lr}
+ 801              	.LCFI27:
+ 802              		.cfi_def_cfa_offset 8
+ 803              		.cfi_offset 3, -8
+ 804              		.cfi_offset 14, -4
+ 805 0004 0A46     		mov	r2, r1
+ 806              		.loc 1 107 14 discriminator 2 view .LVU191
+ 807 0006 41B1     		cbz	r1, .L60
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 20
+
+
+ 108:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 808              		.loc 1 108 5 is_stmt 1 view .LVU192
+ 809              		.loc 1 108 13 is_stmt 0 view .LVU193
+ 810 0008 017B     		ldrb	r1, [r0, #12]	@ zero_extendqisi2
+ 811              	.LVL72:
+ 812              		.loc 1 108 8 view .LVU194
+ 813 000a 49B1     		cbz	r1, .L61
+ 109:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_ACC_DATA_X_LSB, out);
+ 814              		.loc 1 109 5 is_stmt 1 view .LVU195
+ 815              		.loc 1 109 12 is_stmt 0 view .LVU196
+ 816 000c 0821     		movs	r1, #8
+ 817 000e FFF7FEFF 		bl	_read_vec3
+ 818              	.LVL73:
+ 819              	.L57:
+ 110:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 820              		.loc 1 110 1 view .LVU197
+ 821 0012 08BD     		pop	{r3, pc}
+ 822              	.LVL74:
+ 823              	.L59:
+ 824              	.LCFI28:
+ 825              		.cfi_def_cfa_offset 0
+ 826              		.cfi_restore 3
+ 827              		.cfi_restore 14
+ 107:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 828              		.loc 1 107 30 discriminator 3 view .LVU198
+ 829 0014 6FF00200 		mvn	r0, #2
+ 830              	.LVL75:
+ 831              		.loc 1 110 1 view .LVU199
+ 832 0018 7047     		bx	lr
+ 833              	.LVL76:
+ 834              	.L60:
+ 835              	.LCFI29:
+ 836              		.cfi_def_cfa_offset 8
+ 837              		.cfi_offset 3, -8
+ 838              		.cfi_offset 14, -4
+ 107:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 839              		.loc 1 107 30 discriminator 3 view .LVU200
+ 840 001a 6FF00200 		mvn	r0, #2
+ 841              	.LVL77:
+ 107:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 842              		.loc 1 107 30 discriminator 3 view .LVU201
+ 843 001e F8E7     		b	.L57
+ 844              	.LVL78:
+ 845              	.L61:
+ 108:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_ACC_DATA_X_LSB, out);
+ 846              		.loc 1 108 35 discriminator 1 view .LVU202
+ 847 0020 6FF00100 		mvn	r0, #1
+ 848              	.LVL79:
+ 108:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_ACC_DATA_X_LSB, out);
+ 849              		.loc 1 108 35 discriminator 1 view .LVU203
+ 850 0024 F5E7     		b	.L57
+ 851              		.cfi_endproc
+ 852              	.LFE17:
+ 854              		.section	.text.bno055_get_mag,"ax",%progbits
+ 855              		.align	1
+ 856              		.global	bno055_get_mag
+ 857              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 21
+
+
+ 858              		.thumb
+ 859              		.thumb_func
+ 861              	bno055_get_mag:
+ 862              	.LVL80:
+ 863              	.LFB18:
+ 111:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 112:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_mag(bno055_t *dev, bno055_vec3_t *out)
+ 113:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 864              		.loc 1 113 1 is_stmt 1 view -0
+ 865              		.cfi_startproc
+ 866              		@ args = 0, pretend = 0, frame = 0
+ 867              		@ frame_needed = 0, uses_anonymous_args = 0
+ 114:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 868              		.loc 1 114 5 view .LVU205
+ 869              		.loc 1 114 8 is_stmt 0 view .LVU206
+ 870 0000 40B1     		cbz	r0, .L68
+ 113:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 871              		.loc 1 113 1 view .LVU207
+ 872 0002 08B5     		push	{r3, lr}
+ 873              	.LCFI30:
+ 874              		.cfi_def_cfa_offset 8
+ 875              		.cfi_offset 3, -8
+ 876              		.cfi_offset 14, -4
+ 877 0004 0A46     		mov	r2, r1
+ 878              		.loc 1 114 14 discriminator 2 view .LVU208
+ 879 0006 41B1     		cbz	r1, .L69
+ 115:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 880              		.loc 1 115 5 is_stmt 1 view .LVU209
+ 881              		.loc 1 115 13 is_stmt 0 view .LVU210
+ 882 0008 017B     		ldrb	r1, [r0, #12]	@ zero_extendqisi2
+ 883              	.LVL81:
+ 884              		.loc 1 115 8 view .LVU211
+ 885 000a 49B1     		cbz	r1, .L70
+ 116:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_MAG_DATA_X_LSB, out);
+ 886              		.loc 1 116 5 is_stmt 1 view .LVU212
+ 887              		.loc 1 116 12 is_stmt 0 view .LVU213
+ 888 000c 0E21     		movs	r1, #14
+ 889 000e FFF7FEFF 		bl	_read_vec3
+ 890              	.LVL82:
+ 891              	.L66:
+ 117:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 892              		.loc 1 117 1 view .LVU214
+ 893 0012 08BD     		pop	{r3, pc}
+ 894              	.LVL83:
+ 895              	.L68:
+ 896              	.LCFI31:
+ 897              		.cfi_def_cfa_offset 0
+ 898              		.cfi_restore 3
+ 899              		.cfi_restore 14
+ 114:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 900              		.loc 1 114 30 discriminator 3 view .LVU215
+ 901 0014 6FF00200 		mvn	r0, #2
+ 902              	.LVL84:
+ 903              		.loc 1 117 1 view .LVU216
+ 904 0018 7047     		bx	lr
+ 905              	.LVL85:
+ 906              	.L69:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 22
+
+
+ 907              	.LCFI32:
+ 908              		.cfi_def_cfa_offset 8
+ 909              		.cfi_offset 3, -8
+ 910              		.cfi_offset 14, -4
+ 114:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 911              		.loc 1 114 30 discriminator 3 view .LVU217
+ 912 001a 6FF00200 		mvn	r0, #2
+ 913              	.LVL86:
+ 114:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 914              		.loc 1 114 30 discriminator 3 view .LVU218
+ 915 001e F8E7     		b	.L66
+ 916              	.LVL87:
+ 917              	.L70:
+ 115:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_MAG_DATA_X_LSB, out);
+ 918              		.loc 1 115 35 discriminator 1 view .LVU219
+ 919 0020 6FF00100 		mvn	r0, #1
+ 920              	.LVL88:
+ 115:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_MAG_DATA_X_LSB, out);
+ 921              		.loc 1 115 35 discriminator 1 view .LVU220
+ 922 0024 F5E7     		b	.L66
+ 923              		.cfi_endproc
+ 924              	.LFE18:
+ 926              		.section	.text.bno055_get_gyro,"ax",%progbits
+ 927              		.align	1
+ 928              		.global	bno055_get_gyro
+ 929              		.syntax unified
+ 930              		.thumb
+ 931              		.thumb_func
+ 933              	bno055_get_gyro:
+ 934              	.LVL89:
+ 935              	.LFB19:
+ 118:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 119:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_gyro(bno055_t *dev, bno055_vec3_t *out)
+ 120:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 936              		.loc 1 120 1 is_stmt 1 view -0
+ 937              		.cfi_startproc
+ 938              		@ args = 0, pretend = 0, frame = 0
+ 939              		@ frame_needed = 0, uses_anonymous_args = 0
+ 121:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 940              		.loc 1 121 5 view .LVU222
+ 941              		.loc 1 121 8 is_stmt 0 view .LVU223
+ 942 0000 40B1     		cbz	r0, .L77
+ 120:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 943              		.loc 1 120 1 view .LVU224
+ 944 0002 08B5     		push	{r3, lr}
+ 945              	.LCFI33:
+ 946              		.cfi_def_cfa_offset 8
+ 947              		.cfi_offset 3, -8
+ 948              		.cfi_offset 14, -4
+ 949 0004 0A46     		mov	r2, r1
+ 950              		.loc 1 121 14 discriminator 2 view .LVU225
+ 951 0006 41B1     		cbz	r1, .L78
+ 122:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 952              		.loc 1 122 5 is_stmt 1 view .LVU226
+ 953              		.loc 1 122 13 is_stmt 0 view .LVU227
+ 954 0008 017B     		ldrb	r1, [r0, #12]	@ zero_extendqisi2
+ 955              	.LVL90:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 23
+
+
+ 956              		.loc 1 122 8 view .LVU228
+ 957 000a 49B1     		cbz	r1, .L79
+ 123:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_GYR_DATA_X_LSB, out);
+ 958              		.loc 1 123 5 is_stmt 1 view .LVU229
+ 959              		.loc 1 123 12 is_stmt 0 view .LVU230
+ 960 000c 1421     		movs	r1, #20
+ 961 000e FFF7FEFF 		bl	_read_vec3
+ 962              	.LVL91:
+ 963              	.L75:
+ 124:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 964              		.loc 1 124 1 view .LVU231
+ 965 0012 08BD     		pop	{r3, pc}
+ 966              	.LVL92:
+ 967              	.L77:
+ 968              	.LCFI34:
+ 969              		.cfi_def_cfa_offset 0
+ 970              		.cfi_restore 3
+ 971              		.cfi_restore 14
+ 121:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 972              		.loc 1 121 30 discriminator 3 view .LVU232
+ 973 0014 6FF00200 		mvn	r0, #2
+ 974              	.LVL93:
+ 975              		.loc 1 124 1 view .LVU233
+ 976 0018 7047     		bx	lr
+ 977              	.LVL94:
+ 978              	.L78:
+ 979              	.LCFI35:
+ 980              		.cfi_def_cfa_offset 8
+ 981              		.cfi_offset 3, -8
+ 982              		.cfi_offset 14, -4
+ 121:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 983              		.loc 1 121 30 discriminator 3 view .LVU234
+ 984 001a 6FF00200 		mvn	r0, #2
+ 985              	.LVL95:
+ 121:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 986              		.loc 1 121 30 discriminator 3 view .LVU235
+ 987 001e F8E7     		b	.L75
+ 988              	.LVL96:
+ 989              	.L79:
+ 122:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_GYR_DATA_X_LSB, out);
+ 990              		.loc 1 122 35 discriminator 1 view .LVU236
+ 991 0020 6FF00100 		mvn	r0, #1
+ 992              	.LVL97:
+ 122:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_GYR_DATA_X_LSB, out);
+ 993              		.loc 1 122 35 discriminator 1 view .LVU237
+ 994 0024 F5E7     		b	.L75
+ 995              		.cfi_endproc
+ 996              	.LFE19:
+ 998              		.section	.text.bno055_get_linear_accel,"ax",%progbits
+ 999              		.align	1
+ 1000              		.global	bno055_get_linear_accel
+ 1001              		.syntax unified
+ 1002              		.thumb
+ 1003              		.thumb_func
+ 1005              	bno055_get_linear_accel:
+ 1006              	.LVL98:
+ 1007              	.LFB20:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 24
+
+
+ 125:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 126:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_linear_accel(bno055_t *dev, bno055_vec3_t *out)
+ 127:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 1008              		.loc 1 127 1 is_stmt 1 view -0
+ 1009              		.cfi_startproc
+ 1010              		@ args = 0, pretend = 0, frame = 0
+ 1011              		@ frame_needed = 0, uses_anonymous_args = 0
+ 128:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1012              		.loc 1 128 5 view .LVU239
+ 1013              		.loc 1 128 8 is_stmt 0 view .LVU240
+ 1014 0000 40B1     		cbz	r0, .L86
+ 127:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1015              		.loc 1 127 1 view .LVU241
+ 1016 0002 08B5     		push	{r3, lr}
+ 1017              	.LCFI36:
+ 1018              		.cfi_def_cfa_offset 8
+ 1019              		.cfi_offset 3, -8
+ 1020              		.cfi_offset 14, -4
+ 1021 0004 0A46     		mov	r2, r1
+ 1022              		.loc 1 128 14 discriminator 2 view .LVU242
+ 1023 0006 41B1     		cbz	r1, .L87
+ 129:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1024              		.loc 1 129 5 is_stmt 1 view .LVU243
+ 1025              		.loc 1 129 13 is_stmt 0 view .LVU244
+ 1026 0008 017B     		ldrb	r1, [r0, #12]	@ zero_extendqisi2
+ 1027              	.LVL99:
+ 1028              		.loc 1 129 8 view .LVU245
+ 1029 000a 49B1     		cbz	r1, .L88
+ 130:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_LIA_DATA_X_LSB, out);
+ 1030              		.loc 1 130 5 is_stmt 1 view .LVU246
+ 1031              		.loc 1 130 12 is_stmt 0 view .LVU247
+ 1032 000c 2821     		movs	r1, #40
+ 1033 000e FFF7FEFF 		bl	_read_vec3
+ 1034              	.LVL100:
+ 1035              	.L84:
+ 131:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 1036              		.loc 1 131 1 view .LVU248
+ 1037 0012 08BD     		pop	{r3, pc}
+ 1038              	.LVL101:
+ 1039              	.L86:
+ 1040              	.LCFI37:
+ 1041              		.cfi_def_cfa_offset 0
+ 1042              		.cfi_restore 3
+ 1043              		.cfi_restore 14
+ 128:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1044              		.loc 1 128 30 discriminator 3 view .LVU249
+ 1045 0014 6FF00200 		mvn	r0, #2
+ 1046              	.LVL102:
+ 1047              		.loc 1 131 1 view .LVU250
+ 1048 0018 7047     		bx	lr
+ 1049              	.LVL103:
+ 1050              	.L87:
+ 1051              	.LCFI38:
+ 1052              		.cfi_def_cfa_offset 8
+ 1053              		.cfi_offset 3, -8
+ 1054              		.cfi_offset 14, -4
+ 128:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 25
+
+
+ 1055              		.loc 1 128 30 discriminator 3 view .LVU251
+ 1056 001a 6FF00200 		mvn	r0, #2
+ 1057              	.LVL104:
+ 128:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1058              		.loc 1 128 30 discriminator 3 view .LVU252
+ 1059 001e F8E7     		b	.L84
+ 1060              	.LVL105:
+ 1061              	.L88:
+ 129:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_LIA_DATA_X_LSB, out);
+ 1062              		.loc 1 129 35 discriminator 1 view .LVU253
+ 1063 0020 6FF00100 		mvn	r0, #1
+ 1064              	.LVL106:
+ 129:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_LIA_DATA_X_LSB, out);
+ 1065              		.loc 1 129 35 discriminator 1 view .LVU254
+ 1066 0024 F5E7     		b	.L84
+ 1067              		.cfi_endproc
+ 1068              	.LFE20:
+ 1070              		.section	.text.bno055_get_gravity,"ax",%progbits
+ 1071              		.align	1
+ 1072              		.global	bno055_get_gravity
+ 1073              		.syntax unified
+ 1074              		.thumb
+ 1075              		.thumb_func
+ 1077              	bno055_get_gravity:
+ 1078              	.LVL107:
+ 1079              	.LFB21:
+ 132:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 133:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_gravity(bno055_t *dev, bno055_vec3_t *out)
+ 134:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 1080              		.loc 1 134 1 is_stmt 1 view -0
+ 1081              		.cfi_startproc
+ 1082              		@ args = 0, pretend = 0, frame = 0
+ 1083              		@ frame_needed = 0, uses_anonymous_args = 0
+ 135:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1084              		.loc 1 135 5 view .LVU256
+ 1085              		.loc 1 135 8 is_stmt 0 view .LVU257
+ 1086 0000 40B1     		cbz	r0, .L95
+ 134:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1087              		.loc 1 134 1 view .LVU258
+ 1088 0002 08B5     		push	{r3, lr}
+ 1089              	.LCFI39:
+ 1090              		.cfi_def_cfa_offset 8
+ 1091              		.cfi_offset 3, -8
+ 1092              		.cfi_offset 14, -4
+ 1093 0004 0A46     		mov	r2, r1
+ 1094              		.loc 1 135 14 discriminator 2 view .LVU259
+ 1095 0006 41B1     		cbz	r1, .L96
+ 136:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1096              		.loc 1 136 5 is_stmt 1 view .LVU260
+ 1097              		.loc 1 136 13 is_stmt 0 view .LVU261
+ 1098 0008 017B     		ldrb	r1, [r0, #12]	@ zero_extendqisi2
+ 1099              	.LVL108:
+ 1100              		.loc 1 136 8 view .LVU262
+ 1101 000a 49B1     		cbz	r1, .L97
+ 137:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_GRV_DATA_X_LSB, out);
+ 1102              		.loc 1 137 5 is_stmt 1 view .LVU263
+ 1103              		.loc 1 137 12 is_stmt 0 view .LVU264
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 26
+
+
+ 1104 000c 2E21     		movs	r1, #46
+ 1105 000e FFF7FEFF 		bl	_read_vec3
+ 1106              	.LVL109:
+ 1107              	.L93:
+ 138:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 1108              		.loc 1 138 1 view .LVU265
+ 1109 0012 08BD     		pop	{r3, pc}
+ 1110              	.LVL110:
+ 1111              	.L95:
+ 1112              	.LCFI40:
+ 1113              		.cfi_def_cfa_offset 0
+ 1114              		.cfi_restore 3
+ 1115              		.cfi_restore 14
+ 135:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1116              		.loc 1 135 30 discriminator 3 view .LVU266
+ 1117 0014 6FF00200 		mvn	r0, #2
+ 1118              	.LVL111:
+ 1119              		.loc 1 138 1 view .LVU267
+ 1120 0018 7047     		bx	lr
+ 1121              	.LVL112:
+ 1122              	.L96:
+ 1123              	.LCFI41:
+ 1124              		.cfi_def_cfa_offset 8
+ 1125              		.cfi_offset 3, -8
+ 1126              		.cfi_offset 14, -4
+ 135:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1127              		.loc 1 135 30 discriminator 3 view .LVU268
+ 1128 001a 6FF00200 		mvn	r0, #2
+ 1129              	.LVL113:
+ 135:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1130              		.loc 1 135 30 discriminator 3 view .LVU269
+ 1131 001e F8E7     		b	.L93
+ 1132              	.LVL114:
+ 1133              	.L97:
+ 136:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_GRV_DATA_X_LSB, out);
+ 1134              		.loc 1 136 35 discriminator 1 view .LVU270
+ 1135 0020 6FF00100 		mvn	r0, #1
+ 1136              	.LVL115:
+ 136:SynaptiX_FDK/components/modules/imu/bno055.c ****     return _read_vec3(dev, REG_GRV_DATA_X_LSB, out);
+ 1137              		.loc 1 136 35 discriminator 1 view .LVU271
+ 1138 0024 F5E7     		b	.L93
+ 1139              		.cfi_endproc
+ 1140              	.LFE21:
+ 1142              		.section	.text.bno055_get_euler,"ax",%progbits
+ 1143              		.align	1
+ 1144              		.global	bno055_get_euler
+ 1145              		.syntax unified
+ 1146              		.thumb
+ 1147              		.thumb_func
+ 1149              	bno055_get_euler:
+ 1150              	.LVL116:
+ 1151              	.LFB22:
+ 139:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 140:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_euler(bno055_t *dev, bno055_euler_t *out)
+ 141:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 1152              		.loc 1 141 1 is_stmt 1 view -0
+ 1153              		.cfi_startproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 27
+
+
+ 1154              		@ args = 0, pretend = 0, frame = 8
+ 1155              		@ frame_needed = 0, uses_anonymous_args = 0
+ 142:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1156              		.loc 1 142 5 view .LVU273
+ 1157              		.loc 1 142 8 is_stmt 0 view .LVU274
+ 1158 0000 10B3     		cbz	r0, .L104
+ 141:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1159              		.loc 1 141 1 view .LVU275
+ 1160 0002 10B5     		push	{r4, lr}
+ 1161              	.LCFI42:
+ 1162              		.cfi_def_cfa_offset 8
+ 1163              		.cfi_offset 4, -8
+ 1164              		.cfi_offset 14, -4
+ 1165 0004 82B0     		sub	sp, sp, #8
+ 1166              	.LCFI43:
+ 1167              		.cfi_def_cfa_offset 16
+ 1168 0006 0C46     		mov	r4, r1
+ 1169              		.loc 1 142 14 discriminator 2 view .LVU276
+ 1170 0008 09B3     		cbz	r1, .L105
+ 143:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1171              		.loc 1 143 5 is_stmt 1 view .LVU277
+ 1172              		.loc 1 143 13 is_stmt 0 view .LVU278
+ 1173 000a 037B     		ldrb	r3, [r0, #12]	@ zero_extendqisi2
+ 1174              		.loc 1 143 8 view .LVU279
+ 1175 000c 13B3     		cbz	r3, .L106
+ 144:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[6];
+ 1176              		.loc 1 144 5 is_stmt 1 view .LVU280
+ 145:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, REG_EUL_HEADING_LSB, buf, 6) != 0) return BNO055_ERR_I2C;
+ 1177              		.loc 1 145 5 view .LVU281
+ 1178              		.loc 1 145 9 is_stmt 0 view .LVU282
+ 1179 000e 0623     		movs	r3, #6
+ 1180 0010 6A46     		mov	r2, sp
+ 1181 0012 1A21     		movs	r1, #26
+ 1182              	.LVL117:
+ 1183              		.loc 1 145 9 view .LVU283
+ 1184 0014 FFF7FEFF 		bl	_reg_read
+ 1185              	.LVL118:
+ 1186              		.loc 1 145 8 discriminator 1 view .LVU284
+ 1187 0018 F8B9     		cbnz	r0, .L107
+ 146:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->heading = (int16_t)(buf[0] | ((uint16_t)buf[1] << 8));
+ 1188              		.loc 1 146 5 is_stmt 1 view .LVU285
+ 1189              		.loc 1 146 33 is_stmt 0 view .LVU286
+ 1190 001a 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
+ 1191              		.loc 1 146 53 view .LVU287
+ 1192 001e 9DF80120 		ldrb	r2, [sp, #1]	@ zero_extendqisi2
+ 1193              		.loc 1 146 20 view .LVU288
+ 1194 0022 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1195              		.loc 1 146 18 view .LVU289
+ 1196 0026 2380     		strh	r3, [r4]	@ movhi
+ 147:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->roll    = (int16_t)(buf[2] | ((uint16_t)buf[3] << 8));
+ 1197              		.loc 1 147 5 is_stmt 1 view .LVU290
+ 1198              		.loc 1 147 33 is_stmt 0 view .LVU291
+ 1199 0028 9DF80230 		ldrb	r3, [sp, #2]	@ zero_extendqisi2
+ 1200              		.loc 1 147 53 view .LVU292
+ 1201 002c 9DF80320 		ldrb	r2, [sp, #3]	@ zero_extendqisi2
+ 1202              		.loc 1 147 20 view .LVU293
+ 1203 0030 43EA0223 		orr	r3, r3, r2, lsl #8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 28
+
+
+ 1204              		.loc 1 147 18 view .LVU294
+ 1205 0034 6380     		strh	r3, [r4, #2]	@ movhi
+ 148:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->pitch   = (int16_t)(buf[4] | ((uint16_t)buf[5] << 8));
+ 1206              		.loc 1 148 5 is_stmt 1 view .LVU295
+ 1207              		.loc 1 148 33 is_stmt 0 view .LVU296
+ 1208 0036 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 1209              		.loc 1 148 53 view .LVU297
+ 1210 003a 9DF80520 		ldrb	r2, [sp, #5]	@ zero_extendqisi2
+ 1211              		.loc 1 148 20 view .LVU298
+ 1212 003e 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1213              		.loc 1 148 18 view .LVU299
+ 1214 0042 A380     		strh	r3, [r4, #4]	@ movhi
+ 149:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 1215              		.loc 1 149 5 is_stmt 1 view .LVU300
+ 1216              	.L102:
+ 150:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 1217              		.loc 1 150 1 is_stmt 0 view .LVU301
+ 1218 0044 02B0     		add	sp, sp, #8
+ 1219              	.LCFI44:
+ 1220              		.cfi_def_cfa_offset 8
+ 1221              		@ sp needed
+ 1222 0046 10BD     		pop	{r4, pc}
+ 1223              	.LVL119:
+ 1224              	.L104:
+ 1225              	.LCFI45:
+ 1226              		.cfi_def_cfa_offset 0
+ 1227              		.cfi_restore 4
+ 1228              		.cfi_restore 14
+ 142:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1229              		.loc 1 142 30 discriminator 3 view .LVU302
+ 1230 0048 6FF00200 		mvn	r0, #2
+ 1231              	.LVL120:
+ 1232              		.loc 1 150 1 view .LVU303
+ 1233 004c 7047     		bx	lr
+ 1234              	.LVL121:
+ 1235              	.L105:
+ 1236              	.LCFI46:
+ 1237              		.cfi_def_cfa_offset 16
+ 1238              		.cfi_offset 4, -8
+ 1239              		.cfi_offset 14, -4
+ 142:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1240              		.loc 1 142 30 discriminator 3 view .LVU304
+ 1241 004e 6FF00200 		mvn	r0, #2
+ 1242              	.LVL122:
+ 142:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1243              		.loc 1 142 30 discriminator 3 view .LVU305
+ 1244 0052 F7E7     		b	.L102
+ 1245              	.LVL123:
+ 1246              	.L106:
+ 143:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[6];
+ 1247              		.loc 1 143 35 discriminator 1 view .LVU306
+ 1248 0054 6FF00100 		mvn	r0, #1
+ 1249              	.LVL124:
+ 143:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[6];
+ 1250              		.loc 1 143 35 discriminator 1 view .LVU307
+ 1251 0058 F4E7     		b	.L102
+ 1252              	.LVL125:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 29
+
+
+ 1253              	.L107:
+ 145:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->heading = (int16_t)(buf[0] | ((uint16_t)buf[1] << 8));
+ 1254              		.loc 1 145 66 discriminator 1 view .LVU308
+ 1255 005a 4FF0FF30 		mov	r0, #-1
+ 1256 005e F1E7     		b	.L102
+ 1257              		.cfi_endproc
+ 1258              	.LFE22:
+ 1260              		.section	.text.bno055_get_quat,"ax",%progbits
+ 1261              		.align	1
+ 1262              		.global	bno055_get_quat
+ 1263              		.syntax unified
+ 1264              		.thumb
+ 1265              		.thumb_func
+ 1267              	bno055_get_quat:
+ 1268              	.LVL126:
+ 1269              	.LFB23:
+ 151:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 152:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_quat(bno055_t *dev, bno055_quat_t *out)
+ 153:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 1270              		.loc 1 153 1 is_stmt 1 view -0
+ 1271              		.cfi_startproc
+ 1272              		@ args = 0, pretend = 0, frame = 8
+ 1273              		@ frame_needed = 0, uses_anonymous_args = 0
+ 154:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1274              		.loc 1 154 5 view .LVU310
+ 1275              		.loc 1 154 8 is_stmt 0 view .LVU311
+ 1276 0000 48B3     		cbz	r0, .L114
+ 153:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1277              		.loc 1 153 1 view .LVU312
+ 1278 0002 10B5     		push	{r4, lr}
+ 1279              	.LCFI47:
+ 1280              		.cfi_def_cfa_offset 8
+ 1281              		.cfi_offset 4, -8
+ 1282              		.cfi_offset 14, -4
+ 1283 0004 82B0     		sub	sp, sp, #8
+ 1284              	.LCFI48:
+ 1285              		.cfi_def_cfa_offset 16
+ 1286 0006 0C46     		mov	r4, r1
+ 1287              		.loc 1 154 14 discriminator 2 view .LVU313
+ 1288 0008 41B3     		cbz	r1, .L115
+ 155:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1289              		.loc 1 155 5 is_stmt 1 view .LVU314
+ 1290              		.loc 1 155 13 is_stmt 0 view .LVU315
+ 1291 000a 037B     		ldrb	r3, [r0, #12]	@ zero_extendqisi2
+ 1292              		.loc 1 155 8 view .LVU316
+ 1293 000c 4BB3     		cbz	r3, .L116
+ 156:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[8];
+ 1294              		.loc 1 156 5 is_stmt 1 view .LVU317
+ 157:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, REG_QUA_DATA_W_LSB, buf, 8) != 0) return BNO055_ERR_I2C;
+ 1295              		.loc 1 157 5 view .LVU318
+ 1296              		.loc 1 157 9 is_stmt 0 view .LVU319
+ 1297 000e 0823     		movs	r3, #8
+ 1298 0010 6A46     		mov	r2, sp
+ 1299 0012 2021     		movs	r1, #32
+ 1300              	.LVL127:
+ 1301              		.loc 1 157 9 view .LVU320
+ 1302 0014 FFF7FEFF 		bl	_reg_read
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 30
+
+
+ 1303              	.LVL128:
+ 1304              		.loc 1 157 8 discriminator 1 view .LVU321
+ 1305 0018 30BB     		cbnz	r0, .L117
+ 158:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->w = (int16_t)(buf[0] | ((uint16_t)buf[1] << 8));
+ 1306              		.loc 1 158 5 is_stmt 1 view .LVU322
+ 1307              		.loc 1 158 27 is_stmt 0 view .LVU323
+ 1308 001a 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
+ 1309              		.loc 1 158 47 view .LVU324
+ 1310 001e 9DF80120 		ldrb	r2, [sp, #1]	@ zero_extendqisi2
+ 1311              		.loc 1 158 14 view .LVU325
+ 1312 0022 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1313              		.loc 1 158 12 view .LVU326
+ 1314 0026 2380     		strh	r3, [r4]	@ movhi
+ 159:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->x = (int16_t)(buf[2] | ((uint16_t)buf[3] << 8));
+ 1315              		.loc 1 159 5 is_stmt 1 view .LVU327
+ 1316              		.loc 1 159 27 is_stmt 0 view .LVU328
+ 1317 0028 9DF80230 		ldrb	r3, [sp, #2]	@ zero_extendqisi2
+ 1318              		.loc 1 159 47 view .LVU329
+ 1319 002c 9DF80320 		ldrb	r2, [sp, #3]	@ zero_extendqisi2
+ 1320              		.loc 1 159 14 view .LVU330
+ 1321 0030 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1322              		.loc 1 159 12 view .LVU331
+ 1323 0034 6380     		strh	r3, [r4, #2]	@ movhi
+ 160:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->y = (int16_t)(buf[4] | ((uint16_t)buf[5] << 8));
+ 1324              		.loc 1 160 5 is_stmt 1 view .LVU332
+ 1325              		.loc 1 160 27 is_stmt 0 view .LVU333
+ 1326 0036 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 1327              		.loc 1 160 47 view .LVU334
+ 1328 003a 9DF80520 		ldrb	r2, [sp, #5]	@ zero_extendqisi2
+ 1329              		.loc 1 160 14 view .LVU335
+ 1330 003e 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1331              		.loc 1 160 12 view .LVU336
+ 1332 0042 A380     		strh	r3, [r4, #4]	@ movhi
+ 161:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->z = (int16_t)(buf[6] | ((uint16_t)buf[7] << 8));
+ 1333              		.loc 1 161 5 is_stmt 1 view .LVU337
+ 1334              		.loc 1 161 27 is_stmt 0 view .LVU338
+ 1335 0044 9DF80630 		ldrb	r3, [sp, #6]	@ zero_extendqisi2
+ 1336              		.loc 1 161 47 view .LVU339
+ 1337 0048 9DF80720 		ldrb	r2, [sp, #7]	@ zero_extendqisi2
+ 1338              		.loc 1 161 14 view .LVU340
+ 1339 004c 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1340              		.loc 1 161 12 view .LVU341
+ 1341 0050 E380     		strh	r3, [r4, #6]	@ movhi
+ 162:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 1342              		.loc 1 162 5 is_stmt 1 view .LVU342
+ 1343              	.L112:
+ 163:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 1344              		.loc 1 163 1 is_stmt 0 view .LVU343
+ 1345 0052 02B0     		add	sp, sp, #8
+ 1346              	.LCFI49:
+ 1347              		.cfi_def_cfa_offset 8
+ 1348              		@ sp needed
+ 1349 0054 10BD     		pop	{r4, pc}
+ 1350              	.LVL129:
+ 1351              	.L114:
+ 1352              	.LCFI50:
+ 1353              		.cfi_def_cfa_offset 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 31
+
+
+ 1354              		.cfi_restore 4
+ 1355              		.cfi_restore 14
+ 154:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1356              		.loc 1 154 30 discriminator 3 view .LVU344
+ 1357 0056 6FF00200 		mvn	r0, #2
+ 1358              	.LVL130:
+ 1359              		.loc 1 163 1 view .LVU345
+ 1360 005a 7047     		bx	lr
+ 1361              	.LVL131:
+ 1362              	.L115:
+ 1363              	.LCFI51:
+ 1364              		.cfi_def_cfa_offset 16
+ 1365              		.cfi_offset 4, -8
+ 1366              		.cfi_offset 14, -4
+ 154:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1367              		.loc 1 154 30 discriminator 3 view .LVU346
+ 1368 005c 6FF00200 		mvn	r0, #2
+ 1369              	.LVL132:
+ 154:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1370              		.loc 1 154 30 discriminator 3 view .LVU347
+ 1371 0060 F7E7     		b	.L112
+ 1372              	.LVL133:
+ 1373              	.L116:
+ 155:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[8];
+ 1374              		.loc 1 155 35 discriminator 1 view .LVU348
+ 1375 0062 6FF00100 		mvn	r0, #1
+ 1376              	.LVL134:
+ 155:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[8];
+ 1377              		.loc 1 155 35 discriminator 1 view .LVU349
+ 1378 0066 F4E7     		b	.L112
+ 1379              	.LVL135:
+ 1380              	.L117:
+ 157:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->w = (int16_t)(buf[0] | ((uint16_t)buf[1] << 8));
+ 1381              		.loc 1 157 65 discriminator 1 view .LVU350
+ 1382 0068 4FF0FF30 		mov	r0, #-1
+ 1383 006c F1E7     		b	.L112
+ 1384              		.cfi_endproc
+ 1385              	.LFE23:
+ 1387              		.section	.text.bno055_get_calib_stat,"ax",%progbits
+ 1388              		.align	1
+ 1389              		.global	bno055_get_calib_stat
+ 1390              		.syntax unified
+ 1391              		.thumb
+ 1392              		.thumb_func
+ 1394              	bno055_get_calib_stat:
+ 1395              	.LVL136:
+ 1396              	.LFB24:
+ 164:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 165:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_calib_stat(bno055_t *dev, bno055_calib_stat_t *out)
+ 166:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 1397              		.loc 1 166 1 is_stmt 1 view -0
+ 1398              		.cfi_startproc
+ 1399              		@ args = 0, pretend = 0, frame = 8
+ 1400              		@ frame_needed = 0, uses_anonymous_args = 0
+ 167:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1401              		.loc 1 167 5 view .LVU352
+ 1402              		.loc 1 167 8 is_stmt 0 view .LVU353
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 32
+
+
+ 1403 0000 D8B1     		cbz	r0, .L124
+ 166:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1404              		.loc 1 166 1 view .LVU354
+ 1405 0002 10B5     		push	{r4, lr}
+ 1406              	.LCFI52:
+ 1407              		.cfi_def_cfa_offset 8
+ 1408              		.cfi_offset 4, -8
+ 1409              		.cfi_offset 14, -4
+ 1410 0004 82B0     		sub	sp, sp, #8
+ 1411              	.LCFI53:
+ 1412              		.cfi_def_cfa_offset 16
+ 1413 0006 0C46     		mov	r4, r1
+ 1414              		.loc 1 167 14 discriminator 2 view .LVU355
+ 1415 0008 D1B1     		cbz	r1, .L125
+ 168:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1416              		.loc 1 168 5 is_stmt 1 view .LVU356
+ 1417              		.loc 1 168 13 is_stmt 0 view .LVU357
+ 1418 000a 037B     		ldrb	r3, [r0, #12]	@ zero_extendqisi2
+ 1419              		.loc 1 168 8 view .LVU358
+ 1420 000c DBB1     		cbz	r3, .L126
+ 169:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t val;
+ 1421              		.loc 1 169 5 is_stmt 1 view .LVU359
+ 170:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, REG_CALIB_STAT, &val, 1) != 0) return BNO055_ERR_I2C;
+ 1422              		.loc 1 170 5 view .LVU360
+ 1423              		.loc 1 170 9 is_stmt 0 view .LVU361
+ 1424 000e 0123     		movs	r3, #1
+ 1425 0010 0DF10702 		add	r2, sp, #7
+ 1426 0014 3521     		movs	r1, #53
+ 1427              	.LVL137:
+ 1428              		.loc 1 170 9 view .LVU362
+ 1429 0016 FFF7FEFF 		bl	_reg_read
+ 1430              	.LVL138:
+ 1431              		.loc 1 170 8 discriminator 1 view .LVU363
+ 1432 001a B8B9     		cbnz	r0, .L127
+ 171:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->sys   = (val >> 6) & 0x03U;
+ 1433              		.loc 1 171 5 is_stmt 1 view .LVU364
+ 1434              		.loc 1 171 16 is_stmt 0 view .LVU365
+ 1435 001c 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 1436 0020 9A09     		lsrs	r2, r3, #6
+ 1437 0022 2270     		strb	r2, [r4]
+ 172:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->gyro  = (val >> 4) & 0x03U;
+ 1438              		.loc 1 172 5 is_stmt 1 view .LVU366
+ 1439              		.loc 1 172 29 is_stmt 0 view .LVU367
+ 1440 0024 C3F30112 		ubfx	r2, r3, #4, #2
+ 1441              		.loc 1 172 16 view .LVU368
+ 1442 0028 6270     		strb	r2, [r4, #1]
+ 173:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->accel = (val >> 2) & 0x03U;
+ 1443              		.loc 1 173 5 is_stmt 1 view .LVU369
+ 1444              		.loc 1 173 29 is_stmt 0 view .LVU370
+ 1445 002a C3F38102 		ubfx	r2, r3, #2, #2
+ 1446              		.loc 1 173 16 view .LVU371
+ 1447 002e A270     		strb	r2, [r4, #2]
+ 174:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->mag   =  val       & 0x03U;
+ 1448              		.loc 1 174 5 is_stmt 1 view .LVU372
+ 1449              		.loc 1 174 29 is_stmt 0 view .LVU373
+ 1450 0030 03F00303 		and	r3, r3, #3
+ 1451              		.loc 1 174 16 view .LVU374
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 33
+
+
+ 1452 0034 E370     		strb	r3, [r4, #3]
+ 175:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 1453              		.loc 1 175 5 is_stmt 1 view .LVU375
+ 1454              	.L122:
+ 176:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 1455              		.loc 1 176 1 is_stmt 0 view .LVU376
+ 1456 0036 02B0     		add	sp, sp, #8
+ 1457              	.LCFI54:
+ 1458              		.cfi_def_cfa_offset 8
+ 1459              		@ sp needed
+ 1460 0038 10BD     		pop	{r4, pc}
+ 1461              	.LVL139:
+ 1462              	.L124:
+ 1463              	.LCFI55:
+ 1464              		.cfi_def_cfa_offset 0
+ 1465              		.cfi_restore 4
+ 1466              		.cfi_restore 14
+ 167:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1467              		.loc 1 167 30 discriminator 3 view .LVU377
+ 1468 003a 6FF00200 		mvn	r0, #2
+ 1469              	.LVL140:
+ 1470              		.loc 1 176 1 view .LVU378
+ 1471 003e 7047     		bx	lr
+ 1472              	.LVL141:
+ 1473              	.L125:
+ 1474              	.LCFI56:
+ 1475              		.cfi_def_cfa_offset 16
+ 1476              		.cfi_offset 4, -8
+ 1477              		.cfi_offset 14, -4
+ 167:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1478              		.loc 1 167 30 discriminator 3 view .LVU379
+ 1479 0040 6FF00200 		mvn	r0, #2
+ 1480              	.LVL142:
+ 167:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1481              		.loc 1 167 30 discriminator 3 view .LVU380
+ 1482 0044 F7E7     		b	.L122
+ 1483              	.LVL143:
+ 1484              	.L126:
+ 168:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t val;
+ 1485              		.loc 1 168 35 discriminator 1 view .LVU381
+ 1486 0046 6FF00100 		mvn	r0, #1
+ 1487              	.LVL144:
+ 168:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t val;
+ 1488              		.loc 1 168 35 discriminator 1 view .LVU382
+ 1489 004a F4E7     		b	.L122
+ 1490              	.LVL145:
+ 1491              	.L127:
+ 170:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->sys   = (val >> 6) & 0x03U;
+ 1492              		.loc 1 170 62 discriminator 1 view .LVU383
+ 1493 004c 4FF0FF30 		mov	r0, #-1
+ 1494 0050 F1E7     		b	.L122
+ 1495              		.cfi_endproc
+ 1496              	.LFE24:
+ 1498              		.section	.text.bno055_get_calib_data,"ax",%progbits
+ 1499              		.align	1
+ 1500              		.global	bno055_get_calib_data
+ 1501              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 34
+
+
+ 1502              		.thumb
+ 1503              		.thumb_func
+ 1505              	bno055_get_calib_data:
+ 1506              	.LVL146:
+ 1507              	.LFB25:
+ 177:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 178:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_get_calib_data(bno055_t *dev, bno055_calib_data_t *out)
+ 179:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 1508              		.loc 1 179 1 is_stmt 1 view -0
+ 1509              		.cfi_startproc
+ 1510              		@ args = 0, pretend = 0, frame = 24
+ 1511              		@ frame_needed = 0, uses_anonymous_args = 0
+ 180:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1512              		.loc 1 180 5 view .LVU385
+ 1513              		.loc 1 180 8 is_stmt 0 view .LVU386
+ 1514 0000 0028     		cmp	r0, #0
+ 1515 0002 68D0     		beq	.L134
+ 179:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !out) return BNO055_ERR_PARAM;
+ 1516              		.loc 1 179 1 view .LVU387
+ 1517 0004 30B5     		push	{r4, r5, lr}
+ 1518              	.LCFI57:
+ 1519              		.cfi_def_cfa_offset 12
+ 1520              		.cfi_offset 4, -12
+ 1521              		.cfi_offset 5, -8
+ 1522              		.cfi_offset 14, -4
+ 1523 0006 87B0     		sub	sp, sp, #28
+ 1524              	.LCFI58:
+ 1525              		.cfi_def_cfa_offset 40
+ 1526 0008 0C46     		mov	r4, r1
+ 1527 000a 0546     		mov	r5, r0
+ 1528              		.loc 1 180 14 discriminator 2 view .LVU388
+ 1529 000c 0029     		cmp	r1, #0
+ 1530 000e 65D0     		beq	.L135
+ 181:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1531              		.loc 1 181 5 is_stmt 1 view .LVU389
+ 1532              		.loc 1 181 13 is_stmt 0 view .LVU390
+ 1533 0010 037B     		ldrb	r3, [r0, #12]	@ zero_extendqisi2
+ 1534              		.loc 1 181 8 view .LVU391
+ 1535 0012 002B     		cmp	r3, #0
+ 1536 0014 65D0     		beq	.L136
+ 182:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 183:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_OPR_MODE, BNO055_OPR_MODE_CONFIGMODE) != 0) return BNO055_ERR_I2C;
+ 1537              		.loc 1 183 5 is_stmt 1 view .LVU392
+ 1538              		.loc 1 183 9 is_stmt 0 view .LVU393
+ 1539 0016 0022     		movs	r2, #0
+ 1540 0018 3D21     		movs	r1, #61
+ 1541              	.LVL147:
+ 1542              		.loc 1 183 9 view .LVU394
+ 1543 001a FFF7FEFF 		bl	_reg_write
+ 1544              	.LVL148:
+ 1545              		.loc 1 183 8 discriminator 1 view .LVU395
+ 1546 001e 0028     		cmp	r0, #0
+ 1547 0020 62D1     		bne	.L137
+ 184:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(DELAY_MODE_SWITCH_MS);
+ 1548              		.loc 1 184 5 is_stmt 1 view .LVU396
+ 1549 0022 1420     		movs	r0, #20
+ 1550 0024 FFF7FEFF 		bl	sx_delay_ms
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 35
+
+
+ 1551              	.LVL149:
+ 185:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 186:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[22];
+ 1552              		.loc 1 186 5 view .LVU397
+ 187:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_read(dev, REG_ACC_OFFSET_X_LSB, buf, 22) != 0) return BNO055_ERR_I2C;
+ 1553              		.loc 1 187 5 view .LVU398
+ 1554              		.loc 1 187 9 is_stmt 0 view .LVU399
+ 1555 0028 1623     		movs	r3, #22
+ 1556 002a 6A46     		mov	r2, sp
+ 1557 002c 5521     		movs	r1, #85
+ 1558 002e 2846     		mov	r0, r5
+ 1559 0030 FFF7FEFF 		bl	_reg_read
+ 1560              	.LVL150:
+ 1561              		.loc 1 187 8 discriminator 1 view .LVU400
+ 1562 0034 0028     		cmp	r0, #0
+ 1563 0036 5AD1     		bne	.L138
+ 188:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 189:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->acc_x      = (int16_t)(buf[0]  | ((uint16_t)buf[1]  << 8));
+ 1564              		.loc 1 189 5 is_stmt 1 view .LVU401
+ 1565              		.loc 1 189 36 is_stmt 0 view .LVU402
+ 1566 0038 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
+ 1567              		.loc 1 189 57 view .LVU403
+ 1568 003c 9DF80120 		ldrb	r2, [sp, #1]	@ zero_extendqisi2
+ 1569              		.loc 1 189 23 view .LVU404
+ 1570 0040 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1571              		.loc 1 189 21 view .LVU405
+ 1572 0044 2380     		strh	r3, [r4]	@ movhi
+ 190:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->acc_y      = (int16_t)(buf[2]  | ((uint16_t)buf[3]  << 8));
+ 1573              		.loc 1 190 5 is_stmt 1 view .LVU406
+ 1574              		.loc 1 190 36 is_stmt 0 view .LVU407
+ 1575 0046 9DF80230 		ldrb	r3, [sp, #2]	@ zero_extendqisi2
+ 1576              		.loc 1 190 57 view .LVU408
+ 1577 004a 9DF80320 		ldrb	r2, [sp, #3]	@ zero_extendqisi2
+ 1578              		.loc 1 190 23 view .LVU409
+ 1579 004e 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1580              		.loc 1 190 21 view .LVU410
+ 1581 0052 6380     		strh	r3, [r4, #2]	@ movhi
+ 191:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->acc_z      = (int16_t)(buf[4]  | ((uint16_t)buf[5]  << 8));
+ 1582              		.loc 1 191 5 is_stmt 1 view .LVU411
+ 1583              		.loc 1 191 36 is_stmt 0 view .LVU412
+ 1584 0054 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 1585              		.loc 1 191 57 view .LVU413
+ 1586 0058 9DF80520 		ldrb	r2, [sp, #5]	@ zero_extendqisi2
+ 1587              		.loc 1 191 23 view .LVU414
+ 1588 005c 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1589              		.loc 1 191 21 view .LVU415
+ 1590 0060 A380     		strh	r3, [r4, #4]	@ movhi
+ 192:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->mag_x      = (int16_t)(buf[6]  | ((uint16_t)buf[7]  << 8));
+ 1591              		.loc 1 192 5 is_stmt 1 view .LVU416
+ 1592              		.loc 1 192 36 is_stmt 0 view .LVU417
+ 1593 0062 9DF80630 		ldrb	r3, [sp, #6]	@ zero_extendqisi2
+ 1594              		.loc 1 192 57 view .LVU418
+ 1595 0066 9DF80720 		ldrb	r2, [sp, #7]	@ zero_extendqisi2
+ 1596              		.loc 1 192 23 view .LVU419
+ 1597 006a 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1598              		.loc 1 192 21 view .LVU420
+ 1599 006e E380     		strh	r3, [r4, #6]	@ movhi
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 36
+
+
+ 193:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->mag_y      = (int16_t)(buf[8]  | ((uint16_t)buf[9]  << 8));
+ 1600              		.loc 1 193 5 is_stmt 1 view .LVU421
+ 1601              		.loc 1 193 36 is_stmt 0 view .LVU422
+ 1602 0070 9DF80830 		ldrb	r3, [sp, #8]	@ zero_extendqisi2
+ 1603              		.loc 1 193 57 view .LVU423
+ 1604 0074 9DF80920 		ldrb	r2, [sp, #9]	@ zero_extendqisi2
+ 1605              		.loc 1 193 23 view .LVU424
+ 1606 0078 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1607              		.loc 1 193 21 view .LVU425
+ 1608 007c 2381     		strh	r3, [r4, #8]	@ movhi
+ 194:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->mag_z      = (int16_t)(buf[10] | ((uint16_t)buf[11] << 8));
+ 1609              		.loc 1 194 5 is_stmt 1 view .LVU426
+ 1610              		.loc 1 194 36 is_stmt 0 view .LVU427
+ 1611 007e 9DF80A30 		ldrb	r3, [sp, #10]	@ zero_extendqisi2
+ 1612              		.loc 1 194 57 view .LVU428
+ 1613 0082 9DF80B20 		ldrb	r2, [sp, #11]	@ zero_extendqisi2
+ 1614              		.loc 1 194 23 view .LVU429
+ 1615 0086 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1616              		.loc 1 194 21 view .LVU430
+ 1617 008a 6381     		strh	r3, [r4, #10]	@ movhi
+ 195:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->gyr_x      = (int16_t)(buf[12] | ((uint16_t)buf[13] << 8));
+ 1618              		.loc 1 195 5 is_stmt 1 view .LVU431
+ 1619              		.loc 1 195 36 is_stmt 0 view .LVU432
+ 1620 008c 9DF80C30 		ldrb	r3, [sp, #12]	@ zero_extendqisi2
+ 1621              		.loc 1 195 57 view .LVU433
+ 1622 0090 9DF80D20 		ldrb	r2, [sp, #13]	@ zero_extendqisi2
+ 1623              		.loc 1 195 23 view .LVU434
+ 1624 0094 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1625              		.loc 1 195 21 view .LVU435
+ 1626 0098 A381     		strh	r3, [r4, #12]	@ movhi
+ 196:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->gyr_y      = (int16_t)(buf[14] | ((uint16_t)buf[15] << 8));
+ 1627              		.loc 1 196 5 is_stmt 1 view .LVU436
+ 1628              		.loc 1 196 36 is_stmt 0 view .LVU437
+ 1629 009a 9DF80E30 		ldrb	r3, [sp, #14]	@ zero_extendqisi2
+ 1630              		.loc 1 196 57 view .LVU438
+ 1631 009e 9DF80F20 		ldrb	r2, [sp, #15]	@ zero_extendqisi2
+ 1632              		.loc 1 196 23 view .LVU439
+ 1633 00a2 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1634              		.loc 1 196 21 view .LVU440
+ 1635 00a6 E381     		strh	r3, [r4, #14]	@ movhi
+ 197:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->gyr_z      = (int16_t)(buf[16] | ((uint16_t)buf[17] << 8));
+ 1636              		.loc 1 197 5 is_stmt 1 view .LVU441
+ 1637              		.loc 1 197 36 is_stmt 0 view .LVU442
+ 1638 00a8 9DF81030 		ldrb	r3, [sp, #16]	@ zero_extendqisi2
+ 1639              		.loc 1 197 57 view .LVU443
+ 1640 00ac 9DF81120 		ldrb	r2, [sp, #17]	@ zero_extendqisi2
+ 1641              		.loc 1 197 23 view .LVU444
+ 1642 00b0 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1643              		.loc 1 197 21 view .LVU445
+ 1644 00b4 2382     		strh	r3, [r4, #16]	@ movhi
+ 198:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->acc_radius = (int16_t)(buf[18] | ((uint16_t)buf[19] << 8));
+ 1645              		.loc 1 198 5 is_stmt 1 view .LVU446
+ 1646              		.loc 1 198 36 is_stmt 0 view .LVU447
+ 1647 00b6 9DF81230 		ldrb	r3, [sp, #18]	@ zero_extendqisi2
+ 1648              		.loc 1 198 57 view .LVU448
+ 1649 00ba 9DF81320 		ldrb	r2, [sp, #19]	@ zero_extendqisi2
+ 1650              		.loc 1 198 23 view .LVU449
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 37
+
+
+ 1651 00be 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1652              		.loc 1 198 21 view .LVU450
+ 1653 00c2 6382     		strh	r3, [r4, #18]	@ movhi
+ 199:SynaptiX_FDK/components/modules/imu/bno055.c ****     out->mag_radius = (int16_t)(buf[20] | ((uint16_t)buf[21] << 8));
+ 1654              		.loc 1 199 5 is_stmt 1 view .LVU451
+ 1655              		.loc 1 199 36 is_stmt 0 view .LVU452
+ 1656 00c4 9DF81430 		ldrb	r3, [sp, #20]	@ zero_extendqisi2
+ 1657              		.loc 1 199 57 view .LVU453
+ 1658 00c8 9DF81520 		ldrb	r2, [sp, #21]	@ zero_extendqisi2
+ 1659              		.loc 1 199 23 view .LVU454
+ 1660 00cc 43EA0223 		orr	r3, r3, r2, lsl #8
+ 1661              		.loc 1 199 21 view .LVU455
+ 1662 00d0 A382     		strh	r3, [r4, #20]	@ movhi
+ 200:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 201:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 1663              		.loc 1 201 5 is_stmt 1 view .LVU456
+ 1664              	.L132:
+ 202:SynaptiX_FDK/components/modules/imu/bno055.c **** }
+ 1665              		.loc 1 202 1 is_stmt 0 view .LVU457
+ 1666 00d2 07B0     		add	sp, sp, #28
+ 1667              	.LCFI59:
+ 1668              		.cfi_def_cfa_offset 12
+ 1669              		@ sp needed
+ 1670 00d4 30BD     		pop	{r4, r5, pc}
+ 1671              	.LVL151:
+ 1672              	.L134:
+ 1673              	.LCFI60:
+ 1674              		.cfi_def_cfa_offset 0
+ 1675              		.cfi_restore 4
+ 1676              		.cfi_restore 5
+ 1677              		.cfi_restore 14
+ 180:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1678              		.loc 1 180 30 discriminator 3 view .LVU458
+ 1679 00d6 6FF00200 		mvn	r0, #2
+ 1680              	.LVL152:
+ 1681              		.loc 1 202 1 view .LVU459
+ 1682 00da 7047     		bx	lr
+ 1683              	.LVL153:
+ 1684              	.L135:
+ 1685              	.LCFI61:
+ 1686              		.cfi_def_cfa_offset 40
+ 1687              		.cfi_offset 4, -12
+ 1688              		.cfi_offset 5, -8
+ 1689              		.cfi_offset 14, -4
+ 180:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1690              		.loc 1 180 30 discriminator 3 view .LVU460
+ 1691 00dc 6FF00200 		mvn	r0, #2
+ 1692              	.LVL154:
+ 180:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1693              		.loc 1 180 30 discriminator 3 view .LVU461
+ 1694 00e0 F7E7     		b	.L132
+ 1695              	.LVL155:
+ 1696              	.L136:
+ 181:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 1697              		.loc 1 181 35 discriminator 1 view .LVU462
+ 1698 00e2 6FF00100 		mvn	r0, #1
+ 1699              	.LVL156:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 38
+
+
+ 181:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 1700              		.loc 1 181 35 discriminator 1 view .LVU463
+ 1701 00e6 F4E7     		b	.L132
+ 1702              	.LVL157:
+ 1703              	.L137:
+ 183:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(DELAY_MODE_SWITCH_MS);
+ 1704              		.loc 1 183 80 discriminator 1 view .LVU464
+ 1705 00e8 4FF0FF30 		mov	r0, #-1
+ 1706 00ec F1E7     		b	.L132
+ 1707              	.L138:
+ 187:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 1708              		.loc 1 187 68 discriminator 1 view .LVU465
+ 1709 00ee 4FF0FF30 		mov	r0, #-1
+ 1710 00f2 EEE7     		b	.L132
+ 1711              		.cfi_endproc
+ 1712              	.LFE25:
+ 1714              		.section	.text.bno055_set_calib_data,"ax",%progbits
+ 1715              		.align	1
+ 1716              		.global	bno055_set_calib_data
+ 1717              		.syntax unified
+ 1718              		.thumb
+ 1719              		.thumb_func
+ 1721              	bno055_set_calib_data:
+ 1722              	.LVL158:
+ 1723              	.LFB26:
+ 203:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 204:SynaptiX_FDK/components/modules/imu/bno055.c **** int bno055_set_calib_data(bno055_t *dev, const bno055_calib_data_t *in)
+ 205:SynaptiX_FDK/components/modules/imu/bno055.c **** {
+ 1724              		.loc 1 205 1 is_stmt 1 view -0
+ 1725              		.cfi_startproc
+ 1726              		@ args = 0, pretend = 0, frame = 24
+ 1727              		@ frame_needed = 0, uses_anonymous_args = 0
+ 206:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !in) return BNO055_ERR_PARAM;
+ 1728              		.loc 1 206 5 view .LVU467
+ 1729              		.loc 1 206 8 is_stmt 0 view .LVU468
+ 1730 0000 0028     		cmp	r0, #0
+ 1731 0002 76D0     		beq	.L145
+ 205:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !in) return BNO055_ERR_PARAM;
+ 1732              		.loc 1 205 1 view .LVU469
+ 1733 0004 30B5     		push	{r4, r5, lr}
+ 1734              	.LCFI62:
+ 1735              		.cfi_def_cfa_offset 12
+ 1736              		.cfi_offset 4, -12
+ 1737              		.cfi_offset 5, -8
+ 1738              		.cfi_offset 14, -4
+ 1739 0006 89B0     		sub	sp, sp, #36
+ 1740              	.LCFI63:
+ 1741              		.cfi_def_cfa_offset 48
+ 1742 0008 0C46     		mov	r4, r1
+ 1743 000a 0546     		mov	r5, r0
+ 1744              		.loc 1 206 14 discriminator 2 view .LVU470
+ 1745 000c 0029     		cmp	r1, #0
+ 1746 000e 73D0     		beq	.L146
+ 207:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1747              		.loc 1 207 5 is_stmt 1 view .LVU471
+ 1748              		.loc 1 207 13 is_stmt 0 view .LVU472
+ 1749 0010 037B     		ldrb	r3, [r0, #12]	@ zero_extendqisi2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 39
+
+
+ 1750              		.loc 1 207 8 view .LVU473
+ 1751 0012 002B     		cmp	r3, #0
+ 1752 0014 73D0     		beq	.L147
+ 208:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 209:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_OPR_MODE, BNO055_OPR_MODE_CONFIGMODE) != 0) return BNO055_ERR_I2C;
+ 1753              		.loc 1 209 5 is_stmt 1 view .LVU474
+ 1754              		.loc 1 209 9 is_stmt 0 view .LVU475
+ 1755 0016 0022     		movs	r2, #0
+ 1756 0018 3D21     		movs	r1, #61
+ 1757              	.LVL159:
+ 1758              		.loc 1 209 9 view .LVU476
+ 1759 001a FFF7FEFF 		bl	_reg_write
+ 1760              	.LVL160:
+ 1761              		.loc 1 209 8 discriminator 1 view .LVU477
+ 1762 001e 0028     		cmp	r0, #0
+ 1763 0020 70D1     		bne	.L148
+ 210:SynaptiX_FDK/components/modules/imu/bno055.c ****     sx_delay_ms(DELAY_MODE_SWITCH_MS);
+ 1764              		.loc 1 210 5 is_stmt 1 view .LVU478
+ 1765 0022 1420     		movs	r0, #20
+ 1766 0024 FFF7FEFF 		bl	sx_delay_ms
+ 1767              	.LVL161:
+ 211:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 212:SynaptiX_FDK/components/modules/imu/bno055.c ****     uint8_t buf[22];
+ 1768              		.loc 1 212 5 view .LVU479
+ 213:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[0]  = (uint8_t)(in->acc_x      & 0xFF);
+ 1769              		.loc 1 213 5 view .LVU480
+ 1770              		.loc 1 213 27 is_stmt 0 view .LVU481
+ 1771 0028 B4F90030 		ldrsh	r3, [r4]
+ 1772              		.loc 1 213 13 view .LVU482
+ 1773 002c 8DF80830 		strb	r3, [sp, #8]
+ 214:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[1]  = (uint8_t)(in->acc_x      >> 8);
+ 1774              		.loc 1 214 5 is_stmt 1 view .LVU483
+ 1775              		.loc 1 214 15 is_stmt 0 view .LVU484
+ 1776 0030 C3F30723 		ubfx	r3, r3, #8, #8
+ 1777              		.loc 1 214 13 view .LVU485
+ 1778 0034 8DF80930 		strb	r3, [sp, #9]
+ 215:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[2]  = (uint8_t)(in->acc_y      & 0xFF);
+ 1779              		.loc 1 215 5 is_stmt 1 view .LVU486
+ 1780              		.loc 1 215 27 is_stmt 0 view .LVU487
+ 1781 0038 B4F90230 		ldrsh	r3, [r4, #2]
+ 1782              		.loc 1 215 13 view .LVU488
+ 1783 003c 8DF80A30 		strb	r3, [sp, #10]
+ 216:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[3]  = (uint8_t)(in->acc_y      >> 8);
+ 1784              		.loc 1 216 5 is_stmt 1 view .LVU489
+ 1785              		.loc 1 216 15 is_stmt 0 view .LVU490
+ 1786 0040 C3F30723 		ubfx	r3, r3, #8, #8
+ 1787              		.loc 1 216 13 view .LVU491
+ 1788 0044 8DF80B30 		strb	r3, [sp, #11]
+ 217:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[4]  = (uint8_t)(in->acc_z      & 0xFF);
+ 1789              		.loc 1 217 5 is_stmt 1 view .LVU492
+ 1790              		.loc 1 217 27 is_stmt 0 view .LVU493
+ 1791 0048 B4F90430 		ldrsh	r3, [r4, #4]
+ 1792              		.loc 1 217 13 view .LVU494
+ 1793 004c 8DF80C30 		strb	r3, [sp, #12]
+ 218:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[5]  = (uint8_t)(in->acc_z      >> 8);
+ 1794              		.loc 1 218 5 is_stmt 1 view .LVU495
+ 1795              		.loc 1 218 15 is_stmt 0 view .LVU496
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 40
+
+
+ 1796 0050 C3F30723 		ubfx	r3, r3, #8, #8
+ 1797              		.loc 1 218 13 view .LVU497
+ 1798 0054 8DF80D30 		strb	r3, [sp, #13]
+ 219:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[6]  = (uint8_t)(in->mag_x      & 0xFF);
+ 1799              		.loc 1 219 5 is_stmt 1 view .LVU498
+ 1800              		.loc 1 219 27 is_stmt 0 view .LVU499
+ 1801 0058 B4F90630 		ldrsh	r3, [r4, #6]
+ 1802              		.loc 1 219 13 view .LVU500
+ 1803 005c 8DF80E30 		strb	r3, [sp, #14]
+ 220:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[7]  = (uint8_t)(in->mag_x      >> 8);
+ 1804              		.loc 1 220 5 is_stmt 1 view .LVU501
+ 1805              		.loc 1 220 15 is_stmt 0 view .LVU502
+ 1806 0060 C3F30723 		ubfx	r3, r3, #8, #8
+ 1807              		.loc 1 220 13 view .LVU503
+ 1808 0064 8DF80F30 		strb	r3, [sp, #15]
+ 221:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[8]  = (uint8_t)(in->mag_y      & 0xFF);
+ 1809              		.loc 1 221 5 is_stmt 1 view .LVU504
+ 1810              		.loc 1 221 27 is_stmt 0 view .LVU505
+ 1811 0068 B4F90830 		ldrsh	r3, [r4, #8]
+ 1812              		.loc 1 221 13 view .LVU506
+ 1813 006c 8DF81030 		strb	r3, [sp, #16]
+ 222:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[9]  = (uint8_t)(in->mag_y      >> 8);
+ 1814              		.loc 1 222 5 is_stmt 1 view .LVU507
+ 1815              		.loc 1 222 15 is_stmt 0 view .LVU508
+ 1816 0070 C3F30723 		ubfx	r3, r3, #8, #8
+ 1817              		.loc 1 222 13 view .LVU509
+ 1818 0074 8DF81130 		strb	r3, [sp, #17]
+ 223:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[10] = (uint8_t)(in->mag_z      & 0xFF);
+ 1819              		.loc 1 223 5 is_stmt 1 view .LVU510
+ 1820              		.loc 1 223 27 is_stmt 0 view .LVU511
+ 1821 0078 B4F90A30 		ldrsh	r3, [r4, #10]
+ 1822              		.loc 1 223 13 view .LVU512
+ 1823 007c 8DF81230 		strb	r3, [sp, #18]
+ 224:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[11] = (uint8_t)(in->mag_z      >> 8);
+ 1824              		.loc 1 224 5 is_stmt 1 view .LVU513
+ 1825              		.loc 1 224 15 is_stmt 0 view .LVU514
+ 1826 0080 C3F30723 		ubfx	r3, r3, #8, #8
+ 1827              		.loc 1 224 13 view .LVU515
+ 1828 0084 8DF81330 		strb	r3, [sp, #19]
+ 225:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[12] = (uint8_t)(in->gyr_x      & 0xFF);
+ 1829              		.loc 1 225 5 is_stmt 1 view .LVU516
+ 1830              		.loc 1 225 27 is_stmt 0 view .LVU517
+ 1831 0088 B4F90C30 		ldrsh	r3, [r4, #12]
+ 1832              		.loc 1 225 13 view .LVU518
+ 1833 008c 8DF81430 		strb	r3, [sp, #20]
+ 226:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[13] = (uint8_t)(in->gyr_x      >> 8);
+ 1834              		.loc 1 226 5 is_stmt 1 view .LVU519
+ 1835              		.loc 1 226 15 is_stmt 0 view .LVU520
+ 1836 0090 C3F30723 		ubfx	r3, r3, #8, #8
+ 1837              		.loc 1 226 13 view .LVU521
+ 1838 0094 8DF81530 		strb	r3, [sp, #21]
+ 227:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[14] = (uint8_t)(in->gyr_y      & 0xFF);
+ 1839              		.loc 1 227 5 is_stmt 1 view .LVU522
+ 1840              		.loc 1 227 27 is_stmt 0 view .LVU523
+ 1841 0098 B4F90E30 		ldrsh	r3, [r4, #14]
+ 1842              		.loc 1 227 13 view .LVU524
+ 1843 009c 8DF81630 		strb	r3, [sp, #22]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 41
+
+
+ 228:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[15] = (uint8_t)(in->gyr_y      >> 8);
+ 1844              		.loc 1 228 5 is_stmt 1 view .LVU525
+ 1845              		.loc 1 228 15 is_stmt 0 view .LVU526
+ 1846 00a0 C3F30723 		ubfx	r3, r3, #8, #8
+ 1847              		.loc 1 228 13 view .LVU527
+ 1848 00a4 8DF81730 		strb	r3, [sp, #23]
+ 229:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[16] = (uint8_t)(in->gyr_z      & 0xFF);
+ 1849              		.loc 1 229 5 is_stmt 1 view .LVU528
+ 1850              		.loc 1 229 27 is_stmt 0 view .LVU529
+ 1851 00a8 B4F91030 		ldrsh	r3, [r4, #16]
+ 1852              		.loc 1 229 13 view .LVU530
+ 1853 00ac 8DF81830 		strb	r3, [sp, #24]
+ 230:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[17] = (uint8_t)(in->gyr_z      >> 8);
+ 1854              		.loc 1 230 5 is_stmt 1 view .LVU531
+ 1855              		.loc 1 230 15 is_stmt 0 view .LVU532
+ 1856 00b0 C3F30723 		ubfx	r3, r3, #8, #8
+ 1857              		.loc 1 230 13 view .LVU533
+ 1858 00b4 8DF81930 		strb	r3, [sp, #25]
+ 231:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[18] = (uint8_t)(in->acc_radius & 0xFF);
+ 1859              		.loc 1 231 5 is_stmt 1 view .LVU534
+ 1860              		.loc 1 231 27 is_stmt 0 view .LVU535
+ 1861 00b8 B4F91230 		ldrsh	r3, [r4, #18]
+ 1862              		.loc 1 231 13 view .LVU536
+ 1863 00bc 8DF81A30 		strb	r3, [sp, #26]
+ 232:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[19] = (uint8_t)(in->acc_radius >> 8);
+ 1864              		.loc 1 232 5 is_stmt 1 view .LVU537
+ 1865              		.loc 1 232 15 is_stmt 0 view .LVU538
+ 1866 00c0 C3F30723 		ubfx	r3, r3, #8, #8
+ 1867              		.loc 1 232 13 view .LVU539
+ 1868 00c4 8DF81B30 		strb	r3, [sp, #27]
+ 233:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[20] = (uint8_t)(in->mag_radius & 0xFF);
+ 1869              		.loc 1 233 5 is_stmt 1 view .LVU540
+ 1870              		.loc 1 233 27 is_stmt 0 view .LVU541
+ 1871 00c8 B4F91430 		ldrsh	r3, [r4, #20]
+ 1872              		.loc 1 233 13 view .LVU542
+ 1873 00cc 8DF81C30 		strb	r3, [sp, #28]
+ 234:SynaptiX_FDK/components/modules/imu/bno055.c ****     buf[21] = (uint8_t)(in->mag_radius >> 8);
+ 1874              		.loc 1 234 5 is_stmt 1 view .LVU543
+ 1875              		.loc 1 234 15 is_stmt 0 view .LVU544
+ 1876 00d0 C3F30723 		ubfx	r3, r3, #8, #8
+ 1877              		.loc 1 234 13 view .LVU545
+ 1878 00d4 8DF81D30 		strb	r3, [sp, #29]
+ 235:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 236:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (sx_i2c_mem_write(dev->i2c, dev->dev_addr,
+ 1879              		.loc 1 236 5 is_stmt 1 view .LVU546
+ 1880              		.loc 1 236 9 is_stmt 0 view .LVU547
+ 1881 00d8 1623     		movs	r3, #22
+ 1882 00da 0193     		str	r3, [sp, #4]
+ 1883 00dc 02AB     		add	r3, sp, #8
+ 1884 00de 0093     		str	r3, [sp]
+ 1885 00e0 0123     		movs	r3, #1
+ 1886 00e2 5522     		movs	r2, #85
+ 1887 00e4 A988     		ldrh	r1, [r5, #4]
+ 1888 00e6 2868     		ldr	r0, [r5]
+ 1889 00e8 FFF7FEFF 		bl	sx_i2c_mem_write
+ 1890              	.LVL162:
+ 1891              		.loc 1 236 8 discriminator 1 view .LVU548
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 42
+
+
+ 1892 00ec 68B9     		cbnz	r0, .L154
+ 1893              	.L143:
+ 237:SynaptiX_FDK/components/modules/imu/bno055.c ****                          REG_ACC_OFFSET_X_LSB, 1,
+ 238:SynaptiX_FDK/components/modules/imu/bno055.c ****                          buf, 22) != 0) return BNO055_ERR_I2C;
+ 239:SynaptiX_FDK/components/modules/imu/bno055.c **** 
+ 240:SynaptiX_FDK/components/modules/imu/bno055.c ****     return BNO055_OK;
+ 241:SynaptiX_FDK/components/modules/imu/bno055.c **** }...
+ 1894              		.loc 1 241 1 view .LVU549
+ 1895 00ee 09B0     		add	sp, sp, #36
+ 1896              	.LCFI64:
+ 1897              		.cfi_def_cfa_offset 12
+ 1898              		@ sp needed
+ 1899 00f0 30BD     		pop	{r4, r5, pc}
+ 1900              	.LVL163:
+ 1901              	.L145:
+ 1902              	.LCFI65:
+ 1903              		.cfi_def_cfa_offset 0
+ 1904              		.cfi_restore 4
+ 1905              		.cfi_restore 5
+ 1906              		.cfi_restore 14
+ 206:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !in) return BNO055_ERR_PARAM;
+ 1907              		.loc 1 206 29 discriminator 3 view .LVU550
+ 1908 00f2 6FF00200 		mvn	r0, #2
+ 1909              	.LVL164:
+ 1910              		.loc 1 241 1 view .LVU551
+ 1911 00f6 7047     		bx	lr
+ 1912              	.LVL165:
+ 1913              	.L146:
+ 1914              	.LCFI66:
+ 1915              		.cfi_def_cfa_offset 48
+ 1916              		.cfi_offset 4, -12
+ 1917              		.cfi_offset 5, -8
+ 1918              		.cfi_offset 14, -4
+ 206:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !in) return BNO055_ERR_PARAM;
+ 1919              		.loc 1 206 29 discriminator 3 view .LVU552
+ 1920 00f8 6FF00200 		mvn	r0, #2
+ 1921              	.LVL166:
+ 206:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev || !in) return BNO055_ERR_PARAM;
+ 1922              		.loc 1 206 29 discriminator 3 view .LVU553
+ 1923 00fc F7E7     		b	.L143
+ 1924              	.LVL167:
+ 1925              	.L147:
+ 207:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1926              		.loc 1 207 35 discriminator 1 view .LVU554
+ 1927 00fe 6FF00100 		mvn	r0, #1
+ 1928              	.LVL168:
+ 207:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+ 1929              		.loc 1 207 35 discriminator 1 view .LVU555
+ 1930 0102 F4E7     		b	.L143
+ 1931              	.LVL169:
+ 1932              	.L148:
+ 209:SynaptiX_FDK/components/modules/imu/bno055.c ****     if (_reg_write(dev, REG_OPR_MODE, BNO055_OPR_MODE_CONFIGMODE) != 0) return BNO055_ERR_I2C;
+ 1933              		.loc 1 209 80 discriminator 1 view .LVU556
+ 1934 0104 4FF0FF30 		mov	r0, #-1
+ 1935 0108 F1E7     		b	.L143
+ 1936              	.L154:
+ 238:SynaptiX_FDK/components/modules/imu/bno055.c ****                          buf, 22) != 0) return BNO055_ERR_I2C;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 43
+
+
+ 1937              		.loc 1 238 48 view .LVU557
+ 1938 010a 4FF0FF30 		mov	r0, #-1
+ 1939 010e EEE7     		b	.L143
+ 1940              		.cfi_endproc
+ 1941              	.LFE26:
+ 1943              		.text
+ 1944              	.Letext0:
+ 1945              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1946              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1947              		.file 6 "SynaptiX_FDK/components/modules/imu/bno055.h"
+ 1948              		.file 7 "SynaptiX_FDK/services/logger/logger.h"
+ 1949              		.file 8 "SynaptiX_FDK/utils/delay/sx_delay.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s 			page 44
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 bno055.c
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:22     .text.sx_i2c_mem_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:27     .text.sx_i2c_mem_write:00000000 sx_i2c_mem_write
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:90     .text.sx_i2c_mem_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:95     .text.sx_i2c_mem_read:00000000 sx_i2c_mem_read
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:157    .text.sx_gpio_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:162    .text.sx_gpio_write:00000000 sx_gpio_write
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:225    .text._reg_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:230    .text._reg_write:00000000 _reg_write
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:275    .text._reg_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:280    .text._reg_read:00000000 _reg_read
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:323    .text._read_vec3:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:328    .text._read_vec3:00000000 _read_vec3
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:403    .text.bno055_set_opr_mode:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:409    .text.bno055_set_opr_mode:00000000 bno055_set_opr_mode
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:459    .rodata.bno055_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:466    .text.bno055_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:472    .text.bno055_init:00000000 bno055_init
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:693    .text.bno055_init:00000100 $d
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:699    .text.bno055_set_pwr_mode:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:705    .text.bno055_set_pwr_mode:00000000 bno055_set_pwr_mode
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:783    .text.bno055_get_accel:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:789    .text.bno055_get_accel:00000000 bno055_get_accel
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:855    .text.bno055_get_mag:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:861    .text.bno055_get_mag:00000000 bno055_get_mag
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:927    .text.bno055_get_gyro:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:933    .text.bno055_get_gyro:00000000 bno055_get_gyro
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:999    .text.bno055_get_linear_accel:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1005   .text.bno055_get_linear_accel:00000000 bno055_get_linear_accel
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1071   .text.bno055_get_gravity:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1077   .text.bno055_get_gravity:00000000 bno055_get_gravity
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1143   .text.bno055_get_euler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1149   .text.bno055_get_euler:00000000 bno055_get_euler
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1261   .text.bno055_get_quat:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1267   .text.bno055_get_quat:00000000 bno055_get_quat
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1388   .text.bno055_get_calib_stat:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1394   .text.bno055_get_calib_stat:00000000 bno055_get_calib_stat
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1499   .text.bno055_get_calib_data:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1505   .text.bno055_get_calib_data:00000000 bno055_get_calib_data
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1715   .text.bno055_set_calib_data:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4POvCs.s:1721   .text.bno055_set_calib_data:00000000 bno055_set_calib_data
+
+UNDEFINED SYMBOLS
+sx_delay_ms
+log_func

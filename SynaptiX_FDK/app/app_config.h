@@ -96,6 +96,9 @@
 /*  ADC Voltage Reader                                                 */
 /* ================================================================== */
 
+#define USE_READ_PIN 0
+
+#if USE_READ_PIN
 #define ADC_VREF            3.3f
 #define ADC_RESOLUTION      4095.0f
 #define VBAT_DIVIDER_RATIO  1.47f
@@ -113,5 +116,6 @@
 #define VBAT_LPF_ALPHA  0.05f   
 
 #define OVERSAMPLE_COUNT    12U
+#endif
 
 #endif /* APP_CONFIG_H */

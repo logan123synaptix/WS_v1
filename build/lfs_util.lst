@@ -1,0 +1,182 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"lfs_util.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/services/littlefs/lfs_util.c"
+  21              		.section	.text.lfs_crc,"ax",%progbits
+  22              		.align	1
+  23              		.global	lfs_crc
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	lfs_crc:
+  29              	.LVL0:
+  30              	.LFB17:
+   1:SynaptiX_FDK/services/littlefs/lfs_util.c **** /*
+   2:SynaptiX_FDK/services/littlefs/lfs_util.c ****  * lfs util functions
+   3:SynaptiX_FDK/services/littlefs/lfs_util.c ****  *
+   4:SynaptiX_FDK/services/littlefs/lfs_util.c ****  * Copyright (c) 2022, The littlefs authors.
+   5:SynaptiX_FDK/services/littlefs/lfs_util.c ****  * Copyright (c) 2017, Arm Limited. All rights reserved.
+   6:SynaptiX_FDK/services/littlefs/lfs_util.c ****  * SPDX-License-Identifier: BSD-3-Clause
+   7:SynaptiX_FDK/services/littlefs/lfs_util.c ****  */
+   8:SynaptiX_FDK/services/littlefs/lfs_util.c **** #include "lfs_util.h"
+   9:SynaptiX_FDK/services/littlefs/lfs_util.c **** 
+  10:SynaptiX_FDK/services/littlefs/lfs_util.c **** // Only compile if user does not provide custom config
+  11:SynaptiX_FDK/services/littlefs/lfs_util.c **** #ifndef LFS_CONFIG
+  12:SynaptiX_FDK/services/littlefs/lfs_util.c **** 
+  13:SynaptiX_FDK/services/littlefs/lfs_util.c **** 
+  14:SynaptiX_FDK/services/littlefs/lfs_util.c **** // If user provides their own CRC impl we don't need this
+  15:SynaptiX_FDK/services/littlefs/lfs_util.c **** #ifndef LFS_CRC
+  16:SynaptiX_FDK/services/littlefs/lfs_util.c **** // Software CRC implementation with small lookup table
+  17:SynaptiX_FDK/services/littlefs/lfs_util.c **** uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size) {
+  31              		.loc 1 17 65 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  18:SynaptiX_FDK/services/littlefs/lfs_util.c ****     static const uint32_t rtable[16] = {
+  35              		.loc 1 18 5 view .LVU1
+  19:SynaptiX_FDK/services/littlefs/lfs_util.c ****         0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac,
+  20:SynaptiX_FDK/services/littlefs/lfs_util.c ****         0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
+  21:SynaptiX_FDK/services/littlefs/lfs_util.c ****         0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c,
+  22:SynaptiX_FDK/services/littlefs/lfs_util.c ****         0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c,
+  23:SynaptiX_FDK/services/littlefs/lfs_util.c ****     };
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s 			page 2
+
+
+  24:SynaptiX_FDK/services/littlefs/lfs_util.c **** 
+  25:SynaptiX_FDK/services/littlefs/lfs_util.c ****     const uint8_t *data = buffer;
+  36              		.loc 1 25 5 view .LVU2
+  26:SynaptiX_FDK/services/littlefs/lfs_util.c **** 
+  27:SynaptiX_FDK/services/littlefs/lfs_util.c ****     for (size_t i = 0; i < size; i++) {
+  37              		.loc 1 27 5 view .LVU3
+  38              	.LBB2:
+  39              		.loc 1 27 10 view .LVU4
+  40              		.loc 1 27 17 is_stmt 0 view .LVU5
+  41 0000 4FF0000C 		mov	ip, #0
+  42              	.LVL1:
+  43              		.loc 1 27 26 is_stmt 1 discriminator 1 view .LVU6
+  44 0004 9445     		cmp	ip, r2
+  45 0006 18D2     		bcs	.L8
+  46              	.LBE2:
+  17:SynaptiX_FDK/services/littlefs/lfs_util.c ****     static const uint32_t rtable[16] = {
+  47              		.loc 1 17 65 is_stmt 0 view .LVU7
+  48 0008 30B5     		push	{r4, r5, lr}
+  49              	.LCFI0:
+  50              		.cfi_def_cfa_offset 12
+  51              		.cfi_offset 4, -12
+  52              		.cfi_offset 5, -8
+  53              		.cfi_offset 14, -4
+  54              	.L3:
+  55              	.LBB3:
+  28:SynaptiX_FDK/services/littlefs/lfs_util.c ****         crc = (crc >> 4) ^ rtable[(crc ^ (data[i] >> 0)) & 0xf];
+  56              		.loc 1 28 9 is_stmt 1 view .LVU8
+  57              		.loc 1 28 47 is_stmt 0 view .LVU9
+  58 000a 11F80C30 		ldrb	r3, [r1, ip]	@ zero_extendqisi2
+  59              		.loc 1 28 40 view .LVU10
+  60 000e 83EA000E 		eor	lr, r3, r0
+  61              		.loc 1 28 58 view .LVU11
+  62 0012 0EF00F0E 		and	lr, lr, #15
+  63              		.loc 1 28 34 view .LVU12
+  64 0016 094C     		ldr	r4, .L9
+  65 0018 54F82E50 		ldr	r5, [r4, lr, lsl #2]
+  66              		.loc 1 28 13 view .LVU13
+  67 001c 85EA1010 		eor	r0, r5, r0, lsr #4
+  68              	.LVL2:
+  29:SynaptiX_FDK/services/littlefs/lfs_util.c ****         crc = (crc >> 4) ^ rtable[(crc ^ (data[i] >> 4)) & 0xf];
+  69              		.loc 1 29 9 is_stmt 1 view .LVU14
+  70              		.loc 1 29 40 is_stmt 0 view .LVU15
+  71 0020 80EA1313 		eor	r3, r0, r3, lsr #4
+  72              		.loc 1 29 58 view .LVU16
+  73 0024 03F00F03 		and	r3, r3, #15
+  74              		.loc 1 29 34 view .LVU17
+  75 0028 54F82330 		ldr	r3, [r4, r3, lsl #2]
+  76              		.loc 1 29 13 view .LVU18
+  77 002c 83EA1010 		eor	r0, r3, r0, lsr #4
+  78              	.LVL3:
+  27:SynaptiX_FDK/services/littlefs/lfs_util.c ****         crc = (crc >> 4) ^ rtable[(crc ^ (data[i] >> 0)) & 0xf];
+  79              		.loc 1 27 35 is_stmt 1 discriminator 3 view .LVU19
+  80 0030 0CF1010C 		add	ip, ip, #1
+  81              	.LVL4:
+  27:SynaptiX_FDK/services/littlefs/lfs_util.c ****         crc = (crc >> 4) ^ rtable[(crc ^ (data[i] >> 0)) & 0xf];
+  82              		.loc 1 27 26 discriminator 1 view .LVU20
+  83 0034 9445     		cmp	ip, r2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s 			page 3
+
+
+  84 0036 E8D3     		bcc	.L3
+  85              	.LBE3:
+  30:SynaptiX_FDK/services/littlefs/lfs_util.c ****     }
+  31:SynaptiX_FDK/services/littlefs/lfs_util.c **** 
+  32:SynaptiX_FDK/services/littlefs/lfs_util.c ****     return crc;
+  86              		.loc 1 32 5 view .LVU21
+  33:SynaptiX_FDK/services/littlefs/lfs_util.c **** }
+  87              		.loc 1 33 1 is_stmt 0 view .LVU22
+  88 0038 30BD     		pop	{r4, r5, pc}
+  89              	.L8:
+  90              	.LCFI1:
+  91              		.cfi_def_cfa_offset 0
+  92              		.cfi_restore 4
+  93              		.cfi_restore 5
+  94              		.cfi_restore 14
+  95              		.loc 1 33 1 view .LVU23
+  96 003a 7047     		bx	lr
+  97              	.L10:
+  98              		.align	2
+  99              	.L9:
+ 100 003c 00000000 		.word	rtable.0
+ 101              		.cfi_endproc
+ 102              	.LFE17:
+ 104              		.section	.rodata.rtable.0,"a"
+ 105              		.align	2
+ 108              	rtable.0:
+ 109 0000 00000000 		.word	0
+ 110 0004 6410B71D 		.word	498536548
+ 111 0008 C8206E3B 		.word	997073096
+ 112 000c AC30D926 		.word	651767980
+ 113 0010 9041DC76 		.word	1994146192
+ 114 0014 F4516B6B 		.word	1802195444
+ 115 0018 5861B24D 		.word	1303535960
+ 116 001c 3C710550 		.word	1342533948
+ 117 0020 2083B8ED 		.word	-306674912
+ 118 0024 44930FF0 		.word	-267414716
+ 119 0028 E8A3D6D6 		.word	-690576408
+ 120 002c 8CB361CB 		.word	-882789492
+ 121 0030 B0C2649B 		.word	-1687895376
+ 122 0034 D4D2D386 		.word	-2032938284
+ 123 0038 78E20AA0 		.word	-1609899400
+ 124 003c 1CF2BDBD 		.word	-1111625188
+ 125              		.text
+ 126              	.Letext0:
+ 127              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 128              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 129              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 lfs_util.c
+C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s:22     .text.lfs_crc:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s:28     .text.lfs_crc:00000000 lfs_crc
+C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s:100    .text.lfs_crc:0000003c $d
+C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s:108    .rodata.rtable.0:00000000 rtable.0
+C:\Users\DELL\AppData\Local\Temp\ccTPEdJC.s:105    .rodata.rtable.0:00000000 $d
+
+NO UNDEFINED SYMBOLS

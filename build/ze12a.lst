@@ -1,0 +1,1480 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"ze12a.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/modules/ze12a/ze12a.c"
+  21              		.section	.text.sx_gpio_write,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sx_gpio_write:
+  28              	.LVL0:
+  29              	.LFB4:
+  30              		.file 2 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+   1:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifndef SX_GPIO_H
+   2:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #define SX_GPIO_H
+   3:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   7:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   9:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef enum SX_GPIO_VALUE{
+  10:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_LOW = 0,
+  11:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_HIGH = 1
+  12:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } SX_GPIO_VALUE;
+  13:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  14:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio sx_gpio_t;
+  15:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  16:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct {
+  17:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void    *port;
+  18:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     uint16_t pin;
+  19:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_pin_t;
+  20:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  21:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio_ops{
+  22:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*write)(sx_gpio_t *gpio, SX_GPIO_VALUE value);
+  23:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*read)(sx_gpio_t *gpio, SX_GPIO_VALUE *value);
+  24:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*toggle)(sx_gpio_t *gpio);
+  25:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_ops_t;
+  26:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  27:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio{
+  28:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     sx_gpio_ops_t *ops;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 2
+
+
+  29:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void *pDriver;
+  30:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_VALUE value;
+  31:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_t;
+  32:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline void sx_gpio_init(sx_gpio_t *gpio, sx_gpio_ops_t *ops, void *pDriver){
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+  37:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  38:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  39:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline int sx_gpio_write(sx_gpio_t *gpio, SX_GPIO_VALUE value){
+  31              		.loc 2 39 70 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 2 39 70 is_stmt 0 view .LVU1
+  36 0000 38B5     		push	{r3, r4, r5, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 16
+  39              		.cfi_offset 3, -16
+  40              		.cfi_offset 4, -12
+  41              		.cfi_offset 5, -8
+  42              		.cfi_offset 14, -4
+  40:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     if(gpio->ops && gpio->ops->write){
+  43              		.loc 2 40 5 is_stmt 1 view .LVU2
+  44              		.loc 2 40 12 is_stmt 0 view .LVU3
+  45 0002 0368     		ldr	r3, [r0]
+  46              		.loc 2 40 7 view .LVU4
+  47 0004 3BB1     		cbz	r3, .L4
+  48 0006 0446     		mov	r4, r0
+  49 0008 0D46     		mov	r5, r1
+  50              		.loc 2 40 30 discriminator 1 view .LVU5
+  51 000a 1B68     		ldr	r3, [r3]
+  52              		.loc 2 40 18 discriminator 1 view .LVU6
+  53 000c 33B1     		cbz	r3, .L5
+  54              	.LBB7:
+  41:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         int ret = gpio->ops->write(gpio, value);
+  55              		.loc 2 41 9 is_stmt 1 view .LVU7
+  56              		.loc 2 41 19 is_stmt 0 view .LVU8
+  57 000e 9847     		blx	r3
+  58              	.LVL1:
+  42:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         if(ret == 0){
+  59              		.loc 2 42 9 is_stmt 1 view .LVU9
+  60              		.loc 2 42 11 is_stmt 0 view .LVU10
+  61 0010 00B9     		cbnz	r0, .L1
+  43:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****             gpio->value = value;
+  62              		.loc 2 43 13 is_stmt 1 view .LVU11
+  63              		.loc 2 43 25 is_stmt 0 view .LVU12
+  64 0012 2572     		strb	r5, [r4, #8]
+  44:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         }
+  45:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         return ret;
+  65              		.loc 2 45 9 is_stmt 1 view .LVU13
+  66              	.LVL2:
+  67              	.L1:
+  68              		.loc 2 45 9 is_stmt 0 view .LVU14
+  69              	.LBE7:
+  46:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 3
+
+
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     return -1;
+  48:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  70              		.loc 2 48 1 view .LVU15
+  71 0014 38BD     		pop	{r3, r4, r5, pc}
+  72              	.LVL3:
+  73              	.L4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  74              		.loc 2 47 12 view .LVU16
+  75 0016 4FF0FF30 		mov	r0, #-1
+  76              	.LVL4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  77              		.loc 2 47 12 view .LVU17
+  78 001a FBE7     		b	.L1
+  79              	.LVL5:
+  80              	.L5:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  81              		.loc 2 47 12 view .LVU18
+  82 001c 4FF0FF30 		mov	r0, #-1
+  83              	.LVL6:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  84              		.loc 2 47 12 view .LVU19
+  85 0020 F8E7     		b	.L1
+  86              		.cfi_endproc
+  87              	.LFE4:
+  89              		.section	.text.ze12a_checksum,"ax",%progbits
+  90              		.align	1
+  91              		.syntax unified
+  92              		.thumb
+  93              		.thumb_func
+  95              	ze12a_checksum:
+  96              	.LVL7:
+  97              	.LFB7:
+   1:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** #include "ze12a.h"
+   2:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** #include <string.h>
+   3:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** #include "logger.h"
+   4:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** #include "sx_delay.h"
+   5:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+   6:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static const char *TAG = "GAS_SENSOR";
+   7:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+   8:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** GasSensor_t gas_sensor[GAS_SENSOR_COUNT];
+   9:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  10:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** /* Shared UART5 link (through the TMUX4052 mux) and the two GPIOs that
+  11:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * select which physical ZE12A module (SR1/SR2/SR3, plus one unused
+  12:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * channel) is currently connected to it. See the schematic: UART5_S0/S1
+  13:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * map directly to the mux's A0/A1 address inputs; EN is tied to GND on
+  14:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * the board, so it is always enabled and is not driven by firmware. */
+  15:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static sx_uart_t s_comm;
+  16:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static sx_gpio_t s_mux_s0;   /* mux A0 */
+  17:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static sx_gpio_t s_mux_s1;   /* mux A1 */
+  18:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static bool s_initialized;   /* set true once gas_sensor_init() has run */
+  19:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  20:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static uint8_t s_mux_channel;          /* 0..GAS_SENSOR_MUX_CHANNEL_COUNT-1, currently selected */
+  21:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static uint32_t s_channel_dwell_ms;    /* time spent on current channel so far */
+  22:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  23:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static gas_sensor_rx_state_t s_rx_state;
+  24:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static uint8_t s_rx_buf[9];
+  25:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static uint8_t s_rx_count;             /* bytes collected so far into s_rx_buf */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 4
+
+
+  26:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  27:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** /* Checksum per ZE12A datasheet ("Communication Protocol"): two's
+  28:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * complement of the sum of bytes 1..7 (i.e. all bytes between the leading
+  29:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * 0xFF start byte and the trailing check byte, inclusive of both ends
+  30:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * excluded). Verified against the worked example in the datasheet:
+  31:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * bytes {0x04,0x04,0x00,0x00,0x00,0x30,0xD4} sum to 0x0C; two's
+  32:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * complement (~0x0C)+1 = 0xF4, matching the datasheet's own worked
+  33:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * example check byte 0xF4. */
+  34:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static uint8_t ze12a_checksum(const uint8_t *frame)
+  35:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+  98              		.loc 1 35 1 is_stmt 1 view -0
+  99              		.cfi_startproc
+ 100              		@ args = 0, pretend = 0, frame = 0
+ 101              		@ frame_needed = 0, uses_anonymous_args = 0
+ 102              		@ link register save eliminated.
+  36:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint8_t sum = 0;
+ 103              		.loc 1 36 5 view .LVU21
+  37:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     for (uint8_t i = 1; i <= 7; i++) {
+ 104              		.loc 1 37 5 view .LVU22
+ 105              	.LBB8:
+ 106              		.loc 1 37 10 view .LVU23
+ 107              		.loc 1 37 18 is_stmt 0 view .LVU24
+ 108 0000 0123     		movs	r3, #1
+ 109              	.LBE8:
+  36:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint8_t sum = 0;
+ 110              		.loc 1 36 13 view .LVU25
+ 111 0002 0022     		movs	r2, #0
+ 112              	.LBB9:
+ 113              		.loc 1 37 5 view .LVU26
+ 114 0004 04E0     		b	.L8
+ 115              	.LVL8:
+ 116              	.L9:
+  38:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         sum += frame[i];
+ 117              		.loc 1 38 9 is_stmt 1 view .LVU27
+ 118              		.loc 1 38 21 is_stmt 0 view .LVU28
+ 119 0006 C15C     		ldrb	r1, [r0, r3]	@ zero_extendqisi2
+ 120              		.loc 1 38 13 view .LVU29
+ 121 0008 0A44     		add	r2, r2, r1
+ 122              	.LVL9:
+ 123              		.loc 1 38 13 view .LVU30
+ 124 000a D2B2     		uxtb	r2, r2
+ 125              	.LVL10:
+  37:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     for (uint8_t i = 1; i <= 7; i++) {
+ 126              		.loc 1 37 34 is_stmt 1 discriminator 3 view .LVU31
+ 127 000c 0133     		adds	r3, r3, #1
+ 128              	.LVL11:
+  37:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     for (uint8_t i = 1; i <= 7; i++) {
+ 129              		.loc 1 37 34 is_stmt 0 discriminator 3 view .LVU32
+ 130 000e DBB2     		uxtb	r3, r3
+ 131              	.LVL12:
+ 132              	.L8:
+  37:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     for (uint8_t i = 1; i <= 7; i++) {
+ 133              		.loc 1 37 27 is_stmt 1 discriminator 1 view .LVU33
+ 134 0010 072B     		cmp	r3, #7
+ 135 0012 F8D9     		bls	.L9
+ 136              	.LBE9:
+  39:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 5
+
+
+  40:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     return (uint8_t)(~sum + 1);
+ 137              		.loc 1 40 5 view .LVU34
+ 138              		.loc 1 40 12 is_stmt 0 view .LVU35
+ 139 0014 5042     		rsbs	r0, r2, #0
+ 140              	.LVL13:
+  41:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 141              		.loc 1 41 1 view .LVU36
+ 142 0016 C0B2     		uxtb	r0, r0
+ 143 0018 7047     		bx	lr
+ 144              		.cfi_endproc
+ 145              	.LFE7:
+ 147              		.section	.text.ze12a_select_mux_channel,"ax",%progbits
+ 148              		.align	1
+ 149              		.syntax unified
+ 150              		.thumb
+ 151              		.thumb_func
+ 153              	ze12a_select_mux_channel:
+ 154              	.LVL14:
+ 155              	.LFB8:
+  42:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  43:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static void ze12a_select_mux_channel(uint8_t channel)
+  44:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+ 156              		.loc 1 44 1 is_stmt 1 view -0
+ 157              		.cfi_startproc
+ 158              		@ args = 0, pretend = 0, frame = 0
+ 159              		@ frame_needed = 0, uses_anonymous_args = 0
+ 160              		.loc 1 44 1 is_stmt 0 view .LVU38
+ 161 0000 10B5     		push	{r4, lr}
+ 162              	.LCFI1:
+ 163              		.cfi_def_cfa_offset 8
+ 164              		.cfi_offset 4, -8
+ 165              		.cfi_offset 14, -4
+ 166 0002 0446     		mov	r4, r0
+  45:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     /* channel is a 2-bit mux address: bit0 -> S0/A0, bit1 -> S1/A1. */
+  46:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     sx_gpio_write(&s_mux_s0, (channel & 0x01U) ? SX_GPIO_HIGH : SX_GPIO_LOW);
+ 167              		.loc 1 46 5 is_stmt 1 view .LVU39
+ 168 0004 00F00101 		and	r1, r0, #1
+ 169 0008 0448     		ldr	r0, .L12
+ 170              	.LVL15:
+ 171              		.loc 1 46 5 is_stmt 0 view .LVU40
+ 172 000a FFF7FEFF 		bl	sx_gpio_write
+ 173              	.LVL16:
+  47:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     sx_gpio_write(&s_mux_s1, (channel & 0x02U) ? SX_GPIO_HIGH : SX_GPIO_LOW);
+ 174              		.loc 1 47 5 is_stmt 1 view .LVU41
+ 175 000e C4F34001 		ubfx	r1, r4, #1, #1
+ 176 0012 0348     		ldr	r0, .L12+4
+ 177 0014 FFF7FEFF 		bl	sx_gpio_write
+ 178              	.LVL17:
+  48:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 179              		.loc 1 48 1 is_stmt 0 view .LVU42
+ 180 0018 10BD     		pop	{r4, pc}
+ 181              	.LVL18:
+ 182              	.L13:
+ 183              		.loc 1 48 1 view .LVU43
+ 184 001a 00BF     		.align	2
+ 185              	.L12:
+ 186 001c 00000000 		.word	s_mux_s0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 6
+
+
+ 187 0020 00000000 		.word	s_mux_s1
+ 188              		.cfi_endproc
+ 189              	.LFE8:
+ 191              		.section	.rodata.ze12a_handle_frame.str1.4,"aMS",%progbits,1
+ 192              		.align	2
+ 193              	.LC1:
+ 194 0000 5A453132 		.ascii	"ZE12A checksum mismatch on mux ch %u\000"
+ 194      41206368 
+ 194      65636B73 
+ 194      756D206D 
+ 194      69736D61 
+ 195 0025 000000   		.align	2
+ 196              	.LC2:
+ 197 0028 4741535F 		.ascii	"GAS_SENSOR\000"
+ 197      53454E53 
+ 197      4F5200
+ 198 0033 00       		.align	2
+ 199              	.LC3:
+ 200 0034 5A453132 		.ascii	"ZE12A type=0x%02X value=%u unit=0x%02X (mux ch %u)\000"
+ 200      41207479 
+ 200      70653D30 
+ 200      78253032 
+ 200      58207661 
+ 201 0067 00       		.align	2
+ 202              	.LC4:
+ 203 0068 5A453132 		.ascii	"ZE12A frame with unknown gas code 0x%02X\000"
+ 203      41206672 
+ 203      616D6520 
+ 203      77697468 
+ 203      20756E6B 
+ 204              		.section	.text.ze12a_handle_frame,"ax",%progbits
+ 205              		.align	1
+ 206              		.syntax unified
+ 207              		.thumb
+ 208              		.thumb_func
+ 210              	ze12a_handle_frame:
+ 211              	.LVL19:
+ 212              	.LFB11:
+  49:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  50:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
+  51:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                      void *_s0_arg, void *_s1_arg)
+  52:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+  53:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     GasSensorType_t sensor_types[GAS_SENSOR_COUNT] = {
+  54:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_CO,
+  55:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_SO2,
+  56:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_NO2,
+  57:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_O3,
+  58:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_H2S
+  59:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     };
+  60:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
+  62:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+  63:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].isConnected = false;
+  64:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].value = 0;
+  65:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].unitPPB = 0;
+  66:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].timeout = 0;
+  67:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         memset(&gas_sensor[i].Frame, 0, sizeof(gas_sensor[i].Frame));
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 7
+
+
+  68:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+  69:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  70:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     sx_uart_init(&s_comm, _uart_cfg, sizeof(s_rx_buf) * 4, sizeof(s_rx_buf) * 4);
+  71:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  72:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     sx_gpio_init(&s_mux_s0, _gpio_ops, _s0_arg);
+  73:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     sx_gpio_init(&s_mux_s1, _gpio_ops, _s1_arg);
+  74:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  75:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_mux_channel = 0;
+  76:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_channel_dwell_ms = 0;
+  77:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     ze12a_select_mux_channel(s_mux_channel);
+  78:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  79:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_rx_state = GAS_SENSOR_RX_WAIT_START;
+  80:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_rx_count = 0;
+  81:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  82:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_initialized = true;
+  83:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  84:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     log_debug(TAG, "Initializing");
+  85:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+  86:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  87:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** sx_uart_t *gas_sensor_get_uart(void)
+  88:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+  89:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     return s_initialized ? &s_comm : NULL;
+  90:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+  91:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+  92:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** /* Parses one complete 9-byte frame already sitting in s_rx_buf, verifies
+  93:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * its checksum, and if valid, matches it against gas_sensor[] by the Gas
+  94:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * code byte (buffer[1]) - not by which mux channel it arrived on. This
+  95:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * mirrors the reference driver: any module can report any gas type, and
+  96:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * the firmware self-identifies each reading from the frame content
+  97:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****  * itself rather than assuming a fixed channel-to-gas mapping. */
+  98:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** static bool ze12a_handle_frame(const uint8_t *frame)
+  99:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+ 213              		.loc 1 99 1 is_stmt 1 view -0
+ 214              		.cfi_startproc
+ 215              		@ args = 0, pretend = 0, frame = 0
+ 216              		@ frame_needed = 0, uses_anonymous_args = 0
+ 217              		.loc 1 99 1 is_stmt 0 view .LVU45
+ 218 0000 70B5     		push	{r4, r5, r6, lr}
+ 219              	.LCFI2:
+ 220              		.cfi_def_cfa_offset 16
+ 221              		.cfi_offset 4, -16
+ 222              		.cfi_offset 5, -12
+ 223              		.cfi_offset 6, -8
+ 224              		.cfi_offset 14, -4
+ 225 0002 84B0     		sub	sp, sp, #16
+ 226              	.LCFI3:
+ 227              		.cfi_def_cfa_offset 32
+ 228 0004 0446     		mov	r4, r0
+ 100:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint8_t crc = ze12a_checksum(frame);
+ 229              		.loc 1 100 5 is_stmt 1 view .LVU46
+ 230              		.loc 1 100 19 is_stmt 0 view .LVU47
+ 231 0006 FFF7FEFF 		bl	ze12a_checksum
+ 232              	.LVL20:
+ 101:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     if (crc != frame[8]) {
+ 233              		.loc 1 101 5 is_stmt 1 view .LVU48
+ 234              		.loc 1 101 21 is_stmt 0 view .LVU49
+ 235 000a 237A     		ldrb	r3, [r4, #8]	@ zero_extendqisi2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 8
+
+
+ 236              		.loc 1 101 8 view .LVU50
+ 237 000c 8342     		cmp	r3, r0
+ 238 000e 11D1     		bne	.L21
+ 102:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         log_warn(TAG, "ZE12A checksum mismatch on mux ch %u", s_mux_channel);
+ 103:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         return false;
+ 104:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 105:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 106:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     GasSensorType_t type = (GasSensorType_t)frame[1];
+ 239              		.loc 1 106 5 is_stmt 1 view .LVU51
+ 240              		.loc 1 106 21 is_stmt 0 view .LVU52
+ 241 0010 6378     		ldrb	r3, [r4, #1]	@ zero_extendqisi2
+ 242              	.LVL21:
+ 107:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint16_t value = (uint16_t)((frame[4] << 8) | frame[5]);
+ 243              		.loc 1 107 5 is_stmt 1 view .LVU53
+ 244              		.loc 1 107 39 is_stmt 0 view .LVU54
+ 245 0012 2179     		ldrb	r1, [r4, #4]	@ zero_extendqisi2
+ 246              		.loc 1 107 56 view .LVU55
+ 247 0014 6279     		ldrb	r2, [r4, #5]	@ zero_extendqisi2
+ 248              		.loc 1 107 14 view .LVU56
+ 249 0016 42EA0126 		orr	r6, r2, r1, lsl #8
+ 250              	.LVL22:
+ 108:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 109:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
+ 251              		.loc 1 109 5 is_stmt 1 view .LVU57
+ 252              	.LBB10:
+ 253              		.loc 1 109 10 view .LVU58
+ 254              		.loc 1 109 18 is_stmt 0 view .LVU59
+ 255 001a 0022     		movs	r2, #0
+ 256              	.LVL23:
+ 257              	.L17:
+ 258              		.loc 1 109 27 is_stmt 1 discriminator 1 view .LVU60
+ 259 001c 042A     		cmp	r2, #4
+ 260 001e 2DD8     		bhi	.L22
+ 110:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].type == type) {
+ 261              		.loc 1 110 9 view .LVU61
+ 262              		.loc 1 110 26 is_stmt 0 view .LVU62
+ 263 0020 02EB8201 		add	r1, r2, r2, lsl #2
+ 264 0024 1948     		ldr	r0, .L24
+ 265 0026 10F82110 		ldrb	r1, [r0, r1, lsl #2]	@ zero_extendqisi2
+ 266              		.loc 1 110 12 view .LVU63
+ 267 002a 9942     		cmp	r1, r3
+ 268 002c 0BD0     		beq	.L23
+ 109:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].type == type) {
+ 269              		.loc 1 109 48 is_stmt 1 discriminator 2 view .LVU64
+ 270 002e 0132     		adds	r2, r2, #1
+ 271              	.LVL24:
+ 109:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].type == type) {
+ 272              		.loc 1 109 48 is_stmt 0 discriminator 2 view .LVU65
+ 273 0030 D2B2     		uxtb	r2, r2
+ 274              	.LVL25:
+ 109:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].type == type) {
+ 275              		.loc 1 109 48 discriminator 2 view .LVU66
+ 276 0032 F3E7     		b	.L17
+ 277              	.LVL26:
+ 278              	.L21:
+ 109:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].type == type) {
+ 279              		.loc 1 109 48 discriminator 2 view .LVU67
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 9
+
+
+ 280              	.LBE10:
+ 102:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         return false;
+ 281              		.loc 1 102 9 is_stmt 1 view .LVU68
+ 282 0034 164B     		ldr	r3, .L24+4
+ 283 0036 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 284 0038 164A     		ldr	r2, .L24+8
+ 285 003a 1749     		ldr	r1, .L24+12
+ 286 003c 0220     		movs	r0, #2
+ 287              	.LVL27:
+ 102:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         return false;
+ 288              		.loc 1 102 9 is_stmt 0 view .LVU69
+ 289 003e FFF7FEFF 		bl	log_func
+ 290              	.LVL28:
+ 103:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 291              		.loc 1 103 9 is_stmt 1 view .LVU70
+ 103:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 292              		.loc 1 103 16 is_stmt 0 view .LVU71
+ 293 0042 0020     		movs	r0, #0
+ 294 0044 20E0     		b	.L16
+ 295              	.LVL29:
+ 296              	.L23:
+ 297              	.LBB11:
+ 111:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].isConnected = true;
+ 298              		.loc 1 111 13 is_stmt 1 view .LVU72
+ 299              		.loc 1 111 39 is_stmt 0 view .LVU73
+ 300 0046 02EB8201 		add	r1, r2, r2, lsl #2
+ 301 004a 00EB8101 		add	r1, r0, r1, lsl #2
+ 302 004e 0125     		movs	r5, #1
+ 303 0050 0D73     		strb	r5, [r1, #12]
+ 112:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].unitPPB = frame[2];
+ 304              		.loc 1 112 13 is_stmt 1 view .LVU74
+ 305              		.loc 1 112 42 is_stmt 0 view .LVU75
+ 306 0052 94F802C0 		ldrb	ip, [r4, #2]	@ zero_extendqisi2
+ 307              		.loc 1 112 35 view .LVU76
+ 308 0056 81F80DC0 		strb	ip, [r1, #13]
+ 113:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].value = value;
+ 309              		.loc 1 113 13 is_stmt 1 view .LVU77
+ 310              		.loc 1 113 33 is_stmt 0 view .LVU78
+ 311 005a 4E81     		strh	r6, [r1, #10]	@ movhi
+ 114:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout = GAS_SENSOR_TIMEOUT_MS;
+ 312              		.loc 1 114 13 is_stmt 1 view .LVU79
+ 313              		.loc 1 114 35 is_stmt 0 view .LVU80
+ 314 005c 42F21072 		movw	r2, #10000
+ 315              	.LVL30:
+ 316              		.loc 1 114 35 view .LVU81
+ 317 0060 0A61     		str	r2, [r1, #16]
+ 115:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             log_info(TAG, "ZE12A type=0x%02X value=%u unit=0x%02X (mux ch %u)",
+ 318              		.loc 1 115 13 is_stmt 1 view .LVU82
+ 319 0062 A278     		ldrb	r2, [r4, #2]	@ zero_extendqisi2
+ 320 0064 0A49     		ldr	r1, .L24+4
+ 321 0066 0978     		ldrb	r1, [r1]	@ zero_extendqisi2
+ 322 0068 0291     		str	r1, [sp, #8]
+ 323 006a 0192     		str	r2, [sp, #4]
+ 324 006c 0096     		str	r6, [sp]
+ 325 006e 0B4A     		ldr	r2, .L24+16
+ 326 0070 0949     		ldr	r1, .L24+12
+ 327 0072 0320     		movs	r0, #3
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 10
+
+
+ 328 0074 FFF7FEFF 		bl	log_func
+ 329              	.LVL31:
+ 116:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                      type, value, frame[2], s_mux_channel);
+ 117:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             return true;
+ 330              		.loc 1 117 13 view .LVU83
+ 331              		.loc 1 117 20 is_stmt 0 view .LVU84
+ 332 0078 2846     		mov	r0, r5
+ 333 007a 05E0     		b	.L16
+ 334              	.LVL32:
+ 335              	.L22:
+ 336              		.loc 1 117 20 view .LVU85
+ 337              	.LBE11:
+ 118:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         }
+ 119:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 120:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 121:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     log_warn(TAG, "ZE12A frame with unknown gas code 0x%02X", frame[1]);
+ 338              		.loc 1 121 5 is_stmt 1 view .LVU86
+ 339 007c 084A     		ldr	r2, .L24+20
+ 340              	.LVL33:
+ 341              		.loc 1 121 5 is_stmt 0 view .LVU87
+ 342 007e 0649     		ldr	r1, .L24+12
+ 343 0080 0220     		movs	r0, #2
+ 344 0082 FFF7FEFF 		bl	log_func
+ 345              	.LVL34:
+ 122:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     return false;
+ 346              		.loc 1 122 5 is_stmt 1 view .LVU88
+ 347              		.loc 1 122 12 is_stmt 0 view .LVU89
+ 348 0086 0020     		movs	r0, #0
+ 349              	.LVL35:
+ 350              	.L16:
+ 123:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 351              		.loc 1 123 1 view .LVU90
+ 352 0088 04B0     		add	sp, sp, #16
+ 353              	.LCFI4:
+ 354              		.cfi_def_cfa_offset 16
+ 355              		@ sp needed
+ 356 008a 70BD     		pop	{r4, r5, r6, pc}
+ 357              	.LVL36:
+ 358              	.L25:
+ 359              		.loc 1 123 1 view .LVU91
+ 360              		.align	2
+ 361              	.L24:
+ 362 008c 00000000 		.word	gas_sensor
+ 363 0090 00000000 		.word	s_mux_channel
+ 364 0094 00000000 		.word	.LC1
+ 365 0098 28000000 		.word	.LC2
+ 366 009c 34000000 		.word	.LC3
+ 367 00a0 68000000 		.word	.LC4
+ 368              		.cfi_endproc
+ 369              	.LFE11:
+ 371              		.section	.rodata.gas_sensor_init.str1.4,"aMS",%progbits,1
+ 372              		.align	2
+ 373              	.LC5:
+ 374 0000 496E6974 		.ascii	"Initializing\000"
+ 374      69616C69 
+ 374      7A696E67 
+ 374      00
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 11
+
+
+ 375              		.section	.text.gas_sensor_init,"ax",%progbits
+ 376              		.align	1
+ 377              		.global	gas_sensor_init
+ 378              		.syntax unified
+ 379              		.thumb
+ 380              		.thumb_func
+ 382              	gas_sensor_init:
+ 383              	.LVL37:
+ 384              	.LFB9:
+  52:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     GasSensorType_t sensor_types[GAS_SENSOR_COUNT] = {
+ 385              		.loc 1 52 1 is_stmt 1 view -0
+ 386              		.cfi_startproc
+ 387              		@ args = 0, pretend = 0, frame = 8
+ 388              		@ frame_needed = 0, uses_anonymous_args = 0
+  52:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     GasSensorType_t sensor_types[GAS_SENSOR_COUNT] = {
+ 389              		.loc 1 52 1 is_stmt 0 view .LVU93
+ 390 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 391              	.LCFI5:
+ 392              		.cfi_def_cfa_offset 24
+ 393              		.cfi_offset 4, -24
+ 394              		.cfi_offset 5, -20
+ 395              		.cfi_offset 6, -16
+ 396              		.cfi_offset 7, -12
+ 397              		.cfi_offset 8, -8
+ 398              		.cfi_offset 14, -4
+ 399 0004 82B0     		sub	sp, sp, #8
+ 400              	.LCFI6:
+ 401              		.cfi_def_cfa_offset 32
+ 402 0006 8646     		mov	lr, r0
+ 403 0008 0E46     		mov	r6, r1
+ 404 000a 9046     		mov	r8, r2
+ 405 000c 1F46     		mov	r7, r3
+  53:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_CO,
+ 406              		.loc 1 53 5 is_stmt 1 view .LVU94
+  53:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_CO,
+ 407              		.loc 1 53 21 is_stmt 0 view .LVU95
+ 408 000e 264B     		ldr	r3, .L30
+ 409              	.LVL38:
+  53:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_CO,
+ 410              		.loc 1 53 21 view .LVU96
+ 411 0010 93E80300 		ldm	r3, {r0, r1}
+ 412              	.LVL39:
+  53:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         GAS_SENSOR_CO,
+ 413              		.loc 1 53 21 view .LVU97
+ 414 0014 0090     		str	r0, [sp]
+ 415 0016 8DF80410 		strb	r1, [sp, #4]
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+ 416              		.loc 1 61 5 is_stmt 1 view .LVU98
+ 417              	.LBB12:
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+ 418              		.loc 1 61 10 view .LVU99
+ 419              	.LVL40:
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+ 420              		.loc 1 61 18 is_stmt 0 view .LVU100
+ 421 001a 4FF0000C 		mov	ip, #0
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+ 422              		.loc 1 61 5 view .LVU101
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 12
+
+
+ 423 001e 1AE0     		b	.L27
+ 424              	.LVL41:
+ 425              	.L28:
+  62:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].isConnected = false;
+ 426              		.loc 1 62 9 is_stmt 1 view .LVU102
+  62:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].isConnected = false;
+ 427              		.loc 1 62 42 is_stmt 0 view .LVU103
+ 428 0020 0CF10803 		add	r3, ip, #8
+ 429 0024 6B44     		add	r3, sp, r3
+ 430 0026 13F8081C 		ldrb	r1, [r3, #-8]	@ zero_extendqisi2
+  62:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].isConnected = false;
+ 431              		.loc 1 62 28 view .LVU104
+ 432 002a 204C     		ldr	r4, .L30+4
+ 433 002c 0CEB8C02 		add	r2, ip, ip, lsl #2
+ 434 0030 04EB8203 		add	r3, r4, r2, lsl #2
+ 435 0034 04F82210 		strb	r1, [r4, r2, lsl #2]
+  63:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].value = 0;
+ 436              		.loc 1 63 9 is_stmt 1 view .LVU105
+  63:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].value = 0;
+ 437              		.loc 1 63 35 is_stmt 0 view .LVU106
+ 438 0038 0025     		movs	r5, #0
+ 439 003a 1D73     		strb	r5, [r3, #12]
+  64:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].unitPPB = 0;
+ 440              		.loc 1 64 9 is_stmt 1 view .LVU107
+  64:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].unitPPB = 0;
+ 441              		.loc 1 64 29 is_stmt 0 view .LVU108
+ 442 003c 5D81     		strh	r5, [r3, #10]	@ movhi
+  65:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].timeout = 0;
+ 443              		.loc 1 65 9 is_stmt 1 view .LVU109
+  65:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].timeout = 0;
+ 444              		.loc 1 65 31 is_stmt 0 view .LVU110
+ 445 003e 5D73     		strb	r5, [r3, #13]
+  66:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         memset(&gas_sensor[i].Frame, 0, sizeof(gas_sensor[i].Frame));
+ 446              		.loc 1 66 9 is_stmt 1 view .LVU111
+  66:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         memset(&gas_sensor[i].Frame, 0, sizeof(gas_sensor[i].Frame));
+ 447              		.loc 1 66 31 is_stmt 0 view .LVU112
+ 448 0040 1D61     		str	r5, [r3, #16]
+  67:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 449              		.loc 1 67 9 is_stmt 1 view .LVU113
+  67:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 450              		.loc 1 67 16 is_stmt 0 view .LVU114
+ 451 0042 04EB8204 		add	r4, r4, r2, lsl #2
+  67:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 452              		.loc 1 67 9 view .LVU115
+ 453 0046 C4F80150 		str	r5, [r4, #1]	@ unaligned
+ 454 004a C4F80550 		str	r5, [r4, #5]	@ unaligned
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+ 455              		.loc 1 61 48 is_stmt 1 discriminator 3 view .LVU116
+ 456 004e 0CF1010C 		add	ip, ip, #1
+ 457              	.LVL42:
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+ 458              		.loc 1 61 48 is_stmt 0 discriminator 3 view .LVU117
+ 459 0052 5FFA8CFC 		uxtb	ip, ip
+ 460              	.LVL43:
+ 461              	.L27:
+  61:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         gas_sensor[i].type = sensor_types[i];
+ 462              		.loc 1 61 27 is_stmt 1 discriminator 1 view .LVU118
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 13
+
+
+ 463 0056 BCF1040F 		cmp	ip, #4
+ 464 005a E1D9     		bls	.L28
+ 465              	.LBE12:
+  70:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 466              		.loc 1 70 5 view .LVU119
+ 467 005c 2423     		movs	r3, #36
+ 468 005e 1A46     		mov	r2, r3
+ 469 0060 7146     		mov	r1, lr
+ 470 0062 1348     		ldr	r0, .L30+8
+ 471 0064 FFF7FEFF 		bl	sx_uart_init
+ 472              	.LVL44:
+  72:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     sx_gpio_init(&s_mux_s1, _gpio_ops, _s1_arg);
+ 473              		.loc 1 72 5 view .LVU120
+ 474              	.LBB13:
+ 475              	.LBI13:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 476              		.loc 2 33 20 view .LVU121
+ 477              	.LBB14:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 478              		.loc 2 34 5 view .LVU122
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 479              		.loc 2 34 15 is_stmt 0 view .LVU123
+ 480 0068 124B     		ldr	r3, .L30+12
+ 481 006a 1E60     		str	r6, [r3]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 482              		.loc 2 35 5 is_stmt 1 view .LVU124
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 483              		.loc 2 35 19 is_stmt 0 view .LVU125
+ 484 006c C3F80480 		str	r8, [r3, #4]
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 485              		.loc 2 36 5 is_stmt 1 view .LVU126
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 486              		.loc 2 36 17 is_stmt 0 view .LVU127
+ 487 0070 0024     		movs	r4, #0
+ 488 0072 1C72     		strb	r4, [r3, #8]
+ 489              	.LVL45:
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 490              		.loc 2 36 17 view .LVU128
+ 491              	.LBE14:
+ 492              	.LBE13:
+  73:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 493              		.loc 1 73 5 is_stmt 1 view .LVU129
+ 494              	.LBB15:
+ 495              	.LBI15:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 496              		.loc 2 33 20 view .LVU130
+ 497              	.LBB16:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 498              		.loc 2 34 5 view .LVU131
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 499              		.loc 2 34 15 is_stmt 0 view .LVU132
+ 500 0074 104B     		ldr	r3, .L30+16
+ 501 0076 1E60     		str	r6, [r3]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 502              		.loc 2 35 5 is_stmt 1 view .LVU133
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 503              		.loc 2 35 19 is_stmt 0 view .LVU134
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 14
+
+
+ 504 0078 5F60     		str	r7, [r3, #4]
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 505              		.loc 2 36 5 is_stmt 1 view .LVU135
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 506              		.loc 2 36 17 is_stmt 0 view .LVU136
+ 507 007a 1C72     		strb	r4, [r3, #8]
+ 508              	.LVL46:
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 509              		.loc 2 36 17 view .LVU137
+ 510              	.LBE16:
+ 511              	.LBE15:
+  75:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_channel_dwell_ms = 0;
+ 512              		.loc 1 75 5 is_stmt 1 view .LVU138
+  75:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_channel_dwell_ms = 0;
+ 513              		.loc 1 75 19 is_stmt 0 view .LVU139
+ 514 007c 0F4B     		ldr	r3, .L30+20
+ 515 007e 1C70     		strb	r4, [r3]
+  76:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     ze12a_select_mux_channel(s_mux_channel);
+ 516              		.loc 1 76 5 is_stmt 1 view .LVU140
+  76:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     ze12a_select_mux_channel(s_mux_channel);
+ 517              		.loc 1 76 24 is_stmt 0 view .LVU141
+ 518 0080 0F4B     		ldr	r3, .L30+24
+ 519 0082 1C60     		str	r4, [r3]
+  77:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 520              		.loc 1 77 5 is_stmt 1 view .LVU142
+ 521 0084 2046     		mov	r0, r4
+ 522 0086 FFF7FEFF 		bl	ze12a_select_mux_channel
+ 523              	.LVL47:
+  79:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_rx_count = 0;
+ 524              		.loc 1 79 5 view .LVU143
+  79:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_rx_count = 0;
+ 525              		.loc 1 79 16 is_stmt 0 view .LVU144
+ 526 008a 0E4B     		ldr	r3, .L30+28
+ 527 008c 1C70     		strb	r4, [r3]
+  80:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 528              		.loc 1 80 5 is_stmt 1 view .LVU145
+  80:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 529              		.loc 1 80 16 is_stmt 0 view .LVU146
+ 530 008e 0E4B     		ldr	r3, .L30+32
+ 531 0090 1C70     		strb	r4, [r3]
+  82:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 532              		.loc 1 82 5 is_stmt 1 view .LVU147
+  82:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 533              		.loc 1 82 19 is_stmt 0 view .LVU148
+ 534 0092 0E4B     		ldr	r3, .L30+36
+ 535 0094 0122     		movs	r2, #1
+ 536 0096 1A70     		strb	r2, [r3]
+  84:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 537              		.loc 1 84 5 is_stmt 1 view .LVU149
+ 538 0098 0D4A     		ldr	r2, .L30+40
+ 539 009a 0E49     		ldr	r1, .L30+44
+ 540 009c 0420     		movs	r0, #4
+ 541 009e FFF7FEFF 		bl	log_func
+ 542              	.LVL48:
+  85:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 543              		.loc 1 85 1 is_stmt 0 view .LVU150
+ 544 00a2 02B0     		add	sp, sp, #8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 15
+
+
+ 545              	.LCFI7:
+ 546              		.cfi_def_cfa_offset 24
+ 547              		@ sp needed
+ 548 00a4 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 549              	.LVL49:
+ 550              	.L31:
+  85:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 551              		.loc 1 85 1 view .LVU151
+ 552              		.align	2
+ 553              	.L30:
+ 554 00a8 00000000 		.word	.LANCHOR0
+ 555 00ac 00000000 		.word	gas_sensor
+ 556 00b0 00000000 		.word	s_comm
+ 557 00b4 00000000 		.word	s_mux_s0
+ 558 00b8 00000000 		.word	s_mux_s1
+ 559 00bc 00000000 		.word	s_mux_channel
+ 560 00c0 00000000 		.word	s_channel_dwell_ms
+ 561 00c4 00000000 		.word	s_rx_state
+ 562 00c8 00000000 		.word	s_rx_count
+ 563 00cc 00000000 		.word	s_initialized
+ 564 00d0 00000000 		.word	.LC5
+ 565 00d4 28000000 		.word	.LC2
+ 566              		.cfi_endproc
+ 567              	.LFE9:
+ 569              		.section	.text.gas_sensor_get_uart,"ax",%progbits
+ 570              		.align	1
+ 571              		.global	gas_sensor_get_uart
+ 572              		.syntax unified
+ 573              		.thumb
+ 574              		.thumb_func
+ 576              	gas_sensor_get_uart:
+ 577              	.LFB10:
+  88:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     return s_initialized ? &s_comm : NULL;
+ 578              		.loc 1 88 1 is_stmt 1 view -0
+ 579              		.cfi_startproc
+ 580              		@ args = 0, pretend = 0, frame = 0
+ 581              		@ frame_needed = 0, uses_anonymous_args = 0
+ 582              		@ link register save eliminated.
+  89:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 583              		.loc 1 89 5 view .LVU153
+  89:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 584              		.loc 1 89 26 is_stmt 0 view .LVU154
+ 585 0000 034B     		ldr	r3, .L35
+ 586 0002 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  89:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 587              		.loc 1 89 36 view .LVU155
+ 588 0004 0BB1     		cbz	r3, .L34
+  89:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 589              		.loc 1 89 36 discriminator 1 view .LVU156
+ 590 0006 0348     		ldr	r0, .L35+4
+ 591 0008 7047     		bx	lr
+ 592              	.L34:
+  89:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 593              		.loc 1 89 36 discriminator 2 view .LVU157
+ 594 000a 0020     		movs	r0, #0
+  90:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 595              		.loc 1 90 1 view .LVU158
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 16
+
+
+ 596 000c 7047     		bx	lr
+ 597              	.L36:
+ 598 000e 00BF     		.align	2
+ 599              	.L35:
+ 600 0010 00000000 		.word	s_initialized
+ 601 0014 00000000 		.word	s_comm
+ 602              		.cfi_endproc
+ 603              	.LFE10:
+ 605              		.section	.text.gas_sensor_poll,"ax",%progbits
+ 606              		.align	1
+ 607              		.global	gas_sensor_poll
+ 608              		.syntax unified
+ 609              		.thumb
+ 610              		.thumb_func
+ 612              	gas_sensor_poll:
+ 613              	.LVL50:
+ 614              	.LFB12:
+ 124:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 125:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** void gas_sensor_poll(uint32_t time_stamp_ms)
+ 126:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+ 615              		.loc 1 126 1 is_stmt 1 view -0
+ 616              		.cfi_startproc
+ 617              		@ args = 0, pretend = 0, frame = 8
+ 618              		@ frame_needed = 0, uses_anonymous_args = 0
+ 619              		.loc 1 126 1 is_stmt 0 view .LVU160
+ 620 0000 30B5     		push	{r4, r5, lr}
+ 621              	.LCFI8:
+ 622              		.cfi_def_cfa_offset 12
+ 623              		.cfi_offset 4, -12
+ 624              		.cfi_offset 5, -8
+ 625              		.cfi_offset 14, -4
+ 626 0002 83B0     		sub	sp, sp, #12
+ 627              	.LCFI9:
+ 628              		.cfi_def_cfa_offset 24
+ 629 0004 0446     		mov	r4, r0
+ 127:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     /* Non-blocking byte assembly: pull whatever bytes are already queued
+ 128:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * this tick, same approach as gps_process(). Never wait here - if
+ 129:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * fewer than 9 bytes are available, just resume next tick.
+ 130:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      *
+ 131:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * advance_channel mirrors the reference driver's `res == 0` condition:
+ 132:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * gas_sensor_process() in WS_v0 returns 0 (success) only once a full
+ 133:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * 9-byte frame has been collected AND its checksum is valid AND its
+ 134:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * gas code matched a known sensor type. Any other outcome (no frame
+ 135:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * yet, bad checksum, unknown gas code) leaves res == -1 and the mux
+ 136:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * stays on the current channel until the 2s ceiling is hit. We mirror
+ 137:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * that here: only a fully valid, matched frame triggers an early
+ 138:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * channel switch; a checksum failure or unknown code does not. */
+ 139:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     bool advance_channel = false;
+ 630              		.loc 1 139 5 is_stmt 1 view .LVU161
+ 631              	.LVL51:
+ 140:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint8_t byte;
+ 632              		.loc 1 140 5 view .LVU162
+ 141:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     while (sx_uart_available(&s_comm) > 0) {
+ 633              		.loc 1 141 5 view .LVU163
+ 139:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint8_t byte;
+ 634              		.loc 1 139 10 is_stmt 0 view .LVU164
+ 635 0006 0025     		movs	r5, #0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 17
+
+
+ 636              		.loc 1 141 11 view .LVU165
+ 637 0008 10E0     		b	.L38
+ 638              	.LVL52:
+ 639              	.L40:
+ 142:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (1 != sx_uart_read(&s_comm, &byte, 1, 0)) {
+ 143:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             break;
+ 144:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         }
+ 145:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 146:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         switch (s_rx_state) {
+ 147:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         case GAS_SENSOR_RX_WAIT_START:
+ 148:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             if (byte == 0xFFU) {
+ 640              		.loc 1 148 13 is_stmt 1 view .LVU166
+ 641              		.loc 1 148 22 is_stmt 0 view .LVU167
+ 642 000a 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 643              		.loc 1 148 16 view .LVU168
+ 644 000e FF2B     		cmp	r3, #255
+ 645 0010 0CD1     		bne	.L38
+ 149:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 s_rx_buf[0] = byte;
+ 646              		.loc 1 149 17 is_stmt 1 view .LVU169
+ 647              		.loc 1 149 29 is_stmt 0 view .LVU170
+ 648 0012 3B4A     		ldr	r2, .L56
+ 649 0014 1370     		strb	r3, [r2]
+ 150:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 s_rx_count = 1;
+ 650              		.loc 1 150 17 is_stmt 1 view .LVU171
+ 651              		.loc 1 150 28 is_stmt 0 view .LVU172
+ 652 0016 0123     		movs	r3, #1
+ 653 0018 3A4A     		ldr	r2, .L56+4
+ 654 001a 1370     		strb	r3, [r2]
+ 151:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 s_rx_state = GAS_SENSOR_RX_COLLECTING;
+ 655              		.loc 1 151 17 is_stmt 1 view .LVU173
+ 656              		.loc 1 151 28 is_stmt 0 view .LVU174
+ 657 001c 3A4A     		ldr	r2, .L56+8
+ 658 001e 1370     		strb	r3, [r2]
+ 659 0020 04E0     		b	.L38
+ 660              	.L54:
+ 152:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             }
+ 153:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             /* Any other byte while waiting for start is discarded. */
+ 154:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             break;
+ 155:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 156:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         case GAS_SENSOR_RX_COLLECTING:
+ 157:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             s_rx_buf[s_rx_count++] = byte;
+ 158:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             if (s_rx_count >= sizeof(s_rx_buf)) {
+ 159:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 if (ze12a_handle_frame(s_rx_buf)) {
+ 160:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                     advance_channel = true;
+ 161:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 }
+ 162:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 s_rx_state = GAS_SENSOR_RX_WAIT_START;
+ 163:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 s_rx_count = 0;
+ 164:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             }
+ 165:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             break;
+ 166:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 167:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         default:
+ 168:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             s_rx_state = GAS_SENSOR_RX_WAIT_START;
+ 661              		.loc 1 168 13 is_stmt 1 view .LVU175
+ 662              		.loc 1 168 24 is_stmt 0 view .LVU176
+ 663 0022 0023     		movs	r3, #0
+ 664 0024 384A     		ldr	r2, .L56+8
+ 665 0026 1370     		strb	r3, [r2]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 18
+
+
+ 169:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             s_rx_count = 0;
+ 666              		.loc 1 169 13 is_stmt 1 view .LVU177
+ 667              		.loc 1 169 24 is_stmt 0 view .LVU178
+ 668 0028 364A     		ldr	r2, .L56+4
+ 669 002a 1370     		strb	r3, [r2]
+ 170:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             break;
+ 670              		.loc 1 170 13 is_stmt 1 view .LVU179
+ 671              	.LVL53:
+ 672              	.L38:
+ 141:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (1 != sx_uart_read(&s_comm, &byte, 1, 0)) {
+ 673              		.loc 1 141 39 view .LVU180
+ 141:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (1 != sx_uart_read(&s_comm, &byte, 1, 0)) {
+ 674              		.loc 1 141 12 is_stmt 0 view .LVU181
+ 675 002c 3748     		ldr	r0, .L56+12
+ 676 002e FFF7FEFF 		bl	sx_uart_available
+ 677              	.LVL54:
+ 141:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (1 != sx_uart_read(&s_comm, &byte, 1, 0)) {
+ 678              		.loc 1 141 39 discriminator 1 view .LVU182
+ 679 0032 0028     		cmp	r0, #0
+ 680 0034 26DD     		ble	.L39
+ 142:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             break;
+ 681              		.loc 1 142 9 is_stmt 1 view .LVU183
+ 142:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             break;
+ 682              		.loc 1 142 18 is_stmt 0 view .LVU184
+ 683 0036 0023     		movs	r3, #0
+ 684 0038 0122     		movs	r2, #1
+ 685 003a 0DF10701 		add	r1, sp, #7
+ 686 003e 3348     		ldr	r0, .L56+12
+ 687 0040 FFF7FEFF 		bl	sx_uart_read
+ 688              	.LVL55:
+ 142:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             break;
+ 689              		.loc 1 142 12 discriminator 1 view .LVU185
+ 690 0044 0128     		cmp	r0, #1
+ 691 0046 1DD1     		bne	.L39
+ 146:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         case GAS_SENSOR_RX_WAIT_START:
+ 692              		.loc 1 146 9 is_stmt 1 view .LVU186
+ 693 0048 2F4B     		ldr	r3, .L56+8
+ 694 004a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 695 004c 002B     		cmp	r3, #0
+ 696 004e DCD0     		beq	.L40
+ 697 0050 012B     		cmp	r3, #1
+ 698 0052 E6D1     		bne	.L54
+ 157:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             if (s_rx_count >= sizeof(s_rx_buf)) {
+ 699              		.loc 1 157 13 view .LVU187
+ 157:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             if (s_rx_count >= sizeof(s_rx_buf)) {
+ 700              		.loc 1 157 32 is_stmt 0 view .LVU188
+ 701 0054 2B49     		ldr	r1, .L56+4
+ 702 0056 0A78     		ldrb	r2, [r1]	@ zero_extendqisi2
+ 703 0058 531C     		adds	r3, r2, #1
+ 704 005a DBB2     		uxtb	r3, r3
+ 705 005c 0B70     		strb	r3, [r1]
+ 157:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             if (s_rx_count >= sizeof(s_rx_buf)) {
+ 706              		.loc 1 157 36 view .LVU189
+ 707 005e 9DF80700 		ldrb	r0, [sp, #7]	@ zero_extendqisi2
+ 708 0062 2749     		ldr	r1, .L56
+ 709 0064 8854     		strb	r0, [r1, r2]
+ 158:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 if (ze12a_handle_frame(s_rx_buf)) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 19
+
+
+ 710              		.loc 1 158 13 is_stmt 1 view .LVU190
+ 158:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 if (ze12a_handle_frame(s_rx_buf)) {
+ 711              		.loc 1 158 16 is_stmt 0 view .LVU191
+ 712 0066 082B     		cmp	r3, #8
+ 713 0068 E0D9     		bls	.L38
+ 159:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                     advance_channel = true;
+ 714              		.loc 1 159 17 is_stmt 1 view .LVU192
+ 159:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                     advance_channel = true;
+ 715              		.loc 1 159 21 is_stmt 0 view .LVU193
+ 716 006a 0846     		mov	r0, r1
+ 717 006c FFF7FEFF 		bl	ze12a_handle_frame
+ 718              	.LVL56:
+ 159:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                     advance_channel = true;
+ 719              		.loc 1 159 20 discriminator 1 view .LVU194
+ 720 0070 0246     		mov	r2, r0
+ 721 0072 00B9     		cbnz	r0, .L44
+ 722 0074 2A46     		mov	r2, r5
+ 723              	.L44:
+ 724              	.LVL57:
+ 162:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 s_rx_count = 0;
+ 725              		.loc 1 162 17 is_stmt 1 view .LVU195
+ 162:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****                 s_rx_count = 0;
+ 726              		.loc 1 162 28 is_stmt 0 view .LVU196
+ 727 0076 0023     		movs	r3, #0
+ 728 0078 2349     		ldr	r1, .L56+8
+ 729 007a 0B70     		strb	r3, [r1]
+ 163:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             }
+ 730              		.loc 1 163 17 is_stmt 1 view .LVU197
+ 163:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             }
+ 731              		.loc 1 163 28 is_stmt 0 view .LVU198
+ 732 007c 2149     		ldr	r1, .L56+4
+ 733 007e 0B70     		strb	r3, [r1]
+ 734 0080 1546     		mov	r5, r2
+ 735 0082 D3E7     		b	.L38
+ 736              	.LVL58:
+ 737              	.L39:
+ 171:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         }
+ 172:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 173:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 174:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     /* Round-robin the mux to the next channel either as soon as we've
+ 175:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * successfully read one valid frame from the current channel (fast
+ 176:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * path, matches WS_v0's res==0 early-advance), or once the 2s dwell
+ 177:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * ceiling is reached regardless of success (ensures we never get
+ 178:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * stuck on a silent/disconnected channel). */
+ 179:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     s_channel_dwell_ms += time_stamp_ms;
+ 738              		.loc 1 179 5 is_stmt 1 view .LVU199
+ 739              		.loc 1 179 24 is_stmt 0 view .LVU200
+ 740 0084 224A     		ldr	r2, .L56+16
+ 741 0086 1368     		ldr	r3, [r2]
+ 742 0088 2344     		add	r3, r3, r4
+ 743 008a 1360     		str	r3, [r2]
+ 180:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     if (advance_channel || s_channel_dwell_ms >= GAS_SENSOR_CHANNEL_DWELL_MS) {
+ 744              		.loc 1 180 5 is_stmt 1 view .LVU201
+ 745              		.loc 1 180 8 is_stmt 0 view .LVU202
+ 746 008c 15B9     		cbnz	r5, .L46
+ 747              		.loc 1 180 25 discriminator 1 view .LVU203
+ 748 008e B3F5FA6F 		cmp	r3, #2000
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 20
+
+
+ 749 0092 11D3     		bcc	.L47
+ 750              	.L46:
+ 181:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         s_channel_dwell_ms = 0;
+ 751              		.loc 1 181 9 is_stmt 1 view .LVU204
+ 752              		.loc 1 181 28 is_stmt 0 view .LVU205
+ 753 0094 0025     		movs	r5, #0
+ 754              	.LVL59:
+ 755              		.loc 1 181 28 view .LVU206
+ 756 0096 1E4B     		ldr	r3, .L56+16
+ 757 0098 1D60     		str	r5, [r3]
+ 182:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         s_mux_channel = (uint8_t)((s_mux_channel + 1U) % GAS_SENSOR_MUX_CHANNEL_COUNT);
+ 758              		.loc 1 182 9 is_stmt 1 view .LVU207
+ 759              		.loc 1 182 25 is_stmt 0 view .LVU208
+ 760 009a 1E4B     		ldr	r3, .L56+20
+ 761 009c 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 762 009e 0130     		adds	r0, r0, #1
+ 763 00a0 00F00300 		and	r0, r0, #3
+ 764              		.loc 1 182 23 view .LVU209
+ 765 00a4 1870     		strb	r0, [r3]
+ 183:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         ze12a_select_mux_channel(s_mux_channel);
+ 766              		.loc 1 183 9 is_stmt 1 view .LVU210
+ 767 00a6 FFF7FEFF 		bl	ze12a_select_mux_channel
+ 768              	.LVL60:
+ 184:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         /* Switching channels mid-frame would corrupt whatever partial
+ 185:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****          * frame was being collected from the previous module (different
+ 186:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****          * physical sensor, unrelated byte stream); discard it. */
+ 187:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         s_rx_state = GAS_SENSOR_RX_WAIT_START;
+ 769              		.loc 1 187 9 view .LVU211
+ 770              		.loc 1 187 20 is_stmt 0 view .LVU212
+ 771 00aa 174B     		ldr	r3, .L56+8
+ 772 00ac 1D70     		strb	r5, [r3]
+ 188:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         s_rx_count = 0;
+ 773              		.loc 1 188 9 is_stmt 1 view .LVU213
+ 774              		.loc 1 188 20 is_stmt 0 view .LVU214
+ 775 00ae 154B     		ldr	r3, .L56+4
+ 776 00b0 1D70     		strb	r5, [r3]
+ 189:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         sx_uart_flush(&s_comm);
+ 777              		.loc 1 189 9 is_stmt 1 view .LVU215
+ 778 00b2 1648     		ldr	r0, .L56+12
+ 779 00b4 FFF7FEFF 		bl	sx_uart_flush
+ 780              	.LVL61:
+ 781              	.L47:
+ 139:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     uint8_t byte;
+ 782              		.loc 1 139 10 is_stmt 0 view .LVU216
+ 783 00b8 0023     		movs	r3, #0
+ 784 00ba 0DE0     		b	.L50
+ 785              	.LVL62:
+ 786              	.L48:
+ 787              	.LBB17:
+ 190:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 191:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 192:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     /* Age out any gas type that hasn't produced a valid frame recently,
+ 193:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * regardless of which mux channel it last came from. */
+ 194:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
+ 195:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].timeout > time_stamp_ms) {
+ 196:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout -= time_stamp_ms;
+ 197:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         } else {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 21
+
+
+ 198:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout = 0;
+ 788              		.loc 1 198 13 is_stmt 1 view .LVU217
+ 789              		.loc 1 198 35 is_stmt 0 view .LVU218
+ 790 00bc 164A     		ldr	r2, .L56+24
+ 791 00be 03EB8301 		add	r1, r3, r3, lsl #2
+ 792 00c2 02EB8101 		add	r1, r2, r1, lsl #2
+ 793 00c6 0020     		movs	r0, #0
+ 794 00c8 0861     		str	r0, [r1, #16]
+ 199:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].isConnected = false;
+ 795              		.loc 1 199 13 is_stmt 1 view .LVU219
+ 796              		.loc 1 199 39 is_stmt 0 view .LVU220
+ 797 00ca 03EB8301 		add	r1, r3, r3, lsl #2
+ 798 00ce 02EB8102 		add	r2, r2, r1, lsl #2
+ 799 00d2 1073     		strb	r0, [r2, #12]
+ 800              	.L49:
+ 194:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].timeout > time_stamp_ms) {
+ 801              		.loc 1 194 48 is_stmt 1 discriminator 2 view .LVU221
+ 802 00d4 0133     		adds	r3, r3, #1
+ 803              	.LVL63:
+ 194:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].timeout > time_stamp_ms) {
+ 804              		.loc 1 194 48 is_stmt 0 discriminator 2 view .LVU222
+ 805 00d6 DBB2     		uxtb	r3, r3
+ 806              	.LVL64:
+ 807              	.L50:
+ 194:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         if (gas_sensor[i].timeout > time_stamp_ms) {
+ 808              		.loc 1 194 27 is_stmt 1 discriminator 1 view .LVU223
+ 809 00d8 042B     		cmp	r3, #4
+ 810 00da 0ED8     		bhi	.L55
+ 195:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout -= time_stamp_ms;
+ 811              		.loc 1 195 9 view .LVU224
+ 195:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout -= time_stamp_ms;
+ 812              		.loc 1 195 26 is_stmt 0 view .LVU225
+ 813 00dc 03EB8301 		add	r1, r3, r3, lsl #2
+ 814 00e0 0D4A     		ldr	r2, .L56+24
+ 815 00e2 02EB8102 		add	r2, r2, r1, lsl #2
+ 816 00e6 1269     		ldr	r2, [r2, #16]
+ 195:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****             gas_sensor[i].timeout -= time_stamp_ms;
+ 817              		.loc 1 195 12 view .LVU226
+ 818 00e8 A242     		cmp	r2, r4
+ 819 00ea E7D9     		bls	.L48
+ 196:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         } else {
+ 820              		.loc 1 196 13 is_stmt 1 view .LVU227
+ 196:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         } else {
+ 821              		.loc 1 196 35 is_stmt 0 view .LVU228
+ 822 00ec 0846     		mov	r0, r1
+ 823 00ee 0A49     		ldr	r1, .L56+24
+ 824 00f0 01EB8001 		add	r1, r1, r0, lsl #2
+ 825 00f4 121B     		subs	r2, r2, r4
+ 826 00f6 0A61     		str	r2, [r1, #16]
+ 827 00f8 ECE7     		b	.L49
+ 828              	.L55:
+ 196:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         } else {
+ 829              		.loc 1 196 35 view .LVU229
+ 830              	.LBE17:
+ 200:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****         }
+ 201:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     }
+ 202:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 22
+
+
+ 831              		.loc 1 202 1 view .LVU230
+ 832 00fa 03B0     		add	sp, sp, #12
+ 833              	.LCFI10:
+ 834              		.cfi_def_cfa_offset 12
+ 835              		@ sp needed
+ 836 00fc 30BD     		pop	{r4, r5, pc}
+ 837              	.LVL65:
+ 838              	.L57:
+ 839              		.loc 1 202 1 view .LVU231
+ 840 00fe 00BF     		.align	2
+ 841              	.L56:
+ 842 0100 00000000 		.word	s_rx_buf
+ 843 0104 00000000 		.word	s_rx_count
+ 844 0108 00000000 		.word	s_rx_state
+ 845 010c 00000000 		.word	s_comm
+ 846 0110 00000000 		.word	s_channel_dwell_ms
+ 847 0114 00000000 		.word	s_mux_channel
+ 848 0118 00000000 		.word	gas_sensor
+ 849              		.cfi_endproc
+ 850              	.LFE12:
+ 852              		.section	.text.gas_sensor_read_value,"ax",%progbits
+ 853              		.align	1
+ 854              		.global	gas_sensor_read_value
+ 855              		.syntax unified
+ 856              		.thumb
+ 857              		.thumb_func
+ 859              	gas_sensor_read_value:
+ 860              	.LVL66:
+ 861              	.LFB13:
+ 203:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 204:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** int gas_sensor_read_value(GasSensor_t *sensor, uint16_t *value)
+ 205:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+ 862              		.loc 1 205 1 is_stmt 1 view -0
+ 863              		.cfi_startproc
+ 864              		@ args = 0, pretend = 0, frame = 0
+ 865              		@ frame_needed = 0, uses_anonymous_args = 0
+ 866              		@ link register save eliminated.
+ 206:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     *value = sensor->value;
+ 867              		.loc 1 206 5 view .LVU233
+ 868              		.loc 1 206 20 is_stmt 0 view .LVU234
+ 869 0000 4389     		ldrh	r3, [r0, #10]
+ 870              		.loc 1 206 12 view .LVU235
+ 871 0002 0B80     		strh	r3, [r1]	@ movhi
+ 207:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     return 0;
+ 872              		.loc 1 207 5 is_stmt 1 view .LVU236
+ 208:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }
+ 873              		.loc 1 208 1 is_stmt 0 view .LVU237
+ 874 0004 0020     		movs	r0, #0
+ 875              	.LVL67:
+ 876              		.loc 1 208 1 view .LVU238
+ 877 0006 7047     		bx	lr
+ 878              		.cfi_endproc
+ 879              	.LFE13:
+ 881              		.section	.text.gas_sensor_start_calibration,"ax",%progbits
+ 882              		.align	1
+ 883              		.global	gas_sensor_start_calibration
+ 884              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 23
+
+
+ 885              		.thumb
+ 886              		.thumb_func
+ 888              	gas_sensor_start_calibration:
+ 889              	.LVL68:
+ 890              	.LFB14:
+ 209:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** 
+ 210:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** void gas_sensor_start_calibration(GasSensor_t *sensor, bool isZeroCalib)
+ 211:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** {
+ 891              		.loc 1 211 1 is_stmt 1 view -0
+ 892              		.cfi_startproc
+ 893              		@ args = 0, pretend = 0, frame = 0
+ 894              		@ frame_needed = 0, uses_anonymous_args = 0
+ 895              		@ link register save eliminated.
+ 212:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     /* ZE12A calibration (zero-point / span) is not documented in the
+ 213:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * datasheet section available to this driver (only the active-upload
+ 214:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * read protocol is specified) - left unimplemented until calibration
+ 215:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****      * command bytes are confirmed. */
+ 216:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     (void)sensor;
+ 896              		.loc 1 216 5 view .LVU240
+ 217:SynaptiX_FDK/components/modules/ze12a/ze12a.c ****     (void)isZeroCalib;
+ 897              		.loc 1 217 5 view .LVU241
+ 218:SynaptiX_FDK/components/modules/ze12a/ze12a.c **** }...
+ 898              		.loc 1 218 1 is_stmt 0 view .LVU242
+ 899 0000 7047     		bx	lr
+ 900              		.cfi_endproc
+ 901              	.LFE14:
+ 903              		.section	.bss.s_rx_count,"aw",%nobits
+ 906              	s_rx_count:
+ 907 0000 00       		.space	1
+ 908              		.section	.bss.s_rx_buf,"aw",%nobits
+ 909              		.align	2
+ 912              	s_rx_buf:
+ 913 0000 00000000 		.space	9
+ 913      00000000 
+ 913      00
+ 914              		.section	.bss.s_rx_state,"aw",%nobits
+ 917              	s_rx_state:
+ 918 0000 00       		.space	1
+ 919              		.section	.bss.s_channel_dwell_ms,"aw",%nobits
+ 920              		.align	2
+ 923              	s_channel_dwell_ms:
+ 924 0000 00000000 		.space	4
+ 925              		.section	.bss.s_mux_channel,"aw",%nobits
+ 928              	s_mux_channel:
+ 929 0000 00       		.space	1
+ 930              		.section	.bss.s_initialized,"aw",%nobits
+ 933              	s_initialized:
+ 934 0000 00       		.space	1
+ 935              		.section	.bss.s_mux_s1,"aw",%nobits
+ 936              		.align	2
+ 939              	s_mux_s1:
+ 940 0000 00000000 		.space	12
+ 940      00000000 
+ 940      00000000 
+ 941              		.section	.bss.s_mux_s0,"aw",%nobits
+ 942              		.align	2
+ 945              	s_mux_s0:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 24
+
+
+ 946 0000 00000000 		.space	12
+ 946      00000000 
+ 946      00000000 
+ 947              		.section	.bss.s_comm,"aw",%nobits
+ 948              		.align	2
+ 951              	s_comm:
+ 952 0000 00000000 		.space	68
+ 952      00000000 
+ 952      00000000 
+ 952      00000000 
+ 952      00000000 
+ 953              		.global	gas_sensor
+ 954              		.section	.bss.gas_sensor,"aw",%nobits
+ 955              		.align	2
+ 958              	gas_sensor:
+ 959 0000 00000000 		.space	100
+ 959      00000000 
+ 959      00000000 
+ 959      00000000 
+ 959      00000000 
+ 960              		.section	.rodata
+ 961              		.align	2
+ 962              		.set	.LANCHOR0,. + 0
+ 963              	.LC0:
+ 964 0000 04       		.byte	4
+ 965 0001 2B       		.byte	43
+ 966 0002 2C       		.byte	44
+ 967 0003 2A       		.byte	42
+ 968 0004 03       		.byte	3
+ 969              		.text
+ 970              	.Letext0:
+ 971              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 972              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 973              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 974              		.file 6 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 975              		.file 7 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
+ 976              		.file 8 "SynaptiX_FDK/components/modules/ze12a/ze12a.h"
+ 977              		.file 9 "SynaptiX_FDK/services/logger/logger.h"
+ 978              		.file 10 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s 			page 25
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 ze12a.c
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:22     .text.sx_gpio_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:27     .text.sx_gpio_write:00000000 sx_gpio_write
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:90     .text.ze12a_checksum:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:95     .text.ze12a_checksum:00000000 ze12a_checksum
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:148    .text.ze12a_select_mux_channel:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:153    .text.ze12a_select_mux_channel:00000000 ze12a_select_mux_channel
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:186    .text.ze12a_select_mux_channel:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:945    .bss.s_mux_s0:00000000 s_mux_s0
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:939    .bss.s_mux_s1:00000000 s_mux_s1
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:192    .rodata.ze12a_handle_frame.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:205    .text.ze12a_handle_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:210    .text.ze12a_handle_frame:00000000 ze12a_handle_frame
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:362    .text.ze12a_handle_frame:0000008c $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:958    .bss.gas_sensor:00000000 gas_sensor
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:928    .bss.s_mux_channel:00000000 s_mux_channel
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:372    .rodata.gas_sensor_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:376    .text.gas_sensor_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:382    .text.gas_sensor_init:00000000 gas_sensor_init
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:554    .text.gas_sensor_init:000000a8 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:951    .bss.s_comm:00000000 s_comm
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:923    .bss.s_channel_dwell_ms:00000000 s_channel_dwell_ms
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:917    .bss.s_rx_state:00000000 s_rx_state
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:906    .bss.s_rx_count:00000000 s_rx_count
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:933    .bss.s_initialized:00000000 s_initialized
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:570    .text.gas_sensor_get_uart:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:576    .text.gas_sensor_get_uart:00000000 gas_sensor_get_uart
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:600    .text.gas_sensor_get_uart:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:606    .text.gas_sensor_poll:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:612    .text.gas_sensor_poll:00000000 gas_sensor_poll
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:842    .text.gas_sensor_poll:00000100 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:912    .bss.s_rx_buf:00000000 s_rx_buf
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:853    .text.gas_sensor_read_value:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:859    .text.gas_sensor_read_value:00000000 gas_sensor_read_value
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:882    .text.gas_sensor_start_calibration:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:888    .text.gas_sensor_start_calibration:00000000 gas_sensor_start_calibration
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:907    .bss.s_rx_count:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:909    .bss.s_rx_buf:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:918    .bss.s_rx_state:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:920    .bss.s_channel_dwell_ms:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:929    .bss.s_mux_channel:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:934    .bss.s_initialized:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:936    .bss.s_mux_s1:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:942    .bss.s_mux_s0:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:948    .bss.s_comm:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:955    .bss.gas_sensor:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0kOJ9H.s:961    .rodata:00000000 $d
+
+UNDEFINED SYMBOLS
+log_func
+sx_uart_init
+sx_uart_available
+sx_uart_read
+sx_uart_flush

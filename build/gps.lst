@@ -1,0 +1,1824 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"gps.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/modules/gps/gps.c"
+  21              		.section	.text.sx_gpio_write,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sx_gpio_write:
+  28              	.LVL0:
+  29              	.LFB4:
+  30              		.file 2 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+   1:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifndef SX_GPIO_H
+   2:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #define SX_GPIO_H
+   3:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   7:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   9:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef enum SX_GPIO_VALUE{
+  10:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_LOW = 0,
+  11:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_HIGH = 1
+  12:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } SX_GPIO_VALUE;
+  13:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  14:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio sx_gpio_t;
+  15:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  16:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct {
+  17:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void    *port;
+  18:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     uint16_t pin;
+  19:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_pin_t;
+  20:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  21:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio_ops{
+  22:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*write)(sx_gpio_t *gpio, SX_GPIO_VALUE value);
+  23:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*read)(sx_gpio_t *gpio, SX_GPIO_VALUE *value);
+  24:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*toggle)(sx_gpio_t *gpio);
+  25:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_ops_t;
+  26:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  27:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio{
+  28:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     sx_gpio_ops_t *ops;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 2
+
+
+  29:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void *pDriver;
+  30:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_VALUE value;
+  31:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_t;
+  32:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline void sx_gpio_init(sx_gpio_t *gpio, sx_gpio_ops_t *ops, void *pDriver){
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+  37:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  38:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  39:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline int sx_gpio_write(sx_gpio_t *gpio, SX_GPIO_VALUE value){
+  31              		.loc 2 39 70 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 2 39 70 is_stmt 0 view .LVU1
+  36 0000 38B5     		push	{r3, r4, r5, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 16
+  39              		.cfi_offset 3, -16
+  40              		.cfi_offset 4, -12
+  41              		.cfi_offset 5, -8
+  42              		.cfi_offset 14, -4
+  40:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     if(gpio->ops && gpio->ops->write){
+  43              		.loc 2 40 5 is_stmt 1 view .LVU2
+  44              		.loc 2 40 12 is_stmt 0 view .LVU3
+  45 0002 0368     		ldr	r3, [r0]
+  46              		.loc 2 40 7 view .LVU4
+  47 0004 3BB1     		cbz	r3, .L4
+  48 0006 0446     		mov	r4, r0
+  49 0008 0D46     		mov	r5, r1
+  50              		.loc 2 40 30 discriminator 1 view .LVU5
+  51 000a 1B68     		ldr	r3, [r3]
+  52              		.loc 2 40 18 discriminator 1 view .LVU6
+  53 000c 33B1     		cbz	r3, .L5
+  54              	.LBB12:
+  41:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         int ret = gpio->ops->write(gpio, value);
+  55              		.loc 2 41 9 is_stmt 1 view .LVU7
+  56              		.loc 2 41 19 is_stmt 0 view .LVU8
+  57 000e 9847     		blx	r3
+  58              	.LVL1:
+  42:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         if(ret == 0){
+  59              		.loc 2 42 9 is_stmt 1 view .LVU9
+  60              		.loc 2 42 11 is_stmt 0 view .LVU10
+  61 0010 00B9     		cbnz	r0, .L1
+  43:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****             gpio->value = value;
+  62              		.loc 2 43 13 is_stmt 1 view .LVU11
+  63              		.loc 2 43 25 is_stmt 0 view .LVU12
+  64 0012 2572     		strb	r5, [r4, #8]
+  44:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         }
+  45:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         return ret;
+  65              		.loc 2 45 9 is_stmt 1 view .LVU13
+  66              	.LVL2:
+  67              	.L1:
+  68              		.loc 2 45 9 is_stmt 0 view .LVU14
+  69              	.LBE12:
+  46:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 3
+
+
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     return -1;
+  48:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  70              		.loc 2 48 1 view .LVU15
+  71 0014 38BD     		pop	{r3, r4, r5, pc}
+  72              	.LVL3:
+  73              	.L4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  74              		.loc 2 47 12 view .LVU16
+  75 0016 4FF0FF30 		mov	r0, #-1
+  76              	.LVL4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  77              		.loc 2 47 12 view .LVU17
+  78 001a FBE7     		b	.L1
+  79              	.LVL5:
+  80              	.L5:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  81              		.loc 2 47 12 view .LVU18
+  82 001c 4FF0FF30 		mov	r0, #-1
+  83              	.LVL6:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  84              		.loc 2 47 12 view .LVU19
+  85 0020 F8E7     		b	.L1
+  86              		.cfi_endproc
+  87              	.LFE4:
+  89              		.section	.text.minmea_tocoord,"ax",%progbits
+  90              		.align	1
+  91              		.syntax unified
+  92              		.thumb
+  93              		.thumb_func
+  95              	minmea_tocoord:
+  96              	.LVL7:
+  97              	.LFB10:
+  98              		.file 3 "SynaptiX_FDK/components/modules/gps/minmea.h"
+   1:SynaptiX_FDK/components/modules/gps/minmea.h **** /*
+   2:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Copyright © 2014 Kosma Moczek <kosma@cloudyourcar.com>
+   3:SynaptiX_FDK/components/modules/gps/minmea.h ****  * This program is free software. It comes without any warranty, to the extent
+   4:SynaptiX_FDK/components/modules/gps/minmea.h ****  * permitted by applicable law. You can redistribute it and/or modify it under
+   5:SynaptiX_FDK/components/modules/gps/minmea.h ****  * the terms of the Do What The Fuck You Want To Public License, Version 2, as
+   6:SynaptiX_FDK/components/modules/gps/minmea.h ****  * published by Sam Hocevar. See the COPYING file for more details.
+   7:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+   8:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+   9:SynaptiX_FDK/components/modules/gps/minmea.h **** #ifndef MINMEA_H
+  10:SynaptiX_FDK/components/modules/gps/minmea.h **** #define MINMEA_H
+  11:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  12:SynaptiX_FDK/components/modules/gps/minmea.h **** #ifdef __cplusplus
+  13:SynaptiX_FDK/components/modules/gps/minmea.h **** extern "C" {
+  14:SynaptiX_FDK/components/modules/gps/minmea.h **** #endif
+  15:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  16:SynaptiX_FDK/components/modules/gps/minmea.h **** #include <ctype.h>
+  17:SynaptiX_FDK/components/modules/gps/minmea.h **** #include <stdint.h>
+  18:SynaptiX_FDK/components/modules/gps/minmea.h **** #include <stdbool.h>
+  19:SynaptiX_FDK/components/modules/gps/minmea.h **** #include <time.h>
+  20:SynaptiX_FDK/components/modules/gps/minmea.h **** #include <math.h>
+  21:SynaptiX_FDK/components/modules/gps/minmea.h **** #ifdef MINMEA_INCLUDE_COMPAT
+  22:SynaptiX_FDK/components/modules/gps/minmea.h **** #include <minmea_compat.h>
+  23:SynaptiX_FDK/components/modules/gps/minmea.h **** #endif
+  24:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 4
+
+
+  25:SynaptiX_FDK/components/modules/gps/minmea.h **** #ifndef MINMEA_MAX_SENTENCE_LENGTH
+  26:SynaptiX_FDK/components/modules/gps/minmea.h **** #define MINMEA_MAX_SENTENCE_LENGTH 80
+  27:SynaptiX_FDK/components/modules/gps/minmea.h **** #endif
+  28:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  29:SynaptiX_FDK/components/modules/gps/minmea.h **** enum minmea_sentence_id {
+  30:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_INVALID = -1,
+  31:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_UNKNOWN = 0,
+  32:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_GBS,
+  33:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_GGA,
+  34:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_GLL,
+  35:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_GSA,
+  36:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_GST,
+  37:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_GSV,
+  38:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_RMC,
+  39:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_VTG,
+  40:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_SENTENCE_ZDA,
+  41:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+  42:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  43:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_float {
+  44:SynaptiX_FDK/components/modules/gps/minmea.h ****     int_least32_t value;
+  45:SynaptiX_FDK/components/modules/gps/minmea.h ****     int_least32_t scale;
+  46:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+  47:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  48:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_date {
+  49:SynaptiX_FDK/components/modules/gps/minmea.h ****     int day;
+  50:SynaptiX_FDK/components/modules/gps/minmea.h ****     int month;
+  51:SynaptiX_FDK/components/modules/gps/minmea.h ****     int year;
+  52:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+  53:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  54:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_time {
+  55:SynaptiX_FDK/components/modules/gps/minmea.h ****     int hours;
+  56:SynaptiX_FDK/components/modules/gps/minmea.h ****     int minutes;
+  57:SynaptiX_FDK/components/modules/gps/minmea.h ****     int seconds;
+  58:SynaptiX_FDK/components/modules/gps/minmea.h ****     int microseconds;
+  59:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+  60:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  61:SynaptiX_FDK/components/modules/gps/minmea.h **** // provide backwards compatibility to users expecting a null-terminated string
+  62:SynaptiX_FDK/components/modules/gps/minmea.h **** // instead of a struct
+  63:SynaptiX_FDK/components/modules/gps/minmea.h **** union minmea_type {
+  64:SynaptiX_FDK/components/modules/gps/minmea.h ****   char buf[6];
+  65:SynaptiX_FDK/components/modules/gps/minmea.h ****   struct {
+  66:SynaptiX_FDK/components/modules/gps/minmea.h ****     char talker_id[2];
+  67:SynaptiX_FDK/components/modules/gps/minmea.h ****     char sentence_id[3];
+  68:SynaptiX_FDK/components/modules/gps/minmea.h ****     char null_terminator;
+  69:SynaptiX_FDK/components/modules/gps/minmea.h ****   };
+  70:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+  71:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  72:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_gbs {
+  73:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+  74:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_time time;
+  75:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float err_latitude;
+  76:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float err_longitude;
+  77:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float err_altitude;
+  78:SynaptiX_FDK/components/modules/gps/minmea.h ****     int svid;
+  79:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float prob;
+  80:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float bias;
+  81:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float stddev;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 5
+
+
+  82:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+  83:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  84:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_rmc {
+  85:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+  86:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_time time;
+  87:SynaptiX_FDK/components/modules/gps/minmea.h ****     bool valid;
+  88:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float latitude;
+  89:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float longitude;
+  90:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float speed;
+  91:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float course;
+  92:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_date date;
+  93:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float variation;
+  94:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+  95:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+  96:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_gga {
+  97:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+  98:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_time time;
+  99:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float latitude;
+ 100:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float longitude;
+ 101:SynaptiX_FDK/components/modules/gps/minmea.h ****     int fix_quality;
+ 102:SynaptiX_FDK/components/modules/gps/minmea.h ****     int satellites_tracked;
+ 103:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float hdop;
+ 104:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float altitude; char altitude_units;
+ 105:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float height; char height_units;
+ 106:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float dgps_age;
+ 107:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 108:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 109:SynaptiX_FDK/components/modules/gps/minmea.h **** enum minmea_gll_status {
+ 110:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_GLL_STATUS_DATA_VALID = 'A',
+ 111:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_GLL_STATUS_DATA_NOT_VALID = 'V',
+ 112:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 113:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 114:SynaptiX_FDK/components/modules/gps/minmea.h **** // FAA mode added to some fields in NMEA 2.3.
+ 115:SynaptiX_FDK/components/modules/gps/minmea.h **** enum minmea_faa_mode {
+ 116:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_FAA_MODE_AUTONOMOUS = 'A',
+ 117:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_FAA_MODE_DIFFERENTIAL = 'D',
+ 118:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_FAA_MODE_ESTIMATED = 'E',
+ 119:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_FAA_MODE_MANUAL = 'M',
+ 120:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_FAA_MODE_SIMULATED = 'S',
+ 121:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_FAA_MODE_NOT_VALID = 'N',
+ 122:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_FAA_MODE_PRECISE = 'P',
+ 123:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 124:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 125:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_gll {
+ 126:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+ 127:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float latitude;
+ 128:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float longitude;
+ 129:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_time time;
+ 130:SynaptiX_FDK/components/modules/gps/minmea.h ****     char status;
+ 131:SynaptiX_FDK/components/modules/gps/minmea.h ****     char mode;
+ 132:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 133:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 134:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_gst {
+ 135:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+ 136:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_time time;
+ 137:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float rms_deviation;
+ 138:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float semi_major_deviation;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 6
+
+
+ 139:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float semi_minor_deviation;
+ 140:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float semi_major_orientation;
+ 141:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float latitude_error_deviation;
+ 142:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float longitude_error_deviation;
+ 143:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float altitude_error_deviation;
+ 144:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 145:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 146:SynaptiX_FDK/components/modules/gps/minmea.h **** enum minmea_gsa_mode {
+ 147:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_GPGSA_MODE_AUTO = 'A',
+ 148:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_GPGSA_MODE_FORCED = 'M',
+ 149:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 150:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 151:SynaptiX_FDK/components/modules/gps/minmea.h **** enum minmea_gsa_fix_type {
+ 152:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_GPGSA_FIX_NONE = 1,
+ 153:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_GPGSA_FIX_2D = 2,
+ 154:SynaptiX_FDK/components/modules/gps/minmea.h ****     MINMEA_GPGSA_FIX_3D = 3,
+ 155:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 156:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 157:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_gsa {
+ 158:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+ 159:SynaptiX_FDK/components/modules/gps/minmea.h ****     char mode;
+ 160:SynaptiX_FDK/components/modules/gps/minmea.h ****     int fix_type;
+ 161:SynaptiX_FDK/components/modules/gps/minmea.h ****     int sats[12];
+ 162:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float pdop;
+ 163:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float hdop;
+ 164:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float vdop;
+ 165:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 166:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 167:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sat_info {
+ 168:SynaptiX_FDK/components/modules/gps/minmea.h ****     int nr;
+ 169:SynaptiX_FDK/components/modules/gps/minmea.h ****     int elevation;
+ 170:SynaptiX_FDK/components/modules/gps/minmea.h ****     int azimuth;
+ 171:SynaptiX_FDK/components/modules/gps/minmea.h ****     int snr;
+ 172:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 173:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 174:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_gsv {
+ 175:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+ 176:SynaptiX_FDK/components/modules/gps/minmea.h ****     int total_msgs;
+ 177:SynaptiX_FDK/components/modules/gps/minmea.h ****     int msg_nr;
+ 178:SynaptiX_FDK/components/modules/gps/minmea.h ****     int total_sats;
+ 179:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_sat_info sats[4];
+ 180:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 181:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 182:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_vtg {
+ 183:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+ 184:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float true_track_degrees;
+ 185:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float magnetic_track_degrees;
+ 186:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float speed_knots;
+ 187:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_float speed_kph;
+ 188:SynaptiX_FDK/components/modules/gps/minmea.h ****     enum minmea_faa_mode faa_mode;
+ 189:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 190:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 191:SynaptiX_FDK/components/modules/gps/minmea.h **** struct minmea_sentence_zda {
+ 192:SynaptiX_FDK/components/modules/gps/minmea.h ****     union minmea_type type;
+ 193:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_time time;
+ 194:SynaptiX_FDK/components/modules/gps/minmea.h ****     struct minmea_date date;
+ 195:SynaptiX_FDK/components/modules/gps/minmea.h ****     int hour_offset;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 7
+
+
+ 196:SynaptiX_FDK/components/modules/gps/minmea.h ****     int minute_offset;
+ 197:SynaptiX_FDK/components/modules/gps/minmea.h **** };
+ 198:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 199:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 200:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Calculate raw sentence checksum. Does not check sentence integrity.
+ 201:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 202:SynaptiX_FDK/components/modules/gps/minmea.h **** uint8_t minmea_checksum(const char *sentence);
+ 203:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 204:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 205:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Check sentence validity and checksum. Returns true for valid sentences.
+ 206:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 207:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_check(const char *sentence, bool strict);
+ 208:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 209:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 210:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Determine talker identifier.
+ 211:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 212:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_talker_id(char talker[3], const char *sentence);
+ 213:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 214:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 215:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Get sentence id as string.
+ 216:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 217:SynaptiX_FDK/components/modules/gps/minmea.h **** const char* minmea_sentence(enum minmea_sentence_id id);
+ 218:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 219:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 220:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Determine sentence identifier.
+ 221:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 222:SynaptiX_FDK/components/modules/gps/minmea.h **** enum minmea_sentence_id minmea_sentence_id(const char *sentence, bool strict);
+ 223:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 224:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 225:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Scanf-like processor for NMEA sentences. Supports the following formats:
+ 226:SynaptiX_FDK/components/modules/gps/minmea.h ****  * c - single character (char *)
+ 227:SynaptiX_FDK/components/modules/gps/minmea.h ****  * d - direction, returned as 1/-1, default 0 (int *)
+ 228:SynaptiX_FDK/components/modules/gps/minmea.h ****  * f - fractional, returned as value + scale (struct minmea_float *)
+ 229:SynaptiX_FDK/components/modules/gps/minmea.h ****  * i - decimal, default zero (int *)
+ 230:SynaptiX_FDK/components/modules/gps/minmea.h ****  * s - string (char *)
+ 231:SynaptiX_FDK/components/modules/gps/minmea.h ****  * t - talker identifier and type (union minmea_type *)
+ 232:SynaptiX_FDK/components/modules/gps/minmea.h ****  * D - date (struct minmea_date *)
+ 233:SynaptiX_FDK/components/modules/gps/minmea.h ****  * T - time stamp (struct minmea_time *)
+ 234:SynaptiX_FDK/components/modules/gps/minmea.h ****  * _ - ignore this field
+ 235:SynaptiX_FDK/components/modules/gps/minmea.h ****  * ; - following fields are optional
+ 236:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Returns true on success. See library source code for details.
+ 237:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 238:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_scan(const char *sentence, const char *format, ...);
+ 239:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 240:SynaptiX_FDK/components/modules/gps/minmea.h **** /*
+ 241:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Parse a specific type of sentence. Return true on success.
+ 242:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 243:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_gbs(struct minmea_sentence_gbs *frame, const char *sentence);
+ 244:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence);
+ 245:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence);
+ 246:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence);
+ 247:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_gll(struct minmea_sentence_gll *frame, const char *sentence);
+ 248:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence);
+ 249:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence);
+ 250:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_vtg(struct minmea_sentence_vtg *frame, const char *sentence);
+ 251:SynaptiX_FDK/components/modules/gps/minmea.h **** bool minmea_parse_zda(struct minmea_sentence_zda *frame, const char *sentence);
+ 252:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 8
+
+
+ 253:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 254:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Convert GPS UTC date/time representation to a UNIX calendar time.
+ 255:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 256:SynaptiX_FDK/components/modules/gps/minmea.h **** int minmea_getdatetime(struct tm *tm, const struct minmea_date *date, const struct minmea_time *tim
+ 257:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 258:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 259:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Convert GPS UTC date/time representation to a UNIX timestamp.
+ 260:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 261:SynaptiX_FDK/components/modules/gps/minmea.h **** int minmea_gettime(struct timespec *ts, const struct minmea_date *date, const struct minmea_time *t
+ 262:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 263:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 264:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Rescale a fixed-point value to a different scale. Rounds towards zero.
+ 265:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 266:SynaptiX_FDK/components/modules/gps/minmea.h **** static inline int_least32_t minmea_rescale(const struct minmea_float *f, int_least32_t new_scale)
+ 267:SynaptiX_FDK/components/modules/gps/minmea.h **** {
+ 268:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale == 0)
+ 269:SynaptiX_FDK/components/modules/gps/minmea.h ****         return 0;
+ 270:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale == new_scale)
+ 271:SynaptiX_FDK/components/modules/gps/minmea.h ****         return f->value;
+ 272:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale > new_scale)
+ 273:SynaptiX_FDK/components/modules/gps/minmea.h ****         return (f->value + ((f->value > 0) - (f->value < 0)) * f->scale/new_scale/2) / (f->scale/ne
+ 274:SynaptiX_FDK/components/modules/gps/minmea.h ****     else
+ 275:SynaptiX_FDK/components/modules/gps/minmea.h ****         return f->value * (new_scale/f->scale);
+ 276:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 277:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 278:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 279:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Convert a fixed-point value to a floating-point value.
+ 280:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Returns NaN for "unknown" values.
+ 281:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 282:SynaptiX_FDK/components/modules/gps/minmea.h **** static inline float minmea_tofloat(const struct minmea_float *f)
+ 283:SynaptiX_FDK/components/modules/gps/minmea.h **** {
+ 284:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale == 0)
+ 285:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h ****     return (float) f->value / (float) f->scale;
+ 287:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 288:SynaptiX_FDK/components/modules/gps/minmea.h **** 
+ 289:SynaptiX_FDK/components/modules/gps/minmea.h **** /**
+ 290:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Convert a raw coordinate to a floating point DD.DDD... value.
+ 291:SynaptiX_FDK/components/modules/gps/minmea.h ****  * Returns NaN for "unknown" values.
+ 292:SynaptiX_FDK/components/modules/gps/minmea.h ****  */
+ 293:SynaptiX_FDK/components/modules/gps/minmea.h **** static inline float minmea_tocoord(const struct minmea_float *f)
+ 294:SynaptiX_FDK/components/modules/gps/minmea.h **** {
+  99              		.loc 3 294 1 is_stmt 1 view -0
+ 100              		.cfi_startproc
+ 101              		@ args = 0, pretend = 0, frame = 0
+ 102              		@ frame_needed = 0, uses_anonymous_args = 0
+ 103              		@ link register save eliminated.
+ 295:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale == 0)
+ 104              		.loc 3 295 5 view .LVU21
+ 105              		.loc 3 295 10 is_stmt 0 view .LVU22
+ 106 0000 4368     		ldr	r3, [r0, #4]
+ 107              		.loc 3 295 8 view .LVU23
+ 108 0002 0BB3     		cbz	r3, .L9
+ 296:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 297:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale  > (INT_LEAST32_MAX / 100))
+ 109              		.loc 3 297 5 is_stmt 1 view .LVU24
+ 110              		.loc 3 297 8 is_stmt 0 view .LVU25
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 9
+
+
+ 111 0004 154A     		ldr	r2, .L12
+ 112 0006 9342     		cmp	r3, r2
+ 113 0008 21DC     		bgt	.L10
+ 298:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 299:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale < (INT_LEAST32_MIN / 100))
+ 114              		.loc 3 299 5 is_stmt 1 view .LVU26
+ 115              		.loc 3 299 8 is_stmt 0 view .LVU27
+ 116 000a 154A     		ldr	r2, .L12+4
+ 117 000c 9342     		cmp	r3, r2
+ 118 000e 21DB     		blt	.L11
+ 300:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 301:SynaptiX_FDK/components/modules/gps/minmea.h ****     int_least32_t degrees = f->value / (f->scale * 100);
+ 119              		.loc 3 301 5 is_stmt 1 view .LVU28
+ 120              		.loc 3 301 30 is_stmt 0 view .LVU29
+ 121 0010 0168     		ldr	r1, [r0]
+ 122              		.loc 3 301 50 view .LVU30
+ 123 0012 6420     		movs	r0, #100
+ 124              	.LVL8:
+ 125              		.loc 3 301 50 view .LVU31
+ 126 0014 03FB00F0 		mul	r0, r3, r0
+ 127              		.loc 3 301 19 view .LVU32
+ 128 0018 91FBF0F2 		sdiv	r2, r1, r0
+ 129              	.LVL9:
+ 302:SynaptiX_FDK/components/modules/gps/minmea.h ****     int_least32_t minutes = f->value % (f->scale * 100);
+ 130              		.loc 3 302 5 is_stmt 1 view .LVU33
+ 131              		.loc 3 302 19 is_stmt 0 view .LVU34
+ 132 001c 00FB1211 		mls	r1, r0, r2, r1
+ 133              	.LVL10:
+ 303:SynaptiX_FDK/components/modules/gps/minmea.h ****     return (float) degrees + (float) minutes / (60 * f->scale);
+ 134              		.loc 3 303 5 is_stmt 1 view .LVU35
+ 135              		.loc 3 303 12 is_stmt 0 view .LVU36
+ 136 0020 07EE902A 		vmov	s15, r2	@ int
+ 137 0024 B8EEE70A 		vcvt.f32.s32	s0, s15
+ 138              		.loc 3 303 30 view .LVU37
+ 139 0028 07EE901A 		vmov	s15, r1	@ int
+ 140 002c B8EEE77A 		vcvt.f32.s32	s14, s15
+ 141              		.loc 3 303 52 view .LVU38
+ 142 0030 C3EB0313 		rsb	r3, r3, r3, lsl #4
+ 143 0034 9B00     		lsls	r3, r3, #2
+ 144              		.loc 3 303 46 view .LVU39
+ 145 0036 07EE903A 		vmov	s15, r3	@ int
+ 146 003a F8EEE77A 		vcvt.f32.s32	s15, s15
+ 147 003e C7EE276A 		vdiv.f32	s13, s14, s15
+ 148              		.loc 3 303 28 view .LVU40
+ 149 0042 30EE260A 		vadd.f32	s0, s0, s13
+ 150 0046 7047     		bx	lr
+ 151              	.LVL11:
+ 152              	.L9:
+ 296:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale  > (INT_LEAST32_MAX / 100))
+ 153              		.loc 3 296 16 view .LVU41
+ 154 0048 9FED060A 		vldr.32	s0, .L12+8
+ 155 004c 7047     		bx	lr
+ 156              	.L10:
+ 298:SynaptiX_FDK/components/modules/gps/minmea.h ****     if (f->scale < (INT_LEAST32_MIN / 100))
+ 157              		.loc 3 298 16 view .LVU42
+ 158 004e 9FED050A 		vldr.32	s0, .L12+8
+ 159 0052 7047     		bx	lr
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 10
+
+
+ 160              	.L11:
+ 300:SynaptiX_FDK/components/modules/gps/minmea.h ****     int_least32_t degrees = f->value / (f->scale * 100);
+ 161              		.loc 3 300 16 view .LVU43
+ 162 0054 9FED030A 		vldr.32	s0, .L12+8
+ 304:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 163              		.loc 3 304 1 view .LVU44
+ 164 0058 7047     		bx	lr
+ 165              	.L13:
+ 166 005a 00BF     		.align	2
+ 167              	.L12:
+ 168 005c 14AE4701 		.word	21474836
+ 169 0060 EC51B8FE 		.word	-21474836
+ 170 0064 0000C07F 		.word	2143289344
+ 171              		.cfi_endproc
+ 172              	.LFE10:
+ 174              		.section	.rodata.gps_callback_task.str1.4,"aMS",%progbits,1
+ 175              		.align	2
+ 176              	.LC0:
+ 177 0000 524D4320 		.ascii	"RMC sentence is not valid\000"
+ 177      73656E74 
+ 177      656E6365 
+ 177      20697320 
+ 177      6E6F7420 
+ 178 001a 0000     		.align	2
+ 179              	.LC1:
+ 180 001c 47505300 		.ascii	"GPS\000"
+ 181              		.align	2
+ 182              	.LC2:
+ 183 0020 524D433A 		.ascii	"RMC: lat=%.6f lon=%.6f spd=%.2f time=%02d:%02d:%02d"
+ 183      206C6174 
+ 183      3D252E36 
+ 183      66206C6F 
+ 183      6E3D252E 
+ 184 0053 20646174 		.ascii	" date=%02d/%02d/%04d\000"
+ 184      653D2530 
+ 184      32642F25 
+ 184      3032642F 
+ 184      25303464 
+ 185              		.align	2
+ 186              	.LC3:
+ 187 0068 524D4320 		.ascii	"RMC parse failed\000"
+ 187      70617273 
+ 187      65206661 
+ 187      696C6564 
+ 187      00
+ 188 0079 000000   		.align	2
+ 189              	.LC4:
+ 190 007c 4747413A 		.ascii	"GGA: alt=%.2f sat=%d\000"
+ 190      20616C74 
+ 190      3D252E32 
+ 190      66207361 
+ 190      743D2564 
+ 191 0091 000000   		.align	2
+ 192              	.LC5:
+ 193 0094 47474120 		.ascii	"GGA parse failed\000"
+ 193      70617273 
+ 193      65206661 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 11
+
+
+ 193      696C6564 
+ 193      00
+ 194              		.section	.text.gps_callback_task,"ax",%progbits
+ 195              		.align	1
+ 196              		.syntax unified
+ 197              		.thumb
+ 198              		.thumb_func
+ 200              	gps_callback_task:
+ 201              	.LVL12:
+ 202              	.LFB18:
+   1:SynaptiX_FDK/components/modules/gps/gps.c **** #include "gps.h"
+   2:SynaptiX_FDK/components/modules/gps/gps.c **** #include <string.h>
+   3:SynaptiX_FDK/components/modules/gps/gps.c **** #include "logger.h"
+   4:SynaptiX_FDK/components/modules/gps/gps.c **** #include "sx_delay.h"
+   5:SynaptiX_FDK/components/modules/gps/gps.c **** 
+   6:SynaptiX_FDK/components/modules/gps/gps.c **** static const char *TAG = "GPS";
+   7:SynaptiX_FDK/components/modules/gps/gps.c **** 
+   8:SynaptiX_FDK/components/modules/gps/gps.c **** static void gps_callback_task(sx_gps_t *gps, char *message, void *arg);
+   9:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  10:SynaptiX_FDK/components/modules/gps/gps.c **** void gps_init(sx_gps_t *_gps, sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops, void *_pwr_arg
+  11:SynaptiX_FDK/components/modules/gps/gps.c **** {
+  12:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_uart_init(&_gps->comm, _uart_cfg, GPS_BUFF_MAX_SIZE, GPS_BUFF_MAX_SIZE);
+  13:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  14:SynaptiX_FDK/components/modules/gps/gps.c ****     /* N/F (Shutdown Control, per Ai-Thinker GP-02 datasheet): must be held
+  15:SynaptiX_FDK/components/modules/gps/gps.c ****      * HIGH during normal operation (internal pull-up; LOW = shutdown). This
+  16:SynaptiX_FDK/components/modules/gps/gps.c ****      * board wires N/F directly to an MCU GPIO (no transistor, unlike the
+  17:SynaptiX_FDK/components/modules/gps/gps.c ****      * old board), so the firmware must actively drive it HIGH itself. */
+  18:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_init(&_gps->pwr, _gpio_ops, _pwr_arg);
+  19:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
+  20:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  21:SynaptiX_FDK/components/modules/gps/gps.c ****     /* RST (external reset input, internal pull-up): datasheet says leave
+  22:SynaptiX_FDK/components/modules/gps/gps.c ****      * floating if unused. This board has it wired to an MCU GPIO configured
+  23:SynaptiX_FDK/components/modules/gps/gps.c ****      * as push-pull output (see Core/Src/gpio.c), driven LOW by the
+  24:SynaptiX_FDK/components/modules/gps/gps.c ****      * CubeMX-generated startup code before any application code runs —
+  25:SynaptiX_FDK/components/modules/gps/gps.c ****      * holding the module in permanent reset unless corrected here. Drive it
+  26:SynaptiX_FDK/components/modules/gps/gps.c ****      * HIGH once at init as a second layer of protection, independent of the
+  27:SynaptiX_FDK/components/modules/gps/gps.c ****      * CubeMX initial level. */
+  28:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_init(&_gps->rst, _gpio_ops, _rst_arg);
+  29:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
+  30:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  31:SynaptiX_FDK/components/modules/gps/gps.c ****     memset(_gps->buff, 0, GPS_BUFF_MAX_SIZE);
+  32:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->state = GPS_IDLE;
+  33:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->buff_id = 0;
+  34:SynaptiX_FDK/components/modules/gps/gps.c ****     gps_set_callback_handle(_gps, gps_callback_task, _gps);
+  35:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_delay_ms(1000);
+  36:SynaptiX_FDK/components/modules/gps/gps.c ****     log_debug(TAG, "Initializing");
+  37:SynaptiX_FDK/components/modules/gps/gps.c **** }
+  38:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  39:SynaptiX_FDK/components/modules/gps/gps.c **** void gps_set_callback_handle(sx_gps_t *_gps, gps_callback _cb, void *_arg)
+  40:SynaptiX_FDK/components/modules/gps/gps.c **** {
+  41:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->callback = _cb;
+  42:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->arg = _arg;
+  43:SynaptiX_FDK/components/modules/gps/gps.c **** }
+  44:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  45:SynaptiX_FDK/components/modules/gps/gps.c **** /* Pulse RST LOW for >=160ms (datasheet reset time), then release HIGH. */
+  46:SynaptiX_FDK/components/modules/gps/gps.c **** void gps_reset(sx_gps_t *_gps)
+  47:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 12
+
+
+  48:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->rst, SX_GPIO_LOW);
+  49:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_delay_ms(200);
+  50:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
+  51:SynaptiX_FDK/components/modules/gps/gps.c **** }
+  52:SynaptiX_FDK/components/modules/gps/gps.c **** void gps_power_on(sx_gps_t *_gps)
+  53:SynaptiX_FDK/components/modules/gps/gps.c **** {
+  54:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
+  55:SynaptiX_FDK/components/modules/gps/gps.c **** }
+  56:SynaptiX_FDK/components/modules/gps/gps.c **** void gps_power_off(sx_gps_t *_gps)
+  57:SynaptiX_FDK/components/modules/gps/gps.c **** {
+  58:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_LOW);
+  59:SynaptiX_FDK/components/modules/gps/gps.c **** }
+  60:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  61:SynaptiX_FDK/components/modules/gps/gps.c **** void gps_process(sx_gps_t *_gps, uint32_t _timestamp)
+  62:SynaptiX_FDK/components/modules/gps/gps.c **** {
+  63:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->time += _timestamp;
+  64:SynaptiX_FDK/components/modules/gps/gps.c ****     switch (_gps->state)
+  65:SynaptiX_FDK/components/modules/gps/gps.c ****     {
+  66:SynaptiX_FDK/components/modules/gps/gps.c ****     case GPS_IDLE:
+  67:SynaptiX_FDK/components/modules/gps/gps.c ****         /* code */
+  68:SynaptiX_FDK/components/modules/gps/gps.c ****         while(sx_uart_available(&_gps->comm) > 0){
+  69:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 == sx_uart_read(&_gps->comm, &_gps->buff[0], 1, 10))
+  70:SynaptiX_FDK/components/modules/gps/gps.c ****             {
+  71:SynaptiX_FDK/components/modules/gps/gps.c ****                 if (_gps->buff[0] == '$')
+  72:SynaptiX_FDK/components/modules/gps/gps.c ****                 {
+  73:SynaptiX_FDK/components/modules/gps/gps.c ****                     _gps->buff_id = 1;
+  74:SynaptiX_FDK/components/modules/gps/gps.c ****                     _gps->state = GPS_READ_MESSAGE;
+  75:SynaptiX_FDK/components/modules/gps/gps.c ****                     break;
+  76:SynaptiX_FDK/components/modules/gps/gps.c ****                 }
+  77:SynaptiX_FDK/components/modules/gps/gps.c ****             }
+  78:SynaptiX_FDK/components/modules/gps/gps.c ****         }
+  79:SynaptiX_FDK/components/modules/gps/gps.c ****         break;
+  80:SynaptiX_FDK/components/modules/gps/gps.c ****     case GPS_READ_MESSAGE:
+  81:SynaptiX_FDK/components/modules/gps/gps.c ****         /* code */
+  82:SynaptiX_FDK/components/modules/gps/gps.c ****         uint8_t byte;
+  83:SynaptiX_FDK/components/modules/gps/gps.c ****         while (sx_uart_available(&_gps->comm) > 0)
+  84:SynaptiX_FDK/components/modules/gps/gps.c ****         {
+  85:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 != sx_uart_read(&_gps->comm, &byte, 1, 1))
+  86:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+  87:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  88:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->buff[_gps->buff_id] = byte;
+  89:SynaptiX_FDK/components/modules/gps/gps.c **** 
+  90:SynaptiX_FDK/components/modules/gps/gps.c ****             // Detect \r\n
+  91:SynaptiX_FDK/components/modules/gps/gps.c ****             if (_gps->buff_id > 0 &&
+  92:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id - 1] == '\r' &&
+  93:SynaptiX_FDK/components/modules/gps/gps.c ****                 byte == '\n')
+  94:SynaptiX_FDK/components/modules/gps/gps.c ****             {
+  95:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id + 1] = '\0';
+  96:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->state = GPS_NEW_MESSAGE;
+  97:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+  98:SynaptiX_FDK/components/modules/gps/gps.c ****             }
+  99:SynaptiX_FDK/components/modules/gps/gps.c **** 
+ 100:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->buff_id++;
+ 101:SynaptiX_FDK/components/modules/gps/gps.c **** 
+ 102:SynaptiX_FDK/components/modules/gps/gps.c ****             if (_gps->buff_id >= GPS_BUFF_MAX_SIZE - 2)
+ 103:SynaptiX_FDK/components/modules/gps/gps.c ****             {
+ 104:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff_id = 0;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 13
+
+
+ 105:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->state = GPS_IDLE;
+ 106:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+ 107:SynaptiX_FDK/components/modules/gps/gps.c ****             }
+ 108:SynaptiX_FDK/components/modules/gps/gps.c ****         }
+ 109:SynaptiX_FDK/components/modules/gps/gps.c ****         break;
+ 110:SynaptiX_FDK/components/modules/gps/gps.c ****     case GPS_NEW_MESSAGE:
+ 111:SynaptiX_FDK/components/modules/gps/gps.c ****         /* code */
+ 112:SynaptiX_FDK/components/modules/gps/gps.c ****         if (_gps->callback)
+ 113:SynaptiX_FDK/components/modules/gps/gps.c ****         {
+ 114:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->callback(_gps, _gps->buff, _gps->arg);
+ 115:SynaptiX_FDK/components/modules/gps/gps.c ****         }
+ 116:SynaptiX_FDK/components/modules/gps/gps.c ****         _gps->state = GPS_IDLE;
+ 117:SynaptiX_FDK/components/modules/gps/gps.c ****         // log_info(TAG, "%s", _gps->buff);
+ 118:SynaptiX_FDK/components/modules/gps/gps.c ****         memset(_gps->buff, 0, _gps->buff_id);
+ 119:SynaptiX_FDK/components/modules/gps/gps.c ****         _gps->buff_id = 0;
+ 120:SynaptiX_FDK/components/modules/gps/gps.c ****         break;
+ 121:SynaptiX_FDK/components/modules/gps/gps.c ****     default:
+ 122:SynaptiX_FDK/components/modules/gps/gps.c ****         break;
+ 123:SynaptiX_FDK/components/modules/gps/gps.c ****     }
+ 124:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 125:SynaptiX_FDK/components/modules/gps/gps.c **** 
+ 126:SynaptiX_FDK/components/modules/gps/gps.c **** static void gps_callback_task(sx_gps_t *gps, char *message, void *arg)
+ 127:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 203              		.loc 1 127 1 is_stmt 1 view -0
+ 204              		.cfi_startproc
+ 205              		@ args = 0, pretend = 0, frame = 88
+ 206              		@ frame_needed = 0, uses_anonymous_args = 0
+ 207              		.loc 1 127 1 is_stmt 0 view .LVU46
+ 208 0000 70B5     		push	{r4, r5, r6, lr}
+ 209              	.LCFI1:
+ 210              		.cfi_def_cfa_offset 16
+ 211              		.cfi_offset 4, -16
+ 212              		.cfi_offset 5, -12
+ 213              		.cfi_offset 6, -8
+ 214              		.cfi_offset 14, -4
+ 215 0002 A2B0     		sub	sp, sp, #136
+ 216              	.LCFI2:
+ 217              		.cfi_def_cfa_offset 152
+ 218 0004 0446     		mov	r4, r0
+ 219 0006 0D46     		mov	r5, r1
+ 128:SynaptiX_FDK/components/modules/gps/gps.c ****     gps->_sentence_id = minmea_sentence_id((const char *)message, false);
+ 220              		.loc 1 128 5 is_stmt 1 view .LVU47
+ 221              		.loc 1 128 25 is_stmt 0 view .LVU48
+ 222 0008 0021     		movs	r1, #0
+ 223              	.LVL13:
+ 224              		.loc 1 128 25 view .LVU49
+ 225 000a 2846     		mov	r0, r5
+ 226              	.LVL14:
+ 227              		.loc 1 128 25 view .LVU50
+ 228 000c FFF7FEFF 		bl	minmea_sentence_id
+ 229              	.LVL15:
+ 230              		.loc 1 128 23 discriminator 1 view .LVU51
+ 231 0010 84F89800 		strb	r0, [r4, #152]
+ 129:SynaptiX_FDK/components/modules/gps/gps.c ****     switch (gps->_sentence_id)
+ 232              		.loc 1 129 5 is_stmt 1 view .LVU52
+ 233 0014 0228     		cmp	r0, #2
+ 234 0016 7AD0     		beq	.L15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 14
+
+
+ 235 0018 0728     		cmp	r0, #7
+ 236 001a 40F09880 		bne	.L14
+ 237              	.LBB13:
+ 130:SynaptiX_FDK/components/modules/gps/gps.c ****     {
+ 131:SynaptiX_FDK/components/modules/gps/gps.c ****     case MINMEA_SENTENCE_RMC:
+ 132:SynaptiX_FDK/components/modules/gps/gps.c ****     {
+ 133:SynaptiX_FDK/components/modules/gps/gps.c ****         struct minmea_sentence_rmc rmc;
+ 238              		.loc 1 133 9 view .LVU53
+ 134:SynaptiX_FDK/components/modules/gps/gps.c ****         if (minmea_parse_rmc(&rmc, (char *)message))
+ 239              		.loc 1 134 9 view .LVU54
+ 240              		.loc 1 134 13 is_stmt 0 view .LVU55
+ 241 001e 2946     		mov	r1, r5
+ 242 0020 0CA8     		add	r0, sp, #48
+ 243 0022 FFF7FEFF 		bl	minmea_parse_rmc
+ 244              	.LVL16:
+ 245              		.loc 1 134 12 discriminator 1 view .LVU56
+ 246 0026 0028     		cmp	r0, #0
+ 247 0028 6BD0     		beq	.L17
+ 135:SynaptiX_FDK/components/modules/gps/gps.c ****         {
+ 136:SynaptiX_FDK/components/modules/gps/gps.c ****             if (!rmc.valid)
+ 248              		.loc 1 136 13 is_stmt 1 view .LVU57
+ 249              		.loc 1 136 21 is_stmt 0 view .LVU58
+ 250 002a 9DF84830 		ldrb	r3, [sp, #72]	@ zero_extendqisi2
+ 251              		.loc 1 136 16 view .LVU59
+ 252 002e 002B     		cmp	r3, #0
+ 253 0030 5BD0     		beq	.L28
+ 137:SynaptiX_FDK/components/modules/gps/gps.c ****             {
+ 138:SynaptiX_FDK/components/modules/gps/gps.c ****                 log_warn(TAG, "RMC sentence is not valid");
+ 139:SynaptiX_FDK/components/modules/gps/gps.c ****                 gps->latitude = 0.0f;
+ 140:SynaptiX_FDK/components/modules/gps/gps.c ****                 gps->longtitude = 0.0f;
+ 141:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+ 142:SynaptiX_FDK/components/modules/gps/gps.c ****             }
+ 143:SynaptiX_FDK/components/modules/gps/gps.c ****             gps->latitude  = minmea_tocoord(&rmc.latitude);
+ 254              		.loc 1 143 13 is_stmt 1 view .LVU60
+ 255              		.loc 1 143 30 is_stmt 0 view .LVU61
+ 256 0032 13A8     		add	r0, sp, #76
+ 257 0034 FFF7FEFF 		bl	minmea_tocoord
+ 258              	.LVL17:
+ 259              		.loc 1 143 28 discriminator 1 view .LVU62
+ 260 0038 84ED180A 		vstr.32	s0, [r4, #96]
+ 144:SynaptiX_FDK/components/modules/gps/gps.c ****             gps->longtitude = minmea_tocoord(&rmc.longitude);
+ 261              		.loc 1 144 13 is_stmt 1 view .LVU63
+ 262              		.loc 1 144 31 is_stmt 0 view .LVU64
+ 263 003c 15A8     		add	r0, sp, #84
+ 264 003e FFF7FEFF 		bl	minmea_tocoord
+ 265              	.LVL18:
+ 266              		.loc 1 144 29 discriminator 1 view .LVU65
+ 267 0042 84ED190A 		vstr.32	s0, [r4, #100]
+ 145:SynaptiX_FDK/components/modules/gps/gps.c ****             gps->speed     = minmea_tofloat(&rmc.speed);  // knots
+ 268              		.loc 1 145 13 is_stmt 1 view .LVU66
+ 269              	.LVL19:
+ 270              	.LBB14:
+ 271              	.LBI14:
+ 282:SynaptiX_FDK/components/modules/gps/minmea.h **** {
+ 272              		.loc 3 282 21 view .LVU67
+ 273              	.LBB15:
+ 284:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 15
+
+
+ 274              		.loc 3 284 5 view .LVU68
+ 284:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 275              		.loc 3 284 10 is_stmt 0 view .LVU69
+ 276 0046 189B     		ldr	r3, [sp, #96]
+ 284:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 277              		.loc 3 284 8 view .LVU70
+ 278 0048 002B     		cmp	r3, #0
+ 279 004a 57D0     		beq	.L25
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 280              		.loc 3 286 5 is_stmt 1 view .LVU71
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 281              		.loc 3 286 12 is_stmt 0 view .LVU72
+ 282 004c DDED177A 		vldr.32	s15, [sp, #92]	@ int
+ 283 0050 B8EEE77A 		vcvt.f32.s32	s14, s15
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 284              		.loc 3 286 31 view .LVU73
+ 285 0054 07EE903A 		vmov	s15, r3	@ int
+ 286 0058 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 287              		.loc 3 286 29 view .LVU74
+ 288 005c C7EE276A 		vdiv.f32	s13, s14, s15
+ 289              	.L19:
+ 290              	.LVL20:
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 291              		.loc 3 286 29 view .LVU75
+ 292              	.LBE15:
+ 293              	.LBE14:
+ 294              		.loc 1 145 28 discriminator 1 view .LVU76
+ 295 0060 C4ED1B6A 		vstr.32	s13, [r4, #108]
+ 146:SynaptiX_FDK/components/modules/gps/gps.c ****             if (rmc.time.hours != -1 && rmc.date.year != -1)
+ 296              		.loc 1 146 13 is_stmt 1 view .LVU77
+ 297              		.loc 1 146 25 is_stmt 0 view .LVU78
+ 298 0064 0E9B     		ldr	r3, [sp, #56]
+ 299              		.loc 1 146 16 view .LVU79
+ 300 0066 B3F1FF3F 		cmp	r3, #-1
+ 301 006a 70D0     		beq	.L14
+ 302              		.loc 1 146 49 discriminator 1 view .LVU80
+ 303 006c 1D9B     		ldr	r3, [sp, #116]
+ 304              		.loc 1 146 38 discriminator 1 view .LVU81
+ 305 006e B3F1FF3F 		cmp	r3, #-1
+ 306 0072 6CD0     		beq	.L14
+ 147:SynaptiX_FDK/components/modules/gps/gps.c ****             {
+ 148:SynaptiX_FDK/components/modules/gps/gps.c ****                 minmea_getdatetime(&gps->tim, &rmc.date, &rmc.time);
+ 307              		.loc 1 148 17 is_stmt 1 view .LVU82
+ 308 0074 0EAA     		add	r2, sp, #56
+ 309 0076 1BA9     		add	r1, sp, #108
+ 310 0078 04F17400 		add	r0, r4, #116
+ 311 007c FFF7FEFF 		bl	minmea_getdatetime
+ 312              	.LVL21:
+ 149:SynaptiX_FDK/components/modules/gps/gps.c ****                 // UTC+7
+ 150:SynaptiX_FDK/components/modules/gps/gps.c ****                 gps->tim.tm_hour += 7;
+ 313              		.loc 1 150 17 view .LVU83
+ 314              		.loc 1 150 25 is_stmt 0 view .LVU84
+ 315 0080 E36F     		ldr	r3, [r4, #124]
+ 316              		.loc 1 150 34 view .LVU85
+ 317 0082 DA1D     		adds	r2, r3, #7
+ 318 0084 E267     		str	r2, [r4, #124]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 16
+
+
+ 151:SynaptiX_FDK/components/modules/gps/gps.c ****                 if (gps->tim.tm_hour >= 24)
+ 319              		.loc 1 151 17 is_stmt 1 view .LVU86
+ 320              		.loc 1 151 20 is_stmt 0 view .LVU87
+ 321 0086 172A     		cmp	r2, #23
+ 322 0088 06DD     		ble	.L21
+ 152:SynaptiX_FDK/components/modules/gps/gps.c ****                 {
+ 153:SynaptiX_FDK/components/modules/gps/gps.c ****                     gps->tim.tm_hour -= 24;
+ 323              		.loc 1 153 21 is_stmt 1 view .LVU88
+ 324              		.loc 1 153 38 is_stmt 0 view .LVU89
+ 325 008a 113B     		subs	r3, r3, #17
+ 326 008c E367     		str	r3, [r4, #124]
+ 154:SynaptiX_FDK/components/modules/gps/gps.c ****                     gps->tim.tm_mday += 1;
+ 327              		.loc 1 154 21 is_stmt 1 view .LVU90
+ 328              		.loc 1 154 29 is_stmt 0 view .LVU91
+ 329 008e D4F88030 		ldr	r3, [r4, #128]
+ 330              		.loc 1 154 38 view .LVU92
+ 331 0092 0133     		adds	r3, r3, #1
+ 332 0094 C4F88030 		str	r3, [r4, #128]
+ 333              	.L21:
+ 155:SynaptiX_FDK/components/modules/gps/gps.c ****                 }
+ 156:SynaptiX_FDK/components/modules/gps/gps.c ****                 log_info(TAG, "RMC: lat=%.6f lon=%.6f spd=%.2f time=%02d:%02d:%02d date=%02d/%02d/%
+ 334              		.loc 1 156 17 is_stmt 1 view .LVU93
+ 335 0098 256E     		ldr	r5, [r4, #96]	@ float
+ 336              	.LVL22:
+ 337              		.loc 1 156 17 is_stmt 0 view .LVU94
+ 338 009a 666E     		ldr	r6, [r4, #100]	@ float
+ 339 009c D4F88430 		ldr	r3, [r4, #132]
+ 340 00a0 D4F88820 		ldr	r2, [r4, #136]
+ 341 00a4 02F26C72 		addw	r2, r2, #1900
+ 342 00a8 0B92     		str	r2, [sp, #44]
+ 343 00aa 0133     		adds	r3, r3, #1
+ 344 00ac 0A93     		str	r3, [sp, #40]
+ 345 00ae D4F88030 		ldr	r3, [r4, #128]
+ 346 00b2 0993     		str	r3, [sp, #36]
+ 347 00b4 636F     		ldr	r3, [r4, #116]
+ 348 00b6 0893     		str	r3, [sp, #32]
+ 349 00b8 A36F     		ldr	r3, [r4, #120]
+ 350 00ba 0793     		str	r3, [sp, #28]
+ 351 00bc E36F     		ldr	r3, [r4, #124]
+ 352 00be 0693     		str	r3, [sp, #24]
+ 353 00c0 E06E     		ldr	r0, [r4, #108]	@ float
+ 354 00c2 FFF7FEFF 		bl	__aeabi_f2d
+ 355              	.LVL23:
+ 356 00c6 CDE90401 		strd	r0, [sp, #16]
+ 357 00ca 3046     		mov	r0, r6	@ float
+ 358 00cc FFF7FEFF 		bl	__aeabi_f2d
+ 359              	.LVL24:
+ 360 00d0 CDE90201 		strd	r0, [sp, #8]
+ 361 00d4 2846     		mov	r0, r5	@ float
+ 362 00d6 FFF7FEFF 		bl	__aeabi_f2d
+ 363              	.LVL25:
+ 364 00da CDE90001 		strd	r0, [sp]
+ 365 00de 214A     		ldr	r2, .L29
+ 366 00e0 2149     		ldr	r1, .L29+4
+ 367 00e2 0320     		movs	r0, #3
+ 368 00e4 FFF7FEFF 		bl	log_func
+ 369              	.LVL26:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 17
+
+
+ 370 00e8 31E0     		b	.L14
+ 371              	.LVL27:
+ 372              	.L28:
+ 138:SynaptiX_FDK/components/modules/gps/gps.c ****                 gps->latitude = 0.0f;
+ 373              		.loc 1 138 17 is_stmt 1 view .LVU95
+ 374 00ea 204A     		ldr	r2, .L29+8
+ 375 00ec 1E49     		ldr	r1, .L29+4
+ 376 00ee 0220     		movs	r0, #2
+ 377 00f0 FFF7FEFF 		bl	log_func
+ 378              	.LVL28:
+ 139:SynaptiX_FDK/components/modules/gps/gps.c ****                 gps->longtitude = 0.0f;
+ 379              		.loc 1 139 17 view .LVU96
+ 139:SynaptiX_FDK/components/modules/gps/gps.c ****                 gps->longtitude = 0.0f;
+ 380              		.loc 1 139 31 is_stmt 0 view .LVU97
+ 381 00f4 0023     		movs	r3, #0
+ 382 00f6 2366     		str	r3, [r4, #96]	@ float
+ 140:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+ 383              		.loc 1 140 17 is_stmt 1 view .LVU98
+ 140:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+ 384              		.loc 1 140 33 is_stmt 0 view .LVU99
+ 385 00f8 6366     		str	r3, [r4, #100]	@ float
+ 141:SynaptiX_FDK/components/modules/gps/gps.c ****             }
+ 386              		.loc 1 141 17 is_stmt 1 view .LVU100
+ 387 00fa 28E0     		b	.L14
+ 388              	.LVL29:
+ 389              	.L25:
+ 390              	.LBB17:
+ 391              	.LBB16:
+ 285:SynaptiX_FDK/components/modules/gps/minmea.h ****     return (float) f->value / (float) f->scale;
+ 392              		.loc 3 285 16 is_stmt 0 view .LVU101
+ 393 00fc DFED1C6A 		vldr.32	s13, .L29+12
+ 394 0100 AEE7     		b	.L19
+ 395              	.LVL30:
+ 396              	.L17:
+ 285:SynaptiX_FDK/components/modules/gps/minmea.h ****     return (float) f->value / (float) f->scale;
+ 397              		.loc 3 285 16 view .LVU102
+ 398              	.LBE16:
+ 399              	.LBE17:
+ 157:SynaptiX_FDK/components/modules/gps/gps.c ****                          gps->latitude, gps->longtitude, gps->speed,
+ 158:SynaptiX_FDK/components/modules/gps/gps.c ****                          gps->tim.tm_hour, gps->tim.tm_min, gps->tim.tm_sec,
+ 159:SynaptiX_FDK/components/modules/gps/gps.c ****                          gps->tim.tm_mday, gps->tim.tm_mon + 1, gps->tim.tm_year + 1900);
+ 160:SynaptiX_FDK/components/modules/gps/gps.c ****             }
+ 161:SynaptiX_FDK/components/modules/gps/gps.c ****         }
+ 162:SynaptiX_FDK/components/modules/gps/gps.c ****         else
+ 163:SynaptiX_FDK/components/modules/gps/gps.c ****         {
+ 164:SynaptiX_FDK/components/modules/gps/gps.c ****             log_warn(TAG, "RMC parse failed");
+ 400              		.loc 1 164 13 is_stmt 1 view .LVU103
+ 401 0102 1C4A     		ldr	r2, .L29+16
+ 402 0104 1849     		ldr	r1, .L29+4
+ 403 0106 0220     		movs	r0, #2
+ 404 0108 FFF7FEFF 		bl	log_func
+ 405              	.LVL31:
+ 406              	.LBE13:
+ 165:SynaptiX_FDK/components/modules/gps/gps.c ****         }
+ 166:SynaptiX_FDK/components/modules/gps/gps.c ****     }
+ 167:SynaptiX_FDK/components/modules/gps/gps.c ****     break;
+ 407              		.loc 1 167 5 view .LVU104
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 18
+
+
+ 408 010c 1FE0     		b	.L14
+ 409              	.L15:
+ 410              	.LBB18:
+ 168:SynaptiX_FDK/components/modules/gps/gps.c ****     case MINMEA_SENTENCE_GGA:
+ 169:SynaptiX_FDK/components/modules/gps/gps.c ****     {
+ 170:SynaptiX_FDK/components/modules/gps/gps.c ****         struct minmea_sentence_gga gga;
+ 411              		.loc 1 170 9 view .LVU105
+ 171:SynaptiX_FDK/components/modules/gps/gps.c ****         if (minmea_parse_gga(&gga, (char *)message))
+ 412              		.loc 1 171 9 view .LVU106
+ 413              		.loc 1 171 13 is_stmt 0 view .LVU107
+ 414 010e 2946     		mov	r1, r5
+ 415 0110 0CA8     		add	r0, sp, #48
+ 416 0112 FFF7FEFF 		bl	minmea_parse_gga
+ 417              	.LVL32:
+ 418              		.loc 1 171 12 discriminator 1 view .LVU108
+ 419 0116 F0B1     		cbz	r0, .L22
+ 172:SynaptiX_FDK/components/modules/gps/gps.c ****         {
+ 173:SynaptiX_FDK/components/modules/gps/gps.c ****             gps->altitude   = minmea_tofloat(&gga.altitude);
+ 420              		.loc 1 173 13 is_stmt 1 view .LVU109
+ 421              	.LVL33:
+ 422              	.LBB19:
+ 423              	.LBI19:
+ 282:SynaptiX_FDK/components/modules/gps/minmea.h **** {
+ 424              		.loc 3 282 21 view .LVU110
+ 425              	.LBB20:
+ 284:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 426              		.loc 3 284 5 view .LVU111
+ 284:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 427              		.loc 3 284 10 is_stmt 0 view .LVU112
+ 428 0118 1B9B     		ldr	r3, [sp, #108]
+ 284:SynaptiX_FDK/components/modules/gps/minmea.h ****         return NAN;
+ 429              		.loc 3 284 8 view .LVU113
+ 430 011a D3B1     		cbz	r3, .L26
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 431              		.loc 3 286 5 is_stmt 1 view .LVU114
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 432              		.loc 3 286 12 is_stmt 0 view .LVU115
+ 433 011c DDED1A7A 		vldr.32	s15, [sp, #104]	@ int
+ 434 0120 B8EEE77A 		vcvt.f32.s32	s14, s15
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 435              		.loc 3 286 31 view .LVU116
+ 436 0124 07EE903A 		vmov	s15, r3	@ int
+ 437 0128 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 438              		.loc 3 286 29 view .LVU117
+ 439 012c C7EE277A 		vdiv.f32	s15, s14, s15
+ 440 0130 17EE900A 		vmov	r0, s15
+ 441              	.L23:
+ 442              	.LVL34:
+ 286:SynaptiX_FDK/components/modules/gps/minmea.h **** }
+ 443              		.loc 3 286 29 view .LVU118
+ 444              	.LBE20:
+ 445              	.LBE19:
+ 446              		.loc 1 173 29 discriminator 1 view .LVU119
+ 447 0134 A066     		str	r0, [r4, #104]	@ float
+ 174:SynaptiX_FDK/components/modules/gps/gps.c ****             gps->satellites = gga.satellites_tracked;
+ 448              		.loc 1 174 13 is_stmt 1 view .LVU120
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 19
+
+
+ 449              		.loc 1 174 34 is_stmt 0 view .LVU121
+ 450 0136 179B     		ldr	r3, [sp, #92]
+ 451              		.loc 1 174 29 view .LVU122
+ 452 0138 2367     		str	r3, [r4, #112]
+ 175:SynaptiX_FDK/components/modules/gps/gps.c ****             log_info(TAG, "GGA: alt=%.2f sat=%d", gps->altitude, gps->satellites);
+ 453              		.loc 1 175 13 is_stmt 1 view .LVU123
+ 454 013a 0293     		str	r3, [sp, #8]
+ 455 013c FFF7FEFF 		bl	__aeabi_f2d
+ 456              	.LVL35:
+ 457 0140 CDE90001 		strd	r0, [sp]
+ 458 0144 0C4A     		ldr	r2, .L29+20
+ 459 0146 0849     		ldr	r1, .L29+4
+ 460 0148 0320     		movs	r0, #3
+ 461 014a FFF7FEFF 		bl	log_func
+ 462              	.LVL36:
+ 463              	.L14:
+ 464              		.loc 1 175 13 is_stmt 0 view .LVU124
+ 465              	.LBE18:
+ 176:SynaptiX_FDK/components/modules/gps/gps.c ****         }
+ 177:SynaptiX_FDK/components/modules/gps/gps.c ****         else
+ 178:SynaptiX_FDK/components/modules/gps/gps.c ****         {
+ 179:SynaptiX_FDK/components/modules/gps/gps.c ****             log_warn(TAG, "GGA parse failed");
+ 180:SynaptiX_FDK/components/modules/gps/gps.c ****         }
+ 181:SynaptiX_FDK/components/modules/gps/gps.c ****     }
+ 182:SynaptiX_FDK/components/modules/gps/gps.c ****     break;
+ 183:SynaptiX_FDK/components/modules/gps/gps.c ****     default:
+ 184:SynaptiX_FDK/components/modules/gps/gps.c ****         break;
+ 185:SynaptiX_FDK/components/modules/gps/gps.c ****     }
+ 186:SynaptiX_FDK/components/modules/gps/gps.c **** }...
+ 466              		.loc 1 186 1 view .LVU125
+ 467 014e 22B0     		add	sp, sp, #136
+ 468              	.LCFI3:
+ 469              		.cfi_remember_state
+ 470              		.cfi_def_cfa_offset 16
+ 471              		@ sp needed
+ 472 0150 70BD     		pop	{r4, r5, r6, pc}
+ 473              	.LVL37:
+ 474              	.L26:
+ 475              	.LCFI4:
+ 476              		.cfi_restore_state
+ 477              	.LBB23:
+ 478              	.LBB22:
+ 479              	.LBB21:
+ 285:SynaptiX_FDK/components/modules/gps/minmea.h ****     return (float) f->value / (float) f->scale;
+ 480              		.loc 3 285 16 view .LVU126
+ 481 0152 0A48     		ldr	r0, .L29+24
+ 482 0154 EEE7     		b	.L23
+ 483              	.LVL38:
+ 484              	.L22:
+ 285:SynaptiX_FDK/components/modules/gps/minmea.h ****     return (float) f->value / (float) f->scale;
+ 485              		.loc 3 285 16 view .LVU127
+ 486              	.LBE21:
+ 487              	.LBE22:
+ 179:SynaptiX_FDK/components/modules/gps/gps.c ****             log_warn(TAG, "GGA parse failed");
+ 488              		.loc 1 179 13 is_stmt 1 view .LVU128
+ 489 0156 0A4A     		ldr	r2, .L29+28
+ 490 0158 0349     		ldr	r1, .L29+4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 20
+
+
+ 491 015a 0220     		movs	r0, #2
+ 492 015c FFF7FEFF 		bl	log_func
+ 493              	.LVL39:
+ 494              	.LBE23:
+ 182:SynaptiX_FDK/components/modules/gps/gps.c ****     break;
+ 495              		.loc 1 182 5 view .LVU129
+ 496              		.loc 1 186 1 is_stmt 0 view .LVU130
+ 497 0160 F5E7     		b	.L14
+ 498              	.L30:
+ 499 0162 00BF     		.align	2
+ 500              	.L29:
+ 501 0164 20000000 		.word	.LC2
+ 502 0168 1C000000 		.word	.LC1
+ 503 016c 00000000 		.word	.LC0
+ 504 0170 0000C07F 		.word	2143289344
+ 505 0174 68000000 		.word	.LC3
+ 506 0178 7C000000 		.word	.LC4
+ 507 017c 0000C07F 		.word	2143289344
+ 508 0180 94000000 		.word	.LC5
+ 509              		.cfi_endproc
+ 510              	.LFE18:
+ 512              		.section	.text.gps_set_callback_handle,"ax",%progbits
+ 513              		.align	1
+ 514              		.global	gps_set_callback_handle
+ 515              		.syntax unified
+ 516              		.thumb
+ 517              		.thumb_func
+ 519              	gps_set_callback_handle:
+ 520              	.LVL40:
+ 521              	.LFB13:
+  40:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 522              		.loc 1 40 1 is_stmt 1 view -0
+ 523              		.cfi_startproc
+ 524              		@ args = 0, pretend = 0, frame = 0
+ 525              		@ frame_needed = 0, uses_anonymous_args = 0
+ 526              		@ link register save eliminated.
+  41:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->callback = _cb;
+ 527              		.loc 1 41 5 view .LVU132
+  41:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->callback = _cb;
+ 528              		.loc 1 41 20 is_stmt 0 view .LVU133
+ 529 0000 C0F89C11 		str	r1, [r0, #412]
+  42:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->arg = _arg;
+ 530              		.loc 1 42 5 is_stmt 1 view .LVU134
+  42:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->arg = _arg;
+ 531              		.loc 1 42 15 is_stmt 0 view .LVU135
+ 532 0004 C0F8A421 		str	r2, [r0, #420]
+  43:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 533              		.loc 1 43 1 view .LVU136
+ 534 0008 7047     		bx	lr
+ 535              		.cfi_endproc
+ 536              	.LFE13:
+ 538              		.section	.rodata.gps_init.str1.4,"aMS",%progbits,1
+ 539              		.align	2
+ 540              	.LC6:
+ 541 0000 496E6974 		.ascii	"Initializing\000"
+ 541      69616C69 
+ 541      7A696E67 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 21
+
+
+ 541      00
+ 542              		.section	.text.gps_init,"ax",%progbits
+ 543              		.align	1
+ 544              		.global	gps_init
+ 545              		.syntax unified
+ 546              		.thumb
+ 547              		.thumb_func
+ 549              	gps_init:
+ 550              	.LVL41:
+ 551              	.LFB12:
+  11:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 552              		.loc 1 11 1 is_stmt 1 view -0
+ 553              		.cfi_startproc
+ 554              		@ args = 4, pretend = 0, frame = 0
+ 555              		@ frame_needed = 0, uses_anonymous_args = 0
+  11:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 556              		.loc 1 11 1 is_stmt 0 view .LVU138
+ 557 0000 70B5     		push	{r4, r5, r6, lr}
+ 558              	.LCFI5:
+ 559              		.cfi_def_cfa_offset 16
+ 560              		.cfi_offset 4, -16
+ 561              		.cfi_offset 5, -12
+ 562              		.cfi_offset 6, -8
+ 563              		.cfi_offset 14, -4
+ 564 0002 0446     		mov	r4, r0
+ 565 0004 1646     		mov	r6, r2
+ 566 0006 1D46     		mov	r5, r3
+  12:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_uart_init(&_gps->comm, _uart_cfg, GPS_BUFF_MAX_SIZE, GPS_BUFF_MAX_SIZE);
+ 567              		.loc 1 12 5 is_stmt 1 view .LVU139
+ 568 0008 4FF48073 		mov	r3, #256
+ 569              	.LVL42:
+  12:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_uart_init(&_gps->comm, _uart_cfg, GPS_BUFF_MAX_SIZE, GPS_BUFF_MAX_SIZE);
+ 570              		.loc 1 12 5 is_stmt 0 view .LVU140
+ 571 000c 1A46     		mov	r2, r3
+ 572              	.LVL43:
+  12:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_uart_init(&_gps->comm, _uart_cfg, GPS_BUFF_MAX_SIZE, GPS_BUFF_MAX_SIZE);
+ 573              		.loc 1 12 5 view .LVU141
+ 574 000e FFF7FEFF 		bl	sx_uart_init
+ 575              	.LVL44:
+  18:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_init(&_gps->pwr, _gpio_ops, _pwr_arg);
+ 576              		.loc 1 18 5 is_stmt 1 view .LVU142
+ 577              	.LBB24:
+ 578              	.LBI24:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 579              		.loc 2 33 20 view .LVU143
+ 580              	.LBB25:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 581              		.loc 2 34 5 view .LVU144
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 582              		.loc 2 34 15 is_stmt 0 view .LVU145
+ 583 0012 6664     		str	r6, [r4, #68]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 584              		.loc 2 35 5 is_stmt 1 view .LVU146
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 585              		.loc 2 35 19 is_stmt 0 view .LVU147
+ 586 0014 A564     		str	r5, [r4, #72]
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 22
+
+
+ 587              		.loc 2 36 5 is_stmt 1 view .LVU148
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 588              		.loc 2 36 17 is_stmt 0 view .LVU149
+ 589 0016 0025     		movs	r5, #0
+ 590              	.LVL45:
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 591              		.loc 2 36 17 view .LVU150
+ 592 0018 84F84C50 		strb	r5, [r4, #76]
+ 593              	.LVL46:
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 594              		.loc 2 36 17 view .LVU151
+ 595              	.LBE25:
+ 596              	.LBE24:
+  19:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
+ 597              		.loc 1 19 5 is_stmt 1 view .LVU152
+ 598 001c 0121     		movs	r1, #1
+ 599 001e 04F14400 		add	r0, r4, #68
+ 600 0022 FFF7FEFF 		bl	sx_gpio_write
+ 601              	.LVL47:
+  28:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_init(&_gps->rst, _gpio_ops, _rst_arg);
+ 602              		.loc 1 28 5 view .LVU153
+ 603              	.LBB26:
+ 604              	.LBI26:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 605              		.loc 2 33 20 view .LVU154
+ 606              	.LBB27:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 607              		.loc 2 34 5 view .LVU155
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 608              		.loc 2 34 15 is_stmt 0 view .LVU156
+ 609 0026 2665     		str	r6, [r4, #80]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 610              		.loc 2 35 5 is_stmt 1 view .LVU157
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 611              		.loc 2 35 19 is_stmt 0 view .LVU158
+ 612 0028 049B     		ldr	r3, [sp, #16]
+ 613 002a 6365     		str	r3, [r4, #84]
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 614              		.loc 2 36 5 is_stmt 1 view .LVU159
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 615              		.loc 2 36 17 is_stmt 0 view .LVU160
+ 616 002c 84F85850 		strb	r5, [r4, #88]
+ 617              	.LVL48:
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 618              		.loc 2 36 17 view .LVU161
+ 619              	.LBE27:
+ 620              	.LBE26:
+  29:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
+ 621              		.loc 1 29 5 is_stmt 1 view .LVU162
+ 622 0030 0121     		movs	r1, #1
+ 623 0032 04F15000 		add	r0, r4, #80
+ 624 0036 FFF7FEFF 		bl	sx_gpio_write
+ 625              	.LVL49:
+  31:SynaptiX_FDK/components/modules/gps/gps.c ****     memset(_gps->buff, 0, GPS_BUFF_MAX_SIZE);
+ 626              		.loc 1 31 5 view .LVU163
+ 627 003a 4FF48072 		mov	r2, #256
+ 628 003e 2946     		mov	r1, r5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 23
+
+
+ 629 0040 04F19900 		add	r0, r4, #153
+ 630 0044 FFF7FEFF 		bl	memset
+ 631              	.LVL50:
+  32:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->state = GPS_IDLE;
+ 632              		.loc 1 32 5 view .LVU164
+  32:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->state = GPS_IDLE;
+ 633              		.loc 1 32 17 is_stmt 0 view .LVU165
+ 634 0048 84F89951 		strb	r5, [r4, #409]
+  33:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->buff_id = 0;
+ 635              		.loc 1 33 5 is_stmt 1 view .LVU166
+  33:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->buff_id = 0;
+ 636              		.loc 1 33 19 is_stmt 0 view .LVU167
+ 637 004c E565     		str	r5, [r4, #92]
+  34:SynaptiX_FDK/components/modules/gps/gps.c ****     gps_set_callback_handle(_gps, gps_callback_task, _gps);
+ 638              		.loc 1 34 5 is_stmt 1 view .LVU168
+ 639 004e 2246     		mov	r2, r4
+ 640 0050 0649     		ldr	r1, .L34
+ 641 0052 2046     		mov	r0, r4
+ 642 0054 FFF7FEFF 		bl	gps_set_callback_handle
+ 643              	.LVL51:
+  35:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_delay_ms(1000);
+ 644              		.loc 1 35 5 view .LVU169
+ 645 0058 4FF47A70 		mov	r0, #1000
+ 646 005c FFF7FEFF 		bl	sx_delay_ms
+ 647              	.LVL52:
+  36:SynaptiX_FDK/components/modules/gps/gps.c ****     log_debug(TAG, "Initializing");
+ 648              		.loc 1 36 5 view .LVU170
+ 649 0060 034A     		ldr	r2, .L34+4
+ 650 0062 0449     		ldr	r1, .L34+8
+ 651 0064 0420     		movs	r0, #4
+ 652 0066 FFF7FEFF 		bl	log_func
+ 653              	.LVL53:
+  37:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 654              		.loc 1 37 1 is_stmt 0 view .LVU171
+ 655 006a 70BD     		pop	{r4, r5, r6, pc}
+ 656              	.LVL54:
+ 657              	.L35:
+  37:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 658              		.loc 1 37 1 view .LVU172
+ 659              		.align	2
+ 660              	.L34:
+ 661 006c 00000000 		.word	gps_callback_task
+ 662 0070 00000000 		.word	.LC6
+ 663 0074 1C000000 		.word	.LC1
+ 664              		.cfi_endproc
+ 665              	.LFE12:
+ 667              		.section	.text.gps_reset,"ax",%progbits
+ 668              		.align	1
+ 669              		.global	gps_reset
+ 670              		.syntax unified
+ 671              		.thumb
+ 672              		.thumb_func
+ 674              	gps_reset:
+ 675              	.LVL55:
+ 676              	.LFB14:
+  47:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 677              		.loc 1 47 1 is_stmt 1 view -0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 24
+
+
+ 678              		.cfi_startproc
+ 679              		@ args = 0, pretend = 0, frame = 0
+ 680              		@ frame_needed = 0, uses_anonymous_args = 0
+  47:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 681              		.loc 1 47 1 is_stmt 0 view .LVU174
+ 682 0000 10B5     		push	{r4, lr}
+ 683              	.LCFI6:
+ 684              		.cfi_def_cfa_offset 8
+ 685              		.cfi_offset 4, -8
+ 686              		.cfi_offset 14, -4
+  48:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->rst, SX_GPIO_LOW);
+ 687              		.loc 1 48 5 is_stmt 1 view .LVU175
+ 688 0002 00F15004 		add	r4, r0, #80
+ 689 0006 0021     		movs	r1, #0
+ 690 0008 2046     		mov	r0, r4
+ 691              	.LVL56:
+  48:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->rst, SX_GPIO_LOW);
+ 692              		.loc 1 48 5 is_stmt 0 view .LVU176
+ 693 000a FFF7FEFF 		bl	sx_gpio_write
+ 694              	.LVL57:
+  49:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_delay_ms(200);
+ 695              		.loc 1 49 5 is_stmt 1 view .LVU177
+ 696 000e C820     		movs	r0, #200
+ 697 0010 FFF7FEFF 		bl	sx_delay_ms
+ 698              	.LVL58:
+  50:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->rst, SX_GPIO_HIGH);
+ 699              		.loc 1 50 5 view .LVU178
+ 700 0014 0121     		movs	r1, #1
+ 701 0016 2046     		mov	r0, r4
+ 702 0018 FFF7FEFF 		bl	sx_gpio_write
+ 703              	.LVL59:
+  51:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 704              		.loc 1 51 1 is_stmt 0 view .LVU179
+ 705 001c 10BD     		pop	{r4, pc}
+  51:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 706              		.loc 1 51 1 view .LVU180
+ 707              		.cfi_endproc
+ 708              	.LFE14:
+ 710              		.section	.text.gps_power_on,"ax",%progbits
+ 711              		.align	1
+ 712              		.global	gps_power_on
+ 713              		.syntax unified
+ 714              		.thumb
+ 715              		.thumb_func
+ 717              	gps_power_on:
+ 718              	.LVL60:
+ 719              	.LFB15:
+  53:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 720              		.loc 1 53 1 is_stmt 1 view -0
+ 721              		.cfi_startproc
+ 722              		@ args = 0, pretend = 0, frame = 0
+ 723              		@ frame_needed = 0, uses_anonymous_args = 0
+  53:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 724              		.loc 1 53 1 is_stmt 0 view .LVU182
+ 725 0000 08B5     		push	{r3, lr}
+ 726              	.LCFI7:
+ 727              		.cfi_def_cfa_offset 8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 25
+
+
+ 728              		.cfi_offset 3, -8
+ 729              		.cfi_offset 14, -4
+  54:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
+ 730              		.loc 1 54 5 is_stmt 1 view .LVU183
+ 731 0002 0121     		movs	r1, #1
+ 732 0004 4430     		adds	r0, r0, #68
+ 733              	.LVL61:
+  54:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_HIGH);
+ 734              		.loc 1 54 5 is_stmt 0 view .LVU184
+ 735 0006 FFF7FEFF 		bl	sx_gpio_write
+ 736              	.LVL62:
+  55:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 737              		.loc 1 55 1 view .LVU185
+ 738 000a 08BD     		pop	{r3, pc}
+ 739              		.cfi_endproc
+ 740              	.LFE15:
+ 742              		.section	.text.gps_power_off,"ax",%progbits
+ 743              		.align	1
+ 744              		.global	gps_power_off
+ 745              		.syntax unified
+ 746              		.thumb
+ 747              		.thumb_func
+ 749              	gps_power_off:
+ 750              	.LVL63:
+ 751              	.LFB16:
+  57:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 752              		.loc 1 57 1 is_stmt 1 view -0
+ 753              		.cfi_startproc
+ 754              		@ args = 0, pretend = 0, frame = 0
+ 755              		@ frame_needed = 0, uses_anonymous_args = 0
+  57:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 756              		.loc 1 57 1 is_stmt 0 view .LVU187
+ 757 0000 08B5     		push	{r3, lr}
+ 758              	.LCFI8:
+ 759              		.cfi_def_cfa_offset 8
+ 760              		.cfi_offset 3, -8
+ 761              		.cfi_offset 14, -4
+  58:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_LOW);
+ 762              		.loc 1 58 5 is_stmt 1 view .LVU188
+ 763 0002 0021     		movs	r1, #0
+ 764 0004 4430     		adds	r0, r0, #68
+ 765              	.LVL64:
+  58:SynaptiX_FDK/components/modules/gps/gps.c ****     sx_gpio_write(&_gps->pwr, SX_GPIO_LOW);
+ 766              		.loc 1 58 5 is_stmt 0 view .LVU189
+ 767 0006 FFF7FEFF 		bl	sx_gpio_write
+ 768              	.LVL65:
+  59:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 769              		.loc 1 59 1 view .LVU190
+ 770 000a 08BD     		pop	{r3, pc}
+ 771              		.cfi_endproc
+ 772              	.LFE16:
+ 774              		.section	.text.gps_process,"ax",%progbits
+ 775              		.align	1
+ 776              		.global	gps_process
+ 777              		.syntax unified
+ 778              		.thumb
+ 779              		.thumb_func
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 26
+
+
+ 781              	gps_process:
+ 782              	.LVL66:
+ 783              	.LFB17:
+  62:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 784              		.loc 1 62 1 is_stmt 1 view -0
+ 785              		.cfi_startproc
+ 786              		@ args = 0, pretend = 0, frame = 8
+ 787              		@ frame_needed = 0, uses_anonymous_args = 0
+  62:SynaptiX_FDK/components/modules/gps/gps.c **** {
+ 788              		.loc 1 62 1 is_stmt 0 view .LVU192
+ 789 0000 30B5     		push	{r4, r5, lr}
+ 790              	.LCFI9:
+ 791              		.cfi_def_cfa_offset 12
+ 792              		.cfi_offset 4, -12
+ 793              		.cfi_offset 5, -8
+ 794              		.cfi_offset 14, -4
+ 795 0002 83B0     		sub	sp, sp, #12
+ 796              	.LCFI10:
+ 797              		.cfi_def_cfa_offset 24
+ 798 0004 0446     		mov	r4, r0
+  63:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->time += _timestamp;
+ 799              		.loc 1 63 5 is_stmt 1 view .LVU193
+  63:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->time += _timestamp;
+ 800              		.loc 1 63 9 is_stmt 0 view .LVU194
+ 801 0006 D0F8A031 		ldr	r3, [r0, #416]
+  63:SynaptiX_FDK/components/modules/gps/gps.c ****     _gps->time += _timestamp;
+ 802              		.loc 1 63 16 view .LVU195
+ 803 000a 0B44     		add	r3, r3, r1
+ 804 000c C0F8A031 		str	r3, [r0, #416]
+  64:SynaptiX_FDK/components/modules/gps/gps.c ****     switch (_gps->state)
+ 805              		.loc 1 64 5 is_stmt 1 view .LVU196
+  64:SynaptiX_FDK/components/modules/gps/gps.c ****     switch (_gps->state)
+ 806              		.loc 1 64 17 is_stmt 0 view .LVU197
+ 807 0010 90F89931 		ldrb	r3, [r0, #409]	@ zero_extendqisi2
+  64:SynaptiX_FDK/components/modules/gps/gps.c ****     switch (_gps->state)
+ 808              		.loc 1 64 5 view .LVU198
+ 809 0014 012B     		cmp	r3, #1
+ 810 0016 1FD0     		beq	.L43
+ 811 0018 022B     		cmp	r3, #2
+ 812 001a 49D0     		beq	.L44
+ 813 001c 0BB1     		cbz	r3, .L45
+ 814              	.LVL67:
+ 815              	.L42:
+ 124:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 816              		.loc 1 124 1 view .LVU199
+ 817 001e 03B0     		add	sp, sp, #12
+ 818              	.LCFI11:
+ 819              		.cfi_remember_state
+ 820              		.cfi_def_cfa_offset 12
+ 821              		@ sp needed
+ 822 0020 30BD     		pop	{r4, r5, pc}
+ 823              	.LVL68:
+ 824              	.L45:
+ 825              	.LCFI12:
+ 826              		.cfi_restore_state
+ 827              	.LBB28:
+  68:SynaptiX_FDK/components/modules/gps/gps.c ****         while(sx_uart_available(&_gps->comm) > 0){
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 27
+
+
+ 828              		.loc 1 68 46 is_stmt 1 view .LVU200
+  68:SynaptiX_FDK/components/modules/gps/gps.c ****         while(sx_uart_available(&_gps->comm) > 0){
+ 829              		.loc 1 68 15 is_stmt 0 view .LVU201
+ 830 0022 2046     		mov	r0, r4
+ 831 0024 FFF7FEFF 		bl	sx_uart_available
+ 832              	.LVL69:
+  68:SynaptiX_FDK/components/modules/gps/gps.c ****         while(sx_uart_available(&_gps->comm) > 0){
+ 833              		.loc 1 68 46 discriminator 1 view .LVU202
+ 834 0028 0028     		cmp	r0, #0
+ 835 002a F8DD     		ble	.L42
+  69:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 == sx_uart_read(&_gps->comm, &_gps->buff[0], 1, 10))
+ 836              		.loc 1 69 13 is_stmt 1 view .LVU203
+  69:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 == sx_uart_read(&_gps->comm, &_gps->buff[0], 1, 10))
+ 837              		.loc 1 69 22 is_stmt 0 view .LVU204
+ 838 002c 0A23     		movs	r3, #10
+ 839 002e 0122     		movs	r2, #1
+ 840 0030 04F19901 		add	r1, r4, #153
+ 841 0034 2046     		mov	r0, r4
+ 842 0036 FFF7FEFF 		bl	sx_uart_read
+ 843              	.LVL70:
+  69:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 == sx_uart_read(&_gps->comm, &_gps->buff[0], 1, 10))
+ 844              		.loc 1 69 16 discriminator 1 view .LVU205
+ 845 003a 0128     		cmp	r0, #1
+ 846 003c F1D1     		bne	.L45
+  71:SynaptiX_FDK/components/modules/gps/gps.c ****                 if (_gps->buff[0] == '$')
+ 847              		.loc 1 71 17 is_stmt 1 view .LVU206
+  71:SynaptiX_FDK/components/modules/gps/gps.c ****                 if (_gps->buff[0] == '$')
+ 848              		.loc 1 71 31 is_stmt 0 view .LVU207
+ 849 003e 94F89930 		ldrb	r3, [r4, #153]	@ zero_extendqisi2
+  71:SynaptiX_FDK/components/modules/gps/gps.c ****                 if (_gps->buff[0] == '$')
+ 850              		.loc 1 71 20 view .LVU208
+ 851 0042 242B     		cmp	r3, #36
+ 852 0044 EDD1     		bne	.L45
+  73:SynaptiX_FDK/components/modules/gps/gps.c ****                     _gps->buff_id = 1;
+ 853              		.loc 1 73 21 is_stmt 1 view .LVU209
+  73:SynaptiX_FDK/components/modules/gps/gps.c ****                     _gps->buff_id = 1;
+ 854              		.loc 1 73 35 is_stmt 0 view .LVU210
+ 855 0046 0123     		movs	r3, #1
+ 856 0048 E365     		str	r3, [r4, #92]
+  74:SynaptiX_FDK/components/modules/gps/gps.c ****                     _gps->state = GPS_READ_MESSAGE;
+ 857              		.loc 1 74 21 is_stmt 1 view .LVU211
+  74:SynaptiX_FDK/components/modules/gps/gps.c ****                     _gps->state = GPS_READ_MESSAGE;
+ 858              		.loc 1 74 33 is_stmt 0 view .LVU212
+ 859 004a 84F89931 		strb	r3, [r4, #409]
+  75:SynaptiX_FDK/components/modules/gps/gps.c ****                     break;
+ 860              		.loc 1 75 21 is_stmt 1 view .LVU213
+ 861 004e E6E7     		b	.L42
+ 862              	.L48:
+ 100:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->buff_id++;
+ 863              		.loc 1 100 13 view .LVU214
+ 100:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->buff_id++;
+ 864              		.loc 1 100 26 is_stmt 0 view .LVU215
+ 865 0050 0133     		adds	r3, r3, #1
+ 866 0052 E365     		str	r3, [r4, #92]
+ 102:SynaptiX_FDK/components/modules/gps/gps.c ****             if (_gps->buff_id >= GPS_BUFF_MAX_SIZE - 2)
+ 867              		.loc 1 102 13 is_stmt 1 view .LVU216
+ 102:SynaptiX_FDK/components/modules/gps/gps.c ****             if (_gps->buff_id >= GPS_BUFF_MAX_SIZE - 2)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 28
+
+
+ 868              		.loc 1 102 16 is_stmt 0 view .LVU217
+ 869 0054 FD2B     		cmp	r3, #253
+ 870 0056 26D8     		bhi	.L52
+ 871              	.L43:
+  83:SynaptiX_FDK/components/modules/gps/gps.c ****         while (sx_uart_available(&_gps->comm) > 0)
+ 872              		.loc 1 83 47 is_stmt 1 view .LVU218
+  83:SynaptiX_FDK/components/modules/gps/gps.c ****         while (sx_uart_available(&_gps->comm) > 0)
+ 873              		.loc 1 83 16 is_stmt 0 view .LVU219
+ 874 0058 2046     		mov	r0, r4
+ 875 005a FFF7FEFF 		bl	sx_uart_available
+ 876              	.LVL71:
+  83:SynaptiX_FDK/components/modules/gps/gps.c ****         while (sx_uart_available(&_gps->comm) > 0)
+ 877              		.loc 1 83 47 discriminator 1 view .LVU220
+ 878 005e 0028     		cmp	r0, #0
+ 879 0060 DDDD     		ble	.L42
+  85:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 != sx_uart_read(&_gps->comm, &byte, 1, 1))
+ 880              		.loc 1 85 13 is_stmt 1 view .LVU221
+  85:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 != sx_uart_read(&_gps->comm, &byte, 1, 1))
+ 881              		.loc 1 85 22 is_stmt 0 view .LVU222
+ 882 0062 0123     		movs	r3, #1
+ 883 0064 1A46     		mov	r2, r3
+ 884 0066 0DF10701 		add	r1, sp, #7
+ 885 006a 2046     		mov	r0, r4
+ 886 006c FFF7FEFF 		bl	sx_uart_read
+ 887              	.LVL72:
+  85:SynaptiX_FDK/components/modules/gps/gps.c ****             if (1 != sx_uart_read(&_gps->comm, &byte, 1, 1))
+ 888              		.loc 1 85 16 discriminator 1 view .LVU223
+ 889 0070 0128     		cmp	r0, #1
+ 890 0072 D4D1     		bne	.L42
+  88:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->buff[_gps->buff_id] = byte;
+ 891              		.loc 1 88 13 is_stmt 1 view .LVU224
+  88:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->buff[_gps->buff_id] = byte;
+ 892              		.loc 1 88 28 is_stmt 0 view .LVU225
+ 893 0074 E36D     		ldr	r3, [r4, #92]
+  88:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->buff[_gps->buff_id] = byte;
+ 894              		.loc 1 88 39 view .LVU226
+ 895 0076 9DF80720 		ldrb	r2, [sp, #7]	@ zero_extendqisi2
+ 896 007a E118     		adds	r1, r4, r3
+ 897 007c 81F89920 		strb	r2, [r1, #153]
+  91:SynaptiX_FDK/components/modules/gps/gps.c ****             if (_gps->buff_id > 0 &&
+ 898              		.loc 1 91 13 is_stmt 1 view .LVU227
+  91:SynaptiX_FDK/components/modules/gps/gps.c ****             if (_gps->buff_id > 0 &&
+ 899              		.loc 1 91 16 is_stmt 0 view .LVU228
+ 900 0080 002B     		cmp	r3, #0
+ 901 0082 E5D0     		beq	.L48
+  92:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id - 1] == '\r' &&
+ 902              		.loc 1 92 42 view .LVU229
+ 903 0084 591E     		subs	r1, r3, #1
+  92:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id - 1] == '\r' &&
+ 904              		.loc 1 92 27 view .LVU230
+ 905 0086 2144     		add	r1, r1, r4
+ 906 0088 91F89910 		ldrb	r1, [r1, #153]	@ zero_extendqisi2
+  91:SynaptiX_FDK/components/modules/gps/gps.c ****             if (_gps->buff_id > 0 &&
+ 907              		.loc 1 91 35 discriminator 1 view .LVU231
+ 908 008c 0D29     		cmp	r1, #13
+ 909 008e DFD1     		bne	.L48
+  92:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id - 1] == '\r' &&
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 29
+
+
+ 910              		.loc 1 92 55 view .LVU232
+ 911 0090 0A2A     		cmp	r2, #10
+ 912 0092 DDD1     		bne	.L48
+  95:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id + 1] = '\0';
+ 913              		.loc 1 95 17 is_stmt 1 view .LVU233
+  95:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id + 1] = '\0';
+ 914              		.loc 1 95 42 is_stmt 0 view .LVU234
+ 915 0094 0133     		adds	r3, r3, #1
+  95:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff[_gps->buff_id + 1] = '\0';
+ 916              		.loc 1 95 47 view .LVU235
+ 917 0096 2344     		add	r3, r3, r4
+ 918 0098 0022     		movs	r2, #0
+ 919 009a 83F89920 		strb	r2, [r3, #153]
+  96:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->state = GPS_NEW_MESSAGE;
+ 920              		.loc 1 96 17 is_stmt 1 view .LVU236
+  96:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->state = GPS_NEW_MESSAGE;
+ 921              		.loc 1 96 29 is_stmt 0 view .LVU237
+ 922 009e 0223     		movs	r3, #2
+ 923 00a0 84F89931 		strb	r3, [r4, #409]
+  97:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+ 924              		.loc 1 97 17 is_stmt 1 view .LVU238
+ 925 00a4 BBE7     		b	.L42
+ 926              	.L52:
+ 104:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff_id = 0;
+ 927              		.loc 1 104 17 view .LVU239
+ 104:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->buff_id = 0;
+ 928              		.loc 1 104 31 is_stmt 0 view .LVU240
+ 929 00a6 0023     		movs	r3, #0
+ 930 00a8 E365     		str	r3, [r4, #92]
+ 105:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->state = GPS_IDLE;
+ 931              		.loc 1 105 17 is_stmt 1 view .LVU241
+ 105:SynaptiX_FDK/components/modules/gps/gps.c ****                 _gps->state = GPS_IDLE;
+ 932              		.loc 1 105 29 is_stmt 0 view .LVU242
+ 933 00aa 84F89931 		strb	r3, [r4, #409]
+ 106:SynaptiX_FDK/components/modules/gps/gps.c ****                 break;
+ 934              		.loc 1 106 17 is_stmt 1 view .LVU243
+ 935 00ae B6E7     		b	.L42
+ 936              	.LVL73:
+ 937              	.L44:
+ 112:SynaptiX_FDK/components/modules/gps/gps.c ****         if (_gps->callback)
+ 938              		.loc 1 112 9 view .LVU244
+ 112:SynaptiX_FDK/components/modules/gps/gps.c ****         if (_gps->callback)
+ 939              		.loc 1 112 17 is_stmt 0 view .LVU245
+ 940 00b0 D0F89C31 		ldr	r3, [r0, #412]
+ 112:SynaptiX_FDK/components/modules/gps/gps.c ****         if (_gps->callback)
+ 941              		.loc 1 112 12 view .LVU246
+ 942 00b4 23B1     		cbz	r3, .L50
+ 114:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->callback(_gps, _gps->buff, _gps->arg);
+ 943              		.loc 1 114 13 is_stmt 1 view .LVU247
+ 944 00b6 D0F8A421 		ldr	r2, [r0, #420]
+ 945 00ba 00F19901 		add	r1, r0, #153
+ 946              	.LVL74:
+ 114:SynaptiX_FDK/components/modules/gps/gps.c ****             _gps->callback(_gps, _gps->buff, _gps->arg);
+ 947              		.loc 1 114 13 is_stmt 0 view .LVU248
+ 948 00be 9847     		blx	r3
+ 949              	.LVL75:
+ 950              	.L50:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 30
+
+
+ 116:SynaptiX_FDK/components/modules/gps/gps.c ****         _gps->state = GPS_IDLE;
+ 951              		.loc 1 116 9 is_stmt 1 view .LVU249
+ 116:SynaptiX_FDK/components/modules/gps/gps.c ****         _gps->state = GPS_IDLE;
+ 952              		.loc 1 116 21 is_stmt 0 view .LVU250
+ 953 00c0 0025     		movs	r5, #0
+ 954 00c2 84F89951 		strb	r5, [r4, #409]
+ 118:SynaptiX_FDK/components/modules/gps/gps.c ****         memset(_gps->buff, 0, _gps->buff_id);
+ 955              		.loc 1 118 9 is_stmt 1 view .LVU251
+ 956 00c6 E26D     		ldr	r2, [r4, #92]
+ 957 00c8 2946     		mov	r1, r5
+ 958 00ca 04F19900 		add	r0, r4, #153
+ 959 00ce FFF7FEFF 		bl	memset
+ 960              	.LVL76:
+ 119:SynaptiX_FDK/components/modules/gps/gps.c ****         _gps->buff_id = 0;
+ 961              		.loc 1 119 9 view .LVU252
+ 119:SynaptiX_FDK/components/modules/gps/gps.c ****         _gps->buff_id = 0;
+ 962              		.loc 1 119 23 is_stmt 0 view .LVU253
+ 963 00d2 E565     		str	r5, [r4, #92]
+ 120:SynaptiX_FDK/components/modules/gps/gps.c ****         break;
+ 964              		.loc 1 120 9 is_stmt 1 view .LVU254
+ 965              	.LBE28:
+ 124:SynaptiX_FDK/components/modules/gps/gps.c **** }
+ 966              		.loc 1 124 1 is_stmt 0 view .LVU255
+ 967 00d4 A3E7     		b	.L42
+ 968              		.cfi_endproc
+ 969              	.LFE17:
+ 971              		.text
+ 972              	.Letext0:
+ 973              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 974              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 975              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 976              		.file 7 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 977              		.file 8 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 978              		.file 9 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
+ 979              		.file 10 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 980              		.file 11 "SynaptiX_FDK/components/modules/gps/gps.h"
+ 981              		.file 12 "SynaptiX_FDK/services/logger/logger.h"
+ 982              		.file 13 "SynaptiX_FDK/utils/delay/sx_delay.h"
+ 983              		.file 14 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 984              		.file 15 "<built-in>"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s 			page 31
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 gps.c
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:22     .text.sx_gpio_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:27     .text.sx_gpio_write:00000000 sx_gpio_write
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:90     .text.minmea_tocoord:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:95     .text.minmea_tocoord:00000000 minmea_tocoord
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:168    .text.minmea_tocoord:0000005c $d
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:175    .rodata.gps_callback_task.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:195    .text.gps_callback_task:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:200    .text.gps_callback_task:00000000 gps_callback_task
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:501    .text.gps_callback_task:00000164 $d
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:513    .text.gps_set_callback_handle:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:519    .text.gps_set_callback_handle:00000000 gps_set_callback_handle
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:539    .rodata.gps_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:543    .text.gps_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:549    .text.gps_init:00000000 gps_init
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:661    .text.gps_init:0000006c $d
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:668    .text.gps_reset:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:674    .text.gps_reset:00000000 gps_reset
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:711    .text.gps_power_on:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:717    .text.gps_power_on:00000000 gps_power_on
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:743    .text.gps_power_off:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:749    .text.gps_power_off:00000000 gps_power_off
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:775    .text.gps_process:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccY2pAnq.s:781    .text.gps_process:00000000 gps_process
+
+UNDEFINED SYMBOLS
+minmea_sentence_id
+minmea_parse_rmc
+minmea_getdatetime
+__aeabi_f2d
+log_func
+minmea_parse_gga
+sx_uart_init
+memset
+sx_delay_ms
+sx_uart_available
+sx_uart_read

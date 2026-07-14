@@ -1,0 +1,518 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"cqueue.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/utils/cqueue/cqueue.c"
+  21              		.section	.text.cqueue_init_static,"ax",%progbits
+  22              		.align	1
+  23              		.global	cqueue_init_static
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	cqueue_init_static:
+  29              	.LVL0:
+  30              	.LFB3:
+   1:SynaptiX_FDK/utils/cqueue/cqueue.c **** #include "cqueue.h"
+   2:SynaptiX_FDK/utils/cqueue/cqueue.c **** #include <string.h>
+   3:SynaptiX_FDK/utils/cqueue/cqueue.c **** 
+   4:SynaptiX_FDK/utils/cqueue/cqueue.c **** 
+   5:SynaptiX_FDK/utils/cqueue/cqueue.c **** CQueue_t *cqueue_init_static(CQueue_t *queue,void *buff,size_t len, size_t size){
+  31              		.loc 1 5 81 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		@ link register save eliminated.
+   6:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->buff = buff;
+  36              		.loc 1 6 5 view .LVU1
+  37              		.loc 1 6 17 is_stmt 0 view .LVU2
+  38 0000 0160     		str	r1, [r0]
+   7:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->len = len;
+  39              		.loc 1 7 5 is_stmt 1 view .LVU3
+  40              		.loc 1 7 16 is_stmt 0 view .LVU4
+  41 0002 8260     		str	r2, [r0, #8]
+   8:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->size = size;
+  42              		.loc 1 8 5 is_stmt 1 view .LVU5
+  43              		.loc 1 8 17 is_stmt 0 view .LVU6
+  44 0004 4360     		str	r3, [r0, #4]
+   9:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->count = 0;
+  45              		.loc 1 9 5 is_stmt 1 view .LVU7
+  46              		.loc 1 9 18 is_stmt 0 view .LVU8
+  47 0006 0023     		movs	r3, #0
+  48              	.LVL1:
+  49              		.loc 1 9 18 view .LVU9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 2
+
+
+  50 0008 4361     		str	r3, [r0, #20]
+  10:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->head = 0;
+  51              		.loc 1 10 5 is_stmt 1 view .LVU10
+  52              		.loc 1 10 17 is_stmt 0 view .LVU11
+  53 000a C360     		str	r3, [r0, #12]
+  11:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->tail = 0;
+  54              		.loc 1 11 5 is_stmt 1 view .LVU12
+  55              		.loc 1 11 17 is_stmt 0 view .LVU13
+  56 000c 0361     		str	r3, [r0, #16]
+  12:SynaptiX_FDK/utils/cqueue/cqueue.c ****     return queue;
+  57              		.loc 1 12 5 is_stmt 1 view .LVU14
+  13:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+  58              		.loc 1 13 1 is_stmt 0 view .LVU15
+  59 000e 7047     		bx	lr
+  60              		.cfi_endproc
+  61              	.LFE3:
+  63              		.section	.rodata.cqueue_init.str1.4,"aMS",%progbits,1
+  64              		.align	2
+  65              	.LC0:
+  66 0000 71756575 		.ascii	"queue->buff != ((void *)0)\000"
+  66      652D3E62 
+  66      75666620 
+  66      213D2028 
+  66      28766F69 
+  67 001b 00       		.align	2
+  68              	.LC1:
+  69 001c 53796E61 		.ascii	"SynaptiX_FDK/utils/cqueue/cqueue.c\000"
+  69      70746958 
+  69      5F46444B 
+  69      2F757469 
+  69      6C732F63 
+  70              		.section	.text.cqueue_init,"ax",%progbits
+  71              		.align	1
+  72              		.global	cqueue_init
+  73              		.syntax unified
+  74              		.thumb
+  75              		.thumb_func
+  77              	cqueue_init:
+  78              	.LVL2:
+  79              	.LFB4:
+  14:SynaptiX_FDK/utils/cqueue/cqueue.c **** CQueue_t *cqueue_init(CQueue_t *queue,size_t len,size_t size){
+  80              		.loc 1 14 62 is_stmt 1 view -0
+  81              		.cfi_startproc
+  82              		@ args = 0, pretend = 0, frame = 0
+  83              		@ frame_needed = 0, uses_anonymous_args = 0
+  84              		.loc 1 14 62 is_stmt 0 view .LVU17
+  85 0000 10B5     		push	{r4, lr}
+  86              	.LCFI0:
+  87              		.cfi_def_cfa_offset 8
+  88              		.cfi_offset 4, -8
+  89              		.cfi_offset 14, -4
+  90 0002 0446     		mov	r4, r0
+  15:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->buff = NULL;
+  91              		.loc 1 15 5 is_stmt 1 view .LVU18
+  92              		.loc 1 15 17 is_stmt 0 view .LVU19
+  93 0004 0023     		movs	r3, #0
+  94 0006 0360     		str	r3, [r0]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 3
+
+
+  16:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->len = len;
+  95              		.loc 1 16 5 is_stmt 1 view .LVU20
+  96              		.loc 1 16 16 is_stmt 0 view .LVU21
+  97 0008 8160     		str	r1, [r0, #8]
+  17:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->size = size;
+  98              		.loc 1 17 5 is_stmt 1 view .LVU22
+  99              		.loc 1 17 17 is_stmt 0 view .LVU23
+ 100 000a 4260     		str	r2, [r0, #4]
+  18:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->count = 0;
+ 101              		.loc 1 18 5 is_stmt 1 view .LVU24
+ 102              		.loc 1 18 18 is_stmt 0 view .LVU25
+ 103 000c 4361     		str	r3, [r0, #20]
+  19:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->head = 0;
+ 104              		.loc 1 19 5 is_stmt 1 view .LVU26
+ 105              		.loc 1 19 17 is_stmt 0 view .LVU27
+ 106 000e C360     		str	r3, [r0, #12]
+  20:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->tail = 0;
+ 107              		.loc 1 20 5 is_stmt 1 view .LVU28
+ 108              		.loc 1 20 17 is_stmt 0 view .LVU29
+ 109 0010 0361     		str	r3, [r0, #16]
+  21:SynaptiX_FDK/utils/cqueue/cqueue.c **** 
+  22:SynaptiX_FDK/utils/cqueue/cqueue.c ****     queue->buff = (void*) malloc(queue->size * queue->len);
+ 110              		.loc 1 22 5 is_stmt 1 view .LVU30
+ 111              		.loc 1 22 19 is_stmt 0 view .LVU31
+ 112 0012 02FB01F0 		mul	r0, r2, r1
+ 113              	.LVL3:
+ 114              		.loc 1 22 19 view .LVU32
+ 115 0016 FFF7FEFF 		bl	malloc
+ 116              	.LVL4:
+ 117              		.loc 1 22 17 discriminator 1 view .LVU33
+ 118 001a 2060     		str	r0, [r4]
+  23:SynaptiX_FDK/utils/cqueue/cqueue.c **** 
+  24:SynaptiX_FDK/utils/cqueue/cqueue.c ****     CQUEUE_ASSERT(queue->buff != NULL);
+ 119              		.loc 1 24 5 is_stmt 1 view .LVU34
+ 120 001c 08B1     		cbz	r0, .L5
+  25:SynaptiX_FDK/utils/cqueue/cqueue.c **** 
+  26:SynaptiX_FDK/utils/cqueue/cqueue.c ****     return queue;
+ 121              		.loc 1 26 5 view .LVU35
+  27:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+ 122              		.loc 1 27 1 is_stmt 0 view .LVU36
+ 123 001e 2046     		mov	r0, r4
+ 124 0020 10BD     		pop	{r4, pc}
+ 125              	.LVL5:
+ 126              	.L5:
+  24:SynaptiX_FDK/utils/cqueue/cqueue.c **** 
+ 127              		.loc 1 24 5 discriminator 1 view .LVU37
+ 128 0022 034B     		ldr	r3, .L6
+ 129 0024 034A     		ldr	r2, .L6+4
+ 130 0026 1821     		movs	r1, #24
+ 131 0028 0348     		ldr	r0, .L6+8
+ 132 002a FFF7FEFF 		bl	__assert_func
+ 133              	.LVL6:
+ 134              	.L7:
+ 135 002e 00BF     		.align	2
+ 136              	.L6:
+ 137 0030 00000000 		.word	.LC0
+ 138 0034 00000000 		.word	__func__.0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 4
+
+
+ 139 0038 1C000000 		.word	.LC1
+ 140              		.cfi_endproc
+ 141              	.LFE4:
+ 143              		.section	.text.cqueue_is_empty,"ax",%progbits
+ 144              		.align	1
+ 145              		.global	cqueue_is_empty
+ 146              		.syntax unified
+ 147              		.thumb
+ 148              		.thumb_func
+ 150              	cqueue_is_empty:
+ 151              	.LVL7:
+ 152              	.LFB7:
+  28:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_receive(CQueue_t *queue, void *item){
+  29:SynaptiX_FDK/utils/cqueue/cqueue.c ****     if(!cqueue_is_empty(queue)){
+  30:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(item,queue->buff+queue->tail*queue->size,queue->size);
+  31:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->tail = (queue->tail+1) % queue->len;
+  32:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count -= 1;
+  33:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Receiver Item 0X%02X , head %d , tail %d\n",*(uint8_t*)item,queue->head,que
+  34:SynaptiX_FDK/utils/cqueue/cqueue.c ****         return true;
+  35:SynaptiX_FDK/utils/cqueue/cqueue.c ****     }
+  36:SynaptiX_FDK/utils/cqueue/cqueue.c ****     CQUEUE_DEBUG("The Queue is empty\n");
+  37:SynaptiX_FDK/utils/cqueue/cqueue.c ****     return false;
+  38:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+  39:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_send(CQueue_t *queue,void *item){
+  40:SynaptiX_FDK/utils/cqueue/cqueue.c ****     if(!cqueue_is_full(queue)){
+  41:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(queue->buff+queue->head*queue->size,item,queue->size);
+  42:SynaptiX_FDK/utils/cqueue/cqueue.c ****         int next = (queue->head+1) % queue->len;
+  43:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->head = next;
+  44:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count += 1;
+  45:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Send Item 0X%02X, head %d , tail %d\n",*(uint8_t*)item,queue->head,queue->t
+  46:SynaptiX_FDK/utils/cqueue/cqueue.c ****         return true;
+  47:SynaptiX_FDK/utils/cqueue/cqueue.c ****     }
+  48:SynaptiX_FDK/utils/cqueue/cqueue.c ****     CQUEUE_DEBUG("The Queue is full\n");
+  49:SynaptiX_FDK/utils/cqueue/cqueue.c ****     return false;
+  50:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+  51:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_is_empty(CQueue_t *queue){
+ 153              		.loc 1 51 38 is_stmt 1 view -0
+ 154              		.cfi_startproc
+ 155              		@ args = 0, pretend = 0, frame = 0
+ 156              		@ frame_needed = 0, uses_anonymous_args = 0
+ 157              		@ link register save eliminated.
+  52:SynaptiX_FDK/utils/cqueue/cqueue.c ****     return (queue->count == 0) ? true : false;
+ 158              		.loc 1 52 5 view .LVU39
+ 159              		.loc 1 52 18 is_stmt 0 view .LVU40
+ 160 0000 4069     		ldr	r0, [r0, #20]
+ 161              	.LVL8:
+  53:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+ 162              		.loc 1 53 1 view .LVU41
+ 163 0002 B0FA80F0 		clz	r0, r0
+ 164 0006 4009     		lsrs	r0, r0, #5
+ 165 0008 7047     		bx	lr
+ 166              		.cfi_endproc
+ 167              	.LFE7:
+ 169              		.section	.text.cqueue_receive,"ax",%progbits
+ 170              		.align	1
+ 171              		.global	cqueue_receive
+ 172              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 5
+
+
+ 173              		.thumb
+ 174              		.thumb_func
+ 176              	cqueue_receive:
+ 177              	.LVL9:
+ 178              	.LFB5:
+  28:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_receive(CQueue_t *queue, void *item){
+ 179              		.loc 1 28 49 is_stmt 1 view -0
+ 180              		.cfi_startproc
+ 181              		@ args = 0, pretend = 0, frame = 0
+ 182              		@ frame_needed = 0, uses_anonymous_args = 0
+  28:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_receive(CQueue_t *queue, void *item){
+ 183              		.loc 1 28 49 is_stmt 0 view .LVU43
+ 184 0000 38B5     		push	{r3, r4, r5, lr}
+ 185              	.LCFI1:
+ 186              		.cfi_def_cfa_offset 16
+ 187              		.cfi_offset 3, -16
+ 188              		.cfi_offset 4, -12
+ 189              		.cfi_offset 5, -8
+ 190              		.cfi_offset 14, -4
+ 191 0002 0446     		mov	r4, r0
+ 192 0004 0D46     		mov	r5, r1
+  29:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(item,queue->buff+queue->tail*queue->size,queue->size);
+ 193              		.loc 1 29 5 is_stmt 1 view .LVU44
+  29:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(item,queue->buff+queue->tail*queue->size,queue->size);
+ 194              		.loc 1 29 9 is_stmt 0 view .LVU45
+ 195 0006 FFF7FEFF 		bl	cqueue_is_empty
+ 196              	.LVL10:
+  29:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(item,queue->buff+queue->tail*queue->size,queue->size);
+ 197              		.loc 1 29 7 discriminator 1 view .LVU46
+ 198 000a 08B1     		cbz	r0, .L13
+  37:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+ 199              		.loc 1 37 12 view .LVU47
+ 200 000c 0020     		movs	r0, #0
+ 201              	.L10:
+  38:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_send(CQueue_t *queue,void *item){
+ 202              		.loc 1 38 1 view .LVU48
+ 203 000e 38BD     		pop	{r3, r4, r5, pc}
+ 204              	.LVL11:
+ 205              	.L13:
+  30:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->tail = (queue->tail+1) % queue->len;
+ 206              		.loc 1 30 9 is_stmt 1 view .LVU49
+  30:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->tail = (queue->tail+1) % queue->len;
+ 207              		.loc 1 30 26 is_stmt 0 view .LVU50
+ 208 0010 2368     		ldr	r3, [r4]
+  30:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->tail = (queue->tail+1) % queue->len;
+ 209              		.loc 1 30 38 view .LVU51
+ 210 0012 2169     		ldr	r1, [r4, #16]
+  30:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->tail = (queue->tail+1) % queue->len;
+ 211              		.loc 1 30 50 view .LVU52
+ 212 0014 6268     		ldr	r2, [r4, #4]
+  30:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->tail = (queue->tail+1) % queue->len;
+ 213              		.loc 1 30 9 view .LVU53
+ 214 0016 02FB0131 		mla	r1, r2, r1, r3
+ 215 001a 2846     		mov	r0, r5
+ 216 001c FFF7FEFF 		bl	memcpy
+ 217              	.LVL12:
+  31:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count -= 1;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 6
+
+
+ 218              		.loc 1 31 9 is_stmt 1 view .LVU54
+  31:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count -= 1;
+ 219              		.loc 1 31 29 is_stmt 0 view .LVU55
+ 220 0020 2369     		ldr	r3, [r4, #16]
+  31:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count -= 1;
+ 221              		.loc 1 31 35 view .LVU56
+ 222 0022 0133     		adds	r3, r3, #1
+  31:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count -= 1;
+ 223              		.loc 1 31 46 view .LVU57
+ 224 0024 A268     		ldr	r2, [r4, #8]
+  31:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count -= 1;
+ 225              		.loc 1 31 39 view .LVU58
+ 226 0026 B3FBF2F1 		udiv	r1, r3, r2
+ 227 002a 02FB1133 		mls	r3, r2, r1, r3
+  31:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count -= 1;
+ 228              		.loc 1 31 21 view .LVU59
+ 229 002e 2361     		str	r3, [r4, #16]
+  32:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Receiver Item 0X%02X , head %d , tail %d\n",*(uint8_t*)item,queue->head,que
+ 230              		.loc 1 32 9 is_stmt 1 view .LVU60
+  32:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Receiver Item 0X%02X , head %d , tail %d\n",*(uint8_t*)item,queue->head,que
+ 231              		.loc 1 32 14 is_stmt 0 view .LVU61
+ 232 0030 6369     		ldr	r3, [r4, #20]
+  32:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Receiver Item 0X%02X , head %d , tail %d\n",*(uint8_t*)item,queue->head,que
+ 233              		.loc 1 32 22 view .LVU62
+ 234 0032 013B     		subs	r3, r3, #1
+ 235 0034 6361     		str	r3, [r4, #20]
+  34:SynaptiX_FDK/utils/cqueue/cqueue.c ****     }
+ 236              		.loc 1 34 9 is_stmt 1 view .LVU63
+  34:SynaptiX_FDK/utils/cqueue/cqueue.c ****     }
+ 237              		.loc 1 34 16 is_stmt 0 view .LVU64
+ 238 0036 0120     		movs	r0, #1
+ 239 0038 E9E7     		b	.L10
+ 240              		.cfi_endproc
+ 241              	.LFE5:
+ 243              		.section	.text.cqueue_is_full,"ax",%progbits
+ 244              		.align	1
+ 245              		.global	cqueue_is_full
+ 246              		.syntax unified
+ 247              		.thumb
+ 248              		.thumb_func
+ 250              	cqueue_is_full:
+ 251              	.LVL13:
+ 252              	.LFB8:
+  54:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_is_full(CQueue_t *queue){
+ 253              		.loc 1 54 37 is_stmt 1 view -0
+ 254              		.cfi_startproc
+ 255              		@ args = 0, pretend = 0, frame = 0
+ 256              		@ frame_needed = 0, uses_anonymous_args = 0
+ 257              		@ link register save eliminated.
+  55:SynaptiX_FDK/utils/cqueue/cqueue.c ****     return (queue->count == queue->len) ? true : false;
+ 258              		.loc 1 55 5 view .LVU66
+ 259              		.loc 1 55 18 is_stmt 0 view .LVU67
+ 260 0000 4269     		ldr	r2, [r0, #20]
+ 261              		.loc 1 55 34 view .LVU68
+ 262 0002 8068     		ldr	r0, [r0, #8]
+ 263              	.LVL14:
+  56:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 7
+
+
+ 264              		.loc 1 56 1 view .LVU69
+ 265 0004 8242     		cmp	r2, r0
+ 266 0006 14BF     		ite	ne
+ 267 0008 0020     		movne	r0, #0
+ 268 000a 0120     		moveq	r0, #1
+ 269 000c 7047     		bx	lr
+ 270              		.cfi_endproc
+ 271              	.LFE8:
+ 273              		.section	.text.cqueue_send,"ax",%progbits
+ 274              		.align	1
+ 275              		.global	cqueue_send
+ 276              		.syntax unified
+ 277              		.thumb
+ 278              		.thumb_func
+ 280              	cqueue_send:
+ 281              	.LVL15:
+ 282              	.LFB6:
+  39:SynaptiX_FDK/utils/cqueue/cqueue.c ****     if(!cqueue_is_full(queue)){
+ 283              		.loc 1 39 45 is_stmt 1 view -0
+ 284              		.cfi_startproc
+ 285              		@ args = 0, pretend = 0, frame = 0
+ 286              		@ frame_needed = 0, uses_anonymous_args = 0
+  39:SynaptiX_FDK/utils/cqueue/cqueue.c ****     if(!cqueue_is_full(queue)){
+ 287              		.loc 1 39 45 is_stmt 0 view .LVU71
+ 288 0000 38B5     		push	{r3, r4, r5, lr}
+ 289              	.LCFI2:
+ 290              		.cfi_def_cfa_offset 16
+ 291              		.cfi_offset 3, -16
+ 292              		.cfi_offset 4, -12
+ 293              		.cfi_offset 5, -8
+ 294              		.cfi_offset 14, -4
+ 295 0002 0446     		mov	r4, r0
+ 296 0004 0D46     		mov	r5, r1
+  40:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(queue->buff+queue->head*queue->size,item,queue->size);
+ 297              		.loc 1 40 5 is_stmt 1 view .LVU72
+  40:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(queue->buff+queue->head*queue->size,item,queue->size);
+ 298              		.loc 1 40 9 is_stmt 0 view .LVU73
+ 299 0006 FFF7FEFF 		bl	cqueue_is_full
+ 300              	.LVL16:
+  40:SynaptiX_FDK/utils/cqueue/cqueue.c ****         memcpy(queue->buff+queue->head*queue->size,item,queue->size);
+ 301              		.loc 1 40 7 discriminator 1 view .LVU74
+ 302 000a 08B1     		cbz	r0, .L19
+  49:SynaptiX_FDK/utils/cqueue/cqueue.c **** }
+ 303              		.loc 1 49 12 view .LVU75
+ 304 000c 0020     		movs	r0, #0
+ 305              	.L16:
+  50:SynaptiX_FDK/utils/cqueue/cqueue.c **** bool cqueue_is_empty(CQueue_t *queue){
+ 306              		.loc 1 50 1 view .LVU76
+ 307 000e 38BD     		pop	{r3, r4, r5, pc}
+ 308              	.LVL17:
+ 309              	.L19:
+ 310              	.LBB2:
+  41:SynaptiX_FDK/utils/cqueue/cqueue.c ****         int next = (queue->head+1) % queue->len;
+ 311              		.loc 1 41 9 is_stmt 1 view .LVU77
+  41:SynaptiX_FDK/utils/cqueue/cqueue.c ****         int next = (queue->head+1) % queue->len;
+ 312              		.loc 1 41 21 is_stmt 0 view .LVU78
+ 313 0010 2368     		ldr	r3, [r4]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 8
+
+
+  41:SynaptiX_FDK/utils/cqueue/cqueue.c ****         int next = (queue->head+1) % queue->len;
+ 314              		.loc 1 41 33 view .LVU79
+ 315 0012 E068     		ldr	r0, [r4, #12]
+  41:SynaptiX_FDK/utils/cqueue/cqueue.c ****         int next = (queue->head+1) % queue->len;
+ 316              		.loc 1 41 45 view .LVU80
+ 317 0014 6268     		ldr	r2, [r4, #4]
+  41:SynaptiX_FDK/utils/cqueue/cqueue.c ****         int next = (queue->head+1) % queue->len;
+ 318              		.loc 1 41 9 view .LVU81
+ 319 0016 2946     		mov	r1, r5
+ 320 0018 02FB0030 		mla	r0, r2, r0, r3
+ 321 001c FFF7FEFF 		bl	memcpy
+ 322              	.LVL18:
+  42:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->head = next;
+ 323              		.loc 1 42 9 is_stmt 1 view .LVU82
+  42:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->head = next;
+ 324              		.loc 1 42 26 is_stmt 0 view .LVU83
+ 325 0020 E368     		ldr	r3, [r4, #12]
+  42:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->head = next;
+ 326              		.loc 1 42 32 view .LVU84
+ 327 0022 0133     		adds	r3, r3, #1
+  42:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->head = next;
+ 328              		.loc 1 42 43 view .LVU85
+ 329 0024 A268     		ldr	r2, [r4, #8]
+  42:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->head = next;
+ 330              		.loc 1 42 36 view .LVU86
+ 331 0026 B3FBF2F1 		udiv	r1, r3, r2
+ 332 002a 02FB1133 		mls	r3, r2, r1, r3
+ 333              	.LVL19:
+  43:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count += 1;
+ 334              		.loc 1 43 9 is_stmt 1 view .LVU87
+  43:SynaptiX_FDK/utils/cqueue/cqueue.c ****         queue->count += 1;
+ 335              		.loc 1 43 21 is_stmt 0 view .LVU88
+ 336 002e E360     		str	r3, [r4, #12]
+  44:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Send Item 0X%02X, head %d , tail %d\n",*(uint8_t*)item,queue->head,queue->t
+ 337              		.loc 1 44 9 is_stmt 1 view .LVU89
+  44:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Send Item 0X%02X, head %d , tail %d\n",*(uint8_t*)item,queue->head,queue->t
+ 338              		.loc 1 44 14 is_stmt 0 view .LVU90
+ 339 0030 6369     		ldr	r3, [r4, #20]
+ 340              	.LVL20:
+  44:SynaptiX_FDK/utils/cqueue/cqueue.c **** //        CQUEUE_DEBUG("Send Item 0X%02X, head %d , tail %d\n",*(uint8_t*)item,queue->head,queue->t
+ 341              		.loc 1 44 22 view .LVU91
+ 342 0032 0133     		adds	r3, r3, #1
+ 343 0034 6361     		str	r3, [r4, #20]
+  46:SynaptiX_FDK/utils/cqueue/cqueue.c ****     }
+ 344              		.loc 1 46 9 is_stmt 1 view .LVU92
+  46:SynaptiX_FDK/utils/cqueue/cqueue.c ****     }
+ 345              		.loc 1 46 16 is_stmt 0 view .LVU93
+ 346 0036 0120     		movs	r0, #1
+ 347 0038 E9E7     		b	.L16
+ 348              	.LBE2:
+ 349              		.cfi_endproc
+ 350              	.LFE6:
+ 352              		.section	.rodata.__func__.0,"a"
+ 353              		.align	2
+ 356              	__func__.0:
+ 357 0000 63717565 		.ascii	"cqueue_init\000"
+ 357      75655F69 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 9
+
+
+ 357      6E697400 
+ 358              		.text
+ 359              	.Letext0:
+ 360              		.file 2 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 361              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 362              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 363              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 364              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 365              		.file 7 "<built-in>"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s 			page 10
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 cqueue.c
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:22     .text.cqueue_init_static:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:28     .text.cqueue_init_static:00000000 cqueue_init_static
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:64     .rodata.cqueue_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:71     .text.cqueue_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:77     .text.cqueue_init:00000000 cqueue_init
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:137    .text.cqueue_init:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:356    .rodata.__func__.0:00000000 __func__.0
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:144    .text.cqueue_is_empty:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:150    .text.cqueue_is_empty:00000000 cqueue_is_empty
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:170    .text.cqueue_receive:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:176    .text.cqueue_receive:00000000 cqueue_receive
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:244    .text.cqueue_is_full:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:250    .text.cqueue_is_full:00000000 cqueue_is_full
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:274    .text.cqueue_send:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:280    .text.cqueue_send:00000000 cqueue_send
+C:\Users\DELL\AppData\Local\Temp\ccuqSD9g.s:353    .rodata.__func__.0:00000000 $d
+
+UNDEFINED SYMBOLS
+malloc
+__assert_func
+memcpy

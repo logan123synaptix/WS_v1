@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#if USE_READ_PIN
 #include "sx_filter.h"
 
 typedef struct {
@@ -18,6 +19,8 @@ typedef struct {
 
 void sx_adc_reader_init(sx_adc_reader_t *reader);
 void sx_adc_reader_process(sx_adc_reader_t *reader, void *hal_adc, uint32_t timestamp);
+
+#endif
 
 #ifdef __cplusplus
 }

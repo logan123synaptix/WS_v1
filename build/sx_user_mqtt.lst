@@ -1,0 +1,3326 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_user_mqtt.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c"
+  21              		.section	.rodata._on_message.str1.4,"aMS",%progbits,1
+  22              		.align	2
+  23              	.LC0:
+  24 0000 4D534720 		.ascii	"MSG [%s] = %s\000"
+  24      5B25735D 
+  24      203D2025 
+  24      7300
+  25 000e 0000     		.align	2
+  26              	.LC1:
+  27 0010 55534552 		.ascii	"USER_MQTT\000"
+  27      5F4D5154 
+  27      5400
+  28              		.section	.text._on_message,"ax",%progbits
+  29              		.align	1
+  30              		.syntax unified
+  31              		.thumb
+  32              		.thumb_func
+  34              	_on_message:
+  35              	.LVL0:
+  36              	.LFB347:
+   1:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "sx_board.h"
+   2:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "sx_user_mqtt.h"
+   3:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "sx_gpio.h"
+   4:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "sx_uart.h"
+   5:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "sx_mqtt.h"
+   6:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "usart.h"
+   7:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "logger.h"
+   8:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "string.h"
+   9:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #include "cqueue.h"
+  10:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  11:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** /* NOTE: this file only ever touches the modem through board.modem
+  12:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * (a modem_handle_t — see modem_ops.h), never a concrete driver type. This
+  13:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * is what makes swapping to a different modem module later a one-file
+  14:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * change (rewrite the driver + its modem_ops_t, nothing here). board.modem
+  15:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * is expected to be added by the sx_board.c/.h refactor (next piece after
+  16:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * this file) as modem_handle_t modem = { .ops = &a7677s_ops,
+  17:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * .ctx = &board.a7677s }; this file does not know or care which concrete
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 2
+
+
+  18:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * driver backs it. */
+  19:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  20:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static const char *TAG = "USER_MQTT";
+  21:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  22:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #define MQTT_QUEUE_SIZE 16
+  23:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** #define MQTT_PUBLISH_MAX_RETRY 3
+  24:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  25:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** volatile sx_mqtt_t s_mqtt;
+  26:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  27:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** typedef struct {
+  28:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     char topic[128];
+  29:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     char message[256];
+  30:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** } mqtt_queue_item_t;
+  31:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  32:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static mqtt_queue_item_t s_queue_buf[MQTT_QUEUE_SIZE];
+  33:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static CQueue_t s_queue;
+  34:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  35:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static mqtt_queue_item_t s_current_item;
+  36:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static uint8_t s_publish_retry = 0;
+  37:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  38:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static sx_user_mqtt_on_connected_cb_t    s_on_connected    = NULL;
+  39:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static sx_user_mqtt_on_disconnected_cb_t s_on_disconnected = NULL;
+  40:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static sx_user_mqtt_on_message_cb_t      s_on_message      = NULL;
+  41:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static sx_user_mqtt_on_publish_cb_t      s_on_publish      = NULL;
+  42:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static char s_client_id_buf[32];
+  43:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  44:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** // Poll timing
+  45:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static uint32_t s_last_tick = 0;
+  46:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static uint8_t s_initialized = 0;
+  47:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static uint8_t s_publishing = 0;
+  48:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  49:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static void dispatch_next(void){
+  50:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cqueue_is_empty(&s_queue) && sx_mqtt_is_connected(&s_mqtt)) {
+  51:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+  52:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+  53:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+  54:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         }
+  55:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+  56:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+  57:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  58:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static void _on_connected(sx_mqtt_t *mqtt){
+  59:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+  60:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_info(TAG, "MQTT connected");
+  61:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_connected) s_on_connected();
+  62:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+  63:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  64:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static void _on_disconnected(sx_mqtt_t *mqtt){
+  65:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+  66:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_warn(TAG, "MQTT disconnected");
+  67:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_disconnected) s_on_disconnected();
+  68:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+  69:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  70:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static void _on_message(sx_mqtt_t *mqtt, const char *topic, const char *message){
+  37              		.loc 1 70 81 view -0
+  38              		.cfi_startproc
+  39              		@ args = 0, pretend = 0, frame = 0
+  40              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 3
+
+
+  41              		.loc 1 70 81 is_stmt 0 view .LVU1
+  42 0000 30B5     		push	{r4, r5, lr}
+  43              	.LCFI0:
+  44              		.cfi_def_cfa_offset 12
+  45              		.cfi_offset 4, -12
+  46              		.cfi_offset 5, -8
+  47              		.cfi_offset 14, -4
+  48 0002 83B0     		sub	sp, sp, #12
+  49              	.LCFI1:
+  50              		.cfi_def_cfa_offset 24
+  51 0004 0C46     		mov	r4, r1
+  52 0006 1546     		mov	r5, r2
+  71:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+  53              		.loc 1 71 5 is_stmt 1 view .LVU2
+  72:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_info(TAG, "MSG [%s] = %s", topic, message);
+  54              		.loc 1 72 5 view .LVU3
+  55 0008 0092     		str	r2, [sp]
+  56 000a 0B46     		mov	r3, r1
+  57 000c 064A     		ldr	r2, .L4
+  58              	.LVL1:
+  59              		.loc 1 72 5 is_stmt 0 view .LVU4
+  60 000e 0749     		ldr	r1, .L4+4
+  61              	.LVL2:
+  62              		.loc 1 72 5 view .LVU5
+  63 0010 0320     		movs	r0, #3
+  64              	.LVL3:
+  65              		.loc 1 72 5 view .LVU6
+  66 0012 FFF7FEFF 		bl	log_func
+  67              	.LVL4:
+  73:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_message) s_on_message(topic, message);
+  68              		.loc 1 73 5 is_stmt 1 view .LVU7
+  69              		.loc 1 73 9 is_stmt 0 view .LVU8
+  70 0016 064B     		ldr	r3, .L4+8
+  71 0018 1B68     		ldr	r3, [r3]
+  72              		.loc 1 73 8 view .LVU9
+  73 001a 13B1     		cbz	r3, .L1
+  74              		.loc 1 73 23 is_stmt 1 discriminator 1 view .LVU10
+  75 001c 2946     		mov	r1, r5
+  76 001e 2046     		mov	r0, r4
+  77 0020 9847     		blx	r3
+  78              	.LVL5:
+  79              	.L1:
+  74:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+  80              		.loc 1 74 1 is_stmt 0 view .LVU11
+  81 0022 03B0     		add	sp, sp, #12
+  82              	.LCFI2:
+  83              		.cfi_def_cfa_offset 12
+  84              		@ sp needed
+  85 0024 30BD     		pop	{r4, r5, pc}
+  86              	.LVL6:
+  87              	.L5:
+  88              		.loc 1 74 1 view .LVU12
+  89 0026 00BF     		.align	2
+  90              	.L4:
+  91 0028 00000000 		.word	.LC0
+  92 002c 10000000 		.word	.LC1
+  93 0030 00000000 		.word	s_on_message
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 4
+
+
+  94              		.cfi_endproc
+  95              	.LFE347:
+  97              		.section	.rodata._on_disconnected.str1.4,"aMS",%progbits,1
+  98              		.align	2
+  99              	.LC2:
+ 100 0000 4D515454 		.ascii	"MQTT disconnected\000"
+ 100      20646973 
+ 100      636F6E6E 
+ 100      65637465 
+ 100      6400
+ 101              		.section	.text._on_disconnected,"ax",%progbits
+ 102              		.align	1
+ 103              		.syntax unified
+ 104              		.thumb
+ 105              		.thumb_func
+ 107              	_on_disconnected:
+ 108              	.LVL7:
+ 109              	.LFB346:
+  64:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+ 110              		.loc 1 64 46 is_stmt 1 view -0
+ 111              		.cfi_startproc
+ 112              		@ args = 0, pretend = 0, frame = 0
+ 113              		@ frame_needed = 0, uses_anonymous_args = 0
+  64:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+ 114              		.loc 1 64 46 is_stmt 0 view .LVU14
+ 115 0000 08B5     		push	{r3, lr}
+ 116              	.LCFI3:
+ 117              		.cfi_def_cfa_offset 8
+ 118              		.cfi_offset 3, -8
+ 119              		.cfi_offset 14, -4
+  65:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_warn(TAG, "MQTT disconnected");
+ 120              		.loc 1 65 5 is_stmt 1 view .LVU15
+  66:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_disconnected) s_on_disconnected();
+ 121              		.loc 1 66 5 view .LVU16
+ 122 0002 054A     		ldr	r2, .L9
+ 123 0004 0549     		ldr	r1, .L9+4
+ 124 0006 0220     		movs	r0, #2
+ 125              	.LVL8:
+  66:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_disconnected) s_on_disconnected();
+ 126              		.loc 1 66 5 is_stmt 0 view .LVU17
+ 127 0008 FFF7FEFF 		bl	log_func
+ 128              	.LVL9:
+  67:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 129              		.loc 1 67 5 is_stmt 1 view .LVU18
+  67:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 130              		.loc 1 67 9 is_stmt 0 view .LVU19
+ 131 000c 044B     		ldr	r3, .L9+8
+ 132 000e 1B68     		ldr	r3, [r3]
+  67:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 133              		.loc 1 67 8 view .LVU20
+ 134 0010 03B1     		cbz	r3, .L6
+  67:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 135              		.loc 1 67 28 is_stmt 1 discriminator 1 view .LVU21
+ 136 0012 9847     		blx	r3
+ 137              	.LVL10:
+ 138              	.L6:
+  68:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 5
+
+
+ 139              		.loc 1 68 1 is_stmt 0 view .LVU22
+ 140 0014 08BD     		pop	{r3, pc}
+ 141              	.L10:
+ 142 0016 00BF     		.align	2
+ 143              	.L9:
+ 144 0018 00000000 		.word	.LC2
+ 145 001c 10000000 		.word	.LC1
+ 146 0020 00000000 		.word	s_on_disconnected
+ 147              		.cfi_endproc
+ 148              	.LFE346:
+ 150              		.section	.rodata._on_connected.str1.4,"aMS",%progbits,1
+ 151              		.align	2
+ 152              	.LC3:
+ 153 0000 4D515454 		.ascii	"MQTT connected\000"
+ 153      20636F6E 
+ 153      6E656374 
+ 153      656400
+ 154              		.section	.text._on_connected,"ax",%progbits
+ 155              		.align	1
+ 156              		.syntax unified
+ 157              		.thumb
+ 158              		.thumb_func
+ 160              	_on_connected:
+ 161              	.LVL11:
+ 162              	.LFB345:
+  58:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+ 163              		.loc 1 58 43 is_stmt 1 view -0
+ 164              		.cfi_startproc
+ 165              		@ args = 0, pretend = 0, frame = 0
+ 166              		@ frame_needed = 0, uses_anonymous_args = 0
+  58:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+ 167              		.loc 1 58 43 is_stmt 0 view .LVU24
+ 168 0000 08B5     		push	{r3, lr}
+ 169              	.LCFI4:
+ 170              		.cfi_def_cfa_offset 8
+ 171              		.cfi_offset 3, -8
+ 172              		.cfi_offset 14, -4
+  59:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_info(TAG, "MQTT connected");
+ 173              		.loc 1 59 5 is_stmt 1 view .LVU25
+  60:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_connected) s_on_connected();
+ 174              		.loc 1 60 5 view .LVU26
+ 175 0002 054A     		ldr	r2, .L14
+ 176 0004 0549     		ldr	r1, .L14+4
+ 177 0006 0320     		movs	r0, #3
+ 178              	.LVL12:
+  60:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_connected) s_on_connected();
+ 179              		.loc 1 60 5 is_stmt 0 view .LVU27
+ 180 0008 FFF7FEFF 		bl	log_func
+ 181              	.LVL13:
+  61:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 182              		.loc 1 61 5 is_stmt 1 view .LVU28
+  61:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 183              		.loc 1 61 9 is_stmt 0 view .LVU29
+ 184 000c 044B     		ldr	r3, .L14+8
+ 185 000e 1B68     		ldr	r3, [r3]
+  61:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 186              		.loc 1 61 8 view .LVU30
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 6
+
+
+ 187 0010 03B1     		cbz	r3, .L11
+  61:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 188              		.loc 1 61 25 is_stmt 1 discriminator 1 view .LVU31
+ 189 0012 9847     		blx	r3
+ 190              	.LVL14:
+ 191              	.L11:
+  62:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 192              		.loc 1 62 1 is_stmt 0 view .LVU32
+ 193 0014 08BD     		pop	{r3, pc}
+ 194              	.L15:
+ 195 0016 00BF     		.align	2
+ 196              	.L14:
+ 197 0018 00000000 		.word	.LC3
+ 198 001c 10000000 		.word	.LC1
+ 199 0020 00000000 		.word	s_on_connected
+ 200              		.cfi_endproc
+ 201              	.LFE345:
+ 203              		.section	.rodata._validate_cfg.str1.4,"aMS",%progbits,1
+ 204              		.align	2
+ 205              	.LC4:
+ 206 0000 4D697373 		.ascii	"Missing broker\000"
+ 206      696E6720 
+ 206      62726F6B 
+ 206      657200
+ 207 000f 00       		.align	2
+ 208              	.LC5:
+ 209 0010 4D697373 		.ascii	"Missing port\000"
+ 209      696E6720 
+ 209      706F7274 
+ 209      00
+ 210 001d 000000   		.align	2
+ 211              	.LC6:
+ 212 0020 4D697373 		.ascii	"Missing client_id\000"
+ 212      696E6720 
+ 212      636C6965 
+ 212      6E745F69 
+ 212      6400
+ 213              		.section	.text._validate_cfg,"ax",%progbits
+ 214              		.align	1
+ 215              		.syntax unified
+ 216              		.thumb
+ 217              		.thumb_func
+ 219              	_validate_cfg:
+ 220              	.LVL15:
+ 221              	.LFB351:
+  75:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  76:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static void _on_publish(sx_mqtt_t *mqtt, int success)
+  77:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** {
+  78:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+  79:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_publishing = 0;
+  80:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  81:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_debug(TAG, "Publish %s", success ? "OK" : "FAIL");
+  82:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+  83:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!success) {
+  84:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         /* NOTE: s_publish_retry is intentionally NOT reset here — it must
+  85:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****          * accumulate across consecutive failures for MQTT_PUBLISH_MAX_RETRY
+  86:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****          * to ever be reached. It is only cleared on a successful publish
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 7
+
+
+  87:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****          * (see the success branch below) or by the max-retry recovery path
+  88:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****          * itself. Previously this was reset to 0 unconditionally at the top
+  89:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****          * of this function before the increment below, which meant the
+  90:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****          * counter always went 0->1 on every failure and the max-retry
+  91:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****          * threshold was effectively unreachable through normal operation. */
+  92:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         s_publish_retry++;
+  93:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "Publish fail %d/%d", s_publish_retry, MQTT_PUBLISH_MAX_RETRY);
+  94:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (s_publish_retry >= MQTT_PUBLISH_MAX_RETRY) {
+  95:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             log_error(TAG, "Max retry — reporting to sx_mqtt.c's recovery ladder");
+  96:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publish_retry = 0;
+  97:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             cqueue_init_static(&s_queue, s_queue_buf, MQTT_QUEUE_SIZE,
+  98:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****                                sizeof(mqtt_queue_item_t));
+  99:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             if (s_on_publish) s_on_publish(0);
+ 100:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             /* Let sx_mqtt.c decide the actual recovery action (it may
+ 101:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              * already be mid-PWRKEY-cycle from an unrelated connect
+ 102:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              * failure) — this file no longer calls board.modem.ops->start()
+ 103:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              * directly, see sx_mqtt_report_failure()'s doc-comment. */
+ 104:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             sx_mqtt_report_failure(&s_mqtt);
+ 105:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             return;
+ 106:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         }
+ 107:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         s_publishing = 1;
+ 108:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_mqtt_publish(&s_mqtt, s_current_item.topic,
+ 109:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****                         s_current_item.message, 1, 0);
+ 110:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         return;
+ 111:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 112:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 113:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_publish_retry = 0;
+ 114:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     dispatch_next();
+ 115:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_publish) s_on_publish(1);
+ 116:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 117:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 118:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** /*
+ 119:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * modem_ready_cb_t / modem_error_cb_t (modem_ops.h) — registered once via
+ 120:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * board.modem.ops->set_on_ready/set_on_error in _common_init(). These fire
+ 121:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * exactly once per is_ready() transition (see a7677s_poll()'s edge
+ 122:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * detection), so there is no risk of firing sx_mqtt_connect() repeatedly
+ 123:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * while already connecting/connected.
+ 124:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  *
+ 125:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * ctx here is always &board.modem (the user_ctx passed to set_on_ready/
+ 126:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * set_on_error below) — not the driver's own ctx — precisely so this file
+ 127:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * never needs to know the concrete driver type to read it back.
+ 128:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  */
+ 129:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static void _on_modem_ready(void *ctx)
+ 130:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** {
+ 131:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     modem_handle_t *modem = (modem_handle_t *)ctx;
+ 132:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 133:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     const char *imei = modem->ops->get_imei(modem->ctx);
+ 134:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     size_t imei_len = strlen(imei);
+ 135:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     const char *imei_suffix = imei_len >= 8 ? imei + imei_len - 8 : imei;
+ 136:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     snprintf(s_client_id_buf, sizeof(s_client_id_buf), "stm32h5_%s", imei_suffix);
+ 137:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 138:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_mqtt.config.client_id = s_client_id_buf;
+ 139:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 140:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_info(TAG, "Modem ready — IP=%s RSSI=%d client_id=%s",
+ 141:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              modem->ops->get_ip(modem->ctx), modem->ops->get_rssi(modem->ctx),
+ 142:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              s_client_id_buf);
+ 143:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_connect(&s_mqtt);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 8
+
+
+ 144:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 145:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 146:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static void _on_modem_error(void *ctx)
+ 147:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** {
+ 148:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)ctx;
+ 149:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_error(TAG, "Modem error — feeding into recovery ladder");
+ 150:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_report_failure(&s_mqtt);
+ 151:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_disconnected) s_on_disconnected();
+ 152:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 153:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 154:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static int _validate_cfg(const sx_user_mqtt_cfg_t *cfg)
+ 155:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** {
+ 222              		.loc 1 155 1 is_stmt 1 view -0
+ 223              		.cfi_startproc
+ 224              		@ args = 0, pretend = 0, frame = 0
+ 225              		@ frame_needed = 0, uses_anonymous_args = 0
+ 226              		.loc 1 155 1 is_stmt 0 view .LVU34
+ 227 0000 08B5     		push	{r3, lr}
+ 228              	.LCFI5:
+ 229              		.cfi_def_cfa_offset 8
+ 230              		.cfi_offset 3, -8
+ 231              		.cfi_offset 14, -4
+ 156:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     // if (!cfg->apn)       { log_error(TAG, "Missing APN");      return -1; }
+ 157:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->broker)    { log_error(TAG, "Missing broker");    return -1; }
+ 232              		.loc 1 157 5 is_stmt 1 view .LVU35
+ 233              		.loc 1 157 13 is_stmt 0 view .LVU36
+ 234 0002 C36B     		ldr	r3, [r0, #60]
+ 235              		.loc 1 157 8 view .LVU37
+ 236 0004 33B1     		cbz	r3, .L22
+ 158:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->port)      { log_error(TAG, "Missing port");      return -1; }
+ 237              		.loc 1 158 5 is_stmt 1 view .LVU38
+ 238              		.loc 1 158 13 is_stmt 0 view .LVU39
+ 239 0006 B0F84030 		ldrh	r3, [r0, #64]
+ 240              		.loc 1 158 8 view .LVU40
+ 241 000a 5BB1     		cbz	r3, .L23
+ 159:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->client_id) { log_error(TAG, "Missing client_id"); return -1; }
+ 242              		.loc 1 159 5 is_stmt 1 view .LVU41
+ 243              		.loc 1 159 13 is_stmt 0 view .LVU42
+ 244 000c 436C     		ldr	r3, [r0, #68]
+ 245              		.loc 1 159 8 view .LVU43
+ 246 000e 8BB1     		cbz	r3, .L24
+ 160:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return 0;
+ 247              		.loc 1 160 12 view .LVU44
+ 248 0010 0020     		movs	r0, #0
+ 249              	.LVL16:
+ 250              	.L16:
+ 161:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 251              		.loc 1 161 1 view .LVU45
+ 252 0012 08BD     		pop	{r3, pc}
+ 253              	.LVL17:
+ 254              	.L22:
+ 157:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->port)      { log_error(TAG, "Missing port");      return -1; }
+ 255              		.loc 1 157 28 is_stmt 1 discriminator 1 view .LVU46
+ 256 0014 0B4A     		ldr	r2, .L25
+ 257 0016 0C49     		ldr	r1, .L25+4
+ 258 0018 0120     		movs	r0, #1
+ 259              	.LVL18:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 9
+
+
+ 157:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->port)      { log_error(TAG, "Missing port");      return -1; }
+ 260              		.loc 1 157 28 is_stmt 0 discriminator 1 view .LVU47
+ 261 001a FFF7FEFF 		bl	log_func
+ 262              	.LVL19:
+ 157:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->port)      { log_error(TAG, "Missing port");      return -1; }
+ 263              		.loc 1 157 65 is_stmt 1 discriminator 1 view .LVU48
+ 157:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->port)      { log_error(TAG, "Missing port");      return -1; }
+ 264              		.loc 1 157 72 is_stmt 0 discriminator 1 view .LVU49
+ 265 001e 4FF0FF30 		mov	r0, #-1
+ 157:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->port)      { log_error(TAG, "Missing port");      return -1; }
+ 266              		.loc 1 157 72 view .LVU50
+ 267 0022 F6E7     		b	.L16
+ 268              	.LVL20:
+ 269              	.L23:
+ 158:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->client_id) { log_error(TAG, "Missing client_id"); return -1; }
+ 270              		.loc 1 158 28 is_stmt 1 discriminator 1 view .LVU51
+ 271 0024 094A     		ldr	r2, .L25+8
+ 272 0026 0849     		ldr	r1, .L25+4
+ 273 0028 0120     		movs	r0, #1
+ 274              	.LVL21:
+ 158:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->client_id) { log_error(TAG, "Missing client_id"); return -1; }
+ 275              		.loc 1 158 28 is_stmt 0 discriminator 1 view .LVU52
+ 276 002a FFF7FEFF 		bl	log_func
+ 277              	.LVL22:
+ 158:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->client_id) { log_error(TAG, "Missing client_id"); return -1; }
+ 278              		.loc 1 158 65 is_stmt 1 discriminator 1 view .LVU53
+ 158:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->client_id) { log_error(TAG, "Missing client_id"); return -1; }
+ 279              		.loc 1 158 72 is_stmt 0 discriminator 1 view .LVU54
+ 280 002e 4FF0FF30 		mov	r0, #-1
+ 158:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cfg->client_id) { log_error(TAG, "Missing client_id"); return -1; }
+ 281              		.loc 1 158 72 view .LVU55
+ 282 0032 EEE7     		b	.L16
+ 283              	.LVL23:
+ 284              	.L24:
+ 159:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return 0;
+ 285              		.loc 1 159 28 is_stmt 1 discriminator 1 view .LVU56
+ 286 0034 064A     		ldr	r2, .L25+12
+ 287 0036 0449     		ldr	r1, .L25+4
+ 288 0038 0120     		movs	r0, #1
+ 289              	.LVL24:
+ 159:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return 0;
+ 290              		.loc 1 159 28 is_stmt 0 discriminator 1 view .LVU57
+ 291 003a FFF7FEFF 		bl	log_func
+ 292              	.LVL25:
+ 159:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return 0;
+ 293              		.loc 1 159 65 is_stmt 1 discriminator 1 view .LVU58
+ 159:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return 0;
+ 294              		.loc 1 159 72 is_stmt 0 discriminator 1 view .LVU59
+ 295 003e 4FF0FF30 		mov	r0, #-1
+ 159:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return 0;
+ 296              		.loc 1 159 72 view .LVU60
+ 297 0042 E6E7     		b	.L16
+ 298              	.L26:
+ 299              		.align	2
+ 300              	.L25:
+ 301 0044 00000000 		.word	.LC4
+ 302 0048 10000000 		.word	.LC1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 10
+
+
+ 303 004c 10000000 		.word	.LC5
+ 304 0050 20000000 		.word	.LC6
+ 305              		.cfi_endproc
+ 306              	.LFE351:
+ 308              		.section	.rodata._common_init.str1.4,"aMS",%progbits,1
+ 309              		.align	2
+ 310              	.LC7:
+ 311 0000 496E6974 		.ascii	"Init done \342\200\224 broker=%s:%u ssl=%d\000"
+ 311      20646F6E 
+ 311      6520E280 
+ 311      94206272 
+ 311      6F6B6572 
+ 312              		.section	.text._common_init,"ax",%progbits
+ 313              		.align	1
+ 314              		.syntax unified
+ 315              		.thumb
+ 316              		.thumb_func
+ 318              	_common_init:
+ 319              	.LVL26:
+ 320              	.LFB352:
+ 162:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 163:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** static int _common_init(const sx_user_mqtt_cfg_t *cfg, sx_mqtt_config_t *mqtt_cfg){
+ 321              		.loc 1 163 83 is_stmt 1 view -0
+ 322              		.cfi_startproc
+ 323              		@ args = 0, pretend = 0, frame = 0
+ 324              		@ frame_needed = 0, uses_anonymous_args = 0
+ 325              		.loc 1 163 83 is_stmt 0 view .LVU62
+ 326 0000 2DE9F043 		push	{r4, r5, r6, r7, r8, r9, lr}
+ 327              	.LCFI6:
+ 328              		.cfi_def_cfa_offset 28
+ 329              		.cfi_offset 4, -28
+ 330              		.cfi_offset 5, -24
+ 331              		.cfi_offset 6, -20
+ 332              		.cfi_offset 7, -16
+ 333              		.cfi_offset 8, -12
+ 334              		.cfi_offset 9, -8
+ 335              		.cfi_offset 14, -4
+ 336 0004 83B0     		sub	sp, sp, #12
+ 337              	.LCFI7:
+ 338              		.cfi_def_cfa_offset 40
+ 339 0006 0446     		mov	r4, r0
+ 340 0008 0D46     		mov	r5, r1
+ 164:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (_validate_cfg(cfg) != 0) return -1;
+ 341              		.loc 1 164 5 is_stmt 1 view .LVU63
+ 342              		.loc 1 164 9 is_stmt 0 view .LVU64
+ 343 000a FFF7FEFF 		bl	_validate_cfg
+ 344              	.LVL27:
+ 345              		.loc 1 164 8 discriminator 1 view .LVU65
+ 346 000e 0028     		cmp	r0, #0
+ 347 0010 6CD1     		bne	.L30
+ 348 0012 8146     		mov	r9, r0
+ 165:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     /* save user callbacks */
+ 166:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     cqueue_init_static(&s_queue, s_queue_buf, MQTT_QUEUE_SIZE, sizeof(mqtt_queue_item_t));
+ 349              		.loc 1 166 5 is_stmt 1 view .LVU66
+ 350 0014 4FF4C073 		mov	r3, #384
+ 351 0018 1022     		movs	r2, #16
+ 352 001a 3649     		ldr	r1, .L32
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 11
+
+
+ 353 001c 3648     		ldr	r0, .L32+4
+ 354 001e FFF7FEFF 		bl	cqueue_init_static
+ 355              	.LVL28:
+ 167:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_on_connected    = cfg->on_connected;
+ 356              		.loc 1 167 5 view .LVU67
+ 357              		.loc 1 167 28 is_stmt 0 view .LVU68
+ 358 0022 A26D     		ldr	r2, [r4, #88]
+ 359              		.loc 1 167 23 view .LVU69
+ 360 0024 354B     		ldr	r3, .L32+8
+ 361 0026 1A60     		str	r2, [r3]
+ 168:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_on_disconnected = cfg->on_disconnected;
+ 362              		.loc 1 168 5 is_stmt 1 view .LVU70
+ 363              		.loc 1 168 28 is_stmt 0 view .LVU71
+ 364 0028 E26D     		ldr	r2, [r4, #92]
+ 365              		.loc 1 168 23 view .LVU72
+ 366 002a 354B     		ldr	r3, .L32+12
+ 367 002c 1A60     		str	r2, [r3]
+ 169:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_on_message      = cfg->on_message;
+ 368              		.loc 1 169 5 is_stmt 1 view .LVU73
+ 369              		.loc 1 169 28 is_stmt 0 view .LVU74
+ 370 002e 226E     		ldr	r2, [r4, #96]
+ 371              		.loc 1 169 23 view .LVU75
+ 372 0030 344B     		ldr	r3, .L32+16
+ 373 0032 1A60     		str	r2, [r3]
+ 170:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_on_publish      = cfg->on_publish;
+ 374              		.loc 1 170 5 is_stmt 1 view .LVU76
+ 375              		.loc 1 170 28 is_stmt 0 view .LVU77
+ 376 0034 626E     		ldr	r2, [r4, #100]
+ 377              		.loc 1 170 23 view .LVU78
+ 378 0036 344B     		ldr	r3, .L32+20
+ 379 0038 1A60     		str	r2, [r3]
+ 171:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 172:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     /* APN is static per-device config, set once before start() — mirrors
+ 173:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****      * the previous sim76xx_set_full_apn() call. This file deliberately does
+ 174:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****      * NOT call the equivalent a7677s_set_full_apn() itself, since that is
+ 175:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****      * not part of modem_ops_t (APN is driver-specific setup done once at
+ 176:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****      * board init, not a per-call runtime parameter) and calling it here
+ 177:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****      * would require knowing the concrete a7677s_t type. That call belongs
+ 178:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****      * in sx_board.c, alongside where board.a7677s itself is declared — see
+ 179:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****      * the handoff note left for the sx_board.c/.h refactor. */
+ 180:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg->broker        = cfg->broker;
+ 380              		.loc 1 180 5 is_stmt 1 view .LVU79
+ 381              		.loc 1 180 34 is_stmt 0 view .LVU80
+ 382 003a E36B     		ldr	r3, [r4, #60]
+ 383              		.loc 1 180 29 view .LVU81
+ 384 003c 2B60     		str	r3, [r5]
+ 181:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg->port          = cfg->port;
+ 385              		.loc 1 181 5 is_stmt 1 view .LVU82
+ 386              		.loc 1 181 34 is_stmt 0 view .LVU83
+ 387 003e B4F84030 		ldrh	r3, [r4, #64]
+ 388              		.loc 1 181 29 view .LVU84
+ 389 0042 AB80     		strh	r3, [r5, #4]	@ movhi
+ 182:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg->client_id     = cfg->client_id;
+ 390              		.loc 1 182 5 is_stmt 1 view .LVU85
+ 391              		.loc 1 182 34 is_stmt 0 view .LVU86
+ 392 0044 636C     		ldr	r3, [r4, #68]
+ 393              		.loc 1 182 29 view .LVU87
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 12
+
+
+ 394 0046 AB60     		str	r3, [r5, #8]
+ 183:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg->username      = cfg->username;
+ 395              		.loc 1 183 5 is_stmt 1 view .LVU88
+ 396              		.loc 1 183 34 is_stmt 0 view .LVU89
+ 397 0048 A36C     		ldr	r3, [r4, #72]
+ 398              		.loc 1 183 29 view .LVU90
+ 399 004a EB60     		str	r3, [r5, #12]
+ 184:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg->password      = cfg->password;
+ 400              		.loc 1 184 5 is_stmt 1 view .LVU91
+ 401              		.loc 1 184 34 is_stmt 0 view .LVU92
+ 402 004c E36C     		ldr	r3, [r4, #76]
+ 403              		.loc 1 184 29 view .LVU93
+ 404 004e 2B61     		str	r3, [r5, #16]
+ 185:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg->keepalive     = cfg->keepalive ? cfg->keepalive : 60;
+ 405              		.loc 1 185 5 is_stmt 1 view .LVU94
+ 406              		.loc 1 185 34 is_stmt 0 view .LVU95
+ 407 0050 B4F85030 		ldrh	r3, [r4, #80]
+ 408              		.loc 1 185 29 view .LVU96
+ 409 0054 03B9     		cbnz	r3, .L29
+ 410              		.loc 1 185 29 discriminator 2 view .LVU97
+ 411 0056 3C23     		movs	r3, #60
+ 412              	.L29:
+ 413              		.loc 1 185 29 discriminator 4 view .LVU98
+ 414 0058 AB82     		strh	r3, [r5, #20]	@ movhi
+ 186:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg->clean_session = cfg->clean_session;
+ 415              		.loc 1 186 5 is_stmt 1 view .LVU99
+ 416              		.loc 1 186 34 is_stmt 0 view .LVU100
+ 417 005a 94F85230 		ldrb	r3, [r4, #82]	@ zero_extendqisi2
+ 418              		.loc 1 186 29 view .LVU101
+ 419 005e AB75     		strb	r3, [r5, #22]
+ 187:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 188:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     board.modem.ops->set_on_ready(board.modem.ctx, _on_modem_ready, &board.modem);
+ 420              		.loc 1 188 5 is_stmt 1 view .LVU102
+ 421              		.loc 1 188 16 is_stmt 0 view .LVU103
+ 422 0060 2A4F     		ldr	r7, .L32+24
+ 423 0062 D7F8DC3B 		ldr	r3, [r7, #3036]
+ 424              		.loc 1 188 20 view .LVU104
+ 425 0066 DB69     		ldr	r3, [r3, #28]
+ 426              		.loc 1 188 5 view .LVU105
+ 427 0068 07F6DC36 		addw	r6, r7, #3036
+ 428 006c 3246     		mov	r2, r6
+ 429 006e 2849     		ldr	r1, .L32+28
+ 430 0070 D7F8E00B 		ldr	r0, [r7, #3040]
+ 431 0074 9847     		blx	r3
+ 432              	.LVL29:
+ 189:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     board.modem.ops->set_on_error(board.modem.ctx, _on_modem_error, &board.modem);
+ 433              		.loc 1 189 5 is_stmt 1 view .LVU106
+ 434              		.loc 1 189 16 is_stmt 0 view .LVU107
+ 435 0076 D7F8DC3B 		ldr	r3, [r7, #3036]
+ 436              		.loc 1 189 20 view .LVU108
+ 437 007a 1B6A     		ldr	r3, [r3, #32]
+ 438              		.loc 1 189 5 view .LVU109
+ 439 007c 3246     		mov	r2, r6
+ 440 007e 2549     		ldr	r1, .L32+32
+ 441 0080 D7F8E00B 		ldr	r0, [r7, #3040]
+ 442 0084 9847     		blx	r3
+ 443              	.LVL30:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 13
+
+
+ 190:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 191:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_init(&s_mqtt, &board.modem);
+ 444              		.loc 1 191 5 is_stmt 1 view .LVU110
+ 445 0086 DFF8B080 		ldr	r8, .L32+68
+ 446 008a 3146     		mov	r1, r6
+ 447 008c 4046     		mov	r0, r8
+ 448 008e FFF7FEFF 		bl	sx_mqtt_init
+ 449              	.LVL31:
+ 192:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_set_config(&s_mqtt, mqtt_cfg);
+ 450              		.loc 1 192 5 view .LVU111
+ 451 0092 2946     		mov	r1, r5
+ 452 0094 4046     		mov	r0, r8
+ 453 0096 FFF7FEFF 		bl	sx_mqtt_set_config
+ 454              	.LVL32:
+ 193:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_set_on_connected   (&s_mqtt, _on_connected);
+ 455              		.loc 1 193 5 view .LVU112
+ 456              	.LBB28:
+ 457              	.LBI28:
+ 458              		.file 2 "SynaptiX_FDK/services/mqtt/sx_mqtt.h"
+   1:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #ifndef __SX_MQTT_H
+   2:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define __SX_MQTT_H
+   3:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+   4:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** extern "C"{
+   6:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #endif
+   7:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+   8:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #include <stdint.h>
+   9:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #include "modem_ops.h"
+  10:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  11:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_TOPIC_MAX_LEN       128U
+  12:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_MESSAGE_MAX_LEN     512U
+  13:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_TIMEOUT_CONF        2000U
+  14:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_TIMEOUT_ACCQ        2000U
+  15:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_TIMEOUT_CONN        8000U
+  16:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_TIMEOUT_DISC        5000U
+  17:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_TIMEOUT_PUB         3000U
+  18:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** #define SX_MQTT_TIMEOUT_SUB         5000U
+  19:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  20:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** /* NOTE: driver-level states (CMQTTSTART, cert upload, CSSLCFG, ACCQ,
+  21:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * CMQTTCFG version, CMQTTCONNECT...) all now live inside the concrete modem
+  22:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * driver's own state machine (e.g. a7677s_mqtt_state_t in a7677s.c), reached
+  23:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * through a single modem_ops_t.mqtt_connect() call. This service layer only
+  24:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * needs to track its own coarse-grained state, not the driver's internals —
+  25:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * that is the whole point of going through modem_ops_t rather than calling
+  26:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * driver-specific functions directly. Swapping to a different modem module
+  27:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****  * later only means writing a new driver; this file does not change. */
+  28:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef enum{
+  29:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     SX_MQTT_STATE_DISCONNECTED = 0,
+  30:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     SX_MQTT_STATE_CONNECTING,    /* mqtt_connect() issued, waiting for cb */
+  31:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     SX_MQTT_STATE_CONNECTED,
+  32:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     SX_MQTT_STATE_DISCONNECTING, /* mqtt_disconnect() issued, waiting for cb */
+  33:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     SX_MQTT_STATE_ERROR,
+  34:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** } sx_mqtt_state_t;
+  35:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  36:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef struct sx_mqtt sx_mqtt_t;
+  37:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  38:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef void (*sx_mqtt_on_connected_cb_t) (sx_mqtt_t *mqtt);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 14
+
+
+  39:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  40:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef void (*sx_mqtt_on_disconnected_cb_t) (sx_mqtt_t *mqtt);
+  41:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  42:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef void (*sx_mqtt_on_message_cb_t) (sx_mqtt_t *mqtt, const char *topic, const char *message);
+  43:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  44:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef void (*sx_mqtt_on_publish_cb_t) (sx_mqtt_t *mqtt, int success);
+  45:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  46:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef struct{
+  47:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     const char *broker;
+  48:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint16_t port;
+  49:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     const char *client_id;
+  50:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     const char *username;
+  51:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     const char *password;
+  52:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint16_t keepalive;
+  53:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint8_t clean_session;
+  54:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint8_t qos;
+  55:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint8_t use_ssl;        //0 : tcp, 1: ssl
+  56:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint8_t ssl_auth_mode; // 0 : no verify, 1 : sever cert, 2 = mutual
+  57:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     char *ca_cert;        
+  58:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     char *client_cert;    
+  59:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     char *client_key;
+  60:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }sx_mqtt_config_t;
+  61:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  62:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** typedef enum{
+  63:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     CONF_CLIENTID = 0,
+  64:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     CONF_URL,
+  65:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     CONF_KEEPTIME,
+  66:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     CONF_CLEANSS,
+  67:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     CONF_USERNAME,
+  68:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     CONF_PASSWORD,
+  69:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     CONF_DONE,
+  70:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** } sx_mqtt_conf_step_t;
+  71:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  72:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** struct sx_mqtt{
+  73:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     /* Handle into the concrete modem driver (e.g. &board.a7677s paired with
+  74:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * &a7677s_ops). This service layer never touches the driver except
+  75:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * through modem->ops->xxx(modem->ctx, ...) — see modem_ops.h. */
+  76:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     modem_handle_t *modem;
+  77:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_config_t config;
+  78:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_state_t state;
+  79:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  80:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint32_t reconnect_elapsed;
+  81:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint32_t reconnect_delay;
+  82:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint8_t  reconnect_count;
+  83:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  84:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     /* Counts how many times the PWRKEY power-cycle recovery in do_error()
+  85:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * has itself been triggered without a successful connect happening in
+  86:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * between (i.e. reconnect_count reaching SX_MQTT_MAX_RETRY_BEFORE_RESTART
+  87:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * repeatedly). Only cleared on an actual CONNECTED transition (see
+  88:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * sx_mqtt_poll()) — unlike reconnect_count, which resets every time a
+  89:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * restart is triggered. Once this reaches
+  90:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET, do_error() escalates to
+  91:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * modem_ops_t.hard_reset() (physical RST pin) instead of another PWRKEY
+  92:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****      * cycle. */
+  93:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     uint8_t  restart_cycle_count;
+  94:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+  95:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     /*  Callback    */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 15
+
+
+  96:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_on_connected_cb_t on_connected;
+  97:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_on_disconnected_cb_t on_disconnected;
+  98:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_on_message_cb_t on_message;
+  99:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     sx_mqtt_on_publish_cb_t on_publish;
+ 100:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** };
+ 101:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+ 102:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** /*  Status helper   */
+ 103:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** static inline sx_mqtt_state_t sx_mqtt_get_state(sx_mqtt_t *mqtt){
+ 104:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return mqtt->state;
+ 105:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 106:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+ 107:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** static inline uint8_t sx_mqtt_is_connected(sx_mqtt_t *mqtt){
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return (mqtt->state == SX_MQTT_STATE_CONNECTED);
+ 109:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 110:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+ 111:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** /*  Callback    */
+ 112:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** static inline void sx_mqtt_set_on_connected(sx_mqtt_t *mqtt, sx_mqtt_on_connected_cb_t cb){
+ 459              		.loc 2 112 20 view .LVU113
+ 460              	.LBB29:
+ 113:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->on_connected = cb;
+ 461              		.loc 2 113 5 view .LVU114
+ 462              		.loc 2 113 24 is_stmt 0 view .LVU115
+ 463 009a 1F4B     		ldr	r3, .L32+36
+ 464 009c C8F83C30 		str	r3, [r8, #60]
+ 465              	.LVL33:
+ 466              		.loc 2 113 24 view .LVU116
+ 467              	.LBE29:
+ 468              	.LBE28:
+ 194:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_set_on_disconnected(&s_mqtt, _on_disconnected);
+ 469              		.loc 1 194 5 is_stmt 1 view .LVU117
+ 470              	.LBB30:
+ 471              	.LBI30:
+ 114:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 115:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+ 116:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** static inline void sx_mqtt_set_on_disconnected(sx_mqtt_t *mqtt, sx_mqtt_on_disconnected_cb_t cb){
+ 472              		.loc 2 116 20 view .LVU118
+ 473              	.LBB31:
+ 117:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->on_disconnected = cb;
+ 474              		.loc 2 117 5 view .LVU119
+ 475              		.loc 2 117 27 is_stmt 0 view .LVU120
+ 476 00a0 1E4B     		ldr	r3, .L32+40
+ 477 00a2 C8F84030 		str	r3, [r8, #64]
+ 478              	.LVL34:
+ 479              		.loc 2 117 27 view .LVU121
+ 480              	.LBE31:
+ 481              	.LBE30:
+ 195:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_set_on_message     (&s_mqtt, _on_message);
+ 482              		.loc 1 195 5 is_stmt 1 view .LVU122
+ 483              	.LBB32:
+ 484              	.LBI32:
+ 118:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 119:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+ 120:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** static inline void sx_mqtt_set_on_publish(sx_mqtt_t *mqtt, sx_mqtt_on_publish_cb_t cb){
+ 121:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->on_publish = cb;
+ 122:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 123:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+ 124:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** static inline void sx_mqtt_set_on_message(sx_mqtt_t *mqtt, sx_mqtt_on_message_cb_t cb){
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 16
+
+
+ 485              		.loc 2 124 20 view .LVU123
+ 486              	.LBB33:
+ 125:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->on_message = cb;
+ 487              		.loc 2 125 5 view .LVU124
+ 488              		.loc 2 125 22 is_stmt 0 view .LVU125
+ 489 00a6 1E4B     		ldr	r3, .L32+44
+ 490 00a8 C8F84430 		str	r3, [r8, #68]
+ 491              	.LVL35:
+ 492              		.loc 2 125 22 view .LVU126
+ 493              	.LBE33:
+ 494              	.LBE32:
+ 196:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_set_on_publish     (&s_mqtt, _on_publish);
+ 495              		.loc 1 196 5 is_stmt 1 view .LVU127
+ 496              	.LBB34:
+ 497              	.LBI34:
+ 120:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->on_publish = cb;
+ 498              		.loc 2 120 20 view .LVU128
+ 499              	.LBB35:
+ 121:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 500              		.loc 2 121 5 view .LVU129
+ 121:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 501              		.loc 2 121 22 is_stmt 0 view .LVU130
+ 502 00ac 1D4B     		ldr	r3, .L32+48
+ 503 00ae C8F84830 		str	r3, [r8, #72]
+ 504              	.LVL36:
+ 121:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 505              		.loc 2 121 22 view .LVU131
+ 506              	.LBE35:
+ 507              	.LBE34:
+ 197:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 198:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_last_tick = sx_gettick();
+ 508              		.loc 1 198 5 is_stmt 1 view .LVU132
+ 509              	.LBB36:
+ 510              	.LBI36:
+ 511              		.file 3 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 17
+
+
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 18
+
+
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 19
+
+
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 512              		.loc 3 186 17 view .LVU133
+ 513              	.LBB37:
+ 514              		.loc 3 186 34 view .LVU134
+ 515              		.loc 3 186 41 is_stmt 0 view .LVU135
+ 516 00b2 FFF7FEFF 		bl	HAL_GetTick
+ 517              	.LVL37:
+ 518              	.LBE37:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 20
+
+
+ 519              	.LBE36:
+ 520              		.loc 1 198 17 discriminator 1 view .LVU136
+ 521 00b6 1C4B     		ldr	r3, .L32+52
+ 522 00b8 1860     		str	r0, [r3]
+ 199:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     board.modem.ops->start(board.modem.ctx);
+ 523              		.loc 1 199 5 is_stmt 1 view .LVU137
+ 524              		.loc 1 199 16 is_stmt 0 view .LVU138
+ 525 00ba D7F8DC3B 		ldr	r3, [r7, #3036]
+ 526              		.loc 1 199 20 view .LVU139
+ 527 00be 5B69     		ldr	r3, [r3, #20]
+ 528              		.loc 1 199 5 view .LVU140
+ 529 00c0 D7F8E00B 		ldr	r0, [r7, #3040]
+ 530 00c4 9847     		blx	r3
+ 531              	.LVL38:
+ 200:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_info(TAG, "Init done — broker=%s:%u ssl=%d", cfg->broker, cfg->port, cfg->use_ssl);
+ 532              		.loc 1 200 5 is_stmt 1 view .LVU141
+ 533 00c6 B4F84030 		ldrh	r3, [r4, #64]
+ 534 00ca 94F85320 		ldrb	r2, [r4, #83]	@ zero_extendqisi2
+ 535 00ce 0192     		str	r2, [sp, #4]
+ 536 00d0 0093     		str	r3, [sp]
+ 537 00d2 E36B     		ldr	r3, [r4, #60]
+ 538 00d4 154A     		ldr	r2, .L32+56
+ 539 00d6 1649     		ldr	r1, .L32+60
+ 540 00d8 0320     		movs	r0, #3
+ 541 00da FFF7FEFF 		bl	log_func
+ 542              	.LVL39:
+ 201:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 202:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_initialized = 1;
+ 543              		.loc 1 202 5 view .LVU142
+ 544              		.loc 1 202 19 is_stmt 0 view .LVU143
+ 545 00de 154B     		ldr	r3, .L32+64
+ 546 00e0 0122     		movs	r2, #1
+ 547 00e2 1A70     		strb	r2, [r3]
+ 203:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return 0;
+ 548              		.loc 1 203 5 is_stmt 1 view .LVU144
+ 549              	.L27:
+ 204:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 550              		.loc 1 204 1 is_stmt 0 view .LVU145
+ 551 00e4 4846     		mov	r0, r9
+ 552 00e6 03B0     		add	sp, sp, #12
+ 553              	.LCFI8:
+ 554              		.cfi_remember_state
+ 555              		.cfi_def_cfa_offset 28
+ 556              		@ sp needed
+ 557 00e8 BDE8F083 		pop	{r4, r5, r6, r7, r8, r9, pc}
+ 558              	.LVL40:
+ 559              	.L30:
+ 560              	.LCFI9:
+ 561              		.cfi_restore_state
+ 164:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     /* save user callbacks */
+ 562              		.loc 1 164 41 discriminator 1 view .LVU146
+ 563 00ec 4FF0FF39 		mov	r9, #-1
+ 564 00f0 F8E7     		b	.L27
+ 565              	.L33:
+ 566 00f2 00BF     		.align	2
+ 567              	.L32:
+ 568 00f4 00000000 		.word	s_queue_buf
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 21
+
+
+ 569 00f8 00000000 		.word	s_queue
+ 570 00fc 00000000 		.word	s_on_connected
+ 571 0100 00000000 		.word	s_on_disconnected
+ 572 0104 00000000 		.word	s_on_message
+ 573 0108 00000000 		.word	s_on_publish
+ 574 010c 00D00000 		.word	board+53248
+ 575 0110 00000000 		.word	_on_modem_ready
+ 576 0114 00000000 		.word	_on_modem_error
+ 577 0118 00000000 		.word	_on_connected
+ 578 011c 00000000 		.word	_on_disconnected
+ 579 0120 00000000 		.word	_on_message
+ 580 0124 00000000 		.word	_on_publish
+ 581 0128 00000000 		.word	s_last_tick
+ 582 012c 00000000 		.word	.LC7
+ 583 0130 10000000 		.word	.LC1
+ 584 0134 00000000 		.word	s_initialized
+ 585 0138 00000000 		.word	s_mqtt
+ 586              		.cfi_endproc
+ 587              	.LFE352:
+ 589              		.section	.rodata._on_modem_error.str1.4,"aMS",%progbits,1
+ 590              		.align	2
+ 591              	.LC8:
+ 592 0000 4D6F6465 		.ascii	"Modem error \342\200\224 feeding into recovery ladd"
+ 592      6D206572 
+ 592      726F7220 
+ 592      E2809420 
+ 592      66656564 
+ 593 002a 657200   		.ascii	"er\000"
+ 594              		.section	.text._on_modem_error,"ax",%progbits
+ 595              		.align	1
+ 596              		.syntax unified
+ 597              		.thumb
+ 598              		.thumb_func
+ 600              	_on_modem_error:
+ 601              	.LVL41:
+ 602              	.LFB350:
+ 147:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)ctx;
+ 603              		.loc 1 147 1 is_stmt 1 view -0
+ 604              		.cfi_startproc
+ 605              		@ args = 0, pretend = 0, frame = 0
+ 606              		@ frame_needed = 0, uses_anonymous_args = 0
+ 147:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)ctx;
+ 607              		.loc 1 147 1 is_stmt 0 view .LVU148
+ 608 0000 08B5     		push	{r3, lr}
+ 609              	.LCFI10:
+ 610              		.cfi_def_cfa_offset 8
+ 611              		.cfi_offset 3, -8
+ 612              		.cfi_offset 14, -4
+ 148:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_error(TAG, "Modem error — feeding into recovery ladder");
+ 613              		.loc 1 148 5 is_stmt 1 view .LVU149
+ 149:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_report_failure(&s_mqtt);
+ 614              		.loc 1 149 5 view .LVU150
+ 615 0002 064A     		ldr	r2, .L37
+ 616 0004 0649     		ldr	r1, .L37+4
+ 617 0006 0120     		movs	r0, #1
+ 618              	.LVL42:
+ 149:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_report_failure(&s_mqtt);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 22
+
+
+ 619              		.loc 1 149 5 is_stmt 0 view .LVU151
+ 620 0008 FFF7FEFF 		bl	log_func
+ 621              	.LVL43:
+ 150:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_disconnected) s_on_disconnected();
+ 622              		.loc 1 150 5 is_stmt 1 view .LVU152
+ 623 000c 0548     		ldr	r0, .L37+8
+ 624 000e FFF7FEFF 		bl	sx_mqtt_report_failure
+ 625              	.LVL44:
+ 151:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 626              		.loc 1 151 5 view .LVU153
+ 151:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 627              		.loc 1 151 9 is_stmt 0 view .LVU154
+ 628 0012 054B     		ldr	r3, .L37+12
+ 629 0014 1B68     		ldr	r3, [r3]
+ 151:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 630              		.loc 1 151 8 view .LVU155
+ 631 0016 03B1     		cbz	r3, .L34
+ 151:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 632              		.loc 1 151 28 is_stmt 1 discriminator 1 view .LVU156
+ 633 0018 9847     		blx	r3
+ 634              	.LVL45:
+ 635              	.L34:
+ 152:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 636              		.loc 1 152 1 is_stmt 0 view .LVU157
+ 637 001a 08BD     		pop	{r3, pc}
+ 638              	.L38:
+ 639              		.align	2
+ 640              	.L37:
+ 641 001c 00000000 		.word	.LC8
+ 642 0020 10000000 		.word	.LC1
+ 643 0024 00000000 		.word	s_mqtt
+ 644 0028 00000000 		.word	s_on_disconnected
+ 645              		.cfi_endproc
+ 646              	.LFE350:
+ 648              		.section	.text.dispatch_next,"ax",%progbits
+ 649              		.align	1
+ 650              		.syntax unified
+ 651              		.thumb
+ 652              		.thumb_func
+ 654              	dispatch_next:
+ 655              	.LFB344:
+  49:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cqueue_is_empty(&s_queue) && sx_mqtt_is_connected(&s_mqtt)) {
+ 656              		.loc 1 49 32 is_stmt 1 view -0
+ 657              		.cfi_startproc
+ 658              		@ args = 0, pretend = 0, frame = 0
+ 659              		@ frame_needed = 0, uses_anonymous_args = 0
+ 660 0000 00B5     		push	{lr}
+ 661              	.LCFI11:
+ 662              		.cfi_def_cfa_offset 4
+ 663              		.cfi_offset 14, -4
+ 664 0002 83B0     		sub	sp, sp, #12
+ 665              	.LCFI12:
+ 666              		.cfi_def_cfa_offset 16
+  50:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 667              		.loc 1 50 5 view .LVU159
+  50:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 668              		.loc 1 50 10 is_stmt 0 view .LVU160
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 23
+
+
+ 669 0004 0E48     		ldr	r0, .L43
+ 670 0006 FFF7FEFF 		bl	cqueue_is_empty
+ 671              	.LVL46:
+  50:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 672              		.loc 1 50 8 discriminator 1 view .LVU161
+ 673 000a 20B9     		cbnz	r0, .L39
+ 674              	.LVL47:
+ 675              	.LBB38:
+ 676              	.LBI38:
+ 107:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return (mqtt->state == SX_MQTT_STATE_CONNECTED);
+ 677              		.loc 2 107 23 is_stmt 1 view .LVU162
+ 678              	.LBB39:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 679              		.loc 2 108 5 view .LVU163
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 680              		.loc 2 108 17 is_stmt 0 view .LVU164
+ 681 000c 0D4B     		ldr	r3, .L43+4
+ 682 000e 93F82C30 		ldrb	r3, [r3, #44]	@ zero_extendqisi2
+ 683              	.LVL48:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 684              		.loc 2 108 17 view .LVU165
+ 685              	.LBE39:
+ 686              	.LBE38:
+  50:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 687              		.loc 1 50 36 discriminator 1 view .LVU166
+ 688 0012 022B     		cmp	r3, #2
+ 689 0014 01D0     		beq	.L42
+ 690              	.L39:
+  56:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 691              		.loc 1 56 1 view .LVU167
+ 692 0016 03B0     		add	sp, sp, #12
+ 693              	.LCFI13:
+ 694              		.cfi_remember_state
+ 695              		.cfi_def_cfa_offset 4
+ 696              		@ sp needed
+ 697 0018 00BD     		pop	{pc}
+ 698              	.L42:
+ 699              	.LCFI14:
+ 700              		.cfi_restore_state
+  51:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+ 701              		.loc 1 51 9 is_stmt 1 view .LVU168
+  51:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+ 702              		.loc 1 51 13 is_stmt 0 view .LVU169
+ 703 001a 0B49     		ldr	r1, .L43+8
+ 704 001c 0848     		ldr	r0, .L43
+ 705 001e FFF7FEFF 		bl	cqueue_receive
+ 706              	.LVL49:
+  51:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+ 707              		.loc 1 51 12 discriminator 1 view .LVU170
+ 708 0022 0028     		cmp	r0, #0
+ 709 0024 F7D0     		beq	.L39
+  52:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+ 710              		.loc 1 52 13 is_stmt 1 view .LVU171
+  52:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+ 711              		.loc 1 52 26 is_stmt 0 view .LVU172
+ 712 0026 0123     		movs	r3, #1
+ 713 0028 084A     		ldr	r2, .L43+12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 24
+
+
+ 714 002a 1370     		strb	r3, [r2]
+  53:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         }
+ 715              		.loc 1 53 13 is_stmt 1 view .LVU173
+ 716 002c 084A     		ldr	r2, .L43+16
+ 717 002e 0021     		movs	r1, #0
+ 718 0030 0091     		str	r1, [sp]
+ 719 0032 A2F18001 		sub	r1, r2, #128
+ 720 0036 0348     		ldr	r0, .L43+4
+ 721 0038 FFF7FEFF 		bl	sx_mqtt_publish
+ 722              	.LVL50:
+  56:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 723              		.loc 1 56 1 is_stmt 0 view .LVU174
+ 724 003c EBE7     		b	.L39
+ 725              	.L44:
+ 726 003e 00BF     		.align	2
+ 727              	.L43:
+ 728 0040 00000000 		.word	s_queue
+ 729 0044 00000000 		.word	s_mqtt
+ 730 0048 00000000 		.word	s_current_item
+ 731 004c 00000000 		.word	s_publishing
+ 732 0050 80000000 		.word	s_current_item+128
+ 733              		.cfi_endproc
+ 734              	.LFE344:
+ 736              		.section	.rodata._on_publish.str1.4,"aMS",%progbits,1
+ 737              		.align	2
+ 738              	.LC9:
+ 739 0000 4F4B00   		.ascii	"OK\000"
+ 740 0003 00       		.align	2
+ 741              	.LC10:
+ 742 0004 4641494C 		.ascii	"FAIL\000"
+ 742      00
+ 743 0009 000000   		.align	2
+ 744              	.LC11:
+ 745 000c 5075626C 		.ascii	"Publish %s\000"
+ 745      69736820 
+ 745      257300
+ 746 0017 00       		.align	2
+ 747              	.LC12:
+ 748 0018 5075626C 		.ascii	"Publish fail %d/%d\000"
+ 748      69736820 
+ 748      6661696C 
+ 748      2025642F 
+ 748      256400
+ 749 002b 00       		.align	2
+ 750              	.LC13:
+ 751 002c 4D617820 		.ascii	"Max retry \342\200\224 reporting to sx_mqtt.c's rec"
+ 751      72657472 
+ 751      7920E280 
+ 751      94207265 
+ 751      706F7274 
+ 752 0056 6F766572 		.ascii	"overy ladder\000"
+ 752      79206C61 
+ 752      64646572 
+ 752      00
+ 753              		.section	.text._on_publish,"ax",%progbits
+ 754              		.align	1
+ 755              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 25
+
+
+ 756              		.thumb
+ 757              		.thumb_func
+ 759              	_on_publish:
+ 760              	.LVL51:
+ 761              	.LFB348:
+  77:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+ 762              		.loc 1 77 1 is_stmt 1 view -0
+ 763              		.cfi_startproc
+ 764              		@ args = 0, pretend = 0, frame = 0
+ 765              		@ frame_needed = 0, uses_anonymous_args = 0
+  77:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     (void)mqtt;
+ 766              		.loc 1 77 1 is_stmt 0 view .LVU176
+ 767 0000 10B5     		push	{r4, lr}
+ 768              	.LCFI15:
+ 769              		.cfi_def_cfa_offset 8
+ 770              		.cfi_offset 4, -8
+ 771              		.cfi_offset 14, -4
+ 772 0002 82B0     		sub	sp, sp, #8
+ 773              	.LCFI16:
+ 774              		.cfi_def_cfa_offset 16
+  78:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_publishing = 0;
+ 775              		.loc 1 78 5 is_stmt 1 view .LVU177
+  79:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 776              		.loc 1 79 5 view .LVU178
+  79:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 777              		.loc 1 79 18 is_stmt 0 view .LVU179
+ 778 0004 264B     		ldr	r3, .L53
+ 779 0006 0022     		movs	r2, #0
+ 780 0008 1A70     		strb	r2, [r3]
+  81:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 781              		.loc 1 81 5 is_stmt 1 view .LVU180
+ 782 000a 0C46     		mov	r4, r1
+ 783 000c 0029     		cmp	r1, #0
+ 784 000e 2DD0     		beq	.L51
+  81:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 785              		.loc 1 81 5 is_stmt 0 discriminator 1 view .LVU181
+ 786 0010 244B     		ldr	r3, .L53+4
+ 787              	.L46:
+  81:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 788              		.loc 1 81 5 discriminator 4 view .LVU182
+ 789 0012 254A     		ldr	r2, .L53+8
+ 790 0014 2549     		ldr	r1, .L53+12
+ 791              	.LVL52:
+  81:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 792              		.loc 1 81 5 discriminator 4 view .LVU183
+ 793 0016 0420     		movs	r0, #4
+ 794              	.LVL53:
+  81:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 795              		.loc 1 81 5 discriminator 4 view .LVU184
+ 796 0018 FFF7FEFF 		bl	log_func
+ 797              	.LVL54:
+  83:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         /* NOTE: s_publish_retry is intentionally NOT reset here — it must
+ 798              		.loc 1 83 5 is_stmt 1 view .LVU185
+  83:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         /* NOTE: s_publish_retry is intentionally NOT reset here — it must
+ 799              		.loc 1 83 8 is_stmt 0 view .LVU186
+ 800 001c 002C     		cmp	r4, #0
+ 801 001e 33D1     		bne	.L47
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 26
+
+
+  92:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "Publish fail %d/%d", s_publish_retry, MQTT_PUBLISH_MAX_RETRY);
+ 802              		.loc 1 92 9 is_stmt 1 view .LVU187
+  92:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "Publish fail %d/%d", s_publish_retry, MQTT_PUBLISH_MAX_RETRY);
+ 803              		.loc 1 92 24 is_stmt 0 view .LVU188
+ 804 0020 234C     		ldr	r4, .L53+16
+ 805              	.LVL55:
+  92:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "Publish fail %d/%d", s_publish_retry, MQTT_PUBLISH_MAX_RETRY);
+ 806              		.loc 1 92 24 view .LVU189
+ 807 0022 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 808 0024 0133     		adds	r3, r3, #1
+ 809 0026 DBB2     		uxtb	r3, r3
+ 810 0028 2370     		strb	r3, [r4]
+  93:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (s_publish_retry >= MQTT_PUBLISH_MAX_RETRY) {
+ 811              		.loc 1 93 9 is_stmt 1 view .LVU190
+ 812 002a 0322     		movs	r2, #3
+ 813 002c 0092     		str	r2, [sp]
+ 814 002e 214A     		ldr	r2, .L53+20
+ 815 0030 1E49     		ldr	r1, .L53+12
+ 816 0032 0220     		movs	r0, #2
+ 817 0034 FFF7FEFF 		bl	log_func
+ 818              	.LVL56:
+  94:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             log_error(TAG, "Max retry — reporting to sx_mqtt.c's recovery ladder");
+ 819              		.loc 1 94 9 view .LVU191
+  94:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             log_error(TAG, "Max retry — reporting to sx_mqtt.c's recovery ladder");
+ 820              		.loc 1 94 29 is_stmt 0 view .LVU192
+ 821 0038 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+  94:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             log_error(TAG, "Max retry — reporting to sx_mqtt.c's recovery ladder");
+ 822              		.loc 1 94 12 view .LVU193
+ 823 003a 022B     		cmp	r3, #2
+ 824 003c 18D9     		bls	.L48
+  95:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publish_retry = 0;
+ 825              		.loc 1 95 13 is_stmt 1 view .LVU194
+ 826 003e 1E4A     		ldr	r2, .L53+24
+ 827 0040 1A49     		ldr	r1, .L53+12
+ 828 0042 0120     		movs	r0, #1
+ 829 0044 FFF7FEFF 		bl	log_func
+ 830              	.LVL57:
+  96:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             cqueue_init_static(&s_queue, s_queue_buf, MQTT_QUEUE_SIZE,
+ 831              		.loc 1 96 13 view .LVU195
+  96:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             cqueue_init_static(&s_queue, s_queue_buf, MQTT_QUEUE_SIZE,
+ 832              		.loc 1 96 29 is_stmt 0 view .LVU196
+ 833 0048 0022     		movs	r2, #0
+ 834 004a 2270     		strb	r2, [r4]
+  97:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****                                sizeof(mqtt_queue_item_t));
+ 835              		.loc 1 97 13 is_stmt 1 view .LVU197
+ 836 004c 4FF4C073 		mov	r3, #384
+ 837 0050 1022     		movs	r2, #16
+ 838 0052 1A49     		ldr	r1, .L53+28
+ 839 0054 1A48     		ldr	r0, .L53+32
+ 840 0056 FFF7FEFF 		bl	cqueue_init_static
+ 841              	.LVL58:
+  99:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             /* Let sx_mqtt.c decide the actual recovery action (it may
+ 842              		.loc 1 99 13 view .LVU198
+  99:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             /* Let sx_mqtt.c decide the actual recovery action (it may
+ 843              		.loc 1 99 17 is_stmt 0 view .LVU199
+ 844 005a 1A4B     		ldr	r3, .L53+36
+ 845 005c 1B68     		ldr	r3, [r3]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 27
+
+
+  99:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             /* Let sx_mqtt.c decide the actual recovery action (it may
+ 846              		.loc 1 99 16 view .LVU200
+ 847 005e 0BB1     		cbz	r3, .L49
+  99:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             /* Let sx_mqtt.c decide the actual recovery action (it may
+ 848              		.loc 1 99 31 is_stmt 1 discriminator 1 view .LVU201
+ 849 0060 0020     		movs	r0, #0
+ 850 0062 9847     		blx	r3
+ 851              	.LVL59:
+ 852              	.L49:
+ 104:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             return;
+ 853              		.loc 1 104 13 view .LVU202
+ 854 0064 1848     		ldr	r0, .L53+40
+ 855 0066 FFF7FEFF 		bl	sx_mqtt_report_failure
+ 856              	.LVL60:
+ 105:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         }
+ 857              		.loc 1 105 13 view .LVU203
+ 858 006a 17E0     		b	.L45
+ 859              	.LVL61:
+ 860              	.L51:
+  81:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 861              		.loc 1 81 5 is_stmt 0 discriminator 2 view .LVU204
+ 862 006c 174B     		ldr	r3, .L53+44
+ 863 006e D0E7     		b	.L46
+ 864              	.LVL62:
+ 865              	.L48:
+ 107:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_mqtt_publish(&s_mqtt, s_current_item.topic,
+ 866              		.loc 1 107 9 is_stmt 1 view .LVU205
+ 107:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_mqtt_publish(&s_mqtt, s_current_item.topic,
+ 867              		.loc 1 107 22 is_stmt 0 view .LVU206
+ 868 0070 0123     		movs	r3, #1
+ 869 0072 0B4A     		ldr	r2, .L53
+ 870 0074 1370     		strb	r3, [r2]
+ 108:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****                         s_current_item.message, 1, 0);
+ 871              		.loc 1 108 9 is_stmt 1 view .LVU207
+ 872 0076 164A     		ldr	r2, .L53+48
+ 873 0078 0021     		movs	r1, #0
+ 874 007a 0091     		str	r1, [sp]
+ 875 007c A2F18001 		sub	r1, r2, #128
+ 876 0080 1148     		ldr	r0, .L53+40
+ 877 0082 FFF7FEFF 		bl	sx_mqtt_publish
+ 878              	.LVL63:
+ 110:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 879              		.loc 1 110 9 view .LVU208
+ 880 0086 09E0     		b	.L45
+ 881              	.LVL64:
+ 882              	.L47:
+ 113:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     dispatch_next();
+ 883              		.loc 1 113 5 view .LVU209
+ 113:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     dispatch_next();
+ 884              		.loc 1 113 21 is_stmt 0 view .LVU210
+ 885 0088 094B     		ldr	r3, .L53+16
+ 886 008a 0022     		movs	r2, #0
+ 887 008c 1A70     		strb	r2, [r3]
+ 114:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (s_on_publish) s_on_publish(1);
+ 888              		.loc 1 114 5 is_stmt 1 view .LVU211
+ 889 008e FFF7FEFF 		bl	dispatch_next
+ 890              	.LVL65:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 28
+
+
+ 115:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 891              		.loc 1 115 5 view .LVU212
+ 115:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 892              		.loc 1 115 9 is_stmt 0 view .LVU213
+ 893 0092 0C4B     		ldr	r3, .L53+36
+ 894 0094 1B68     		ldr	r3, [r3]
+ 115:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 895              		.loc 1 115 8 view .LVU214
+ 896 0096 0BB1     		cbz	r3, .L45
+ 115:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 897              		.loc 1 115 23 is_stmt 1 discriminator 1 view .LVU215
+ 898 0098 0120     		movs	r0, #1
+ 899 009a 9847     		blx	r3
+ 900              	.LVL66:
+ 901              	.L45:
+ 116:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 902              		.loc 1 116 1 is_stmt 0 view .LVU216
+ 903 009c 02B0     		add	sp, sp, #8
+ 904              	.LCFI17:
+ 905              		.cfi_def_cfa_offset 8
+ 906              		@ sp needed
+ 907 009e 10BD     		pop	{r4, pc}
+ 908              	.L54:
+ 909              		.align	2
+ 910              	.L53:
+ 911 00a0 00000000 		.word	s_publishing
+ 912 00a4 00000000 		.word	.LC9
+ 913 00a8 0C000000 		.word	.LC11
+ 914 00ac 10000000 		.word	.LC1
+ 915 00b0 00000000 		.word	s_publish_retry
+ 916 00b4 18000000 		.word	.LC12
+ 917 00b8 2C000000 		.word	.LC13
+ 918 00bc 00000000 		.word	s_queue_buf
+ 919 00c0 00000000 		.word	s_queue
+ 920 00c4 00000000 		.word	s_on_publish
+ 921 00c8 00000000 		.word	s_mqtt
+ 922 00cc 04000000 		.word	.LC10
+ 923 00d0 80000000 		.word	s_current_item+128
+ 924              		.cfi_endproc
+ 925              	.LFE348:
+ 927              		.section	.rodata._on_modem_ready.str1.4,"aMS",%progbits,1
+ 928              		.align	2
+ 929              	.LC14:
+ 930 0000 73746D33 		.ascii	"stm32h5_%s\000"
+ 930      3268355F 
+ 930      257300
+ 931 000b 00       		.align	2
+ 932              	.LC15:
+ 933 000c 4D6F6465 		.ascii	"Modem ready \342\200\224 IP=%s RSSI=%d client_id=%s"
+ 933      6D207265 
+ 933      61647920 
+ 933      E2809420 
+ 933      49503D25 
+ 934 0036 00       		.ascii	"\000"
+ 935              		.section	.text._on_modem_ready,"ax",%progbits
+ 936              		.align	1
+ 937              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 29
+
+
+ 938              		.thumb
+ 939              		.thumb_func
+ 941              	_on_modem_ready:
+ 942              	.LVL67:
+ 943              	.LFB349:
+ 130:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     modem_handle_t *modem = (modem_handle_t *)ctx;
+ 944              		.loc 1 130 1 is_stmt 1 view -0
+ 945              		.cfi_startproc
+ 946              		@ args = 0, pretend = 0, frame = 0
+ 947              		@ frame_needed = 0, uses_anonymous_args = 0
+ 130:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     modem_handle_t *modem = (modem_handle_t *)ctx;
+ 948              		.loc 1 130 1 is_stmt 0 view .LVU218
+ 949 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 950              	.LCFI18:
+ 951              		.cfi_def_cfa_offset 20
+ 952              		.cfi_offset 4, -20
+ 953              		.cfi_offset 5, -16
+ 954              		.cfi_offset 6, -12
+ 955              		.cfi_offset 7, -8
+ 956              		.cfi_offset 14, -4
+ 957 0002 83B0     		sub	sp, sp, #12
+ 958              	.LCFI19:
+ 959              		.cfi_def_cfa_offset 32
+ 960 0004 0446     		mov	r4, r0
+ 131:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 961              		.loc 1 131 5 is_stmt 1 view .LVU219
+ 962              	.LVL68:
+ 133:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     size_t imei_len = strlen(imei);
+ 963              		.loc 1 133 5 view .LVU220
+ 133:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     size_t imei_len = strlen(imei);
+ 964              		.loc 1 133 29 is_stmt 0 view .LVU221
+ 965 0006 0368     		ldr	r3, [r0]
+ 133:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     size_t imei_len = strlen(imei);
+ 966              		.loc 1 133 34 view .LVU222
+ 967 0008 1B6C     		ldr	r3, [r3, #64]
+ 133:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     size_t imei_len = strlen(imei);
+ 968              		.loc 1 133 24 view .LVU223
+ 969 000a 4068     		ldr	r0, [r0, #4]
+ 970              	.LVL69:
+ 133:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     size_t imei_len = strlen(imei);
+ 971              		.loc 1 133 24 view .LVU224
+ 972 000c 9847     		blx	r3
+ 973              	.LVL70:
+ 974 000e 0546     		mov	r5, r0
+ 975              	.LVL71:
+ 134:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     const char *imei_suffix = imei_len >= 8 ? imei + imei_len - 8 : imei;
+ 976              		.loc 1 134 5 is_stmt 1 view .LVU225
+ 134:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     const char *imei_suffix = imei_len >= 8 ? imei + imei_len - 8 : imei;
+ 977              		.loc 1 134 23 is_stmt 0 view .LVU226
+ 978 0010 FFF7FEFF 		bl	strlen
+ 979              	.LVL72:
+ 135:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     snprintf(s_client_id_buf, sizeof(s_client_id_buf), "stm32h5_%s", imei_suffix);
+ 980              		.loc 1 135 5 is_stmt 1 view .LVU227
+ 135:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     snprintf(s_client_id_buf, sizeof(s_client_id_buf), "stm32h5_%s", imei_suffix);
+ 981              		.loc 1 135 67 is_stmt 0 view .LVU228
+ 982 0014 0728     		cmp	r0, #7
+ 983 0016 02D9     		bls	.L56
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 30
+
+
+ 135:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     snprintf(s_client_id_buf, sizeof(s_client_id_buf), "stm32h5_%s", imei_suffix);
+ 984              		.loc 1 135 63 discriminator 1 view .LVU229
+ 985 0018 A0F10802 		sub	r2, r0, #8
+ 135:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     snprintf(s_client_id_buf, sizeof(s_client_id_buf), "stm32h5_%s", imei_suffix);
+ 986              		.loc 1 135 67 discriminator 1 view .LVU230
+ 987 001c 1544     		add	r5, r5, r2
+ 988              	.LVL73:
+ 989              	.L56:
+ 136:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 990              		.loc 1 136 5 is_stmt 1 view .LVU231
+ 991 001e 0F4E     		ldr	r6, .L58
+ 992 0020 2B46     		mov	r3, r5
+ 993 0022 0F4A     		ldr	r2, .L58+4
+ 994 0024 2021     		movs	r1, #32
+ 995 0026 3046     		mov	r0, r6
+ 996              	.LVL74:
+ 136:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 997              		.loc 1 136 5 is_stmt 0 view .LVU232
+ 998 0028 FFF7FEFF 		bl	snprintf
+ 999              	.LVL75:
+ 138:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 1000              		.loc 1 138 5 is_stmt 1 view .LVU233
+ 138:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 1001              		.loc 1 138 29 is_stmt 0 view .LVU234
+ 1002 002c 0D4F     		ldr	r7, .L58+8
+ 1003 002e FE60     		str	r6, [r7, #12]
+ 140:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              modem->ops->get_ip(modem->ctx), modem->ops->get_rssi(modem->ctx),
+ 1004              		.loc 1 140 5 is_stmt 1 view .LVU235
+ 1005 0030 2368     		ldr	r3, [r4]
+ 1006 0032 9B6C     		ldr	r3, [r3, #72]
+ 1007 0034 6068     		ldr	r0, [r4, #4]
+ 1008 0036 9847     		blx	r3
+ 1009              	.LVL76:
+ 1010 0038 0546     		mov	r5, r0
+ 1011              	.LVL77:
+ 140:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              modem->ops->get_ip(modem->ctx), modem->ops->get_rssi(modem->ctx),
+ 1012              		.loc 1 140 5 is_stmt 0 discriminator 1 view .LVU236
+ 1013 003a 2368     		ldr	r3, [r4]
+ 1014 003c 5B6C     		ldr	r3, [r3, #68]
+ 1015 003e 6068     		ldr	r0, [r4, #4]
+ 1016 0040 9847     		blx	r3
+ 1017              	.LVL78:
+ 140:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****              modem->ops->get_ip(modem->ctx), modem->ops->get_rssi(modem->ctx),
+ 1018              		.loc 1 140 5 discriminator 2 view .LVU237
+ 1019 0042 0196     		str	r6, [sp, #4]
+ 1020 0044 0090     		str	r0, [sp]
+ 1021 0046 2B46     		mov	r3, r5
+ 1022 0048 074A     		ldr	r2, .L58+12
+ 1023 004a 0849     		ldr	r1, .L58+16
+ 1024 004c 0320     		movs	r0, #3
+ 1025 004e FFF7FEFF 		bl	log_func
+ 1026              	.LVL79:
+ 143:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1027              		.loc 1 143 5 is_stmt 1 view .LVU238
+ 1028 0052 3846     		mov	r0, r7
+ 1029 0054 FFF7FEFF 		bl	sx_mqtt_connect
+ 1030              	.LVL80:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 31
+
+
+ 144:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 1031              		.loc 1 144 1 is_stmt 0 view .LVU239
+ 1032 0058 03B0     		add	sp, sp, #12
+ 1033              	.LCFI20:
+ 1034              		.cfi_def_cfa_offset 20
+ 1035              		@ sp needed
+ 1036 005a F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1037              	.LVL81:
+ 1038              	.L59:
+ 144:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 1039              		.loc 1 144 1 view .LVU240
+ 1040              		.align	2
+ 1041              	.L58:
+ 1042 005c 00000000 		.word	s_client_id_buf
+ 1043 0060 00000000 		.word	.LC14
+ 1044 0064 00000000 		.word	s_mqtt
+ 1045 0068 0C000000 		.word	.LC15
+ 1046 006c 10000000 		.word	.LC1
+ 1047              		.cfi_endproc
+ 1048              	.LFE349:
+ 1050              		.section	.text.sx_gettick,"ax",%progbits
+ 1051              		.align	1
+ 1052              		.global	sx_gettick
+ 1053              		.syntax unified
+ 1054              		.thumb
+ 1055              		.thumb_func
+ 1057              	sx_gettick:
+ 1058              	.LFB336:
+ 1059              		.loc 3 186 33 is_stmt 1 view -0
+ 1060              		.cfi_startproc
+ 1061              		@ args = 0, pretend = 0, frame = 0
+ 1062              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1063 0000 08B5     		push	{r3, lr}
+ 1064              	.LCFI21:
+ 1065              		.cfi_def_cfa_offset 8
+ 1066              		.cfi_offset 3, -8
+ 1067              		.cfi_offset 14, -4
+ 1068              		.loc 3 186 34 view .LVU242
+ 1069              		.loc 3 186 41 is_stmt 0 view .LVU243
+ 1070 0002 FFF7FEFF 		bl	HAL_GetTick
+ 1071              	.LVL82:
+ 1072              		.loc 3 186 55 view .LVU244
+ 1073 0006 08BD     		pop	{r3, pc}
+ 1074              		.cfi_endproc
+ 1075              	.LFE336:
+ 1077              		.section	.text.sx_user_mqtt_is_connected,"ax",%progbits
+ 1078              		.align	1
+ 1079              		.global	sx_user_mqtt_is_connected
+ 1080              		.syntax unified
+ 1081              		.thumb
+ 1082              		.thumb_func
+ 1084              	sx_user_mqtt_is_connected:
+ 1085              	.LFB353:
+ 205:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 206:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** uint8_t sx_user_mqtt_is_connected(void) {
+ 1086              		.loc 1 206 41 is_stmt 1 view -0
+ 1087              		.cfi_startproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 32
+
+
+ 1088              		@ args = 0, pretend = 0, frame = 0
+ 1089              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1090              		@ link register save eliminated.
+ 207:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return sx_mqtt_is_connected(&s_mqtt);
+ 1091              		.loc 1 207 5 view .LVU246
+ 1092              	.LVL83:
+ 1093              	.LBB40:
+ 1094              	.LBI40:
+ 107:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return (mqtt->state == SX_MQTT_STATE_CONNECTED);
+ 1095              		.loc 2 107 23 view .LVU247
+ 1096              	.LBB41:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1097              		.loc 2 108 5 view .LVU248
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1098              		.loc 2 108 17 is_stmt 0 view .LVU249
+ 1099 0000 034B     		ldr	r3, .L63
+ 1100 0002 93F82C00 		ldrb	r0, [r3, #44]	@ zero_extendqisi2
+ 1101              	.LVL84:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1102              		.loc 2 108 17 view .LVU250
+ 1103              	.LBE41:
+ 1104              	.LBE40:
+ 208:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1105              		.loc 1 208 1 view .LVU251
+ 1106 0006 0228     		cmp	r0, #2
+ 1107 0008 14BF     		ite	ne
+ 1108 000a 0020     		movne	r0, #0
+ 1109 000c 0120     		moveq	r0, #1
+ 1110 000e 7047     		bx	lr
+ 1111              	.L64:
+ 1112              		.align	2
+ 1113              	.L63:
+ 1114 0010 00000000 		.word	s_mqtt
+ 1115              		.cfi_endproc
+ 1116              	.LFE353:
+ 1118              		.section	.text.sx_user_mqtt_get_ip,"ax",%progbits
+ 1119              		.align	1
+ 1120              		.global	sx_user_mqtt_get_ip
+ 1121              		.syntax unified
+ 1122              		.thumb
+ 1123              		.thumb_func
+ 1125              	sx_user_mqtt_get_ip:
+ 1126              	.LFB354:
+ 209:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 210:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** const char *sx_user_mqtt_get_ip(void) {
+ 1127              		.loc 1 210 39 is_stmt 1 view -0
+ 1128              		.cfi_startproc
+ 1129              		@ args = 0, pretend = 0, frame = 0
+ 1130              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1131 0000 08B5     		push	{r3, lr}
+ 1132              	.LCFI22:
+ 1133              		.cfi_def_cfa_offset 8
+ 1134              		.cfi_offset 3, -8
+ 1135              		.cfi_offset 14, -4
+ 211:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return board.modem.ops->get_ip(board.modem.ctx);
+ 1136              		.loc 1 211 5 view .LVU253
+ 1137              		.loc 1 211 23 is_stmt 0 view .LVU254
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 33
+
+
+ 1138 0002 044B     		ldr	r3, .L67
+ 1139 0004 D3F8DC2B 		ldr	r2, [r3, #3036]
+ 1140              		.loc 1 211 27 view .LVU255
+ 1141 0008 926C     		ldr	r2, [r2, #72]
+ 1142              		.loc 1 211 12 view .LVU256
+ 1143 000a D3F8E00B 		ldr	r0, [r3, #3040]
+ 1144 000e 9047     		blx	r2
+ 1145              	.LVL85:
+ 212:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1146              		.loc 1 212 1 view .LVU257
+ 1147 0010 08BD     		pop	{r3, pc}
+ 1148              	.L68:
+ 1149 0012 00BF     		.align	2
+ 1150              	.L67:
+ 1151 0014 00D00000 		.word	board+53248
+ 1152              		.cfi_endproc
+ 1153              	.LFE354:
+ 1155              		.section	.text.sx_user_mqtt_get_imei,"ax",%progbits
+ 1156              		.align	1
+ 1157              		.global	sx_user_mqtt_get_imei
+ 1158              		.syntax unified
+ 1159              		.thumb
+ 1160              		.thumb_func
+ 1162              	sx_user_mqtt_get_imei:
+ 1163              	.LFB355:
+ 213:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 214:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** const char *sx_user_mqtt_get_imei(void) {
+ 1164              		.loc 1 214 41 is_stmt 1 view -0
+ 1165              		.cfi_startproc
+ 1166              		@ args = 0, pretend = 0, frame = 0
+ 1167              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1168 0000 08B5     		push	{r3, lr}
+ 1169              	.LCFI23:
+ 1170              		.cfi_def_cfa_offset 8
+ 1171              		.cfi_offset 3, -8
+ 1172              		.cfi_offset 14, -4
+ 215:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return board.modem.ops->get_imei(board.modem.ctx);
+ 1173              		.loc 1 215 5 view .LVU259
+ 1174              		.loc 1 215 23 is_stmt 0 view .LVU260
+ 1175 0002 044B     		ldr	r3, .L71
+ 1176 0004 D3F8DC2B 		ldr	r2, [r3, #3036]
+ 1177              		.loc 1 215 27 view .LVU261
+ 1178 0008 126C     		ldr	r2, [r2, #64]
+ 1179              		.loc 1 215 12 view .LVU262
+ 1180 000a D3F8E00B 		ldr	r0, [r3, #3040]
+ 1181 000e 9047     		blx	r2
+ 1182              	.LVL86:
+ 216:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1183              		.loc 1 216 1 view .LVU263
+ 1184 0010 08BD     		pop	{r3, pc}
+ 1185              	.L72:
+ 1186 0012 00BF     		.align	2
+ 1187              	.L71:
+ 1188 0014 00D00000 		.word	board+53248
+ 1189              		.cfi_endproc
+ 1190              	.LFE355:
+ 1192              		.section	.text.sx_user_mqtt_get_rssi,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 34
+
+
+ 1193              		.align	1
+ 1194              		.global	sx_user_mqtt_get_rssi
+ 1195              		.syntax unified
+ 1196              		.thumb
+ 1197              		.thumb_func
+ 1199              	sx_user_mqtt_get_rssi:
+ 1200              	.LFB356:
+ 217:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 218:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** int sx_user_mqtt_get_rssi(void) {
+ 1201              		.loc 1 218 33 is_stmt 1 view -0
+ 1202              		.cfi_startproc
+ 1203              		@ args = 0, pretend = 0, frame = 0
+ 1204              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1205 0000 08B5     		push	{r3, lr}
+ 1206              	.LCFI24:
+ 1207              		.cfi_def_cfa_offset 8
+ 1208              		.cfi_offset 3, -8
+ 1209              		.cfi_offset 14, -4
+ 219:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return board.modem.ops->get_rssi(board.modem.ctx);
+ 1210              		.loc 1 219 5 view .LVU265
+ 1211              		.loc 1 219 23 is_stmt 0 view .LVU266
+ 1212 0002 044B     		ldr	r3, .L75
+ 1213 0004 D3F8DC2B 		ldr	r2, [r3, #3036]
+ 1214              		.loc 1 219 27 view .LVU267
+ 1215 0008 526C     		ldr	r2, [r2, #68]
+ 1216              		.loc 1 219 12 view .LVU268
+ 1217 000a D3F8E00B 		ldr	r0, [r3, #3040]
+ 1218 000e 9047     		blx	r2
+ 1219              	.LVL87:
+ 220:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1220              		.loc 1 220 1 view .LVU269
+ 1221 0010 08BD     		pop	{r3, pc}
+ 1222              	.L76:
+ 1223 0012 00BF     		.align	2
+ 1224              	.L75:
+ 1225 0014 00D00000 		.word	board+53248
+ 1226              		.cfi_endproc
+ 1227              	.LFE356:
+ 1229              		.section	.text.sx_user_mqtt_nontls_init,"ax",%progbits
+ 1230              		.align	1
+ 1231              		.global	sx_user_mqtt_nontls_init
+ 1232              		.syntax unified
+ 1233              		.thumb
+ 1234              		.thumb_func
+ 1236              	sx_user_mqtt_nontls_init:
+ 1237              	.LVL88:
+ 1238              	.LFB357:
+ 221:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 222:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** int sx_user_mqtt_nontls_init(const sx_user_mqtt_cfg_t *cfg){
+ 1239              		.loc 1 222 60 is_stmt 1 view -0
+ 1240              		.cfi_startproc
+ 1241              		@ args = 0, pretend = 0, frame = 0
+ 1242              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1243              		.loc 1 222 60 is_stmt 0 view .LVU271
+ 1244 0000 38B5     		push	{r3, r4, r5, lr}
+ 1245              	.LCFI25:
+ 1246              		.cfi_def_cfa_offset 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 35
+
+
+ 1247              		.cfi_offset 3, -16
+ 1248              		.cfi_offset 4, -12
+ 1249              		.cfi_offset 5, -8
+ 1250              		.cfi_offset 14, -4
+ 1251 0002 0446     		mov	r4, r0
+ 223:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     static sx_mqtt_config_t mqtt_cfg;
+ 1252              		.loc 1 223 5 is_stmt 1 view .LVU272
+ 224:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     memset(&mqtt_cfg, 0, sizeof(mqtt_cfg));
+ 1253              		.loc 1 224 5 view .LVU273
+ 1254 0004 054D     		ldr	r5, .L79
+ 1255 0006 2822     		movs	r2, #40
+ 1256 0008 0021     		movs	r1, #0
+ 1257 000a 2846     		mov	r0, r5
+ 1258              	.LVL89:
+ 1259              		.loc 1 224 5 is_stmt 0 view .LVU274
+ 1260 000c FFF7FEFF 		bl	memset
+ 1261              	.LVL90:
+ 225:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg.use_ssl = 0;
+ 1262              		.loc 1 225 5 is_stmt 1 view .LVU275
+ 226:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return _common_init(cfg, &mqtt_cfg);
+ 1263              		.loc 1 226 5 view .LVU276
+ 1264              		.loc 1 226 12 is_stmt 0 view .LVU277
+ 1265 0010 2946     		mov	r1, r5
+ 1266 0012 2046     		mov	r0, r4
+ 1267 0014 FFF7FEFF 		bl	_common_init
+ 1268              	.LVL91:
+ 227:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1269              		.loc 1 227 1 view .LVU278
+ 1270 0018 38BD     		pop	{r3, r4, r5, pc}
+ 1271              	.LVL92:
+ 1272              	.L80:
+ 1273              		.loc 1 227 1 view .LVU279
+ 1274 001a 00BF     		.align	2
+ 1275              	.L79:
+ 1276 001c 00000000 		.word	mqtt_cfg.1
+ 1277              		.cfi_endproc
+ 1278              	.LFE357:
+ 1280              		.section	.text.sx_user_mqtt_tls_init,"ax",%progbits
+ 1281              		.align	1
+ 1282              		.global	sx_user_mqtt_tls_init
+ 1283              		.syntax unified
+ 1284              		.thumb
+ 1285              		.thumb_func
+ 1287              	sx_user_mqtt_tls_init:
+ 1288              	.LVL93:
+ 1289              	.LFB358:
+ 228:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 229:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** int sx_user_mqtt_tls_init(const sx_user_mqtt_cfg_t *cfg, char *ca_cert, char *client_cert, char *cl
+ 1290              		.loc 1 229 109 is_stmt 1 view -0
+ 1291              		.cfi_startproc
+ 1292              		@ args = 0, pretend = 0, frame = 0
+ 1293              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1294              		.loc 1 229 109 is_stmt 0 view .LVU281
+ 1295 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 1296              	.LCFI26:
+ 1297              		.cfi_def_cfa_offset 24
+ 1298              		.cfi_offset 4, -24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 36
+
+
+ 1299              		.cfi_offset 5, -20
+ 1300              		.cfi_offset 6, -16
+ 1301              		.cfi_offset 7, -12
+ 1302              		.cfi_offset 8, -8
+ 1303              		.cfi_offset 14, -4
+ 1304 0004 8046     		mov	r8, r0
+ 1305 0006 0F46     		mov	r7, r1
+ 1306 0008 1446     		mov	r4, r2
+ 1307 000a 1D46     		mov	r5, r3
+ 230:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     static sx_mqtt_config_t mqtt_cfg;
+ 1308              		.loc 1 230 5 is_stmt 1 view .LVU282
+ 231:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     memset(&mqtt_cfg, 0, sizeof(mqtt_cfg));
+ 1309              		.loc 1 231 5 view .LVU283
+ 1310 000c 0D4E     		ldr	r6, .L85
+ 1311 000e 2822     		movs	r2, #40
+ 1312              	.LVL94:
+ 1313              		.loc 1 231 5 is_stmt 0 view .LVU284
+ 1314 0010 0021     		movs	r1, #0
+ 1315              	.LVL95:
+ 1316              		.loc 1 231 5 view .LVU285
+ 1317 0012 3046     		mov	r0, r6
+ 1318              	.LVL96:
+ 1319              		.loc 1 231 5 view .LVU286
+ 1320 0014 FFF7FEFF 		bl	memset
+ 1321              	.LVL97:
+ 232:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg.use_ssl = 1;
+ 1322              		.loc 1 232 5 is_stmt 1 view .LVU287
+ 1323              		.loc 1 232 22 is_stmt 0 view .LVU288
+ 1324 0018 0123     		movs	r3, #1
+ 1325 001a 3376     		strb	r3, [r6, #24]
+ 233:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 234:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (client_cert && client_key)
+ 1326              		.loc 1 234 5 is_stmt 1 view .LVU289
+ 1327              		.loc 1 234 8 is_stmt 0 view .LVU290
+ 1328 001c 5CB1     		cbz	r4, .L82
+ 1329              		.loc 1 234 21 discriminator 1 view .LVU291
+ 1330 001e 55B1     		cbz	r5, .L82
+ 235:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         mqtt_cfg.ssl_auth_mode = 2;
+ 1331              		.loc 1 235 9 is_stmt 1 view .LVU292
+ 1332              		.loc 1 235 32 is_stmt 0 view .LVU293
+ 1333 0020 0222     		movs	r2, #2
+ 1334 0022 7276     		strb	r2, [r6, #25]
+ 1335              	.L83:
+ 236:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     else if (ca_cert)
+ 237:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         mqtt_cfg.ssl_auth_mode = 1;
+ 238:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     else
+ 239:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         mqtt_cfg.ssl_auth_mode = 0;
+ 240:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 241:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg.ca_cert     = ca_cert;
+ 1336              		.loc 1 241 5 is_stmt 1 view .LVU294
+ 1337              		.loc 1 241 26 is_stmt 0 view .LVU295
+ 1338 0024 0749     		ldr	r1, .L85
+ 1339 0026 CF61     		str	r7, [r1, #28]
+ 242:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg.client_cert = client_cert;
+ 1340              		.loc 1 242 5 is_stmt 1 view .LVU296
+ 1341              		.loc 1 242 26 is_stmt 0 view .LVU297
+ 1342 0028 0C62     		str	r4, [r1, #32]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 37
+
+
+ 243:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_cfg.client_key  = client_key;
+ 1343              		.loc 1 243 5 is_stmt 1 view .LVU298
+ 1344              		.loc 1 243 26 is_stmt 0 view .LVU299
+ 1345 002a 4D62     		str	r5, [r1, #36]
+ 244:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 245:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return _common_init(cfg, &mqtt_cfg);
+ 1346              		.loc 1 245 5 is_stmt 1 view .LVU300
+ 1347              		.loc 1 245 12 is_stmt 0 view .LVU301
+ 1348 002c 4046     		mov	r0, r8
+ 1349 002e FFF7FEFF 		bl	_common_init
+ 1350              	.LVL98:
+ 246:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1351              		.loc 1 246 1 view .LVU302
+ 1352 0032 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1353              	.LVL99:
+ 1354              	.L82:
+ 236:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         mqtt_cfg.ssl_auth_mode = 1;
+ 1355              		.loc 1 236 10 is_stmt 1 view .LVU303
+ 236:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         mqtt_cfg.ssl_auth_mode = 1;
+ 1356              		.loc 1 236 13 is_stmt 0 view .LVU304
+ 1357 0036 002F     		cmp	r7, #0
+ 1358 0038 F4D0     		beq	.L83
+ 237:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     else
+ 1359              		.loc 1 237 9 is_stmt 1 view .LVU305
+ 237:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     else
+ 1360              		.loc 1 237 32 is_stmt 0 view .LVU306
+ 1361 003a 024B     		ldr	r3, .L85
+ 1362 003c 0122     		movs	r2, #1
+ 1363 003e 5A76     		strb	r2, [r3, #25]
+ 1364 0040 F0E7     		b	.L83
+ 1365              	.L86:
+ 1366 0042 00BF     		.align	2
+ 1367              	.L85:
+ 1368 0044 00000000 		.word	mqtt_cfg.0
+ 1369              		.cfi_endproc
+ 1370              	.LFE358:
+ 1372              		.section	.text.sx_user_mqtt_force_disconnect,"ax",%progbits
+ 1373              		.align	1
+ 1374              		.global	sx_user_mqtt_force_disconnect
+ 1375              		.syntax unified
+ 1376              		.thumb
+ 1377              		.thumb_func
+ 1379              	sx_user_mqtt_force_disconnect:
+ 1380              	.LFB359:
+ 247:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 248:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** void sx_user_mqtt_force_disconnect(void) {
+ 1381              		.loc 1 248 42 is_stmt 1 view -0
+ 1382              		.cfi_startproc
+ 1383              		@ args = 0, pretend = 0, frame = 0
+ 1384              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1385              		@ link register save eliminated.
+ 249:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_force_disconnect(&s_mqtt);
+ 1386              		.loc 1 249 5 view .LVU308
+ 1387              	.LVL100:
+ 1388              	.LBB42:
+ 1389              	.LBI42:
+ 126:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 38
+
+
+ 127:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** 
+ 128:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** static inline void sx_mqtt_force_disconnect(sx_mqtt_t *mqtt) {
+ 1390              		.loc 2 128 20 view .LVU309
+ 1391              	.LBB43:
+ 129:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->state           = SX_MQTT_STATE_DISCONNECTED;
+ 1392              		.loc 2 129 5 view .LVU310
+ 1393              		.loc 2 129 27 is_stmt 0 view .LVU311
+ 1394 0000 034B     		ldr	r3, .L88
+ 1395 0002 0022     		movs	r2, #0
+ 1396 0004 83F82C20 		strb	r2, [r3, #44]
+ 130:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->reconnect_count = 0;
+ 1397              		.loc 2 130 5 is_stmt 1 view .LVU312
+ 1398              		.loc 2 130 27 is_stmt 0 view .LVU313
+ 1399 0008 83F83820 		strb	r2, [r3, #56]
+ 131:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->reconnect_elapsed = 0;
+ 1400              		.loc 2 131 5 is_stmt 1 view .LVU314
+ 1401              		.loc 2 131 29 is_stmt 0 view .LVU315
+ 1402 000c 1A63     		str	r2, [r3, #48]
+ 1403              	.LVL101:
+ 1404              		.loc 2 131 29 view .LVU316
+ 1405              	.LBE43:
+ 1406              	.LBE42:
+ 250:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1407              		.loc 1 250 1 view .LVU317
+ 1408 000e 7047     		bx	lr
+ 1409              	.L89:
+ 1410              		.align	2
+ 1411              	.L88:
+ 1412 0010 00000000 		.word	s_mqtt
+ 1413              		.cfi_endproc
+ 1414              	.LFE359:
+ 1416              		.section	.rodata.sx_user_mqtt_publish.str1.4,"aMS",%progbits,1
+ 1417              		.align	2
+ 1418              	.LC16:
+ 1419 0000 7075626C 		.ascii	"publish: not connected\000"
+ 1419      6973683A 
+ 1419      206E6F74 
+ 1419      20636F6E 
+ 1419      6E656374 
+ 1420 0017 00       		.align	2
+ 1421              	.LC17:
+ 1422 0018 7075626C 		.ascii	"publish queue full, drop: %s\000"
+ 1422      69736820 
+ 1422      71756575 
+ 1422      65206675 
+ 1422      6C6C2C20 
+ 1423              		.section	.text.sx_user_mqtt_publish,"ax",%progbits
+ 1424              		.align	1
+ 1425              		.global	sx_user_mqtt_publish
+ 1426              		.syntax unified
+ 1427              		.thumb
+ 1428              		.thumb_func
+ 1430              	sx_user_mqtt_publish:
+ 1431              	.LVL102:
+ 1432              	.LFB360:
+ 251:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 252:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** void sx_user_mqtt_publish(const char *topic, const char *message){
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 39
+
+
+ 1433              		.loc 1 252 66 is_stmt 1 view -0
+ 1434              		.cfi_startproc
+ 1435              		@ args = 0, pretend = 0, frame = 384
+ 1436              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1437              		.loc 1 252 66 is_stmt 0 view .LVU319
+ 1438 0000 70B5     		push	{r4, r5, r6, lr}
+ 1439              	.LCFI27:
+ 1440              		.cfi_def_cfa_offset 16
+ 1441              		.cfi_offset 4, -16
+ 1442              		.cfi_offset 5, -12
+ 1443              		.cfi_offset 6, -8
+ 1444              		.cfi_offset 14, -4
+ 1445 0002 E2B0     		sub	sp, sp, #392
+ 1446              	.LCFI28:
+ 1447              		.cfi_def_cfa_offset 408
+ 253:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!sx_mqtt_is_connected(&s_mqtt)) { log_warn(TAG, "publish: not connected"); return; }
+ 1448              		.loc 1 253 5 is_stmt 1 view .LVU320
+ 1449              	.LVL103:
+ 1450              	.LBB44:
+ 1451              	.LBI44:
+ 107:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return (mqtt->state == SX_MQTT_STATE_CONNECTED);
+ 1452              		.loc 2 107 23 view .LVU321
+ 1453              	.LBB45:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1454              		.loc 2 108 5 view .LVU322
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1455              		.loc 2 108 17 is_stmt 0 view .LVU323
+ 1456 0004 1F4B     		ldr	r3, .L98
+ 1457 0006 93F82C30 		ldrb	r3, [r3, #44]	@ zero_extendqisi2
+ 1458              	.LVL104:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1459              		.loc 2 108 17 view .LVU324
+ 1460              	.LBE45:
+ 1461              	.LBE44:
+ 1462              		.loc 1 253 8 discriminator 1 view .LVU325
+ 1463 000a 022B     		cmp	r3, #2
+ 1464 000c 06D0     		beq	.L91
+ 1465              		.loc 1 253 43 is_stmt 1 discriminator 1 view .LVU326
+ 1466 000e 1E4A     		ldr	r2, .L98+4
+ 1467 0010 1E49     		ldr	r1, .L98+8
+ 1468              	.LVL105:
+ 1469              		.loc 1 253 43 is_stmt 0 discriminator 1 view .LVU327
+ 1470 0012 0220     		movs	r0, #2
+ 1471              	.LVL106:
+ 1472              		.loc 1 253 43 discriminator 1 view .LVU328
+ 1473 0014 FFF7FEFF 		bl	log_func
+ 1474              	.LVL107:
+ 1475              		.loc 1 253 84 is_stmt 1 discriminator 1 view .LVU329
+ 1476              	.L90:
+ 254:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 255:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     mqtt_queue_item_t item;
+ 256:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     strncpy(item.topic,   topic,   sizeof(item.topic)   - 1);
+ 257:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     strncpy(item.message, message, sizeof(item.message) - 1);
+ 258:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     item.topic  [sizeof(item.topic)   - 1] = '\0';
+ 259:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     item.message[sizeof(item.message) - 1] = '\0';
+ 260:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 261:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!cqueue_send(&s_queue, &item)) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 40
+
+
+ 262:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "publish queue full, drop: %s", topic);
+ 263:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         return;
+ 264:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 265:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 266:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!s_publishing) {
+ 267:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 268:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+ 269:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+ 270:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         }
+ 271:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 272:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1477              		.loc 1 272 1 is_stmt 0 view .LVU330
+ 1478 0018 62B0     		add	sp, sp, #392
+ 1479              	.LCFI29:
+ 1480              		.cfi_remember_state
+ 1481              		.cfi_def_cfa_offset 16
+ 1482              		@ sp needed
+ 1483 001a 70BD     		pop	{r4, r5, r6, pc}
+ 1484              	.LVL108:
+ 1485              	.L91:
+ 1486              	.LCFI30:
+ 1487              		.cfi_restore_state
+ 1488              		.loc 1 272 1 view .LVU331
+ 1489 001c 0446     		mov	r4, r0
+ 1490 001e 0D46     		mov	r5, r1
+ 255:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     strncpy(item.topic,   topic,   sizeof(item.topic)   - 1);
+ 1491              		.loc 1 255 5 is_stmt 1 view .LVU332
+ 256:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     strncpy(item.message, message, sizeof(item.message) - 1);
+ 1492              		.loc 1 256 5 view .LVU333
+ 1493 0020 02AE     		add	r6, sp, #8
+ 1494 0022 7F22     		movs	r2, #127
+ 1495 0024 0146     		mov	r1, r0
+ 1496              	.LVL109:
+ 256:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     strncpy(item.message, message, sizeof(item.message) - 1);
+ 1497              		.loc 1 256 5 is_stmt 0 view .LVU334
+ 1498 0026 3046     		mov	r0, r6
+ 1499              	.LVL110:
+ 256:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     strncpy(item.message, message, sizeof(item.message) - 1);
+ 1500              		.loc 1 256 5 view .LVU335
+ 1501 0028 FFF7FEFF 		bl	strncpy
+ 1502              	.LVL111:
+ 257:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     item.topic  [sizeof(item.topic)   - 1] = '\0';
+ 1503              		.loc 1 257 5 is_stmt 1 view .LVU336
+ 1504 002c FF22     		movs	r2, #255
+ 1505 002e 2946     		mov	r1, r5
+ 1506 0030 22A8     		add	r0, sp, #136
+ 1507 0032 FFF7FEFF 		bl	strncpy
+ 1508              	.LVL112:
+ 258:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     item.message[sizeof(item.message) - 1] = '\0';
+ 1509              		.loc 1 258 5 view .LVU337
+ 258:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     item.message[sizeof(item.message) - 1] = '\0';
+ 1510              		.loc 1 258 44 is_stmt 0 view .LVU338
+ 1511 0036 0023     		movs	r3, #0
+ 1512 0038 8DF88730 		strb	r3, [sp, #135]
+ 259:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 1513              		.loc 1 259 5 is_stmt 1 view .LVU339
+ 259:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 41
+
+
+ 1514              		.loc 1 259 44 is_stmt 0 view .LVU340
+ 1515 003c 8DF88731 		strb	r3, [sp, #391]
+ 261:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "publish queue full, drop: %s", topic);
+ 1516              		.loc 1 261 5 is_stmt 1 view .LVU341
+ 261:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "publish queue full, drop: %s", topic);
+ 1517              		.loc 1 261 10 is_stmt 0 view .LVU342
+ 1518 0040 3146     		mov	r1, r6
+ 1519 0042 1348     		ldr	r0, .L98+12
+ 1520 0044 FFF7FEFF 		bl	cqueue_send
+ 1521              	.LVL113:
+ 261:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         log_warn(TAG, "publish queue full, drop: %s", topic);
+ 1522              		.loc 1 261 8 discriminator 1 view .LVU343
+ 1523 0048 A8B1     		cbz	r0, .L97
+ 266:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 1524              		.loc 1 266 5 is_stmt 1 view .LVU344
+ 266:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 1525              		.loc 1 266 9 is_stmt 0 view .LVU345
+ 1526 004a 124B     		ldr	r3, .L98+16
+ 1527 004c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 266:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         if (cqueue_receive(&s_queue, &s_current_item)) {
+ 1528              		.loc 1 266 8 view .LVU346
+ 1529 004e 002B     		cmp	r3, #0
+ 1530 0050 E2D1     		bne	.L90
+ 267:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+ 1531              		.loc 1 267 9 is_stmt 1 view .LVU347
+ 267:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+ 1532              		.loc 1 267 13 is_stmt 0 view .LVU348
+ 1533 0052 1149     		ldr	r1, .L98+20
+ 1534 0054 0E48     		ldr	r0, .L98+12
+ 1535 0056 FFF7FEFF 		bl	cqueue_receive
+ 1536              	.LVL114:
+ 267:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             s_publishing = 1;
+ 1537              		.loc 1 267 12 discriminator 1 view .LVU349
+ 1538 005a 0028     		cmp	r0, #0
+ 1539 005c DCD0     		beq	.L90
+ 268:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+ 1540              		.loc 1 268 13 is_stmt 1 view .LVU350
+ 268:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****             sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+ 1541              		.loc 1 268 26 is_stmt 0 view .LVU351
+ 1542 005e 0123     		movs	r3, #1
+ 1543 0060 0C4A     		ldr	r2, .L98+16
+ 1544 0062 1370     		strb	r3, [r2]
+ 269:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         }
+ 1545              		.loc 1 269 13 is_stmt 1 view .LVU352
+ 1546 0064 0D4A     		ldr	r2, .L98+24
+ 1547 0066 0021     		movs	r1, #0
+ 1548 0068 0091     		str	r1, [sp]
+ 1549 006a A2F18001 		sub	r1, r2, #128
+ 1550 006e 0548     		ldr	r0, .L98
+ 1551 0070 FFF7FEFF 		bl	sx_mqtt_publish
+ 1552              	.LVL115:
+ 1553 0074 D0E7     		b	.L90
+ 1554              	.L97:
+ 262:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         return;
+ 1555              		.loc 1 262 9 view .LVU353
+ 1556 0076 2346     		mov	r3, r4
+ 1557 0078 094A     		ldr	r2, .L98+28
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 42
+
+
+ 1558 007a 0449     		ldr	r1, .L98+8
+ 1559 007c 0220     		movs	r0, #2
+ 1560 007e FFF7FEFF 		bl	log_func
+ 1561              	.LVL116:
+ 263:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 1562              		.loc 1 263 9 view .LVU354
+ 1563 0082 C9E7     		b	.L90
+ 1564              	.L99:
+ 1565              		.align	2
+ 1566              	.L98:
+ 1567 0084 00000000 		.word	s_mqtt
+ 1568 0088 00000000 		.word	.LC16
+ 1569 008c 10000000 		.word	.LC1
+ 1570 0090 00000000 		.word	s_queue
+ 1571 0094 00000000 		.word	s_publishing
+ 1572 0098 00000000 		.word	s_current_item
+ 1573 009c 80000000 		.word	s_current_item+128
+ 1574 00a0 18000000 		.word	.LC17
+ 1575              		.cfi_endproc
+ 1576              	.LFE360:
+ 1578              		.section	.rodata.sx_user_mqtt_subscribe.str1.4,"aMS",%progbits,1
+ 1579              		.align	2
+ 1580              	.LC18:
+ 1581 0000 73756273 		.ascii	"subscribe: not connected\000"
+ 1581      63726962 
+ 1581      653A206E 
+ 1581      6F742063 
+ 1581      6F6E6E65 
+ 1582 0019 000000   		.align	2
+ 1583              	.LC19:
+ 1584 001c 73756273 		.ascii	"subscribe: NULL topic\000"
+ 1584      63726962 
+ 1584      653A204E 
+ 1584      554C4C20 
+ 1584      746F7069 
+ 1585              		.section	.text.sx_user_mqtt_subscribe,"ax",%progbits
+ 1586              		.align	1
+ 1587              		.global	sx_user_mqtt_subscribe
+ 1588              		.syntax unified
+ 1589              		.thumb
+ 1590              		.thumb_func
+ 1592              	sx_user_mqtt_subscribe:
+ 1593              	.LVL117:
+ 1594              	.LFB361:
+ 273:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 274:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** void sx_user_mqtt_subscribe(const char *topic){
+ 1595              		.loc 1 274 47 view -0
+ 1596              		.cfi_startproc
+ 1597              		@ args = 0, pretend = 0, frame = 0
+ 1598              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1599              		.loc 1 274 47 is_stmt 0 view .LVU356
+ 1600 0000 08B5     		push	{r3, lr}
+ 1601              	.LCFI31:
+ 1602              		.cfi_def_cfa_offset 8
+ 1603              		.cfi_offset 3, -8
+ 1604              		.cfi_offset 14, -4
+ 275:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!sx_mqtt_is_connected(&s_mqtt)) { log_warn(TAG, "subscribe: not connected"); return; }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 43
+
+
+ 1605              		.loc 1 275 5 is_stmt 1 view .LVU357
+ 1606              	.LVL118:
+ 1607              	.LBB46:
+ 1608              	.LBI46:
+ 107:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return (mqtt->state == SX_MQTT_STATE_CONNECTED);
+ 1609              		.loc 2 107 23 view .LVU358
+ 1610              	.LBB47:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1611              		.loc 2 108 5 view .LVU359
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1612              		.loc 2 108 17 is_stmt 0 view .LVU360
+ 1613 0002 0C4B     		ldr	r3, .L107
+ 1614 0004 93F82C30 		ldrb	r3, [r3, #44]	@ zero_extendqisi2
+ 1615              	.LVL119:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1616              		.loc 2 108 17 view .LVU361
+ 1617              	.LBE47:
+ 1618              	.LBE46:
+ 1619              		.loc 1 275 8 discriminator 1 view .LVU362
+ 1620 0008 022B     		cmp	r3, #2
+ 1621 000a 06D1     		bne	.L105
+ 1622 000c 0146     		mov	r1, r0
+ 276:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!topic) { log_warn(TAG, "subscribe: NULL topic"); return; }
+ 1623              		.loc 1 276 5 is_stmt 1 view .LVU363
+ 1624              		.loc 1 276 8 is_stmt 0 view .LVU364
+ 1625 000e 50B1     		cbz	r0, .L106
+ 277:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_subscribe(&s_mqtt, topic, 1);
+ 1626              		.loc 1 277 5 is_stmt 1 view .LVU365
+ 1627 0010 0122     		movs	r2, #1
+ 1628 0012 0848     		ldr	r0, .L107
+ 1629              	.LVL120:
+ 1630              		.loc 1 277 5 is_stmt 0 view .LVU366
+ 1631 0014 FFF7FEFF 		bl	sx_mqtt_subscribe
+ 1632              	.LVL121:
+ 1633              	.L100:
+ 278:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1634              		.loc 1 278 1 view .LVU367
+ 1635 0018 08BD     		pop	{r3, pc}
+ 1636              	.LVL122:
+ 1637              	.L105:
+ 275:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!topic) { log_warn(TAG, "subscribe: NULL topic"); return; }
+ 1638              		.loc 1 275 43 is_stmt 1 discriminator 1 view .LVU368
+ 1639 001a 074A     		ldr	r2, .L107+4
+ 1640 001c 0749     		ldr	r1, .L107+8
+ 1641 001e 0220     		movs	r0, #2
+ 1642              	.LVL123:
+ 275:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!topic) { log_warn(TAG, "subscribe: NULL topic"); return; }
+ 1643              		.loc 1 275 43 is_stmt 0 discriminator 1 view .LVU369
+ 1644 0020 FFF7FEFF 		bl	log_func
+ 1645              	.LVL124:
+ 275:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!topic) { log_warn(TAG, "subscribe: NULL topic"); return; }
+ 1646              		.loc 1 275 86 is_stmt 1 discriminator 1 view .LVU370
+ 275:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (!topic) { log_warn(TAG, "subscribe: NULL topic"); return; }
+ 1647              		.loc 1 275 86 is_stmt 0 view .LVU371
+ 1648 0024 F8E7     		b	.L100
+ 1649              	.LVL125:
+ 1650              	.L106:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 44
+
+
+ 276:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_subscribe(&s_mqtt, topic, 1);
+ 1651              		.loc 1 276 19 is_stmt 1 discriminator 1 view .LVU372
+ 1652 0026 064A     		ldr	r2, .L107+12
+ 1653 0028 0449     		ldr	r1, .L107+8
+ 1654 002a 0220     		movs	r0, #2
+ 1655              	.LVL126:
+ 276:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_subscribe(&s_mqtt, topic, 1);
+ 1656              		.loc 1 276 19 is_stmt 0 discriminator 1 view .LVU373
+ 1657 002c FFF7FEFF 		bl	log_func
+ 1658              	.LVL127:
+ 276:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_subscribe(&s_mqtt, topic, 1);
+ 1659              		.loc 1 276 59 is_stmt 1 discriminator 1 view .LVU374
+ 276:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_subscribe(&s_mqtt, topic, 1);
+ 1660              		.loc 1 276 59 is_stmt 0 view .LVU375
+ 1661 0030 F2E7     		b	.L100
+ 1662              	.L108:
+ 1663 0032 00BF     		.align	2
+ 1664              	.L107:
+ 1665 0034 00000000 		.word	s_mqtt
+ 1666 0038 00000000 		.word	.LC18
+ 1667 003c 10000000 		.word	.LC1
+ 1668 0040 1C000000 		.word	.LC19
+ 1669              		.cfi_endproc
+ 1670              	.LFE361:
+ 1672              		.section	.text.sx_user_mqtt_stop,"ax",%progbits
+ 1673              		.align	1
+ 1674              		.global	sx_user_mqtt_stop
+ 1675              		.syntax unified
+ 1676              		.thumb
+ 1677              		.thumb_func
+ 1679              	sx_user_mqtt_stop:
+ 1680              	.LFB362:
+ 279:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 280:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** void sx_user_mqtt_stop(void){
+ 1681              		.loc 1 280 29 is_stmt 1 view -0
+ 1682              		.cfi_startproc
+ 1683              		@ args = 0, pretend = 0, frame = 0
+ 1684              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1685 0000 08B5     		push	{r3, lr}
+ 1686              	.LCFI32:
+ 1687              		.cfi_def_cfa_offset 8
+ 1688              		.cfi_offset 3, -8
+ 1689              		.cfi_offset 14, -4
+ 281:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (sx_mqtt_is_connected(&s_mqtt))
+ 1690              		.loc 1 281 5 view .LVU377
+ 1691              	.LVL128:
+ 1692              	.LBB48:
+ 1693              	.LBI48:
+ 107:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return (mqtt->state == SX_MQTT_STATE_CONNECTED);
+ 1694              		.loc 2 107 23 view .LVU378
+ 1695              	.LBB49:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1696              		.loc 2 108 5 view .LVU379
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1697              		.loc 2 108 17 is_stmt 0 view .LVU380
+ 1698 0002 054B     		ldr	r3, .L113
+ 1699 0004 93F82C30 		ldrb	r3, [r3, #44]	@ zero_extendqisi2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 45
+
+
+ 1700              	.LVL129:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1701              		.loc 2 108 17 view .LVU381
+ 1702              	.LBE49:
+ 1703              	.LBE48:
+ 1704              		.loc 1 281 8 discriminator 1 view .LVU382
+ 1705 0008 022B     		cmp	r3, #2
+ 1706 000a 00D0     		beq	.L112
+ 1707              	.L109:
+ 282:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_mqtt_disconnect(&s_mqtt);
+ 283:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1708              		.loc 1 283 1 view .LVU383
+ 1709 000c 08BD     		pop	{r3, pc}
+ 1710              	.L112:
+ 282:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_mqtt_disconnect(&s_mqtt);
+ 1711              		.loc 1 282 9 is_stmt 1 view .LVU384
+ 1712 000e 0248     		ldr	r0, .L113
+ 1713 0010 FFF7FEFF 		bl	sx_mqtt_disconnect
+ 1714              	.LVL130:
+ 1715              		.loc 1 283 1 is_stmt 0 view .LVU385
+ 1716 0014 FAE7     		b	.L109
+ 1717              	.L114:
+ 1718 0016 00BF     		.align	2
+ 1719              	.L113:
+ 1720 0018 00000000 		.word	s_mqtt
+ 1721              		.cfi_endproc
+ 1722              	.LFE362:
+ 1724              		.section	.text.sx_user_mqtt_poll,"ax",%progbits
+ 1725              		.align	1
+ 1726              		.global	sx_user_mqtt_poll
+ 1727              		.syntax unified
+ 1728              		.thumb
+ 1729              		.thumb_func
+ 1731              	sx_user_mqtt_poll:
+ 1732              	.LVL131:
+ 1733              	.LFB363:
+ 284:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 285:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** void sx_user_mqtt_poll(uint32_t time_stamp){
+ 1734              		.loc 1 285 44 is_stmt 1 view -0
+ 1735              		.cfi_startproc
+ 1736              		@ args = 0, pretend = 0, frame = 0
+ 1737              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1738              		.loc 1 285 44 is_stmt 0 view .LVU387
+ 1739 0000 08B5     		push	{r3, lr}
+ 1740              	.LCFI33:
+ 1741              		.cfi_def_cfa_offset 8
+ 1742              		.cfi_offset 3, -8
+ 1743              		.cfi_offset 14, -4
+ 1744 0002 0146     		mov	r1, r0
+ 286:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_poll(&s_mqtt, time_stamp);
+ 1745              		.loc 1 286 5 is_stmt 1 view .LVU388
+ 1746 0004 0148     		ldr	r0, .L117
+ 1747              	.LVL132:
+ 1748              		.loc 1 286 5 is_stmt 0 view .LVU389
+ 1749 0006 FFF7FEFF 		bl	sx_mqtt_poll
+ 1750              	.LVL133:
+ 287:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 46
+
+
+ 1751              		.loc 1 287 1 view .LVU390
+ 1752 000a 08BD     		pop	{r3, pc}
+ 1753              	.L118:
+ 1754              		.align	2
+ 1755              	.L117:
+ 1756 000c 00000000 		.word	s_mqtt
+ 1757              		.cfi_endproc
+ 1758              	.LFE363:
+ 1760              		.section	.text.sx_user_mqtt_is_initialized,"ax",%progbits
+ 1761              		.align	1
+ 1762              		.global	sx_user_mqtt_is_initialized
+ 1763              		.syntax unified
+ 1764              		.thumb
+ 1765              		.thumb_func
+ 1767              	sx_user_mqtt_is_initialized:
+ 1768              	.LFB364:
+ 288:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 289:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** uint8_t sx_user_mqtt_is_initialized(void) { return s_initialized; }
+ 1769              		.loc 1 289 43 is_stmt 1 view -0
+ 1770              		.cfi_startproc
+ 1771              		@ args = 0, pretend = 0, frame = 0
+ 1772              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1773              		@ link register save eliminated.
+ 1774              		.loc 1 289 45 view .LVU392
+ 1775              		.loc 1 289 67 is_stmt 0 view .LVU393
+ 1776 0000 014B     		ldr	r3, .L120
+ 1777 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 1778 0004 7047     		bx	lr
+ 1779              	.L121:
+ 1780 0006 00BF     		.align	2
+ 1781              	.L120:
+ 1782 0008 00000000 		.word	s_initialized
+ 1783              		.cfi_endproc
+ 1784              	.LFE364:
+ 1786              		.section	.rodata.sx_user_mqtt_stop_service.str1.4,"aMS",%progbits,1
+ 1787              		.align	2
+ 1788              	.LC20:
+ 1789 0000 4D515454 		.ascii	"MQTT service stopped, wait=%lu\000"
+ 1789      20736572 
+ 1789      76696365 
+ 1789      2073746F 
+ 1789      70706564 
+ 1790              		.section	.text.sx_user_mqtt_stop_service,"ax",%progbits
+ 1791              		.align	1
+ 1792              		.global	sx_user_mqtt_stop_service
+ 1793              		.syntax unified
+ 1794              		.thumb
+ 1795              		.thumb_func
+ 1797              	sx_user_mqtt_stop_service:
+ 1798              	.LFB365:
+ 290:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 291:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** /*
+ 292:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * Stop the MQTT service and wait for it to actually disconnect.
+ 293:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  *
+ 294:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * NOTE: this remains a blocking busy-wait loop, unlike the rest of this
+ 295:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * architecture which is non-blocking/poll-based — kept as-is, not something
+ 296:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * this refactor changes on its own initiative. sx_mqtt_disconnect() already
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 47
+
+
+ 297:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * goes through modem_ops_t.mqtt_disconnect() -> the driver's own
+ 298:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * CMQTTDISC/CMQTTREL/CMQTTSTOP sequence (see a7677s_mqtt_state_t's DISC/
+ 299:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * REL/STOP states) and reports completion asynchronously via sx_mqtt_t's
+ 300:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * state flipping to SX_MQTT_STATE_DISCONNECTED. There is no separate
+ 301:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * "mqtt_stop" operation in modem_ops_t (confirmed with the user:
+ 302:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * sx_mqtt_disconnect() alone replaces the old two-call
+ 303:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * sim76xx_mqtt_disconnect()+sim76xx_mqtt_stop() sequence). This function
+ 304:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * polls sx_mqtt_t.state directly instead of relying on a raw AT command
+ 305:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * callback — cb_mqtt_stop_done/cb_mqtt_disc_done and the modem_t-typed
+ 306:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * callback signature they used are gone, since modem_ops_t's mqtt_cb_t is
+ 307:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  * the only callback shape available now.
+ 308:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****  */
+ 309:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** void sx_user_mqtt_stop_service(void) {
+ 1799              		.loc 1 309 38 is_stmt 1 view -0
+ 1800              		.cfi_startproc
+ 1801              		@ args = 0, pretend = 0, frame = 0
+ 1802              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1803 0000 10B5     		push	{r4, lr}
+ 1804              	.LCFI34:
+ 1805              		.cfi_def_cfa_offset 8
+ 1806              		.cfi_offset 4, -8
+ 1807              		.cfi_offset 14, -4
+ 310:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (sx_mqtt_is_connected(&s_mqtt)) {
+ 1808              		.loc 1 310 5 view .LVU395
+ 1809              	.LVL134:
+ 1810              	.LBB50:
+ 1811              	.LBI50:
+ 107:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     return (mqtt->state == SX_MQTT_STATE_CONNECTED);
+ 1812              		.loc 2 107 23 view .LVU396
+ 1813              	.LBB51:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1814              		.loc 2 108 5 view .LVU397
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1815              		.loc 2 108 17 is_stmt 0 view .LVU398
+ 1816 0002 144B     		ldr	r3, .L129
+ 1817 0004 93F82C30 		ldrb	r3, [r3, #44]	@ zero_extendqisi2
+ 1818              	.LVL135:
+ 108:SynaptiX_FDK/services/mqtt/sx_mqtt.h **** }
+ 1819              		.loc 2 108 17 view .LVU399
+ 1820              	.LBE51:
+ 1821              	.LBE50:
+ 1822              		.loc 1 310 8 discriminator 1 view .LVU400
+ 1823 0008 022B     		cmp	r3, #2
+ 1824 000a 11D0     		beq	.L128
+ 1825              	.L123:
+ 309:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     if (sx_mqtt_is_connected(&s_mqtt)) {
+ 1826              		.loc 1 309 38 view .LVU401
+ 1827 000c 0024     		movs	r4, #0
+ 1828              	.L124:
+ 1829              	.LVL136:
+ 311:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_mqtt_disconnect(&s_mqtt);
+ 312:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 313:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 314:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     uint32_t wait = 0;
+ 315:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     while (s_mqtt.state != SX_MQTT_STATE_DISCONNECTED && wait < 10000) {
+ 1830              		.loc 1 315 55 is_stmt 1 view .LVU402
+ 1831              		.loc 1 315 18 is_stmt 0 view .LVU403
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 48
+
+
+ 1832 000e 114B     		ldr	r3, .L129
+ 1833 0010 93F82C30 		ldrb	r3, [r3, #44]	@ zero_extendqisi2
+ 1834              		.loc 1 315 55 view .LVU404
+ 1835 0014 83B1     		cbz	r3, .L125
+ 1836              		.loc 1 315 55 discriminator 1 view .LVU405
+ 1837 0016 42F20F73 		movw	r3, #9999
+ 1838 001a 9C42     		cmp	r4, r3
+ 1839 001c 0CD8     		bhi	.L125
+ 316:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_mqtt_poll(&s_mqtt, 10);
+ 1840              		.loc 1 316 9 is_stmt 1 view .LVU406
+ 1841 001e 0A21     		movs	r1, #10
+ 1842 0020 0C48     		ldr	r0, .L129
+ 1843 0022 FFF7FEFF 		bl	sx_mqtt_poll
+ 1844              	.LVL137:
+ 317:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         sx_delay_ms(10);
+ 1845              		.loc 1 317 9 view .LVU407
+ 1846 0026 0A20     		movs	r0, #10
+ 1847 0028 FFF7FEFF 		bl	sx_delay_ms
+ 1848              	.LVL138:
+ 318:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****         wait += 10;
+ 1849              		.loc 1 318 9 view .LVU408
+ 1850              		.loc 1 318 14 is_stmt 0 view .LVU409
+ 1851 002c 0A34     		adds	r4, r4, #10
+ 1852              	.LVL139:
+ 1853              		.loc 1 318 14 view .LVU410
+ 1854 002e EEE7     		b	.L124
+ 1855              	.LVL140:
+ 1856              	.L128:
+ 311:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 1857              		.loc 1 311 9 is_stmt 1 view .LVU411
+ 1858 0030 0848     		ldr	r0, .L129
+ 1859 0032 FFF7FEFF 		bl	sx_mqtt_disconnect
+ 1860              	.LVL141:
+ 1861 0036 E9E7     		b	.L123
+ 1862              	.LVL142:
+ 1863              	.L125:
+ 319:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     }
+ 320:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 321:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     sx_mqtt_force_disconnect(&s_mqtt);
+ 1864              		.loc 1 321 5 view .LVU412
+ 1865              	.LBB52:
+ 1866              	.LBI52:
+ 128:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->state           = SX_MQTT_STATE_DISCONNECTED;
+ 1867              		.loc 2 128 20 view .LVU413
+ 1868              	.LBB53:
+ 129:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->reconnect_count = 0;
+ 1869              		.loc 2 129 5 view .LVU414
+ 129:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->reconnect_count = 0;
+ 1870              		.loc 2 129 27 is_stmt 0 view .LVU415
+ 1871 0038 064B     		ldr	r3, .L129
+ 1872 003a 0022     		movs	r2, #0
+ 1873 003c 83F82C20 		strb	r2, [r3, #44]
+ 130:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->reconnect_elapsed = 0;
+ 1874              		.loc 2 130 5 is_stmt 1 view .LVU416
+ 130:SynaptiX_FDK/services/mqtt/sx_mqtt.h ****     mqtt->reconnect_elapsed = 0;
+ 1875              		.loc 2 130 27 is_stmt 0 view .LVU417
+ 1876 0040 83F83820 		strb	r2, [r3, #56]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 49
+
+
+ 1877              		.loc 2 131 5 is_stmt 1 view .LVU418
+ 1878              		.loc 2 131 29 is_stmt 0 view .LVU419
+ 1879 0044 1A63     		str	r2, [r3, #48]
+ 1880              	.LVL143:
+ 1881              		.loc 2 131 29 view .LVU420
+ 1882              	.LBE53:
+ 1883              	.LBE52:
+ 322:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 323:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_info(TAG, "MQTT service stopped, wait=%lu", (unsigned long)wait);
+ 1884              		.loc 1 323 5 is_stmt 1 view .LVU421
+ 1885 0046 2346     		mov	r3, r4
+ 1886 0048 034A     		ldr	r2, .L129+4
+ 1887 004a 0449     		ldr	r1, .L129+8
+ 1888 004c 0320     		movs	r0, #3
+ 1889 004e FFF7FEFF 		bl	log_func
+ 1890              	.LVL144:
+ 324:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1891              		.loc 1 324 1 is_stmt 0 view .LVU422
+ 1892 0052 10BD     		pop	{r4, pc}
+ 1893              	.LVL145:
+ 1894              	.L130:
+ 1895              		.loc 1 324 1 view .LVU423
+ 1896              		.align	2
+ 1897              	.L129:
+ 1898 0054 00000000 		.word	s_mqtt
+ 1899 0058 00000000 		.word	.LC20
+ 1900 005c 10000000 		.word	.LC1
+ 1901              		.cfi_endproc
+ 1902              	.LFE365:
+ 1904              		.section	.text.sx_user_mqtt_is_publishing,"ax",%progbits
+ 1905              		.align	1
+ 1906              		.global	sx_user_mqtt_is_publishing
+ 1907              		.syntax unified
+ 1908              		.thumb
+ 1909              		.thumb_func
+ 1911              	sx_user_mqtt_is_publishing:
+ 1912              	.LFB366:
+ 325:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 326:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** uint8_t sx_user_mqtt_is_publishing(void) {
+ 1913              		.loc 1 326 42 is_stmt 1 view -0
+ 1914              		.cfi_startproc
+ 1915              		@ args = 0, pretend = 0, frame = 0
+ 1916              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1917              		@ link register save eliminated.
+ 327:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return s_publishing;
+ 1918              		.loc 1 327 5 view .LVU425
+ 328:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1919              		.loc 1 328 1 is_stmt 0 view .LVU426
+ 1920 0000 014B     		ldr	r3, .L132
+ 1921 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 1922 0004 7047     		bx	lr
+ 1923              	.L133:
+ 1924 0006 00BF     		.align	2
+ 1925              	.L132:
+ 1926 0008 00000000 		.word	s_publishing
+ 1927              		.cfi_endproc
+ 1928              	.LFE366:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 50
+
+
+ 1930              		.section	.text.sx_user_mqtt_queue_empty,"ax",%progbits
+ 1931              		.align	1
+ 1932              		.global	sx_user_mqtt_queue_empty
+ 1933              		.syntax unified
+ 1934              		.thumb
+ 1935              		.thumb_func
+ 1937              	sx_user_mqtt_queue_empty:
+ 1938              	.LFB367:
+ 329:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 330:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** uint8_t sx_user_mqtt_queue_empty(void) {
+ 1939              		.loc 1 330 40 is_stmt 1 view -0
+ 1940              		.cfi_startproc
+ 1941              		@ args = 0, pretend = 0, frame = 0
+ 1942              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1943 0000 08B5     		push	{r3, lr}
+ 1944              	.LCFI35:
+ 1945              		.cfi_def_cfa_offset 8
+ 1946              		.cfi_offset 3, -8
+ 1947              		.cfi_offset 14, -4
+ 331:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     return cqueue_is_empty(&s_queue);
+ 1948              		.loc 1 331 5 view .LVU428
+ 1949              		.loc 1 331 12 is_stmt 0 view .LVU429
+ 1950 0002 0248     		ldr	r0, .L136
+ 1951 0004 FFF7FEFF 		bl	cqueue_is_empty
+ 1952              	.LVL146:
+ 332:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }
+ 1953              		.loc 1 332 1 view .LVU430
+ 1954 0008 08BD     		pop	{r3, pc}
+ 1955              	.L137:
+ 1956 000a 00BF     		.align	2
+ 1957              	.L136:
+ 1958 000c 00000000 		.word	s_queue
+ 1959              		.cfi_endproc
+ 1960              	.LFE367:
+ 1962              		.section	.rodata.sx_user_mqtt_queue_flush.str1.4,"aMS",%progbits,1
+ 1963              		.align	2
+ 1964              	.LC21:
+ 1965 0000 51756575 		.ascii	"Queue flushed\000"
+ 1965      6520666C 
+ 1965      75736865 
+ 1965      6400
+ 1966              		.section	.text.sx_user_mqtt_queue_flush,"ax",%progbits
+ 1967              		.align	1
+ 1968              		.global	sx_user_mqtt_queue_flush
+ 1969              		.syntax unified
+ 1970              		.thumb
+ 1971              		.thumb_func
+ 1973              	sx_user_mqtt_queue_flush:
+ 1974              	.LFB368:
+ 333:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** 
+ 334:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** void sx_user_mqtt_queue_flush(void) {
+ 1975              		.loc 1 334 37 is_stmt 1 view -0
+ 1976              		.cfi_startproc
+ 1977              		@ args = 0, pretend = 0, frame = 0
+ 1978              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1979 0000 08B5     		push	{r3, lr}
+ 1980              	.LCFI36:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 51
+
+
+ 1981              		.cfi_def_cfa_offset 8
+ 1982              		.cfi_offset 3, -8
+ 1983              		.cfi_offset 14, -4
+ 335:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     cqueue_init_static(&s_queue, s_queue_buf, MQTT_QUEUE_SIZE, sizeof(mqtt_queue_item_t));
+ 1984              		.loc 1 335 5 view .LVU432
+ 1985 0002 4FF4C073 		mov	r3, #384
+ 1986 0006 1022     		movs	r2, #16
+ 1987 0008 0749     		ldr	r1, .L140
+ 1988 000a 0848     		ldr	r0, .L140+4
+ 1989 000c FFF7FEFF 		bl	cqueue_init_static
+ 1990              	.LVL147:
+ 336:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_publishing   = 0;
+ 1991              		.loc 1 336 5 view .LVU433
+ 1992              		.loc 1 336 20 is_stmt 0 view .LVU434
+ 1993 0010 0023     		movs	r3, #0
+ 1994 0012 074A     		ldr	r2, .L140+8
+ 1995 0014 1370     		strb	r3, [r2]
+ 337:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     s_publish_retry = 0;
+ 1996              		.loc 1 337 5 is_stmt 1 view .LVU435
+ 1997              		.loc 1 337 21 is_stmt 0 view .LVU436
+ 1998 0016 074A     		ldr	r2, .L140+12
+ 1999 0018 1370     		strb	r3, [r2]
+ 338:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c ****     log_info(TAG, "Queue flushed");
+ 2000              		.loc 1 338 5 is_stmt 1 view .LVU437
+ 2001 001a 074A     		ldr	r2, .L140+16
+ 2002 001c 0749     		ldr	r1, .L140+20
+ 2003 001e 0320     		movs	r0, #3
+ 2004 0020 FFF7FEFF 		bl	log_func
+ 2005              	.LVL148:
+ 339:SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.c **** }...
+ 2006              		.loc 1 339 1 is_stmt 0 view .LVU438
+ 2007 0024 08BD     		pop	{r3, pc}
+ 2008              	.L141:
+ 2009 0026 00BF     		.align	2
+ 2010              	.L140:
+ 2011 0028 00000000 		.word	s_queue_buf
+ 2012 002c 00000000 		.word	s_queue
+ 2013 0030 00000000 		.word	s_publishing
+ 2014 0034 00000000 		.word	s_publish_retry
+ 2015 0038 00000000 		.word	.LC21
+ 2016 003c 10000000 		.word	.LC1
+ 2017              		.cfi_endproc
+ 2018              	.LFE368:
+ 2020              		.section	.bss.mqtt_cfg.0,"aw",%nobits
+ 2021              		.align	2
+ 2024              	mqtt_cfg.0:
+ 2025 0000 00000000 		.space	40
+ 2025      00000000 
+ 2025      00000000 
+ 2025      00000000 
+ 2025      00000000 
+ 2026              		.section	.bss.mqtt_cfg.1,"aw",%nobits
+ 2027              		.align	2
+ 2030              	mqtt_cfg.1:
+ 2031 0000 00000000 		.space	40
+ 2031      00000000 
+ 2031      00000000 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 52
+
+
+ 2031      00000000 
+ 2031      00000000 
+ 2032              		.section	.bss.s_publishing,"aw",%nobits
+ 2035              	s_publishing:
+ 2036 0000 00       		.space	1
+ 2037              		.section	.bss.s_initialized,"aw",%nobits
+ 2040              	s_initialized:
+ 2041 0000 00       		.space	1
+ 2042              		.section	.bss.s_last_tick,"aw",%nobits
+ 2043              		.align	2
+ 2046              	s_last_tick:
+ 2047 0000 00000000 		.space	4
+ 2048              		.section	.bss.s_client_id_buf,"aw",%nobits
+ 2049              		.align	2
+ 2052              	s_client_id_buf:
+ 2053 0000 00000000 		.space	32
+ 2053      00000000 
+ 2053      00000000 
+ 2053      00000000 
+ 2053      00000000 
+ 2054              		.section	.bss.s_on_publish,"aw",%nobits
+ 2055              		.align	2
+ 2058              	s_on_publish:
+ 2059 0000 00000000 		.space	4
+ 2060              		.section	.bss.s_on_message,"aw",%nobits
+ 2061              		.align	2
+ 2064              	s_on_message:
+ 2065 0000 00000000 		.space	4
+ 2066              		.section	.bss.s_on_disconnected,"aw",%nobits
+ 2067              		.align	2
+ 2070              	s_on_disconnected:
+ 2071 0000 00000000 		.space	4
+ 2072              		.section	.bss.s_on_connected,"aw",%nobits
+ 2073              		.align	2
+ 2076              	s_on_connected:
+ 2077 0000 00000000 		.space	4
+ 2078              		.section	.bss.s_publish_retry,"aw",%nobits
+ 2081              	s_publish_retry:
+ 2082 0000 00       		.space	1
+ 2083              		.section	.bss.s_current_item,"aw",%nobits
+ 2084              		.align	2
+ 2087              	s_current_item:
+ 2088 0000 00000000 		.space	384
+ 2088      00000000 
+ 2088      00000000 
+ 2088      00000000 
+ 2088      00000000 
+ 2089              		.section	.bss.s_queue,"aw",%nobits
+ 2090              		.align	2
+ 2093              	s_queue:
+ 2094 0000 00000000 		.space	24
+ 2094      00000000 
+ 2094      00000000 
+ 2094      00000000 
+ 2094      00000000 
+ 2095              		.section	.bss.s_queue_buf,"aw",%nobits
+ 2096              		.align	2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 53
+
+
+ 2099              	s_queue_buf:
+ 2100 0000 00000000 		.space	6144
+ 2100      00000000 
+ 2100      00000000 
+ 2100      00000000 
+ 2100      00000000 
+ 2101              		.global	s_mqtt
+ 2102              		.section	.bss.s_mqtt,"aw",%nobits
+ 2103              		.align	2
+ 2106              	s_mqtt:
+ 2107 0000 00000000 		.space	76
+ 2107      00000000 
+ 2107      00000000 
+ 2107      00000000 
+ 2107      00000000 
+ 2108              		.text
+ 2109              	.Letext0:
+ 2110              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 2111              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 2112              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 2113              		.file 7 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 2114              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 2115              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma.h"
+ 2116              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma_ex.h"
+ 2117              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 2118              		.file 12 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_spi.h"
+ 2119              		.file 13 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+ 2120              		.file 14 "SynaptiX_FDK/components/peripherals/spi/sx_spi.h"
+ 2121              		.file 15 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 2122              		.file 16 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
+ 2123              		.file 17 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 2124              		.file 18 "SynaptiX_FDK/components/modules/gps/minmea.h"
+ 2125              		.file 19 "SynaptiX_FDK/components/modules/gps/gps.h"
+ 2126              		.file 20 "SynaptiX_FDK/components/modules/modem/modem.h"
+ 2127              		.file 21 "SynaptiX_FDK/components/modules/modem_ops/modem_ops.h"
+ 2128              		.file 22 "SynaptiX_FDK/components/modules/a76xx/a7677s.h"
+ 2129              		.file 23 "SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.h"
+ 2130              		.file 24 "SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.h"
+ 2131              		.file 25 "SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.h"
+ 2132              		.file 26 "SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h"
+ 2133              		.file 27 "SynaptiX_FDK/components/modules/rtc/sx_ex_rtc.h"
+ 2134              		.file 28 "SynaptiX_FDK/components/modules/imu/bno055.h"
+ 2135              		.file 29 "SynaptiX_FDK/components/modules/sht3x/sht3x.h"
+ 2136              		.file 30 "SynaptiX_FDK/components/modules/ads1115/ads1115.h"
+ 2137              		.file 31 "SynaptiX_FDK/app/user/sx_mqtt/sx_user_mqtt.h"
+ 2138              		.file 32 "SynaptiX_FDK/services/logger/logger.h"
+ 2139              		.file 33 "SynaptiX_FDK/utils/delay/sx_delay.h"
+ 2140              		.file 34 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 2141              		.file 35 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 2142              		.file 36 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ 2143              		.file 37 "<built-in>"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 54
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_user_mqtt.c
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:22     .rodata._on_message.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:29     .text._on_message:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:34     .text._on_message:00000000 _on_message
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:91     .text._on_message:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2064   .bss.s_on_message:00000000 s_on_message
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:98     .rodata._on_disconnected.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:102    .text._on_disconnected:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:107    .text._on_disconnected:00000000 _on_disconnected
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:144    .text._on_disconnected:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2070   .bss.s_on_disconnected:00000000 s_on_disconnected
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:151    .rodata._on_connected.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:155    .text._on_connected:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:160    .text._on_connected:00000000 _on_connected
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:197    .text._on_connected:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2076   .bss.s_on_connected:00000000 s_on_connected
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:204    .rodata._validate_cfg.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:214    .text._validate_cfg:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:219    .text._validate_cfg:00000000 _validate_cfg
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:301    .text._validate_cfg:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:309    .rodata._common_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:313    .text._common_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:318    .text._common_init:00000000 _common_init
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:568    .text._common_init:000000f4 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2099   .bss.s_queue_buf:00000000 s_queue_buf
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2093   .bss.s_queue:00000000 s_queue
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2058   .bss.s_on_publish:00000000 s_on_publish
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:941    .text._on_modem_ready:00000000 _on_modem_ready
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:600    .text._on_modem_error:00000000 _on_modem_error
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:759    .text._on_publish:00000000 _on_publish
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2046   .bss.s_last_tick:00000000 s_last_tick
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2040   .bss.s_initialized:00000000 s_initialized
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2106   .bss.s_mqtt:00000000 s_mqtt
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:590    .rodata._on_modem_error.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:595    .text._on_modem_error:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:641    .text._on_modem_error:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:649    .text.dispatch_next:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:654    .text.dispatch_next:00000000 dispatch_next
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:728    .text.dispatch_next:00000040 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2087   .bss.s_current_item:00000000 s_current_item
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2035   .bss.s_publishing:00000000 s_publishing
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:737    .rodata._on_publish.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:754    .text._on_publish:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:911    .text._on_publish:000000a0 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2081   .bss.s_publish_retry:00000000 s_publish_retry
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:928    .rodata._on_modem_ready.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:936    .text._on_modem_ready:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1042   .text._on_modem_ready:0000005c $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2052   .bss.s_client_id_buf:00000000 s_client_id_buf
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1051   .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1057   .text.sx_gettick:00000000 sx_gettick
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1078   .text.sx_user_mqtt_is_connected:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1084   .text.sx_user_mqtt_is_connected:00000000 sx_user_mqtt_is_connected
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1114   .text.sx_user_mqtt_is_connected:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1119   .text.sx_user_mqtt_get_ip:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1125   .text.sx_user_mqtt_get_ip:00000000 sx_user_mqtt_get_ip
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 55
+
+
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1151   .text.sx_user_mqtt_get_ip:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1156   .text.sx_user_mqtt_get_imei:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1162   .text.sx_user_mqtt_get_imei:00000000 sx_user_mqtt_get_imei
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1188   .text.sx_user_mqtt_get_imei:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1193   .text.sx_user_mqtt_get_rssi:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1199   .text.sx_user_mqtt_get_rssi:00000000 sx_user_mqtt_get_rssi
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1225   .text.sx_user_mqtt_get_rssi:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1230   .text.sx_user_mqtt_nontls_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1236   .text.sx_user_mqtt_nontls_init:00000000 sx_user_mqtt_nontls_init
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1276   .text.sx_user_mqtt_nontls_init:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2030   .bss.mqtt_cfg.1:00000000 mqtt_cfg.1
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1281   .text.sx_user_mqtt_tls_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1287   .text.sx_user_mqtt_tls_init:00000000 sx_user_mqtt_tls_init
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1368   .text.sx_user_mqtt_tls_init:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2024   .bss.mqtt_cfg.0:00000000 mqtt_cfg.0
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1373   .text.sx_user_mqtt_force_disconnect:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1379   .text.sx_user_mqtt_force_disconnect:00000000 sx_user_mqtt_force_disconnect
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1412   .text.sx_user_mqtt_force_disconnect:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1417   .rodata.sx_user_mqtt_publish.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1424   .text.sx_user_mqtt_publish:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1430   .text.sx_user_mqtt_publish:00000000 sx_user_mqtt_publish
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1567   .text.sx_user_mqtt_publish:00000084 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1579   .rodata.sx_user_mqtt_subscribe.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1586   .text.sx_user_mqtt_subscribe:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1592   .text.sx_user_mqtt_subscribe:00000000 sx_user_mqtt_subscribe
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1665   .text.sx_user_mqtt_subscribe:00000034 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1673   .text.sx_user_mqtt_stop:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1679   .text.sx_user_mqtt_stop:00000000 sx_user_mqtt_stop
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1720   .text.sx_user_mqtt_stop:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1725   .text.sx_user_mqtt_poll:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1731   .text.sx_user_mqtt_poll:00000000 sx_user_mqtt_poll
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1756   .text.sx_user_mqtt_poll:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1761   .text.sx_user_mqtt_is_initialized:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1767   .text.sx_user_mqtt_is_initialized:00000000 sx_user_mqtt_is_initialized
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1782   .text.sx_user_mqtt_is_initialized:00000008 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1787   .rodata.sx_user_mqtt_stop_service.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1791   .text.sx_user_mqtt_stop_service:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1797   .text.sx_user_mqtt_stop_service:00000000 sx_user_mqtt_stop_service
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1898   .text.sx_user_mqtt_stop_service:00000054 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1905   .text.sx_user_mqtt_is_publishing:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1911   .text.sx_user_mqtt_is_publishing:00000000 sx_user_mqtt_is_publishing
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1926   .text.sx_user_mqtt_is_publishing:00000008 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1931   .text.sx_user_mqtt_queue_empty:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1937   .text.sx_user_mqtt_queue_empty:00000000 sx_user_mqtt_queue_empty
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1958   .text.sx_user_mqtt_queue_empty:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1963   .rodata.sx_user_mqtt_queue_flush.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1967   .text.sx_user_mqtt_queue_flush:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:1973   .text.sx_user_mqtt_queue_flush:00000000 sx_user_mqtt_queue_flush
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2011   .text.sx_user_mqtt_queue_flush:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2021   .bss.mqtt_cfg.0:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2027   .bss.mqtt_cfg.1:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2036   .bss.s_publishing:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2041   .bss.s_initialized:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2043   .bss.s_last_tick:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2049   .bss.s_client_id_buf:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2055   .bss.s_on_publish:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2061   .bss.s_on_message:00000000 $d
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s 			page 56
+
+
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2067   .bss.s_on_disconnected:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2073   .bss.s_on_connected:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2082   .bss.s_publish_retry:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2084   .bss.s_current_item:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2090   .bss.s_queue:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2096   .bss.s_queue_buf:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cctQ8jJB.s:2103   .bss.s_mqtt:00000000 $d
+
+UNDEFINED SYMBOLS
+log_func
+cqueue_init_static
+sx_mqtt_init
+sx_mqtt_set_config
+HAL_GetTick
+board
+sx_mqtt_report_failure
+cqueue_is_empty
+cqueue_receive
+sx_mqtt_publish
+strlen
+snprintf
+sx_mqtt_connect
+memset
+strncpy
+cqueue_send
+sx_mqtt_subscribe
+sx_mqtt_disconnect
+sx_mqtt_poll
+sx_delay_ms

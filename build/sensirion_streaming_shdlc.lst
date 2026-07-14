@@ -1,0 +1,1107 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sensirion_streaming_shdlc.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c"
+  21              		.section	.text.sensirion_shdlc_stream_stuff_and_write_next_byte,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sensirion_shdlc_stream_stuff_and_write_next_byte:
+  28              	.LVL0:
+  29              	.LFB3:
+   1:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** /*
+   2:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * Copyright (c) 2024, Sensirion AG
+   3:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * All rights reserved.
+   4:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *
+   5:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * Redistribution and use in source and binary forms, with or without
+   6:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * modification, are permitted provided that the following conditions are met:
+   7:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *
+   8:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * * Redistributions of source code must retain the above copyright notice, this
+   9:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *   list of conditions and the following disclaimer.
+  10:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *
+  11:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * * Redistributions in binary form must reproduce the above copyright notice,
+  12:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *   this list of conditions and the following disclaimer in the documentation
+  13:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *   and/or other materials provided with the distribution.
+  14:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *
+  15:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * * Neither the name of Sensirion AG nor the names of its
+  16:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *   contributors may be used to endorse or promote products derived from
+  17:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *   this software without specific prior written permission.
+  18:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *
+  19:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  20:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  21:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  22:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  23:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  24:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  25:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  26:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  27:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  28:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  29:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  * POSSIBILITY OF SUCH DAMAGE.
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 2
+
+
+  30:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  */
+  31:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+  32:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** /**
+  33:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  *  @file sensirion_streaming_shdlc.c
+  34:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****  */
+  35:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #include "sensirion_streaming_shdlc.h"
+  36:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #include "sensirion_streaming.h"
+  37:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #include "sensirion_uart_hal.h"
+  38:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+  39:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #define SHDLC_FRAME_DELIMITER 0x7e
+  40:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #define SHDLC_STUFF_BYTE 0x7d
+  41:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+  42:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #define SHDLC_MOSI_ADDR_POS 0
+  43:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #define SHDLC_MOSI_CMD_POS 1
+  44:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** #define SHDLC_MOSI_LEN_POS 2
+  45:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+  46:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** static void sensirion_shdlc_stream_stuff_and_write_next_byte(
+  47:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     sensirion_streaming_state* stream, uint8_t byte) {
+  30              		.loc 1 47 54 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 16
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		.loc 1 47 54 is_stmt 0 view .LVU1
+  35 0000 10B5     		push	{r4, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 4, -8
+  39              		.cfi_offset 14, -4
+  40 0002 84B0     		sub	sp, sp, #16
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 24
+  43 0004 0446     		mov	r4, r0
+  44 0006 8DF80710 		strb	r1, [sp, #7]
+  48:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->checksum += byte;
+  45              		.loc 1 48 5 is_stmt 1 view .LVU2
+  46              		.loc 1 48 11 is_stmt 0 view .LVU3
+  47 000a 8279     		ldrb	r2, [r0, #6]	@ zero_extendqisi2
+  48              		.loc 1 48 22 view .LVU4
+  49 000c CBB2     		uxtb	r3, r1
+  50 000e 1A44     		add	r2, r2, r3
+  51 0010 8271     		strb	r2, [r0, #6]
+  49:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     switch (byte) {
+  52              		.loc 1 49 5 is_stmt 1 view .LVU5
+  53 0012 132B     		cmp	r3, #19
+  54 0014 0ED0     		beq	.L2
+  55 0016 09D8     		bhi	.L3
+  56 0018 112B     		cmp	r3, #17
+  57 001a 0BD0     		beq	.L2
+  58              	.LVL1:
+  59              	.L4:
+  50:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         case 0x11:
+  51:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         case 0x13:
+  52:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         case SHDLC_STUFF_BYTE:
+  53:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         case SHDLC_FRAME_DELIMITER: {
+  54:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             /* byte stuffing is done by inserting 0x7d and inverting bit 5
+  55:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****              */
+  56:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             uint8_t stuffed = SHDLC_STUFF_BYTE;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 3
+
+
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             stream->stream_status = stream->stream.write(1, &stuffed);
+  58:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (stream->stream_status != 1) {
+  59:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                 return;
+  60:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             }
+  61:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             byte = byte ^ (1 << 5);
+  62:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             break;
+  63:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+  64:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         default:
+  65:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             break;
+  66:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+  67:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream_status = stream->stream.write(1, &byte);
+  60              		.loc 1 67 5 view .LVU6
+  61              		.loc 1 67 43 is_stmt 0 view .LVU7
+  62 001c E368     		ldr	r3, [r4, #12]
+  63              		.loc 1 67 29 view .LVU8
+  64 001e 0DF10701 		add	r1, sp, #7
+  65 0022 0120     		movs	r0, #1
+  66 0024 9847     		blx	r3
+  67              	.LVL2:
+  68              		.loc 1 67 27 discriminator 1 view .LVU9
+  69 0026 2081     		strh	r0, [r4, #8]	@ movhi
+  70              	.L1:
+  68:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** }
+  71              		.loc 1 68 1 view .LVU10
+  72 0028 04B0     		add	sp, sp, #16
+  73              	.LCFI2:
+  74              		.cfi_remember_state
+  75              		.cfi_def_cfa_offset 8
+  76              		@ sp needed
+  77 002a 10BD     		pop	{r4, pc}
+  78              	.LVL3:
+  79              	.L3:
+  80              	.LCFI3:
+  81              		.cfi_restore_state
+  49:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     switch (byte) {
+  82              		.loc 1 49 5 view .LVU11
+  83 002c 7D3B     		subs	r3, r3, #125
+  84 002e DBB2     		uxtb	r3, r3
+  85 0030 012B     		cmp	r3, #1
+  86 0032 F3D8     		bhi	.L4
+  87              	.L2:
+  88              	.LBB2:
+  56:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             stream->stream_status = stream->stream.write(1, &stuffed);
+  89              		.loc 1 56 13 is_stmt 1 view .LVU12
+  56:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             stream->stream_status = stream->stream.write(1, &stuffed);
+  90              		.loc 1 56 21 is_stmt 0 view .LVU13
+  91 0034 7D23     		movs	r3, #125
+  92 0036 8DF80F30 		strb	r3, [sp, #15]
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (stream->stream_status != 1) {
+  93              		.loc 1 57 13 is_stmt 1 view .LVU14
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (stream->stream_status != 1) {
+  94              		.loc 1 57 51 is_stmt 0 view .LVU15
+  95 003a E368     		ldr	r3, [r4, #12]
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (stream->stream_status != 1) {
+  96              		.loc 1 57 37 view .LVU16
+  97 003c 0DF10F01 		add	r1, sp, #15
+  98              	.LVL4:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 4
+
+
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (stream->stream_status != 1) {
+  99              		.loc 1 57 37 view .LVU17
+ 100 0040 0120     		movs	r0, #1
+ 101              	.LVL5:
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (stream->stream_status != 1) {
+ 102              		.loc 1 57 37 view .LVU18
+ 103 0042 9847     		blx	r3
+ 104              	.LVL6:
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (stream->stream_status != 1) {
+ 105              		.loc 1 57 35 discriminator 1 view .LVU19
+ 106 0044 2081     		strh	r0, [r4, #8]	@ movhi
+  58:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                 return;
+ 107              		.loc 1 58 13 is_stmt 1 view .LVU20
+  58:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                 return;
+ 108              		.loc 1 58 16 is_stmt 0 view .LVU21
+ 109 0046 0128     		cmp	r0, #1
+ 110 0048 EED1     		bne	.L1
+  61:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             break;
+ 111              		.loc 1 61 13 is_stmt 1 view .LVU22
+  61:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             break;
+ 112              		.loc 1 61 18 is_stmt 0 view .LVU23
+ 113 004a 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 114 004e 83F02003 		eor	r3, r3, #32
+ 115 0052 8DF80730 		strb	r3, [sp, #7]
+  62:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+ 116              		.loc 1 62 13 is_stmt 1 view .LVU24
+ 117 0056 E1E7     		b	.L4
+ 118              	.LBE2:
+ 119              		.cfi_endproc
+ 120              	.LFE3:
+ 122              		.section	.text.sensirion_shdlc_stream_read_and_unstuff_next_byte,"ax",%progbits
+ 123              		.align	1
+ 124              		.syntax unified
+ 125              		.thumb
+ 126              		.thumb_func
+ 128              	sensirion_shdlc_stream_read_and_unstuff_next_byte:
+ 129              	.LVL7:
+ 130              	.LFB4:
+  69:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+  70:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** static uint8_t sensirion_shdlc_stream_read_and_unstuff_next_byte(
+  71:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     sensirion_streaming_state* stream) {
+ 131              		.loc 1 71 40 view -0
+ 132              		.cfi_startproc
+ 133              		@ args = 0, pretend = 0, frame = 8
+ 134              		@ frame_needed = 0, uses_anonymous_args = 0
+ 135              		.loc 1 71 40 is_stmt 0 view .LVU26
+ 136 0000 10B5     		push	{r4, lr}
+ 137              	.LCFI4:
+ 138              		.cfi_def_cfa_offset 8
+ 139              		.cfi_offset 4, -8
+ 140              		.cfi_offset 14, -4
+ 141 0002 82B0     		sub	sp, sp, #8
+ 142              	.LCFI5:
+ 143              		.cfi_def_cfa_offset 16
+ 144 0004 0446     		mov	r4, r0
+  72:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+  73:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     uint8_t data = 0;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 5
+
+
+ 145              		.loc 1 73 5 is_stmt 1 view .LVU27
+ 146              		.loc 1 73 13 is_stmt 0 view .LVU28
+ 147 0006 0023     		movs	r3, #0
+ 148 0008 8DF80730 		strb	r3, [sp, #7]
+  74:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream_status = stream->stream.read(1, &data);
+ 149              		.loc 1 74 5 is_stmt 1 view .LVU29
+ 150              		.loc 1 74 43 is_stmt 0 view .LVU30
+ 151 000c C368     		ldr	r3, [r0, #12]
+ 152              		.loc 1 74 29 view .LVU31
+ 153 000e 0DF10701 		add	r1, sp, #7
+ 154 0012 0120     		movs	r0, #1
+ 155              	.LVL8:
+ 156              		.loc 1 74 29 view .LVU32
+ 157 0014 9847     		blx	r3
+ 158              	.LVL9:
+ 159              		.loc 1 74 27 discriminator 1 view .LVU33
+ 160 0016 2081     		strh	r0, [r4, #8]	@ movhi
+  75:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status < 0) {
+ 161              		.loc 1 75 5 is_stmt 1 view .LVU34
+ 162              		.loc 1 75 8 is_stmt 0 view .LVU35
+ 163 0018 0028     		cmp	r0, #0
+ 164 001a 19DB     		blt	.L11
+  76:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return 0;
+  77:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+  78:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (data == SHDLC_STUFF_BYTE) {
+ 165              		.loc 1 78 5 is_stmt 1 view .LVU36
+ 166              		.loc 1 78 14 is_stmt 0 view .LVU37
+ 167 001c 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 168              		.loc 1 78 8 view .LVU38
+ 169 0020 7D2B     		cmp	r3, #125
+ 170 0022 06D0     		beq	.L14
+ 171              	.L10:
+  79:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         stream->stream_status = stream->stream.read(1, &data);
+  80:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status < 0) {
+  81:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return 0;
+  82:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+  83:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         data = data ^ (1 << 5);
+  84:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+  85:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->checksum += data;
+ 172              		.loc 1 85 5 is_stmt 1 view .LVU39
+ 173              		.loc 1 85 11 is_stmt 0 view .LVU40
+ 174 0024 A379     		ldrb	r3, [r4, #6]	@ zero_extendqisi2
+ 175              		.loc 1 85 22 view .LVU41
+ 176 0026 9DF80700 		ldrb	r0, [sp, #7]	@ zero_extendqisi2
+ 177 002a 0344     		add	r3, r3, r0
+ 178 002c A371     		strb	r3, [r4, #6]
+  86:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     return data;
+ 179              		.loc 1 86 5 is_stmt 1 view .LVU42
+ 180              	.L9:
+  87:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** }
+ 181              		.loc 1 87 1 is_stmt 0 view .LVU43
+ 182 002e 02B0     		add	sp, sp, #8
+ 183              	.LCFI6:
+ 184              		.cfi_remember_state
+ 185              		.cfi_def_cfa_offset 8
+ 186              		@ sp needed
+ 187 0030 10BD     		pop	{r4, pc}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 6
+
+
+ 188              	.LVL10:
+ 189              	.L14:
+ 190              	.LCFI7:
+ 191              		.cfi_restore_state
+  79:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         stream->stream_status = stream->stream.read(1, &data);
+ 192              		.loc 1 79 9 is_stmt 1 view .LVU44
+  79:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         stream->stream_status = stream->stream.read(1, &data);
+ 193              		.loc 1 79 47 is_stmt 0 view .LVU45
+ 194 0032 E368     		ldr	r3, [r4, #12]
+  79:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         stream->stream_status = stream->stream.read(1, &data);
+ 195              		.loc 1 79 33 view .LVU46
+ 196 0034 0DF10701 		add	r1, sp, #7
+ 197 0038 0120     		movs	r0, #1
+ 198 003a 9847     		blx	r3
+ 199              	.LVL11:
+  79:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         stream->stream_status = stream->stream.read(1, &data);
+ 200              		.loc 1 79 31 discriminator 1 view .LVU47
+ 201 003c 2081     		strh	r0, [r4, #8]	@ movhi
+  80:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return 0;
+ 202              		.loc 1 80 9 is_stmt 1 view .LVU48
+  80:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return 0;
+ 203              		.loc 1 80 12 is_stmt 0 view .LVU49
+ 204 003e 0028     		cmp	r0, #0
+ 205 0040 08DB     		blt	.L12
+  83:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 206              		.loc 1 83 9 is_stmt 1 view .LVU50
+  83:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 207              		.loc 1 83 14 is_stmt 0 view .LVU51
+ 208 0042 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 209 0046 83F02003 		eor	r3, r3, #32
+ 210 004a 8DF80730 		strb	r3, [sp, #7]
+ 211 004e E9E7     		b	.L10
+ 212              	.L11:
+  76:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 213              		.loc 1 76 16 view .LVU52
+ 214 0050 0020     		movs	r0, #0
+ 215 0052 ECE7     		b	.L9
+ 216              	.L12:
+  81:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+ 217              		.loc 1 81 20 view .LVU53
+ 218 0054 0020     		movs	r0, #0
+ 219 0056 EAE7     		b	.L9
+ 220              		.cfi_endproc
+ 221              	.LFE4:
+ 223              		.section	.text.sensirion_shdlc_begin_stream,"ax",%progbits
+ 224              		.align	1
+ 225              		.global	sensirion_shdlc_begin_stream
+ 226              		.syntax unified
+ 227              		.thumb
+ 228              		.thumb_func
+ 230              	sensirion_shdlc_begin_stream:
+ 231              	.LVL12:
+ 232              	.LFB5:
+  88:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+  89:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** void sensirion_shdlc_begin_stream(sensirion_streaming_state* stream,
+  90:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                   uint8_t* buffer, uint8_t command,
+  91:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                   uint8_t address, uint8_t data_length) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 7
+
+
+ 233              		.loc 1 91 73 is_stmt 1 view -0
+ 234              		.cfi_startproc
+ 235              		@ args = 4, pretend = 0, frame = 0
+ 236              		@ frame_needed = 0, uses_anonymous_args = 0
+ 237              		@ link register save eliminated.
+  92:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->data = buffer;
+ 238              		.loc 1 92 5 view .LVU55
+ 239              		.loc 1 92 18 is_stmt 0 view .LVU56
+ 240 0000 0160     		str	r1, [r0]
+  93:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->checksum = 0;
+ 241              		.loc 1 93 5 is_stmt 1 view .LVU57
+ 242              		.loc 1 93 22 is_stmt 0 view .LVU58
+ 243 0002 4FF0000C 		mov	ip, #0
+ 244 0006 80F806C0 		strb	ip, [r0, #6]
+  94:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream_status = 0;
+ 245              		.loc 1 94 5 is_stmt 1 view .LVU59
+ 246              		.loc 1 94 27 is_stmt 0 view .LVU60
+ 247 000a A0F808C0 		strh	ip, [r0, #8]	@ movhi
+  95:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->data[SHDLC_MOSI_ADDR_POS] = address;
+ 248              		.loc 1 95 5 is_stmt 1 view .LVU61
+ 249              		.loc 1 95 39 is_stmt 0 view .LVU62
+ 250 000e 0B70     		strb	r3, [r1]
+  96:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->data[SHDLC_MOSI_CMD_POS] = command;
+ 251              		.loc 1 96 5 is_stmt 1 view .LVU63
+ 252              		.loc 1 96 11 is_stmt 0 view .LVU64
+ 253 0010 0368     		ldr	r3, [r0]
+ 254              	.LVL13:
+ 255              		.loc 1 96 38 view .LVU65
+ 256 0012 5A70     		strb	r2, [r3, #1]
+ 257              	.LVL14:
+  97:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->data[SHDLC_MOSI_LEN_POS] = data_length;
+ 258              		.loc 1 97 5 is_stmt 1 view .LVU66
+ 259              		.loc 1 97 11 is_stmt 0 view .LVU67
+ 260 0014 0368     		ldr	r3, [r0]
+ 261              		.loc 1 97 38 view .LVU68
+ 262 0016 9DF80020 		ldrb	r2, [sp]	@ zero_extendqisi2
+ 263              	.LVL15:
+ 264              		.loc 1 97 38 view .LVU69
+ 265 001a 9A70     		strb	r2, [r3, #2]
+  98:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->offset = SHDLC_MOSI_LEN_POS + 1;
+ 266              		.loc 1 98 5 is_stmt 1 view .LVU70
+ 267              		.loc 1 98 20 is_stmt 0 view .LVU71
+ 268 001c 0323     		movs	r3, #3
+ 269 001e 8380     		strh	r3, [r0, #4]	@ movhi
+  99:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** }
+ 270              		.loc 1 99 1 view .LVU72
+ 271 0020 7047     		bx	lr
+ 272              		.cfi_endproc
+ 273              	.LFE5:
+ 275              		.section	.text.sensirion_shdlc_write_request,"ax",%progbits
+ 276              		.align	1
+ 277              		.global	sensirion_shdlc_write_request
+ 278              		.syntax unified
+ 279              		.thumb
+ 280              		.thumb_func
+ 282              	sensirion_shdlc_write_request:
+ 283              	.LVL16:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 8
+
+
+ 284              	.LFB6:
+ 100:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 101:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** int16_t sensirion_shdlc_write_request(sensirion_streaming_state* stream) {
+ 285              		.loc 1 101 74 is_stmt 1 view -0
+ 286              		.cfi_startproc
+ 287              		@ args = 0, pretend = 0, frame = 8
+ 288              		@ frame_needed = 0, uses_anonymous_args = 0
+ 289              		.loc 1 101 74 is_stmt 0 view .LVU74
+ 290 0000 30B5     		push	{r4, r5, lr}
+ 291              	.LCFI8:
+ 292              		.cfi_def_cfa_offset 12
+ 293              		.cfi_offset 4, -12
+ 294              		.cfi_offset 5, -8
+ 295              		.cfi_offset 14, -4
+ 296 0002 83B0     		sub	sp, sp, #12
+ 297              	.LCFI9:
+ 298              		.cfi_def_cfa_offset 24
+ 102:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream.write = sensirion_uart_hal_tx;
+ 299              		.loc 1 102 5 is_stmt 1 view .LVU75
+ 300              		.loc 1 102 26 is_stmt 0 view .LVU76
+ 301 0004 254B     		ldr	r3, .L28
+ 302 0006 C360     		str	r3, [r0, #12]
+ 103:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     uint8_t shdlc_frame_delimiter = SHDLC_FRAME_DELIMITER;
+ 303              		.loc 1 103 5 is_stmt 1 view .LVU77
+ 304              		.loc 1 103 13 is_stmt 0 view .LVU78
+ 305 0008 7E23     		movs	r3, #126
+ 306 000a 8DF80730 		strb	r3, [sp, #7]
+ 104:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if ((stream->offset - 3) != stream->data[SHDLC_MOSI_LEN_POS]) {
+ 307              		.loc 1 104 5 is_stmt 1 view .LVU79
+ 308              		.loc 1 104 16 is_stmt 0 view .LVU80
+ 309 000e 8388     		ldrh	r3, [r0, #4]
+ 310              		.loc 1 104 25 view .LVU81
+ 311 0010 033B     		subs	r3, r3, #3
+ 312              		.loc 1 104 39 view .LVU82
+ 313 0012 0268     		ldr	r2, [r0]
+ 314              		.loc 1 104 45 view .LVU83
+ 315 0014 9278     		ldrb	r2, [r2, #2]	@ zero_extendqisi2
+ 316              		.loc 1 104 8 view .LVU84
+ 317 0016 9342     		cmp	r3, r2
+ 318 0018 33D1     		bne	.L20
+ 319 001a 0546     		mov	r5, r0
+ 105:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 106:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 107:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream_status = stream->stream.write(1, &shdlc_frame_delimiter);
+ 320              		.loc 1 107 5 is_stmt 1 view .LVU85
+ 321              		.loc 1 107 29 is_stmt 0 view .LVU86
+ 322 001c 0DF10701 		add	r1, sp, #7
+ 323 0020 0120     		movs	r0, #1
+ 324              	.LVL17:
+ 325              		.loc 1 107 29 view .LVU87
+ 326 0022 FFF7FEFF 		bl	sensirion_uart_hal_tx
+ 327              	.LVL18:
+ 328              		.loc 1 107 27 discriminator 1 view .LVU88
+ 329 0026 2881     		strh	r0, [r5, #8]	@ movhi
+ 108:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 330              		.loc 1 108 5 is_stmt 1 view .LVU89
+ 331              		.loc 1 108 8 is_stmt 0 view .LVU90
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 9
+
+
+ 332 0028 0128     		cmp	r0, #1
+ 333 002a 2DD1     		bne	.L21
+ 334              	.LBB3:
+ 109:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 110:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 111:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 112:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     for (uint16_t i = 0; i < stream->offset; i++) {
+ 335              		.loc 1 112 19 view .LVU91
+ 336 002c 0024     		movs	r4, #0
+ 337 002e 01E0     		b	.L18
+ 338              	.LVL19:
+ 339              	.L27:
+ 340              		.loc 1 112 47 is_stmt 1 discriminator 2 view .LVU92
+ 341 0030 0134     		adds	r4, r4, #1
+ 342              	.LVL20:
+ 343              		.loc 1 112 47 is_stmt 0 discriminator 2 view .LVU93
+ 344 0032 A4B2     		uxth	r4, r4
+ 345              	.LVL21:
+ 346              	.L18:
+ 347              		.loc 1 112 28 is_stmt 1 discriminator 1 view .LVU94
+ 348              		.loc 1 112 36 is_stmt 0 discriminator 1 view .LVU95
+ 349 0034 AB88     		ldrh	r3, [r5, #4]
+ 350              		.loc 1 112 28 discriminator 1 view .LVU96
+ 351 0036 A342     		cmp	r3, r4
+ 352 0038 0CD9     		bls	.L26
+ 113:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_shdlc_stream_stuff_and_write_next_byte(stream,
+ 353              		.loc 1 113 9 is_stmt 1 view .LVU97
+ 114:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                                          stream->data[i]);
+ 354              		.loc 1 114 64 is_stmt 0 view .LVU98
+ 355 003a 2B68     		ldr	r3, [r5]
+ 113:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_shdlc_stream_stuff_and_write_next_byte(stream,
+ 356              		.loc 1 113 9 view .LVU99
+ 357 003c 195D     		ldrb	r1, [r3, r4]	@ zero_extendqisi2
+ 358 003e 2846     		mov	r0, r5
+ 359 0040 FFF7FEFF 		bl	sensirion_shdlc_stream_stuff_and_write_next_byte
+ 360              	.LVL22:
+ 115:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status != 1) {
+ 361              		.loc 1 115 9 is_stmt 1 view .LVU100
+ 362              		.loc 1 115 19 is_stmt 0 view .LVU101
+ 363 0044 B5F90830 		ldrsh	r3, [r5, #8]
+ 364              		.loc 1 115 12 view .LVU102
+ 365 0048 012B     		cmp	r3, #1
+ 366 004a F1D0     		beq	.L27
+ 116:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 367              		.loc 1 116 20 view .LVU103
+ 368 004c 6FF00500 		mvn	r0, #5
+ 369              	.LVL23:
+ 370              	.L17:
+ 371              		.loc 1 116 20 view .LVU104
+ 372              	.LBE3:
+ 117:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+ 118:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 119:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     sensirion_shdlc_stream_stuff_and_write_next_byte(stream,
+ 120:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                                      ~(stream->checksum));
+ 121:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 122:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 123:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 10
+
+
+ 124:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream_status = stream->stream.write(1, &shdlc_frame_delimiter);
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 126:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 127:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 128:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     sensirion_uart_hal_sleep_usec(100);
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     return NO_ERROR;
+ 130:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** }
+ 373              		.loc 1 130 1 view .LVU105
+ 374 0050 03B0     		add	sp, sp, #12
+ 375              	.LCFI10:
+ 376              		.cfi_remember_state
+ 377              		.cfi_def_cfa_offset 12
+ 378              		@ sp needed
+ 379 0052 30BD     		pop	{r4, r5, pc}
+ 380              	.LVL24:
+ 381              	.L26:
+ 382              	.LCFI11:
+ 383              		.cfi_restore_state
+ 119:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                                      ~(stream->checksum));
+ 384              		.loc 1 119 5 is_stmt 1 view .LVU106
+ 120:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 385              		.loc 1 120 62 is_stmt 0 view .LVU107
+ 386 0054 A979     		ldrb	r1, [r5, #6]	@ zero_extendqisi2
+ 119:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                                      ~(stream->checksum));
+ 387              		.loc 1 119 5 view .LVU108
+ 388 0056 C943     		mvns	r1, r1
+ 389 0058 C9B2     		uxtb	r1, r1
+ 390 005a 2846     		mov	r0, r5
+ 391 005c FFF7FEFF 		bl	sensirion_shdlc_stream_stuff_and_write_next_byte
+ 392              	.LVL25:
+ 121:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 393              		.loc 1 121 5 is_stmt 1 view .LVU109
+ 121:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 394              		.loc 1 121 15 is_stmt 0 view .LVU110
+ 395 0060 B5F90830 		ldrsh	r3, [r5, #8]
+ 121:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 396              		.loc 1 121 8 view .LVU111
+ 397 0064 012B     		cmp	r3, #1
+ 398 0066 12D1     		bne	.L23
+ 124:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 399              		.loc 1 124 5 is_stmt 1 view .LVU112
+ 124:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 400              		.loc 1 124 43 is_stmt 0 view .LVU113
+ 401 0068 EB68     		ldr	r3, [r5, #12]
+ 124:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 402              		.loc 1 124 29 view .LVU114
+ 403 006a 0DF10701 		add	r1, sp, #7
+ 404 006e 0120     		movs	r0, #1
+ 405 0070 9847     		blx	r3
+ 406              	.LVL26:
+ 124:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->stream_status != 1) {
+ 407              		.loc 1 124 27 discriminator 1 view .LVU115
+ 408 0072 2881     		strh	r0, [r5, #8]	@ movhi
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 409              		.loc 1 125 5 is_stmt 1 view .LVU116
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 410              		.loc 1 125 8 is_stmt 0 view .LVU117
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 11
+
+
+ 411 0074 0128     		cmp	r0, #1
+ 412 0076 0DD1     		bne	.L24
+ 128:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     return NO_ERROR;
+ 413              		.loc 1 128 5 is_stmt 1 view .LVU118
+ 414 0078 6420     		movs	r0, #100
+ 415 007a FFF7FEFF 		bl	sensirion_uart_hal_sleep_usec
+ 416              	.LVL27:
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** }
+ 417              		.loc 1 129 5 view .LVU119
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** }
+ 418              		.loc 1 129 12 is_stmt 0 view .LVU120
+ 419 007e 0020     		movs	r0, #0
+ 420 0080 E6E7     		b	.L17
+ 421              	.LVL28:
+ 422              	.L20:
+ 105:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 423              		.loc 1 105 16 view .LVU121
+ 424 0082 6FF00400 		mvn	r0, #4
+ 425              	.LVL29:
+ 105:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 426              		.loc 1 105 16 view .LVU122
+ 427 0086 E3E7     		b	.L17
+ 428              	.LVL30:
+ 429              	.L21:
+ 109:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 430              		.loc 1 109 16 view .LVU123
+ 431 0088 6FF00500 		mvn	r0, #5
+ 432 008c E0E7     		b	.L17
+ 433              	.LVL31:
+ 434              	.L23:
+ 122:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 435              		.loc 1 122 16 view .LVU124
+ 436 008e 6FF00500 		mvn	r0, #5
+ 437 0092 DDE7     		b	.L17
+ 438              	.L24:
+ 126:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 439              		.loc 1 126 16 view .LVU125
+ 440 0094 6FF00500 		mvn	r0, #5
+ 441 0098 DAE7     		b	.L17
+ 442              	.L29:
+ 443 009a 00BF     		.align	2
+ 444              	.L28:
+ 445 009c 00000000 		.word	sensirion_uart_hal_tx
+ 446              		.cfi_endproc
+ 447              	.LFE6:
+ 449              		.section	.text.sensirion_shdlc_read_response,"ax",%progbits
+ 450              		.align	1
+ 451              		.global	sensirion_shdlc_read_response
+ 452              		.syntax unified
+ 453              		.thumb
+ 454              		.thumb_func
+ 456              	sensirion_shdlc_read_response:
+ 457              	.LVL32:
+ 458              	.LFB7:
+ 131:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 132:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** int16_t sensirion_shdlc_read_response(sensirion_streaming_state* stream,
+ 133:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                       uint8_t expected_data_length,
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 12
+
+
+ 134:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                       struct sensirion_shdlc_rx_header* header,
+ 135:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                                       uint32_t max_timeout_ms) {
+ 459              		.loc 1 135 64 is_stmt 1 view -0
+ 460              		.cfi_startproc
+ 461              		@ args = 0, pretend = 0, frame = 8
+ 462              		@ frame_needed = 0, uses_anonymous_args = 0
+ 463              		.loc 1 135 64 is_stmt 0 view .LVU127
+ 464 0000 2DE9F043 		push	{r4, r5, r6, r7, r8, r9, lr}
+ 465              	.LCFI12:
+ 466              		.cfi_def_cfa_offset 28
+ 467              		.cfi_offset 4, -28
+ 468              		.cfi_offset 5, -24
+ 469              		.cfi_offset 6, -20
+ 470              		.cfi_offset 7, -16
+ 471              		.cfi_offset 8, -12
+ 472              		.cfi_offset 9, -8
+ 473              		.cfi_offset 14, -4
+ 474 0004 83B0     		sub	sp, sp, #12
+ 475              	.LCFI13:
+ 476              		.cfi_def_cfa_offset 40
+ 477 0006 0446     		mov	r4, r0
+ 478 0008 8846     		mov	r8, r1
+ 479 000a 1646     		mov	r6, r2
+ 480 000c 1D46     		mov	r5, r3
+ 136:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->offset = 0;
+ 481              		.loc 1 136 5 is_stmt 1 view .LVU128
+ 482              		.loc 1 136 20 is_stmt 0 view .LVU129
+ 483 000e 0023     		movs	r3, #0
+ 484              	.LVL33:
+ 485              		.loc 1 136 20 view .LVU130
+ 486 0010 8380     		strh	r3, [r0, #4]	@ movhi
+ 137:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->checksum = 0;
+ 487              		.loc 1 137 5 is_stmt 1 view .LVU131
+ 488              		.loc 1 137 22 is_stmt 0 view .LVU132
+ 489 0012 8371     		strb	r3, [r0, #6]
+ 138:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream_status = 0;
+ 490              		.loc 1 138 5 is_stmt 1 view .LVU133
+ 491              		.loc 1 138 27 is_stmt 0 view .LVU134
+ 492 0014 0381     		strh	r3, [r0, #8]	@ movhi
+ 139:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream.read = sensirion_uart_hal_rx;
+ 493              		.loc 1 139 5 is_stmt 1 view .LVU135
+ 494              		.loc 1 139 25 is_stmt 0 view .LVU136
+ 495 0016 404A     		ldr	r2, .L53
+ 496              	.LVL34:
+ 497              		.loc 1 139 25 view .LVU137
+ 498 0018 C260     		str	r2, [r0, #12]
+ 140:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     uint8_t data = 0;
+ 499              		.loc 1 140 5 is_stmt 1 view .LVU138
+ 500              		.loc 1 140 13 is_stmt 0 view .LVU139
+ 501 001a 8DF80730 		strb	r3, [sp, #7]
+ 141:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     uint32_t retries = max_timeout_ms;
+ 502              		.loc 1 141 5 is_stmt 1 view .LVU140
+ 503              	.LVL35:
+ 142:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // sensirion_uart_hal_sleep_usec(1000);                                    
+ 143:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // Poll for data available
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     while ((stream->stream.read(1, &data) <= 0) && (retries-- > 0)) {
+ 504              		.loc 1 144 5 view .LVU141
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 13
+
+
+ 505              		.loc 1 144 11 is_stmt 0 view .LVU142
+ 506 001e 03E0     		b	.L31
+ 507              	.LVL36:
+ 508              	.L33:
+ 145:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 509              		.loc 1 145 9 is_stmt 1 view .LVU143
+ 510 0020 0A20     		movs	r0, #10
+ 511 0022 FFF7FEFF 		bl	sensirion_uart_hal_sleep_usec
+ 512              	.LVL37:
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 513              		.loc 1 144 60 is_stmt 0 discriminator 1 view .LVU144
+ 514 0026 3D46     		mov	r5, r7
+ 515              	.LVL38:
+ 516              	.L31:
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 517              		.loc 1 144 49 is_stmt 1 view .LVU145
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 518              		.loc 1 144 27 is_stmt 0 view .LVU146
+ 519 0028 E368     		ldr	r3, [r4, #12]
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 520              		.loc 1 144 13 view .LVU147
+ 521 002a 0DF10701 		add	r1, sp, #7
+ 522 002e 0120     		movs	r0, #1
+ 523 0030 9847     		blx	r3
+ 524              	.LVL39:
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 525              		.loc 1 144 49 discriminator 1 view .LVU148
+ 526 0032 0028     		cmp	r0, #0
+ 527 0034 03DC     		bgt	.L32
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 528              		.loc 1 144 60 discriminator 1 view .LVU149
+ 529 0036 6F1E     		subs	r7, r5, #1
+ 530              	.LVL40:
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 531              		.loc 1 144 49 discriminator 1 view .LVU150
+ 532 0038 002D     		cmp	r5, #0
+ 533 003a F1D1     		bne	.L33
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         sensirion_uart_hal_sleep_usec(10);
+ 534              		.loc 1 144 60 discriminator 1 view .LVU151
+ 535 003c 3D46     		mov	r5, r7
+ 536              	.LVL41:
+ 537              	.L32:
+ 146:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 147:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 148:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // read the beginning of the frame
+ 149:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (data != SHDLC_FRAME_DELIMITER) {
+ 538              		.loc 1 149 5 is_stmt 1 view .LVU152
+ 539              		.loc 1 149 14 is_stmt 0 view .LVU153
+ 540 003e 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 541              		.loc 1 149 8 view .LVU154
+ 542 0042 7E2B     		cmp	r3, #126
+ 543 0044 4FD1     		bne	.L42
+ 150:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 151:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 152:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // read the header
+ 153:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     uint8_t* ptr = (uint8_t*)header;
+ 544              		.loc 1 153 14 view .LVU155
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 14
+
+
+ 545 0046 B146     		mov	r9, r6
+ 546              	.LBB4:
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     for (uint8_t i = 0; i < sizeof(struct sensirion_shdlc_rx_header); i++) {
+ 547              		.loc 1 154 18 view .LVU156
+ 548 0048 0027     		movs	r7, #0
+ 549              	.L35:
+ 550              	.LVL42:
+ 551              		.loc 1 154 27 is_stmt 1 discriminator 1 view .LVU157
+ 552 004a 032F     		cmp	r7, #3
+ 553 004c 0DD8     		bhi	.L52
+ 155:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         *ptr = sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 554              		.loc 1 155 9 view .LVU158
+ 555              		.loc 1 155 16 is_stmt 0 view .LVU159
+ 556 004e 2046     		mov	r0, r4
+ 557 0050 FFF7FEFF 		bl	sensirion_shdlc_stream_read_and_unstuff_next_byte
+ 558              	.LVL43:
+ 559              		.loc 1 155 14 discriminator 1 view .LVU160
+ 560 0054 89F80000 		strb	r0, [r9]
+ 156:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status < 0) {
+ 561              		.loc 1 156 9 is_stmt 1 view .LVU161
+ 562              		.loc 1 156 19 is_stmt 0 view .LVU162
+ 563 0058 B4F90830 		ldrsh	r3, [r4, #8]
+ 564              		.loc 1 156 12 view .LVU163
+ 565 005c 002B     		cmp	r3, #0
+ 566 005e 45DB     		blt	.L43
+ 157:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+ 159:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         ptr++;
+ 567              		.loc 1 159 9 is_stmt 1 view .LVU164
+ 568              		.loc 1 159 12 is_stmt 0 view .LVU165
+ 569 0060 09F10109 		add	r9, r9, #1
+ 570              	.LVL44:
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         *ptr = sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 571              		.loc 1 154 72 is_stmt 1 discriminator 2 view .LVU166
+ 572 0064 0137     		adds	r7, r7, #1
+ 573              	.LVL45:
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         *ptr = sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 574              		.loc 1 154 72 is_stmt 0 discriminator 2 view .LVU167
+ 575 0066 FFB2     		uxtb	r7, r7
+ 576              	.LVL46:
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         *ptr = sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 577              		.loc 1 154 72 discriminator 2 view .LVU168
+ 578 0068 EFE7     		b	.L35
+ 579              	.LVL47:
+ 580              	.L52:
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         *ptr = sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 581              		.loc 1 154 72 discriminator 2 view .LVU169
+ 582              	.LBE4:
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 161:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // consistency check with data read from header
+ 162:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (expected_data_length < header->data_len) {
+ 583              		.loc 1 162 5 is_stmt 1 view .LVU170
+ 584              		.loc 1 162 38 is_stmt 0 view .LVU171
+ 585 006a F378     		ldrb	r3, [r6, #3]	@ zero_extendqisi2
+ 586              		.loc 1 162 8 view .LVU172
+ 587 006c 4345     		cmp	r3, r8
+ 588 006e 07D9     		bls	.L37
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 15
+
+
+ 163:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_FRAME_TOO_LONG;
+ 589              		.loc 1 163 16 view .LVU173
+ 590 0070 6FF00600 		mvn	r0, #6
+ 591 0074 34E0     		b	.L34
+ 592              	.L38:
+ 164:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 165:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // read all data
+ 166:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     while ((stream->offset < header->data_len) &&
+ 167:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****            (stream->stream_status >= 0)) {
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         data = sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 169:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status < 0) {
+ 170:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 171:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+ 172:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status == 0) {
+ 173:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (retries == 0) {
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                 return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 175:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             }
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             retries--;
+ 177:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             sensirion_uart_hal_sleep_usec(1000);
+ 178:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             continue;
+ 179:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+ 180:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         stream->data[stream->offset++] = data;
+ 593              		.loc 1 180 9 is_stmt 1 view .LVU174
+ 594              		.loc 1 180 15 is_stmt 0 view .LVU175
+ 595 0076 2268     		ldr	r2, [r4]
+ 596              		.loc 1 180 28 view .LVU176
+ 597 0078 A388     		ldrh	r3, [r4, #4]
+ 598              		.loc 1 180 36 view .LVU177
+ 599 007a 591C     		adds	r1, r3, #1
+ 600 007c A180     		strh	r1, [r4, #4]	@ movhi
+ 601              		.loc 1 180 40 view .LVU178
+ 602 007e D054     		strb	r0, [r2, r3]
+ 603              	.L37:
+ 166:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****            (stream->stream_status >= 0)) {
+ 604              		.loc 1 166 48 is_stmt 1 view .LVU179
+ 166:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****            (stream->stream_status >= 0)) {
+ 605              		.loc 1 166 19 is_stmt 0 view .LVU180
+ 606 0080 A288     		ldrh	r2, [r4, #4]
+ 166:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****            (stream->stream_status >= 0)) {
+ 607              		.loc 1 166 36 view .LVU181
+ 608 0082 F378     		ldrb	r3, [r6, #3]	@ zero_extendqisi2
+ 166:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****            (stream->stream_status >= 0)) {
+ 609              		.loc 1 166 48 view .LVU182
+ 610 0084 9A42     		cmp	r2, r3
+ 611 0086 15D2     		bcs	.L40
+ 167:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         data = sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 612              		.loc 1 167 19 view .LVU183
+ 613 0088 B4F90810 		ldrsh	r1, [r4, #8]
+ 166:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****            (stream->stream_status >= 0)) {
+ 614              		.loc 1 166 48 discriminator 1 view .LVU184
+ 615 008c 0029     		cmp	r1, #0
+ 616 008e 11DB     		blt	.L40
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status < 0) {
+ 617              		.loc 1 168 9 is_stmt 1 view .LVU185
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status < 0) {
+ 618              		.loc 1 168 16 is_stmt 0 view .LVU186
+ 619 0090 2046     		mov	r0, r4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 16
+
+
+ 620 0092 FFF7FEFF 		bl	sensirion_shdlc_stream_read_and_unstuff_next_byte
+ 621              	.LVL48:
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         if (stream->stream_status < 0) {
+ 622              		.loc 1 168 14 discriminator 1 view .LVU187
+ 623 0096 8DF80700 		strb	r0, [sp, #7]
+ 169:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 624              		.loc 1 169 9 is_stmt 1 view .LVU188
+ 169:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 625              		.loc 1 169 19 is_stmt 0 view .LVU189
+ 626 009a B4F90830 		ldrsh	r3, [r4, #8]
+ 169:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 627              		.loc 1 169 12 view .LVU190
+ 628 009e 002B     		cmp	r3, #0
+ 629 00a0 27DB     		blt	.L45
+ 172:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (retries == 0) {
+ 630              		.loc 1 172 9 is_stmt 1 view .LVU191
+ 172:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             if (retries == 0) {
+ 631              		.loc 1 172 12 is_stmt 0 view .LVU192
+ 632 00a2 002B     		cmp	r3, #0
+ 633 00a4 E7D1     		bne	.L38
+ 173:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                 return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 634              		.loc 1 173 13 is_stmt 1 view .LVU193
+ 173:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                 return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 635              		.loc 1 173 16 is_stmt 0 view .LVU194
+ 636 00a6 3DB3     		cbz	r5, .L46
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             sensirion_uart_hal_sleep_usec(1000);
+ 637              		.loc 1 176 13 is_stmt 1 view .LVU195
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             sensirion_uart_hal_sleep_usec(1000);
+ 638              		.loc 1 176 20 is_stmt 0 view .LVU196
+ 639 00a8 013D     		subs	r5, r5, #1
+ 640              	.LVL49:
+ 177:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             continue;
+ 641              		.loc 1 177 13 is_stmt 1 view .LVU197
+ 642 00aa 4FF47A70 		mov	r0, #1000
+ 643 00ae FFF7FEFF 		bl	sensirion_uart_hal_sleep_usec
+ 644              	.LVL50:
+ 178:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         }
+ 645              		.loc 1 178 13 view .LVU198
+ 646 00b2 E5E7     		b	.L37
+ 647              	.L40:
+ 181:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 182:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 183:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->offset < header->data_len) {
+ 648              		.loc 1 183 5 view .LVU199
+ 649              		.loc 1 183 8 is_stmt 0 view .LVU200
+ 650 00b4 9A42     		cmp	r2, r3
+ 651 00b6 22D3     		bcc	.L47
+ 184:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 185:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 186:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 187:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // read checksum, the data byte is not needed as the checksum
+ 188:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // is computed behind the scene
+ 189:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     sensirion_shdlc_stream_read_and_unstuff_next_byte(stream);
+ 652              		.loc 1 189 5 is_stmt 1 view .LVU201
+ 653 00b8 2046     		mov	r0, r4
+ 654 00ba FFF7FEFF 		bl	sensirion_shdlc_stream_read_and_unstuff_next_byte
+ 655              	.LVL51:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 17
+
+
+ 190:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     /* (CHECKSUM + ~CHECKSUM) = 0xFF */
+ 191:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (stream->checksum != 0xFF) {
+ 656              		.loc 1 191 5 view .LVU202
+ 657              		.loc 1 191 15 is_stmt 0 view .LVU203
+ 658 00be A379     		ldrb	r3, [r4, #6]	@ zero_extendqisi2
+ 659              		.loc 1 191 8 view .LVU204
+ 660 00c0 FF2B     		cmp	r3, #255
+ 661 00c2 1FD1     		bne	.L48
+ 192:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_CRC_MISMATCH;
+ 193:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 194:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     // read expected frame delimiter before checking state
+ 196:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     stream->stream.read(1, &data);
+ 662              		.loc 1 196 5 is_stmt 1 view .LVU205
+ 663              		.loc 1 196 19 is_stmt 0 view .LVU206
+ 664 00c4 E368     		ldr	r3, [r4, #12]
+ 665              		.loc 1 196 5 view .LVU207
+ 666 00c6 0DF10701 		add	r1, sp, #7
+ 667 00ca 0120     		movs	r0, #1
+ 668 00cc 9847     		blx	r3
+ 669              	.LVL52:
+ 197:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 198:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (0x7F & header->state) {
+ 670              		.loc 1 198 5 is_stmt 1 view .LVU208
+ 671              		.loc 1 198 22 is_stmt 0 view .LVU209
+ 672 00ce B378     		ldrb	r3, [r6, #2]	@ zero_extendqisi2
+ 673              		.loc 1 198 8 view .LVU210
+ 674 00d0 13F07F0F 		tst	r3, #127
+ 675 00d4 19D1     		bne	.L49
+ 199:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_EXECUTION_FAILURE;
+ 200:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 201:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 202:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     if (data != SHDLC_FRAME_DELIMITER) {
+ 676              		.loc 1 202 5 is_stmt 1 view .LVU211
+ 677              		.loc 1 202 14 is_stmt 0 view .LVU212
+ 678 00d6 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 679              		.loc 1 202 8 view .LVU213
+ 680 00da 7E2B     		cmp	r3, #126
+ 681 00dc 18D1     		bne	.L50
+ 203:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 204:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     }
+ 205:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** 
+ 206:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****     return NO_ERROR;
+ 682              		.loc 1 206 12 view .LVU214
+ 683 00de 0020     		movs	r0, #0
+ 684              	.LVL53:
+ 685              	.L34:
+ 207:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c **** }...
+ 686              		.loc 1 207 1 view .LVU215
+ 687 00e0 03B0     		add	sp, sp, #12
+ 688              	.LCFI14:
+ 689              		.cfi_remember_state
+ 690              		.cfi_def_cfa_offset 28
+ 691              		@ sp needed
+ 692 00e2 BDE8F083 		pop	{r4, r5, r6, r7, r8, r9, pc}
+ 693              	.LVL54:
+ 694              	.L42:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 18
+
+
+ 695              	.LCFI15:
+ 696              		.cfi_restore_state
+ 150:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 697              		.loc 1 150 16 view .LVU216
+ 698 00e6 6FF00100 		mvn	r0, #1
+ 699 00ea F9E7     		b	.L34
+ 700              	.LVL55:
+ 701              	.L43:
+ 702              	.LBB5:
+ 157:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 703              		.loc 1 157 20 view .LVU217
+ 704 00ec 6FF00200 		mvn	r0, #2
+ 705 00f0 F6E7     		b	.L34
+ 706              	.L45:
+ 157:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 707              		.loc 1 157 20 view .LVU218
+ 708              	.LBE5:
+ 170:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****             return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 709              		.loc 1 170 20 view .LVU219
+ 710 00f2 6FF00200 		mvn	r0, #2
+ 711 00f6 F3E7     		b	.L34
+ 712              	.L46:
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****                 return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 713              		.loc 1 174 24 view .LVU220
+ 714 00f8 6FF00200 		mvn	r0, #2
+ 715 00fc F0E7     		b	.L34
+ 716              	.L47:
+ 184:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 717              		.loc 1 184 16 view .LVU221
+ 718 00fe 6FF00400 		mvn	r0, #4
+ 719 0102 EDE7     		b	.L34
+ 720              	.L48:
+ 192:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_CRC_MISMATCH;
+ 721              		.loc 1 192 16 view .LVU222
+ 722 0104 6FF00300 		mvn	r0, #3
+ 723 0108 EAE7     		b	.L34
+ 724              	.L49:
+ 199:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_EXECUTION_FAILURE;
+ 725              		.loc 1 199 16 view .LVU223
+ 726 010a 6FF00700 		mvn	r0, #7
+ 727 010e E7E7     		b	.L34
+ 728              	.L50:
+ 203:SynaptiX_FDK/components/modules/sps30/sensirion_streaming_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 729              		.loc 1 203 16 view .LVU224
+ 730 0110 6FF00200 		mvn	r0, #2
+ 731 0114 E4E7     		b	.L34
+ 732              	.L54:
+ 733 0116 00BF     		.align	2
+ 734              	.L53:
+ 735 0118 00000000 		.word	sensirion_uart_hal_rx
+ 736              		.cfi_endproc
+ 737              	.LFE7:
+ 739              		.text
+ 740              	.Letext0:
+ 741              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 742              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 743              		.file 4 "SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 19
+
+
+ 744              		.file 5 "SynaptiX_FDK/components/modules/sps30/sensirion_streaming.h"
+ 745              		.file 6 "SynaptiX_FDK/components/modules/sps30/sensirion_uart_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s 			page 20
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sensirion_streaming_shdlc.c
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:22     .text.sensirion_shdlc_stream_stuff_and_write_next_byte:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:27     .text.sensirion_shdlc_stream_stuff_and_write_next_byte:00000000 sensirion_shdlc_stream_stuff_and_write_next_byte
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:123    .text.sensirion_shdlc_stream_read_and_unstuff_next_byte:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:128    .text.sensirion_shdlc_stream_read_and_unstuff_next_byte:00000000 sensirion_shdlc_stream_read_and_unstuff_next_byte
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:224    .text.sensirion_shdlc_begin_stream:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:230    .text.sensirion_shdlc_begin_stream:00000000 sensirion_shdlc_begin_stream
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:276    .text.sensirion_shdlc_write_request:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:282    .text.sensirion_shdlc_write_request:00000000 sensirion_shdlc_write_request
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:445    .text.sensirion_shdlc_write_request:0000009c $d
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:450    .text.sensirion_shdlc_read_response:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:456    .text.sensirion_shdlc_read_response:00000000 sensirion_shdlc_read_response
+C:\Users\DELL\AppData\Local\Temp\ccvhwr3P.s:735    .text.sensirion_shdlc_read_response:00000118 $d
+
+UNDEFINED SYMBOLS
+sensirion_uart_hal_tx
+sensirion_uart_hal_sleep_usec
+sensirion_uart_hal_rx

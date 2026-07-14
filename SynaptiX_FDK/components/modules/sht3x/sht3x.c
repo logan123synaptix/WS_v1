@@ -1,5 +1,5 @@
 #include "sht3x.h"
-#include "board.h"
+#include "sx_board.h"
 #include <string.h>
 
 static uint8_t calculate_crc(const uint8_t *data, uint8_t length)

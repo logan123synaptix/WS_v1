@@ -7,7 +7,6 @@
 #include "logger.h"
 #include "sx_delay.h"
 #include "sx_gpio.h"
-#include "app_config.h"
 #include "app.h"
 #include "sx_sleep.h"
 

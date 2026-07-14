@@ -1,0 +1,263 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"midi_device.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/lib/tinyusb/src/class/midi/midi_device.c"
+  21              		.section	.text.sx_gettick,"ax",%progbits
+  22              		.align	1
+  23              		.global	sx_gettick
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	sx_gettick:
+  29              	.LFB336:
+  30              		.file 2 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s 			page 2
+
+
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s 			page 3
+
+
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s 			page 4
+
+
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+  31              		.loc 2 186 33 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35 0000 08B5     		push	{r3, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 3, -8
+  39              		.cfi_offset 14, -4
+  40              		.loc 2 186 34 view .LVU1
+  41              		.loc 2 186 41 is_stmt 0 view .LVU2
+  42 0002 FFF7FEFF 		bl	HAL_GetTick
+  43              	.LVL0:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s 			page 5
+
+
+  44              		.loc 2 186 55 view .LVU3
+  45 0006 08BD     		pop	{r3, pc}
+  46              		.cfi_endproc
+  47              	.LFE336:
+  49              		.text
+  50              	.Letext0:
+  51              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+  52              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+  53              		.file 5 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+  54              		.file 6 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s 			page 6
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 midi_device.c
+C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s:22     .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccNuA8L6.s:28     .text.sx_gettick:00000000 sx_gettick
+
+UNDEFINED SYMBOLS
+HAL_GetTick

@@ -1,0 +1,1315 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"cli_shell.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/services/shell/cli_shell.c"
+  21              		.section	.text.prv_booted,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	prv_booted:
+  28              	.LVL0:
+  29              	.LFB3:
+   1:SynaptiX_FDK/services/shell/cli_shell.c **** 
+   2:SynaptiX_FDK/services/shell/cli_shell.c **** 
+   3:SynaptiX_FDK/services/shell/cli_shell.c **** 
+   4:SynaptiX_FDK/services/shell/cli_shell.c **** #include "cli_shell.h"
+   5:SynaptiX_FDK/services/shell/cli_shell.c **** 
+   6:SynaptiX_FDK/services/shell/cli_shell.c **** 
+   7:SynaptiX_FDK/services/shell/cli_shell.c **** #include <stdbool.h>
+   8:SynaptiX_FDK/services/shell/cli_shell.c **** #include <stddef.h>
+   9:SynaptiX_FDK/services/shell/cli_shell.c **** #include <string.h>
+  10:SynaptiX_FDK/services/shell/cli_shell.c **** #include <stdarg.h>
+  11:SynaptiX_FDK/services/shell/cli_shell.c **** #include <stdio.h>
+  12:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  13:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  14:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  15:SynaptiX_FDK/services/shell/cli_shell.c **** #define SHELL_FOR_EACH_COMMAND(command) \
+  16:SynaptiX_FDK/services/shell/cli_shell.c ****   for (const Cli_Shell_Cmd *command = g_shell_commands; \
+  17:SynaptiX_FDK/services/shell/cli_shell.c ****     command < &g_shell_commands[g_num_shell_commands]; \
+  18:SynaptiX_FDK/services/shell/cli_shell.c ****     ++command)
+  19:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  20:SynaptiX_FDK/services/shell/cli_shell.c **** static bool prv_booted(ShellContext_t *s_shell) {
+  30              		.loc 1 20 49 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+  21:SynaptiX_FDK/services/shell/cli_shell.c ****   return s_shell->impl.send_char != NULL;
+  35              		.loc 1 21 3 view .LVU1
+  36              		.loc 1 21 23 is_stmt 0 view .LVU2
+  37 0000 4068     		ldr	r0, [r0, #4]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 2
+
+
+  38              	.LVL1:
+  22:SynaptiX_FDK/services/shell/cli_shell.c **** }
+  39              		.loc 1 22 1 view .LVU3
+  40 0002 0038     		subs	r0, r0, #0
+  41 0004 18BF     		it	ne
+  42 0006 0120     		movne	r0, #1
+  43 0008 7047     		bx	lr
+  44              		.cfi_endproc
+  45              	.LFE3:
+  47              		.section	.text.prv_send_char,"ax",%progbits
+  48              		.align	1
+  49              		.syntax unified
+  50              		.thumb
+  51              		.thumb_func
+  53              	prv_send_char:
+  54              	.LVL2:
+  55              	.LFB4:
+  23:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  24:SynaptiX_FDK/services/shell/cli_shell.c **** static void prv_send_char(ShellContext_t *s_shell,char c) {
+  56              		.loc 1 24 59 is_stmt 1 view -0
+  57              		.cfi_startproc
+  58              		@ args = 0, pretend = 0, frame = 0
+  59              		@ frame_needed = 0, uses_anonymous_args = 0
+  60              		.loc 1 24 59 is_stmt 0 view .LVU5
+  61 0000 38B5     		push	{r3, r4, r5, lr}
+  62              	.LCFI0:
+  63              		.cfi_def_cfa_offset 16
+  64              		.cfi_offset 3, -16
+  65              		.cfi_offset 4, -12
+  66              		.cfi_offset 5, -8
+  67              		.cfi_offset 14, -4
+  68 0002 0446     		mov	r4, r0
+  69 0004 0D46     		mov	r5, r1
+  25:SynaptiX_FDK/services/shell/cli_shell.c ****   if (!prv_booted(s_shell)) {
+  70              		.loc 1 25 3 is_stmt 1 view .LVU6
+  71              		.loc 1 25 8 is_stmt 0 view .LVU7
+  72 0006 FFF7FEFF 		bl	prv_booted
+  73              	.LVL3:
+  74              		.loc 1 25 6 discriminator 1 view .LVU8
+  75 000a 18B1     		cbz	r0, .L2
+  26:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+  27:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+  28:SynaptiX_FDK/services/shell/cli_shell.c ****   s_shell->impl.send_char(s_shell->impl.arg,c);
+  76              		.loc 1 28 3 is_stmt 1 view .LVU9
+  77              		.loc 1 28 16 is_stmt 0 view .LVU10
+  78 000c 6368     		ldr	r3, [r4, #4]
+  79              		.loc 1 28 3 view .LVU11
+  80 000e 2946     		mov	r1, r5
+  81 0010 2068     		ldr	r0, [r4]
+  82 0012 9847     		blx	r3
+  83              	.LVL4:
+  84              	.L2:
+  29:SynaptiX_FDK/services/shell/cli_shell.c **** }
+  85              		.loc 1 29 1 view .LVU12
+  86 0014 38BD     		pop	{r3, r4, r5, pc}
+  87              		.loc 1 29 1 view .LVU13
+  88              		.cfi_endproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 3
+
+
+  89              	.LFE4:
+  91              		.section	.text.prv_echo,"ax",%progbits
+  92              		.align	1
+  93              		.syntax unified
+  94              		.thumb
+  95              		.thumb_func
+  97              	prv_echo:
+  98              	.LVL5:
+  99              	.LFB5:
+  30:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  31:SynaptiX_FDK/services/shell/cli_shell.c **** static void prv_echo(ShellContext_t *s_shell,char c) {
+ 100              		.loc 1 31 54 is_stmt 1 view -0
+ 101              		.cfi_startproc
+ 102              		@ args = 0, pretend = 0, frame = 0
+ 103              		@ frame_needed = 0, uses_anonymous_args = 0
+ 104              		.loc 1 31 54 is_stmt 0 view .LVU15
+ 105 0000 10B5     		push	{r4, lr}
+ 106              	.LCFI1:
+ 107              		.cfi_def_cfa_offset 8
+ 108              		.cfi_offset 4, -8
+ 109              		.cfi_offset 14, -4
+ 110 0002 0446     		mov	r4, r0
+  32:SynaptiX_FDK/services/shell/cli_shell.c ****   if ('\n' == c) {
+ 111              		.loc 1 32 3 is_stmt 1 view .LVU16
+ 112              		.loc 1 32 6 is_stmt 0 view .LVU17
+ 113 0004 0A29     		cmp	r1, #10
+ 114 0006 04D0     		beq	.L10
+  33:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,'\r');
+  34:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,'\n');
+  35:SynaptiX_FDK/services/shell/cli_shell.c ****   } else if ('\b' == c) {
+ 115              		.loc 1 35 10 is_stmt 1 view .LVU18
+ 116              		.loc 1 35 13 is_stmt 0 view .LVU19
+ 117 0008 0829     		cmp	r1, #8
+ 118 000a 0AD0     		beq	.L11
+  36:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,'\b');
+  37:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,' ');
+  38:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,'\b');
+  39:SynaptiX_FDK/services/shell/cli_shell.c ****   } else {
+  40:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,c);
+ 119              		.loc 1 40 5 is_stmt 1 view .LVU20
+ 120 000c FFF7FEFF 		bl	prv_send_char
+ 121              	.LVL6:
+ 122              	.L5:
+  41:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+  42:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 123              		.loc 1 42 1 is_stmt 0 view .LVU21
+ 124 0010 10BD     		pop	{r4, pc}
+ 125              	.LVL7:
+ 126              	.L10:
+  33:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,'\n');
+ 127              		.loc 1 33 5 is_stmt 1 view .LVU22
+ 128 0012 0D21     		movs	r1, #13
+ 129              	.LVL8:
+  33:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,'\n');
+ 130              		.loc 1 33 5 is_stmt 0 view .LVU23
+ 131 0014 FFF7FEFF 		bl	prv_send_char
+ 132              	.LVL9:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 4
+
+
+  34:SynaptiX_FDK/services/shell/cli_shell.c ****   } else if ('\b' == c) {
+ 133              		.loc 1 34 5 is_stmt 1 view .LVU24
+ 134 0018 0A21     		movs	r1, #10
+ 135 001a 2046     		mov	r0, r4
+ 136 001c FFF7FEFF 		bl	prv_send_char
+ 137              	.LVL10:
+ 138 0020 F6E7     		b	.L5
+ 139              	.LVL11:
+ 140              	.L11:
+  36:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,' ');
+ 141              		.loc 1 36 5 view .LVU25
+ 142 0022 FFF7FEFF 		bl	prv_send_char
+ 143              	.LVL12:
+  37:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_send_char(s_shell,'\b');
+ 144              		.loc 1 37 5 view .LVU26
+ 145 0026 2021     		movs	r1, #32
+ 146 0028 2046     		mov	r0, r4
+ 147 002a FFF7FEFF 		bl	prv_send_char
+ 148              	.LVL13:
+  38:SynaptiX_FDK/services/shell/cli_shell.c ****   } else {
+ 149              		.loc 1 38 5 view .LVU27
+ 150 002e 0821     		movs	r1, #8
+ 151 0030 2046     		mov	r0, r4
+ 152 0032 FFF7FEFF 		bl	prv_send_char
+ 153              	.LVL14:
+ 154 0036 EBE7     		b	.L5
+ 155              		.cfi_endproc
+ 156              	.LFE5:
+ 158              		.section	.text.prv_last_char,"ax",%progbits
+ 159              		.align	1
+ 160              		.syntax unified
+ 161              		.thumb
+ 162              		.thumb_func
+ 164              	prv_last_char:
+ 165              	.LVL15:
+ 166              	.LFB6:
+  43:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  44:SynaptiX_FDK/services/shell/cli_shell.c **** static char prv_last_char(ShellContext_t *s_shell) {
+ 167              		.loc 1 44 52 view -0
+ 168              		.cfi_startproc
+ 169              		@ args = 0, pretend = 0, frame = 0
+ 170              		@ frame_needed = 0, uses_anonymous_args = 0
+ 171              		@ link register save eliminated.
+  45:SynaptiX_FDK/services/shell/cli_shell.c ****   return s_shell->rx_buffer[s_shell->rx_size - 1];
+ 172              		.loc 1 45 3 view .LVU29
+ 173              		.loc 1 45 36 is_stmt 0 view .LVU30
+ 174 0000 0369     		ldr	r3, [r0, #16]
+ 175              		.loc 1 45 46 view .LVU31
+ 176 0002 013B     		subs	r3, r3, #1
+ 177              		.loc 1 45 28 view .LVU32
+ 178 0004 1844     		add	r0, r0, r3
+ 179              	.LVL16:
+  46:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 180              		.loc 1 46 1 view .LVU33
+ 181 0006 007D     		ldrb	r0, [r0, #20]	@ zero_extendqisi2
+ 182 0008 7047     		bx	lr
+ 183              		.cfi_endproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 5
+
+
+ 184              	.LFE6:
+ 186              		.section	.text.prv_is_rx_buffer_full,"ax",%progbits
+ 187              		.align	1
+ 188              		.syntax unified
+ 189              		.thumb
+ 190              		.thumb_func
+ 192              	prv_is_rx_buffer_full:
+ 193              	.LVL17:
+ 194              	.LFB7:
+  47:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  48:SynaptiX_FDK/services/shell/cli_shell.c **** static bool prv_is_rx_buffer_full(ShellContext_t *s_shell) {
+ 195              		.loc 1 48 60 is_stmt 1 view -0
+ 196              		.cfi_startproc
+ 197              		@ args = 0, pretend = 0, frame = 0
+ 198              		@ frame_needed = 0, uses_anonymous_args = 0
+ 199              		@ link register save eliminated.
+  49:SynaptiX_FDK/services/shell/cli_shell.c ****   return s_shell->rx_size >= SHELL_RX_BUFFER_SIZE;
+ 200              		.loc 1 49 3 view .LVU35
+ 201              		.loc 1 49 17 is_stmt 0 view .LVU36
+ 202 0000 0069     		ldr	r0, [r0, #16]
+ 203              	.LVL18:
+  50:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 204              		.loc 1 50 1 view .LVU37
+ 205 0002 FF28     		cmp	r0, #255
+ 206 0004 94BF     		ite	ls
+ 207 0006 0020     		movls	r0, #0
+ 208 0008 0120     		movhi	r0, #1
+ 209 000a 7047     		bx	lr
+ 210              		.cfi_endproc
+ 211              	.LFE7:
+ 213              		.section	.text.prv_echo_str,"ax",%progbits
+ 214              		.align	1
+ 215              		.syntax unified
+ 216              		.thumb
+ 217              		.thumb_func
+ 219              	prv_echo_str:
+ 220              	.LVL19:
+ 221              	.LFB9:
+  51:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  52:SynaptiX_FDK/services/shell/cli_shell.c **** static void prv_reset_rx_buffer(ShellContext_t *s_shell) {
+  53:SynaptiX_FDK/services/shell/cli_shell.c ****   memset(s_shell->rx_buffer, 0, sizeof(s_shell->rx_buffer));
+  54:SynaptiX_FDK/services/shell/cli_shell.c ****   s_shell->rx_size = 0;
+  55:SynaptiX_FDK/services/shell/cli_shell.c **** }
+  56:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  57:SynaptiX_FDK/services/shell/cli_shell.c **** static void prv_echo_str(ShellContext_t *s_shell,const char *str) {
+ 222              		.loc 1 57 67 is_stmt 1 view -0
+ 223              		.cfi_startproc
+ 224              		@ args = 0, pretend = 0, frame = 0
+ 225              		@ frame_needed = 0, uses_anonymous_args = 0
+ 226              		.loc 1 57 67 is_stmt 0 view .LVU39
+ 227 0000 08B5     		push	{r3, lr}
+ 228              	.LCFI2:
+ 229              		.cfi_def_cfa_offset 8
+ 230              		.cfi_offset 3, -8
+ 231              		.cfi_offset 14, -4
+  58:SynaptiX_FDK/services/shell/cli_shell.c ****   s_shell->impl.send_str(s_shell->impl.arg,str);
+ 232              		.loc 1 58 3 is_stmt 1 view .LVU40
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 6
+
+
+ 233              		.loc 1 58 16 is_stmt 0 view .LVU41
+ 234 0002 C368     		ldr	r3, [r0, #12]
+ 235              		.loc 1 58 3 view .LVU42
+ 236 0004 0068     		ldr	r0, [r0]
+ 237              	.LVL20:
+ 238              		.loc 1 58 3 view .LVU43
+ 239 0006 9847     		blx	r3
+ 240              	.LVL21:
+  59:SynaptiX_FDK/services/shell/cli_shell.c ****   // for (const char *c = str; *c != '\0'; ++c) {
+  60:SynaptiX_FDK/services/shell/cli_shell.c ****   //   prv_echo(s_shell,*c);
+  61:SynaptiX_FDK/services/shell/cli_shell.c ****   // }
+  62:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 241              		.loc 1 62 1 view .LVU44
+ 242 0008 08BD     		pop	{r3, pc}
+ 243              		.cfi_endproc
+ 244              	.LFE9:
+ 246              		.section	.rodata.prv_send_prompt.str1.4,"aMS",%progbits,1
+ 247              		.align	2
+ 248              	.LC0:
+ 249 0000 7368656C 		.ascii	"shell> \000"
+ 249      6C3E2000 
+ 250              		.section	.text.prv_send_prompt,"ax",%progbits
+ 251              		.align	1
+ 252              		.syntax unified
+ 253              		.thumb
+ 254              		.thumb_func
+ 256              	prv_send_prompt:
+ 257              	.LVL22:
+ 258              	.LFB10:
+  63:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  64:SynaptiX_FDK/services/shell/cli_shell.c **** static void prv_send_prompt(ShellContext_t *s_shell) {
+ 259              		.loc 1 64 54 is_stmt 1 view -0
+ 260              		.cfi_startproc
+ 261              		@ args = 0, pretend = 0, frame = 0
+ 262              		@ frame_needed = 0, uses_anonymous_args = 0
+ 263              		.loc 1 64 54 is_stmt 0 view .LVU46
+ 264 0000 08B5     		push	{r3, lr}
+ 265              	.LCFI3:
+ 266              		.cfi_def_cfa_offset 8
+ 267              		.cfi_offset 3, -8
+ 268              		.cfi_offset 14, -4
+  65:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_echo_str(s_shell,SHELL_PROMPT);
+ 269              		.loc 1 65 3 is_stmt 1 view .LVU47
+ 270 0002 0249     		ldr	r1, .L18
+ 271 0004 FFF7FEFF 		bl	prv_echo_str
+ 272              	.LVL23:
+  66:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 273              		.loc 1 66 1 is_stmt 0 view .LVU48
+ 274 0008 08BD     		pop	{r3, pc}
+ 275              	.L19:
+ 276 000a 00BF     		.align	2
+ 277              	.L18:
+ 278 000c 00000000 		.word	.LC0
+ 279              		.cfi_endproc
+ 280              	.LFE10:
+ 282              		.section	.text.prv_reset_rx_buffer,"ax",%progbits
+ 283              		.align	1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 7
+
+
+ 284              		.syntax unified
+ 285              		.thumb
+ 286              		.thumb_func
+ 288              	prv_reset_rx_buffer:
+ 289              	.LVL24:
+ 290              	.LFB8:
+  52:SynaptiX_FDK/services/shell/cli_shell.c ****   memset(s_shell->rx_buffer, 0, sizeof(s_shell->rx_buffer));
+ 291              		.loc 1 52 58 is_stmt 1 view -0
+ 292              		.cfi_startproc
+ 293              		@ args = 0, pretend = 0, frame = 0
+ 294              		@ frame_needed = 0, uses_anonymous_args = 0
+  52:SynaptiX_FDK/services/shell/cli_shell.c ****   memset(s_shell->rx_buffer, 0, sizeof(s_shell->rx_buffer));
+ 295              		.loc 1 52 58 is_stmt 0 view .LVU50
+ 296 0000 10B5     		push	{r4, lr}
+ 297              	.LCFI4:
+ 298              		.cfi_def_cfa_offset 8
+ 299              		.cfi_offset 4, -8
+ 300              		.cfi_offset 14, -4
+ 301 0002 0446     		mov	r4, r0
+  53:SynaptiX_FDK/services/shell/cli_shell.c ****   s_shell->rx_size = 0;
+ 302              		.loc 1 53 3 is_stmt 1 view .LVU51
+ 303 0004 4FF48072 		mov	r2, #256
+ 304 0008 0021     		movs	r1, #0
+ 305 000a 1430     		adds	r0, r0, #20
+ 306              	.LVL25:
+  53:SynaptiX_FDK/services/shell/cli_shell.c ****   s_shell->rx_size = 0;
+ 307              		.loc 1 53 3 is_stmt 0 view .LVU52
+ 308 000c FFF7FEFF 		bl	memset
+ 309              	.LVL26:
+  54:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 310              		.loc 1 54 3 is_stmt 1 view .LVU53
+  54:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 311              		.loc 1 54 20 is_stmt 0 view .LVU54
+ 312 0010 0023     		movs	r3, #0
+ 313 0012 2361     		str	r3, [r4, #16]
+  55:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 314              		.loc 1 55 1 view .LVU55
+ 315 0014 10BD     		pop	{r4, pc}
+  55:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 316              		.loc 1 55 1 view .LVU56
+ 317              		.cfi_endproc
+ 318              	.LFE8:
+ 320              		.section	.text.prv_find_command,"ax",%progbits
+ 321              		.align	1
+ 322              		.syntax unified
+ 323              		.thumb
+ 324              		.thumb_func
+ 326              	prv_find_command:
+ 327              	.LVL27:
+ 328              	.LFB11:
+  67:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  68:SynaptiX_FDK/services/shell/cli_shell.c **** static const Cli_Shell_Cmd *prv_find_command(const char *name) { // @suppress("Type cannot be resol
+ 329              		.loc 1 68 64 is_stmt 1 view -0
+ 330              		.cfi_startproc
+ 331              		@ args = 0, pretend = 0, frame = 0
+ 332              		@ frame_needed = 0, uses_anonymous_args = 0
+ 333              		.loc 1 68 64 is_stmt 0 view .LVU58
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 8
+
+
+ 334 0000 70B5     		push	{r4, r5, r6, lr}
+ 335              	.LCFI5:
+ 336              		.cfi_def_cfa_offset 16
+ 337              		.cfi_offset 4, -16
+ 338              		.cfi_offset 5, -12
+ 339              		.cfi_offset 6, -8
+ 340              		.cfi_offset 14, -4
+ 341 0002 0546     		mov	r5, r0
+  69:SynaptiX_FDK/services/shell/cli_shell.c ****   SHELL_FOR_EACH_COMMAND(command) {
+ 342              		.loc 1 69 3 is_stmt 1 view .LVU59
+ 343              	.LBB2:
+ 344              		.loc 1 69 3 view .LVU60
+ 345 0004 0B4B     		ldr	r3, .L29
+ 346 0006 1E68     		ldr	r6, [r3]
+ 347              	.LVL28:
+ 348              		.loc 1 69 3 is_stmt 0 view .LVU61
+ 349 0008 3446     		mov	r4, r6
+ 350 000a 00E0     		b	.L23
+ 351              	.LVL29:
+ 352              	.L28:
+ 353              		.loc 1 69 3 is_stmt 1 discriminator 2 view .LVU62
+ 354 000c 0C34     		adds	r4, r4, #12
+ 355              	.LVL30:
+ 356              	.L23:
+ 357              		.loc 1 69 3 discriminator 1 view .LVU63
+ 358 000e 0A4B     		ldr	r3, .L29+4
+ 359 0010 1B68     		ldr	r3, [r3]
+ 360 0012 03EB4303 		add	r3, r3, r3, lsl #1
+ 361 0016 06EB8303 		add	r3, r6, r3, lsl #2
+ 362 001a A342     		cmp	r3, r4
+ 363 001c 06D9     		bls	.L27
+  70:SynaptiX_FDK/services/shell/cli_shell.c ****     if (strcmp(command->command, name) == 0) {
+ 364              		.loc 1 70 5 view .LVU64
+ 365              		.loc 1 70 9 is_stmt 0 view .LVU65
+ 366 001e 2946     		mov	r1, r5
+ 367 0020 2068     		ldr	r0, [r4]
+ 368 0022 FFF7FEFF 		bl	strcmp
+ 369              	.LVL31:
+ 370              		.loc 1 70 8 discriminator 1 view .LVU66
+ 371 0026 0028     		cmp	r0, #0
+ 372 0028 F0D1     		bne	.L28
+ 373 002a 00E0     		b	.L22
+ 374              	.L27:
+ 375              		.loc 1 70 8 discriminator 1 view .LVU67
+ 376              	.LBE2:
+  71:SynaptiX_FDK/services/shell/cli_shell.c ****       return command;
+  72:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+  73:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+  74:SynaptiX_FDK/services/shell/cli_shell.c ****   return NULL;
+ 377              		.loc 1 74 10 view .LVU68
+ 378 002c 0024     		movs	r4, #0
+ 379              	.LVL32:
+ 380              	.L22:
+  75:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 381              		.loc 1 75 1 view .LVU69
+ 382 002e 2046     		mov	r0, r4
+ 383 0030 70BD     		pop	{r4, r5, r6, pc}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 9
+
+
+ 384              	.LVL33:
+ 385              	.L30:
+ 386              		.loc 1 75 1 view .LVU70
+ 387 0032 00BF     		.align	2
+ 388              	.L29:
+ 389 0034 00000000 		.word	g_shell_commands
+ 390 0038 00000000 		.word	g_num_shell_commands
+ 391              		.cfi_endproc
+ 392              	.LFE11:
+ 394              		.section	.rodata.prv_process.str1.4,"aMS",%progbits,1
+ 395              		.align	2
+ 396              	.LC1:
+ 397 0000 556E6B6E 		.ascii	"Unknown command: \000"
+ 397      6F776E20 
+ 397      636F6D6D 
+ 397      616E643A 
+ 397      2000
+ 398 0012 0000     		.align	2
+ 399              	.LC2:
+ 400 0014 54797065 		.ascii	"Type 'help' to list all commands\012\000"
+ 400      20276865 
+ 400      6C702720 
+ 400      746F206C 
+ 400      69737420 
+ 401              		.section	.text.prv_process,"ax",%progbits
+ 402              		.align	1
+ 403              		.syntax unified
+ 404              		.thumb
+ 405              		.thumb_func
+ 407              	prv_process:
+ 408              	.LVL34:
+ 409              	.LFB12:
+  76:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  77:SynaptiX_FDK/services/shell/cli_shell.c **** static void prv_process(ShellContext_t *s_shell) {
+ 410              		.loc 1 77 50 is_stmt 1 view -0
+ 411              		.cfi_startproc
+ 412              		@ args = 0, pretend = 0, frame = 64
+ 413              		@ frame_needed = 0, uses_anonymous_args = 0
+ 414              		.loc 1 77 50 is_stmt 0 view .LVU72
+ 415 0000 70B5     		push	{r4, r5, r6, lr}
+ 416              	.LCFI6:
+ 417              		.cfi_def_cfa_offset 16
+ 418              		.cfi_offset 4, -16
+ 419              		.cfi_offset 5, -12
+ 420              		.cfi_offset 6, -8
+ 421              		.cfi_offset 14, -4
+ 422 0002 90B0     		sub	sp, sp, #64
+ 423              	.LCFI7:
+ 424              		.cfi_def_cfa_offset 80
+ 425 0004 0446     		mov	r4, r0
+  78:SynaptiX_FDK/services/shell/cli_shell.c ****   if (prv_last_char(s_shell) != '\n' && !prv_is_rx_buffer_full(s_shell)) {
+ 426              		.loc 1 78 3 is_stmt 1 view .LVU73
+ 427              		.loc 1 78 7 is_stmt 0 view .LVU74
+ 428 0006 FFF7FEFF 		bl	prv_last_char
+ 429              	.LVL35:
+ 430              		.loc 1 78 6 discriminator 1 view .LVU75
+ 431 000a 0A28     		cmp	r0, #10
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 10
+
+
+ 432 000c 03D0     		beq	.L32
+ 433              		.loc 1 78 42 discriminator 1 view .LVU76
+ 434 000e 2046     		mov	r0, r4
+ 435 0010 FFF7FEFF 		bl	prv_is_rx_buffer_full
+ 436              	.LVL36:
+ 437              		.loc 1 78 38 discriminator 1 view .LVU77
+ 438 0014 A8B3     		cbz	r0, .L31
+ 439              	.L32:
+  79:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+  80:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+  81:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  82:SynaptiX_FDK/services/shell/cli_shell.c ****   char *argv[SHELL_MAX_ARGS] = {0};
+ 440              		.loc 1 82 3 is_stmt 1 view .LVU78
+ 441              		.loc 1 82 9 is_stmt 0 view .LVU79
+ 442 0016 4022     		movs	r2, #64
+ 443 0018 0021     		movs	r1, #0
+ 444 001a 6846     		mov	r0, sp
+ 445 001c FFF7FEFF 		bl	memset
+ 446              	.LVL37:
+  83:SynaptiX_FDK/services/shell/cli_shell.c ****   int argc = 0;
+ 447              		.loc 1 83 3 is_stmt 1 view .LVU80
+  84:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  85:SynaptiX_FDK/services/shell/cli_shell.c ****   char *next_arg = NULL;
+ 448              		.loc 1 85 3 view .LVU81
+  86:SynaptiX_FDK/services/shell/cli_shell.c ****   for (size_t i = 0; i < s_shell->rx_size && argc < SHELL_MAX_ARGS; ++i) {
+ 449              		.loc 1 86 3 view .LVU82
+ 450              	.LBB3:
+ 451              		.loc 1 86 8 view .LVU83
+ 452              		.loc 1 86 15 is_stmt 0 view .LVU84
+ 453 0020 0023     		movs	r3, #0
+ 454              	.LBE3:
+  85:SynaptiX_FDK/services/shell/cli_shell.c ****   for (size_t i = 0; i < s_shell->rx_size && argc < SHELL_MAX_ARGS; ++i) {
+ 455              		.loc 1 85 9 view .LVU85
+ 456 0022 1E46     		mov	r6, r3
+  83:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 457              		.loc 1 83 7 view .LVU86
+ 458 0024 1D46     		mov	r5, r3
+ 459              	.LBB6:
+ 460              		.loc 1 86 3 view .LVU87
+ 461 0026 0BE0     		b	.L34
+ 462              	.LVL38:
+ 463              	.L35:
+ 464              	.LBB4:
+  87:SynaptiX_FDK/services/shell/cli_shell.c ****     char *const c = &s_shell->rx_buffer[i];
+  88:SynaptiX_FDK/services/shell/cli_shell.c ****     if (*c == ' ' || *c == '\n' || i == s_shell->rx_size - 1) {
+  89:SynaptiX_FDK/services/shell/cli_shell.c ****       *c = '\0';
+ 465              		.loc 1 89 7 is_stmt 1 view .LVU88
+ 466              		.loc 1 89 10 is_stmt 0 view .LVU89
+ 467 0028 E218     		adds	r2, r4, r3
+ 468              	.LVL39:
+ 469              		.loc 1 89 10 view .LVU90
+ 470 002a 0021     		movs	r1, #0
+ 471 002c 1175     		strb	r1, [r2, #20]
+  90:SynaptiX_FDK/services/shell/cli_shell.c ****       if (next_arg) {
+ 472              		.loc 1 90 7 is_stmt 1 view .LVU91
+ 473              		.loc 1 90 10 is_stmt 0 view .LVU92
+ 474 002e 36B1     		cbz	r6, .L37
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 11
+
+
+  91:SynaptiX_FDK/services/shell/cli_shell.c ****         argv[argc++] = next_arg;
+ 475              		.loc 1 91 9 is_stmt 1 view .LVU93
+ 476              	.LVL40:
+ 477              		.loc 1 91 22 is_stmt 0 view .LVU94
+ 478 0030 10AA     		add	r2, sp, #64
+ 479 0032 02EB8502 		add	r2, r2, r5, lsl #2
+ 480 0036 42F8406C 		str	r6, [r2, #-64]
+  92:SynaptiX_FDK/services/shell/cli_shell.c ****         next_arg = NULL;
+ 481              		.loc 1 92 9 is_stmt 1 view .LVU95
+ 482              	.LVL41:
+  91:SynaptiX_FDK/services/shell/cli_shell.c ****         argv[argc++] = next_arg;
+ 483              		.loc 1 91 18 is_stmt 0 view .LVU96
+ 484 003a 0135     		adds	r5, r5, #1
+ 485              	.LVL42:
+ 486              		.loc 1 92 18 view .LVU97
+ 487 003c 0E46     		mov	r6, r1
+ 488              	.LVL43:
+ 489              	.L37:
+ 490              		.loc 1 92 18 view .LVU98
+ 491              	.LBE4:
+  86:SynaptiX_FDK/services/shell/cli_shell.c ****     char *const c = &s_shell->rx_buffer[i];
+ 492              		.loc 1 86 69 is_stmt 1 discriminator 2 view .LVU99
+ 493 003e 0133     		adds	r3, r3, #1
+ 494              	.LVL44:
+ 495              	.L34:
+  86:SynaptiX_FDK/services/shell/cli_shell.c ****     char *const c = &s_shell->rx_buffer[i];
+ 496              		.loc 1 86 43 discriminator 1 view .LVU100
+  86:SynaptiX_FDK/services/shell/cli_shell.c ****     char *const c = &s_shell->rx_buffer[i];
+ 497              		.loc 1 86 33 is_stmt 0 discriminator 1 view .LVU101
+ 498 0040 2169     		ldr	r1, [r4, #16]
+  86:SynaptiX_FDK/services/shell/cli_shell.c ****     char *const c = &s_shell->rx_buffer[i];
+ 499              		.loc 1 86 43 discriminator 1 view .LVU102
+ 500 0042 9942     		cmp	r1, r3
+ 501 0044 12D9     		bls	.L38
+  86:SynaptiX_FDK/services/shell/cli_shell.c ****     char *const c = &s_shell->rx_buffer[i];
+ 502              		.loc 1 86 43 discriminator 3 view .LVU103
+ 503 0046 0F2D     		cmp	r5, #15
+ 504 0048 10DC     		bgt	.L38
+ 505              	.LBB5:
+  87:SynaptiX_FDK/services/shell/cli_shell.c ****     if (*c == ' ' || *c == '\n' || i == s_shell->rx_size - 1) {
+ 506              		.loc 1 87 5 is_stmt 1 view .LVU104
+  87:SynaptiX_FDK/services/shell/cli_shell.c ****     if (*c == ' ' || *c == '\n' || i == s_shell->rx_size - 1) {
+ 507              		.loc 1 87 17 is_stmt 0 view .LVU105
+ 508 004a 03F11002 		add	r2, r3, #16
+ 509 004e 2244     		add	r2, r2, r4
+ 510 0050 0432     		adds	r2, r2, #4
+ 511              	.LVL45:
+  88:SynaptiX_FDK/services/shell/cli_shell.c ****       *c = '\0';
+ 512              		.loc 1 88 5 is_stmt 1 view .LVU106
+  88:SynaptiX_FDK/services/shell/cli_shell.c ****       *c = '\0';
+ 513              		.loc 1 88 9 is_stmt 0 view .LVU107
+ 514 0052 E018     		adds	r0, r4, r3
+ 515 0054 007D     		ldrb	r0, [r0, #20]	@ zero_extendqisi2
+  88:SynaptiX_FDK/services/shell/cli_shell.c ****       *c = '\0';
+ 516              		.loc 1 88 8 view .LVU108
+ 517 0056 2028     		cmp	r0, #32
+ 518 0058 E6D0     		beq	.L35
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 12
+
+
+  88:SynaptiX_FDK/services/shell/cli_shell.c ****       *c = '\0';
+ 519              		.loc 1 88 19 discriminator 1 view .LVU109
+ 520 005a 0A28     		cmp	r0, #10
+ 521 005c E4D0     		beq	.L35
+  88:SynaptiX_FDK/services/shell/cli_shell.c ****       *c = '\0';
+ 522              		.loc 1 88 58 discriminator 2 view .LVU110
+ 523 005e 0139     		subs	r1, r1, #1
+  88:SynaptiX_FDK/services/shell/cli_shell.c ****       *c = '\0';
+ 524              		.loc 1 88 33 discriminator 2 view .LVU111
+ 525 0060 9942     		cmp	r1, r3
+ 526 0062 E1D0     		beq	.L35
+  93:SynaptiX_FDK/services/shell/cli_shell.c ****       }
+  94:SynaptiX_FDK/services/shell/cli_shell.c ****     } else if (!next_arg) {
+ 527              		.loc 1 94 12 is_stmt 1 view .LVU112
+ 528              		.loc 1 94 15 is_stmt 0 view .LVU113
+ 529 0064 002E     		cmp	r6, #0
+ 530 0066 EAD1     		bne	.L37
+  95:SynaptiX_FDK/services/shell/cli_shell.c ****       next_arg = c;
+ 531              		.loc 1 95 16 view .LVU114
+ 532 0068 1646     		mov	r6, r2
+ 533              	.LVL46:
+ 534              		.loc 1 95 16 view .LVU115
+ 535 006a E8E7     		b	.L37
+ 536              	.LVL47:
+ 537              	.L38:
+ 538              		.loc 1 95 16 view .LVU116
+ 539              	.LBE5:
+ 540              	.LBE6:
+  96:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+  97:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+  98:SynaptiX_FDK/services/shell/cli_shell.c **** 
+  99:SynaptiX_FDK/services/shell/cli_shell.c ****   if (s_shell->rx_size == SHELL_RX_BUFFER_SIZE) {
+ 541              		.loc 1 99 3 is_stmt 1 view .LVU117
+ 542              		.loc 1 99 6 is_stmt 0 view .LVU118
+ 543 006c B1F5807F 		cmp	r1, #256
+ 544 0070 09D0     		beq	.L45
+ 545              	.LVL48:
+ 546              	.L40:
+ 100:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_echo(s_shell,'\n');
+ 101:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 102:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 103:SynaptiX_FDK/services/shell/cli_shell.c ****   if (argc >= 1) {
+ 547              		.loc 1 103 3 is_stmt 1 view .LVU119
+ 548              		.loc 1 103 6 is_stmt 0 view .LVU120
+ 549 0072 002D     		cmp	r5, #0
+ 550 0074 0CDC     		bgt	.L46
+ 551              	.L41:
+ 104:SynaptiX_FDK/services/shell/cli_shell.c ****     const Cli_Shell_Cmd *command = prv_find_command(argv[0]);
+ 105:SynaptiX_FDK/services/shell/cli_shell.c ****     if (!command) {
+ 106:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,"Unknown command: ");
+ 107:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,argv[0]);
+ 108:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo(s_shell,'\n');
+ 109:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,"Type 'help' to list all commands\n");
+ 110:SynaptiX_FDK/services/shell/cli_shell.c ****     } else {
+ 111:SynaptiX_FDK/services/shell/cli_shell.c ****       command->handler(s_shell,argc, argv);
+ 112:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+ 113:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 13
+
+
+ 114:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_reset_rx_buffer(s_shell);
+ 552              		.loc 1 114 3 is_stmt 1 view .LVU121
+ 553 0076 2046     		mov	r0, r4
+ 554 0078 FFF7FEFF 		bl	prv_reset_rx_buffer
+ 555              	.LVL49:
+ 115:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_send_prompt(s_shell);
+ 556              		.loc 1 115 3 view .LVU122
+ 557 007c 2046     		mov	r0, r4
+ 558 007e FFF7FEFF 		bl	prv_send_prompt
+ 559              	.LVL50:
+ 560              	.L31:
+ 116:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 561              		.loc 1 116 1 is_stmt 0 view .LVU123
+ 562 0082 10B0     		add	sp, sp, #64
+ 563              	.LCFI8:
+ 564              		.cfi_remember_state
+ 565              		.cfi_def_cfa_offset 16
+ 566              		@ sp needed
+ 567 0084 70BD     		pop	{r4, r5, r6, pc}
+ 568              	.LVL51:
+ 569              	.L45:
+ 570              	.LCFI9:
+ 571              		.cfi_restore_state
+ 100:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 572              		.loc 1 100 5 is_stmt 1 view .LVU124
+ 573 0086 0A21     		movs	r1, #10
+ 574 0088 2046     		mov	r0, r4
+ 575 008a FFF7FEFF 		bl	prv_echo
+ 576              	.LVL52:
+ 100:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 577              		.loc 1 100 5 is_stmt 0 view .LVU125
+ 578 008e F0E7     		b	.L40
+ 579              	.L46:
+ 580              	.LBB7:
+ 104:SynaptiX_FDK/services/shell/cli_shell.c ****     if (!command) {
+ 581              		.loc 1 104 5 is_stmt 1 view .LVU126
+ 104:SynaptiX_FDK/services/shell/cli_shell.c ****     if (!command) {
+ 582              		.loc 1 104 36 is_stmt 0 view .LVU127
+ 583 0090 0098     		ldr	r0, [sp]
+ 584 0092 FFF7FEFF 		bl	prv_find_command
+ 585              	.LVL53:
+ 105:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,"Unknown command: ");
+ 586              		.loc 1 105 5 is_stmt 1 view .LVU128
+ 105:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,"Unknown command: ");
+ 587              		.loc 1 105 8 is_stmt 0 view .LVU129
+ 588 0096 28B1     		cbz	r0, .L47
+ 111:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+ 589              		.loc 1 111 7 is_stmt 1 view .LVU130
+ 111:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+ 590              		.loc 1 111 14 is_stmt 0 view .LVU131
+ 591 0098 4368     		ldr	r3, [r0, #4]
+ 111:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+ 592              		.loc 1 111 7 view .LVU132
+ 593 009a 6A46     		mov	r2, sp
+ 594 009c 2946     		mov	r1, r5
+ 595 009e 2046     		mov	r0, r4
+ 596              	.LVL54:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 14
+
+
+ 111:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+ 597              		.loc 1 111 7 view .LVU133
+ 598 00a0 9847     		blx	r3
+ 599              	.LVL55:
+ 600 00a2 E8E7     		b	.L41
+ 601              	.LVL56:
+ 602              	.L47:
+ 106:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,argv[0]);
+ 603              		.loc 1 106 7 is_stmt 1 view .LVU134
+ 604 00a4 0849     		ldr	r1, .L48
+ 605 00a6 2046     		mov	r0, r4
+ 606              	.LVL57:
+ 106:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,argv[0]);
+ 607              		.loc 1 106 7 is_stmt 0 view .LVU135
+ 608 00a8 FFF7FEFF 		bl	prv_echo_str
+ 609              	.LVL58:
+ 107:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo(s_shell,'\n');
+ 610              		.loc 1 107 7 is_stmt 1 view .LVU136
+ 611 00ac 0099     		ldr	r1, [sp]
+ 612 00ae 2046     		mov	r0, r4
+ 613 00b0 FFF7FEFF 		bl	prv_echo_str
+ 614              	.LVL59:
+ 108:SynaptiX_FDK/services/shell/cli_shell.c ****       prv_echo_str(s_shell,"Type 'help' to list all commands\n");
+ 615              		.loc 1 108 7 view .LVU137
+ 616 00b4 0A21     		movs	r1, #10
+ 617 00b6 2046     		mov	r0, r4
+ 618 00b8 FFF7FEFF 		bl	prv_echo
+ 619              	.LVL60:
+ 109:SynaptiX_FDK/services/shell/cli_shell.c ****     } else {
+ 620              		.loc 1 109 7 view .LVU138
+ 621 00bc 0349     		ldr	r1, .L48+4
+ 622 00be 2046     		mov	r0, r4
+ 623 00c0 FFF7FEFF 		bl	prv_echo_str
+ 624              	.LVL61:
+ 625 00c4 D7E7     		b	.L41
+ 626              	.L49:
+ 627 00c6 00BF     		.align	2
+ 628              	.L48:
+ 629 00c8 00000000 		.word	.LC1
+ 630 00cc 14000000 		.word	.LC2
+ 631              	.LBE7:
+ 632              		.cfi_endproc
+ 633              	.LFE12:
+ 635              		.section	.rodata.cli_shell_boot.str1.4,"aMS",%progbits,1
+ 636              		.align	2
+ 637              	.LC3:
+ 638 0000 0A736865 		.ascii	"\012shell> \000"
+ 638      6C6C3E20 
+ 638      00
+ 639              		.section	.text.cli_shell_boot,"ax",%progbits
+ 640              		.align	1
+ 641              		.global	cli_shell_boot
+ 642              		.syntax unified
+ 643              		.thumb
+ 644              		.thumb_func
+ 646              	cli_shell_boot:
+ 647              	.LVL62:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 15
+
+
+ 648              	.LFB13:
+ 117:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 118:SynaptiX_FDK/services/shell/cli_shell.c **** void cli_shell_boot(ShellContext_t *s_shell) {
+ 649              		.loc 1 118 46 view -0
+ 650              		.cfi_startproc
+ 651              		@ args = 0, pretend = 0, frame = 0
+ 652              		@ frame_needed = 0, uses_anonymous_args = 0
+ 653              		.loc 1 118 46 is_stmt 0 view .LVU140
+ 654 0000 10B5     		push	{r4, lr}
+ 655              	.LCFI10:
+ 656              		.cfi_def_cfa_offset 8
+ 657              		.cfi_offset 4, -8
+ 658              		.cfi_offset 14, -4
+ 659 0002 0446     		mov	r4, r0
+ 119:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_reset_rx_buffer(s_shell);
+ 660              		.loc 1 119 3 is_stmt 1 view .LVU141
+ 661 0004 FFF7FEFF 		bl	prv_reset_rx_buffer
+ 662              	.LVL63:
+ 120:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_echo_str(s_shell, "\n" SHELL_PROMPT);
+ 663              		.loc 1 120 3 view .LVU142
+ 664 0008 0249     		ldr	r1, .L52
+ 665 000a 2046     		mov	r0, r4
+ 666 000c FFF7FEFF 		bl	prv_echo_str
+ 667              	.LVL64:
+ 121:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 668              		.loc 1 121 1 is_stmt 0 view .LVU143
+ 669 0010 10BD     		pop	{r4, pc}
+ 670              	.LVL65:
+ 671              	.L53:
+ 672              		.loc 1 121 1 view .LVU144
+ 673 0012 00BF     		.align	2
+ 674              	.L52:
+ 675 0014 00000000 		.word	.LC3
+ 676              		.cfi_endproc
+ 677              	.LFE13:
+ 679              		.section	.text.cli_shell_receive_char,"ax",%progbits
+ 680              		.align	1
+ 681              		.global	cli_shell_receive_char
+ 682              		.syntax unified
+ 683              		.thumb
+ 684              		.thumb_func
+ 686              	cli_shell_receive_char:
+ 687              	.LVL66:
+ 688              	.LFB14:
+ 122:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 123:SynaptiX_FDK/services/shell/cli_shell.c **** void cli_shell_receive_char(ShellContext_t *s_shell,char c) {
+ 689              		.loc 1 123 61 is_stmt 1 view -0
+ 690              		.cfi_startproc
+ 691              		@ args = 0, pretend = 0, frame = 0
+ 692              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124:SynaptiX_FDK/services/shell/cli_shell.c ****   if (c == '\r' || prv_is_rx_buffer_full(s_shell) || !prv_booted(s_shell)) {
+ 693              		.loc 1 124 3 view .LVU146
+ 694              		.loc 1 124 6 is_stmt 0 view .LVU147
+ 695 0000 0D29     		cmp	r1, #13
+ 696 0002 20D0     		beq	.L58
+ 123:SynaptiX_FDK/services/shell/cli_shell.c ****   if (c == '\r' || prv_is_rx_buffer_full(s_shell) || !prv_booted(s_shell)) {
+ 697              		.loc 1 123 61 view .LVU148
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 16
+
+
+ 698 0004 38B5     		push	{r3, r4, r5, lr}
+ 699              	.LCFI11:
+ 700              		.cfi_def_cfa_offset 16
+ 701              		.cfi_offset 3, -16
+ 702              		.cfi_offset 4, -12
+ 703              		.cfi_offset 5, -8
+ 704              		.cfi_offset 14, -4
+ 705 0006 0446     		mov	r4, r0
+ 706 0008 0D46     		mov	r5, r1
+ 707              		.loc 1 124 20 discriminator 1 view .LVU149
+ 708 000a FFF7FEFF 		bl	prv_is_rx_buffer_full
+ 709              	.LVL67:
+ 710              		.loc 1 124 17 discriminator 1 view .LVU150
+ 711 000e 18B9     		cbnz	r0, .L54
+ 712              		.loc 1 124 55 discriminator 2 view .LVU151
+ 713 0010 2046     		mov	r0, r4
+ 714 0012 FFF7FEFF 		bl	prv_booted
+ 715              	.LVL68:
+ 716              		.loc 1 124 51 discriminator 1 view .LVU152
+ 717 0016 00B9     		cbnz	r0, .L61
+ 718              	.L54:
+ 125:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+ 126:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 127:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_echo(s_shell,c);
+ 128:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 129:SynaptiX_FDK/services/shell/cli_shell.c ****   if (c == '\b') {
+ 130:SynaptiX_FDK/services/shell/cli_shell.c ****     s_shell->rx_buffer[--s_shell->rx_size] = '\0';
+ 131:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+ 132:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 133:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 134:SynaptiX_FDK/services/shell/cli_shell.c ****   s_shell->rx_buffer[s_shell->rx_size++] = c;
+ 135:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 136:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_process(s_shell);
+ 137:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 719              		.loc 1 137 1 view .LVU153
+ 720 0018 38BD     		pop	{r3, r4, r5, pc}
+ 721              	.LVL69:
+ 722              	.L61:
+ 127:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 723              		.loc 1 127 3 is_stmt 1 view .LVU154
+ 724 001a 2946     		mov	r1, r5
+ 725 001c 2046     		mov	r0, r4
+ 726 001e FFF7FEFF 		bl	prv_echo
+ 727              	.LVL70:
+ 129:SynaptiX_FDK/services/shell/cli_shell.c ****     s_shell->rx_buffer[--s_shell->rx_size] = '\0';
+ 728              		.loc 1 129 3 view .LVU155
+ 129:SynaptiX_FDK/services/shell/cli_shell.c ****     s_shell->rx_buffer[--s_shell->rx_size] = '\0';
+ 729              		.loc 1 129 6 is_stmt 0 view .LVU156
+ 730 0022 082D     		cmp	r5, #8
+ 731 0024 08D0     		beq	.L62
+ 134:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 732              		.loc 1 134 3 is_stmt 1 view .LVU157
+ 134:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 733              		.loc 1 134 29 is_stmt 0 view .LVU158
+ 734 0026 2369     		ldr	r3, [r4, #16]
+ 134:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 735              		.loc 1 134 38 view .LVU159
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 17
+
+
+ 736 0028 5A1C     		adds	r2, r3, #1
+ 737 002a 2261     		str	r2, [r4, #16]
+ 134:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 738              		.loc 1 134 42 view .LVU160
+ 739 002c 2344     		add	r3, r3, r4
+ 740 002e 1D75     		strb	r5, [r3, #20]
+ 136:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 741              		.loc 1 136 3 is_stmt 1 view .LVU161
+ 742 0030 2046     		mov	r0, r4
+ 743 0032 FFF7FEFF 		bl	prv_process
+ 744              	.LVL71:
+ 745 0036 EFE7     		b	.L54
+ 746              	.L62:
+ 130:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+ 747              		.loc 1 130 5 view .LVU162
+ 130:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+ 748              		.loc 1 130 33 is_stmt 0 view .LVU163
+ 749 0038 2369     		ldr	r3, [r4, #16]
+ 130:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+ 750              		.loc 1 130 24 view .LVU164
+ 751 003a 013B     		subs	r3, r3, #1
+ 130:SynaptiX_FDK/services/shell/cli_shell.c ****     return;
+ 752              		.loc 1 130 44 view .LVU165
+ 753 003c 2361     		str	r3, [r4, #16]
+ 754 003e 2344     		add	r3, r3, r4
+ 755 0040 0022     		movs	r2, #0
+ 756 0042 1A75     		strb	r2, [r3, #20]
+ 131:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 757              		.loc 1 131 5 is_stmt 1 view .LVU166
+ 758 0044 E8E7     		b	.L54
+ 759              	.LVL72:
+ 760              	.L58:
+ 761              	.LCFI12:
+ 762              		.cfi_def_cfa_offset 0
+ 763              		.cfi_restore 3
+ 764              		.cfi_restore 4
+ 765              		.cfi_restore 5
+ 766              		.cfi_restore 14
+ 131:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 767              		.loc 1 131 5 is_stmt 0 view .LVU167
+ 768 0046 7047     		bx	lr
+ 769              		.cfi_endproc
+ 770              	.LFE14:
+ 772              		.section	.text.cli_shell_put_line,"ax",%progbits
+ 773              		.align	1
+ 774              		.global	cli_shell_put_line
+ 775              		.syntax unified
+ 776              		.thumb
+ 777              		.thumb_func
+ 779              	cli_shell_put_line:
+ 780              	.LVL73:
+ 781              	.LFB15:
+ 138:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 139:SynaptiX_FDK/services/shell/cli_shell.c **** void cli_shell_put_line(ShellContext_t *s_shell,const char *str) {
+ 782              		.loc 1 139 66 is_stmt 1 view -0
+ 783              		.cfi_startproc
+ 784              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 18
+
+
+ 785              		@ frame_needed = 0, uses_anonymous_args = 0
+ 786              		.loc 1 139 66 is_stmt 0 view .LVU169
+ 787 0000 10B5     		push	{r4, lr}
+ 788              	.LCFI13:
+ 789              		.cfi_def_cfa_offset 8
+ 790              		.cfi_offset 4, -8
+ 791              		.cfi_offset 14, -4
+ 792 0002 0446     		mov	r4, r0
+ 140:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_echo_str(s_shell,str);
+ 793              		.loc 1 140 3 is_stmt 1 view .LVU170
+ 794 0004 FFF7FEFF 		bl	prv_echo_str
+ 795              	.LVL74:
+ 141:SynaptiX_FDK/services/shell/cli_shell.c ****   prv_echo(s_shell,'\n');
+ 796              		.loc 1 141 3 view .LVU171
+ 797 0008 0A21     		movs	r1, #10
+ 798 000a 2046     		mov	r0, r4
+ 799 000c FFF7FEFF 		bl	prv_echo
+ 800              	.LVL75:
+ 142:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 801              		.loc 1 142 1 is_stmt 0 view .LVU172
+ 802 0010 10BD     		pop	{r4, pc}
+ 803              		.loc 1 142 1 view .LVU173
+ 804              		.cfi_endproc
+ 805              	.LFE15:
+ 807              		.section	.text.cli_shell_printf,"ax",%progbits
+ 808              		.align	1
+ 809              		.global	cli_shell_printf
+ 810              		.syntax unified
+ 811              		.thumb
+ 812              		.thumb_func
+ 814              	cli_shell_printf:
+ 815              	.LVL76:
+ 816              	.LFB16:
+ 143:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 144:SynaptiX_FDK/services/shell/cli_shell.c **** void cli_shell_printf(ShellContext_t *shell, const char *fmt, ...){
+ 817              		.loc 1 144 67 is_stmt 1 view -0
+ 818              		.cfi_startproc
+ 819              		@ args = 4, pretend = 12, frame = 2056
+ 820              		@ frame_needed = 0, uses_anonymous_args = 1
+ 821              		.loc 1 144 67 is_stmt 0 view .LVU175
+ 822 0000 0EB4     		push	{r1, r2, r3}
+ 823              	.LCFI14:
+ 824              		.cfi_def_cfa_offset 12
+ 825              		.cfi_offset 1, -12
+ 826              		.cfi_offset 2, -8
+ 827              		.cfi_offset 3, -4
+ 828 0002 10B5     		push	{r4, lr}
+ 829              	.LCFI15:
+ 830              		.cfi_def_cfa_offset 20
+ 831              		.cfi_offset 4, -20
+ 832              		.cfi_offset 14, -16
+ 833 0004 ADF60C0D 		subw	sp, sp, #2060
+ 834              	.LCFI16:
+ 835              		.cfi_def_cfa_offset 2080
+ 836 0008 0446     		mov	r4, r0
+ 837 000a 0DF61403 		addw	r3, sp, #2068
+ 838 000e 53F8042B 		ldr	r2, [r3], #4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 19
+
+
+ 145:SynaptiX_FDK/services/shell/cli_shell.c ****     char buffer[2048];
+ 839              		.loc 1 145 5 is_stmt 1 view .LVU176
+ 146:SynaptiX_FDK/services/shell/cli_shell.c ****     va_list args;
+ 840              		.loc 1 146 5 view .LVU177
+ 147:SynaptiX_FDK/services/shell/cli_shell.c ****     va_start(args, fmt);
+ 841              		.loc 1 147 5 view .LVU178
+ 842 0012 0193     		str	r3, [sp, #4]
+ 148:SynaptiX_FDK/services/shell/cli_shell.c ****     int len = vsnprintf(buffer, sizeof(buffer), fmt, args);
+ 843              		.loc 1 148 5 view .LVU179
+ 844              		.loc 1 148 15 is_stmt 0 view .LVU180
+ 845 0014 4FF40061 		mov	r1, #2048
+ 846 0018 02A8     		add	r0, sp, #8
+ 847              	.LVL77:
+ 848              		.loc 1 148 15 view .LVU181
+ 849 001a FFF7FEFF 		bl	vsnprintf
+ 850              	.LVL78:
+ 149:SynaptiX_FDK/services/shell/cli_shell.c ****     va_end(args);
+ 851              		.loc 1 149 5 is_stmt 1 view .LVU182
+ 150:SynaptiX_FDK/services/shell/cli_shell.c ****     if(len > 0){
+ 852              		.loc 1 150 5 view .LVU183
+ 853              		.loc 1 150 7 is_stmt 0 view .LVU184
+ 854 001e 0028     		cmp	r0, #0
+ 855 0020 05DC     		bgt	.L68
+ 856              	.LVL79:
+ 857              	.L65:
+ 151:SynaptiX_FDK/services/shell/cli_shell.c ****         prv_echo_str(shell,buffer);
+ 152:SynaptiX_FDK/services/shell/cli_shell.c ****     }
+ 153:SynaptiX_FDK/services/shell/cli_shell.c **** }
+ 858              		.loc 1 153 1 view .LVU185
+ 859 0022 0DF60C0D 		addw	sp, sp, #2060
+ 860              	.LCFI17:
+ 861              		.cfi_remember_state
+ 862              		.cfi_def_cfa_offset 20
+ 863              		@ sp needed
+ 864 0026 BDE81040 		pop	{r4, lr}
+ 865              	.LCFI18:
+ 866              		.cfi_restore 14
+ 867              		.cfi_restore 4
+ 868              		.cfi_def_cfa_offset 12
+ 869              	.LVL80:
+ 870              		.loc 1 153 1 view .LVU186
+ 871 002a 03B0     		add	sp, sp, #12
+ 872              	.LCFI19:
+ 873              		.cfi_restore 3
+ 874              		.cfi_restore 2
+ 875              		.cfi_restore 1
+ 876              		.cfi_def_cfa_offset 0
+ 877 002c 7047     		bx	lr
+ 878              	.LVL81:
+ 879              	.L68:
+ 880              	.LCFI20:
+ 881              		.cfi_restore_state
+ 151:SynaptiX_FDK/services/shell/cli_shell.c ****         prv_echo_str(shell,buffer);
+ 882              		.loc 1 151 9 is_stmt 1 view .LVU187
+ 883 002e 02A9     		add	r1, sp, #8
+ 884 0030 2046     		mov	r0, r4
+ 885              	.LVL82:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 20
+
+
+ 151:SynaptiX_FDK/services/shell/cli_shell.c ****         prv_echo_str(shell,buffer);
+ 886              		.loc 1 151 9 is_stmt 0 view .LVU188
+ 887 0032 FFF7FEFF 		bl	prv_echo_str
+ 888              	.LVL83:
+ 889              		.loc 1 153 1 view .LVU189
+ 890 0036 F4E7     		b	.L65
+ 891              		.cfi_endproc
+ 892              	.LFE16:
+ 894              		.section	.rodata.cli_shell_help_handler.str1.4,"aMS",%progbits,1
+ 895              		.align	2
+ 896              	.LC4:
+ 897 0000 3A2000   		.ascii	": \000"
+ 898              		.section	.text.cli_shell_help_handler,"ax",%progbits
+ 899              		.align	1
+ 900              		.global	cli_shell_help_handler
+ 901              		.syntax unified
+ 902              		.thumb
+ 903              		.thumb_func
+ 905              	cli_shell_help_handler:
+ 906              	.LVL84:
+ 907              	.LFB17:
+ 154:SynaptiX_FDK/services/shell/cli_shell.c **** 
+ 155:SynaptiX_FDK/services/shell/cli_shell.c **** int cli_shell_help_handler(ShellContext_t *s_shell,int argc, char *argv[]) {
+ 908              		.loc 1 155 76 is_stmt 1 view -0
+ 909              		.cfi_startproc
+ 910              		@ args = 0, pretend = 0, frame = 0
+ 911              		@ frame_needed = 0, uses_anonymous_args = 0
+ 912              		.loc 1 155 76 is_stmt 0 view .LVU191
+ 913 0000 70B5     		push	{r4, r5, r6, lr}
+ 914              	.LCFI21:
+ 915              		.cfi_def_cfa_offset 16
+ 916              		.cfi_offset 4, -16
+ 917              		.cfi_offset 5, -12
+ 918              		.cfi_offset 6, -8
+ 919              		.cfi_offset 14, -4
+ 920 0002 0546     		mov	r5, r0
+ 156:SynaptiX_FDK/services/shell/cli_shell.c ****  (void) argc;
+ 921              		.loc 1 156 2 is_stmt 1 view .LVU192
+ 157:SynaptiX_FDK/services/shell/cli_shell.c ****  (void) argv;
+ 922              		.loc 1 157 2 view .LVU193
+ 158:SynaptiX_FDK/services/shell/cli_shell.c ****   SHELL_FOR_EACH_COMMAND(command) {
+ 923              		.loc 1 158 3 view .LVU194
+ 924              	.LBB8:
+ 925              		.loc 1 158 3 view .LVU195
+ 926 0004 0F4B     		ldr	r3, .L73
+ 927 0006 1E68     		ldr	r6, [r3]
+ 928              	.LVL85:
+ 929              		.loc 1 158 3 is_stmt 0 view .LVU196
+ 930 0008 3446     		mov	r4, r6
+ 931 000a 10E0     		b	.L70
+ 932              	.LVL86:
+ 933              	.L71:
+ 159:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_echo_str(s_shell,command->command);
+ 934              		.loc 1 159 5 is_stmt 1 view .LVU197
+ 935 000c 2168     		ldr	r1, [r4]
+ 936 000e 2846     		mov	r0, r5
+ 937 0010 FFF7FEFF 		bl	prv_echo_str
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 21
+
+
+ 938              	.LVL87:
+ 160:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_echo_str(s_shell,": ");
+ 939              		.loc 1 160 5 view .LVU198
+ 940 0014 0C49     		ldr	r1, .L73+4
+ 941 0016 2846     		mov	r0, r5
+ 942 0018 FFF7FEFF 		bl	prv_echo_str
+ 943              	.LVL88:
+ 161:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_echo_str(s_shell,command->help);
+ 944              		.loc 1 161 5 view .LVU199
+ 945 001c A168     		ldr	r1, [r4, #8]
+ 946 001e 2846     		mov	r0, r5
+ 947 0020 FFF7FEFF 		bl	prv_echo_str
+ 948              	.LVL89:
+ 162:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_echo(s_shell,'\n');
+ 949              		.loc 1 162 5 view .LVU200
+ 950 0024 0A21     		movs	r1, #10
+ 951 0026 2846     		mov	r0, r5
+ 952 0028 FFF7FEFF 		bl	prv_echo
+ 953              	.LVL90:
+ 158:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_echo_str(s_shell,command->command);
+ 954              		.loc 1 158 3 discriminator 3 view .LVU201
+ 955 002c 0C34     		adds	r4, r4, #12
+ 956              	.LVL91:
+ 957              	.L70:
+ 158:SynaptiX_FDK/services/shell/cli_shell.c ****     prv_echo_str(s_shell,command->command);
+ 958              		.loc 1 158 3 discriminator 1 view .LVU202
+ 959 002e 074B     		ldr	r3, .L73+8
+ 960 0030 1B68     		ldr	r3, [r3]
+ 961 0032 03EB4303 		add	r3, r3, r3, lsl #1
+ 962 0036 06EB8303 		add	r3, r6, r3, lsl #2
+ 963 003a A342     		cmp	r3, r4
+ 964 003c E6D8     		bhi	.L71
+ 965              	.LBE8:
+ 163:SynaptiX_FDK/services/shell/cli_shell.c ****   }
+ 164:SynaptiX_FDK/services/shell/cli_shell.c ****   return 0;
+ 966              		.loc 1 164 3 view .LVU203
+ 165:SynaptiX_FDK/services/shell/cli_shell.c **** }...
+ 967              		.loc 1 165 1 is_stmt 0 view .LVU204
+ 968 003e 0020     		movs	r0, #0
+ 969 0040 70BD     		pop	{r4, r5, r6, pc}
+ 970              	.LVL92:
+ 971              	.L74:
+ 972              		.loc 1 165 1 view .LVU205
+ 973 0042 00BF     		.align	2
+ 974              	.L73:
+ 975 0044 00000000 		.word	g_shell_commands
+ 976 0048 00000000 		.word	.LC4
+ 977 004c 00000000 		.word	g_num_shell_commands
+ 978              		.cfi_endproc
+ 979              	.LFE17:
+ 981              		.text
+ 982              	.Letext0:
+ 983              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 984              		.file 3 "SynaptiX_FDK/services/shell/cli_shell.h"
+ 985              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 986              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 987              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 22
+
+
+ 988              		.file 7 "<built-in>"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s 			page 23
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 cli_shell.c
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:22     .text.prv_booted:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:27     .text.prv_booted:00000000 prv_booted
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:48     .text.prv_send_char:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:53     .text.prv_send_char:00000000 prv_send_char
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:92     .text.prv_echo:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:97     .text.prv_echo:00000000 prv_echo
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:159    .text.prv_last_char:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:164    .text.prv_last_char:00000000 prv_last_char
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:187    .text.prv_is_rx_buffer_full:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:192    .text.prv_is_rx_buffer_full:00000000 prv_is_rx_buffer_full
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:214    .text.prv_echo_str:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:219    .text.prv_echo_str:00000000 prv_echo_str
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:247    .rodata.prv_send_prompt.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:251    .text.prv_send_prompt:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:256    .text.prv_send_prompt:00000000 prv_send_prompt
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:278    .text.prv_send_prompt:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:283    .text.prv_reset_rx_buffer:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:288    .text.prv_reset_rx_buffer:00000000 prv_reset_rx_buffer
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:321    .text.prv_find_command:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:326    .text.prv_find_command:00000000 prv_find_command
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:389    .text.prv_find_command:00000034 $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:395    .rodata.prv_process.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:402    .text.prv_process:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:407    .text.prv_process:00000000 prv_process
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:629    .text.prv_process:000000c8 $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:636    .rodata.cli_shell_boot.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:640    .text.cli_shell_boot:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:646    .text.cli_shell_boot:00000000 cli_shell_boot
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:675    .text.cli_shell_boot:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:680    .text.cli_shell_receive_char:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:686    .text.cli_shell_receive_char:00000000 cli_shell_receive_char
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:773    .text.cli_shell_put_line:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:779    .text.cli_shell_put_line:00000000 cli_shell_put_line
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:808    .text.cli_shell_printf:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:814    .text.cli_shell_printf:00000000 cli_shell_printf
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:895    .rodata.cli_shell_help_handler.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:899    .text.cli_shell_help_handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:905    .text.cli_shell_help_handler:00000000 cli_shell_help_handler
+C:\Users\DELL\AppData\Local\Temp\ccv4u2Df.s:975    .text.cli_shell_help_handler:00000044 $d
+
+UNDEFINED SYMBOLS
+memset
+strcmp
+g_shell_commands
+g_num_shell_commands
+vsnprintf

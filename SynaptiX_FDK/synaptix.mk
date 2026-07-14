@@ -35,8 +35,8 @@ COMPONENT_FILES = \
 				  $(SYNAPTIX_DIR)/components/modules/sensirion_streaming.c \
 				  $(SYNAPTIX_DIR)/components/modules/sensirion_uart_hal.c \
 				  $(SYNAPTIX_DIR)/components/modules/sps30_uart.c \
-				  $(SYNAPTIX_DIR)/components/modules/ze12a.c \
-				  $(SYNAPTIX_DIR)/components/modules/ads1115.c 
+				  $(SYNAPTIX_DIR)/components/modules/ze12a/ze12a.c \
+				  $(SYNAPTIX_DIR)/components/modules/ads1115/ads1115.c 
 
 SERVICES_FILES = ${SYNAPTIX_DIR}/services/logger/logger.c \
 				 ${SYNAPTIX_DIR}/services/littlefs/lfs.c \

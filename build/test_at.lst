@@ -1,0 +1,996 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"test_at.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/app/user/at_usb/test_at.c"
+  21              		.section	.text._respond,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	_respond:
+  28              	.LVL0:
+  29              	.LFB337:
+   1:SynaptiX_FDK/app/user/at_usb/test_at.c **** #include "test_at.h"
+   2:SynaptiX_FDK/app/user/at_usb/test_at.c **** #include "logger.h"
+   3:SynaptiX_FDK/app/user/at_usb/test_at.c **** #include "sx_board.h"
+   4:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+   5:SynaptiX_FDK/app/user/at_usb/test_at.c **** static const char *TAG = "TEST_AT_USB";
+   6:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+   7:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define NUMBER_COMMAND  4
+   8:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+   9:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define AT              0
+  10:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define AT_VPN          1
+  11:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define AT_MQTTCONNECT  2
+  12:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define AT_TIMESLEEP    3
+  13:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  14:SynaptiX_FDK/app/user/at_usb/test_at.c **** // const char* at_usb_command[NUMBER_COMMAND] = {"AT", "AT+VPN", "AT+MQTTCONNECT", "AT+TIMESLEEP"};
+  15:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  16:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define CMD_AT              "AT"
+  17:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define CMD_AT_VPN          "AT+VPN"
+  18:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define CMD_AT_MQTT         "AT+MQTTCONNECT"
+  19:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define CMD_AT_TIMESLEEP    "AT+TIMESLEEP"
+  20:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  21:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define AT_RESP_OK      "\r\nOK\r\n"
+  22:SynaptiX_FDK/app/user/at_usb/test_at.c **** #define AT_RESP_ERROR   "\r\nERROR\r\n"
+  23:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  24:SynaptiX_FDK/app/user/at_usb/test_at.c **** static void _respond(const char *resp)
+  25:SynaptiX_FDK/app/user/at_usb/test_at.c **** {
+  30              		.loc 1 25 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 2
+
+
+  34              		.loc 1 25 1 is_stmt 0 view .LVU1
+  35 0000 10B5     		push	{r4, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 4, -8
+  39              		.cfi_offset 14, -4
+  40 0002 0446     		mov	r4, r0
+  26:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (&board.usb == NULL) return;
+  41              		.loc 1 26 5 is_stmt 1 view .LVU2
+  27:SynaptiX_FDK/app/user/at_usb/test_at.c ****     sx_usb_tiny_write(&board.usb, (const uint8_t *)resp, strlen(resp));
+  42              		.loc 1 27 5 view .LVU3
+  43              		.loc 1 27 58 is_stmt 0 view .LVU4
+  44 0004 FFF7FEFF 		bl	strlen
+  45              	.LVL1:
+  46              		.loc 1 27 58 view .LVU5
+  47 0008 0246     		mov	r2, r0
+  48              		.loc 1 27 5 discriminator 1 view .LVU6
+  49 000a 2146     		mov	r1, r4
+  50 000c 0148     		ldr	r0, .L3
+  51 000e FFF7FEFF 		bl	sx_usb_tiny_write
+  52              	.LVL2:
+  28:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+  53              		.loc 1 28 1 view .LVU7
+  54 0012 10BD     		pop	{r4, pc}
+  55              	.LVL3:
+  56              	.L4:
+  57              		.loc 1 28 1 view .LVU8
+  58              		.align	2
+  59              	.L3:
+  60 0014 D0DD0000 		.word	board+56784
+  61              		.cfi_endproc
+  62              	.LFE337:
+  64              		.section	.rodata._at_timesleep_set.str1.4,"aMS",%progbits,1
+  65              		.align	2
+  66              	.LC0:
+  67 0000 4E554C4C 		.ascii	"NULL\000"
+  67      00
+  68 0005 000000   		.align	2
+  69              	.LC1:
+  70 0008 54696D65 		.ascii	"TimeSleep set: %s\000"
+  70      536C6565 
+  70      70207365 
+  70      743A2025 
+  70      7300
+  71 001a 0000     		.align	2
+  72              	.LC2:
+  73 001c 54455354 		.ascii	"TEST_AT_USB\000"
+  73      5F41545F 
+  73      55534200 
+  74              		.align	2
+  75              	.LC3:
+  76 0028 0D0A4552 		.ascii	"\015\012ERROR\015\012\000"
+  76      524F520D 
+  76      0A00
+  77 0032 0000     		.align	2
+  78              	.LC4:
+  79 0034 0D0A4F4B 		.ascii	"\015\012OK\015\012\000"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 3
+
+
+  79      0D0A00
+  80              		.section	.text._at_timesleep_set,"ax",%progbits
+  81              		.align	1
+  82              		.syntax unified
+  83              		.thumb
+  84              		.thumb_func
+  86              	_at_timesleep_set:
+  87              	.LVL4:
+  88              	.LFB341:
+  29:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  30:SynaptiX_FDK/app/user/at_usb/test_at.c **** static int _at_execute(AT_Command_t *cmd)
+  31:SynaptiX_FDK/app/user/at_usb/test_at.c **** {
+  32:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "Execute: %s", cmd->command);
+  33:SynaptiX_FDK/app/user/at_usb/test_at.c ****     _respond(AT_RESP_OK);
+  34:SynaptiX_FDK/app/user/at_usb/test_at.c ****     return 0;
+  35:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+  36:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  37:SynaptiX_FDK/app/user/at_usb/test_at.c **** static int _at_vpn_set(AT_Command_t *cmd, const char *param)
+  38:SynaptiX_FDK/app/user/at_usb/test_at.c **** {
+  39:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "VPN set: %s", param ? param : "NULL");
+  40:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+  41:SynaptiX_FDK/app/user/at_usb/test_at.c ****         _respond(AT_RESP_ERROR);
+  42:SynaptiX_FDK/app/user/at_usb/test_at.c ****         return -1;
+  43:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+  44:SynaptiX_FDK/app/user/at_usb/test_at.c ****     _respond(AT_RESP_OK);
+  45:SynaptiX_FDK/app/user/at_usb/test_at.c ****     return 0;
+  46:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+  47:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  48:SynaptiX_FDK/app/user/at_usb/test_at.c **** static int _at_mqtt_set(AT_Command_t *cmd, const char *param)
+  49:SynaptiX_FDK/app/user/at_usb/test_at.c **** {
+  50:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "MQTT set: %s", param ? param : "NULL");
+  51:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+  52:SynaptiX_FDK/app/user/at_usb/test_at.c ****         _respond(AT_RESP_ERROR);
+  53:SynaptiX_FDK/app/user/at_usb/test_at.c ****         return -1;
+  54:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+  55:SynaptiX_FDK/app/user/at_usb/test_at.c ****     _respond(AT_RESP_OK);
+  56:SynaptiX_FDK/app/user/at_usb/test_at.c ****     return 0;
+  57:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+  58:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  59:SynaptiX_FDK/app/user/at_usb/test_at.c **** static int _at_timesleep_set(AT_Command_t *cmd, const char *param)
+  60:SynaptiX_FDK/app/user/at_usb/test_at.c **** {
+  89              		.loc 1 60 1 is_stmt 1 view -0
+  90              		.cfi_startproc
+  91              		@ args = 0, pretend = 0, frame = 0
+  92              		@ frame_needed = 0, uses_anonymous_args = 0
+  93              		.loc 1 60 1 is_stmt 0 view .LVU10
+  94 0000 10B5     		push	{r4, lr}
+  95              	.LCFI1:
+  96              		.cfi_def_cfa_offset 8
+  97              		.cfi_offset 4, -8
+  98              		.cfi_offset 14, -4
+  61:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "TimeSleep set: %s", param ? param : "NULL");
+  99              		.loc 1 61 5 is_stmt 1 view .LVU11
+ 100 0002 0C46     		mov	r4, r1
+ 101 0004 59B1     		cbz	r1, .L9
+ 102              		.loc 1 61 5 is_stmt 0 discriminator 1 view .LVU12
+ 103 0006 0B46     		mov	r3, r1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 4
+
+
+ 104              	.L6:
+ 105              		.loc 1 61 5 discriminator 4 view .LVU13
+ 106 0008 094A     		ldr	r2, .L12
+ 107 000a 0A49     		ldr	r1, .L12+4
+ 108              	.LVL5:
+ 109              		.loc 1 61 5 discriminator 4 view .LVU14
+ 110 000c 0320     		movs	r0, #3
+ 111              	.LVL6:
+ 112              		.loc 1 61 5 discriminator 4 view .LVU15
+ 113 000e FFF7FEFF 		bl	log_func
+ 114              	.LVL7:
+  62:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 115              		.loc 1 62 5 is_stmt 1 view .LVU16
+ 116              		.loc 1 62 8 is_stmt 0 view .LVU17
+ 117 0012 34B1     		cbz	r4, .L11
+  63:SynaptiX_FDK/app/user/at_usb/test_at.c ****         _respond(AT_RESP_ERROR);
+  64:SynaptiX_FDK/app/user/at_usb/test_at.c ****         return -1;
+  65:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+  66:SynaptiX_FDK/app/user/at_usb/test_at.c ****     _respond(AT_RESP_OK);
+ 118              		.loc 1 66 5 is_stmt 1 view .LVU18
+ 119 0014 0848     		ldr	r0, .L12+8
+ 120 0016 FFF7FEFF 		bl	_respond
+ 121              	.LVL8:
+  67:SynaptiX_FDK/app/user/at_usb/test_at.c ****     return 0;
+ 122              		.loc 1 67 5 view .LVU19
+ 123              		.loc 1 67 12 is_stmt 0 view .LVU20
+ 124 001a 0020     		movs	r0, #0
+ 125              	.L5:
+  68:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 126              		.loc 1 68 1 view .LVU21
+ 127 001c 10BD     		pop	{r4, pc}
+ 128              	.LVL9:
+ 129              	.L9:
+  61:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 130              		.loc 1 61 5 discriminator 2 view .LVU22
+ 131 001e 074B     		ldr	r3, .L12+12
+ 132 0020 F2E7     		b	.L6
+ 133              	.LVL10:
+ 134              	.L11:
+  63:SynaptiX_FDK/app/user/at_usb/test_at.c ****         return -1;
+ 135              		.loc 1 63 9 is_stmt 1 view .LVU23
+ 136 0022 0748     		ldr	r0, .L12+16
+ 137 0024 FFF7FEFF 		bl	_respond
+ 138              	.LVL11:
+  64:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+ 139              		.loc 1 64 9 view .LVU24
+  64:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+ 140              		.loc 1 64 16 is_stmt 0 view .LVU25
+ 141 0028 4FF0FF30 		mov	r0, #-1
+ 142 002c F6E7     		b	.L5
+ 143              	.L13:
+ 144 002e 00BF     		.align	2
+ 145              	.L12:
+ 146 0030 08000000 		.word	.LC1
+ 147 0034 1C000000 		.word	.LC2
+ 148 0038 34000000 		.word	.LC4
+ 149 003c 00000000 		.word	.LC0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 5
+
+
+ 150 0040 28000000 		.word	.LC3
+ 151              		.cfi_endproc
+ 152              	.LFE341:
+ 154              		.section	.rodata._at_mqtt_set.str1.4,"aMS",%progbits,1
+ 155              		.align	2
+ 156              	.LC5:
+ 157 0000 4D515454 		.ascii	"MQTT set: %s\000"
+ 157      20736574 
+ 157      3A202573 
+ 157      00
+ 158              		.section	.text._at_mqtt_set,"ax",%progbits
+ 159              		.align	1
+ 160              		.syntax unified
+ 161              		.thumb
+ 162              		.thumb_func
+ 164              	_at_mqtt_set:
+ 165              	.LVL12:
+ 166              	.LFB340:
+  49:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "MQTT set: %s", param ? param : "NULL");
+ 167              		.loc 1 49 1 is_stmt 1 view -0
+ 168              		.cfi_startproc
+ 169              		@ args = 0, pretend = 0, frame = 0
+ 170              		@ frame_needed = 0, uses_anonymous_args = 0
+  49:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "MQTT set: %s", param ? param : "NULL");
+ 171              		.loc 1 49 1 is_stmt 0 view .LVU27
+ 172 0000 10B5     		push	{r4, lr}
+ 173              	.LCFI2:
+ 174              		.cfi_def_cfa_offset 8
+ 175              		.cfi_offset 4, -8
+ 176              		.cfi_offset 14, -4
+  50:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 177              		.loc 1 50 5 is_stmt 1 view .LVU28
+ 178 0002 0C46     		mov	r4, r1
+ 179 0004 59B1     		cbz	r1, .L18
+  50:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 180              		.loc 1 50 5 is_stmt 0 discriminator 1 view .LVU29
+ 181 0006 0B46     		mov	r3, r1
+ 182              	.L15:
+  50:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 183              		.loc 1 50 5 discriminator 4 view .LVU30
+ 184 0008 094A     		ldr	r2, .L21
+ 185 000a 0A49     		ldr	r1, .L21+4
+ 186              	.LVL13:
+  50:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 187              		.loc 1 50 5 discriminator 4 view .LVU31
+ 188 000c 0320     		movs	r0, #3
+ 189              	.LVL14:
+  50:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 190              		.loc 1 50 5 discriminator 4 view .LVU32
+ 191 000e FFF7FEFF 		bl	log_func
+ 192              	.LVL15:
+  51:SynaptiX_FDK/app/user/at_usb/test_at.c ****         _respond(AT_RESP_ERROR);
+ 193              		.loc 1 51 5 is_stmt 1 view .LVU33
+  51:SynaptiX_FDK/app/user/at_usb/test_at.c ****         _respond(AT_RESP_ERROR);
+ 194              		.loc 1 51 8 is_stmt 0 view .LVU34
+ 195 0012 34B1     		cbz	r4, .L20
+  55:SynaptiX_FDK/app/user/at_usb/test_at.c ****     return 0;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 6
+
+
+ 196              		.loc 1 55 5 is_stmt 1 view .LVU35
+ 197 0014 0848     		ldr	r0, .L21+8
+ 198 0016 FFF7FEFF 		bl	_respond
+ 199              	.LVL16:
+  56:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 200              		.loc 1 56 5 view .LVU36
+  56:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 201              		.loc 1 56 12 is_stmt 0 view .LVU37
+ 202 001a 0020     		movs	r0, #0
+ 203              	.L14:
+  57:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+ 204              		.loc 1 57 1 view .LVU38
+ 205 001c 10BD     		pop	{r4, pc}
+ 206              	.LVL17:
+ 207              	.L18:
+  50:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 208              		.loc 1 50 5 discriminator 2 view .LVU39
+ 209 001e 074B     		ldr	r3, .L21+12
+ 210 0020 F2E7     		b	.L15
+ 211              	.LVL18:
+ 212              	.L20:
+  52:SynaptiX_FDK/app/user/at_usb/test_at.c ****         return -1;
+ 213              		.loc 1 52 9 is_stmt 1 view .LVU40
+ 214 0022 0748     		ldr	r0, .L21+16
+ 215 0024 FFF7FEFF 		bl	_respond
+ 216              	.LVL19:
+  53:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+ 217              		.loc 1 53 9 view .LVU41
+  53:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+ 218              		.loc 1 53 16 is_stmt 0 view .LVU42
+ 219 0028 4FF0FF30 		mov	r0, #-1
+ 220 002c F6E7     		b	.L14
+ 221              	.L22:
+ 222 002e 00BF     		.align	2
+ 223              	.L21:
+ 224 0030 00000000 		.word	.LC5
+ 225 0034 1C000000 		.word	.LC2
+ 226 0038 34000000 		.word	.LC4
+ 227 003c 00000000 		.word	.LC0
+ 228 0040 28000000 		.word	.LC3
+ 229              		.cfi_endproc
+ 230              	.LFE340:
+ 232              		.section	.rodata._at_vpn_set.str1.4,"aMS",%progbits,1
+ 233              		.align	2
+ 234              	.LC6:
+ 235 0000 56504E20 		.ascii	"VPN set: %s\000"
+ 235      7365743A 
+ 235      20257300 
+ 236              		.section	.text._at_vpn_set,"ax",%progbits
+ 237              		.align	1
+ 238              		.syntax unified
+ 239              		.thumb
+ 240              		.thumb_func
+ 242              	_at_vpn_set:
+ 243              	.LVL20:
+ 244              	.LFB339:
+  38:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "VPN set: %s", param ? param : "NULL");
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 7
+
+
+ 245              		.loc 1 38 1 is_stmt 1 view -0
+ 246              		.cfi_startproc
+ 247              		@ args = 0, pretend = 0, frame = 0
+ 248              		@ frame_needed = 0, uses_anonymous_args = 0
+  38:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "VPN set: %s", param ? param : "NULL");
+ 249              		.loc 1 38 1 is_stmt 0 view .LVU44
+ 250 0000 10B5     		push	{r4, lr}
+ 251              	.LCFI3:
+ 252              		.cfi_def_cfa_offset 8
+ 253              		.cfi_offset 4, -8
+ 254              		.cfi_offset 14, -4
+  39:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 255              		.loc 1 39 5 is_stmt 1 view .LVU45
+ 256 0002 0C46     		mov	r4, r1
+ 257 0004 59B1     		cbz	r1, .L27
+  39:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 258              		.loc 1 39 5 is_stmt 0 discriminator 1 view .LVU46
+ 259 0006 0B46     		mov	r3, r1
+ 260              	.L24:
+  39:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 261              		.loc 1 39 5 discriminator 4 view .LVU47
+ 262 0008 094A     		ldr	r2, .L30
+ 263 000a 0A49     		ldr	r1, .L30+4
+ 264              	.LVL21:
+  39:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 265              		.loc 1 39 5 discriminator 4 view .LVU48
+ 266 000c 0320     		movs	r0, #3
+ 267              	.LVL22:
+  39:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 268              		.loc 1 39 5 discriminator 4 view .LVU49
+ 269 000e FFF7FEFF 		bl	log_func
+ 270              	.LVL23:
+  40:SynaptiX_FDK/app/user/at_usb/test_at.c ****         _respond(AT_RESP_ERROR);
+ 271              		.loc 1 40 5 is_stmt 1 view .LVU50
+  40:SynaptiX_FDK/app/user/at_usb/test_at.c ****         _respond(AT_RESP_ERROR);
+ 272              		.loc 1 40 8 is_stmt 0 view .LVU51
+ 273 0012 34B1     		cbz	r4, .L29
+  44:SynaptiX_FDK/app/user/at_usb/test_at.c ****     return 0;
+ 274              		.loc 1 44 5 is_stmt 1 view .LVU52
+ 275 0014 0848     		ldr	r0, .L30+8
+ 276 0016 FFF7FEFF 		bl	_respond
+ 277              	.LVL24:
+  45:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 278              		.loc 1 45 5 view .LVU53
+  45:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 279              		.loc 1 45 12 is_stmt 0 view .LVU54
+ 280 001a 0020     		movs	r0, #0
+ 281              	.L23:
+  46:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+ 282              		.loc 1 46 1 view .LVU55
+ 283 001c 10BD     		pop	{r4, pc}
+ 284              	.LVL25:
+ 285              	.L27:
+  39:SynaptiX_FDK/app/user/at_usb/test_at.c ****     if (param == NULL) {
+ 286              		.loc 1 39 5 discriminator 2 view .LVU56
+ 287 001e 074B     		ldr	r3, .L30+12
+ 288 0020 F2E7     		b	.L24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 8
+
+
+ 289              	.LVL26:
+ 290              	.L29:
+  41:SynaptiX_FDK/app/user/at_usb/test_at.c ****         return -1;
+ 291              		.loc 1 41 9 is_stmt 1 view .LVU57
+ 292 0022 0748     		ldr	r0, .L30+16
+ 293 0024 FFF7FEFF 		bl	_respond
+ 294              	.LVL27:
+  42:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+ 295              		.loc 1 42 9 view .LVU58
+  42:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+ 296              		.loc 1 42 16 is_stmt 0 view .LVU59
+ 297 0028 4FF0FF30 		mov	r0, #-1
+ 298 002c F6E7     		b	.L23
+ 299              	.L31:
+ 300 002e 00BF     		.align	2
+ 301              	.L30:
+ 302 0030 00000000 		.word	.LC6
+ 303 0034 1C000000 		.word	.LC2
+ 304 0038 34000000 		.word	.LC4
+ 305 003c 00000000 		.word	.LC0
+ 306 0040 28000000 		.word	.LC3
+ 307              		.cfi_endproc
+ 308              	.LFE339:
+ 310              		.section	.rodata._at_execute.str1.4,"aMS",%progbits,1
+ 311              		.align	2
+ 312              	.LC7:
+ 313 0000 45786563 		.ascii	"Execute: %s\000"
+ 313      7574653A 
+ 313      20257300 
+ 314              		.section	.text._at_execute,"ax",%progbits
+ 315              		.align	1
+ 316              		.syntax unified
+ 317              		.thumb
+ 318              		.thumb_func
+ 320              	_at_execute:
+ 321              	.LVL28:
+ 322              	.LFB338:
+  31:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "Execute: %s", cmd->command);
+ 323              		.loc 1 31 1 is_stmt 1 view -0
+ 324              		.cfi_startproc
+ 325              		@ args = 0, pretend = 0, frame = 0
+ 326              		@ frame_needed = 0, uses_anonymous_args = 0
+  31:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "Execute: %s", cmd->command);
+ 327              		.loc 1 31 1 is_stmt 0 view .LVU61
+ 328 0000 08B5     		push	{r3, lr}
+ 329              	.LCFI4:
+ 330              		.cfi_def_cfa_offset 8
+ 331              		.cfi_offset 3, -8
+ 332              		.cfi_offset 14, -4
+  32:SynaptiX_FDK/app/user/at_usb/test_at.c ****     _respond(AT_RESP_OK);
+ 333              		.loc 1 32 5 is_stmt 1 view .LVU62
+ 334 0002 0368     		ldr	r3, [r0]
+ 335 0004 044A     		ldr	r2, .L34
+ 336 0006 0549     		ldr	r1, .L34+4
+ 337 0008 0320     		movs	r0, #3
+ 338              	.LVL29:
+  32:SynaptiX_FDK/app/user/at_usb/test_at.c ****     _respond(AT_RESP_OK);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 9
+
+
+ 339              		.loc 1 32 5 is_stmt 0 view .LVU63
+ 340 000a FFF7FEFF 		bl	log_func
+ 341              	.LVL30:
+  33:SynaptiX_FDK/app/user/at_usb/test_at.c ****     return 0;
+ 342              		.loc 1 33 5 is_stmt 1 view .LVU64
+ 343 000e 0448     		ldr	r0, .L34+8
+ 344 0010 FFF7FEFF 		bl	_respond
+ 345              	.LVL31:
+  34:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 346              		.loc 1 34 5 view .LVU65
+  35:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+ 347              		.loc 1 35 1 is_stmt 0 view .LVU66
+ 348 0014 0020     		movs	r0, #0
+ 349 0016 08BD     		pop	{r3, pc}
+ 350              	.L35:
+ 351              		.align	2
+ 352              	.L34:
+ 353 0018 00000000 		.word	.LC7
+ 354 001c 1C000000 		.word	.LC2
+ 355 0020 34000000 		.word	.LC4
+ 356              		.cfi_endproc
+ 357              	.LFE338:
+ 359              		.section	.text.sx_gettick,"ax",%progbits
+ 360              		.align	1
+ 361              		.global	sx_gettick
+ 362              		.syntax unified
+ 363              		.thumb
+ 364              		.thumb_func
+ 366              	sx_gettick:
+ 367              	.LFB336:
+ 368              		.file 2 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 10
+
+
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 11
+
+
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 12
+
+
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 369              		.loc 2 186 33 is_stmt 1 view -0
+ 370              		.cfi_startproc
+ 371              		@ args = 0, pretend = 0, frame = 0
+ 372              		@ frame_needed = 0, uses_anonymous_args = 0
+ 373 0000 08B5     		push	{r3, lr}
+ 374              	.LCFI5:
+ 375              		.cfi_def_cfa_offset 8
+ 376              		.cfi_offset 3, -8
+ 377              		.cfi_offset 14, -4
+ 378              		.loc 2 186 34 view .LVU68
+ 379              		.loc 2 186 41 is_stmt 0 view .LVU69
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 13
+
+
+ 380 0002 FFF7FEFF 		bl	HAL_GetTick
+ 381              	.LVL32:
+ 382              		.loc 2 186 55 view .LVU70
+ 383 0006 08BD     		pop	{r3, pc}
+ 384              		.cfi_endproc
+ 385              	.LFE336:
+ 387              		.section	.rodata.app_at_init.str1.4,"aMS",%progbits,1
+ 388              		.align	2
+ 389              	.LC8:
+ 390 0000 41542063 		.ascii	"AT command init OK\000"
+ 390      6F6D6D61 
+ 390      6E642069 
+ 390      6E697420 
+ 390      4F4B00
+ 391              		.section	.text.app_at_init,"ax",%progbits
+ 392              		.align	1
+ 393              		.global	app_at_init
+ 394              		.syntax unified
+ 395              		.thumb
+ 396              		.thumb_func
+ 398              	app_at_init:
+ 399              	.LFB342:
+  69:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+  70:SynaptiX_FDK/app/user/at_usb/test_at.c **** static AT_Command_t s_commands[NUMBER_COMMAND] = {
+  71:SynaptiX_FDK/app/user/at_usb/test_at.c ****     [AT] = {
+  72:SynaptiX_FDK/app/user/at_usb/test_at.c ****     .command = CMD_AT,
+  73:SynaptiX_FDK/app/user/at_usb/test_at.c ****     .handler = {
+  74:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .execute_handler  = _at_execute,  
+  75:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .question_handler = NULL,
+  76:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .set_handler      = NULL,
+  77:SynaptiX_FDK/app/user/at_usb/test_at.c ****     }
+  78:SynaptiX_FDK/app/user/at_usb/test_at.c ****     },
+  79:SynaptiX_FDK/app/user/at_usb/test_at.c ****     [AT_VPN] = {
+  80:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .command = CMD_AT_VPN,
+  81:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .handler = {
+  82:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .set_handler      = _at_vpn_set,  
+  83:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .question_handler = NULL,
+  84:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .execute_handler  = NULL,
+  85:SynaptiX_FDK/app/user/at_usb/test_at.c ****         }
+  86:SynaptiX_FDK/app/user/at_usb/test_at.c ****     },
+  87:SynaptiX_FDK/app/user/at_usb/test_at.c ****     [AT_MQTTCONNECT] = {
+  88:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .command = CMD_AT_MQTT,
+  89:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .handler = {
+  90:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .set_handler      = _at_mqtt_set, 
+  91:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .question_handler = NULL,
+  92:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .execute_handler  = NULL,
+  93:SynaptiX_FDK/app/user/at_usb/test_at.c ****         }
+  94:SynaptiX_FDK/app/user/at_usb/test_at.c ****     },
+  95:SynaptiX_FDK/app/user/at_usb/test_at.c ****     [AT_TIMESLEEP] = {
+  96:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .command = CMD_AT_TIMESLEEP, 
+  97:SynaptiX_FDK/app/user/at_usb/test_at.c ****         .handler = {
+  98:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .set_handler      = _at_timesleep_set, 
+  99:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .question_handler = NULL,
+ 100:SynaptiX_FDK/app/user/at_usb/test_at.c ****             .execute_handler  = NULL,
+ 101:SynaptiX_FDK/app/user/at_usb/test_at.c ****         }
+ 102:SynaptiX_FDK/app/user/at_usb/test_at.c ****     },
+ 103:SynaptiX_FDK/app/user/at_usb/test_at.c **** };
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 14
+
+
+ 104:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+ 105:SynaptiX_FDK/app/user/at_usb/test_at.c **** static AT_Implementation_t s_at_impl;
+ 106:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+ 107:SynaptiX_FDK/app/user/at_usb/test_at.c **** void app_at_init(void) {
+ 400              		.loc 1 107 24 is_stmt 1 view -0
+ 401              		.cfi_startproc
+ 402              		@ args = 0, pretend = 0, frame = 0
+ 403              		@ frame_needed = 0, uses_anonymous_args = 0
+ 404 0000 08B5     		push	{r3, lr}
+ 405              	.LCFI6:
+ 406              		.cfi_def_cfa_offset 8
+ 407              		.cfi_offset 3, -8
+ 408              		.cfi_offset 14, -4
+ 108:SynaptiX_FDK/app/user/at_usb/test_at.c ****     at_init(&s_at_impl, s_commands, NUMBER_COMMAND);
+ 409              		.loc 1 108 5 view .LVU72
+ 410 0002 0422     		movs	r2, #4
+ 411 0004 0449     		ldr	r1, .L40
+ 412 0006 0548     		ldr	r0, .L40+4
+ 413 0008 FFF7FEFF 		bl	at_init
+ 414              	.LVL33:
+ 109:SynaptiX_FDK/app/user/at_usb/test_at.c ****     log_info(TAG, "AT command init OK");
+ 415              		.loc 1 109 5 view .LVU73
+ 416 000c 044A     		ldr	r2, .L40+8
+ 417 000e 0549     		ldr	r1, .L40+12
+ 418 0010 0320     		movs	r0, #3
+ 419 0012 FFF7FEFF 		bl	log_func
+ 420              	.LVL34:
+ 110:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 421              		.loc 1 110 1 is_stmt 0 view .LVU74
+ 422 0016 08BD     		pop	{r3, pc}
+ 423              	.L41:
+ 424              		.align	2
+ 425              	.L40:
+ 426 0018 00000000 		.word	s_commands
+ 427 001c 00000000 		.word	s_at_impl
+ 428 0020 00000000 		.word	.LC8
+ 429 0024 1C000000 		.word	.LC2
+ 430              		.cfi_endproc
+ 431              	.LFE342:
+ 433              		.section	.text.app_at_process,"ax",%progbits
+ 434              		.align	1
+ 435              		.global	app_at_process
+ 436              		.syntax unified
+ 437              		.thumb
+ 438              		.thumb_func
+ 440              	app_at_process:
+ 441              	.LVL35:
+ 442              	.LFB343:
+ 111:SynaptiX_FDK/app/user/at_usb/test_at.c **** 
+ 112:SynaptiX_FDK/app/user/at_usb/test_at.c **** void app_at_process(const char *data, size_t len) {
+ 443              		.loc 1 112 51 is_stmt 1 view -0
+ 444              		.cfi_startproc
+ 445              		@ args = 0, pretend = 0, frame = 0
+ 446              		@ frame_needed = 0, uses_anonymous_args = 0
+ 447              		.loc 1 112 51 is_stmt 0 view .LVU76
+ 448 0000 08B5     		push	{r3, lr}
+ 449              	.LCFI7:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 15
+
+
+ 450              		.cfi_def_cfa_offset 8
+ 451              		.cfi_offset 3, -8
+ 452              		.cfi_offset 14, -4
+ 453 0002 0A46     		mov	r2, r1
+ 113:SynaptiX_FDK/app/user/at_usb/test_at.c ****     at_process_input(&s_at_impl, data, len);
+ 454              		.loc 1 113 5 is_stmt 1 view .LVU77
+ 455 0004 0146     		mov	r1, r0
+ 456              	.LVL36:
+ 457              		.loc 1 113 5 is_stmt 0 view .LVU78
+ 458 0006 0248     		ldr	r0, .L44
+ 459              	.LVL37:
+ 460              		.loc 1 113 5 view .LVU79
+ 461 0008 FFF7FEFF 		bl	at_process_input
+ 462              	.LVL38:
+ 114:SynaptiX_FDK/app/user/at_usb/test_at.c **** }
+ 463              		.loc 1 114 1 view .LVU80
+ 464 000c 08BD     		pop	{r3, pc}
+ 465              	.L45:
+ 466 000e 00BF     		.align	2
+ 467              	.L44:
+ 468 0010 00000000 		.word	s_at_impl
+ 469              		.cfi_endproc
+ 470              	.LFE343:
+ 472              		.section	.bss.s_at_impl,"aw",%nobits
+ 473              		.align	2
+ 476              	s_at_impl:
+ 477 0000 00000000 		.space	272
+ 477      00000000 
+ 477      00000000 
+ 477      00000000 
+ 477      00000000 
+ 478              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 479              		.align	2
+ 480              	.LC9:
+ 481 0000 415400   		.ascii	"AT\000"
+ 482 0003 00       		.align	2
+ 483              	.LC10:
+ 484 0004 41542B56 		.ascii	"AT+VPN\000"
+ 484      504E00
+ 485 000b 00       		.align	2
+ 486              	.LC11:
+ 487 000c 41542B4D 		.ascii	"AT+MQTTCONNECT\000"
+ 487      51545443 
+ 487      4F4E4E45 
+ 487      435400
+ 488 001b 00       		.align	2
+ 489              	.LC12:
+ 490 001c 41542B54 		.ascii	"AT+TIMESLEEP\000"
+ 490      494D4553 
+ 490      4C454550 
+ 490      00
+ 491              		.section	.data.s_commands,"aw"
+ 492              		.align	2
+ 495              	s_commands:
+ 496 0000 00000000 		.word	.LC9
+ 497 0004 00000000 		.word	0
+ 498 0008 00000000 		.word	0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 16
+
+
+ 499 000c 00000000 		.word	_at_execute
+ 500 0010 04000000 		.word	.LC10
+ 501 0014 00000000 		.word	0
+ 502 0018 00000000 		.word	_at_vpn_set
+ 503 001c 00000000 		.word	0
+ 504 0020 0C000000 		.word	.LC11
+ 505 0024 00000000 		.word	0
+ 506 0028 00000000 		.word	_at_mqtt_set
+ 507 002c 00000000 		.word	0
+ 508 0030 1C000000 		.word	.LC12
+ 509 0034 00000000 		.word	0
+ 510 0038 00000000 		.word	_at_timesleep_set
+ 511 003c 00000000 		.word	0
+ 512              		.text
+ 513              	.Letext0:
+ 514              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 515              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 516              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 517              		.file 6 "SynaptiX_FDK/app/user/at_usb/at_command.h"
+ 518              		.file 7 "SynaptiX_FDK/services/logger/logger.h"
+ 519              		.file 8 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 520              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 521              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma.h"
+ 522              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma_ex.h"
+ 523              		.file 12 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 524              		.file 13 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_spi.h"
+ 525              		.file 14 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+ 526              		.file 15 "SynaptiX_FDK/components/peripherals/spi/sx_spi.h"
+ 527              		.file 16 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 528              		.file 17 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
+ 529              		.file 18 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 530              		.file 19 "SynaptiX_FDK/components/modules/gps/minmea.h"
+ 531              		.file 20 "SynaptiX_FDK/components/modules/gps/gps.h"
+ 532              		.file 21 "SynaptiX_FDK/components/modules/modem/modem.h"
+ 533              		.file 22 "SynaptiX_FDK/components/modules/modem_ops/modem_ops.h"
+ 534              		.file 23 "SynaptiX_FDK/components/modules/a76xx/a7677s.h"
+ 535              		.file 24 "SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.h"
+ 536              		.file 25 "SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.h"
+ 537              		.file 26 "SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.h"
+ 538              		.file 27 "SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h"
+ 539              		.file 28 "SynaptiX_FDK/components/modules/rtc/sx_ex_rtc.h"
+ 540              		.file 29 "SynaptiX_FDK/components/modules/imu/bno055.h"
+ 541              		.file 30 "SynaptiX_FDK/components/modules/sht3x/sht3x.h"
+ 542              		.file 31 "SynaptiX_FDK/components/modules/ads1115/ads1115.h"
+ 543              		.file 32 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 544              		.file 33 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s 			page 17
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 test_at.c
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:22     .text._respond:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:27     .text._respond:00000000 _respond
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:60     .text._respond:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:65     .rodata._at_timesleep_set.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:81     .text._at_timesleep_set:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:86     .text._at_timesleep_set:00000000 _at_timesleep_set
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:146    .text._at_timesleep_set:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:155    .rodata._at_mqtt_set.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:159    .text._at_mqtt_set:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:164    .text._at_mqtt_set:00000000 _at_mqtt_set
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:224    .text._at_mqtt_set:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:233    .rodata._at_vpn_set.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:237    .text._at_vpn_set:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:242    .text._at_vpn_set:00000000 _at_vpn_set
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:302    .text._at_vpn_set:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:311    .rodata._at_execute.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:315    .text._at_execute:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:320    .text._at_execute:00000000 _at_execute
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:353    .text._at_execute:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:360    .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:366    .text.sx_gettick:00000000 sx_gettick
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:388    .rodata.app_at_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:392    .text.app_at_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:398    .text.app_at_init:00000000 app_at_init
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:426    .text.app_at_init:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:495    .data.s_commands:00000000 s_commands
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:476    .bss.s_at_impl:00000000 s_at_impl
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:434    .text.app_at_process:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:440    .text.app_at_process:00000000 app_at_process
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:468    .text.app_at_process:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:473    .bss.s_at_impl:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:479    .rodata.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc8Ir5Pq.s:492    .data.s_commands:00000000 $d
+
+UNDEFINED SYMBOLS
+strlen
+sx_usb_tiny_write
+board
+log_func
+HAL_GetTick
+at_init
+at_process_input

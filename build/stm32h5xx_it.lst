@@ -1,0 +1,1124 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"stm32h5xx_it.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "Core/Src/stm32h5xx_it.c"
+  21              		.section	.text.NMI_Handler,"ax",%progbits
+  22              		.align	1
+  23              		.global	NMI_Handler
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	NMI_Handler:
+  29              	.LFB297:
+   1:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN Header */
+   2:Core/Src/stm32h5xx_it.c **** /**
+   3:Core/Src/stm32h5xx_it.c ****   ******************************************************************************
+   4:Core/Src/stm32h5xx_it.c ****   * @file    stm32h5xx_it.c
+   5:Core/Src/stm32h5xx_it.c ****   * @brief   Interrupt Service Routines.
+   6:Core/Src/stm32h5xx_it.c ****   ******************************************************************************
+   7:Core/Src/stm32h5xx_it.c ****   * @attention
+   8:Core/Src/stm32h5xx_it.c ****   *
+   9:Core/Src/stm32h5xx_it.c ****   * Copyright (c) 2026 STMicroelectronics.
+  10:Core/Src/stm32h5xx_it.c ****   * All rights reserved.
+  11:Core/Src/stm32h5xx_it.c ****   *
+  12:Core/Src/stm32h5xx_it.c ****   * This software is licensed under terms that can be found in the LICENSE file
+  13:Core/Src/stm32h5xx_it.c ****   * in the root directory of this software component.
+  14:Core/Src/stm32h5xx_it.c ****   * If no LICENSE file comes with this software, it is provided AS-IS.
+  15:Core/Src/stm32h5xx_it.c ****   *
+  16:Core/Src/stm32h5xx_it.c ****   ******************************************************************************
+  17:Core/Src/stm32h5xx_it.c ****   */
+  18:Core/Src/stm32h5xx_it.c **** /* USER CODE END Header */
+  19:Core/Src/stm32h5xx_it.c **** 
+  20:Core/Src/stm32h5xx_it.c **** /* Includes ------------------------------------------------------------------*/
+  21:Core/Src/stm32h5xx_it.c **** #include "main.h"
+  22:Core/Src/stm32h5xx_it.c **** #include "stm32h5xx_it.h"
+  23:Core/Src/stm32h5xx_it.c **** /* Private includes ----------------------------------------------------------*/
+  24:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN Includes */
+  25:Core/Src/stm32h5xx_it.c **** /* USER CODE END Includes */
+  26:Core/Src/stm32h5xx_it.c **** 
+  27:Core/Src/stm32h5xx_it.c **** /* Private typedef -----------------------------------------------------------*/
+  28:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN TD */
+  29:Core/Src/stm32h5xx_it.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 2
+
+
+  30:Core/Src/stm32h5xx_it.c **** /* USER CODE END TD */
+  31:Core/Src/stm32h5xx_it.c **** 
+  32:Core/Src/stm32h5xx_it.c **** /* Private define ------------------------------------------------------------*/
+  33:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN PD */
+  34:Core/Src/stm32h5xx_it.c **** 
+  35:Core/Src/stm32h5xx_it.c **** /* USER CODE END PD */
+  36:Core/Src/stm32h5xx_it.c **** 
+  37:Core/Src/stm32h5xx_it.c **** /* Private macro -------------------------------------------------------------*/
+  38:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN PM */
+  39:Core/Src/stm32h5xx_it.c **** 
+  40:Core/Src/stm32h5xx_it.c **** /* USER CODE END PM */
+  41:Core/Src/stm32h5xx_it.c **** 
+  42:Core/Src/stm32h5xx_it.c **** /* Private variables ---------------------------------------------------------*/
+  43:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN PV */
+  44:Core/Src/stm32h5xx_it.c **** 
+  45:Core/Src/stm32h5xx_it.c **** /* USER CODE END PV */
+  46:Core/Src/stm32h5xx_it.c **** 
+  47:Core/Src/stm32h5xx_it.c **** /* Private function prototypes -----------------------------------------------*/
+  48:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN PFP */
+  49:Core/Src/stm32h5xx_it.c **** 
+  50:Core/Src/stm32h5xx_it.c **** /* USER CODE END PFP */
+  51:Core/Src/stm32h5xx_it.c **** 
+  52:Core/Src/stm32h5xx_it.c **** /* Private user code ---------------------------------------------------------*/
+  53:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN 0 */
+  54:Core/Src/stm32h5xx_it.c **** 
+  55:Core/Src/stm32h5xx_it.c **** /* USER CODE END 0 */
+  56:Core/Src/stm32h5xx_it.c **** 
+  57:Core/Src/stm32h5xx_it.c **** /* External variables --------------------------------------------------------*/
+  58:Core/Src/stm32h5xx_it.c **** extern I2C_HandleTypeDef hi2c1;
+  59:Core/Src/stm32h5xx_it.c **** extern LPTIM_HandleTypeDef hlptim1;
+  60:Core/Src/stm32h5xx_it.c **** extern RTC_HandleTypeDef hrtc;
+  61:Core/Src/stm32h5xx_it.c **** extern TIM_HandleTypeDef htim1;
+  62:Core/Src/stm32h5xx_it.c **** extern UART_HandleTypeDef huart4;
+  63:Core/Src/stm32h5xx_it.c **** extern UART_HandleTypeDef huart5;
+  64:Core/Src/stm32h5xx_it.c **** extern UART_HandleTypeDef huart1;
+  65:Core/Src/stm32h5xx_it.c **** extern UART_HandleTypeDef huart2;
+  66:Core/Src/stm32h5xx_it.c **** extern UART_HandleTypeDef huart3;
+  67:Core/Src/stm32h5xx_it.c **** /* USER CODE BEGIN EV */
+  68:Core/Src/stm32h5xx_it.c **** 
+  69:Core/Src/stm32h5xx_it.c **** /* USER CODE END EV */
+  70:Core/Src/stm32h5xx_it.c **** 
+  71:Core/Src/stm32h5xx_it.c **** /******************************************************************************/
+  72:Core/Src/stm32h5xx_it.c **** /*           Cortex Processor Interruption and Exception Handlers          */
+  73:Core/Src/stm32h5xx_it.c **** /******************************************************************************/
+  74:Core/Src/stm32h5xx_it.c **** /**
+  75:Core/Src/stm32h5xx_it.c ****   * @brief This function handles Non maskable interrupt.
+  76:Core/Src/stm32h5xx_it.c ****   */
+  77:Core/Src/stm32h5xx_it.c **** void NMI_Handler(void)
+  78:Core/Src/stm32h5xx_it.c **** {
+  30              		.loc 1 78 1 view -0
+  31              		.cfi_startproc
+  32              		@ Volatile: function does not return.
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		@ link register save eliminated.
+  36              	.L2:
+  79:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 3
+
+
+  80:Core/Src/stm32h5xx_it.c **** 
+  81:Core/Src/stm32h5xx_it.c ****   /* USER CODE END NonMaskableInt_IRQn 0 */
+  82:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+  83:Core/Src/stm32h5xx_it.c ****    while (1)
+  37              		.loc 1 83 4 view .LVU1
+  84:Core/Src/stm32h5xx_it.c ****   {
+  85:Core/Src/stm32h5xx_it.c ****   }
+  38              		.loc 1 85 3 view .LVU2
+  83:Core/Src/stm32h5xx_it.c ****   {
+  39              		.loc 1 83 10 view .LVU3
+  40 0000 FEE7     		b	.L2
+  41              		.cfi_endproc
+  42              	.LFE297:
+  44              		.section	.text.HardFault_Handler,"ax",%progbits
+  45              		.align	1
+  46              		.global	HardFault_Handler
+  47              		.syntax unified
+  48              		.thumb
+  49              		.thumb_func
+  51              	HardFault_Handler:
+  52              	.LFB298:
+  86:Core/Src/stm32h5xx_it.c ****   /* USER CODE END NonMaskableInt_IRQn 1 */
+  87:Core/Src/stm32h5xx_it.c **** }
+  88:Core/Src/stm32h5xx_it.c **** 
+  89:Core/Src/stm32h5xx_it.c **** /**
+  90:Core/Src/stm32h5xx_it.c ****   * @brief This function handles Hard fault interrupt.
+  91:Core/Src/stm32h5xx_it.c ****   */
+  92:Core/Src/stm32h5xx_it.c **** void HardFault_Handler(void)
+  93:Core/Src/stm32h5xx_it.c **** {
+  53              		.loc 1 93 1 view -0
+  54              		.cfi_startproc
+  55              		@ Volatile: function does not return.
+  56              		@ args = 0, pretend = 0, frame = 0
+  57              		@ frame_needed = 0, uses_anonymous_args = 0
+  58              		@ link register save eliminated.
+  59              	.L4:
+  94:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN HardFault_IRQn 0 */
+  95:Core/Src/stm32h5xx_it.c **** 
+  96:Core/Src/stm32h5xx_it.c ****   /* USER CODE END HardFault_IRQn 0 */
+  97:Core/Src/stm32h5xx_it.c ****   while (1)
+  60              		.loc 1 97 3 view .LVU5
+  98:Core/Src/stm32h5xx_it.c ****   {
+  99:Core/Src/stm32h5xx_it.c ****     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+ 100:Core/Src/stm32h5xx_it.c ****     /* USER CODE END W1_HardFault_IRQn 0 */
+ 101:Core/Src/stm32h5xx_it.c ****   }
+  61              		.loc 1 101 3 view .LVU6
+  97:Core/Src/stm32h5xx_it.c ****   {
+  62              		.loc 1 97 9 view .LVU7
+  63 0000 FEE7     		b	.L4
+  64              		.cfi_endproc
+  65              	.LFE298:
+  67              		.section	.text.MemManage_Handler,"ax",%progbits
+  68              		.align	1
+  69              		.global	MemManage_Handler
+  70              		.syntax unified
+  71              		.thumb
+  72              		.thumb_func
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 4
+
+
+  74              	MemManage_Handler:
+  75              	.LFB299:
+ 102:Core/Src/stm32h5xx_it.c **** }
+ 103:Core/Src/stm32h5xx_it.c **** 
+ 104:Core/Src/stm32h5xx_it.c **** /**
+ 105:Core/Src/stm32h5xx_it.c ****   * @brief This function handles Memory management fault.
+ 106:Core/Src/stm32h5xx_it.c ****   */
+ 107:Core/Src/stm32h5xx_it.c **** void MemManage_Handler(void)
+ 108:Core/Src/stm32h5xx_it.c **** {
+  76              		.loc 1 108 1 view -0
+  77              		.cfi_startproc
+  78              		@ Volatile: function does not return.
+  79              		@ args = 0, pretend = 0, frame = 0
+  80              		@ frame_needed = 0, uses_anonymous_args = 0
+  81              		@ link register save eliminated.
+  82              	.L6:
+ 109:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+ 110:Core/Src/stm32h5xx_it.c **** 
+ 111:Core/Src/stm32h5xx_it.c ****   /* USER CODE END MemoryManagement_IRQn 0 */
+ 112:Core/Src/stm32h5xx_it.c ****   while (1)
+  83              		.loc 1 112 3 view .LVU9
+ 113:Core/Src/stm32h5xx_it.c ****   {
+ 114:Core/Src/stm32h5xx_it.c ****     /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+ 115:Core/Src/stm32h5xx_it.c ****     /* USER CODE END W1_MemoryManagement_IRQn 0 */
+ 116:Core/Src/stm32h5xx_it.c ****   }
+  84              		.loc 1 116 3 view .LVU10
+ 112:Core/Src/stm32h5xx_it.c ****   {
+  85              		.loc 1 112 9 view .LVU11
+  86 0000 FEE7     		b	.L6
+  87              		.cfi_endproc
+  88              	.LFE299:
+  90              		.section	.text.BusFault_Handler,"ax",%progbits
+  91              		.align	1
+  92              		.global	BusFault_Handler
+  93              		.syntax unified
+  94              		.thumb
+  95              		.thumb_func
+  97              	BusFault_Handler:
+  98              	.LFB300:
+ 117:Core/Src/stm32h5xx_it.c **** }
+ 118:Core/Src/stm32h5xx_it.c **** 
+ 119:Core/Src/stm32h5xx_it.c **** /**
+ 120:Core/Src/stm32h5xx_it.c ****   * @brief This function handles Pre-fetch fault, memory access fault.
+ 121:Core/Src/stm32h5xx_it.c ****   */
+ 122:Core/Src/stm32h5xx_it.c **** void BusFault_Handler(void)
+ 123:Core/Src/stm32h5xx_it.c **** {
+  99              		.loc 1 123 1 view -0
+ 100              		.cfi_startproc
+ 101              		@ Volatile: function does not return.
+ 102              		@ args = 0, pretend = 0, frame = 0
+ 103              		@ frame_needed = 0, uses_anonymous_args = 0
+ 104              		@ link register save eliminated.
+ 105              	.L8:
+ 124:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN BusFault_IRQn 0 */
+ 125:Core/Src/stm32h5xx_it.c **** 
+ 126:Core/Src/stm32h5xx_it.c ****   /* USER CODE END BusFault_IRQn 0 */
+ 127:Core/Src/stm32h5xx_it.c ****   while (1)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 5
+
+
+ 106              		.loc 1 127 3 view .LVU13
+ 128:Core/Src/stm32h5xx_it.c ****   {
+ 129:Core/Src/stm32h5xx_it.c ****     /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+ 130:Core/Src/stm32h5xx_it.c ****     /* USER CODE END W1_BusFault_IRQn 0 */
+ 131:Core/Src/stm32h5xx_it.c ****   }
+ 107              		.loc 1 131 3 view .LVU14
+ 127:Core/Src/stm32h5xx_it.c ****   {
+ 108              		.loc 1 127 9 view .LVU15
+ 109 0000 FEE7     		b	.L8
+ 110              		.cfi_endproc
+ 111              	.LFE300:
+ 113              		.section	.text.UsageFault_Handler,"ax",%progbits
+ 114              		.align	1
+ 115              		.global	UsageFault_Handler
+ 116              		.syntax unified
+ 117              		.thumb
+ 118              		.thumb_func
+ 120              	UsageFault_Handler:
+ 121              	.LFB301:
+ 132:Core/Src/stm32h5xx_it.c **** }
+ 133:Core/Src/stm32h5xx_it.c **** 
+ 134:Core/Src/stm32h5xx_it.c **** /**
+ 135:Core/Src/stm32h5xx_it.c ****   * @brief This function handles Undefined instruction or illegal state.
+ 136:Core/Src/stm32h5xx_it.c ****   */
+ 137:Core/Src/stm32h5xx_it.c **** void UsageFault_Handler(void)
+ 138:Core/Src/stm32h5xx_it.c **** {
+ 122              		.loc 1 138 1 view -0
+ 123              		.cfi_startproc
+ 124              		@ Volatile: function does not return.
+ 125              		@ args = 0, pretend = 0, frame = 0
+ 126              		@ frame_needed = 0, uses_anonymous_args = 0
+ 127              		@ link register save eliminated.
+ 128              	.L10:
+ 139:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN UsageFault_IRQn 0 */
+ 140:Core/Src/stm32h5xx_it.c **** 
+ 141:Core/Src/stm32h5xx_it.c ****   /* USER CODE END UsageFault_IRQn 0 */
+ 142:Core/Src/stm32h5xx_it.c ****   while (1)
+ 129              		.loc 1 142 3 view .LVU17
+ 143:Core/Src/stm32h5xx_it.c ****   {
+ 144:Core/Src/stm32h5xx_it.c ****     /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+ 145:Core/Src/stm32h5xx_it.c ****     /* USER CODE END W1_UsageFault_IRQn 0 */
+ 146:Core/Src/stm32h5xx_it.c ****   }
+ 130              		.loc 1 146 3 view .LVU18
+ 142:Core/Src/stm32h5xx_it.c ****   {
+ 131              		.loc 1 142 9 view .LVU19
+ 132 0000 FEE7     		b	.L10
+ 133              		.cfi_endproc
+ 134              	.LFE301:
+ 136              		.section	.text.SVC_Handler,"ax",%progbits
+ 137              		.align	1
+ 138              		.global	SVC_Handler
+ 139              		.syntax unified
+ 140              		.thumb
+ 141              		.thumb_func
+ 143              	SVC_Handler:
+ 144              	.LFB302:
+ 147:Core/Src/stm32h5xx_it.c **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 6
+
+
+ 148:Core/Src/stm32h5xx_it.c **** 
+ 149:Core/Src/stm32h5xx_it.c **** /**
+ 150:Core/Src/stm32h5xx_it.c ****   * @brief This function handles System service call via SWI instruction.
+ 151:Core/Src/stm32h5xx_it.c ****   */
+ 152:Core/Src/stm32h5xx_it.c **** void SVC_Handler(void)
+ 153:Core/Src/stm32h5xx_it.c **** {
+ 145              		.loc 1 153 1 view -0
+ 146              		.cfi_startproc
+ 147              		@ args = 0, pretend = 0, frame = 0
+ 148              		@ frame_needed = 0, uses_anonymous_args = 0
+ 149              		@ link register save eliminated.
+ 154:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN SVCall_IRQn 0 */
+ 155:Core/Src/stm32h5xx_it.c **** 
+ 156:Core/Src/stm32h5xx_it.c ****   /* USER CODE END SVCall_IRQn 0 */
+ 157:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN SVCall_IRQn 1 */
+ 158:Core/Src/stm32h5xx_it.c **** 
+ 159:Core/Src/stm32h5xx_it.c ****   /* USER CODE END SVCall_IRQn 1 */
+ 160:Core/Src/stm32h5xx_it.c **** }
+ 150              		.loc 1 160 1 view .LVU21
+ 151 0000 7047     		bx	lr
+ 152              		.cfi_endproc
+ 153              	.LFE302:
+ 155              		.section	.text.DebugMon_Handler,"ax",%progbits
+ 156              		.align	1
+ 157              		.global	DebugMon_Handler
+ 158              		.syntax unified
+ 159              		.thumb
+ 160              		.thumb_func
+ 162              	DebugMon_Handler:
+ 163              	.LFB303:
+ 161:Core/Src/stm32h5xx_it.c **** 
+ 162:Core/Src/stm32h5xx_it.c **** /**
+ 163:Core/Src/stm32h5xx_it.c ****   * @brief This function handles Debug monitor.
+ 164:Core/Src/stm32h5xx_it.c ****   */
+ 165:Core/Src/stm32h5xx_it.c **** void DebugMon_Handler(void)
+ 166:Core/Src/stm32h5xx_it.c **** {
+ 164              		.loc 1 166 1 view -0
+ 165              		.cfi_startproc
+ 166              		@ args = 0, pretend = 0, frame = 0
+ 167              		@ frame_needed = 0, uses_anonymous_args = 0
+ 168              		@ link register save eliminated.
+ 167:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN DebugMonitor_IRQn 0 */
+ 168:Core/Src/stm32h5xx_it.c **** 
+ 169:Core/Src/stm32h5xx_it.c ****   /* USER CODE END DebugMonitor_IRQn 0 */
+ 170:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN DebugMonitor_IRQn 1 */
+ 171:Core/Src/stm32h5xx_it.c **** 
+ 172:Core/Src/stm32h5xx_it.c ****   /* USER CODE END DebugMonitor_IRQn 1 */
+ 173:Core/Src/stm32h5xx_it.c **** }
+ 169              		.loc 1 173 1 view .LVU23
+ 170 0000 7047     		bx	lr
+ 171              		.cfi_endproc
+ 172              	.LFE303:
+ 174              		.section	.text.PendSV_Handler,"ax",%progbits
+ 175              		.align	1
+ 176              		.global	PendSV_Handler
+ 177              		.syntax unified
+ 178              		.thumb
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 7
+
+
+ 179              		.thumb_func
+ 181              	PendSV_Handler:
+ 182              	.LFB304:
+ 174:Core/Src/stm32h5xx_it.c **** 
+ 175:Core/Src/stm32h5xx_it.c **** /**
+ 176:Core/Src/stm32h5xx_it.c ****   * @brief This function handles Pendable request for system service.
+ 177:Core/Src/stm32h5xx_it.c ****   */
+ 178:Core/Src/stm32h5xx_it.c **** void PendSV_Handler(void)
+ 179:Core/Src/stm32h5xx_it.c **** {
+ 183              		.loc 1 179 1 view -0
+ 184              		.cfi_startproc
+ 185              		@ args = 0, pretend = 0, frame = 0
+ 186              		@ frame_needed = 0, uses_anonymous_args = 0
+ 187              		@ link register save eliminated.
+ 180:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN PendSV_IRQn 0 */
+ 181:Core/Src/stm32h5xx_it.c **** 
+ 182:Core/Src/stm32h5xx_it.c ****   /* USER CODE END PendSV_IRQn 0 */
+ 183:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN PendSV_IRQn 1 */
+ 184:Core/Src/stm32h5xx_it.c **** 
+ 185:Core/Src/stm32h5xx_it.c ****   /* USER CODE END PendSV_IRQn 1 */
+ 186:Core/Src/stm32h5xx_it.c **** }
+ 188              		.loc 1 186 1 view .LVU25
+ 189 0000 7047     		bx	lr
+ 190              		.cfi_endproc
+ 191              	.LFE304:
+ 193              		.section	.text.SysTick_Handler,"ax",%progbits
+ 194              		.align	1
+ 195              		.global	SysTick_Handler
+ 196              		.syntax unified
+ 197              		.thumb
+ 198              		.thumb_func
+ 200              	SysTick_Handler:
+ 201              	.LFB305:
+ 187:Core/Src/stm32h5xx_it.c **** 
+ 188:Core/Src/stm32h5xx_it.c **** /**
+ 189:Core/Src/stm32h5xx_it.c ****   * @brief This function handles System tick timer.
+ 190:Core/Src/stm32h5xx_it.c ****   */
+ 191:Core/Src/stm32h5xx_it.c **** void SysTick_Handler(void)
+ 192:Core/Src/stm32h5xx_it.c **** {
+ 202              		.loc 1 192 1 view -0
+ 203              		.cfi_startproc
+ 204              		@ args = 0, pretend = 0, frame = 0
+ 205              		@ frame_needed = 0, uses_anonymous_args = 0
+ 206 0000 08B5     		push	{r3, lr}
+ 207              	.LCFI0:
+ 208              		.cfi_def_cfa_offset 8
+ 209              		.cfi_offset 3, -8
+ 210              		.cfi_offset 14, -4
+ 193:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN SysTick_IRQn 0 */
+ 194:Core/Src/stm32h5xx_it.c **** 
+ 195:Core/Src/stm32h5xx_it.c ****   /* USER CODE END SysTick_IRQn 0 */
+ 196:Core/Src/stm32h5xx_it.c ****   HAL_IncTick();
+ 211              		.loc 1 196 3 view .LVU27
+ 212 0002 FFF7FEFF 		bl	HAL_IncTick
+ 213              	.LVL0:
+ 197:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN SysTick_IRQn 1 */
+ 198:Core/Src/stm32h5xx_it.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 8
+
+
+ 199:Core/Src/stm32h5xx_it.c ****   /* USER CODE END SysTick_IRQn 1 */
+ 200:Core/Src/stm32h5xx_it.c **** }
+ 214              		.loc 1 200 1 is_stmt 0 view .LVU28
+ 215 0006 08BD     		pop	{r3, pc}
+ 216              		.cfi_endproc
+ 217              	.LFE305:
+ 219              		.section	.text.RTC_IRQHandler,"ax",%progbits
+ 220              		.align	1
+ 221              		.global	RTC_IRQHandler
+ 222              		.syntax unified
+ 223              		.thumb
+ 224              		.thumb_func
+ 226              	RTC_IRQHandler:
+ 227              	.LFB306:
+ 201:Core/Src/stm32h5xx_it.c **** 
+ 202:Core/Src/stm32h5xx_it.c **** /******************************************************************************/
+ 203:Core/Src/stm32h5xx_it.c **** /* STM32H5xx Peripheral Interrupt Handlers                                    */
+ 204:Core/Src/stm32h5xx_it.c **** /* Add here the Interrupt Handlers for the used peripherals.                  */
+ 205:Core/Src/stm32h5xx_it.c **** /* For the available peripheral interrupt handler names,                      */
+ 206:Core/Src/stm32h5xx_it.c **** /* please refer to the startup file (startup_stm32h5xx.s).                    */
+ 207:Core/Src/stm32h5xx_it.c **** /******************************************************************************/
+ 208:Core/Src/stm32h5xx_it.c **** 
+ 209:Core/Src/stm32h5xx_it.c **** /**
+ 210:Core/Src/stm32h5xx_it.c ****   * @brief This function handles RTC non-secure interrupt.
+ 211:Core/Src/stm32h5xx_it.c ****   */
+ 212:Core/Src/stm32h5xx_it.c **** void RTC_IRQHandler(void)
+ 213:Core/Src/stm32h5xx_it.c **** {
+ 228              		.loc 1 213 1 is_stmt 1 view -0
+ 229              		.cfi_startproc
+ 230              		@ args = 0, pretend = 0, frame = 0
+ 231              		@ frame_needed = 0, uses_anonymous_args = 0
+ 232 0000 08B5     		push	{r3, lr}
+ 233              	.LCFI1:
+ 234              		.cfi_def_cfa_offset 8
+ 235              		.cfi_offset 3, -8
+ 236              		.cfi_offset 14, -4
+ 214:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN RTC_IRQn 0 */
+ 215:Core/Src/stm32h5xx_it.c **** 
+ 216:Core/Src/stm32h5xx_it.c ****   /* USER CODE END RTC_IRQn 0 */
+ 217:Core/Src/stm32h5xx_it.c ****   HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
+ 237              		.loc 1 217 3 view .LVU30
+ 238 0002 0248     		ldr	r0, .L18
+ 239 0004 FFF7FEFF 		bl	HAL_RTCEx_WakeUpTimerIRQHandler
+ 240              	.LVL1:
+ 218:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN RTC_IRQn 1 */
+ 219:Core/Src/stm32h5xx_it.c **** 
+ 220:Core/Src/stm32h5xx_it.c ****   /* USER CODE END RTC_IRQn 1 */
+ 221:Core/Src/stm32h5xx_it.c **** }
+ 241              		.loc 1 221 1 is_stmt 0 view .LVU31
+ 242 0008 08BD     		pop	{r3, pc}
+ 243              	.L19:
+ 244 000a 00BF     		.align	2
+ 245              	.L18:
+ 246 000c 00000000 		.word	hrtc
+ 247              		.cfi_endproc
+ 248              	.LFE306:
+ 250              		.section	.text.TIM1_BRK_IRQHandler,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 9
+
+
+ 251              		.align	1
+ 252              		.global	TIM1_BRK_IRQHandler
+ 253              		.syntax unified
+ 254              		.thumb
+ 255              		.thumb_func
+ 257              	TIM1_BRK_IRQHandler:
+ 258              	.LFB307:
+ 222:Core/Src/stm32h5xx_it.c **** 
+ 223:Core/Src/stm32h5xx_it.c **** /**
+ 224:Core/Src/stm32h5xx_it.c ****   * @brief This function handles TIM1 Break interrupt.
+ 225:Core/Src/stm32h5xx_it.c ****   */
+ 226:Core/Src/stm32h5xx_it.c **** void TIM1_BRK_IRQHandler(void)
+ 227:Core/Src/stm32h5xx_it.c **** {
+ 259              		.loc 1 227 1 is_stmt 1 view -0
+ 260              		.cfi_startproc
+ 261              		@ args = 0, pretend = 0, frame = 0
+ 262              		@ frame_needed = 0, uses_anonymous_args = 0
+ 263 0000 08B5     		push	{r3, lr}
+ 264              	.LCFI2:
+ 265              		.cfi_def_cfa_offset 8
+ 266              		.cfi_offset 3, -8
+ 267              		.cfi_offset 14, -4
+ 228:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_BRK_IRQn 0 */
+ 229:Core/Src/stm32h5xx_it.c **** 
+ 230:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_BRK_IRQn 0 */
+ 231:Core/Src/stm32h5xx_it.c ****   HAL_TIM_IRQHandler(&htim1);
+ 268              		.loc 1 231 3 view .LVU33
+ 269 0002 0248     		ldr	r0, .L22
+ 270 0004 FFF7FEFF 		bl	HAL_TIM_IRQHandler
+ 271              	.LVL2:
+ 232:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_BRK_IRQn 1 */
+ 233:Core/Src/stm32h5xx_it.c **** 
+ 234:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_BRK_IRQn 1 */
+ 235:Core/Src/stm32h5xx_it.c **** }
+ 272              		.loc 1 235 1 is_stmt 0 view .LVU34
+ 273 0008 08BD     		pop	{r3, pc}
+ 274              	.L23:
+ 275 000a 00BF     		.align	2
+ 276              	.L22:
+ 277 000c 00000000 		.word	htim1
+ 278              		.cfi_endproc
+ 279              	.LFE307:
+ 281              		.section	.text.TIM1_UP_IRQHandler,"ax",%progbits
+ 282              		.align	1
+ 283              		.global	TIM1_UP_IRQHandler
+ 284              		.syntax unified
+ 285              		.thumb
+ 286              		.thumb_func
+ 288              	TIM1_UP_IRQHandler:
+ 289              	.LFB308:
+ 236:Core/Src/stm32h5xx_it.c **** 
+ 237:Core/Src/stm32h5xx_it.c **** /**
+ 238:Core/Src/stm32h5xx_it.c ****   * @brief This function handles TIM1 Update interrupt.
+ 239:Core/Src/stm32h5xx_it.c ****   */
+ 240:Core/Src/stm32h5xx_it.c **** void TIM1_UP_IRQHandler(void)
+ 241:Core/Src/stm32h5xx_it.c **** {
+ 290              		.loc 1 241 1 is_stmt 1 view -0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 10
+
+
+ 291              		.cfi_startproc
+ 292              		@ args = 0, pretend = 0, frame = 0
+ 293              		@ frame_needed = 0, uses_anonymous_args = 0
+ 294 0000 08B5     		push	{r3, lr}
+ 295              	.LCFI3:
+ 296              		.cfi_def_cfa_offset 8
+ 297              		.cfi_offset 3, -8
+ 298              		.cfi_offset 14, -4
+ 242:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
+ 243:Core/Src/stm32h5xx_it.c **** 
+ 244:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_UP_IRQn 0 */
+ 245:Core/Src/stm32h5xx_it.c ****   HAL_TIM_IRQHandler(&htim1);
+ 299              		.loc 1 245 3 view .LVU36
+ 300 0002 0248     		ldr	r0, .L26
+ 301 0004 FFF7FEFF 		bl	HAL_TIM_IRQHandler
+ 302              	.LVL3:
+ 246:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_UP_IRQn 1 */
+ 247:Core/Src/stm32h5xx_it.c **** 
+ 248:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_UP_IRQn 1 */
+ 249:Core/Src/stm32h5xx_it.c **** }
+ 303              		.loc 1 249 1 is_stmt 0 view .LVU37
+ 304 0008 08BD     		pop	{r3, pc}
+ 305              	.L27:
+ 306 000a 00BF     		.align	2
+ 307              	.L26:
+ 308 000c 00000000 		.word	htim1
+ 309              		.cfi_endproc
+ 310              	.LFE308:
+ 312              		.section	.text.TIM1_TRG_COM_IRQHandler,"ax",%progbits
+ 313              		.align	1
+ 314              		.global	TIM1_TRG_COM_IRQHandler
+ 315              		.syntax unified
+ 316              		.thumb
+ 317              		.thumb_func
+ 319              	TIM1_TRG_COM_IRQHandler:
+ 320              	.LFB309:
+ 250:Core/Src/stm32h5xx_it.c **** 
+ 251:Core/Src/stm32h5xx_it.c **** /**
+ 252:Core/Src/stm32h5xx_it.c ****   * @brief This function handles TIM1 Trigger and Commutation interrupts.
+ 253:Core/Src/stm32h5xx_it.c ****   */
+ 254:Core/Src/stm32h5xx_it.c **** void TIM1_TRG_COM_IRQHandler(void)
+ 255:Core/Src/stm32h5xx_it.c **** {
+ 321              		.loc 1 255 1 is_stmt 1 view -0
+ 322              		.cfi_startproc
+ 323              		@ args = 0, pretend = 0, frame = 0
+ 324              		@ frame_needed = 0, uses_anonymous_args = 0
+ 325 0000 08B5     		push	{r3, lr}
+ 326              	.LCFI4:
+ 327              		.cfi_def_cfa_offset 8
+ 328              		.cfi_offset 3, -8
+ 329              		.cfi_offset 14, -4
+ 256:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_TRG_COM_IRQn 0 */
+ 257:Core/Src/stm32h5xx_it.c **** 
+ 258:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_TRG_COM_IRQn 0 */
+ 259:Core/Src/stm32h5xx_it.c ****   HAL_TIM_IRQHandler(&htim1);
+ 330              		.loc 1 259 3 view .LVU39
+ 331 0002 0248     		ldr	r0, .L30
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 11
+
+
+ 332 0004 FFF7FEFF 		bl	HAL_TIM_IRQHandler
+ 333              	.LVL4:
+ 260:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_TRG_COM_IRQn 1 */
+ 261:Core/Src/stm32h5xx_it.c **** 
+ 262:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_TRG_COM_IRQn 1 */
+ 263:Core/Src/stm32h5xx_it.c **** }
+ 334              		.loc 1 263 1 is_stmt 0 view .LVU40
+ 335 0008 08BD     		pop	{r3, pc}
+ 336              	.L31:
+ 337 000a 00BF     		.align	2
+ 338              	.L30:
+ 339 000c 00000000 		.word	htim1
+ 340              		.cfi_endproc
+ 341              	.LFE309:
+ 343              		.section	.text.TIM1_CC_IRQHandler,"ax",%progbits
+ 344              		.align	1
+ 345              		.global	TIM1_CC_IRQHandler
+ 346              		.syntax unified
+ 347              		.thumb
+ 348              		.thumb_func
+ 350              	TIM1_CC_IRQHandler:
+ 351              	.LFB310:
+ 264:Core/Src/stm32h5xx_it.c **** 
+ 265:Core/Src/stm32h5xx_it.c **** /**
+ 266:Core/Src/stm32h5xx_it.c ****   * @brief This function handles TIM1 Capture Compare interrupt.
+ 267:Core/Src/stm32h5xx_it.c ****   */
+ 268:Core/Src/stm32h5xx_it.c **** void TIM1_CC_IRQHandler(void)
+ 269:Core/Src/stm32h5xx_it.c **** {
+ 352              		.loc 1 269 1 is_stmt 1 view -0
+ 353              		.cfi_startproc
+ 354              		@ args = 0, pretend = 0, frame = 0
+ 355              		@ frame_needed = 0, uses_anonymous_args = 0
+ 356 0000 08B5     		push	{r3, lr}
+ 357              	.LCFI5:
+ 358              		.cfi_def_cfa_offset 8
+ 359              		.cfi_offset 3, -8
+ 360              		.cfi_offset 14, -4
+ 270:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_CC_IRQn 0 */
+ 271:Core/Src/stm32h5xx_it.c **** 
+ 272:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_CC_IRQn 0 */
+ 273:Core/Src/stm32h5xx_it.c ****   HAL_TIM_IRQHandler(&htim1);
+ 361              		.loc 1 273 3 view .LVU42
+ 362 0002 0248     		ldr	r0, .L34
+ 363 0004 FFF7FEFF 		bl	HAL_TIM_IRQHandler
+ 364              	.LVL5:
+ 274:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN TIM1_CC_IRQn 1 */
+ 275:Core/Src/stm32h5xx_it.c **** 
+ 276:Core/Src/stm32h5xx_it.c ****   /* USER CODE END TIM1_CC_IRQn 1 */
+ 277:Core/Src/stm32h5xx_it.c **** }
+ 365              		.loc 1 277 1 is_stmt 0 view .LVU43
+ 366 0008 08BD     		pop	{r3, pc}
+ 367              	.L35:
+ 368 000a 00BF     		.align	2
+ 369              	.L34:
+ 370 000c 00000000 		.word	htim1
+ 371              		.cfi_endproc
+ 372              	.LFE310:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 12
+
+
+ 374              		.section	.text.I2C1_EV_IRQHandler,"ax",%progbits
+ 375              		.align	1
+ 376              		.global	I2C1_EV_IRQHandler
+ 377              		.syntax unified
+ 378              		.thumb
+ 379              		.thumb_func
+ 381              	I2C1_EV_IRQHandler:
+ 382              	.LFB311:
+ 278:Core/Src/stm32h5xx_it.c **** 
+ 279:Core/Src/stm32h5xx_it.c **** /**
+ 280:Core/Src/stm32h5xx_it.c ****   * @brief This function handles I2C1 Event interrupt.
+ 281:Core/Src/stm32h5xx_it.c ****   */
+ 282:Core/Src/stm32h5xx_it.c **** void I2C1_EV_IRQHandler(void)
+ 283:Core/Src/stm32h5xx_it.c **** {
+ 383              		.loc 1 283 1 is_stmt 1 view -0
+ 384              		.cfi_startproc
+ 385              		@ args = 0, pretend = 0, frame = 0
+ 386              		@ frame_needed = 0, uses_anonymous_args = 0
+ 387 0000 08B5     		push	{r3, lr}
+ 388              	.LCFI6:
+ 389              		.cfi_def_cfa_offset 8
+ 390              		.cfi_offset 3, -8
+ 391              		.cfi_offset 14, -4
+ 284:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN I2C1_EV_IRQn 0 */
+ 285:Core/Src/stm32h5xx_it.c **** 
+ 286:Core/Src/stm32h5xx_it.c ****   /* USER CODE END I2C1_EV_IRQn 0 */
+ 287:Core/Src/stm32h5xx_it.c ****   HAL_I2C_EV_IRQHandler(&hi2c1);
+ 392              		.loc 1 287 3 view .LVU45
+ 393 0002 0248     		ldr	r0, .L38
+ 394 0004 FFF7FEFF 		bl	HAL_I2C_EV_IRQHandler
+ 395              	.LVL6:
+ 288:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN I2C1_EV_IRQn 1 */
+ 289:Core/Src/stm32h5xx_it.c **** 
+ 290:Core/Src/stm32h5xx_it.c ****   /* USER CODE END I2C1_EV_IRQn 1 */
+ 291:Core/Src/stm32h5xx_it.c **** }
+ 396              		.loc 1 291 1 is_stmt 0 view .LVU46
+ 397 0008 08BD     		pop	{r3, pc}
+ 398              	.L39:
+ 399 000a 00BF     		.align	2
+ 400              	.L38:
+ 401 000c 00000000 		.word	hi2c1
+ 402              		.cfi_endproc
+ 403              	.LFE311:
+ 405              		.section	.text.I2C1_ER_IRQHandler,"ax",%progbits
+ 406              		.align	1
+ 407              		.global	I2C1_ER_IRQHandler
+ 408              		.syntax unified
+ 409              		.thumb
+ 410              		.thumb_func
+ 412              	I2C1_ER_IRQHandler:
+ 413              	.LFB312:
+ 292:Core/Src/stm32h5xx_it.c **** 
+ 293:Core/Src/stm32h5xx_it.c **** /**
+ 294:Core/Src/stm32h5xx_it.c ****   * @brief This function handles I2C1 Error interrupt.
+ 295:Core/Src/stm32h5xx_it.c ****   */
+ 296:Core/Src/stm32h5xx_it.c **** void I2C1_ER_IRQHandler(void)
+ 297:Core/Src/stm32h5xx_it.c **** {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 13
+
+
+ 414              		.loc 1 297 1 is_stmt 1 view -0
+ 415              		.cfi_startproc
+ 416              		@ args = 0, pretend = 0, frame = 0
+ 417              		@ frame_needed = 0, uses_anonymous_args = 0
+ 418 0000 08B5     		push	{r3, lr}
+ 419              	.LCFI7:
+ 420              		.cfi_def_cfa_offset 8
+ 421              		.cfi_offset 3, -8
+ 422              		.cfi_offset 14, -4
+ 298:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN I2C1_ER_IRQn 0 */
+ 299:Core/Src/stm32h5xx_it.c **** 
+ 300:Core/Src/stm32h5xx_it.c ****   /* USER CODE END I2C1_ER_IRQn 0 */
+ 301:Core/Src/stm32h5xx_it.c ****   HAL_I2C_ER_IRQHandler(&hi2c1);
+ 423              		.loc 1 301 3 view .LVU48
+ 424 0002 0248     		ldr	r0, .L42
+ 425 0004 FFF7FEFF 		bl	HAL_I2C_ER_IRQHandler
+ 426              	.LVL7:
+ 302:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN I2C1_ER_IRQn 1 */
+ 303:Core/Src/stm32h5xx_it.c **** 
+ 304:Core/Src/stm32h5xx_it.c ****   /* USER CODE END I2C1_ER_IRQn 1 */
+ 305:Core/Src/stm32h5xx_it.c **** }
+ 427              		.loc 1 305 1 is_stmt 0 view .LVU49
+ 428 0008 08BD     		pop	{r3, pc}
+ 429              	.L43:
+ 430 000a 00BF     		.align	2
+ 431              	.L42:
+ 432 000c 00000000 		.word	hi2c1
+ 433              		.cfi_endproc
+ 434              	.LFE312:
+ 436              		.section	.text.USART1_IRQHandler,"ax",%progbits
+ 437              		.align	1
+ 438              		.global	USART1_IRQHandler
+ 439              		.syntax unified
+ 440              		.thumb
+ 441              		.thumb_func
+ 443              	USART1_IRQHandler:
+ 444              	.LFB313:
+ 306:Core/Src/stm32h5xx_it.c **** 
+ 307:Core/Src/stm32h5xx_it.c **** /**
+ 308:Core/Src/stm32h5xx_it.c ****   * @brief This function handles USART1 global interrupt.
+ 309:Core/Src/stm32h5xx_it.c ****   */
+ 310:Core/Src/stm32h5xx_it.c **** void USART1_IRQHandler(void)
+ 311:Core/Src/stm32h5xx_it.c **** {
+ 445              		.loc 1 311 1 is_stmt 1 view -0
+ 446              		.cfi_startproc
+ 447              		@ args = 0, pretend = 0, frame = 0
+ 448              		@ frame_needed = 0, uses_anonymous_args = 0
+ 449 0000 08B5     		push	{r3, lr}
+ 450              	.LCFI8:
+ 451              		.cfi_def_cfa_offset 8
+ 452              		.cfi_offset 3, -8
+ 453              		.cfi_offset 14, -4
+ 312:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN USART1_IRQn 0 */
+ 313:Core/Src/stm32h5xx_it.c **** 
+ 314:Core/Src/stm32h5xx_it.c ****   /* USER CODE END USART1_IRQn 0 */
+ 315:Core/Src/stm32h5xx_it.c ****   HAL_UART_IRQHandler(&huart1);
+ 454              		.loc 1 315 3 view .LVU51
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 14
+
+
+ 455 0002 0248     		ldr	r0, .L46
+ 456 0004 FFF7FEFF 		bl	HAL_UART_IRQHandler
+ 457              	.LVL8:
+ 316:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN USART1_IRQn 1 */
+ 317:Core/Src/stm32h5xx_it.c **** 
+ 318:Core/Src/stm32h5xx_it.c ****   /* USER CODE END USART1_IRQn 1 */
+ 319:Core/Src/stm32h5xx_it.c **** }
+ 458              		.loc 1 319 1 is_stmt 0 view .LVU52
+ 459 0008 08BD     		pop	{r3, pc}
+ 460              	.L47:
+ 461 000a 00BF     		.align	2
+ 462              	.L46:
+ 463 000c 00000000 		.word	huart1
+ 464              		.cfi_endproc
+ 465              	.LFE313:
+ 467              		.section	.text.USART2_IRQHandler,"ax",%progbits
+ 468              		.align	1
+ 469              		.global	USART2_IRQHandler
+ 470              		.syntax unified
+ 471              		.thumb
+ 472              		.thumb_func
+ 474              	USART2_IRQHandler:
+ 475              	.LFB314:
+ 320:Core/Src/stm32h5xx_it.c **** 
+ 321:Core/Src/stm32h5xx_it.c **** /**
+ 322:Core/Src/stm32h5xx_it.c ****   * @brief This function handles USART2 global interrupt.
+ 323:Core/Src/stm32h5xx_it.c ****   */
+ 324:Core/Src/stm32h5xx_it.c **** void USART2_IRQHandler(void)
+ 325:Core/Src/stm32h5xx_it.c **** {
+ 476              		.loc 1 325 1 is_stmt 1 view -0
+ 477              		.cfi_startproc
+ 478              		@ args = 0, pretend = 0, frame = 0
+ 479              		@ frame_needed = 0, uses_anonymous_args = 0
+ 480 0000 08B5     		push	{r3, lr}
+ 481              	.LCFI9:
+ 482              		.cfi_def_cfa_offset 8
+ 483              		.cfi_offset 3, -8
+ 484              		.cfi_offset 14, -4
+ 326:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN USART2_IRQn 0 */
+ 327:Core/Src/stm32h5xx_it.c **** 
+ 328:Core/Src/stm32h5xx_it.c ****   /* USER CODE END USART2_IRQn 0 */
+ 329:Core/Src/stm32h5xx_it.c ****   HAL_UART_IRQHandler(&huart2);
+ 485              		.loc 1 329 3 view .LVU54
+ 486 0002 0248     		ldr	r0, .L50
+ 487 0004 FFF7FEFF 		bl	HAL_UART_IRQHandler
+ 488              	.LVL9:
+ 330:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN USART2_IRQn 1 */
+ 331:Core/Src/stm32h5xx_it.c **** 
+ 332:Core/Src/stm32h5xx_it.c ****   /* USER CODE END USART2_IRQn 1 */
+ 333:Core/Src/stm32h5xx_it.c **** }
+ 489              		.loc 1 333 1 is_stmt 0 view .LVU55
+ 490 0008 08BD     		pop	{r3, pc}
+ 491              	.L51:
+ 492 000a 00BF     		.align	2
+ 493              	.L50:
+ 494 000c 00000000 		.word	huart2
+ 495              		.cfi_endproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 15
+
+
+ 496              	.LFE314:
+ 498              		.section	.text.USART3_IRQHandler,"ax",%progbits
+ 499              		.align	1
+ 500              		.global	USART3_IRQHandler
+ 501              		.syntax unified
+ 502              		.thumb
+ 503              		.thumb_func
+ 505              	USART3_IRQHandler:
+ 506              	.LFB315:
+ 334:Core/Src/stm32h5xx_it.c **** 
+ 335:Core/Src/stm32h5xx_it.c **** /**
+ 336:Core/Src/stm32h5xx_it.c ****   * @brief This function handles USART3 global interrupt.
+ 337:Core/Src/stm32h5xx_it.c ****   */
+ 338:Core/Src/stm32h5xx_it.c **** void USART3_IRQHandler(void)
+ 339:Core/Src/stm32h5xx_it.c **** {
+ 507              		.loc 1 339 1 is_stmt 1 view -0
+ 508              		.cfi_startproc
+ 509              		@ args = 0, pretend = 0, frame = 0
+ 510              		@ frame_needed = 0, uses_anonymous_args = 0
+ 511 0000 08B5     		push	{r3, lr}
+ 512              	.LCFI10:
+ 513              		.cfi_def_cfa_offset 8
+ 514              		.cfi_offset 3, -8
+ 515              		.cfi_offset 14, -4
+ 340:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN USART3_IRQn 0 */
+ 341:Core/Src/stm32h5xx_it.c **** 
+ 342:Core/Src/stm32h5xx_it.c ****   /* USER CODE END USART3_IRQn 0 */
+ 343:Core/Src/stm32h5xx_it.c ****   HAL_UART_IRQHandler(&huart3);
+ 516              		.loc 1 343 3 view .LVU57
+ 517 0002 0248     		ldr	r0, .L54
+ 518 0004 FFF7FEFF 		bl	HAL_UART_IRQHandler
+ 519              	.LVL10:
+ 344:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN USART3_IRQn 1 */
+ 345:Core/Src/stm32h5xx_it.c **** 
+ 346:Core/Src/stm32h5xx_it.c ****   /* USER CODE END USART3_IRQn 1 */
+ 347:Core/Src/stm32h5xx_it.c **** }
+ 520              		.loc 1 347 1 is_stmt 0 view .LVU58
+ 521 0008 08BD     		pop	{r3, pc}
+ 522              	.L55:
+ 523 000a 00BF     		.align	2
+ 524              	.L54:
+ 525 000c 00000000 		.word	huart3
+ 526              		.cfi_endproc
+ 527              	.LFE315:
+ 529              		.section	.text.UART4_IRQHandler,"ax",%progbits
+ 530              		.align	1
+ 531              		.global	UART4_IRQHandler
+ 532              		.syntax unified
+ 533              		.thumb
+ 534              		.thumb_func
+ 536              	UART4_IRQHandler:
+ 537              	.LFB316:
+ 348:Core/Src/stm32h5xx_it.c **** 
+ 349:Core/Src/stm32h5xx_it.c **** /**
+ 350:Core/Src/stm32h5xx_it.c ****   * @brief This function handles UART4 global interrupt.
+ 351:Core/Src/stm32h5xx_it.c ****   */
+ 352:Core/Src/stm32h5xx_it.c **** void UART4_IRQHandler(void)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 16
+
+
+ 353:Core/Src/stm32h5xx_it.c **** {
+ 538              		.loc 1 353 1 is_stmt 1 view -0
+ 539              		.cfi_startproc
+ 540              		@ args = 0, pretend = 0, frame = 0
+ 541              		@ frame_needed = 0, uses_anonymous_args = 0
+ 542 0000 08B5     		push	{r3, lr}
+ 543              	.LCFI11:
+ 544              		.cfi_def_cfa_offset 8
+ 545              		.cfi_offset 3, -8
+ 546              		.cfi_offset 14, -4
+ 354:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN UART4_IRQn 0 */
+ 355:Core/Src/stm32h5xx_it.c **** 
+ 356:Core/Src/stm32h5xx_it.c ****   /* USER CODE END UART4_IRQn 0 */
+ 357:Core/Src/stm32h5xx_it.c ****   HAL_UART_IRQHandler(&huart4);
+ 547              		.loc 1 357 3 view .LVU60
+ 548 0002 0248     		ldr	r0, .L58
+ 549 0004 FFF7FEFF 		bl	HAL_UART_IRQHandler
+ 550              	.LVL11:
+ 358:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN UART4_IRQn 1 */
+ 359:Core/Src/stm32h5xx_it.c **** 
+ 360:Core/Src/stm32h5xx_it.c ****   /* USER CODE END UART4_IRQn 1 */
+ 361:Core/Src/stm32h5xx_it.c **** }
+ 551              		.loc 1 361 1 is_stmt 0 view .LVU61
+ 552 0008 08BD     		pop	{r3, pc}
+ 553              	.L59:
+ 554 000a 00BF     		.align	2
+ 555              	.L58:
+ 556 000c 00000000 		.word	huart4
+ 557              		.cfi_endproc
+ 558              	.LFE316:
+ 560              		.section	.text.UART5_IRQHandler,"ax",%progbits
+ 561              		.align	1
+ 562              		.global	UART5_IRQHandler
+ 563              		.syntax unified
+ 564              		.thumb
+ 565              		.thumb_func
+ 567              	UART5_IRQHandler:
+ 568              	.LFB317:
+ 362:Core/Src/stm32h5xx_it.c **** 
+ 363:Core/Src/stm32h5xx_it.c **** /**
+ 364:Core/Src/stm32h5xx_it.c ****   * @brief This function handles UART5 global interrupt.
+ 365:Core/Src/stm32h5xx_it.c ****   */
+ 366:Core/Src/stm32h5xx_it.c **** void UART5_IRQHandler(void)
+ 367:Core/Src/stm32h5xx_it.c **** {
+ 569              		.loc 1 367 1 is_stmt 1 view -0
+ 570              		.cfi_startproc
+ 571              		@ args = 0, pretend = 0, frame = 0
+ 572              		@ frame_needed = 0, uses_anonymous_args = 0
+ 573 0000 08B5     		push	{r3, lr}
+ 574              	.LCFI12:
+ 575              		.cfi_def_cfa_offset 8
+ 576              		.cfi_offset 3, -8
+ 577              		.cfi_offset 14, -4
+ 368:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN UART5_IRQn 0 */
+ 369:Core/Src/stm32h5xx_it.c **** 
+ 370:Core/Src/stm32h5xx_it.c ****   /* USER CODE END UART5_IRQn 0 */
+ 371:Core/Src/stm32h5xx_it.c ****   HAL_UART_IRQHandler(&huart5);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 17
+
+
+ 578              		.loc 1 371 3 view .LVU63
+ 579 0002 0248     		ldr	r0, .L62
+ 580 0004 FFF7FEFF 		bl	HAL_UART_IRQHandler
+ 581              	.LVL12:
+ 372:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN UART5_IRQn 1 */
+ 373:Core/Src/stm32h5xx_it.c **** 
+ 374:Core/Src/stm32h5xx_it.c ****   /* USER CODE END UART5_IRQn 1 */
+ 375:Core/Src/stm32h5xx_it.c **** }
+ 582              		.loc 1 375 1 is_stmt 0 view .LVU64
+ 583 0008 08BD     		pop	{r3, pc}
+ 584              	.L63:
+ 585 000a 00BF     		.align	2
+ 586              	.L62:
+ 587 000c 00000000 		.word	huart5
+ 588              		.cfi_endproc
+ 589              	.LFE317:
+ 591              		.section	.text.LPTIM1_IRQHandler,"ax",%progbits
+ 592              		.align	1
+ 593              		.global	LPTIM1_IRQHandler
+ 594              		.syntax unified
+ 595              		.thumb
+ 596              		.thumb_func
+ 598              	LPTIM1_IRQHandler:
+ 599              	.LFB318:
+ 376:Core/Src/stm32h5xx_it.c **** 
+ 377:Core/Src/stm32h5xx_it.c **** /**
+ 378:Core/Src/stm32h5xx_it.c ****   * @brief This function handles LPTIM1 global interrupt.
+ 379:Core/Src/stm32h5xx_it.c ****   */
+ 380:Core/Src/stm32h5xx_it.c **** void LPTIM1_IRQHandler(void)
+ 381:Core/Src/stm32h5xx_it.c **** {
+ 600              		.loc 1 381 1 is_stmt 1 view -0
+ 601              		.cfi_startproc
+ 602              		@ args = 0, pretend = 0, frame = 0
+ 603              		@ frame_needed = 0, uses_anonymous_args = 0
+ 604 0000 08B5     		push	{r3, lr}
+ 605              	.LCFI13:
+ 606              		.cfi_def_cfa_offset 8
+ 607              		.cfi_offset 3, -8
+ 608              		.cfi_offset 14, -4
+ 382:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN LPTIM1_IRQn 0 */
+ 383:Core/Src/stm32h5xx_it.c **** 
+ 384:Core/Src/stm32h5xx_it.c ****   /* USER CODE END LPTIM1_IRQn 0 */
+ 385:Core/Src/stm32h5xx_it.c ****   HAL_LPTIM_IRQHandler(&hlptim1);
+ 609              		.loc 1 385 3 view .LVU66
+ 610 0002 0248     		ldr	r0, .L66
+ 611 0004 FFF7FEFF 		bl	HAL_LPTIM_IRQHandler
+ 612              	.LVL13:
+ 386:Core/Src/stm32h5xx_it.c ****   /* USER CODE BEGIN LPTIM1_IRQn 1 */
+ 387:Core/Src/stm32h5xx_it.c **** 
+ 388:Core/Src/stm32h5xx_it.c ****   /* USER CODE END LPTIM1_IRQn 1 */
+ 389:Core/Src/stm32h5xx_it.c **** }
+ 613              		.loc 1 389 1 is_stmt 0 view .LVU67
+ 614 0008 08BD     		pop	{r3, pc}
+ 615              	.L67:
+ 616 000a 00BF     		.align	2
+ 617              	.L66:
+ 618 000c 00000000 		.word	hlptim1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 18
+
+
+ 619              		.cfi_endproc
+ 620              	.LFE318:
+ 622              		.text
+ 623              	.Letext0:
+ 624              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 625              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 626              		.file 4 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 627              		.file 5 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 628              		.file 6 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma.h"
+ 629              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma_ex.h"
+ 630              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_i2c.h"
+ 631              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 632              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_lptim.h"
+ 633              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc.h"
+ 634              		.file 12 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_tim.h"
+ 635              		.file 13 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_uart.h"
+ 636              		.file 14 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_rtc_ex.h"
+ 637              		.file 15 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 19
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 stm32h5xx_it.c
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:22     .text.NMI_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:28     .text.NMI_Handler:00000000 NMI_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:45     .text.HardFault_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:51     .text.HardFault_Handler:00000000 HardFault_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:68     .text.MemManage_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:74     .text.MemManage_Handler:00000000 MemManage_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:91     .text.BusFault_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:97     .text.BusFault_Handler:00000000 BusFault_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:114    .text.UsageFault_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:120    .text.UsageFault_Handler:00000000 UsageFault_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:137    .text.SVC_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:143    .text.SVC_Handler:00000000 SVC_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:156    .text.DebugMon_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:162    .text.DebugMon_Handler:00000000 DebugMon_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:175    .text.PendSV_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:181    .text.PendSV_Handler:00000000 PendSV_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:194    .text.SysTick_Handler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:200    .text.SysTick_Handler:00000000 SysTick_Handler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:220    .text.RTC_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:226    .text.RTC_IRQHandler:00000000 RTC_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:246    .text.RTC_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:251    .text.TIM1_BRK_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:257    .text.TIM1_BRK_IRQHandler:00000000 TIM1_BRK_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:277    .text.TIM1_BRK_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:282    .text.TIM1_UP_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:288    .text.TIM1_UP_IRQHandler:00000000 TIM1_UP_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:308    .text.TIM1_UP_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:313    .text.TIM1_TRG_COM_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:319    .text.TIM1_TRG_COM_IRQHandler:00000000 TIM1_TRG_COM_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:339    .text.TIM1_TRG_COM_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:344    .text.TIM1_CC_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:350    .text.TIM1_CC_IRQHandler:00000000 TIM1_CC_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:370    .text.TIM1_CC_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:375    .text.I2C1_EV_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:381    .text.I2C1_EV_IRQHandler:00000000 I2C1_EV_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:401    .text.I2C1_EV_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:406    .text.I2C1_ER_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:412    .text.I2C1_ER_IRQHandler:00000000 I2C1_ER_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:432    .text.I2C1_ER_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:437    .text.USART1_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:443    .text.USART1_IRQHandler:00000000 USART1_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:463    .text.USART1_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:468    .text.USART2_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:474    .text.USART2_IRQHandler:00000000 USART2_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:494    .text.USART2_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:499    .text.USART3_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:505    .text.USART3_IRQHandler:00000000 USART3_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:525    .text.USART3_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:530    .text.UART4_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:536    .text.UART4_IRQHandler:00000000 UART4_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:556    .text.UART4_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:561    .text.UART5_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:567    .text.UART5_IRQHandler:00000000 UART5_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:587    .text.UART5_IRQHandler:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:592    .text.LPTIM1_IRQHandler:00000000 $t
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s 			page 20
+
+
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:598    .text.LPTIM1_IRQHandler:00000000 LPTIM1_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\cc4PcYep.s:618    .text.LPTIM1_IRQHandler:0000000c $d
+
+UNDEFINED SYMBOLS
+HAL_IncTick
+HAL_RTCEx_WakeUpTimerIRQHandler
+hrtc
+HAL_TIM_IRQHandler
+htim1
+HAL_I2C_EV_IRQHandler
+hi2c1
+HAL_I2C_ER_IRQHandler
+HAL_UART_IRQHandler
+huart1
+huart2
+huart3
+huart4
+huart5
+HAL_LPTIM_IRQHandler
+hlptim1

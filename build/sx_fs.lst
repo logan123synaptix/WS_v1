@@ -1,0 +1,811 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_fs.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/services/filesystem/sx_fs.c"
+  21              		.section	.text.sx_ext_flash_read,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sx_ext_flash_read:
+  28              	.LVL0:
+  29              	.LFB24:
+  30              		.file 2 "SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h"
+   1:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #ifndef __SX_EXTERNAL_FLASH_H
+   2:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #define __SX_EXTERNAL_FLASH_H
+   3:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+   4:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #ifdef  __cplusplus
+   5:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** extern "C"{
+   6:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #endif
+   7:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+   8:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #include "stdint.h"
+   9:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #include "stdbool.h"
+  10:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #include "sx_gpio.h"
+  11:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  12:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** typedef struct {
+  13:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t page_size;     /* bytes per page   */
+  14:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t sector_size;   /* bytes per sector */
+  15:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t block_size;    /* bytes per block  */
+  16:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t total_bytes;   /* total chip size  */
+  17:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** } sx_ext_flash_info_t;
+  18:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  19:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** typedef struct {
+  20:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     int  (*read)        (uint32_t addr, uint8_t *buf, uint32_t len);
+  21:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     int  (*write)       (uint32_t addr, const uint8_t *buf, uint32_t len);
+  22:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     int  (*erase_sector)(uint32_t addr);
+  23:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     bool (*is_busy)     (void);
+  24:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** } sx_ext_flash_ops_t;
+  25:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  26:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** typedef struct {
+  27:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     sx_ext_flash_ops_t  *ops;
+  28:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     sx_ext_flash_info_t  info;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 2
+
+
+  29:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** } sx_ext_flash_t;
+  30:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  31:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** static inline void sx_ext_flash_init(sx_ext_flash_t *flash, sx_ext_flash_ops_t *ops, sx_ext_flash_i
+  32:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     flash->ops = ops;
+  33:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     flash->info = *info;
+  34:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** }
+  35:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  36:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** static inline int sx_ext_flash_read(sx_ext_flash_t *flash, uint32_t addr, uint8_t *buf, uint32_t le
+  37:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** {
+  31              		.loc 2 37 1 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 2 37 1 is_stmt 0 view .LVU1
+  36 0000 08B5     		push	{r3, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 8
+  39              		.cfi_offset 3, -8
+  40              		.cfi_offset 14, -4
+  41 0002 8446     		mov	ip, r0
+  42 0004 0846     		mov	r0, r1
+  43              	.LVL1:
+  44              		.loc 2 37 1 view .LVU2
+  45 0006 1146     		mov	r1, r2
+  46              	.LVL2:
+  47              		.loc 2 37 1 view .LVU3
+  48 0008 1A46     		mov	r2, r3
+  49              	.LVL3:
+  38:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     if (flash->ops && flash->ops->read)
+  50              		.loc 2 38 5 is_stmt 1 view .LVU4
+  51              		.loc 2 38 14 is_stmt 0 view .LVU5
+  52 000a DCF80030 		ldr	r3, [ip]
+  53              	.LVL4:
+  54              		.loc 2 38 8 view .LVU6
+  55 000e 1BB1     		cbz	r3, .L3
+  56              		.loc 2 38 33 discriminator 1 view .LVU7
+  57 0010 1B68     		ldr	r3, [r3]
+  58              		.loc 2 38 20 discriminator 1 view .LVU8
+  59 0012 23B1     		cbz	r3, .L4
+  39:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****         return flash->ops->read(addr, buf, len);
+  60              		.loc 2 39 9 is_stmt 1 view .LVU9
+  61              		.loc 2 39 16 is_stmt 0 view .LVU10
+  62 0014 9847     		blx	r3
+  63              	.LVL5:
+  64              	.L1:
+  40:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+  41:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** }
+  65              		.loc 2 41 1 view .LVU11
+  66 0016 08BD     		pop	{r3, pc}
+  67              	.LVL6:
+  68              	.L3:
+  40:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+  69              		.loc 2 40 12 view .LVU12
+  70 0018 4FF0FF30 		mov	r0, #-1
+  71              	.LVL7:
+  40:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+  72              		.loc 2 40 12 view .LVU13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 3
+
+
+  73 001c FBE7     		b	.L1
+  74              	.LVL8:
+  75              	.L4:
+  40:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+  76              		.loc 2 40 12 view .LVU14
+  77 001e 4FF0FF30 		mov	r0, #-1
+  78              	.LVL9:
+  40:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+  79              		.loc 2 40 12 view .LVU15
+  80 0022 F8E7     		b	.L1
+  81              		.cfi_endproc
+  82              	.LFE24:
+  84              		.section	.text.sx_ext_flash_write,"ax",%progbits
+  85              		.align	1
+  86              		.syntax unified
+  87              		.thumb
+  88              		.thumb_func
+  90              	sx_ext_flash_write:
+  91              	.LVL10:
+  92              	.LFB25:
+  42:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  43:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** static inline int sx_ext_flash_write(sx_ext_flash_t *flash, uint32_t addr, const uint8_t *buf, uint
+  93              		.loc 2 43 109 is_stmt 1 view -0
+  94              		.cfi_startproc
+  95              		@ args = 0, pretend = 0, frame = 0
+  96              		@ frame_needed = 0, uses_anonymous_args = 0
+  97              		.loc 2 43 109 is_stmt 0 view .LVU17
+  98 0000 08B5     		push	{r3, lr}
+  99              	.LCFI1:
+ 100              		.cfi_def_cfa_offset 8
+ 101              		.cfi_offset 3, -8
+ 102              		.cfi_offset 14, -4
+ 103 0002 8446     		mov	ip, r0
+ 104 0004 0846     		mov	r0, r1
+ 105              	.LVL11:
+ 106              		.loc 2 43 109 view .LVU18
+ 107 0006 1146     		mov	r1, r2
+ 108              	.LVL12:
+ 109              		.loc 2 43 109 view .LVU19
+ 110 0008 1A46     		mov	r2, r3
+ 111              	.LVL13:
+  44:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     if (flash->ops && flash->ops->write)
+ 112              		.loc 2 44 5 is_stmt 1 view .LVU20
+ 113              		.loc 2 44 14 is_stmt 0 view .LVU21
+ 114 000a DCF80030 		ldr	r3, [ip]
+ 115              	.LVL14:
+ 116              		.loc 2 44 8 view .LVU22
+ 117 000e 1BB1     		cbz	r3, .L8
+ 118              		.loc 2 44 33 discriminator 1 view .LVU23
+ 119 0010 5B68     		ldr	r3, [r3, #4]
+ 120              		.loc 2 44 20 discriminator 1 view .LVU24
+ 121 0012 23B1     		cbz	r3, .L9
+  45:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****         return flash->ops->write(addr, buf, len);
+ 122              		.loc 2 45 9 is_stmt 1 view .LVU25
+ 123              		.loc 2 45 16 is_stmt 0 view .LVU26
+ 124 0014 9847     		blx	r3
+ 125              	.LVL15:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 4
+
+
+ 126              	.L6:
+  46:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+  47:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** }
+ 127              		.loc 2 47 1 view .LVU27
+ 128 0016 08BD     		pop	{r3, pc}
+ 129              	.LVL16:
+ 130              	.L8:
+  46:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 131              		.loc 2 46 12 view .LVU28
+ 132 0018 4FF0FF30 		mov	r0, #-1
+ 133              	.LVL17:
+  46:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 134              		.loc 2 46 12 view .LVU29
+ 135 001c FBE7     		b	.L6
+ 136              	.LVL18:
+ 137              	.L9:
+  46:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 138              		.loc 2 46 12 view .LVU30
+ 139 001e 4FF0FF30 		mov	r0, #-1
+ 140              	.LVL19:
+  46:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 141              		.loc 2 46 12 view .LVU31
+ 142 0022 F8E7     		b	.L6
+ 143              		.cfi_endproc
+ 144              	.LFE25:
+ 146              		.section	.text.sx_ext_flash_erase_sector,"ax",%progbits
+ 147              		.align	1
+ 148              		.syntax unified
+ 149              		.thumb
+ 150              		.thumb_func
+ 152              	sx_ext_flash_erase_sector:
+ 153              	.LVL20:
+ 154              	.LFB26:
+  48:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  49:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** static inline int sx_ext_flash_erase_sector(sx_ext_flash_t *flash, uint32_t addr)
+  50:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** {
+ 155              		.loc 2 50 1 is_stmt 1 view -0
+ 156              		.cfi_startproc
+ 157              		@ args = 0, pretend = 0, frame = 0
+ 158              		@ frame_needed = 0, uses_anonymous_args = 0
+ 159              		.loc 2 50 1 is_stmt 0 view .LVU33
+ 160 0000 08B5     		push	{r3, lr}
+ 161              	.LCFI2:
+ 162              		.cfi_def_cfa_offset 8
+ 163              		.cfi_offset 3, -8
+ 164              		.cfi_offset 14, -4
+  51:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     if (flash->ops && flash->ops->erase_sector)
+ 165              		.loc 2 51 5 is_stmt 1 view .LVU34
+ 166              		.loc 2 51 14 is_stmt 0 view .LVU35
+ 167 0002 0368     		ldr	r3, [r0]
+ 168              		.loc 2 51 8 view .LVU36
+ 169 0004 23B1     		cbz	r3, .L13
+ 170              		.loc 2 51 33 discriminator 1 view .LVU37
+ 171 0006 9B68     		ldr	r3, [r3, #8]
+ 172              		.loc 2 51 20 discriminator 1 view .LVU38
+ 173 0008 2BB1     		cbz	r3, .L14
+  52:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****         return flash->ops->erase_sector(addr);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 5
+
+
+ 174              		.loc 2 52 9 is_stmt 1 view .LVU39
+ 175              		.loc 2 52 16 is_stmt 0 view .LVU40
+ 176 000a 0846     		mov	r0, r1
+ 177              	.LVL21:
+ 178              		.loc 2 52 16 view .LVU41
+ 179 000c 9847     		blx	r3
+ 180              	.LVL22:
+ 181              	.L11:
+  53:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+  54:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** }
+ 182              		.loc 2 54 1 view .LVU42
+ 183 000e 08BD     		pop	{r3, pc}
+ 184              	.LVL23:
+ 185              	.L13:
+  53:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 186              		.loc 2 53 12 view .LVU43
+ 187 0010 4FF0FF30 		mov	r0, #-1
+ 188              	.LVL24:
+  53:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 189              		.loc 2 53 12 view .LVU44
+ 190 0014 FBE7     		b	.L11
+ 191              	.LVL25:
+ 192              	.L14:
+  53:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 193              		.loc 2 53 12 view .LVU45
+ 194 0016 4FF0FF30 		mov	r0, #-1
+ 195              	.LVL26:
+  53:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     return -1;
+ 196              		.loc 2 53 12 view .LVU46
+ 197 001a F8E7     		b	.L11
+ 198              		.cfi_endproc
+ 199              	.LFE26:
+ 201              		.section	.text.lfs_flash_read,"ax",%progbits
+ 202              		.align	1
+ 203              		.syntax unified
+ 204              		.thumb
+ 205              		.thumb_func
+ 207              	lfs_flash_read:
+ 208              	.LVL27:
+ 209              	.LFB28:
+   1:SynaptiX_FDK/services/filesystem/sx_fs.c **** #include "sx_fs.h"
+   2:SynaptiX_FDK/services/filesystem/sx_fs.c **** #include "logger.h"
+   3:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+   4:SynaptiX_FDK/services/filesystem/sx_fs.c **** static const char *TAG = "SX_FS";
+   5:SynaptiX_FDK/services/filesystem/sx_fs.c **** static sx_ext_flash_t *s_flash = NULL;
+   6:SynaptiX_FDK/services/filesystem/sx_fs.c **** static file_system_config_t s_config;
+   7:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+   8:SynaptiX_FDK/services/filesystem/sx_fs.c **** static int lfs_flash_read(const struct lfs_config *c,
+   9:SynaptiX_FDK/services/filesystem/sx_fs.c ****                            lfs_block_t block, lfs_off_t off,
+  10:SynaptiX_FDK/services/filesystem/sx_fs.c ****                            void *buf, lfs_size_t size)
+  11:SynaptiX_FDK/services/filesystem/sx_fs.c **** {
+ 210              		.loc 1 11 1 is_stmt 1 view -0
+ 211              		.cfi_startproc
+ 212              		@ args = 4, pretend = 0, frame = 0
+ 213              		@ frame_needed = 0, uses_anonymous_args = 0
+ 214              		.loc 1 11 1 is_stmt 0 view .LVU48
+ 215 0000 08B5     		push	{r3, lr}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 6
+
+
+ 216              	.LCFI3:
+ 217              		.cfi_def_cfa_offset 8
+ 218              		.cfi_offset 3, -8
+ 219              		.cfi_offset 14, -4
+ 220 0002 9C46     		mov	ip, r3
+  12:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // uint32_t addr = block * c->block_size + off;
+  13:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // log_info("SX_FS", "lfs read block=%lu off=%lu size=%lu addr=0x%06lX", (unsigned long)block, 
+  14:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // int ret = sx_ext_flash_read(s_flash, addr, buf, size);
+  15:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // if (ret != 0) log_error("SX_FS", "read FAILED ret=%d", ret);
+  16:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // return ret;
+  17:SynaptiX_FDK/services/filesystem/sx_fs.c ****     uint32_t addr = PART_GPS_LOG_OFFSET + block * c->block_size + off;
+ 221              		.loc 1 17 5 is_stmt 1 view .LVU49
+ 222              		.loc 1 17 52 is_stmt 0 view .LVU50
+ 223 0004 C369     		ldr	r3, [r0, #28]
+ 224              	.LVL28:
+ 225              		.loc 1 17 65 view .LVU51
+ 226 0006 01FB0321 		mla	r1, r1, r3, r2
+ 227              	.LVL29:
+  18:SynaptiX_FDK/services/filesystem/sx_fs.c ****     return sx_ext_flash_read(s_flash, addr, buf, size);
+ 228              		.loc 1 18 5 is_stmt 1 view .LVU52
+ 229              		.loc 1 18 12 is_stmt 0 view .LVU53
+ 230 000a 029B     		ldr	r3, [sp, #8]
+ 231 000c 6246     		mov	r2, ip
+ 232              	.LVL30:
+ 233              		.loc 1 18 12 view .LVU54
+ 234 000e 01F5E001 		add	r1, r1, #7340032
+ 235              	.LVL31:
+ 236              		.loc 1 18 12 view .LVU55
+ 237 0012 0248     		ldr	r0, .L18
+ 238              	.LVL32:
+ 239              		.loc 1 18 12 view .LVU56
+ 240 0014 0068     		ldr	r0, [r0]
+ 241 0016 FFF7FEFF 		bl	sx_ext_flash_read
+ 242              	.LVL33:
+  19:SynaptiX_FDK/services/filesystem/sx_fs.c **** }
+ 243              		.loc 1 19 1 view .LVU57
+ 244 001a 08BD     		pop	{r3, pc}
+ 245              	.LVL34:
+ 246              	.L19:
+ 247              		.loc 1 19 1 view .LVU58
+ 248              		.align	2
+ 249              	.L18:
+ 250 001c 00000000 		.word	s_flash
+ 251              		.cfi_endproc
+ 252              	.LFE28:
+ 254              		.section	.text.lfs_flash_erase,"ax",%progbits
+ 255              		.align	1
+ 256              		.syntax unified
+ 257              		.thumb
+ 258              		.thumb_func
+ 260              	lfs_flash_erase:
+ 261              	.LVL35:
+ 262              	.LFB30:
+  20:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+  21:SynaptiX_FDK/services/filesystem/sx_fs.c **** static int lfs_flash_write(const struct lfs_config *c,
+  22:SynaptiX_FDK/services/filesystem/sx_fs.c ****                            lfs_block_t block, lfs_off_t off,
+  23:SynaptiX_FDK/services/filesystem/sx_fs.c ****                            const void *buf, lfs_size_t size)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 7
+
+
+  24:SynaptiX_FDK/services/filesystem/sx_fs.c **** {
+  25:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // uint32_t addr = block *c->block_size + off;
+  26:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // int ret = sx_ext_flash_write(s_flash, addr, buf, size);
+  27:SynaptiX_FDK/services/filesystem/sx_fs.c ****     uint32_t addr = PART_GPS_LOG_OFFSET + block * c->block_size + off;
+  28:SynaptiX_FDK/services/filesystem/sx_fs.c ****     int ret = sx_ext_flash_write(s_flash, addr, buf, size);
+  29:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (ret != 0) {
+  30:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "write FAILED ret=%d", ret);
+  31:SynaptiX_FDK/services/filesystem/sx_fs.c ****         return ret;
+  32:SynaptiX_FDK/services/filesystem/sx_fs.c ****     }
+  33:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+  34:SynaptiX_FDK/services/filesystem/sx_fs.c ****     static uint8_t verify_buf[16];
+  35:SynaptiX_FDK/services/filesystem/sx_fs.c ****     sx_ext_flash_read(s_flash, addr, verify_buf, size);
+  36:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (memcmp(buf, verify_buf, size) != 0) {
+  37:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "VERIFY FAILED at addr=0x%06lX", (unsigned long)addr);
+  38:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "wrote: %02X %02X %02X %02X ...", ((uint8_t*)buf)[0], ((uint8_t*)buf)[1]
+  39:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "read : %02X %02X %02X %02X ...", verify_buf[0], verify_buf[1], verify_b
+  40:SynaptiX_FDK/services/filesystem/sx_fs.c ****     } else {
+  41:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_info("SX_FS", "verify OK at addr=0x%06lX", (unsigned long)addr);
+  42:SynaptiX_FDK/services/filesystem/sx_fs.c ****     }
+  43:SynaptiX_FDK/services/filesystem/sx_fs.c ****     return ret;
+  44:SynaptiX_FDK/services/filesystem/sx_fs.c **** }
+  45:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+  46:SynaptiX_FDK/services/filesystem/sx_fs.c **** static int lfs_flash_erase(const struct lfs_config *c, lfs_block_t block){
+ 263              		.loc 1 46 74 is_stmt 1 view -0
+ 264              		.cfi_startproc
+ 265              		@ args = 0, pretend = 0, frame = 0
+ 266              		@ frame_needed = 0, uses_anonymous_args = 0
+ 267              		.loc 1 46 74 is_stmt 0 view .LVU60
+ 268 0000 08B5     		push	{r3, lr}
+ 269              	.LCFI4:
+ 270              		.cfi_def_cfa_offset 8
+ 271              		.cfi_offset 3, -8
+ 272              		.cfi_offset 14, -4
+  47:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // uint32_t addr = block * c->block_size;
+  48:SynaptiX_FDK/services/filesystem/sx_fs.c ****     uint32_t addr = PART_GPS_LOG_OFFSET + block * c->block_size;
+ 273              		.loc 1 48 5 is_stmt 1 view .LVU61
+ 274              		.loc 1 48 52 is_stmt 0 view .LVU62
+ 275 0002 C369     		ldr	r3, [r0, #28]
+ 276              		.loc 1 48 49 view .LVU63
+ 277 0004 03FB01F1 		mul	r1, r3, r1
+ 278              	.LVL36:
+  49:SynaptiX_FDK/services/filesystem/sx_fs.c ****     return sx_ext_flash_erase_sector(s_flash, addr);
+ 279              		.loc 1 49 5 is_stmt 1 view .LVU64
+ 280              		.loc 1 49 12 is_stmt 0 view .LVU65
+ 281 0008 01F5E001 		add	r1, r1, #7340032
+ 282              	.LVL37:
+ 283              		.loc 1 49 12 view .LVU66
+ 284 000c 024B     		ldr	r3, .L22
+ 285 000e 1868     		ldr	r0, [r3]
+ 286              	.LVL38:
+ 287              		.loc 1 49 12 view .LVU67
+ 288 0010 FFF7FEFF 		bl	sx_ext_flash_erase_sector
+ 289              	.LVL39:
+  50:SynaptiX_FDK/services/filesystem/sx_fs.c **** }
+ 290              		.loc 1 50 1 view .LVU68
+ 291 0014 08BD     		pop	{r3, pc}
+ 292              	.L23:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 8
+
+
+ 293 0016 00BF     		.align	2
+ 294              	.L22:
+ 295 0018 00000000 		.word	s_flash
+ 296              		.cfi_endproc
+ 297              	.LFE30:
+ 299              		.section	.rodata.lfs_flash_write.str1.4,"aMS",%progbits,1
+ 300              		.align	2
+ 301              	.LC0:
+ 302 0000 77726974 		.ascii	"write FAILED ret=%d\000"
+ 302      65204641 
+ 302      494C4544 
+ 302      20726574 
+ 302      3D256400 
+ 303              		.align	2
+ 304              	.LC1:
+ 305 0014 53585F46 		.ascii	"SX_FS\000"
+ 305      5300
+ 306 001a 0000     		.align	2
+ 307              	.LC2:
+ 308 001c 56455249 		.ascii	"VERIFY FAILED at addr=0x%06lX\000"
+ 308      46592046 
+ 308      41494C45 
+ 308      44206174 
+ 308      20616464 
+ 309 003a 0000     		.align	2
+ 310              	.LC3:
+ 311 003c 77726F74 		.ascii	"wrote: %02X %02X %02X %02X ...\000"
+ 311      653A2025 
+ 311      30325820 
+ 311      25303258 
+ 311      20253032 
+ 312 005b 00       		.align	2
+ 313              	.LC4:
+ 314 005c 72656164 		.ascii	"read : %02X %02X %02X %02X ...\000"
+ 314      203A2025 
+ 314      30325820 
+ 314      25303258 
+ 314      20253032 
+ 315 007b 00       		.align	2
+ 316              	.LC5:
+ 317 007c 76657269 		.ascii	"verify OK at addr=0x%06lX\000"
+ 317      6679204F 
+ 317      4B206174 
+ 317      20616464 
+ 317      723D3078 
+ 318              		.section	.text.lfs_flash_write,"ax",%progbits
+ 319              		.align	1
+ 320              		.syntax unified
+ 321              		.thumb
+ 322              		.thumb_func
+ 324              	lfs_flash_write:
+ 325              	.LVL40:
+ 326              	.LFB29:
+  24:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // uint32_t addr = block *c->block_size + off;
+ 327              		.loc 1 24 1 is_stmt 1 view -0
+ 328              		.cfi_startproc
+ 329              		@ args = 4, pretend = 0, frame = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 9
+
+
+ 330              		@ frame_needed = 0, uses_anonymous_args = 0
+  24:SynaptiX_FDK/services/filesystem/sx_fs.c ****     // uint32_t addr = block *c->block_size + off;
+ 331              		.loc 1 24 1 is_stmt 0 view .LVU70
+ 332 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 333              	.LCFI5:
+ 334              		.cfi_def_cfa_offset 24
+ 335              		.cfi_offset 4, -24
+ 336              		.cfi_offset 5, -20
+ 337              		.cfi_offset 6, -16
+ 338              		.cfi_offset 7, -12
+ 339              		.cfi_offset 8, -8
+ 340              		.cfi_offset 14, -4
+ 341 0004 84B0     		sub	sp, sp, #16
+ 342              	.LCFI6:
+ 343              		.cfi_def_cfa_offset 40
+ 344 0006 1D46     		mov	r5, r3
+ 345 0008 0A9E     		ldr	r6, [sp, #40]
+  27:SynaptiX_FDK/services/filesystem/sx_fs.c ****     int ret = sx_ext_flash_write(s_flash, addr, buf, size);
+ 346              		.loc 1 27 5 is_stmt 1 view .LVU71
+  27:SynaptiX_FDK/services/filesystem/sx_fs.c ****     int ret = sx_ext_flash_write(s_flash, addr, buf, size);
+ 347              		.loc 1 27 52 is_stmt 0 view .LVU72
+ 348 000a C469     		ldr	r4, [r0, #28]
+  27:SynaptiX_FDK/services/filesystem/sx_fs.c ****     int ret = sx_ext_flash_write(s_flash, addr, buf, size);
+ 349              		.loc 1 27 65 view .LVU73
+ 350 000c 01FB0424 		mla	r4, r1, r4, r2
+  27:SynaptiX_FDK/services/filesystem/sx_fs.c ****     int ret = sx_ext_flash_write(s_flash, addr, buf, size);
+ 351              		.loc 1 27 14 view .LVU74
+ 352 0010 04F5E004 		add	r4, r4, #7340032
+ 353              	.LVL41:
+  28:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (ret != 0) {
+ 354              		.loc 1 28 5 is_stmt 1 view .LVU75
+  28:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (ret != 0) {
+ 355              		.loc 1 28 15 is_stmt 0 view .LVU76
+ 356 0014 3346     		mov	r3, r6
+ 357              	.LVL42:
+  28:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (ret != 0) {
+ 358              		.loc 1 28 15 view .LVU77
+ 359 0016 2A46     		mov	r2, r5
+ 360              	.LVL43:
+  28:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (ret != 0) {
+ 361              		.loc 1 28 15 view .LVU78
+ 362 0018 2146     		mov	r1, r4
+ 363              	.LVL44:
+  28:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (ret != 0) {
+ 364              		.loc 1 28 15 view .LVU79
+ 365 001a 2548     		ldr	r0, .L30
+ 366              	.LVL45:
+  28:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (ret != 0) {
+ 367              		.loc 1 28 15 view .LVU80
+ 368 001c 0068     		ldr	r0, [r0]
+ 369 001e FFF7FEFF 		bl	sx_ext_flash_write
+ 370              	.LVL46:
+  29:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "write FAILED ret=%d", ret);
+ 371              		.loc 1 29 5 is_stmt 1 view .LVU81
+  29:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "write FAILED ret=%d", ret);
+ 372              		.loc 1 29 8 is_stmt 0 view .LVU82
+ 373 0022 0746     		mov	r7, r0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 10
+
+
+ 374 0024 0028     		cmp	r0, #0
+ 375 0026 32D1     		bne	.L29
+  34:SynaptiX_FDK/services/filesystem/sx_fs.c ****     sx_ext_flash_read(s_flash, addr, verify_buf, size);
+ 376              		.loc 1 34 5 is_stmt 1 view .LVU83
+  35:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (memcmp(buf, verify_buf, size) != 0) {
+ 377              		.loc 1 35 5 view .LVU84
+ 378 0028 DFF8A080 		ldr	r8, .L30+28
+ 379 002c 3346     		mov	r3, r6
+ 380 002e 4246     		mov	r2, r8
+ 381 0030 2146     		mov	r1, r4
+ 382 0032 1F48     		ldr	r0, .L30
+ 383              	.LVL47:
+  35:SynaptiX_FDK/services/filesystem/sx_fs.c ****     if (memcmp(buf, verify_buf, size) != 0) {
+ 384              		.loc 1 35 5 is_stmt 0 view .LVU85
+ 385 0034 0068     		ldr	r0, [r0]
+ 386 0036 FFF7FEFF 		bl	sx_ext_flash_read
+ 387              	.LVL48:
+  36:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "VERIFY FAILED at addr=0x%06lX", (unsigned long)addr);
+ 388              		.loc 1 36 5 is_stmt 1 view .LVU86
+  36:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "VERIFY FAILED at addr=0x%06lX", (unsigned long)addr);
+ 389              		.loc 1 36 9 is_stmt 0 view .LVU87
+ 390 003a 3246     		mov	r2, r6
+ 391 003c 4146     		mov	r1, r8
+ 392 003e 2846     		mov	r0, r5
+ 393 0040 FFF7FEFF 		bl	memcmp
+ 394              	.LVL49:
+  36:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "VERIFY FAILED at addr=0x%06lX", (unsigned long)addr);
+ 395              		.loc 1 36 8 discriminator 1 view .LVU88
+ 396 0044 68B3     		cbz	r0, .L27
+  37:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "wrote: %02X %02X %02X %02X ...", ((uint8_t*)buf)[0], ((uint8_t*)buf)[1]
+ 397              		.loc 1 37 9 is_stmt 1 view .LVU89
+ 398 0046 1B4E     		ldr	r6, .L30+4
+ 399 0048 2346     		mov	r3, r4
+ 400 004a 1B4A     		ldr	r2, .L30+8
+ 401 004c 3146     		mov	r1, r6
+ 402 004e 0120     		movs	r0, #1
+ 403 0050 FFF7FEFF 		bl	log_func
+ 404              	.LVL50:
+  38:SynaptiX_FDK/services/filesystem/sx_fs.c ****         log_error("SX_FS", "read : %02X %02X %02X %02X ...", verify_buf[0], verify_buf[1], verify_b
+ 405              		.loc 1 38 9 view .LVU90
+ 406 0054 6B78     		ldrb	r3, [r5, #1]	@ zero_extendqisi2
+ 407 0056 AA78     		ldrb	r2, [r5, #2]	@ zero_extendqisi2
+ 408 0058 E978     		ldrb	r1, [r5, #3]	@ zero_extendqisi2
+ 409 005a 0291     		str	r1, [sp, #8]
+ 410 005c 0192     		str	r2, [sp, #4]
+ 411 005e 0093     		str	r3, [sp]
+ 412 0060 2B78     		ldrb	r3, [r5]	@ zero_extendqisi2
+ 413 0062 164A     		ldr	r2, .L30+12
+ 414 0064 3146     		mov	r1, r6
+ 415 0066 0120     		movs	r0, #1
+ 416 0068 FFF7FEFF 		bl	log_func
+ 417              	.LVL51:
+  39:SynaptiX_FDK/services/filesystem/sx_fs.c ****     } else {
+ 418              		.loc 1 39 9 view .LVU91
+ 419 006c 98F80120 		ldrb	r2, [r8, #1]	@ zero_extendqisi2
+ 420 0070 98F80210 		ldrb	r1, [r8, #2]	@ zero_extendqisi2
+ 421 0074 98F80300 		ldrb	r0, [r8, #3]	@ zero_extendqisi2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 11
+
+
+ 422 0078 0290     		str	r0, [sp, #8]
+ 423 007a 0191     		str	r1, [sp, #4]
+ 424 007c 0092     		str	r2, [sp]
+ 425 007e 98F80030 		ldrb	r3, [r8]	@ zero_extendqisi2
+ 426 0082 0F4A     		ldr	r2, .L30+16
+ 427 0084 3146     		mov	r1, r6
+ 428 0086 0120     		movs	r0, #1
+ 429 0088 FFF7FEFF 		bl	log_func
+ 430              	.LVL52:
+ 431 008c 05E0     		b	.L24
+ 432              	.LVL53:
+ 433              	.L29:
+  30:SynaptiX_FDK/services/filesystem/sx_fs.c ****         return ret;
+ 434              		.loc 1 30 9 view .LVU92
+ 435 008e 0346     		mov	r3, r0
+ 436 0090 0C4A     		ldr	r2, .L30+20
+ 437 0092 0849     		ldr	r1, .L30+4
+ 438 0094 0120     		movs	r0, #1
+ 439              	.LVL54:
+  30:SynaptiX_FDK/services/filesystem/sx_fs.c ****         return ret;
+ 440              		.loc 1 30 9 is_stmt 0 view .LVU93
+ 441 0096 FFF7FEFF 		bl	log_func
+ 442              	.LVL55:
+  31:SynaptiX_FDK/services/filesystem/sx_fs.c ****     }
+ 443              		.loc 1 31 9 is_stmt 1 view .LVU94
+ 444              	.L24:
+  44:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+ 445              		.loc 1 44 1 is_stmt 0 view .LVU95
+ 446 009a 3846     		mov	r0, r7
+ 447 009c 04B0     		add	sp, sp, #16
+ 448              	.LCFI7:
+ 449              		.cfi_remember_state
+ 450              		.cfi_def_cfa_offset 24
+ 451              		@ sp needed
+ 452 009e BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 453              	.LVL56:
+ 454              	.L27:
+ 455              	.LCFI8:
+ 456              		.cfi_restore_state
+  41:SynaptiX_FDK/services/filesystem/sx_fs.c ****     }
+ 457              		.loc 1 41 9 is_stmt 1 view .LVU96
+ 458 00a2 2346     		mov	r3, r4
+ 459 00a4 084A     		ldr	r2, .L30+24
+ 460 00a6 0349     		ldr	r1, .L30+4
+ 461 00a8 0320     		movs	r0, #3
+ 462 00aa FFF7FEFF 		bl	log_func
+ 463              	.LVL57:
+ 464 00ae F4E7     		b	.L24
+ 465              	.L31:
+ 466              		.align	2
+ 467              	.L30:
+ 468 00b0 00000000 		.word	s_flash
+ 469 00b4 14000000 		.word	.LC1
+ 470 00b8 1C000000 		.word	.LC2
+ 471 00bc 3C000000 		.word	.LC3
+ 472 00c0 5C000000 		.word	.LC4
+ 473 00c4 00000000 		.word	.LC0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 12
+
+
+ 474 00c8 7C000000 		.word	.LC5
+ 475 00cc 00000000 		.word	verify_buf.0
+ 476              		.cfi_endproc
+ 477              	.LFE29:
+ 479              		.section	.text.sx_fs_init,"ax",%progbits
+ 480              		.align	1
+ 481              		.global	sx_fs_init
+ 482              		.syntax unified
+ 483              		.thumb
+ 484              		.thumb_func
+ 486              	sx_fs_init:
+ 487              	.LVL58:
+ 488              	.LFB31:
+  51:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+  52:SynaptiX_FDK/services/filesystem/sx_fs.c **** 
+  53:SynaptiX_FDK/services/filesystem/sx_fs.c **** int sx_fs_init(sx_ext_flash_t *flash){
+ 489              		.loc 1 53 38 view -0
+ 490              		.cfi_startproc
+ 491              		@ args = 0, pretend = 0, frame = 0
+ 492              		@ frame_needed = 0, uses_anonymous_args = 0
+ 493              		.loc 1 53 38 is_stmt 0 view .LVU98
+ 494 0000 08B5     		push	{r3, lr}
+ 495              	.LCFI9:
+ 496              		.cfi_def_cfa_offset 8
+ 497              		.cfi_offset 3, -8
+ 498              		.cfi_offset 14, -4
+  54:SynaptiX_FDK/services/filesystem/sx_fs.c ****     s_flash = flash;
+ 499              		.loc 1 54 5 is_stmt 1 view .LVU99
+ 500              		.loc 1 54 13 is_stmt 0 view .LVU100
+ 501 0002 094B     		ldr	r3, .L34
+ 502 0004 1860     		str	r0, [r3]
+  55:SynaptiX_FDK/services/filesystem/sx_fs.c ****     s_config.block_size  = flash->info.sector_size;
+ 503              		.loc 1 55 5 is_stmt 1 view .LVU101
+ 504              		.loc 1 55 39 is_stmt 0 view .LVU102
+ 505 0006 8268     		ldr	r2, [r0, #8]
+ 506              		.loc 1 55 26 view .LVU103
+ 507 0008 0848     		ldr	r0, .L34+4
+ 508              	.LVL59:
+ 509              		.loc 1 55 26 view .LVU104
+ 510 000a 8265     		str	r2, [r0, #88]
+  56:SynaptiX_FDK/services/filesystem/sx_fs.c ****     
+  57:SynaptiX_FDK/services/filesystem/sx_fs.c ****     s_config.block_count = PART_GPS_LOG_SIZE / flash->info.sector_size;
+ 511              		.loc 1 57 5 is_stmt 1 view .LVU105
+ 512              		.loc 1 57 46 is_stmt 0 view .LVU106
+ 513 000c 4FF41003 		mov	r3, #9437184
+ 514              		.loc 1 57 46 view .LVU107
+ 515 0010 B3FBF2F3 		udiv	r3, r3, r2
+ 516              		.loc 1 57 26 view .LVU108
+ 517 0014 C365     		str	r3, [r0, #92]
+  58:SynaptiX_FDK/services/filesystem/sx_fs.c ****     
+  59:SynaptiX_FDK/services/filesystem/sx_fs.c ****     s_config.file_function.read  = lfs_flash_read;
+ 518              		.loc 1 59 5 is_stmt 1 view .LVU109
+ 519              		.loc 1 59 34 is_stmt 0 view .LVU110
+ 520 0016 064B     		ldr	r3, .L34+8
+ 521 0018 4366     		str	r3, [r0, #100]
+  60:SynaptiX_FDK/services/filesystem/sx_fs.c ****     s_config.file_function.write = lfs_flash_write;
+ 522              		.loc 1 60 5 is_stmt 1 view .LVU111
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 13
+
+
+ 523              		.loc 1 60 34 is_stmt 0 view .LVU112
+ 524 001a 064B     		ldr	r3, .L34+12
+ 525 001c 8366     		str	r3, [r0, #104]
+  61:SynaptiX_FDK/services/filesystem/sx_fs.c ****     s_config.file_function.erase = lfs_flash_erase;
+ 526              		.loc 1 61 5 is_stmt 1 view .LVU113
+ 527              		.loc 1 61 34 is_stmt 0 view .LVU114
+ 528 001e 064B     		ldr	r3, .L34+16
+ 529 0020 0366     		str	r3, [r0, #96]
+  62:SynaptiX_FDK/services/filesystem/sx_fs.c ****     return file_system_init(&s_config);
+ 530              		.loc 1 62 5 is_stmt 1 view .LVU115
+ 531              		.loc 1 62 12 is_stmt 0 view .LVU116
+ 532 0022 FFF7FEFF 		bl	file_system_init
+ 533              	.LVL60:
+  63:SynaptiX_FDK/services/filesystem/sx_fs.c **** }...
+ 534              		.loc 1 63 1 view .LVU117
+ 535 0026 08BD     		pop	{r3, pc}
+ 536              	.L35:
+ 537              		.align	2
+ 538              	.L34:
+ 539 0028 00000000 		.word	s_flash
+ 540 002c 00000000 		.word	s_config
+ 541 0030 00000000 		.word	lfs_flash_read
+ 542 0034 00000000 		.word	lfs_flash_write
+ 543 0038 00000000 		.word	lfs_flash_erase
+ 544              		.cfi_endproc
+ 545              	.LFE31:
+ 547              		.section	.bss.verify_buf.0,"aw",%nobits
+ 548              		.align	2
+ 551              	verify_buf.0:
+ 552 0000 00000000 		.space	16
+ 552      00000000 
+ 552      00000000 
+ 552      00000000 
+ 553              		.section	.bss.s_config,"aw",%nobits
+ 554              		.align	2
+ 557              	s_config:
+ 558 0000 00000000 		.space	108
+ 558      00000000 
+ 558      00000000 
+ 558      00000000 
+ 558      00000000 
+ 559              		.section	.bss.s_flash,"aw",%nobits
+ 560              		.align	2
+ 563              	s_flash:
+ 564 0000 00000000 		.space	4
+ 565              		.text
+ 566              	.Letext0:
+ 567              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 568              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 569              		.file 5 "SynaptiX_FDK/services/littlefs/lfs.h"
+ 570              		.file 6 "SynaptiX_FDK/services/filesystem/file_io.h"
+ 571              		.file 7 "SynaptiX_FDK/services/logger/logger.h"
+ 572              		.file 8 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s 			page 14
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_fs.c
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:22     .text.sx_ext_flash_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:27     .text.sx_ext_flash_read:00000000 sx_ext_flash_read
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:85     .text.sx_ext_flash_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:90     .text.sx_ext_flash_write:00000000 sx_ext_flash_write
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:147    .text.sx_ext_flash_erase_sector:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:152    .text.sx_ext_flash_erase_sector:00000000 sx_ext_flash_erase_sector
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:202    .text.lfs_flash_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:207    .text.lfs_flash_read:00000000 lfs_flash_read
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:250    .text.lfs_flash_read:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:563    .bss.s_flash:00000000 s_flash
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:255    .text.lfs_flash_erase:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:260    .text.lfs_flash_erase:00000000 lfs_flash_erase
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:295    .text.lfs_flash_erase:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:300    .rodata.lfs_flash_write.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:319    .text.lfs_flash_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:324    .text.lfs_flash_write:00000000 lfs_flash_write
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:468    .text.lfs_flash_write:000000b0 $d
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:551    .bss.verify_buf.0:00000000 verify_buf.0
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:480    .text.sx_fs_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:486    .text.sx_fs_init:00000000 sx_fs_init
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:539    .text.sx_fs_init:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:557    .bss.s_config:00000000 s_config
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:548    .bss.verify_buf.0:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:554    .bss.s_config:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc0rCYBk.s:560    .bss.s_flash:00000000 $d
+
+UNDEFINED SYMBOLS
+memcmp
+log_func
+file_system_init

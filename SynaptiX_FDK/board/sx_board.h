@@ -9,6 +9,7 @@ extern "C" {
 #include "main.h"
 #include "usart.h"
 #include "gpio.h"
+#include "app_config.h"
 #include "sx_spi.h"
 #include "sx_gpio.h"
 #include "sx_uart.h"
@@ -19,7 +20,7 @@ extern "C" {
 #include "sx_W25Q128.h"
 #include "sx_ex_storage.h"
 #include "sx_usb_tiny_cdc.h"
-#include "adc.h"
+// #include "adc.h"
 #include "spi.h"
 #include "i2c.h"
 #include "sx_ex_rtc.h"
@@ -47,7 +48,9 @@ typedef struct Board{
     modem_handle_t  modem;
     sx_gps_t gps;
     sx_uart_t log_uart;
+    #if USE_READ_PIN
     voltage_t voltage;
+    #endif
     sx_usb_tiny_t usb;
     sx_W25Q128_t  q128;
     sx_usb_tiny_config_t usb_cfg;
@@ -56,7 +59,9 @@ typedef struct Board{
     rx8130ce_t          rtc;
     sx_i2c_t    rtc_i2c;
     bno055_t    imu;
+    #if USE_READ_PIN
     sx_adc_reader_t s_adc_reader;
+    #endif
     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
      * sx_uart_t instance is owned here and its address passed to

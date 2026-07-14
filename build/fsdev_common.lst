@@ -1,0 +1,1005 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"fsdev_common.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c"
+  21              		.section	.text.sx_gettick,"ax",%progbits
+  22              		.align	1
+  23              		.global	sx_gettick
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	sx_gettick:
+  29              	.LFB336:
+  30              		.file 2 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 2
+
+
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 3
+
+
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 4
+
+
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+  31              		.loc 2 186 33 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35 0000 08B5     		push	{r3, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 3, -8
+  39              		.cfi_offset 14, -4
+  40              		.loc 2 186 34 view .LVU1
+  41              		.loc 2 186 41 is_stmt 0 view .LVU2
+  42 0002 FFF7FEFF 		bl	HAL_GetTick
+  43              	.LVL0:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 5
+
+
+  44              		.loc 2 186 55 view .LVU3
+  45 0006 08BD     		pop	{r3, pc}
+  46              		.cfi_endproc
+  47              	.LFE336:
+  49              		.section	.text.fsdev_core_reset,"ax",%progbits
+  50              		.align	1
+  51              		.global	fsdev_core_reset
+  52              		.syntax unified
+  53              		.thumb
+  54              		.thumb_func
+  56              	fsdev_core_reset:
+  57              	.LFB434:
+   1:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** /*
+   2:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * The MIT License (MIT)
+   3:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  *
+   4:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * Copyright (c) 2024 Ha Thach (tinyusb.org)
+   5:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * Copyright (c) 2025, HiFiPhile (Zixun LI)
+   6:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  *
+   7:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * Permission is hereby granted, free of charge, to any person obtaining a copy
+   8:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * of this software and associated documentation files (the "Software"), to deal
+   9:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * in the Software without restriction, including without limitation the rights
+  10:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  11:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * copies of the Software, and to permit persons to whom the Software is
+  12:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * furnished to do so, subject to the following conditions:
+  13:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  *
+  14:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * The above copyright notice and this permission notice shall be included in
+  15:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * all copies or substantial portions of the Software.
+  16:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  *
+  17:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  18:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  19:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  20:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  21:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  22:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  23:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * THE SOFTWARE.
+  24:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  *
+  25:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  * This file is part of the TinyUSB stack.
+  26:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****  */
+  27:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  28:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** #include "tusb_option.h"
+  29:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  30:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** #if defined(TUP_USBIP_FSDEV) && (CFG_TUH_ENABLED || CFG_TUD_ENABLED)
+  31:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  32:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** #include "fsdev_common.h"
+  33:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  34:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** //--------------------------------------------------------------------+
+  35:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** // Global
+  36:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** //--------------------------------------------------------------------+
+  37:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  38:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** // Reset the USB Core
+  39:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** void fsdev_core_reset(void) {
+  58              		.loc 1 39 29 is_stmt 1 view -0
+  59              		.cfi_startproc
+  60              		@ args = 0, pretend = 0, frame = 8
+  61              		@ frame_needed = 0, uses_anonymous_args = 0
+  62              		@ link register save eliminated.
+  63 0000 82B0     		sub	sp, sp, #8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 6
+
+
+  64              	.LCFI1:
+  65              		.cfi_def_cfa_offset 8
+  40:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   // Perform USB peripheral reset
+  41:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_REG->CNTR = U_CNTR_FRES | U_CNTR_PDWN;
+  66              		.loc 1 41 3 view .LVU5
+  67              		.loc 1 41 19 is_stmt 0 view .LVU6
+  68 0002 104B     		ldr	r3, .L9
+  69 0004 0322     		movs	r2, #3
+  70 0006 1A64     		str	r2, [r3, #64]
+  42:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   for (volatile uint32_t i = 0; i < 200; i++) { // should be a few us
+  71              		.loc 1 42 3 is_stmt 1 view .LVU7
+  72              	.LBB6:
+  73              		.loc 1 42 8 view .LVU8
+  74              		.loc 1 42 26 is_stmt 0 view .LVU9
+  75 0008 0023     		movs	r3, #0
+  76 000a 0093     		str	r3, [sp]
+  77              		.loc 1 42 3 view .LVU10
+  78 000c 03E0     		b	.L4
+  79              	.L5:
+  43:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     asm("NOP");
+  80              		.loc 1 43 5 is_stmt 1 view .LVU11
+  81              		.syntax unified
+  82              	@ 43 "SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c" 1
+  83 000e 00BF     		NOP
+  84              	@ 0 "" 2
+  42:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   for (volatile uint32_t i = 0; i < 200; i++) { // should be a few us
+  85              		.loc 1 42 43 discriminator 3 view .LVU12
+  86              		.thumb
+  87              		.syntax unified
+  88 0010 009B     		ldr	r3, [sp]
+  89 0012 0133     		adds	r3, r3, #1
+  90 0014 0093     		str	r3, [sp]
+  91              	.L4:
+  42:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   for (volatile uint32_t i = 0; i < 200; i++) { // should be a few us
+  92              		.loc 1 42 35 discriminator 1 view .LVU13
+  93 0016 009B     		ldr	r3, [sp]
+  94 0018 C72B     		cmp	r3, #199
+  95 001a F8D9     		bls	.L5
+  96              	.LBE6:
+  44:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   }
+  45:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  46:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_REG->CNTR &= ~U_CNTR_PDWN;
+  97              		.loc 1 46 3 view .LVU14
+  98              		.loc 1 46 12 is_stmt 0 view .LVU15
+  99 001c 094A     		ldr	r2, .L9
+ 100 001e 136C     		ldr	r3, [r2, #64]
+ 101              		.loc 1 46 19 view .LVU16
+ 102 0020 23F00203 		bic	r3, r3, #2
+ 103 0024 1364     		str	r3, [r2, #64]
+  47:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  48:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   // Wait startup time, for F042 and F070, this is <= 1 us.
+  49:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   for (volatile uint32_t i = 0; i < 200; i++) { // should be a few us
+ 104              		.loc 1 49 3 is_stmt 1 view .LVU17
+ 105              	.LBB7:
+ 106              		.loc 1 49 8 view .LVU18
+ 107              		.loc 1 49 26 is_stmt 0 view .LVU19
+ 108 0026 0023     		movs	r3, #0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 7
+
+
+ 109 0028 0193     		str	r3, [sp, #4]
+ 110              		.loc 1 49 3 view .LVU20
+ 111 002a 03E0     		b	.L6
+ 112              	.L7:
+  50:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     asm("NOP");
+ 113              		.loc 1 50 5 is_stmt 1 view .LVU21
+ 114              		.syntax unified
+ 115              	@ 50 "SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c" 1
+ 116 002c 00BF     		NOP
+ 117              	@ 0 "" 2
+  49:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     asm("NOP");
+ 118              		.loc 1 49 43 discriminator 3 view .LVU22
+ 119              		.thumb
+ 120              		.syntax unified
+ 121 002e 019B     		ldr	r3, [sp, #4]
+ 122 0030 0133     		adds	r3, r3, #1
+ 123 0032 0193     		str	r3, [sp, #4]
+ 124              	.L6:
+  49:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     asm("NOP");
+ 125              		.loc 1 49 35 discriminator 1 view .LVU23
+ 126 0034 019B     		ldr	r3, [sp, #4]
+ 127 0036 C72B     		cmp	r3, #199
+ 128 0038 F8D9     		bls	.L7
+ 129              	.LBE7:
+  51:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   }
+  52:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  53:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   // Clear pending interrupts
+  54:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_REG->ISTR = 0;
+ 130              		.loc 1 54 3 view .LVU24
+ 131              		.loc 1 54 19 is_stmt 0 view .LVU25
+ 132 003a 024B     		ldr	r3, .L9
+ 133 003c 0022     		movs	r2, #0
+ 134 003e 5A64     		str	r2, [r3, #68]
+  55:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** }
+ 135              		.loc 1 55 1 view .LVU26
+ 136 0040 02B0     		add	sp, sp, #8
+ 137              	.LCFI2:
+ 138              		.cfi_def_cfa_offset 0
+ 139              		@ sp needed
+ 140 0042 7047     		bx	lr
+ 141              	.L10:
+ 142              		.align	2
+ 143              	.L9:
+ 144 0044 00600140 		.word	1073831936
+ 145              		.cfi_endproc
+ 146              	.LFE434:
+ 148              		.section	.text.fsdev_deinit,"ax",%progbits
+ 149              		.align	1
+ 150              		.global	fsdev_deinit
+ 151              		.syntax unified
+ 152              		.thumb
+ 153              		.thumb_func
+ 155              	fsdev_deinit:
+ 156              	.LFB435:
+  56:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  57:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** // De-initialize the USB Core
+  58:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** void fsdev_deinit(void) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 8
+
+
+ 157              		.loc 1 58 25 is_stmt 1 view -0
+ 158              		.cfi_startproc
+ 159              		@ args = 0, pretend = 0, frame = 8
+ 160              		@ frame_needed = 0, uses_anonymous_args = 0
+ 161              		@ link register save eliminated.
+ 162 0000 82B0     		sub	sp, sp, #8
+ 163              	.LCFI3:
+ 164              		.cfi_def_cfa_offset 8
+  59:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   // Disable all interrupts and force USB reset
+  60:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_REG->CNTR = U_CNTR_FRES;
+ 165              		.loc 1 60 3 view .LVU28
+ 166              		.loc 1 60 19 is_stmt 0 view .LVU29
+ 167 0002 094B     		ldr	r3, .L15
+ 168 0004 0122     		movs	r2, #1
+ 169 0006 1A64     		str	r2, [r3, #64]
+  61:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  62:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   // Clear pending interrupts
+  63:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_REG->ISTR = 0;
+ 170              		.loc 1 63 3 is_stmt 1 view .LVU30
+ 171              		.loc 1 63 19 is_stmt 0 view .LVU31
+ 172 0008 0022     		movs	r2, #0
+ 173 000a 5A64     		str	r2, [r3, #68]
+  64:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  65:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   // Put USB peripheral in power down mode
+  66:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_REG->CNTR = U_CNTR_FRES | U_CNTR_PDWN;
+ 174              		.loc 1 66 3 is_stmt 1 view .LVU32
+ 175              		.loc 1 66 19 is_stmt 0 view .LVU33
+ 176 000c 0321     		movs	r1, #3
+ 177 000e 1964     		str	r1, [r3, #64]
+  67:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   for (volatile uint32_t i = 0; i < 200; i++) { // should be a few us
+ 178              		.loc 1 67 3 is_stmt 1 view .LVU34
+ 179              	.LBB8:
+ 180              		.loc 1 67 8 view .LVU35
+ 181              		.loc 1 67 26 is_stmt 0 view .LVU36
+ 182 0010 0192     		str	r2, [sp, #4]
+ 183              		.loc 1 67 3 view .LVU37
+ 184 0012 03E0     		b	.L12
+ 185              	.L13:
+  68:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     asm("NOP");
+ 186              		.loc 1 68 5 is_stmt 1 view .LVU38
+ 187              		.syntax unified
+ 188              	@ 68 "SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c" 1
+ 189 0014 00BF     		NOP
+ 190              	@ 0 "" 2
+  67:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   for (volatile uint32_t i = 0; i < 200; i++) { // should be a few us
+ 191              		.loc 1 67 43 discriminator 3 view .LVU39
+ 192              		.thumb
+ 193              		.syntax unified
+ 194 0016 019B     		ldr	r3, [sp, #4]
+ 195 0018 0133     		adds	r3, r3, #1
+ 196 001a 0193     		str	r3, [sp, #4]
+ 197              	.L12:
+  67:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   for (volatile uint32_t i = 0; i < 200; i++) { // should be a few us
+ 198              		.loc 1 67 35 discriminator 1 view .LVU40
+ 199 001c 019B     		ldr	r3, [sp, #4]
+ 200 001e C72B     		cmp	r3, #199
+ 201 0020 F8D9     		bls	.L13
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 9
+
+
+ 202              	.LBE8:
+  69:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   }
+  70:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** }
+ 203              		.loc 1 70 1 is_stmt 0 view .LVU41
+ 204 0022 02B0     		add	sp, sp, #8
+ 205              	.LCFI4:
+ 206              		.cfi_def_cfa_offset 0
+ 207              		@ sp needed
+ 208 0024 7047     		bx	lr
+ 209              	.L16:
+ 210 0026 00BF     		.align	2
+ 211              	.L15:
+ 212 0028 00600140 		.word	1073831936
+ 213              		.cfi_endproc
+ 214              	.LFE435:
+ 216              		.section	.text.pma_align_buffer_size,"ax",%progbits
+ 217              		.align	1
+ 218              		.global	pma_align_buffer_size
+ 219              		.syntax unified
+ 220              		.thumb
+ 221              		.thumb_func
+ 223              	pma_align_buffer_size:
+ 224              	.LVL1:
+ 225              	.LFB436:
+  71:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  72:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** //--------------------------------------------------------------------+
+  73:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** // BTable Helper
+  74:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** //--------------------------------------------------------------------+
+  75:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  76:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** // Aligned buffer size according to hardware
+  77:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** uint16_t pma_align_buffer_size(uint16_t size, uint8_t* blsize, uint8_t* num_block) {
+ 226              		.loc 1 77 84 is_stmt 1 view -0
+ 227              		.cfi_startproc
+ 228              		@ args = 0, pretend = 0, frame = 0
+ 229              		@ frame_needed = 0, uses_anonymous_args = 0
+ 230              		@ link register save eliminated.
+  78:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   /* The STM32 full speed USB peripheral supports only a limited set of
+  79:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****    * buffer sizes given by the RX buffer entry format in the USB_BTABLE. */
+  80:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   uint16_t block_in_bytes;
+ 231              		.loc 1 80 3 view .LVU43
+  81:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   if (size > 62) {
+ 232              		.loc 1 81 3 view .LVU44
+ 233              		.loc 1 81 6 is_stmt 0 view .LVU45
+ 234 0000 3E28     		cmp	r0, #62
+ 235 0002 09D9     		bls	.L18
+  82:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     block_in_bytes = 32;
+ 236              		.loc 1 82 5 is_stmt 1 view .LVU46
+ 237              	.LVL2:
+  83:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *blsize = 1;
+ 238              		.loc 1 83 5 view .LVU47
+ 239              		.loc 1 83 13 is_stmt 0 view .LVU48
+ 240 0004 0123     		movs	r3, #1
+ 241 0006 0B70     		strb	r3, [r1]
+  84:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *num_block = tu_div_ceil(size, 32);
+ 242              		.loc 1 84 5 is_stmt 1 view .LVU49
+ 243              	.LVL3:
+ 244              	.LBB9:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 10
+
+
+ 245              	.LBI9:
+ 246              		.file 3 "SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h"
+   1:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** /*
+   2:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * The MIT License (MIT)
+   3:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  *
+   4:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * Copyright (c) 2019 Ha Thach (tinyusb.org)
+   5:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  *
+   6:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * Permission is hereby granted, free of charge, to any person obtaining a copy
+   7:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * of this software and associated documentation files (the "Software"), to deal
+   8:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * in the Software without restriction, including without limitation the rights
+   9:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  10:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * copies of the Software, and to permit persons to whom the Software is
+  11:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * furnished to do so, subject to the following conditions:
+  12:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  *
+  13:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * The above copyright notice and this permission notice shall be included in
+  14:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * all copies or substantial portions of the Software.
+  15:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  *
+  16:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  17:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  18:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  19:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  20:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  21:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  22:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * THE SOFTWARE.
+  23:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  *
+  24:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  * This file is part of the TinyUSB stack.
+  25:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  */
+  26:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  27:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #ifndef TUSB_COMMON_H_
+  28:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TUSB_COMMON_H_
+  29:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  30:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #ifdef __cplusplus
+  31:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****  extern "C" {
+  32:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #endif
+  33:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  34:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+  35:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Macros Helper
+  36:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+  37:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_ARRAY_SIZE(_arr)           ( sizeof(_arr) / sizeof(_arr[0]) )
+  38:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_FIELD_SIZE(_type, _field)  (sizeof(((_type *)0)->_field))
+  39:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_MIN(_x, _y)                ( ( (_x) < (_y) ) ? (_x) : (_y) )
+  40:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_MAX(_x, _y)                ( ( (_x) > (_y) ) ? (_x) : (_y) )
+  41:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_DIV_CEIL(n, d)             (((n) + (d) - 1) / (d))
+  42:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_DIV_ROUND_NEAREST(v, d)    (((v) + (d)/2) / (d) ) // round to nearest integer
+  43:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  44:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U16(_high, _low)           ((uint16_t) ((((uint16_t) (_high)) << 8) | ((uint16_t) (_low)
+  45:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U16_HIGH(_u16)             ((uint8_t) (((uint16_t) (_u16) >> 8) & 0x00ffu))
+  46:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U16_LOW(_u16)              ((uint8_t) ((uint16_t) (_u16) & 0x00ffu))
+  47:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define U16_TO_U8S_BE(_u16)           TU_U16_HIGH(_u16), TU_U16_LOW(_u16)
+  48:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define U16_TO_U8S_LE(_u16)           TU_U16_LOW(_u16), TU_U16_HIGH(_u16)
+  49:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  50:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U24(_high, _mid, _low)     ((uint32_t) ((((uint32_t) (_high)) << 16) | (((uint32_t) (_mi
+  51:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U24_HIGH(_u24)             ((uint8_t) (((uint32_t) (_u24) >> 16) & 0x0000ffu))
+  52:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U24_MID(_u24)              ((uint8_t) (((uint32_t) (_u24) >>  8) & 0x0000ffu))
+  53:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U24_LOW(_u24)              ((uint8_t) ((uint32_t) (_u24) & 0x0000ffu))
+  54:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define U24_TO_U8S_BE(_u24)           TU_U24_HIGH(_u24), TU_U24_MID(_u24), TU_U24_LOW(_u24)
+  55:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define U24_TO_U8S_LE(_u24)           TU_U24_LOW(_u24), TU_U24_MID(_u24), TU_U24_HIGH(_u24)
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 11
+
+
+  56:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  57:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U32_BYTE3(_u32)            ((uint8_t) ((((uint32_t) _u32) >> 24) & 0x000000ff)) // MSB
+  58:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U32_BYTE2(_u32)            ((uint8_t) ((((uint32_t) _u32) >> 16) & 0x000000ff))
+  59:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U32_BYTE1(_u32)            ((uint8_t) ((((uint32_t) _u32) >>  8) & 0x000000ff))
+  60:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_U32_BYTE0(_u32)            ((uint8_t) (((uint32_t)  _u32)        & 0x000000ff)) // LSB
+  61:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  62:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define U32_TO_U8S_BE(_u32)           TU_U32_BYTE3(_u32), TU_U32_BYTE2(_u32), TU_U32_BYTE1(_u32), T
+  63:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define U32_TO_U8S_LE(_u32)           TU_U32_BYTE0(_u32), TU_U32_BYTE1(_u32), TU_U32_BYTE2(_u32), T
+  64:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  65:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_BIT(n)                     (1UL << (n))
+  66:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  67:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Generate a mask with bit from high (31) to low (0) set, e.g TU_GENMASK(3, 0) = 0b1111
+  68:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define TU_GENMASK(h, l)              ( (UINT32_MAX << (l)) & (UINT32_MAX >> (31 - (h))) )
+  69:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  70:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+  71:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Includes
+  72:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+  73:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  74:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Standard Headers
+  75:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include <stdbool.h>
+  76:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include <stdint.h>
+  77:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include <inttypes.h>
+  78:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include <stddef.h>
+  79:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include <string.h>
+  80:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  81:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Tinyusb Common Headers
+  82:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include "tusb_option.h"
+  83:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include "tusb_compiler.h"
+  84:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include "tusb_verify.h"
+  85:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include "tusb_types.h"
+  86:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #include "tusb_debug.h"
+  87:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  88:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+  89:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // API implemented by application if needed
+  90:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // TODO move to a more obvious place/file
+  91:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+  92:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  93:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Get current milliseconds, required by some port/configuration without RTOS
+  94:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** extern uint32_t tusb_time_millis_api(void);
+  95:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  96:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Delay in milliseconds, use tusb_time_millis_api() by default. required by some port/configuratio
+  97:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** extern void tusb_time_delay_ms_api(uint32_t ms);
+  98:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+  99:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // flush data cache
+ 100:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** extern void tusb_app_dcache_flush(uintptr_t addr, uint32_t data_size);
+ 101:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 102:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // invalidate data cache
+ 103:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** extern void tusb_app_dcache_invalidate(uintptr_t addr, uint32_t data_size);
+ 104:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 105:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Optional physical <-> virtual address translation
+ 106:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** extern void* tusb_app_virt_to_phys(void *virt_addr);
+ 107:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** extern void* tusb_app_phys_to_virt(void *phys_addr);
+ 108:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 109:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+ 110:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // Internal Inline Functions
+ 111:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //--------------------------------------------------------------------+
+ 112:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 12
+
+
+ 113:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //------------- Mem -------------//
+ 114:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define tu_memclr(buffer, size)  (void) memset((buffer), 0, (size))
+ 115:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** #define tu_varclr(_var)          tu_memclr(_var, sizeof(*(_var)))
+ 116:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 117:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // This is a backport of memset_s from c11
+ 118:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline int tu_memset_s(void *dest, size_t destsz, int ch, size_t count
+ 119:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   // Validate parameters
+ 120:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   if (dest == NULL) {
+ 121:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     return -1;
+ 122:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 123:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 124:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   if (count == 0u) {
+ 125:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     return 0;
+ 126:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 127:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 128:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   if (count > destsz) {
+ 129:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     return -1;
+ 130:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 131:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 132:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   (void) memset(dest, ch, count);
+ 133:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return 0;
+ 134:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 135:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 136:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** // This is a backport of memcpy_s from c11
+ 137:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline int tu_memcpy_s(void *dest, size_t destsz, const void *src, siz
+ 138:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   if (dest == NULL) {
+ 139:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     return -1;
+ 140:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 141:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 142:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   if (count == 0u) {
+ 143:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     return 0;
+ 144:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 145:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 146:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   if (src == NULL) {
+ 147:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     return -1;
+ 148:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 149:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 150:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   if (count > destsz) {
+ 151:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     return -1;
+ 152:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 153:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 154:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   (void) memcpy(dest, src, count);
+ 155:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return 0;
+ 156:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 157:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 158:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline bool tu_mem_is_zero(const void *buffer, size_t size) {
+ 159:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   const uint8_t* buf8 = (const uint8_t*) buffer;
+ 160:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   for (size_t i = 0; i < size; i++) {
+ 161:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     if (buf8[i] != 0) { return false; }
+ 162:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 163:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return true;
+ 164:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 165:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 166:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline bool tu_mem_is_ff(const void *buffer, size_t size) {
+ 167:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   const uint8_t* buf8 = (const uint8_t*) buffer;
+ 168:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   for (size_t i = 0; i < size; i++) {
+ 169:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****     if (buf8[i] != 0xff) { return false; }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 13
+
+
+ 170:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   }
+ 171:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return true;
+ 172:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 173:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 174:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 175:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //------------- Bytes -------------//
+ 176:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_u32(uint8_t b3, uint8_t b2, uint8_t b1, uint8_t b0)
+ 177:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return (((uint32_t)b3) << 24) | (((uint32_t)b2) << 16) | (((uint32_t)b1) << 8) | b0;
+ 178:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 179:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 180:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_u32_from_u16(uint16_t high, uint16_t low) {
+ 181:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return (((uint32_t)high) << 16) | low;
+ 182:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 183:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 184:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint16_t tu_u16(uint8_t high, uint8_t low) {
+ 185:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return (uint16_t)((((uint16_t)high) << 8) | low);
+ 186:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 187:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 188:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t tu_u32_byte3(uint32_t ui32) { return TU_U32_BYTE3(ui32)
+ 189:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t tu_u32_byte2(uint32_t ui32) { return TU_U32_BYTE2(ui32)
+ 190:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t tu_u32_byte1(uint32_t ui32) { return TU_U32_BYTE1(ui32)
+ 191:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t tu_u32_byte0(uint32_t ui32) { return TU_U32_BYTE0(ui32)
+ 192:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 193:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint16_t tu_u32_high16(uint32_t ui32) { return (uint16_t) (ui32
+ 194:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint16_t tu_u32_low16 (uint32_t ui32) { return (uint16_t) (ui32
+ 195:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 196:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t tu_u16_high(uint16_t ui16) { return TU_U16_HIGH(ui16); 
+ 197:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t tu_u16_low (uint16_t ui16) { return TU_U16_LOW(ui16); }
+ 198:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 199:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //------------- Bits -------------//
+ 200:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_bit_set  (uint32_t value, uint8_t pos) { return val
+ 201:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_bit_clear(uint32_t value, uint8_t pos) { return val
+ 202:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline bool     tu_bit_test (uint32_t value, uint8_t pos) { return (va
+ 203:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 204:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //------------- Min -------------//
+ 205:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t  tu_min8  (uint8_t  x, uint8_t y ) { return (x < y) ? x
+ 206:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint16_t tu_min16 (uint16_t x, uint16_t y) { return (x < y) ? x
+ 207:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_min32 (uint32_t x, uint32_t y) { return (x < y) ? x
+ 208:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 209:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //------------- Max -------------//
+ 210:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t  tu_max8  (uint8_t  x, uint8_t y ) { return (x > y) ? x
+ 211:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint16_t tu_max16 (uint16_t x, uint16_t y) { return (x > y) ? x
+ 212:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_max32 (uint32_t x, uint32_t y) { return (x > y) ? x
+ 213:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 214:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //------------- Align -------------//
+ 215:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_align(uint32_t value, uint32_t alignment) {
+ 216:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h ****   return value & ((uint32_t) ~(alignment-1));
+ 217:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** }
+ 218:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 219:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_align4  (uint32_t value) { return (value & 0xFFFFFF
+ 220:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_align8  (uint32_t value) { return (value & 0xFFFFFF
+ 221:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_align16 (uint32_t value) { return (value & 0xFFFFFF
+ 222:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_align32 (uint32_t value) { return (value & 0xFFFFFF
+ 223:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_align4k (uint32_t value) { return (value & 0xFFFFF0
+ 224:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_offset4k(uint32_t value) { return (value & 0xFFFUL)
+ 225:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 226:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline bool tu_is_aligned32(uint32_t value) { return (value & 0x1FUL) 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 14
+
+
+ 227:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline bool tu_is_aligned64(uint64_t value) { return (value & 0x3FUL) 
+ 228:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** 
+ 229:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** //------------- Mathematics -------------//
+ 230:SynaptiX_FDK/lib/tinyusb/src/common/tusb_common.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tu_div_ceil(uint32_t v, uint32_t d) { return TU_DIV_CE
+ 247              		.loc 3 230 46 view .LVU50
+ 248              	.LBB10:
+ 249              		.loc 3 230 84 view .LVU51
+ 250              		.loc 3 230 91 is_stmt 0 view .LVU52
+ 251 0008 1F30     		adds	r0, r0, #31
+ 252              	.LVL4:
+ 253              		.loc 3 230 91 view .LVU53
+ 254 000a 4009     		lsrs	r0, r0, #5
+ 255              	.LVL5:
+ 256              		.loc 3 230 91 view .LVU54
+ 257              	.LBE10:
+ 258              	.LBE9:
+ 259              		.loc 1 84 16 discriminator 1 view .LVU55
+ 260 000c 1070     		strb	r0, [r2]
+  82:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *blsize = 1;
+ 261              		.loc 1 82 20 view .LVU56
+ 262 000e 2023     		movs	r3, #32
+ 263              	.LVL6:
+ 264              	.L19:
+  85:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   } else {
+  86:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     block_in_bytes = 2;
+  87:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *blsize = 0;
+  88:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *num_block = tu_div_ceil(size, 2);
+  89:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   }
+  90:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  91:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   return (*num_block) * block_in_bytes;
+ 265              		.loc 1 91 3 is_stmt 1 view .LVU57
+ 266              		.loc 1 91 11 is_stmt 0 view .LVU58
+ 267 0010 1078     		ldrb	r0, [r2]	@ zero_extendqisi2
+  92:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** }
+ 268              		.loc 1 92 1 view .LVU59
+ 269 0012 03FB00F0 		mul	r0, r3, r0
+ 270 0016 7047     		bx	lr
+ 271              	.LVL7:
+ 272              	.L18:
+  86:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *blsize = 0;
+ 273              		.loc 1 86 5 is_stmt 1 view .LVU60
+  87:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *num_block = tu_div_ceil(size, 2);
+ 274              		.loc 1 87 5 view .LVU61
+  87:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *num_block = tu_div_ceil(size, 2);
+ 275              		.loc 1 87 13 is_stmt 0 view .LVU62
+ 276 0018 0023     		movs	r3, #0
+ 277 001a 0B70     		strb	r3, [r1]
+  88:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   }
+ 278              		.loc 1 88 5 is_stmt 1 view .LVU63
+ 279              	.LVL8:
+ 280              	.LBB11:
+ 281              	.LBI11:
+ 282              		.loc 3 230 46 view .LVU64
+ 283              	.LBB12:
+ 284              		.loc 3 230 84 view .LVU65
+ 285              		.loc 3 230 91 is_stmt 0 view .LVU66
+ 286 001c 0130     		adds	r0, r0, #1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 15
+
+
+ 287              	.LVL9:
+ 288              		.loc 3 230 91 view .LVU67
+ 289 001e 4008     		lsrs	r0, r0, #1
+ 290              	.LVL10:
+ 291              		.loc 3 230 91 view .LVU68
+ 292              	.LBE12:
+ 293              	.LBE11:
+  88:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   }
+ 294              		.loc 1 88 16 discriminator 1 view .LVU69
+ 295 0020 1070     		strb	r0, [r2]
+  86:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     *blsize = 0;
+ 296              		.loc 1 86 20 view .LVU70
+ 297 0022 0223     		movs	r3, #2
+ 298 0024 F4E7     		b	.L19
+ 299              		.cfi_endproc
+ 300              	.LFE436:
+ 302              		.section	.text.btable_set_rx_bufsize,"ax",%progbits
+ 303              		.align	1
+ 304              		.global	btable_set_rx_bufsize
+ 305              		.syntax unified
+ 306              		.thumb
+ 307              		.thumb_func
+ 309              	btable_set_rx_bufsize:
+ 310              	.LVL11:
+ 311              	.LFB437:
+  93:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  94:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** // Set RX buffer size
+  95:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** void btable_set_rx_bufsize(uint32_t ep_id, uint8_t buf_id, uint16_t wCount) {
+ 312              		.loc 1 95 77 is_stmt 1 view -0
+ 313              		.cfi_startproc
+ 314              		@ args = 0, pretend = 0, frame = 8
+ 315              		@ frame_needed = 0, uses_anonymous_args = 0
+ 316              		.loc 1 95 77 is_stmt 0 view .LVU72
+ 317 0000 30B5     		push	{r4, r5, lr}
+ 318              	.LCFI5:
+ 319              		.cfi_def_cfa_offset 12
+ 320              		.cfi_offset 4, -12
+ 321              		.cfi_offset 5, -8
+ 322              		.cfi_offset 14, -4
+ 323 0002 83B0     		sub	sp, sp, #12
+ 324              	.LCFI6:
+ 325              		.cfi_def_cfa_offset 24
+ 326 0004 0546     		mov	r5, r0
+ 327 0006 0C46     		mov	r4, r1
+ 328 0008 1046     		mov	r0, r2
+ 329              	.LVL12:
+  96:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   uint8_t blsize, num_block;
+ 330              		.loc 1 96 3 is_stmt 1 view .LVU73
+  97:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   (void) pma_align_buffer_size(wCount, &blsize, &num_block);
+ 331              		.loc 1 97 3 view .LVU74
+ 332              		.loc 1 97 10 is_stmt 0 view .LVU75
+ 333 000a 0DF10602 		add	r2, sp, #6
+ 334              	.LVL13:
+ 335              		.loc 1 97 10 view .LVU76
+ 336 000e 0DF10701 		add	r1, sp, #7
+ 337              	.LVL14:
+ 338              		.loc 1 97 10 view .LVU77
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 16
+
+
+ 339 0012 FFF7FEFF 		bl	pma_align_buffer_size
+ 340              	.LVL15:
+  98:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+  99:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   /* Encode into register. When BLSIZE==1, we need to subtract 1 block count */
+ 100:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   uint16_t bl_nb = (blsize << 15) | ((num_block - blsize) << 10);
+ 341              		.loc 1 100 3 is_stmt 1 view .LVU78
+ 342              		.loc 1 100 35 is_stmt 0 view .LVU79
+ 343 0016 9DF80720 		ldrb	r2, [sp, #7]	@ zero_extendqisi2
+ 344              		.loc 1 100 49 view .LVU80
+ 345 001a 9DF80630 		ldrb	r3, [sp, #6]	@ zero_extendqisi2
+ 346 001e 9B1A     		subs	r3, r3, r2
+ 347              		.loc 1 100 35 view .LVU81
+ 348 0020 9B02     		lsls	r3, r3, #10
+ 349 0022 43EAC233 		orr	r3, r3, r2, lsl #15
+ 350              	.LVL16:
+ 101:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   if (bl_nb == 0) {
+ 351              		.loc 1 101 3 is_stmt 1 view .LVU82
+ 352              		.loc 1 101 6 is_stmt 0 view .LVU83
+ 353 0026 13F47C43 		ands	r3, r3, #64512
+ 354              	.LVL17:
+ 355              		.loc 1 101 6 view .LVU84
+ 356 002a 01D1     		bne	.L21
+ 102:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     // zlp but 0 is invalid value, set blsize to 1 (32 bytes)
+ 103:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     // Note: lower value can cause PMAOVR on setup with ch32v203
+ 104:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****     bl_nb = 1 << 15;
+ 357              		.loc 1 104 11 view .LVU85
+ 358 002c 4FF40043 		mov	r3, #32768
+ 359              	.L21:
+ 360              	.LVL18:
+ 105:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   }
+ 106:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** 
+ 107:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** #ifdef  CFG_TUSB_FSDEV_32BIT
+ 108:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   uint32_t count_addr = FSDEV_BTABLE->ep32[ep_id][buf_id].count_addr;
+ 361              		.loc 1 108 3 is_stmt 1 view .LVU86
+ 362              		.loc 1 108 12 is_stmt 0 view .LVU87
+ 363 0030 0548     		ldr	r0, .L24
+ 364 0032 04EB4501 		add	r1, r4, r5, lsl #1
+ 365 0036 50F82120 		ldr	r2, [r0, r1, lsl #2]
+ 366              	.LVL19:
+ 109:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   count_addr = (bl_nb << 16) | (count_addr & 0x0000FFFFu);
+ 367              		.loc 1 109 3 is_stmt 1 view .LVU88
+ 368              		.loc 1 109 44 is_stmt 0 view .LVU89
+ 369 003a 92B2     		uxth	r2, r2
+ 370              	.LVL20:
+ 371              		.loc 1 109 14 view .LVU90
+ 372 003c 42EA0343 		orr	r3, r2, r3, lsl #16
+ 373              	.LVL21:
+ 110:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_BTABLE->ep32[ep_id][buf_id].count_addr = count_addr;
+ 374              		.loc 1 110 3 is_stmt 1 view .LVU91
+ 375              		.loc 1 110 48 is_stmt 0 view .LVU92
+ 376 0040 40F82130 		str	r3, [r0, r1, lsl #2]
+ 111:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** #else
+ 112:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c ****   FSDEV_BTABLE->ep16[ep_id][buf_id].count = bl_nb;
+ 113:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** #endif
+ 114:SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.c **** }
+ 377              		.loc 1 114 1 view .LVU93
+ 378 0044 03B0     		add	sp, sp, #12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 17
+
+
+ 379              	.LCFI7:
+ 380              		.cfi_def_cfa_offset 12
+ 381              		@ sp needed
+ 382 0046 30BD     		pop	{r4, r5, pc}
+ 383              	.LVL22:
+ 384              	.L25:
+ 385              		.loc 1 114 1 view .LVU94
+ 386              		.align	2
+ 387              	.L24:
+ 388 0048 00640140 		.word	1073832960
+ 389              		.cfi_endproc
+ 390              	.LFE437:
+ 392              		.text
+ 393              	.Letext0:
+ 394              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 395              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 396              		.file 6 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 397              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 398              		.file 8 "SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_common.h"
+ 399              		.file 9 "SynaptiX_FDK/lib/tinyusb/src/portable/st/stm32_fsdev/fsdev_stm32.h"
+ 400              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s 			page 18
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 fsdev_common.c
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:22     .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:28     .text.sx_gettick:00000000 sx_gettick
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:50     .text.fsdev_core_reset:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:56     .text.fsdev_core_reset:00000000 fsdev_core_reset
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:144    .text.fsdev_core_reset:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:149    .text.fsdev_deinit:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:155    .text.fsdev_deinit:00000000 fsdev_deinit
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:212    .text.fsdev_deinit:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:217    .text.pma_align_buffer_size:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:223    .text.pma_align_buffer_size:00000000 pma_align_buffer_size
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:303    .text.btable_set_rx_bufsize:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:309    .text.btable_set_rx_bufsize:00000000 btable_set_rx_bufsize
+C:\Users\DELL\AppData\Local\Temp\ccG5NXKx.s:388    .text.btable_set_rx_bufsize:00000048 $d
+
+UNDEFINED SYMBOLS
+HAL_GetTick

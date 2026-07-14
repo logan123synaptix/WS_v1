@@ -1,0 +1,672 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"at_command.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/app/user/at_usb/at_command.c"
+  21              		.section	.text.at_init,"ax",%progbits
+  22              		.align	1
+  23              		.global	at_init
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	at_init:
+  29              	.LVL0:
+  30              	.LFB3:
+   1:SynaptiX_FDK/app/user/at_usb/at_command.c **** #include "at_command.h"
+   2:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+   3:SynaptiX_FDK/app/user/at_usb/at_command.c **** int at_init(AT_Implementation_t *at_impl, AT_Command_t *commands, size_t num_commands){
+  31              		.loc 1 3 87 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		@ link register save eliminated.
+   4:SynaptiX_FDK/app/user/at_usb/at_command.c ****     if(at_impl == NULL || commands == NULL || num_commands == 0){
+  36              		.loc 1 4 5 view .LVU1
+  37              		.loc 1 4 7 is_stmt 0 view .LVU2
+  38 0000 0346     		mov	r3, r0
+  39 0002 48B1     		cbz	r0, .L3
+  40              		.loc 1 4 24 discriminator 1 view .LVU3
+  41 0004 59B1     		cbz	r1, .L4
+  42              		.loc 1 4 44 discriminator 2 view .LVU4
+  43 0006 6AB1     		cbz	r2, .L5
+   5:SynaptiX_FDK/app/user/at_usb/at_command.c ****         return -1; // Invalid parameters
+   6:SynaptiX_FDK/app/user/at_usb/at_command.c ****     }
+   7:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+   8:SynaptiX_FDK/app/user/at_usb/at_command.c ****     at_impl->commands = commands;
+  44              		.loc 1 8 5 is_stmt 1 view .LVU5
+  45              		.loc 1 8 23 is_stmt 0 view .LVU6
+  46 0008 0160     		str	r1, [r0]
+   9:SynaptiX_FDK/app/user/at_usb/at_command.c ****     at_impl->num_commands = num_commands;
+  47              		.loc 1 9 5 is_stmt 1 view .LVU7
+  48              		.loc 1 9 27 is_stmt 0 view .LVU8
+  49 000a 4260     		str	r2, [r0, #4]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 2
+
+
+  10:SynaptiX_FDK/app/user/at_usb/at_command.c ****     at_impl->rx_buffer_index = 0;
+  50              		.loc 1 10 5 is_stmt 1 view .LVU9
+  51              		.loc 1 10 30 is_stmt 0 view .LVU10
+  52 000c 0020     		movs	r0, #0
+  53              	.LVL1:
+  54              		.loc 1 10 30 view .LVU11
+  55 000e C3F80801 		str	r0, [r3, #264]
+  11:SynaptiX_FDK/app/user/at_usb/at_command.c ****     at_impl->response_callback = NULL;
+  56              		.loc 1 11 5 is_stmt 1 view .LVU12
+  57              		.loc 1 11 32 is_stmt 0 view .LVU13
+  58 0012 C3F80C01 		str	r0, [r3, #268]
+  12:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  13:SynaptiX_FDK/app/user/at_usb/at_command.c ****     return 0; // Success
+  59              		.loc 1 13 5 is_stmt 1 view .LVU14
+  60              		.loc 1 13 12 is_stmt 0 view .LVU15
+  61 0016 7047     		bx	lr
+  62              	.LVL2:
+  63              	.L3:
+   5:SynaptiX_FDK/app/user/at_usb/at_command.c ****     }
+  64              		.loc 1 5 16 view .LVU16
+  65 0018 4FF0FF30 		mov	r0, #-1
+  66              	.LVL3:
+   5:SynaptiX_FDK/app/user/at_usb/at_command.c ****     }
+  67              		.loc 1 5 16 view .LVU17
+  68 001c 7047     		bx	lr
+  69              	.LVL4:
+  70              	.L4:
+   5:SynaptiX_FDK/app/user/at_usb/at_command.c ****     }
+  71              		.loc 1 5 16 view .LVU18
+  72 001e 4FF0FF30 		mov	r0, #-1
+  73              	.LVL5:
+   5:SynaptiX_FDK/app/user/at_usb/at_command.c ****     }
+  74              		.loc 1 5 16 view .LVU19
+  75 0022 7047     		bx	lr
+  76              	.LVL6:
+  77              	.L5:
+   5:SynaptiX_FDK/app/user/at_usb/at_command.c ****     }
+  78              		.loc 1 5 16 view .LVU20
+  79 0024 4FF0FF30 		mov	r0, #-1
+  80              	.LVL7:
+  14:SynaptiX_FDK/app/user/at_usb/at_command.c **** }
+  81              		.loc 1 14 1 view .LVU21
+  82 0028 7047     		bx	lr
+  83              		.cfi_endproc
+  84              	.LFE3:
+  86              		.section	.text.at_process_input,"ax",%progbits
+  87              		.align	1
+  88              		.global	at_process_input
+  89              		.syntax unified
+  90              		.thumb
+  91              		.thumb_func
+  93              	at_process_input:
+  94              	.LVL8:
+  95              	.LFB4:
+  15:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  16:SynaptiX_FDK/app/user/at_usb/at_command.c **** int at_process_input(AT_Implementation_t *at_impl, const char *input, size_t input_length)
+  17:SynaptiX_FDK/app/user/at_usb/at_command.c **** {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 3
+
+
+  96              		.loc 1 17 1 is_stmt 1 view -0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 256
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+  18:SynaptiX_FDK/app/user/at_usb/at_command.c ****     if (at_impl == NULL || input == NULL || input_length == 0) return -1;
+ 100              		.loc 1 18 5 view .LVU23
+ 101              		.loc 1 18 8 is_stmt 0 view .LVU24
+ 102 0000 0028     		cmp	r0, #0
+ 103 0002 00F09280 		beq	.L23
+  17:SynaptiX_FDK/app/user/at_usb/at_command.c ****     if (at_impl == NULL || input == NULL || input_length == 0) return -1;
+ 104              		.loc 1 17 1 view .LVU25
+ 105 0006 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 106              	.LCFI0:
+ 107              		.cfi_def_cfa_offset 36
+ 108              		.cfi_offset 4, -36
+ 109              		.cfi_offset 5, -32
+ 110              		.cfi_offset 6, -28
+ 111              		.cfi_offset 7, -24
+ 112              		.cfi_offset 8, -20
+ 113              		.cfi_offset 9, -16
+ 114              		.cfi_offset 10, -12
+ 115              		.cfi_offset 11, -8
+ 116              		.cfi_offset 14, -4
+ 117 000a C1B0     		sub	sp, sp, #260
+ 118              	.LCFI1:
+ 119              		.cfi_def_cfa_offset 296
+ 120 000c 8846     		mov	r8, r1
+ 121 000e 1746     		mov	r7, r2
+ 122 0010 0546     		mov	r5, r0
+ 123              		.loc 1 18 25 discriminator 2 view .LVU26
+ 124 0012 0029     		cmp	r1, #0
+ 125 0014 00F08C80 		beq	.L24
+ 126              		.loc 1 18 42 discriminator 4 view .LVU27
+ 127 0018 002A     		cmp	r2, #0
+ 128 001a 00F08C80 		beq	.L25
+ 129              	.LBB2:
+  19:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  20:SynaptiX_FDK/app/user/at_usb/at_command.c ****     for (size_t i = 0; i < input_length; i++) {
+ 130              		.loc 1 20 17 view .LVU28
+ 131 001e 0026     		movs	r6, #0
+ 132 0020 03E0     		b	.L8
+ 133              	.LVL9:
+ 134              	.L9:
+ 135              	.LBB3:
+  21:SynaptiX_FDK/app/user/at_usb/at_command.c ****         char c = input[i];
+  22:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  23:SynaptiX_FDK/app/user/at_usb/at_command.c ****         if (c == '\r' || c == '\n') {
+  24:SynaptiX_FDK/app/user/at_usb/at_command.c ****             if (at_impl->rx_buffer_index > 0) {
+ 136              		.loc 1 24 13 is_stmt 1 view .LVU29
+ 137              		.loc 1 24 24 is_stmt 0 view .LVU30
+ 138 0022 D5F80831 		ldr	r3, [r5, #264]
+ 139              	.LVL10:
+ 140              		.loc 1 24 16 view .LVU31
+ 141 0026 93B9     		cbnz	r3, .L30
+ 142              	.LVL11:
+ 143              	.L11:
+ 144              		.loc 1 24 16 view .LVU32
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 4
+
+
+ 145              	.LBE3:
+  20:SynaptiX_FDK/app/user/at_usb/at_command.c ****         char c = input[i];
+ 146              		.loc 1 20 43 is_stmt 1 discriminator 2 view .LVU33
+ 147 0028 0136     		adds	r6, r6, #1
+ 148              	.LVL12:
+ 149              	.L8:
+  20:SynaptiX_FDK/app/user/at_usb/at_command.c ****         char c = input[i];
+ 150              		.loc 1 20 26 discriminator 1 view .LVU34
+ 151 002a BE42     		cmp	r6, r7
+ 152 002c 79D2     		bcs	.L31
+ 153              	.LBB10:
+  21:SynaptiX_FDK/app/user/at_usb/at_command.c ****         char c = input[i];
+ 154              		.loc 1 21 9 view .LVU35
+  21:SynaptiX_FDK/app/user/at_usb/at_command.c ****         char c = input[i];
+ 155              		.loc 1 21 14 is_stmt 0 view .LVU36
+ 156 002e 18F80630 		ldrb	r3, [r8, r6]	@ zero_extendqisi2
+ 157              	.LVL13:
+  23:SynaptiX_FDK/app/user/at_usb/at_command.c ****             if (at_impl->rx_buffer_index > 0) {
+ 158              		.loc 1 23 9 is_stmt 1 view .LVU37
+  23:SynaptiX_FDK/app/user/at_usb/at_command.c ****             if (at_impl->rx_buffer_index > 0) {
+ 159              		.loc 1 23 12 is_stmt 0 view .LVU38
+ 160 0032 0D2B     		cmp	r3, #13
+ 161 0034 F5D0     		beq	.L9
+  23:SynaptiX_FDK/app/user/at_usb/at_command.c ****             if (at_impl->rx_buffer_index > 0) {
+ 162              		.loc 1 23 23 discriminator 1 view .LVU39
+ 163 0036 0A2B     		cmp	r3, #10
+ 164 0038 F3D0     		beq	.L9
+  25:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 at_impl->rx_buffer[at_impl->rx_buffer_index] = '\0';
+  26:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  27:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char *eq  = strchr((char *)at_impl->rx_buffer, '=');
+  28:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char *q   = strchr((char *)at_impl->rx_buffer, '?');
+  29:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  30:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char cmd_name[AT_RX_BUFFER_SIZE];
+  31:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 const char *param   = NULL;
+  32:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char        at_type = 0;  
+  33:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  34:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 if (eq != NULL) {
+  35:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     /* AT+CMD=param */
+  36:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     size_t name_len = (size_t)(eq - (char *)at_impl->rx_buffer);
+  37:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     strncpy(cmd_name, (char *)at_impl->rx_buffer, name_len);
+  38:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[name_len] = '\0';
+  39:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     param   = eq + 1;
+  40:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = '=';
+  41:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 } else if (q != NULL) {
+  42:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     /* AT+CMD? */
+  43:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     size_t name_len = (size_t)(q - (char *)at_impl->rx_buffer);
+  44:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     strncpy(cmd_name, (char *)at_impl->rx_buffer, name_len);
+  45:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[name_len] = '\0';
+  46:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = '?';
+  47:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 } else {
+  48:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     /* AT+CMD (execute) */
+  49:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     strncpy(cmd_name, (char *)at_impl->rx_buffer, AT_RX_BUFFER_SIZE - 1);
+  50:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[AT_RX_BUFFER_SIZE - 1] = '\0';
+  51:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = 0;
+  52:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 }
+  53:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 for (size_t j = 0; j < at_impl->num_commands; j++) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 5
+
+
+  55:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+  56:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         switch (at_type) {
+  57:SynaptiX_FDK/app/user/at_usb/at_command.c ****                             case '?':
+  58:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 if (at_impl->commands[j].handler.question_handler)
+  59:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.question_handler(&at_impl->command
+  60:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 break;
+  61:SynaptiX_FDK/app/user/at_usb/at_command.c ****                             case '=':
+  62:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 if (at_impl->commands[j].handler.set_handler)
+  63:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.set_handler(&at_impl->commands[j],
+  64:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 break;
+  65:SynaptiX_FDK/app/user/at_usb/at_command.c ****                             default:
+  66:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 if (at_impl->commands[j].handler.execute_handler)
+  67:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.execute_handler(&at_impl->commands
+  68:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 break;
+  69:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         }
+  70:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         break;
+  71:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     }
+  72:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 }
+  73:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+  74:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 /* ── Reset buffer ── */
+  75:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 at_impl->rx_buffer_index = 0;
+  76:SynaptiX_FDK/app/user/at_usb/at_command.c ****             }
+  77:SynaptiX_FDK/app/user/at_usb/at_command.c ****         } else {
+  78:SynaptiX_FDK/app/user/at_usb/at_command.c ****             if (at_impl->rx_buffer_index < AT_RX_BUFFER_SIZE - 1)
+ 165              		.loc 1 78 13 is_stmt 1 view .LVU40
+ 166              		.loc 1 78 24 is_stmt 0 view .LVU41
+ 167 003a D5F80821 		ldr	r2, [r5, #264]
+ 168              		.loc 1 78 16 view .LVU42
+ 169 003e FE2A     		cmp	r2, #254
+ 170 0040 6BD8     		bhi	.L21
+  79:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 at_impl->rx_buffer[at_impl->rx_buffer_index++] = c;
+ 171              		.loc 1 79 17 is_stmt 1 view .LVU43
+ 172              		.loc 1 79 60 is_stmt 0 view .LVU44
+ 173 0042 511C     		adds	r1, r2, #1
+ 174 0044 C5F80811 		str	r1, [r5, #264]
+ 175              		.loc 1 79 64 view .LVU45
+ 176 0048 2A44     		add	r2, r2, r5
+ 177 004a 1372     		strb	r3, [r2, #8]
+ 178 004c ECE7     		b	.L11
+ 179              	.LVL14:
+ 180              	.L30:
+ 181              	.LBB4:
+  25:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 at_impl->rx_buffer[at_impl->rx_buffer_index] = '\0';
+ 182              		.loc 1 25 17 is_stmt 1 view .LVU46
+  25:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 at_impl->rx_buffer[at_impl->rx_buffer_index] = '\0';
+ 183              		.loc 1 25 62 is_stmt 0 view .LVU47
+ 184 004e 2B44     		add	r3, r3, r5
+ 185 0050 0022     		movs	r2, #0
+ 186 0052 1A72     		strb	r2, [r3, #8]
+ 187              	.LVL15:
+  27:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char *q   = strchr((char *)at_impl->rx_buffer, '?');
+ 188              		.loc 1 27 17 is_stmt 1 view .LVU48
+  27:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char *q   = strchr((char *)at_impl->rx_buffer, '?');
+ 189              		.loc 1 27 44 is_stmt 0 view .LVU49
+ 190 0054 05F10809 		add	r9, r5, #8
+  27:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char *q   = strchr((char *)at_impl->rx_buffer, '?');
+ 191              		.loc 1 27 29 view .LVU50
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 6
+
+
+ 192 0058 3D21     		movs	r1, #61
+ 193 005a 4846     		mov	r0, r9
+ 194 005c FFF7FEFF 		bl	strchr
+ 195              	.LVL16:
+ 196 0060 8246     		mov	r10, r0
+ 197              	.LVL17:
+  28:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 198              		.loc 1 28 17 is_stmt 1 view .LVU51
+  28:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 199              		.loc 1 28 29 is_stmt 0 view .LVU52
+ 200 0062 3F21     		movs	r1, #63
+ 201 0064 4846     		mov	r0, r9
+ 202              	.LVL18:
+  28:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 203              		.loc 1 28 29 view .LVU53
+ 204 0066 FFF7FEFF 		bl	strchr
+ 205              	.LVL19:
+ 206 006a 0446     		mov	r4, r0
+ 207              	.LVL20:
+  30:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 const char *param   = NULL;
+ 208              		.loc 1 30 17 is_stmt 1 view .LVU54
+  31:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char        at_type = 0;  
+ 209              		.loc 1 31 17 view .LVU55
+  32:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 210              		.loc 1 32 17 view .LVU56
+  34:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     /* AT+CMD=param */
+ 211              		.loc 1 34 17 view .LVU57
+  34:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     /* AT+CMD=param */
+ 212              		.loc 1 34 20 is_stmt 0 view .LVU58
+ 213 006c BAF1000F 		cmp	r10, #0
+ 214 0070 1CD0     		beq	.L12
+ 215              	.LBB5:
+  36:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     strncpy(cmd_name, (char *)at_impl->rx_buffer, name_len);
+ 216              		.loc 1 36 21 is_stmt 1 view .LVU59
+  36:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     strncpy(cmd_name, (char *)at_impl->rx_buffer, name_len);
+ 217              		.loc 1 36 51 is_stmt 0 view .LVU60
+ 218 0072 AAEB0904 		sub	r4, r10, r9
+ 219              	.LVL21:
+  37:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[name_len] = '\0';
+ 220              		.loc 1 37 21 is_stmt 1 view .LVU61
+ 221 0076 2246     		mov	r2, r4
+ 222 0078 4946     		mov	r1, r9
+ 223 007a 6846     		mov	r0, sp
+ 224              	.LVL22:
+  37:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[name_len] = '\0';
+ 225              		.loc 1 37 21 is_stmt 0 view .LVU62
+ 226 007c FFF7FEFF 		bl	strncpy
+ 227              	.LVL23:
+  38:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     param   = eq + 1;
+ 228              		.loc 1 38 21 is_stmt 1 view .LVU63
+  38:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     param   = eq + 1;
+ 229              		.loc 1 38 40 is_stmt 0 view .LVU64
+ 230 0080 0023     		movs	r3, #0
+ 231 0082 0DF80430 		strb	r3, [sp, r4]
+  39:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = '=';
+ 232              		.loc 1 39 21 is_stmt 1 view .LVU65
+  39:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = '=';
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 7
+
+
+ 233              		.loc 1 39 29 is_stmt 0 view .LVU66
+ 234 0086 0AF1010A 		add	r10, r10, #1
+ 235              	.LVL24:
+  40:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 } else if (q != NULL) {
+ 236              		.loc 1 40 21 is_stmt 1 view .LVU67
+  40:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 } else if (q != NULL) {
+ 237              		.loc 1 40 29 is_stmt 0 view .LVU68
+ 238 008a 4FF03D0B 		mov	fp, #61
+ 239              	.LVL25:
+ 240              	.L13:
+  40:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 } else if (q != NULL) {
+ 241              		.loc 1 40 29 view .LVU69
+ 242              	.LBE5:
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 243              		.loc 1 54 17 is_stmt 1 view .LVU70
+ 244              	.LBB6:
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 245              		.loc 1 54 22 view .LVU71
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 246              		.loc 1 54 29 is_stmt 0 view .LVU72
+ 247 008e 0024     		movs	r4, #0
+ 248              	.LVL26:
+ 249              	.L15:
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 250              		.loc 1 54 38 is_stmt 1 discriminator 1 view .LVU73
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 251              		.loc 1 54 47 is_stmt 0 discriminator 1 view .LVU74
+ 252 0090 6B68     		ldr	r3, [r5, #4]
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 253              		.loc 1 54 38 discriminator 1 view .LVU75
+ 254 0092 A342     		cmp	r3, r4
+ 255 0094 2ED9     		bls	.L19
+  55:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         switch (at_type) {
+ 256              		.loc 1 55 21 is_stmt 1 view .LVU76
+  55:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         switch (at_type) {
+ 257              		.loc 1 55 49 is_stmt 0 view .LVU77
+ 258 0096 2A68     		ldr	r2, [r5]
+  55:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         switch (at_type) {
+ 259              		.loc 1 55 59 view .LVU78
+ 260 0098 2301     		lsls	r3, r4, #4
+ 261 009a 02EB0419 		add	r9, r2, r4, lsl #4
+  55:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         switch (at_type) {
+ 262              		.loc 1 55 25 view .LVU79
+ 263 009e D158     		ldr	r1, [r2, r3]
+ 264 00a0 6846     		mov	r0, sp
+ 265 00a2 FFF7FEFF 		bl	strcmp
+ 266              	.LVL27:
+  55:SynaptiX_FDK/app/user/at_usb/at_command.c ****                         switch (at_type) {
+ 267              		.loc 1 55 24 discriminator 1 view .LVU80
+ 268 00a6 D0B1     		cbz	r0, .L32
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 269              		.loc 1 54 64 is_stmt 1 discriminator 2 view .LVU81
+ 270 00a8 0134     		adds	r4, r4, #1
+ 271              	.LVL28:
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 272              		.loc 1 54 64 is_stmt 0 discriminator 2 view .LVU82
+ 273 00aa F1E7     		b	.L15
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 8
+
+
+ 274              	.LVL29:
+ 275              	.L12:
+  54:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     if (strcmp(cmd_name, at_impl->commands[j].command) == 0) {
+ 276              		.loc 1 54 64 discriminator 2 view .LVU83
+ 277              	.LBE6:
+  41:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     /* AT+CMD? */
+ 278              		.loc 1 41 24 is_stmt 1 view .LVU84
+  41:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     /* AT+CMD? */
+ 279              		.loc 1 41 27 is_stmt 0 view .LVU85
+ 280 00ac 60B1     		cbz	r0, .L14
+ 281              	.LBB7:
+  43:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     strncpy(cmd_name, (char *)at_impl->rx_buffer, name_len);
+ 282              		.loc 1 43 21 is_stmt 1 view .LVU86
+  43:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     strncpy(cmd_name, (char *)at_impl->rx_buffer, name_len);
+ 283              		.loc 1 43 50 is_stmt 0 view .LVU87
+ 284 00ae A0EB0904 		sub	r4, r0, r9
+ 285              	.LVL30:
+  44:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[name_len] = '\0';
+ 286              		.loc 1 44 21 is_stmt 1 view .LVU88
+ 287 00b2 2246     		mov	r2, r4
+ 288 00b4 4946     		mov	r1, r9
+ 289 00b6 6846     		mov	r0, sp
+ 290              	.LVL31:
+  44:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[name_len] = '\0';
+ 291              		.loc 1 44 21 is_stmt 0 view .LVU89
+ 292 00b8 FFF7FEFF 		bl	strncpy
+ 293              	.LVL32:
+  45:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = '?';
+ 294              		.loc 1 45 21 is_stmt 1 view .LVU90
+  45:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = '?';
+ 295              		.loc 1 45 40 is_stmt 0 view .LVU91
+ 296 00bc 0023     		movs	r3, #0
+ 297 00be 0DF80430 		strb	r3, [sp, r4]
+  46:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 } else {
+ 298              		.loc 1 46 21 is_stmt 1 view .LVU92
+ 299              	.LVL33:
+  46:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 } else {
+ 300              		.loc 1 46 29 is_stmt 0 view .LVU93
+ 301 00c2 4FF03F0B 		mov	fp, #63
+ 302              	.LBE7:
+ 303 00c6 E2E7     		b	.L13
+ 304              	.LVL34:
+ 305              	.L14:
+  49:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[AT_RX_BUFFER_SIZE - 1] = '\0';
+ 306              		.loc 1 49 21 is_stmt 1 view .LVU94
+ 307 00c8 FF22     		movs	r2, #255
+ 308 00ca 4946     		mov	r1, r9
+ 309 00cc 6846     		mov	r0, sp
+ 310              	.LVL35:
+  49:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     cmd_name[AT_RX_BUFFER_SIZE - 1] = '\0';
+ 311              		.loc 1 49 21 is_stmt 0 view .LVU95
+ 312 00ce FFF7FEFF 		bl	strncpy
+ 313              	.LVL36:
+  50:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = 0;
+ 314              		.loc 1 50 21 is_stmt 1 view .LVU96
+  50:SynaptiX_FDK/app/user/at_usb/at_command.c ****                     at_type = 0;
+ 315              		.loc 1 50 53 is_stmt 0 view .LVU97
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 9
+
+
+ 316 00d2 4FF0000B 		mov	fp, #0
+ 317 00d6 8DF8FFB0 		strb	fp, [sp, #255]
+  51:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 }
+ 318              		.loc 1 51 21 is_stmt 1 view .LVU98
+  31:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char        at_type = 0;  
+ 319              		.loc 1 31 29 is_stmt 0 view .LVU99
+ 320 00da A246     		mov	r10, r4
+ 321              	.LVL37:
+  31:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 char        at_type = 0;  
+ 322              		.loc 1 31 29 view .LVU100
+ 323 00dc D7E7     		b	.L13
+ 324              	.LVL38:
+ 325              	.L32:
+ 326              	.LBB8:
+  56:SynaptiX_FDK/app/user/at_usb/at_command.c ****                             case '?':
+ 327              		.loc 1 56 25 is_stmt 1 view .LVU101
+ 328 00de BBF13D0F 		cmp	fp, #61
+ 329 00e2 0BD0     		beq	.L17
+ 330 00e4 BBF13F0F 		cmp	fp, #63
+ 331 00e8 10D1     		bne	.L18
+  58:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.question_handler(&at_impl->command
+ 332              		.loc 1 58 33 view .LVU102
+  58:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.question_handler(&at_impl->command
+ 333              		.loc 1 58 65 is_stmt 0 view .LVU103
+ 334 00ea D9F80430 		ldr	r3, [r9, #4]
+  58:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.question_handler(&at_impl->command
+ 335              		.loc 1 58 36 view .LVU104
+ 336 00ee 0BB1     		cbz	r3, .L19
+  59:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 break;
+ 337              		.loc 1 59 37 is_stmt 1 view .LVU105
+ 338 00f0 4846     		mov	r0, r9
+ 339 00f2 9847     		blx	r3
+ 340              	.LVL39:
+ 341              	.L19:
+ 342              	.LBE8:
+  75:SynaptiX_FDK/app/user/at_usb/at_command.c ****             }
+ 343              		.loc 1 75 17 view .LVU106
+  75:SynaptiX_FDK/app/user/at_usb/at_command.c ****             }
+ 344              		.loc 1 75 42 is_stmt 0 view .LVU107
+ 345 00f4 0023     		movs	r3, #0
+ 346 00f6 C5F80831 		str	r3, [r5, #264]
+ 347 00fa 95E7     		b	.L11
+ 348              	.L17:
+ 349              	.LBB9:
+  62:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.set_handler(&at_impl->commands[j],
+ 350              		.loc 1 62 33 is_stmt 1 view .LVU108
+  62:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.set_handler(&at_impl->commands[j],
+ 351              		.loc 1 62 65 is_stmt 0 view .LVU109
+ 352 00fc D9F80830 		ldr	r3, [r9, #8]
+  62:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.set_handler(&at_impl->commands[j],
+ 353              		.loc 1 62 36 view .LVU110
+ 354 0100 002B     		cmp	r3, #0
+ 355 0102 F7D0     		beq	.L19
+  63:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 break;
+ 356              		.loc 1 63 37 is_stmt 1 view .LVU111
+ 357 0104 5146     		mov	r1, r10
+ 358 0106 4846     		mov	r0, r9
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 10
+
+
+ 359 0108 9847     		blx	r3
+ 360              	.LVL40:
+ 361 010a F3E7     		b	.L19
+ 362              	.L18:
+  66:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.execute_handler(&at_impl->commands
+ 363              		.loc 1 66 33 view .LVU112
+  66:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.execute_handler(&at_impl->commands
+ 364              		.loc 1 66 65 is_stmt 0 view .LVU113
+ 365 010c D9F80C30 		ldr	r3, [r9, #12]
+  66:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                     at_impl->commands[j].handler.execute_handler(&at_impl->commands
+ 366              		.loc 1 66 36 view .LVU114
+ 367 0110 002B     		cmp	r3, #0
+ 368 0112 EFD0     		beq	.L19
+  67:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 break;
+ 369              		.loc 1 67 37 is_stmt 1 view .LVU115
+ 370 0114 4846     		mov	r0, r9
+ 371 0116 9847     		blx	r3
+ 372              	.LVL41:
+ 373 0118 ECE7     		b	.L19
+ 374              	.LVL42:
+ 375              	.L21:
+  67:SynaptiX_FDK/app/user/at_usb/at_command.c ****                                 break;
+ 376              		.loc 1 67 37 is_stmt 0 view .LVU116
+ 377              	.LBE9:
+ 378              	.LBE4:
+  80:SynaptiX_FDK/app/user/at_usb/at_command.c ****             else
+  81:SynaptiX_FDK/app/user/at_usb/at_command.c ****                 at_impl->rx_buffer_index = 0;
+ 379              		.loc 1 81 17 is_stmt 1 view .LVU117
+ 380              		.loc 1 81 42 is_stmt 0 view .LVU118
+ 381 011a 0023     		movs	r3, #0
+ 382              	.LVL43:
+ 383              		.loc 1 81 42 view .LVU119
+ 384 011c C5F80831 		str	r3, [r5, #264]
+ 385              	.LVL44:
+ 386              		.loc 1 81 42 view .LVU120
+ 387 0120 82E7     		b	.L11
+ 388              	.LVL45:
+ 389              	.L31:
+ 390              		.loc 1 81 42 view .LVU121
+ 391              	.LBE10:
+ 392              	.LBE2:
+  82:SynaptiX_FDK/app/user/at_usb/at_command.c ****         }
+  83:SynaptiX_FDK/app/user/at_usb/at_command.c ****     }
+  84:SynaptiX_FDK/app/user/at_usb/at_command.c ****     return 0;
+ 393              		.loc 1 84 12 view .LVU122
+ 394 0122 0020     		movs	r0, #0
+ 395              	.LVL46:
+ 396              	.L6:
+  85:SynaptiX_FDK/app/user/at_usb/at_command.c **** }
+ 397              		.loc 1 85 1 view .LVU123
+ 398 0124 41B0     		add	sp, sp, #260
+ 399              	.LCFI2:
+ 400              		.cfi_def_cfa_offset 36
+ 401              		@ sp needed
+ 402 0126 BDE8F08F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 403              	.LVL47:
+ 404              	.L23:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 11
+
+
+ 405              	.LCFI3:
+ 406              		.cfi_def_cfa_offset 0
+ 407              		.cfi_restore 4
+ 408              		.cfi_restore 5
+ 409              		.cfi_restore 6
+ 410              		.cfi_restore 7
+ 411              		.cfi_restore 8
+ 412              		.cfi_restore 9
+ 413              		.cfi_restore 10
+ 414              		.cfi_restore 11
+ 415              		.cfi_restore 14
+  18:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 416              		.loc 1 18 71 discriminator 5 view .LVU124
+ 417 012a 4FF0FF30 		mov	r0, #-1
+ 418              	.LVL48:
+ 419              		.loc 1 85 1 view .LVU125
+ 420 012e 7047     		bx	lr
+ 421              	.LVL49:
+ 422              	.L24:
+ 423              	.LCFI4:
+ 424              		.cfi_def_cfa_offset 296
+ 425              		.cfi_offset 4, -36
+ 426              		.cfi_offset 5, -32
+ 427              		.cfi_offset 6, -28
+ 428              		.cfi_offset 7, -24
+ 429              		.cfi_offset 8, -20
+ 430              		.cfi_offset 9, -16
+ 431              		.cfi_offset 10, -12
+ 432              		.cfi_offset 11, -8
+ 433              		.cfi_offset 14, -4
+  18:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 434              		.loc 1 18 71 discriminator 5 view .LVU126
+ 435 0130 4FF0FF30 		mov	r0, #-1
+ 436              	.LVL50:
+  18:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 437              		.loc 1 18 71 discriminator 5 view .LVU127
+ 438 0134 F6E7     		b	.L6
+ 439              	.LVL51:
+ 440              	.L25:
+  18:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 441              		.loc 1 18 71 discriminator 5 view .LVU128
+ 442 0136 4FF0FF30 		mov	r0, #-1
+ 443              	.LVL52:
+  18:SynaptiX_FDK/app/user/at_usb/at_command.c **** 
+ 444              		.loc 1 18 71 discriminator 5 view .LVU129
+ 445 013a F3E7     		b	.L6
+ 446              		.cfi_endproc
+ 447              	.LFE4:
+ 449              		.text
+ 450              	.Letext0:
+ 451              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 452              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 453              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 454              		.file 5 "SynaptiX_FDK/app/user/at_usb/at_command.h"
+ 455              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s 			page 12
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 at_command.c
+C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s:22     .text.at_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s:28     .text.at_init:00000000 at_init
+C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s:87     .text.at_process_input:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccUhRgLT.s:93     .text.at_process_input:00000000 at_process_input
+
+UNDEFINED SYMBOLS
+strchr
+strncpy
+strcmp

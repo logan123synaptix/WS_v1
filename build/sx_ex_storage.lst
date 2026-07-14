@@ -1,0 +1,2425 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_ex_storage.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c"
+  21              		.section	.text.sx_gpio_write,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sx_gpio_write:
+  28              	.LVL0:
+  29              	.LFB298:
+  30              		.file 2 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+   1:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifndef SX_GPIO_H
+   2:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #define SX_GPIO_H
+   3:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   7:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   9:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef enum SX_GPIO_VALUE{
+  10:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_LOW = 0,
+  11:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_HIGH = 1
+  12:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } SX_GPIO_VALUE;
+  13:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  14:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio sx_gpio_t;
+  15:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  16:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct {
+  17:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void    *port;
+  18:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     uint16_t pin;
+  19:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_pin_t;
+  20:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  21:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio_ops{
+  22:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*write)(sx_gpio_t *gpio, SX_GPIO_VALUE value);
+  23:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*read)(sx_gpio_t *gpio, SX_GPIO_VALUE *value);
+  24:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*toggle)(sx_gpio_t *gpio);
+  25:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_ops_t;
+  26:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  27:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio{
+  28:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     sx_gpio_ops_t *ops;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 2
+
+
+  29:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void *pDriver;
+  30:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_VALUE value;
+  31:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_t;
+  32:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline void sx_gpio_init(sx_gpio_t *gpio, sx_gpio_ops_t *ops, void *pDriver){
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+  37:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  38:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  39:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline int sx_gpio_write(sx_gpio_t *gpio, SX_GPIO_VALUE value){
+  31              		.loc 2 39 70 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 2 39 70 is_stmt 0 view .LVU1
+  36 0000 38B5     		push	{r3, r4, r5, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 16
+  39              		.cfi_offset 3, -16
+  40              		.cfi_offset 4, -12
+  41              		.cfi_offset 5, -8
+  42              		.cfi_offset 14, -4
+  40:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     if(gpio->ops && gpio->ops->write){
+  43              		.loc 2 40 5 is_stmt 1 view .LVU2
+  44              		.loc 2 40 12 is_stmt 0 view .LVU3
+  45 0002 0368     		ldr	r3, [r0]
+  46              		.loc 2 40 7 view .LVU4
+  47 0004 3BB1     		cbz	r3, .L4
+  48 0006 0446     		mov	r4, r0
+  49 0008 0D46     		mov	r5, r1
+  50              		.loc 2 40 30 discriminator 1 view .LVU5
+  51 000a 1B68     		ldr	r3, [r3]
+  52              		.loc 2 40 18 discriminator 1 view .LVU6
+  53 000c 33B1     		cbz	r3, .L5
+  54              	.LBB8:
+  41:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         int ret = gpio->ops->write(gpio, value);
+  55              		.loc 2 41 9 is_stmt 1 view .LVU7
+  56              		.loc 2 41 19 is_stmt 0 view .LVU8
+  57 000e 9847     		blx	r3
+  58              	.LVL1:
+  42:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         if(ret == 0){
+  59              		.loc 2 42 9 is_stmt 1 view .LVU9
+  60              		.loc 2 42 11 is_stmt 0 view .LVU10
+  61 0010 00B9     		cbnz	r0, .L1
+  43:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****             gpio->value = value;
+  62              		.loc 2 43 13 is_stmt 1 view .LVU11
+  63              		.loc 2 43 25 is_stmt 0 view .LVU12
+  64 0012 2572     		strb	r5, [r4, #8]
+  44:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         }
+  45:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****         return ret;
+  65              		.loc 2 45 9 is_stmt 1 view .LVU13
+  66              	.LVL2:
+  67              	.L1:
+  68              		.loc 2 45 9 is_stmt 0 view .LVU14
+  69              	.LBE8:
+  46:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 3
+
+
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     return -1;
+  48:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  70              		.loc 2 48 1 view .LVU15
+  71 0014 38BD     		pop	{r3, r4, r5, pc}
+  72              	.LVL3:
+  73              	.L4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  74              		.loc 2 47 12 view .LVU16
+  75 0016 4FF0FF30 		mov	r0, #-1
+  76              	.LVL4:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  77              		.loc 2 47 12 view .LVU17
+  78 001a FBE7     		b	.L1
+  79              	.LVL5:
+  80              	.L5:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  81              		.loc 2 47 12 view .LVU18
+  82 001c 4FF0FF30 		mov	r0, #-1
+  83              	.LVL6:
+  47:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+  84              		.loc 2 47 12 view .LVU19
+  85 0020 F8E7     		b	.L1
+  86              		.cfi_endproc
+  87              	.LFE298:
+  89              		.section	.rodata._check_init.str1.4,"aMS",%progbits,1
+  90              		.align	2
+  91              	.LC0:
+  92 0000 4E6F7420 		.ascii	"Not initialized\000"
+  92      696E6974 
+  92      69616C69 
+  92      7A656400 
+  93              		.align	2
+  94              	.LC1:
+  95 0010 53585F53 		.ascii	"SX_STORAGE\000"
+  95      544F5241 
+  95      474500
+  96              		.section	.text._check_init,"ax",%progbits
+  97              		.align	1
+  98              		.syntax unified
+  99              		.thumb
+ 100              		.thumb_func
+ 102              	_check_init:
+ 103              	.LFB332:
+   1:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "sx_ex_storage.h"
+   2:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "sx_spi.h"
+   3:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "sx_gpio.h"
+   4:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "sx_W25Q128.h"
+   5:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "sx_external_flash.h"
+   6:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "sx_fs.h"
+   7:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "file_io.h"
+   8:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** #include "logger.h"
+   9:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  10:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** static const char *TAG = "SX_STORAGE";
+  11:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  12:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** static sx_W25Q128_t     s_w25q128;
+  13:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** static sx_ext_flash_t   s_flash;
+  14:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** static bool             s_initialized = false;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 4
+
+
+  15:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  16:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_init(sx_storage_cfg_t *cfg)
+  17:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+  18:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (cfg == NULL) return SX_STORAGE_ERR_INVALID;
+  19:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  20:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_gpio_init(&cfg->s_cs, &sx_gpio_ops, &cfg->cs_pin);
+  21:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_gpio_write(&cfg->s_cs, SX_GPIO_HIGH);
+  22:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_spi_init(&cfg->s_spi, &sx_spi_ops, cfg->hspi, &cfg->s_cs); 
+  23:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  24:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (!sx_W25Q128_init(&s_w25q128, &cfg->s_spi)) {
+  25:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "W25Q128 init failed");
+  26:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+  27:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+  28:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  29:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     /* External flash interface */
+  30:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_ext_flash_init(&s_flash, &sx_W25Q128_ops, &sx_W25Q128_info);
+  31:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  32:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     /* Filesystem */
+  33:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (sx_fs_init(&s_flash) != 0) {
+  34:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Filesystem init failed");
+  35:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+  36:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+  37:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  38:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     s_initialized = true;
+  39:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     log_info(TAG, "Storage init OK");
+  40:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+  41:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+  42:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  43:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** static sx_storage_err_t _check_init(void)
+  44:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 104              		.loc 1 44 1 is_stmt 1 view -0
+ 105              		.cfi_startproc
+ 106              		@ args = 0, pretend = 0, frame = 0
+ 107              		@ frame_needed = 0, uses_anonymous_args = 0
+ 108 0000 08B5     		push	{r3, lr}
+ 109              	.LCFI1:
+ 110              		.cfi_def_cfa_offset 8
+ 111              		.cfi_offset 3, -8
+ 112              		.cfi_offset 14, -4
+  45:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (!s_initialized) {
+ 113              		.loc 1 45 5 view .LVU21
+ 114              		.loc 1 45 9 is_stmt 0 view .LVU22
+ 115 0002 064B     		ldr	r3, .L12
+ 116 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 117              		.loc 1 45 8 view .LVU23
+ 118 0006 0BB1     		cbz	r3, .L11
+  46:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Not initialized");
+  47:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_NOT_INIT;
+  48:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+  49:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 119              		.loc 1 49 12 view .LVU24
+ 120 0008 0020     		movs	r0, #0
+ 121              	.L8:
+  50:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 122              		.loc 1 50 1 view .LVU25
+ 123 000a 08BD     		pop	{r3, pc}
+ 124              	.L11:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 5
+
+
+  46:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Not initialized");
+ 125              		.loc 1 46 9 is_stmt 1 view .LVU26
+ 126 000c 044A     		ldr	r2, .L12+4
+ 127 000e 0549     		ldr	r1, .L12+8
+ 128 0010 0120     		movs	r0, #1
+ 129 0012 FFF7FEFF 		bl	log_func
+ 130              	.LVL7:
+  47:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 131              		.loc 1 47 9 view .LVU27
+  47:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 132              		.loc 1 47 16 is_stmt 0 view .LVU28
+ 133 0016 6FF00400 		mvn	r0, #4
+ 134 001a F6E7     		b	.L8
+ 135              	.L13:
+ 136              		.align	2
+ 137              	.L12:
+ 138 001c 00000000 		.word	s_initialized
+ 139 0020 00000000 		.word	.LC0
+ 140 0024 10000000 		.word	.LC1
+ 141              		.cfi_endproc
+ 142              	.LFE332:
+ 144              		.section	.text.file_open,"ax",%progbits
+ 145              		.align	1
+ 146              		.syntax unified
+ 147              		.thumb
+ 148              		.thumb_func
+ 150              	file_open:
+ 151              	.LVL8:
+ 152              	.LFB329:
+ 153              		.file 3 "SynaptiX_FDK/services/filesystem/file_io.h"
+   1:SynaptiX_FDK/services/filesystem/file_io.h **** #ifndef __FILE_IO_H
+   2:SynaptiX_FDK/services/filesystem/file_io.h **** #define __FILE_IO_H
+   3:SynaptiX_FDK/services/filesystem/file_io.h **** 
+   4:SynaptiX_FDK/services/filesystem/file_io.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/services/filesystem/file_io.h **** extern "C" {
+   6:SynaptiX_FDK/services/filesystem/file_io.h **** #endif
+   7:SynaptiX_FDK/services/filesystem/file_io.h **** 
+   8:SynaptiX_FDK/services/filesystem/file_io.h **** #include <stdio.h>
+   9:SynaptiX_FDK/services/filesystem/file_io.h **** #include "lfs.h"
+  10:SynaptiX_FDK/services/filesystem/file_io.h **** #include "lfs_util.h"
+  11:SynaptiX_FDK/services/filesystem/file_io.h **** 
+  12:SynaptiX_FDK/services/filesystem/file_io.h **** typedef struct file_system_config{
+  13:SynaptiX_FDK/services/filesystem/file_io.h ****     struct lfs_config cfg; // LittleFS configuration
+  14:SynaptiX_FDK/services/filesystem/file_io.h ****     lfs_t *lfs; // Pointer to the LittleFS object
+  15:SynaptiX_FDK/services/filesystem/file_io.h ****     uint32_t block_size; // Size of a block in bytes
+  16:SynaptiX_FDK/services/filesystem/file_io.h ****     uint32_t block_count; // Number of blocks in the filesystem
+  17:SynaptiX_FDK/services/filesystem/file_io.h ****     struct file_function_t{
+  18:SynaptiX_FDK/services/filesystem/file_io.h ****         int (*erase)(const struct lfs_config *c,lfs_size_t block); // Function to erase a block
+  19:SynaptiX_FDK/services/filesystem/file_io.h ****         int (*read)(const struct lfs_config *c, lfs_block_t block,
+  20:SynaptiX_FDK/services/filesystem/file_io.h ****             lfs_off_t off, void *buffer, lfs_size_t size); // Function to read data from a block
+  21:SynaptiX_FDK/services/filesystem/file_io.h ****         int (*write)(const struct lfs_config *c, lfs_block_t block,
+  22:SynaptiX_FDK/services/filesystem/file_io.h ****             lfs_off_t off, const void *buffer, lfs_size_t size); // Function to write data to a blo
+  23:SynaptiX_FDK/services/filesystem/file_io.h ****     } file_function; // Disk operations functions
+  24:SynaptiX_FDK/services/filesystem/file_io.h **** }file_system_config_t;
+  25:SynaptiX_FDK/services/filesystem/file_io.h **** 
+  26:SynaptiX_FDK/services/filesystem/file_io.h **** int file_system_init(file_system_config_t *config);
+  27:SynaptiX_FDK/services/filesystem/file_io.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 6
+
+
+  28:SynaptiX_FDK/services/filesystem/file_io.h **** extern lfs_t lfs;
+  29:SynaptiX_FDK/services/filesystem/file_io.h **** 
+  30:SynaptiX_FDK/services/filesystem/file_io.h **** #define CONFIG_LITTLEFS &lfs
+  31:SynaptiX_FDK/services/filesystem/file_io.h **** 
+  32:SynaptiX_FDK/services/filesystem/file_io.h **** static inline FILE *file_open(const char *path, const char *mode) {
+ 154              		.loc 3 32 67 is_stmt 1 view -0
+ 155              		.cfi_startproc
+ 156              		@ args = 0, pretend = 0, frame = 0
+ 157              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158              		.loc 3 32 67 is_stmt 0 view .LVU30
+ 159 0000 70B5     		push	{r4, r5, r6, lr}
+ 160              	.LCFI2:
+ 161              		.cfi_def_cfa_offset 16
+ 162              		.cfi_offset 4, -16
+ 163              		.cfi_offset 5, -12
+ 164              		.cfi_offset 6, -8
+ 165              		.cfi_offset 14, -4
+ 166 0002 0646     		mov	r6, r0
+ 167 0004 0C46     		mov	r4, r1
+  33:SynaptiX_FDK/services/filesystem/file_io.h ****     // Use LittleFS to open a file
+  34:SynaptiX_FDK/services/filesystem/file_io.h ****     lfs_file_t *file = malloc(sizeof(lfs_file_t));
+ 168              		.loc 3 34 5 is_stmt 1 view .LVU31
+ 169              		.loc 3 34 24 is_stmt 0 view .LVU32
+ 170 0006 5420     		movs	r0, #84
+ 171              	.LVL9:
+ 172              		.loc 3 34 24 view .LVU33
+ 173 0008 FFF7FEFF 		bl	malloc
+ 174              	.LVL10:
+  35:SynaptiX_FDK/services/filesystem/file_io.h ****     int lfs_status;
+ 175              		.loc 3 35 5 is_stmt 1 view .LVU34
+  36:SynaptiX_FDK/services/filesystem/file_io.h ****     if(file == NULL) {
+ 176              		.loc 3 36 5 view .LVU35
+ 177              		.loc 3 36 7 is_stmt 0 view .LVU36
+ 178 000c 0546     		mov	r5, r0
+ 179 000e 60B3     		cbz	r0, .L14
+  37:SynaptiX_FDK/services/filesystem/file_io.h ****         return NULL; // Memory allocation failed
+  38:SynaptiX_FDK/services/filesystem/file_io.h ****     }
+  39:SynaptiX_FDK/services/filesystem/file_io.h ****     int flags = LFS_O_RDONLY;
+ 180              		.loc 3 39 5 is_stmt 1 view .LVU37
+ 181              	.LVL11:
+  40:SynaptiX_FDK/services/filesystem/file_io.h **** 
+  41:SynaptiX_FDK/services/filesystem/file_io.h ****     if (mode[0] == 'r' && mode[1] == '+') {
+ 182              		.loc 3 41 5 view .LVU38
+ 183              		.loc 3 41 13 is_stmt 0 view .LVU39
+ 184 0010 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 185              		.loc 3 41 8 view .LVU40
+ 186 0012 722B     		cmp	r3, #114
+ 187 0014 0ED0     		beq	.L27
+ 188              	.L16:
+  42:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR;
+  43:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'w' && mode[1] == '+') {
+ 189              		.loc 3 43 12 is_stmt 1 view .LVU41
+ 190              		.loc 3 43 15 is_stmt 0 view .LVU42
+ 191 0016 772B     		cmp	r3, #119
+ 192 0018 11D0     		beq	.L28
+ 193              	.L18:
+  44:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR | LFS_O_CREAT | LFS_O_TRUNC;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 7
+
+
+  45:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'a' && mode[1] == '+') {
+ 194              		.loc 3 45 12 is_stmt 1 view .LVU43
+ 195              		.loc 3 45 15 is_stmt 0 view .LVU44
+ 196 001a 612B     		cmp	r3, #97
+ 197 001c 15D0     		beq	.L29
+ 198              	.L19:
+  46:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND;
+  47:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'r') {
+ 199              		.loc 3 47 12 is_stmt 1 view .LVU45
+ 200 001e 722B     		cmp	r3, #114
+ 201 0020 19D0     		beq	.L23
+ 202 0022 772B     		cmp	r3, #119
+ 203 0024 19D0     		beq	.L24
+ 204 0026 612B     		cmp	r3, #97
+ 205 0028 21D0     		beq	.L25
+  48:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDONLY;
+  49:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'w') {
+  50:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC;
+  51:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'a') {
+  52:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_WRONLY | LFS_O_CREAT | LFS_O_APPEND;
+  53:SynaptiX_FDK/services/filesystem/file_io.h ****     } else {
+  54:SynaptiX_FDK/services/filesystem/file_io.h ****         free(file);
+ 206              		.loc 3 54 9 view .LVU46
+ 207 002a 2846     		mov	r0, r5
+ 208              	.LVL12:
+ 209              		.loc 3 54 9 is_stmt 0 view .LVU47
+ 210 002c FFF7FEFF 		bl	free
+ 211              	.LVL13:
+  55:SynaptiX_FDK/services/filesystem/file_io.h ****         return NULL;
+ 212              		.loc 3 55 9 is_stmt 1 view .LVU48
+ 213              		.loc 3 55 16 is_stmt 0 view .LVU49
+ 214 0030 0025     		movs	r5, #0
+ 215              	.LVL14:
+ 216              		.loc 3 55 16 view .LVU50
+ 217 0032 1AE0     		b	.L14
+ 218              	.LVL15:
+ 219              	.L27:
+  41:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR;
+ 220              		.loc 3 41 31 discriminator 1 view .LVU51
+ 221 0034 6278     		ldrb	r2, [r4, #1]	@ zero_extendqisi2
+  41:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR;
+ 222              		.loc 3 41 24 discriminator 1 view .LVU52
+ 223 0036 2B2A     		cmp	r2, #43
+ 224 0038 EDD1     		bne	.L16
+  42:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'w' && mode[1] == '+') {
+ 225              		.loc 3 42 15 view .LVU53
+ 226 003a 0323     		movs	r3, #3
+ 227 003c 0FE0     		b	.L17
+ 228              	.L28:
+  43:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR | LFS_O_CREAT | LFS_O_TRUNC;
+ 229              		.loc 3 43 38 discriminator 1 view .LVU54
+ 230 003e 6278     		ldrb	r2, [r4, #1]	@ zero_extendqisi2
+  43:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR | LFS_O_CREAT | LFS_O_TRUNC;
+ 231              		.loc 3 43 31 discriminator 1 view .LVU55
+ 232 0040 2B2A     		cmp	r2, #43
+ 233 0042 EAD1     		bne	.L18
+  44:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'a' && mode[1] == '+') {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 8
+
+
+ 234              		.loc 3 44 15 view .LVU56
+ 235 0044 40F20353 		movw	r3, #1283
+ 236 0048 09E0     		b	.L17
+ 237              	.L29:
+  45:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND;
+ 238              		.loc 3 45 38 discriminator 1 view .LVU57
+ 239 004a 6278     		ldrb	r2, [r4, #1]	@ zero_extendqisi2
+  45:SynaptiX_FDK/services/filesystem/file_io.h ****         flags = LFS_O_RDWR | LFS_O_CREAT | LFS_O_APPEND;
+ 240              		.loc 3 45 31 discriminator 1 view .LVU58
+ 241 004c 2B2A     		cmp	r2, #43
+ 242 004e E6D1     		bne	.L19
+  46:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'r') {
+ 243              		.loc 3 46 15 view .LVU59
+ 244 0050 40F60313 		movw	r3, #2307
+ 245 0054 03E0     		b	.L17
+ 246              	.L23:
+  46:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'r') {
+ 247              		.loc 3 46 15 view .LVU60
+ 248 0056 0123     		movs	r3, #1
+ 249 0058 01E0     		b	.L17
+ 250              	.L24:
+ 251 005a 40F20253 		movw	r3, #1282
+ 252              	.L17:
+ 253              	.LVL16:
+  56:SynaptiX_FDK/services/filesystem/file_io.h ****     }
+  57:SynaptiX_FDK/services/filesystem/file_io.h ****     lfs_status = lfs_file_open(CONFIG_LITTLEFS,file, path, flags);
+ 254              		.loc 3 57 5 is_stmt 1 view .LVU61
+ 255              		.loc 3 57 18 is_stmt 0 view .LVU62
+ 256 005e 3246     		mov	r2, r6
+ 257 0060 2946     		mov	r1, r5
+ 258 0062 0748     		ldr	r0, .L31
+ 259              	.LVL17:
+ 260              		.loc 3 57 18 view .LVU63
+ 261 0064 FFF7FEFF 		bl	lfs_file_open
+ 262              	.LVL18:
+  58:SynaptiX_FDK/services/filesystem/file_io.h ****     if (lfs_status != LFS_ERR_OK) {
+ 263              		.loc 3 58 5 is_stmt 1 view .LVU64
+ 264              		.loc 3 58 8 is_stmt 0 view .LVU65
+ 265 0068 20B9     		cbnz	r0, .L30
+ 266              	.LVL19:
+ 267              	.L14:
+  59:SynaptiX_FDK/services/filesystem/file_io.h ****         free(file);
+  60:SynaptiX_FDK/services/filesystem/file_io.h ****         return NULL; // Error opening file
+  61:SynaptiX_FDK/services/filesystem/file_io.h ****     }
+  62:SynaptiX_FDK/services/filesystem/file_io.h ****     return (FILE *)file; // Cast to FILE pointer
+  63:SynaptiX_FDK/services/filesystem/file_io.h **** }
+ 268              		.loc 3 63 1 view .LVU66
+ 269 006a 2846     		mov	r0, r5
+ 270 006c 70BD     		pop	{r4, r5, r6, pc}
+ 271              	.LVL20:
+ 272              	.L25:
+  46:SynaptiX_FDK/services/filesystem/file_io.h ****     } else if (mode[0] == 'r') {
+ 273              		.loc 3 46 15 view .LVU67
+ 274 006e 40F60213 		movw	r3, #2306
+ 275 0072 F4E7     		b	.L17
+ 276              	.LVL21:
+ 277              	.L30:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 9
+
+
+  59:SynaptiX_FDK/services/filesystem/file_io.h ****         free(file);
+ 278              		.loc 3 59 9 is_stmt 1 view .LVU68
+ 279 0074 2846     		mov	r0, r5
+ 280              	.LVL22:
+  59:SynaptiX_FDK/services/filesystem/file_io.h ****         free(file);
+ 281              		.loc 3 59 9 is_stmt 0 view .LVU69
+ 282 0076 FFF7FEFF 		bl	free
+ 283              	.LVL23:
+  60:SynaptiX_FDK/services/filesystem/file_io.h ****     }
+ 284              		.loc 3 60 9 is_stmt 1 view .LVU70
+  60:SynaptiX_FDK/services/filesystem/file_io.h ****     }
+ 285              		.loc 3 60 16 is_stmt 0 view .LVU71
+ 286 007a 0025     		movs	r5, #0
+ 287              	.LVL24:
+  60:SynaptiX_FDK/services/filesystem/file_io.h ****     }
+ 288              		.loc 3 60 16 view .LVU72
+ 289 007c F5E7     		b	.L14
+ 290              	.L32:
+ 291 007e 00BF     		.align	2
+ 292              	.L31:
+ 293 0080 00000000 		.word	lfs
+ 294              		.cfi_endproc
+ 295              	.LFE329:
+ 297              		.section	.rodata.sx_storage_init.str1.4,"aMS",%progbits,1
+ 298              		.align	2
+ 299              	.LC2:
+ 300 0000 57323551 		.ascii	"W25Q128 init failed\000"
+ 300      31323820 
+ 300      696E6974 
+ 300      20666169 
+ 300      6C656400 
+ 301              		.align	2
+ 302              	.LC3:
+ 303 0014 46696C65 		.ascii	"Filesystem init failed\000"
+ 303      73797374 
+ 303      656D2069 
+ 303      6E697420 
+ 303      6661696C 
+ 304 002b 00       		.align	2
+ 305              	.LC4:
+ 306 002c 53746F72 		.ascii	"Storage init OK\000"
+ 306      61676520 
+ 306      696E6974 
+ 306      204F4B00 
+ 307              		.section	.text.sx_storage_init,"ax",%progbits
+ 308              		.align	1
+ 309              		.global	sx_storage_init
+ 310              		.syntax unified
+ 311              		.thumb
+ 312              		.thumb_func
+ 314              	sx_storage_init:
+ 315              	.LVL25:
+ 316              	.LFB331:
+  17:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (cfg == NULL) return SX_STORAGE_ERR_INVALID;
+ 317              		.loc 1 17 1 is_stmt 1 view -0
+ 318              		.cfi_startproc
+ 319              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 10
+
+
+ 320              		@ frame_needed = 0, uses_anonymous_args = 0
+  18:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 321              		.loc 1 18 5 view .LVU74
+  18:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 322              		.loc 1 18 8 is_stmt 0 view .LVU75
+ 323 0000 0028     		cmp	r0, #0
+ 324 0002 3FD0     		beq	.L37
+  17:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (cfg == NULL) return SX_STORAGE_ERR_INVALID;
+ 325              		.loc 1 17 1 view .LVU76
+ 326 0004 38B5     		push	{r3, r4, r5, lr}
+ 327              	.LCFI3:
+ 328              		.cfi_def_cfa_offset 16
+ 329              		.cfi_offset 3, -16
+ 330              		.cfi_offset 4, -12
+ 331              		.cfi_offset 5, -8
+ 332              		.cfi_offset 14, -4
+ 333 0006 0446     		mov	r4, r0
+  20:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_gpio_write(&cfg->s_cs, SX_GPIO_HIGH);
+ 334              		.loc 1 20 5 is_stmt 1 view .LVU77
+  20:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_gpio_write(&cfg->s_cs, SX_GPIO_HIGH);
+ 335              		.loc 1 20 44 is_stmt 0 view .LVU78
+ 336 0008 00F11C03 		add	r3, r0, #28
+ 337              	.LVL26:
+ 338              	.LBB9:
+ 339              	.LBI9:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 340              		.loc 2 33 20 is_stmt 1 view .LVU79
+ 341              	.LBB10:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 342              		.loc 2 34 5 view .LVU80
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 343              		.loc 2 34 15 is_stmt 0 view .LVU81
+ 344 000c 1F4A     		ldr	r2, .L44
+ 345 000e 0261     		str	r2, [r0, #16]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 346              		.loc 2 35 5 is_stmt 1 view .LVU82
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 347              		.loc 2 35 19 is_stmt 0 view .LVU83
+ 348 0010 4361     		str	r3, [r0, #20]
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 349              		.loc 2 36 5 is_stmt 1 view .LVU84
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 350              		.loc 2 36 17 is_stmt 0 view .LVU85
+ 351 0012 0023     		movs	r3, #0
+ 352              	.LVL27:
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 353              		.loc 2 36 17 view .LVU86
+ 354 0014 0376     		strb	r3, [r0, #24]
+ 355              	.LVL28:
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** }
+ 356              		.loc 2 36 17 view .LVU87
+ 357              	.LBE10:
+ 358              	.LBE9:
+  21:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_spi_init(&cfg->s_spi, &sx_spi_ops, cfg->hspi, &cfg->s_cs); 
+ 359              		.loc 1 21 5 is_stmt 1 view .LVU88
+ 360 0016 00F11005 		add	r5, r0, #16
+ 361 001a 0121     		movs	r1, #1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 11
+
+
+ 362 001c 2846     		mov	r0, r5
+ 363              	.LVL29:
+  21:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_spi_init(&cfg->s_spi, &sx_spi_ops, cfg->hspi, &cfg->s_cs); 
+ 364              		.loc 1 21 5 is_stmt 0 view .LVU89
+ 365 001e FFF7FEFF 		bl	sx_gpio_write
+ 366              	.LVL30:
+  22:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 367              		.loc 1 22 5 is_stmt 1 view .LVU90
+  22:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 368              		.loc 1 22 46 is_stmt 0 view .LVU91
+ 369 0022 2368     		ldr	r3, [r4]
+ 370              	.LVL31:
+ 371              	.LBB11:
+ 372              	.LBI11:
+ 373              		.file 4 "SynaptiX_FDK/components/peripherals/spi/sx_spi.h"
+   1:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #ifndef SX_SPI_H
+   2:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #define SX_SPI_H
+   3:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+   7:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** #include "sx_gpio.h"
+   9:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  10:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** typedef struct sx_spi sx_spi_t;
+  11:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  12:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** typedef struct sx_spi_ops{
+  13:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     int (*write)(sx_spi_t *spi, const uint8_t *data, uint32_t len);
+  14:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     int (*read)(sx_spi_t *spi, uint8_t *data, uint32_t len);
+  15:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     int (*write_read)(sx_spi_t *spi, const uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len);
+  16:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** } sx_spi_ops_t;
+  17:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  18:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** struct sx_spi
+  19:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** {
+  20:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     /* data */
+  21:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     sx_spi_ops_t *ops;
+  22:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     void *pDriver;
+  23:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     sx_gpio_t *cs;
+  24:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** };
+  25:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** 
+  26:SynaptiX_FDK/components/peripherals/spi/sx_spi.h **** static inline void sx_spi_init(sx_spi_t *spi, sx_spi_ops_t *ops, void *pDriver, sx_gpio_t *cs){
+ 374              		.loc 4 26 20 is_stmt 1 view .LVU92
+ 375              	.LBB12:
+  27:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->ops = ops;
+ 376              		.loc 4 27 5 view .LVU93
+ 377              		.loc 4 27 14 is_stmt 0 view .LVU94
+ 378 0024 1A4A     		ldr	r2, .L44+4
+ 379 0026 6260     		str	r2, [r4, #4]
+  28:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->pDriver = pDriver;
+ 380              		.loc 4 28 5 is_stmt 1 view .LVU95
+ 381              		.loc 4 28 18 is_stmt 0 view .LVU96
+ 382 0028 A360     		str	r3, [r4, #8]
+  29:SynaptiX_FDK/components/peripherals/spi/sx_spi.h ****     spi->cs = cs;
+ 383              		.loc 4 29 5 is_stmt 1 view .LVU97
+ 384              		.loc 4 29 13 is_stmt 0 view .LVU98
+ 385 002a E560     		str	r5, [r4, #12]
+ 386              	.LVL32:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 12
+
+
+ 387              		.loc 4 29 13 view .LVU99
+ 388              	.LBE12:
+ 389              	.LBE11:
+  24:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "W25Q128 init failed");
+ 390              		.loc 1 24 5 is_stmt 1 view .LVU100
+  24:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "W25Q128 init failed");
+ 391              		.loc 1 24 10 is_stmt 0 view .LVU101
+ 392 002c 211D     		adds	r1, r4, #4
+ 393 002e 1948     		ldr	r0, .L44+8
+ 394 0030 FFF7FEFF 		bl	sx_W25Q128_init
+ 395              	.LVL33:
+  24:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "W25Q128 init failed");
+ 396              		.loc 1 24 8 discriminator 1 view .LVU102
+ 397 0034 B0B1     		cbz	r0, .L42
+  30:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 398              		.loc 1 30 5 is_stmt 1 view .LVU103
+ 399              	.LVL34:
+ 400              	.LBB13:
+ 401              	.LBI13:
+ 402              		.file 5 "SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h"
+   1:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #ifndef __SX_EXTERNAL_FLASH_H
+   2:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #define __SX_EXTERNAL_FLASH_H
+   3:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+   4:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #ifdef  __cplusplus
+   5:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** extern "C"{
+   6:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #endif
+   7:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+   8:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #include "stdint.h"
+   9:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #include "stdbool.h"
+  10:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** #include "sx_gpio.h"
+  11:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  12:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** typedef struct {
+  13:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t page_size;     /* bytes per page   */
+  14:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t sector_size;   /* bytes per sector */
+  15:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t block_size;    /* bytes per block  */
+  16:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     uint32_t total_bytes;   /* total chip size  */
+  17:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** } sx_ext_flash_info_t;
+  18:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  19:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** typedef struct {
+  20:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     int  (*read)        (uint32_t addr, uint8_t *buf, uint32_t len);
+  21:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     int  (*write)       (uint32_t addr, const uint8_t *buf, uint32_t len);
+  22:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     int  (*erase_sector)(uint32_t addr);
+  23:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     bool (*is_busy)     (void);
+  24:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** } sx_ext_flash_ops_t;
+  25:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  26:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** typedef struct {
+  27:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     sx_ext_flash_ops_t  *ops;
+  28:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     sx_ext_flash_info_t  info;
+  29:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** } sx_ext_flash_t;
+  30:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** 
+  31:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h **** static inline void sx_ext_flash_init(sx_ext_flash_t *flash, sx_ext_flash_ops_t *ops, sx_ext_flash_i
+ 403              		.loc 5 31 20 view .LVU104
+ 404              	.LBB14:
+  32:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     flash->ops = ops;
+ 405              		.loc 5 32 5 view .LVU105
+ 406              		.loc 5 32 16 is_stmt 0 view .LVU106
+ 407 0036 184D     		ldr	r5, .L44+12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 13
+
+
+ 408 0038 2C46     		mov	r4, r5
+ 409              	.LVL35:
+ 410              		.loc 5 32 16 view .LVU107
+ 411 003a 184B     		ldr	r3, .L44+16
+ 412 003c 44F8043B 		str	r3, [r4], #4
+  33:SynaptiX_FDK/components/modules/external_flash/sx_external_flash.h ****     flash->info = *info;
+ 413              		.loc 5 33 5 is_stmt 1 view .LVU108
+ 414              		.loc 5 33 17 is_stmt 0 view .LVU109
+ 415 0040 174B     		ldr	r3, .L44+20
+ 416 0042 0FCB     		ldm	r3, {r0, r1, r2, r3}
+ 417 0044 84E80F00 		stm	r4, {r0, r1, r2, r3}
+ 418              	.LVL36:
+ 419              		.loc 5 33 17 view .LVU110
+ 420              	.LBE14:
+ 421              	.LBE13:
+  33:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Filesystem init failed");
+ 422              		.loc 1 33 5 is_stmt 1 view .LVU111
+  33:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Filesystem init failed");
+ 423              		.loc 1 33 9 is_stmt 0 view .LVU112
+ 424 0048 2846     		mov	r0, r5
+ 425 004a FFF7FEFF 		bl	sx_fs_init
+ 426              	.LVL37:
+  33:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Filesystem init failed");
+ 427              		.loc 1 33 8 discriminator 1 view .LVU113
+ 428 004e 88B9     		cbnz	r0, .L43
+  38:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     log_info(TAG, "Storage init OK");
+ 429              		.loc 1 38 5 is_stmt 1 view .LVU114
+  38:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     log_info(TAG, "Storage init OK");
+ 430              		.loc 1 38 19 is_stmt 0 view .LVU115
+ 431 0050 144B     		ldr	r3, .L44+24
+ 432 0052 0122     		movs	r2, #1
+ 433 0054 1A70     		strb	r2, [r3]
+  39:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 434              		.loc 1 39 5 is_stmt 1 view .LVU116
+ 435 0056 144A     		ldr	r2, .L44+28
+ 436 0058 1449     		ldr	r1, .L44+32
+ 437 005a 0320     		movs	r0, #3
+ 438 005c FFF7FEFF 		bl	log_func
+ 439              	.LVL38:
+  40:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 440              		.loc 1 40 5 view .LVU117
+  40:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 441              		.loc 1 40 12 is_stmt 0 view .LVU118
+ 442 0060 0020     		movs	r0, #0
+ 443              	.L34:
+  41:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 444              		.loc 1 41 1 view .LVU119
+ 445 0062 38BD     		pop	{r3, r4, r5, pc}
+ 446              	.LVL39:
+ 447              	.L42:
+  25:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 448              		.loc 1 25 9 is_stmt 1 view .LVU120
+ 449 0064 124A     		ldr	r2, .L44+36
+ 450 0066 1149     		ldr	r1, .L44+32
+ 451 0068 0120     		movs	r0, #1
+ 452 006a FFF7FEFF 		bl	log_func
+ 453              	.LVL40:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 14
+
+
+  26:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 454              		.loc 1 26 9 view .LVU121
+  26:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 455              		.loc 1 26 16 is_stmt 0 view .LVU122
+ 456 006e 6FF00100 		mvn	r0, #1
+ 457 0072 F6E7     		b	.L34
+ 458              	.LVL41:
+ 459              	.L43:
+  34:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 460              		.loc 1 34 9 is_stmt 1 view .LVU123
+ 461 0074 0F4A     		ldr	r2, .L44+40
+ 462 0076 0D49     		ldr	r1, .L44+32
+ 463 0078 0120     		movs	r0, #1
+ 464 007a FFF7FEFF 		bl	log_func
+ 465              	.LVL42:
+  35:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 466              		.loc 1 35 9 view .LVU124
+  35:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 467              		.loc 1 35 16 is_stmt 0 view .LVU125
+ 468 007e 6FF00100 		mvn	r0, #1
+ 469 0082 EEE7     		b	.L34
+ 470              	.LVL43:
+ 471              	.L37:
+ 472              	.LCFI4:
+ 473              		.cfi_def_cfa_offset 0
+ 474              		.cfi_restore 3
+ 475              		.cfi_restore 4
+ 476              		.cfi_restore 5
+ 477              		.cfi_restore 14
+  18:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 478              		.loc 1 18 29 discriminator 1 view .LVU126
+ 479 0084 4FF0FF30 		mov	r0, #-1
+ 480              	.LVL44:
+  41:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 481              		.loc 1 41 1 view .LVU127
+ 482 0088 7047     		bx	lr
+ 483              	.L45:
+ 484 008a 00BF     		.align	2
+ 485              	.L44:
+ 486 008c 00000000 		.word	sx_gpio_ops
+ 487 0090 00000000 		.word	sx_spi_ops
+ 488 0094 00000000 		.word	s_w25q128
+ 489 0098 00000000 		.word	s_flash
+ 490 009c 00000000 		.word	sx_W25Q128_ops
+ 491 00a0 00000000 		.word	sx_W25Q128_info
+ 492 00a4 00000000 		.word	s_initialized
+ 493 00a8 2C000000 		.word	.LC4
+ 494 00ac 10000000 		.word	.LC1
+ 495 00b0 00000000 		.word	.LC2
+ 496 00b4 14000000 		.word	.LC3
+ 497              		.cfi_endproc
+ 498              	.LFE331:
+ 500              		.section	.rodata.sx_storage_write.str1.4,"aMS",%progbits,1
+ 501              		.align	2
+ 502              	.LC5:
+ 503 0000 7700     		.ascii	"w\000"
+ 504              		.section	.text.sx_storage_write,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 15
+
+
+ 505              		.align	1
+ 506              		.global	sx_storage_write
+ 507              		.syntax unified
+ 508              		.thumb
+ 509              		.thumb_func
+ 511              	sx_storage_write:
+ 512              	.LVL45:
+ 513              	.LFB333:
+  51:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  52:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_write(const char *path, const void *data, uint32_t len)
+  53:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 514              		.loc 1 53 1 is_stmt 1 view -0
+ 515              		.cfi_startproc
+ 516              		@ args = 0, pretend = 0, frame = 0
+ 517              		@ frame_needed = 0, uses_anonymous_args = 0
+ 518              		.loc 1 53 1 is_stmt 0 view .LVU129
+ 519 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 520              	.LCFI5:
+ 521              		.cfi_def_cfa_offset 24
+ 522              		.cfi_offset 4, -24
+ 523              		.cfi_offset 5, -20
+ 524              		.cfi_offset 6, -16
+ 525              		.cfi_offset 7, -12
+ 526              		.cfi_offset 8, -8
+ 527              		.cfi_offset 14, -4
+ 528 0004 0446     		mov	r4, r0
+ 529 0006 0D46     		mov	r5, r1
+ 530 0008 1646     		mov	r6, r2
+  54:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK)     return SX_STORAGE_ERR_NOT_INIT;
+ 531              		.loc 1 54 5 is_stmt 1 view .LVU130
+ 532              		.loc 1 54 9 is_stmt 0 view .LVU131
+ 533 000a FFF7FEFF 		bl	_check_init
+ 534              	.LVL46:
+ 535              		.loc 1 54 8 discriminator 1 view .LVU132
+ 536 000e F0B9     		cbnz	r0, .L48
+ 537 0010 0746     		mov	r7, r0
+  55:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || data == NULL || len == 0) return SX_STORAGE_ERR_INVALID;
+ 538              		.loc 1 55 5 is_stmt 1 view .LVU133
+ 539              		.loc 1 55 8 is_stmt 0 view .LVU134
+ 540 0012 FCB1     		cbz	r4, .L49
+ 541              		.loc 1 55 22 discriminator 2 view .LVU135
+ 542 0014 0DB3     		cbz	r5, .L50
+ 543              		.loc 1 55 38 discriminator 4 view .LVU136
+ 544 0016 1EB3     		cbz	r6, .L51
+  56:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  57:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     FILE *f = fopen(path, "w");
+ 545              		.loc 1 57 5 is_stmt 1 view .LVU137
+ 546              		.loc 1 57 15 is_stmt 0 view .LVU138
+ 547 0018 1649     		ldr	r1, .L56
+ 548 001a 2046     		mov	r0, r4
+ 549 001c FFF7FEFF 		bl	file_open
+ 550              	.LVL47:
+  58:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (f == NULL) return SX_STORAGE_ERR_IO;
+ 551              		.loc 1 58 5 is_stmt 1 view .LVU139
+ 552              		.loc 1 58 8 is_stmt 0 view .LVU140
+ 553 0020 0446     		mov	r4, r0
+ 554              	.LVL48:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 16
+
+
+ 555              		.loc 1 58 8 view .LVU141
+ 556 0022 00B3     		cbz	r0, .L52
+  59:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  60:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     int ret = fwrite(data, 1, len, f);
+ 557              		.loc 1 60 5 is_stmt 1 view .LVU142
+ 558              		.loc 1 60 15 is_stmt 0 view .LVU143
+ 559 0024 DFF85080 		ldr	r8, .L56+4
+ 560 0028 3346     		mov	r3, r6
+ 561 002a 2A46     		mov	r2, r5
+ 562 002c 0146     		mov	r1, r0
+ 563 002e 4046     		mov	r0, r8
+ 564              	.LVL49:
+ 565              		.loc 1 60 15 view .LVU144
+ 566 0030 FFF7FEFF 		bl	lfs_file_write
+ 567              	.LVL50:
+ 568              		.loc 1 60 15 view .LVU145
+ 569 0034 0546     		mov	r5, r0
+ 570              	.LVL51:
+  61:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fclose(f);
+ 571              		.loc 1 61 5 is_stmt 1 view .LVU146
+ 572              		.loc 1 61 5 view .LVU147
+ 573 0036 2146     		mov	r1, r4
+ 574 0038 4046     		mov	r0, r8
+ 575              	.LVL52:
+ 576              		.loc 1 61 5 is_stmt 0 view .LVU148
+ 577 003a FFF7FEFF 		bl	lfs_file_close
+ 578              	.LVL53:
+ 579              		.loc 1 61 5 is_stmt 1 discriminator 1 view .LVU149
+ 580 003e 2046     		mov	r0, r4
+ 581 0040 FFF7FEFF 		bl	free
+ 582              	.LVL54:
+ 583              		.loc 1 61 5 discriminator 2 view .LVU150
+  62:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  63:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (ret < 0) return SX_STORAGE_ERR_IO;
+ 584              		.loc 1 63 5 view .LVU151
+ 585              		.loc 1 63 8 is_stmt 0 view .LVU152
+ 586 0044 002D     		cmp	r5, #0
+ 587 0046 11DB     		blt	.L55
+ 588              	.LVL55:
+ 589              	.L47:
+  64:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+  65:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 590              		.loc 1 65 1 view .LVU153
+ 591 0048 3846     		mov	r0, r7
+ 592 004a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 593              	.LVL56:
+ 594              	.L48:
+  54:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || data == NULL || len == 0) return SX_STORAGE_ERR_INVALID;
+ 595              		.loc 1 54 52 discriminator 1 view .LVU154
+ 596 004e 6FF00407 		mvn	r7, #4
+ 597 0052 F9E7     		b	.L47
+ 598              	.L49:
+  55:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 599              		.loc 1 55 58 discriminator 5 view .LVU155
+ 600 0054 4FF0FF37 		mov	r7, #-1
+ 601 0058 F6E7     		b	.L47
+ 602              	.L50:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 17
+
+
+ 603 005a 4FF0FF37 		mov	r7, #-1
+ 604 005e F3E7     		b	.L47
+ 605              	.L51:
+ 606 0060 4FF0FF37 		mov	r7, #-1
+ 607 0064 F0E7     		b	.L47
+ 608              	.LVL57:
+ 609              	.L52:
+  58:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 610              		.loc 1 58 27 discriminator 1 view .LVU156
+ 611 0066 6FF00107 		mvn	r7, #1
+ 612 006a EDE7     		b	.L47
+ 613              	.LVL58:
+ 614              	.L55:
+  63:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 615              		.loc 1 63 25 discriminator 1 view .LVU157
+ 616 006c 6FF00107 		mvn	r7, #1
+ 617 0070 EAE7     		b	.L47
+ 618              	.L57:
+ 619 0072 00BF     		.align	2
+ 620              	.L56:
+ 621 0074 00000000 		.word	.LC5
+ 622 0078 00000000 		.word	lfs
+ 623              		.cfi_endproc
+ 624              	.LFE333:
+ 626              		.section	.rodata.sx_storage_append.str1.4,"aMS",%progbits,1
+ 627              		.align	2
+ 628              	.LC6:
+ 629 0000 6100     		.ascii	"a\000"
+ 630              		.section	.text.sx_storage_append,"ax",%progbits
+ 631              		.align	1
+ 632              		.global	sx_storage_append
+ 633              		.syntax unified
+ 634              		.thumb
+ 635              		.thumb_func
+ 637              	sx_storage_append:
+ 638              	.LVL59:
+ 639              	.LFB334:
+  66:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  67:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_append(const char *path, const void *data, uint32_t len)
+  68:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 640              		.loc 1 68 1 is_stmt 1 view -0
+ 641              		.cfi_startproc
+ 642              		@ args = 0, pretend = 0, frame = 0
+ 643              		@ frame_needed = 0, uses_anonymous_args = 0
+ 644              		.loc 1 68 1 is_stmt 0 view .LVU159
+ 645 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 646              	.LCFI6:
+ 647              		.cfi_def_cfa_offset 24
+ 648              		.cfi_offset 4, -24
+ 649              		.cfi_offset 5, -20
+ 650              		.cfi_offset 6, -16
+ 651              		.cfi_offset 7, -12
+ 652              		.cfi_offset 8, -8
+ 653              		.cfi_offset 14, -4
+ 654 0004 0446     		mov	r4, r0
+ 655 0006 0D46     		mov	r5, r1
+ 656 0008 1646     		mov	r6, r2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 18
+
+
+  69:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK)           return SX_STORAGE_ERR_NOT_INIT;
+ 657              		.loc 1 69 5 is_stmt 1 view .LVU160
+ 658              		.loc 1 69 9 is_stmt 0 view .LVU161
+ 659 000a FFF7FEFF 		bl	_check_init
+ 660              	.LVL60:
+ 661              		.loc 1 69 8 discriminator 1 view .LVU162
+ 662 000e F0B9     		cbnz	r0, .L60
+ 663 0010 0746     		mov	r7, r0
+  70:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || data == NULL || len == 0) return SX_STORAGE_ERR_INVALID;
+ 664              		.loc 1 70 5 is_stmt 1 view .LVU163
+ 665              		.loc 1 70 8 is_stmt 0 view .LVU164
+ 666 0012 FCB1     		cbz	r4, .L61
+ 667              		.loc 1 70 22 discriminator 2 view .LVU165
+ 668 0014 0DB3     		cbz	r5, .L62
+ 669              		.loc 1 70 38 discriminator 4 view .LVU166
+ 670 0016 1EB3     		cbz	r6, .L63
+  71:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  72:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     FILE *f = fopen(path, "a");
+ 671              		.loc 1 72 5 is_stmt 1 view .LVU167
+ 672              		.loc 1 72 15 is_stmt 0 view .LVU168
+ 673 0018 1649     		ldr	r1, .L68
+ 674 001a 2046     		mov	r0, r4
+ 675 001c FFF7FEFF 		bl	file_open
+ 676              	.LVL61:
+  73:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (f == NULL) return SX_STORAGE_ERR_IO;
+ 677              		.loc 1 73 5 is_stmt 1 view .LVU169
+ 678              		.loc 1 73 8 is_stmt 0 view .LVU170
+ 679 0020 0446     		mov	r4, r0
+ 680              	.LVL62:
+ 681              		.loc 1 73 8 view .LVU171
+ 682 0022 00B3     		cbz	r0, .L64
+  74:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  75:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     int ret = fwrite(data, 1, len, f);
+ 683              		.loc 1 75 5 is_stmt 1 view .LVU172
+ 684              		.loc 1 75 15 is_stmt 0 view .LVU173
+ 685 0024 DFF85080 		ldr	r8, .L68+4
+ 686 0028 3346     		mov	r3, r6
+ 687 002a 2A46     		mov	r2, r5
+ 688 002c 0146     		mov	r1, r0
+ 689 002e 4046     		mov	r0, r8
+ 690              	.LVL63:
+ 691              		.loc 1 75 15 view .LVU174
+ 692 0030 FFF7FEFF 		bl	lfs_file_write
+ 693              	.LVL64:
+ 694              		.loc 1 75 15 view .LVU175
+ 695 0034 0546     		mov	r5, r0
+ 696              	.LVL65:
+  76:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fclose(f);
+ 697              		.loc 1 76 5 is_stmt 1 view .LVU176
+ 698              		.loc 1 76 5 view .LVU177
+ 699 0036 2146     		mov	r1, r4
+ 700 0038 4046     		mov	r0, r8
+ 701              	.LVL66:
+ 702              		.loc 1 76 5 is_stmt 0 view .LVU178
+ 703 003a FFF7FEFF 		bl	lfs_file_close
+ 704              	.LVL67:
+ 705              		.loc 1 76 5 is_stmt 1 discriminator 1 view .LVU179
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 19
+
+
+ 706 003e 2046     		mov	r0, r4
+ 707 0040 FFF7FEFF 		bl	free
+ 708              	.LVL68:
+ 709              		.loc 1 76 5 discriminator 2 view .LVU180
+  77:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  78:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (ret < 0) return SX_STORAGE_ERR_IO;
+ 710              		.loc 1 78 5 view .LVU181
+ 711              		.loc 1 78 8 is_stmt 0 view .LVU182
+ 712 0044 002D     		cmp	r5, #0
+ 713 0046 11DB     		blt	.L67
+ 714              	.LVL69:
+ 715              	.L59:
+  79:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+  80:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 716              		.loc 1 80 1 view .LVU183
+ 717 0048 3846     		mov	r0, r7
+ 718 004a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 719              	.LVL70:
+ 720              	.L60:
+  69:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || data == NULL || len == 0) return SX_STORAGE_ERR_INVALID;
+ 721              		.loc 1 69 58 discriminator 1 view .LVU184
+ 722 004e 6FF00407 		mvn	r7, #4
+ 723 0052 F9E7     		b	.L59
+ 724              	.L61:
+  70:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 725              		.loc 1 70 58 discriminator 5 view .LVU185
+ 726 0054 4FF0FF37 		mov	r7, #-1
+ 727 0058 F6E7     		b	.L59
+ 728              	.L62:
+ 729 005a 4FF0FF37 		mov	r7, #-1
+ 730 005e F3E7     		b	.L59
+ 731              	.L63:
+ 732 0060 4FF0FF37 		mov	r7, #-1
+ 733 0064 F0E7     		b	.L59
+ 734              	.LVL71:
+ 735              	.L64:
+  73:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 736              		.loc 1 73 27 discriminator 1 view .LVU186
+ 737 0066 6FF00107 		mvn	r7, #1
+ 738 006a EDE7     		b	.L59
+ 739              	.LVL72:
+ 740              	.L67:
+  78:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 741              		.loc 1 78 25 discriminator 1 view .LVU187
+ 742 006c 6FF00107 		mvn	r7, #1
+ 743 0070 EAE7     		b	.L59
+ 744              	.L69:
+ 745 0072 00BF     		.align	2
+ 746              	.L68:
+ 747 0074 00000000 		.word	.LC6
+ 748 0078 00000000 		.word	lfs
+ 749              		.cfi_endproc
+ 750              	.LFE334:
+ 752              		.section	.rodata.sx_storage_read.str1.4,"aMS",%progbits,1
+ 753              		.align	2
+ 754              	.LC7:
+ 755 0000 7200     		.ascii	"r\000"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 20
+
+
+ 756              		.section	.text.sx_storage_read,"ax",%progbits
+ 757              		.align	1
+ 758              		.global	sx_storage_read
+ 759              		.syntax unified
+ 760              		.thumb
+ 761              		.thumb_func
+ 763              	sx_storage_read:
+ 764              	.LVL73:
+ 765              	.LFB335:
+  81:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  82:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_read(const char *path, void *buf, uint32_t len)
+  83:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 766              		.loc 1 83 1 is_stmt 1 view -0
+ 767              		.cfi_startproc
+ 768              		@ args = 0, pretend = 0, frame = 0
+ 769              		@ frame_needed = 0, uses_anonymous_args = 0
+ 770              		.loc 1 83 1 is_stmt 0 view .LVU189
+ 771 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 772              	.LCFI7:
+ 773              		.cfi_def_cfa_offset 24
+ 774              		.cfi_offset 4, -24
+ 775              		.cfi_offset 5, -20
+ 776              		.cfi_offset 6, -16
+ 777              		.cfi_offset 7, -12
+ 778              		.cfi_offset 8, -8
+ 779              		.cfi_offset 14, -4
+ 780 0004 0446     		mov	r4, r0
+ 781 0006 0D46     		mov	r5, r1
+ 782 0008 1646     		mov	r6, r2
+  84:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK)          return SX_STORAGE_ERR_NOT_INIT;
+ 783              		.loc 1 84 5 is_stmt 1 view .LVU190
+ 784              		.loc 1 84 9 is_stmt 0 view .LVU191
+ 785 000a FFF7FEFF 		bl	_check_init
+ 786              	.LVL74:
+ 787              		.loc 1 84 8 discriminator 1 view .LVU192
+ 788 000e F0B9     		cbnz	r0, .L72
+ 789 0010 0746     		mov	r7, r0
+  85:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || buf == NULL || len == 0) return SX_STORAGE_ERR_INVALID;
+ 790              		.loc 1 85 5 is_stmt 1 view .LVU193
+ 791              		.loc 1 85 8 is_stmt 0 view .LVU194
+ 792 0012 FCB1     		cbz	r4, .L73
+ 793              		.loc 1 85 22 discriminator 2 view .LVU195
+ 794 0014 0DB3     		cbz	r5, .L74
+ 795              		.loc 1 85 37 discriminator 4 view .LVU196
+ 796 0016 1EB3     		cbz	r6, .L75
+  86:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  87:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     FILE *f = fopen(path, "r");
+ 797              		.loc 1 87 5 is_stmt 1 view .LVU197
+ 798              		.loc 1 87 15 is_stmt 0 view .LVU198
+ 799 0018 1649     		ldr	r1, .L80
+ 800 001a 2046     		mov	r0, r4
+ 801 001c FFF7FEFF 		bl	file_open
+ 802              	.LVL75:
+  88:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (f == NULL) return SX_STORAGE_ERR_NOT_FOUND;
+ 803              		.loc 1 88 5 is_stmt 1 view .LVU199
+ 804              		.loc 1 88 8 is_stmt 0 view .LVU200
+ 805 0020 0446     		mov	r4, r0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 21
+
+
+ 806              	.LVL76:
+ 807              		.loc 1 88 8 view .LVU201
+ 808 0022 00B3     		cbz	r0, .L76
+  89:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  90:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     int ret = fread(buf, 1, len, f);
+ 809              		.loc 1 90 5 is_stmt 1 view .LVU202
+ 810              		.loc 1 90 15 is_stmt 0 view .LVU203
+ 811 0024 DFF85080 		ldr	r8, .L80+4
+ 812 0028 3346     		mov	r3, r6
+ 813 002a 2A46     		mov	r2, r5
+ 814 002c 0146     		mov	r1, r0
+ 815 002e 4046     		mov	r0, r8
+ 816              	.LVL77:
+ 817              		.loc 1 90 15 view .LVU204
+ 818 0030 FFF7FEFF 		bl	lfs_file_read
+ 819              	.LVL78:
+ 820              		.loc 1 90 15 view .LVU205
+ 821 0034 0546     		mov	r5, r0
+ 822              	.LVL79:
+  91:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fclose(f);
+ 823              		.loc 1 91 5 is_stmt 1 view .LVU206
+ 824              		.loc 1 91 5 view .LVU207
+ 825 0036 2146     		mov	r1, r4
+ 826 0038 4046     		mov	r0, r8
+ 827              	.LVL80:
+ 828              		.loc 1 91 5 is_stmt 0 view .LVU208
+ 829 003a FFF7FEFF 		bl	lfs_file_close
+ 830              	.LVL81:
+ 831              		.loc 1 91 5 is_stmt 1 discriminator 1 view .LVU209
+ 832 003e 2046     		mov	r0, r4
+ 833 0040 FFF7FEFF 		bl	free
+ 834              	.LVL82:
+ 835              		.loc 1 91 5 discriminator 2 view .LVU210
+  92:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  93:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (ret < 0) return SX_STORAGE_ERR_IO;
+ 836              		.loc 1 93 5 view .LVU211
+ 837              		.loc 1 93 8 is_stmt 0 view .LVU212
+ 838 0044 002D     		cmp	r5, #0
+ 839 0046 11DB     		blt	.L79
+ 840              	.LVL83:
+ 841              	.L71:
+  94:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+  95:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 842              		.loc 1 95 1 view .LVU213
+ 843 0048 3846     		mov	r0, r7
+ 844 004a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 845              	.LVL84:
+ 846              	.L72:
+  84:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || buf == NULL || len == 0) return SX_STORAGE_ERR_INVALID;
+ 847              		.loc 1 84 57 discriminator 1 view .LVU214
+ 848 004e 6FF00407 		mvn	r7, #4
+ 849 0052 F9E7     		b	.L71
+ 850              	.L73:
+  85:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 851              		.loc 1 85 57 discriminator 5 view .LVU215
+ 852 0054 4FF0FF37 		mov	r7, #-1
+ 853 0058 F6E7     		b	.L71
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 22
+
+
+ 854              	.L74:
+ 855 005a 4FF0FF37 		mov	r7, #-1
+ 856 005e F3E7     		b	.L71
+ 857              	.L75:
+ 858 0060 4FF0FF37 		mov	r7, #-1
+ 859 0064 F0E7     		b	.L71
+ 860              	.LVL85:
+ 861              	.L76:
+  88:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 862              		.loc 1 88 27 discriminator 1 view .LVU216
+ 863 0066 6FF00207 		mvn	r7, #2
+ 864 006a EDE7     		b	.L71
+ 865              	.LVL86:
+ 866              	.L79:
+  93:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 867              		.loc 1 93 25 discriminator 1 view .LVU217
+ 868 006c 6FF00107 		mvn	r7, #1
+ 869 0070 EAE7     		b	.L71
+ 870              	.L81:
+ 871 0072 00BF     		.align	2
+ 872              	.L80:
+ 873 0074 00000000 		.word	.LC7
+ 874 0078 00000000 		.word	lfs
+ 875              		.cfi_endproc
+ 876              	.LFE335:
+ 878              		.section	.text.sx_storage_read_partial,"ax",%progbits
+ 879              		.align	1
+ 880              		.global	sx_storage_read_partial
+ 881              		.syntax unified
+ 882              		.thumb
+ 883              		.thumb_func
+ 885              	sx_storage_read_partial:
+ 886              	.LVL87:
+ 887              	.LFB336:
+  96:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+  97:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_read_partial(const char *path, void *buf, uint32_t offset, uint32_t len
+  98:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 888              		.loc 1 98 1 is_stmt 1 view -0
+ 889              		.cfi_startproc
+ 890              		@ args = 0, pretend = 0, frame = 0
+ 891              		@ frame_needed = 0, uses_anonymous_args = 0
+ 892              		.loc 1 98 1 is_stmt 0 view .LVU219
+ 893 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 894              	.LCFI8:
+ 895              		.cfi_def_cfa_offset 24
+ 896              		.cfi_offset 4, -24
+ 897              		.cfi_offset 5, -20
+ 898              		.cfi_offset 6, -16
+ 899              		.cfi_offset 7, -12
+ 900              		.cfi_offset 8, -8
+ 901              		.cfi_offset 14, -4
+ 902 0004 0446     		mov	r4, r0
+ 903 0006 0D46     		mov	r5, r1
+ 904 0008 1746     		mov	r7, r2
+ 905 000a 1E46     		mov	r6, r3
+  99:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK)          return SX_STORAGE_ERR_NOT_INIT;
+ 906              		.loc 1 99 5 is_stmt 1 view .LVU220
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 23
+
+
+ 907              		.loc 1 99 9 is_stmt 0 view .LVU221
+ 908 000c FFF7FEFF 		bl	_check_init
+ 909              	.LVL88:
+ 910              		.loc 1 99 8 discriminator 1 view .LVU222
+ 911 0010 78BB     		cbnz	r0, .L85
+ 912 0012 8046     		mov	r8, r0
+ 100:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || buf == NULL || len == 0)  return SX_STORAGE_ERR_INVALID;
+ 913              		.loc 1 100 5 is_stmt 1 view .LVU223
+ 914              		.loc 1 100 8 is_stmt 0 view .LVU224
+ 915 0014 84B3     		cbz	r4, .L86
+ 916              		.loc 1 100 22 discriminator 2 view .LVU225
+ 917 0016 95B3     		cbz	r5, .L87
+ 918              		.loc 1 100 37 discriminator 4 view .LVU226
+ 919 0018 A6B3     		cbz	r6, .L88
+ 101:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 102:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     FILE *f = fopen(path, "r");
+ 920              		.loc 1 102 5 is_stmt 1 view .LVU227
+ 921              		.loc 1 102 15 is_stmt 0 view .LVU228
+ 922 001a 1F49     		ldr	r1, .L94
+ 923 001c 2046     		mov	r0, r4
+ 924 001e FFF7FEFF 		bl	file_open
+ 925              	.LVL89:
+ 103:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (f == NULL) return SX_STORAGE_ERR_NOT_FOUND;
+ 926              		.loc 1 103 5 is_stmt 1 view .LVU229
+ 927              		.loc 1 103 8 is_stmt 0 view .LVU230
+ 928 0022 0446     		mov	r4, r0
+ 929              	.LVL90:
+ 930              		.loc 1 103 8 view .LVU231
+ 931 0024 88B3     		cbz	r0, .L89
+ 104:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 105:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (fseek(f, offset, LFS_SEEK_SET) < 0) {
+ 932              		.loc 1 105 5 is_stmt 1 view .LVU232
+ 933              		.loc 1 105 9 is_stmt 0 view .LVU233
+ 934 0026 0023     		movs	r3, #0
+ 935 0028 3A46     		mov	r2, r7
+ 936 002a 0146     		mov	r1, r0
+ 937 002c 1B48     		ldr	r0, .L94+4
+ 938              	.LVL91:
+ 939              		.loc 1 105 9 view .LVU234
+ 940 002e FFF7FEFF 		bl	lfs_file_seek
+ 941              	.LVL92:
+ 942              		.loc 1 105 8 discriminator 1 view .LVU235
+ 943 0032 0028     		cmp	r0, #0
+ 944 0034 13DB     		blt	.L92
+ 106:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         fclose(f);
+ 107:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 108:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 109:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 110:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     int ret = fread(buf, 1, len, f);
+ 945              		.loc 1 110 5 is_stmt 1 view .LVU236
+ 946              		.loc 1 110 15 is_stmt 0 view .LVU237
+ 947 0036 194F     		ldr	r7, .L94+4
+ 948              	.LVL93:
+ 949              		.loc 1 110 15 view .LVU238
+ 950 0038 3346     		mov	r3, r6
+ 951 003a 2A46     		mov	r2, r5
+ 952 003c 2146     		mov	r1, r4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 24
+
+
+ 953 003e 3846     		mov	r0, r7
+ 954 0040 FFF7FEFF 		bl	lfs_file_read
+ 955              	.LVL94:
+ 956 0044 0546     		mov	r5, r0
+ 957              	.LVL95:
+ 111:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fclose(f);
+ 958              		.loc 1 111 5 is_stmt 1 view .LVU239
+ 959              		.loc 1 111 5 view .LVU240
+ 960 0046 2146     		mov	r1, r4
+ 961 0048 3846     		mov	r0, r7
+ 962              	.LVL96:
+ 963              		.loc 1 111 5 is_stmt 0 view .LVU241
+ 964 004a FFF7FEFF 		bl	lfs_file_close
+ 965              	.LVL97:
+ 966              		.loc 1 111 5 is_stmt 1 discriminator 1 view .LVU242
+ 967 004e 2046     		mov	r0, r4
+ 968 0050 FFF7FEFF 		bl	free
+ 969              	.LVL98:
+ 970              		.loc 1 111 5 discriminator 2 view .LVU243
+ 112:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 113:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (ret < 0) return SX_STORAGE_ERR_IO;
+ 971              		.loc 1 113 5 view .LVU244
+ 972              		.loc 1 113 8 is_stmt 0 view .LVU245
+ 973 0054 002D     		cmp	r5, #0
+ 974 0056 1BDB     		blt	.L93
+ 975              	.LVL99:
+ 976              	.L83:
+ 114:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 115:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 977              		.loc 1 115 1 view .LVU246
+ 978 0058 4046     		mov	r0, r8
+ 979 005a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 980              	.LVL100:
+ 981              	.L92:
+ 106:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 982              		.loc 1 106 9 is_stmt 1 view .LVU247
+ 106:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 983              		.loc 1 106 9 view .LVU248
+ 984 005e 2146     		mov	r1, r4
+ 985 0060 0E48     		ldr	r0, .L94+4
+ 986 0062 FFF7FEFF 		bl	lfs_file_close
+ 987              	.LVL101:
+ 106:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 988              		.loc 1 106 9 discriminator 1 view .LVU249
+ 989 0066 2046     		mov	r0, r4
+ 990 0068 FFF7FEFF 		bl	free
+ 991              	.LVL102:
+ 106:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 992              		.loc 1 106 9 discriminator 2 view .LVU250
+ 107:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 993              		.loc 1 107 9 view .LVU251
+ 107:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 994              		.loc 1 107 16 is_stmt 0 view .LVU252
+ 995 006c 6FF00108 		mvn	r8, #1
+ 996 0070 F2E7     		b	.L83
+ 997              	.LVL103:
+ 998              	.L85:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 25
+
+
+  99:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL || buf == NULL || len == 0)  return SX_STORAGE_ERR_INVALID;
+ 999              		.loc 1 99 57 discriminator 1 view .LVU253
+ 1000 0072 6FF00408 		mvn	r8, #4
+ 1001 0076 EFE7     		b	.L83
+ 1002              	.L86:
+ 100:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1003              		.loc 1 100 58 discriminator 5 view .LVU254
+ 1004 0078 4FF0FF38 		mov	r8, #-1
+ 1005 007c ECE7     		b	.L83
+ 1006              	.L87:
+ 1007 007e 4FF0FF38 		mov	r8, #-1
+ 1008 0082 E9E7     		b	.L83
+ 1009              	.L88:
+ 1010 0084 4FF0FF38 		mov	r8, #-1
+ 1011 0088 E6E7     		b	.L83
+ 1012              	.LVL104:
+ 1013              	.L89:
+ 103:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1014              		.loc 1 103 27 discriminator 1 view .LVU255
+ 1015 008a 6FF00208 		mvn	r8, #2
+ 1016 008e E3E7     		b	.L83
+ 1017              	.LVL105:
+ 1018              	.L93:
+ 113:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 1019              		.loc 1 113 25 discriminator 1 view .LVU256
+ 1020 0090 6FF00108 		mvn	r8, #1
+ 1021 0094 E0E7     		b	.L83
+ 1022              	.L95:
+ 1023 0096 00BF     		.align	2
+ 1024              	.L94:
+ 1025 0098 00000000 		.word	.LC7
+ 1026 009c 00000000 		.word	lfs
+ 1027              		.cfi_endproc
+ 1028              	.LFE336:
+ 1030              		.section	.text.sx_storage_delete,"ax",%progbits
+ 1031              		.align	1
+ 1032              		.global	sx_storage_delete
+ 1033              		.syntax unified
+ 1034              		.thumb
+ 1035              		.thumb_func
+ 1037              	sx_storage_delete:
+ 1038              	.LVL106:
+ 1039              	.LFB337:
+ 116:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 117:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_delete(const char *path)
+ 118:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1040              		.loc 1 118 1 is_stmt 1 view -0
+ 1041              		.cfi_startproc
+ 1042              		@ args = 0, pretend = 0, frame = 0
+ 1043              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1044              		.loc 1 118 1 is_stmt 0 view .LVU258
+ 1045 0000 38B5     		push	{r3, r4, r5, lr}
+ 1046              	.LCFI9:
+ 1047              		.cfi_def_cfa_offset 16
+ 1048              		.cfi_offset 3, -16
+ 1049              		.cfi_offset 4, -12
+ 1050              		.cfi_offset 5, -8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 26
+
+
+ 1051              		.cfi_offset 14, -4
+ 1052 0002 0446     		mov	r4, r0
+ 119:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK) return SX_STORAGE_ERR_NOT_INIT;
+ 1053              		.loc 1 119 5 is_stmt 1 view .LVU259
+ 1054              		.loc 1 119 9 is_stmt 0 view .LVU260
+ 1055 0004 FFF7FEFF 		bl	_check_init
+ 1056              	.LVL107:
+ 1057              		.loc 1 119 8 discriminator 1 view .LVU261
+ 1058 0008 48B9     		cbnz	r0, .L98
+ 1059 000a 0546     		mov	r5, r0
+ 120:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL)                    return SX_STORAGE_ERR_INVALID;
+ 1060              		.loc 1 120 5 is_stmt 1 view .LVU262
+ 1061              		.loc 1 120 8 is_stmt 0 view .LVU263
+ 1062 000c 54B1     		cbz	r4, .L99
+ 121:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 122:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (remove(path) < 0) return SX_STORAGE_ERR_NOT_FOUND;
+ 1063              		.loc 1 122 5 is_stmt 1 view .LVU264
+ 1064              		.loc 1 122 9 is_stmt 0 view .LVU265
+ 1065 000e 2146     		mov	r1, r4
+ 1066 0010 0748     		ldr	r0, .L103
+ 1067 0012 FFF7FEFF 		bl	lfs_remove
+ 1068              	.LVL108:
+ 1069              		.loc 1 122 8 discriminator 1 view .LVU266
+ 1070 0016 0028     		cmp	r0, #0
+ 1071 0018 07DB     		blt	.L102
+ 1072              	.L97:
+ 123:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 124:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1073              		.loc 1 124 1 view .LVU267
+ 1074 001a 2846     		mov	r0, r5
+ 1075 001c 38BD     		pop	{r3, r4, r5, pc}
+ 1076              	.LVL109:
+ 1077              	.L98:
+ 119:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL)                    return SX_STORAGE_ERR_INVALID;
+ 1078              		.loc 1 119 48 discriminator 1 view .LVU268
+ 1079 001e 6FF00405 		mvn	r5, #4
+ 1080 0022 FAE7     		b	.L97
+ 1081              	.L99:
+ 120:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1082              		.loc 1 120 49 discriminator 1 view .LVU269
+ 1083 0024 4FF0FF35 		mov	r5, #-1
+ 1084 0028 F7E7     		b	.L97
+ 1085              	.L102:
+ 122:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 1086              		.loc 1 122 34 discriminator 1 view .LVU270
+ 1087 002a 6FF00205 		mvn	r5, #2
+ 1088 002e F4E7     		b	.L97
+ 1089              	.L104:
+ 1090              		.align	2
+ 1091              	.L103:
+ 1092 0030 00000000 		.word	lfs
+ 1093              		.cfi_endproc
+ 1094              	.LFE337:
+ 1096              		.section	.text.sx_storage_exists,"ax",%progbits
+ 1097              		.align	1
+ 1098              		.global	sx_storage_exists
+ 1099              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 27
+
+
+ 1100              		.thumb
+ 1101              		.thumb_func
+ 1103              	sx_storage_exists:
+ 1104              	.LVL110:
+ 1105              	.LFB338:
+ 125:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 126:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** bool sx_storage_exists(const char *path){
+ 1106              		.loc 1 126 41 is_stmt 1 view -0
+ 1107              		.cfi_startproc
+ 1108              		@ args = 0, pretend = 0, frame = 0
+ 1109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1110              		.loc 1 126 41 is_stmt 0 view .LVU272
+ 1111 0000 38B5     		push	{r3, r4, r5, lr}
+ 1112              	.LCFI10:
+ 1113              		.cfi_def_cfa_offset 16
+ 1114              		.cfi_offset 3, -16
+ 1115              		.cfi_offset 4, -12
+ 1116              		.cfi_offset 5, -8
+ 1117              		.cfi_offset 14, -4
+ 127:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (!s_initialized || path == NULL) return false;
+ 1118              		.loc 1 127 5 is_stmt 1 view .LVU273
+ 1119              		.loc 1 127 9 is_stmt 0 view .LVU274
+ 1120 0002 0B4B     		ldr	r3, .L110
+ 1121 0004 1C78     		ldrb	r4, [r3]	@ zero_extendqisi2
+ 1122              		.loc 1 127 8 view .LVU275
+ 1123 0006 64B1     		cbz	r4, .L106
+ 1124              		.loc 1 127 24 discriminator 2 view .LVU276
+ 1125 0008 68B1     		cbz	r0, .L107
+ 128:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 129:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     FILE *f = fopen(path, "r");
+ 1126              		.loc 1 129 5 is_stmt 1 view .LVU277
+ 1127              		.loc 1 129 15 is_stmt 0 view .LVU278
+ 1128 000a 0A49     		ldr	r1, .L110+4
+ 1129 000c FFF7FEFF 		bl	file_open
+ 1130              	.LVL111:
+ 130:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (f == NULL) return false;
+ 1131              		.loc 1 130 5 is_stmt 1 view .LVU279
+ 1132              		.loc 1 130 8 is_stmt 0 view .LVU280
+ 1133 0010 0546     		mov	r5, r0
+ 1134 0012 50B1     		cbz	r0, .L108
+ 131:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fclose(f);
+ 1135              		.loc 1 131 5 is_stmt 1 view .LVU281
+ 1136              		.loc 1 131 5 view .LVU282
+ 1137 0014 0146     		mov	r1, r0
+ 1138 0016 0848     		ldr	r0, .L110+8
+ 1139              	.LVL112:
+ 1140              		.loc 1 131 5 is_stmt 0 view .LVU283
+ 1141 0018 FFF7FEFF 		bl	lfs_file_close
+ 1142              	.LVL113:
+ 1143              		.loc 1 131 5 is_stmt 1 discriminator 1 view .LVU284
+ 1144 001c 2846     		mov	r0, r5
+ 1145 001e FFF7FEFF 		bl	free
+ 1146              	.LVL114:
+ 1147              		.loc 1 131 5 discriminator 2 view .LVU285
+ 132:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return true;
+ 1148              		.loc 1 132 5 view .LVU286
+ 1149              	.L106:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 28
+
+
+ 133:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1150              		.loc 1 133 1 is_stmt 0 view .LVU287
+ 1151 0022 2046     		mov	r0, r4
+ 1152 0024 38BD     		pop	{r3, r4, r5, pc}
+ 1153              	.LVL115:
+ 1154              	.L107:
+ 127:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1155              		.loc 1 127 48 discriminator 3 view .LVU288
+ 1156 0026 0024     		movs	r4, #0
+ 1157 0028 FBE7     		b	.L106
+ 1158              	.LVL116:
+ 1159              	.L108:
+ 130:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fclose(f);
+ 1160              		.loc 1 130 27 discriminator 1 view .LVU289
+ 1161 002a 0024     		movs	r4, #0
+ 1162 002c F9E7     		b	.L106
+ 1163              	.L111:
+ 1164 002e 00BF     		.align	2
+ 1165              	.L110:
+ 1166 0030 00000000 		.word	s_initialized
+ 1167 0034 00000000 		.word	.LC7
+ 1168 0038 00000000 		.word	lfs
+ 1169              		.cfi_endproc
+ 1170              	.LFE338:
+ 1172              		.section	.text.sx_storage_size,"ax",%progbits
+ 1173              		.align	1
+ 1174              		.global	sx_storage_size
+ 1175              		.syntax unified
+ 1176              		.thumb
+ 1177              		.thumb_func
+ 1179              	sx_storage_size:
+ 1180              	.LVL117:
+ 1181              	.LFB339:
+ 134:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 135:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** int32_t sx_storage_size(const char *path)
+ 136:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1182              		.loc 1 136 1 is_stmt 1 view -0
+ 1183              		.cfi_startproc
+ 1184              		@ args = 0, pretend = 0, frame = 0
+ 1185              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1186              		.loc 1 136 1 is_stmt 0 view .LVU291
+ 1187 0000 70B5     		push	{r4, r5, r6, lr}
+ 1188              	.LCFI11:
+ 1189              		.cfi_def_cfa_offset 16
+ 1190              		.cfi_offset 4, -16
+ 1191              		.cfi_offset 5, -12
+ 1192              		.cfi_offset 6, -8
+ 1193              		.cfi_offset 14, -4
+ 137:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (!s_initialized || path == NULL) return -1;
+ 1194              		.loc 1 137 5 is_stmt 1 view .LVU292
+ 1195              		.loc 1 137 9 is_stmt 0 view .LVU293
+ 1196 0002 104B     		ldr	r3, .L118
+ 1197 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1198              		.loc 1 137 8 view .LVU294
+ 1199 0006 A3B1     		cbz	r3, .L114
+ 1200              		.loc 1 137 24 discriminator 2 view .LVU295
+ 1201 0008 B0B1     		cbz	r0, .L115
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 29
+
+
+ 138:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 139:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     FILE *f = fopen(path, "r");
+ 1202              		.loc 1 139 5 is_stmt 1 view .LVU296
+ 1203              		.loc 1 139 15 is_stmt 0 view .LVU297
+ 1204 000a 0F49     		ldr	r1, .L118+4
+ 1205 000c FFF7FEFF 		bl	file_open
+ 1206              	.LVL118:
+ 140:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (f == NULL) return -1;
+ 1207              		.loc 1 140 5 is_stmt 1 view .LVU298
+ 1208              		.loc 1 140 8 is_stmt 0 view .LVU299
+ 1209 0010 0546     		mov	r5, r0
+ 1210 0012 A0B1     		cbz	r0, .L116
+ 141:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 142:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     int32_t sz = (int32_t)file_size(f);
+ 1211              		.loc 1 142 5 is_stmt 1 view .LVU300
+ 1212              		.loc 1 142 27 is_stmt 0 view .LVU301
+ 1213 0014 0D4E     		ldr	r6, .L118+8
+ 1214 0016 0146     		mov	r1, r0
+ 1215 0018 3046     		mov	r0, r6
+ 1216              	.LVL119:
+ 1217              		.loc 1 142 27 view .LVU302
+ 1218 001a FFF7FEFF 		bl	lfs_file_size
+ 1219              	.LVL120:
+ 1220              		.loc 1 142 27 view .LVU303
+ 1221 001e 0446     		mov	r4, r0
+ 1222              	.LVL121:
+ 143:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fclose(f);
+ 1223              		.loc 1 143 5 is_stmt 1 view .LVU304
+ 1224              		.loc 1 143 5 view .LVU305
+ 1225 0020 2946     		mov	r1, r5
+ 1226 0022 3046     		mov	r0, r6
+ 1227              	.LVL122:
+ 1228              		.loc 1 143 5 is_stmt 0 view .LVU306
+ 1229 0024 FFF7FEFF 		bl	lfs_file_close
+ 1230              	.LVL123:
+ 1231              		.loc 1 143 5 is_stmt 1 discriminator 1 view .LVU307
+ 1232 0028 2846     		mov	r0, r5
+ 1233 002a FFF7FEFF 		bl	free
+ 1234              	.LVL124:
+ 1235              		.loc 1 143 5 discriminator 2 view .LVU308
+ 144:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return sz;
+ 1236              		.loc 1 144 5 view .LVU309
+ 1237              	.L112:
+ 145:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1238              		.loc 1 145 1 is_stmt 0 view .LVU310
+ 1239 002e 2046     		mov	r0, r4
+ 1240 0030 70BD     		pop	{r4, r5, r6, pc}
+ 1241              	.LVL125:
+ 1242              	.L114:
+ 137:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1243              		.loc 1 137 48 discriminator 3 view .LVU311
+ 1244 0032 4FF0FF34 		mov	r4, #-1
+ 1245 0036 FAE7     		b	.L112
+ 1246              	.L115:
+ 1247 0038 4FF0FF34 		mov	r4, #-1
+ 1248 003c F7E7     		b	.L112
+ 1249              	.LVL126:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 30
+
+
+ 1250              	.L116:
+ 140:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1251              		.loc 1 140 27 discriminator 1 view .LVU312
+ 1252 003e 4FF0FF34 		mov	r4, #-1
+ 1253 0042 F4E7     		b	.L112
+ 1254              	.L119:
+ 1255              		.align	2
+ 1256              	.L118:
+ 1257 0044 00000000 		.word	s_initialized
+ 1258 0048 00000000 		.word	.LC7
+ 1259 004c 00000000 		.word	lfs
+ 1260              		.cfi_endproc
+ 1261              	.LFE339:
+ 1263              		.section	.text.sx_storage_mkdir,"ax",%progbits
+ 1264              		.align	1
+ 1265              		.global	sx_storage_mkdir
+ 1266              		.syntax unified
+ 1267              		.thumb
+ 1268              		.thumb_func
+ 1270              	sx_storage_mkdir:
+ 1271              	.LVL127:
+ 1272              	.LFB340:
+ 146:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 147:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_mkdir(const char *path)
+ 148:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1273              		.loc 1 148 1 is_stmt 1 view -0
+ 1274              		.cfi_startproc
+ 1275              		@ args = 0, pretend = 0, frame = 0
+ 1276              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1277              		.loc 1 148 1 is_stmt 0 view .LVU314
+ 1278 0000 38B5     		push	{r3, r4, r5, lr}
+ 1279              	.LCFI12:
+ 1280              		.cfi_def_cfa_offset 16
+ 1281              		.cfi_offset 3, -16
+ 1282              		.cfi_offset 4, -12
+ 1283              		.cfi_offset 5, -8
+ 1284              		.cfi_offset 14, -4
+ 1285 0002 0446     		mov	r4, r0
+ 149:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK) return SX_STORAGE_ERR_NOT_INIT;
+ 1286              		.loc 1 149 5 is_stmt 1 view .LVU315
+ 1287              		.loc 1 149 9 is_stmt 0 view .LVU316
+ 1288 0004 FFF7FEFF 		bl	_check_init
+ 1289              	.LVL128:
+ 1290              		.loc 1 149 8 discriminator 1 view .LVU317
+ 1291 0008 48B9     		cbnz	r0, .L122
+ 1292 000a 0546     		mov	r5, r0
+ 150:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL)                    return SX_STORAGE_ERR_INVALID;
+ 1293              		.loc 1 150 5 is_stmt 1 view .LVU318
+ 1294              		.loc 1 150 8 is_stmt 0 view .LVU319
+ 1295 000c 54B1     		cbz	r4, .L123
+ 151:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 152:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (mkdir(path) < 0) return SX_STORAGE_ERR_IO;
+ 1296              		.loc 1 152 5 is_stmt 1 view .LVU320
+ 1297              		.loc 1 152 9 is_stmt 0 view .LVU321
+ 1298 000e 2146     		mov	r1, r4
+ 1299 0010 0748     		ldr	r0, .L127
+ 1300 0012 FFF7FEFF 		bl	lfs_mkdir
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 31
+
+
+ 1301              	.LVL129:
+ 1302              		.loc 1 152 8 discriminator 1 view .LVU322
+ 1303 0016 0028     		cmp	r0, #0
+ 1304 0018 07DB     		blt	.L126
+ 1305              	.L121:
+ 153:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 154:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1306              		.loc 1 154 1 view .LVU323
+ 1307 001a 2846     		mov	r0, r5
+ 1308 001c 38BD     		pop	{r3, r4, r5, pc}
+ 1309              	.LVL130:
+ 1310              	.L122:
+ 149:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (path == NULL)                    return SX_STORAGE_ERR_INVALID;
+ 1311              		.loc 1 149 48 discriminator 1 view .LVU324
+ 1312 001e 6FF00405 		mvn	r5, #4
+ 1313 0022 FAE7     		b	.L121
+ 1314              	.L123:
+ 150:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1315              		.loc 1 150 49 discriminator 1 view .LVU325
+ 1316 0024 4FF0FF35 		mov	r5, #-1
+ 1317 0028 F7E7     		b	.L121
+ 1318              	.L126:
+ 152:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 1319              		.loc 1 152 33 discriminator 1 view .LVU326
+ 1320 002a 6FF00105 		mvn	r5, #1
+ 1321 002e F4E7     		b	.L121
+ 1322              	.L128:
+ 1323              		.align	2
+ 1324              	.L127:
+ 1325 0030 00000000 		.word	lfs
+ 1326              		.cfi_endproc
+ 1327              	.LFE340:
+ 1329              		.section	.text.sx_storage_list_dir,"ax",%progbits
+ 1330              		.align	1
+ 1331              		.global	sx_storage_list_dir
+ 1332              		.syntax unified
+ 1333              		.thumb
+ 1334              		.thumb_func
+ 1336              	sx_storage_list_dir:
+ 1337              	.LVL131:
+ 1338              	.LFB341:
+ 155:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 156:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** void sx_storage_list_dir(const char *path)
+ 157:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1339              		.loc 1 157 1 is_stmt 1 view -0
+ 1340              		.cfi_startproc
+ 1341              		@ args = 0, pretend = 0, frame = 0
+ 1342              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1343              		.loc 1 157 1 is_stmt 0 view .LVU328
+ 1344 0000 08B5     		push	{r3, lr}
+ 1345              	.LCFI13:
+ 1346              		.cfi_def_cfa_offset 8
+ 1347              		.cfi_offset 3, -8
+ 1348              		.cfi_offset 14, -4
+ 158:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (!s_initialized || path == NULL) return;
+ 1349              		.loc 1 158 5 is_stmt 1 view .LVU329
+ 1350              		.loc 1 158 9 is_stmt 0 view .LVU330
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 32
+
+
+ 1351 0002 034B     		ldr	r3, .L132
+ 1352 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1353              		.loc 1 158 8 view .LVU331
+ 1354 0006 13B1     		cbz	r3, .L129
+ 1355              		.loc 1 158 24 discriminator 2 view .LVU332
+ 1356 0008 08B1     		cbz	r0, .L129
+ 159:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     fs_list_dir(path);
+ 1357              		.loc 1 159 5 is_stmt 1 view .LVU333
+ 1358 000a FFF7FEFF 		bl	fs_list_dir
+ 1359              	.LVL132:
+ 1360              	.L129:
+ 160:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1361              		.loc 1 160 1 is_stmt 0 view .LVU334
+ 1362 000e 08BD     		pop	{r3, pc}
+ 1363              	.L133:
+ 1364              		.align	2
+ 1365              	.L132:
+ 1366 0010 00000000 		.word	s_initialized
+ 1367              		.cfi_endproc
+ 1368              	.LFE341:
+ 1370              		.section	.text.sx_storage_free_space,"ax",%progbits
+ 1371              		.align	1
+ 1372              		.global	sx_storage_free_space
+ 1373              		.syntax unified
+ 1374              		.thumb
+ 1375              		.thumb_func
+ 1377              	sx_storage_free_space:
+ 1378              	.LFB342:
+ 161:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 162:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** int32_t sx_storage_free_space(void)
+ 163:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1379              		.loc 1 163 1 is_stmt 1 view -0
+ 1380              		.cfi_startproc
+ 1381              		@ args = 0, pretend = 0, frame = 0
+ 1382              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1383 0000 08B5     		push	{r3, lr}
+ 1384              	.LCFI14:
+ 1385              		.cfi_def_cfa_offset 8
+ 1386              		.cfi_offset 3, -8
+ 1387              		.cfi_offset 14, -4
+ 164:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (!s_initialized) return -1;
+ 1388              		.loc 1 164 5 view .LVU336
+ 1389              		.loc 1 164 9 is_stmt 0 view .LVU337
+ 1390 0002 094B     		ldr	r3, .L139
+ 1391 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 1392              		.loc 1 164 8 view .LVU338
+ 1393 0006 43B1     		cbz	r3, .L136
+ 165:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     int32_t used = (int32_t)fs_size();
+ 1394              		.loc 1 165 5 is_stmt 1 view .LVU339
+ 1395              		.loc 1 165 29 is_stmt 0 view .LVU340
+ 1396 0008 0848     		ldr	r0, .L139+4
+ 1397 000a FFF7FEFF 		bl	lfs_fs_size
+ 1398              	.LVL133:
+ 166:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (used < 0) return -1;
+ 1399              		.loc 1 166 5 is_stmt 1 view .LVU341
+ 1400              		.loc 1 166 8 is_stmt 0 view .LVU342
+ 1401 000e 0028     		cmp	r0, #0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 33
+
+
+ 1402              		.loc 1 166 8 view .LVU343
+ 1403 0010 06DB     		blt	.L137
+ 167:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return (int32_t)sx_W25Q128_info.total_bytes - used;
+ 1404              		.loc 1 167 5 is_stmt 1 view .LVU344
+ 1405              		.loc 1 167 36 is_stmt 0 view .LVU345
+ 1406 0012 074B     		ldr	r3, .L139+8
+ 1407 0014 DB68     		ldr	r3, [r3, #12]
+ 1408              		.loc 1 167 49 view .LVU346
+ 1409 0016 181A     		subs	r0, r3, r0
+ 1410              	.LVL134:
+ 1411              	.L134:
+ 168:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1412              		.loc 1 168 1 view .LVU347
+ 1413 0018 08BD     		pop	{r3, pc}
+ 1414              	.L136:
+ 164:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     int32_t used = (int32_t)fs_size();
+ 1415              		.loc 1 164 32 discriminator 1 view .LVU348
+ 1416 001a 4FF0FF30 		mov	r0, #-1
+ 1417 001e FBE7     		b	.L134
+ 1418              	.LVL135:
+ 1419              	.L137:
+ 166:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return (int32_t)sx_W25Q128_info.total_bytes - used;
+ 1420              		.loc 1 166 26 discriminator 1 view .LVU349
+ 1421 0020 4FF0FF30 		mov	r0, #-1
+ 1422              	.LVL136:
+ 166:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return (int32_t)sx_W25Q128_info.total_bytes - used;
+ 1423              		.loc 1 166 26 discriminator 1 view .LVU350
+ 1424 0024 F8E7     		b	.L134
+ 1425              	.L140:
+ 1426 0026 00BF     		.align	2
+ 1427              	.L139:
+ 1428 0028 00000000 		.word	s_initialized
+ 1429 002c 00000000 		.word	lfs
+ 1430 0030 00000000 		.word	sx_W25Q128_info
+ 1431              		.cfi_endproc
+ 1432              	.LFE342:
+ 1434              		.section	.text.sx_storage_total_space,"ax",%progbits
+ 1435              		.align	1
+ 1436              		.global	sx_storage_total_space
+ 1437              		.syntax unified
+ 1438              		.thumb
+ 1439              		.thumb_func
+ 1441              	sx_storage_total_space:
+ 1442              	.LFB343:
+ 169:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 170:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** int32_t sx_storage_total_space(void)
+ 171:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1443              		.loc 1 171 1 is_stmt 1 view -0
+ 1444              		.cfi_startproc
+ 1445              		@ args = 0, pretend = 0, frame = 0
+ 1446              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1447              		@ link register save eliminated.
+ 172:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return (int32_t)sx_W25Q128_info.total_bytes;
+ 1448              		.loc 1 172 5 view .LVU352
+ 173:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1449              		.loc 1 173 1 is_stmt 0 view .LVU353
+ 1450 0000 014B     		ldr	r3, .L142
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 34
+
+
+ 1451 0002 D868     		ldr	r0, [r3, #12]
+ 1452 0004 7047     		bx	lr
+ 1453              	.L143:
+ 1454 0006 00BF     		.align	2
+ 1455              	.L142:
+ 1456 0008 00000000 		.word	sx_W25Q128_info
+ 1457              		.cfi_endproc
+ 1458              	.LFE343:
+ 1460              		.section	.rodata.sx_storage_format.str1.4,"aMS",%progbits,1
+ 1461              		.align	2
+ 1462              	.LC8:
+ 1463 0000 466F726D 		.ascii	"Format failed\000"
+ 1463      61742066 
+ 1463      61696C65 
+ 1463      6400
+ 1464 000e 0000     		.align	2
+ 1465              	.LC9:
+ 1466 0010 466F726D 		.ascii	"Format OK\000"
+ 1466      6174204F 
+ 1466      4B00
+ 1467              		.section	.text.sx_storage_format,"ax",%progbits
+ 1468              		.align	1
+ 1469              		.global	sx_storage_format
+ 1470              		.syntax unified
+ 1471              		.thumb
+ 1472              		.thumb_func
+ 1474              	sx_storage_format:
+ 1475              	.LFB344:
+ 174:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 175:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_format(void)
+ 176:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1476              		.loc 1 176 1 is_stmt 1 view -0
+ 1477              		.cfi_startproc
+ 1478              		@ args = 0, pretend = 0, frame = 0
+ 1479              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1480 0000 10B5     		push	{r4, lr}
+ 1481              	.LCFI15:
+ 1482              		.cfi_def_cfa_offset 8
+ 1483              		.cfi_offset 4, -8
+ 1484              		.cfi_offset 14, -4
+ 177:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK) return SX_STORAGE_ERR_NOT_INIT;
+ 1485              		.loc 1 177 5 view .LVU355
+ 1486              		.loc 1 177 9 is_stmt 0 view .LVU356
+ 1487 0002 FFF7FEFF 		bl	_check_init
+ 1488              	.LVL137:
+ 1489              		.loc 1 177 8 discriminator 1 view .LVU357
+ 1490 0006 C8B9     		cbnz	r0, .L147
+ 1491 0008 0446     		mov	r4, r0
+ 178:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 179:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     s_initialized = false;
+ 1492              		.loc 1 179 5 is_stmt 1 view .LVU358
+ 1493              		.loc 1 179 19 is_stmt 0 view .LVU359
+ 1494 000a 0E4B     		ldr	r3, .L150
+ 1495 000c 0022     		movs	r2, #0
+ 1496 000e 1A70     		strb	r2, [r3]
+ 180:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (sx_fs_init(&s_flash) != 0) {
+ 1497              		.loc 1 180 5 is_stmt 1 view .LVU360
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 35
+
+
+ 1498              		.loc 1 180 9 is_stmt 0 view .LVU361
+ 1499 0010 0D48     		ldr	r0, .L150+4
+ 1500 0012 FFF7FEFF 		bl	sx_fs_init
+ 1501              	.LVL138:
+ 1502              		.loc 1 180 8 discriminator 1 view .LVU362
+ 1503 0016 48B9     		cbnz	r0, .L149
+ 181:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Format failed");
+ 182:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 183:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 184:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 185:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     s_initialized = true;
+ 1504              		.loc 1 185 5 is_stmt 1 view .LVU363
+ 1505              		.loc 1 185 19 is_stmt 0 view .LVU364
+ 1506 0018 0A4B     		ldr	r3, .L150
+ 1507 001a 0122     		movs	r2, #1
+ 1508 001c 1A70     		strb	r2, [r3]
+ 186:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     log_info(TAG, "Format OK");
+ 1509              		.loc 1 186 5 is_stmt 1 view .LVU365
+ 1510 001e 0B4A     		ldr	r2, .L150+8
+ 1511 0020 0B49     		ldr	r1, .L150+12
+ 1512 0022 0320     		movs	r0, #3
+ 1513 0024 FFF7FEFF 		bl	log_func
+ 1514              	.LVL139:
+ 187:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 1515              		.loc 1 187 5 view .LVU366
+ 1516              	.L145:
+ 188:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1517              		.loc 1 188 1 is_stmt 0 view .LVU367
+ 1518 0028 2046     		mov	r0, r4
+ 1519 002a 10BD     		pop	{r4, pc}
+ 1520              	.L149:
+ 181:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 1521              		.loc 1 181 9 is_stmt 1 view .LVU368
+ 1522 002c 094A     		ldr	r2, .L150+16
+ 1523 002e 0849     		ldr	r1, .L150+12
+ 1524 0030 0120     		movs	r0, #1
+ 1525 0032 FFF7FEFF 		bl	log_func
+ 1526              	.LVL140:
+ 182:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 1527              		.loc 1 182 9 view .LVU369
+ 182:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 1528              		.loc 1 182 16 is_stmt 0 view .LVU370
+ 1529 0036 6FF00104 		mvn	r4, #1
+ 1530 003a F5E7     		b	.L145
+ 1531              	.L147:
+ 177:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1532              		.loc 1 177 48 discriminator 1 view .LVU371
+ 1533 003c 6FF00404 		mvn	r4, #4
+ 1534 0040 F2E7     		b	.L145
+ 1535              	.L151:
+ 1536 0042 00BF     		.align	2
+ 1537              	.L150:
+ 1538 0044 00000000 		.word	s_initialized
+ 1539 0048 00000000 		.word	s_flash
+ 1540 004c 10000000 		.word	.LC9
+ 1541 0050 10000000 		.word	.LC1
+ 1542 0054 00000000 		.word	.LC8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 36
+
+
+ 1543              		.cfi_endproc
+ 1544              	.LFE344:
+ 1546              		.section	.rodata.sx_storage_factory_reset.str1.4,"aMS",%progbits,1
+ 1547              		.align	2
+ 1548              	.LC10:
+ 1549 0000 46616374 		.ascii	"Factory reset start...\000"
+ 1549      6F727920 
+ 1549      72657365 
+ 1549      74207374 
+ 1549      6172742E 
+ 1550 0017 00       		.align	2
+ 1551              	.LC11:
+ 1552 0018 46616374 		.ascii	"Factory reset: fs init failed\000"
+ 1552      6F727920 
+ 1552      72657365 
+ 1552      743A2066 
+ 1552      7320696E 
+ 1553 0036 0000     		.align	2
+ 1554              	.LC12:
+ 1555 0038 46616374 		.ascii	"Factory reset done\000"
+ 1555      6F727920 
+ 1555      72657365 
+ 1555      7420646F 
+ 1555      6E6500
+ 1556              		.section	.text.sx_storage_factory_reset,"ax",%progbits
+ 1557              		.align	1
+ 1558              		.global	sx_storage_factory_reset
+ 1559              		.syntax unified
+ 1560              		.thumb
+ 1561              		.thumb_func
+ 1563              	sx_storage_factory_reset:
+ 1564              	.LFB345:
+ 189:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 190:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** sx_storage_err_t sx_storage_factory_reset(void)
+ 191:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** {
+ 1565              		.loc 1 191 1 is_stmt 1 view -0
+ 1566              		.cfi_startproc
+ 1567              		@ args = 0, pretend = 0, frame = 0
+ 1568              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1569 0000 10B5     		push	{r4, lr}
+ 1570              	.LCFI16:
+ 1571              		.cfi_def_cfa_offset 8
+ 1572              		.cfi_offset 4, -8
+ 1573              		.cfi_offset 14, -4
+ 192:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (_check_init() != SX_STORAGE_OK) return SX_STORAGE_ERR_NOT_INIT;
+ 1574              		.loc 1 192 5 view .LVU373
+ 1575              		.loc 1 192 9 is_stmt 0 view .LVU374
+ 1576 0002 FFF7FEFF 		bl	_check_init
+ 1577              	.LVL141:
+ 1578              		.loc 1 192 8 discriminator 1 view .LVU375
+ 1579 0006 08BB     		cbnz	r0, .L155
+ 1580 0008 0446     		mov	r4, r0
+ 193:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 194:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     s_initialized = false;
+ 1581              		.loc 1 194 5 is_stmt 1 view .LVU376
+ 1582              		.loc 1 194 19 is_stmt 0 view .LVU377
+ 1583 000a 124B     		ldr	r3, .L158
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 37
+
+
+ 1584 000c 0022     		movs	r2, #0
+ 1585 000e 1A70     		strb	r2, [r3]
+ 195:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     log_info(TAG, "Factory reset start...");
+ 1586              		.loc 1 195 5 is_stmt 1 view .LVU378
+ 1587 0010 114A     		ldr	r2, .L158+4
+ 1588 0012 1249     		ldr	r1, .L158+8
+ 1589 0014 0320     		movs	r0, #3
+ 1590 0016 FFF7FEFF 		bl	log_func
+ 1591              	.LVL142:
+ 196:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 197:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     sx_W25Q128_chip_erase(&s_w25q128);
+ 1592              		.loc 1 197 5 view .LVU379
+ 1593 001a 1148     		ldr	r0, .L158+12
+ 1594 001c FFF7FEFF 		bl	sx_W25Q128_chip_erase
+ 1595              	.LVL143:
+ 198:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 199:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     if (sx_fs_init(&s_flash) != 0) {
+ 1596              		.loc 1 199 5 view .LVU380
+ 1597              		.loc 1 199 9 is_stmt 0 view .LVU381
+ 1598 0020 1048     		ldr	r0, .L158+16
+ 1599 0022 FFF7FEFF 		bl	sx_fs_init
+ 1600              	.LVL144:
+ 1601              		.loc 1 199 8 discriminator 1 view .LVU382
+ 1602 0026 48B9     		cbnz	r0, .L157
+ 200:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         log_error(TAG, "Factory reset: fs init failed");
+ 201:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 202:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 203:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 204:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     s_initialized = true;
+ 1603              		.loc 1 204 5 is_stmt 1 view .LVU383
+ 1604              		.loc 1 204 19 is_stmt 0 view .LVU384
+ 1605 0028 0A4B     		ldr	r3, .L158
+ 1606 002a 0122     		movs	r2, #1
+ 1607 002c 1A70     		strb	r2, [r3]
+ 205:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     log_info(TAG, "Factory reset done");
+ 1608              		.loc 1 205 5 is_stmt 1 view .LVU385
+ 1609 002e 0E4A     		ldr	r2, .L158+20
+ 1610 0030 0A49     		ldr	r1, .L158+8
+ 1611 0032 0320     		movs	r0, #3
+ 1612 0034 FFF7FEFF 		bl	log_func
+ 1613              	.LVL145:
+ 206:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     return SX_STORAGE_OK;
+ 1614              		.loc 1 206 5 view .LVU386
+ 1615              	.L153:
+ 207:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1616              		.loc 1 207 1 is_stmt 0 view .LVU387
+ 1617 0038 2046     		mov	r0, r4
+ 1618 003a 10BD     		pop	{r4, pc}
+ 1619              	.L157:
+ 200:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****         return SX_STORAGE_ERR_IO;
+ 1620              		.loc 1 200 9 is_stmt 1 view .LVU388
+ 1621 003c 0B4A     		ldr	r2, .L158+24
+ 1622 003e 0749     		ldr	r1, .L158+8
+ 1623 0040 0120     		movs	r0, #1
+ 1624 0042 FFF7FEFF 		bl	log_func
+ 1625              	.LVL146:
+ 201:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 38
+
+
+ 1626              		.loc 1 201 9 view .LVU389
+ 201:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     }
+ 1627              		.loc 1 201 16 is_stmt 0 view .LVU390
+ 1628 0046 6FF00104 		mvn	r4, #1
+ 1629 004a F5E7     		b	.L153
+ 1630              	.L155:
+ 192:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 1631              		.loc 1 192 48 discriminator 1 view .LVU391
+ 1632 004c 6FF00404 		mvn	r4, #4
+ 1633 0050 F2E7     		b	.L153
+ 1634              	.L159:
+ 1635 0052 00BF     		.align	2
+ 1636              	.L158:
+ 1637 0054 00000000 		.word	s_initialized
+ 1638 0058 00000000 		.word	.LC10
+ 1639 005c 10000000 		.word	.LC1
+ 1640 0060 00000000 		.word	s_w25q128
+ 1641 0064 00000000 		.word	s_flash
+ 1642 0068 38000000 		.word	.LC12
+ 1643 006c 18000000 		.word	.LC11
+ 1644              		.cfi_endproc
+ 1645              	.LFE345:
+ 1647              		.section	.text.sx_storage_sleep,"ax",%progbits
+ 1648              		.align	1
+ 1649              		.global	sx_storage_sleep
+ 1650              		.syntax unified
+ 1651              		.thumb
+ 1652              		.thumb_func
+ 1654              	sx_storage_sleep:
+ 1655              	.LFB346:
+ 208:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 209:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** void sx_storage_sleep(void){
+ 1656              		.loc 1 209 28 is_stmt 1 view -0
+ 1657              		.cfi_startproc
+ 1658              		@ args = 0, pretend = 0, frame = 0
+ 1659              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1660              		@ link register save eliminated.
+ 210:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 211:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }
+ 1661              		.loc 1 211 1 view .LVU393
+ 1662 0000 7047     		bx	lr
+ 1663              		.cfi_endproc
+ 1664              	.LFE346:
+ 1666              		.section	.text.sx_storage_wake,"ax",%progbits
+ 1667              		.align	1
+ 1668              		.global	sx_storage_wake
+ 1669              		.syntax unified
+ 1670              		.thumb
+ 1671              		.thumb_func
+ 1673              	sx_storage_wake:
+ 1674              	.LFB347:
+ 212:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** 
+ 213:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** void sx_storage_wake(void){
+ 1675              		.loc 1 213 27 view -0
+ 1676              		.cfi_startproc
+ 1677              		@ args = 0, pretend = 0, frame = 0
+ 1678              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 39
+
+
+ 1679              		@ link register save eliminated.
+ 214:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c ****     
+ 215:SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.c **** }...
+ 1680              		.loc 1 215 1 view .LVU395
+ 1681 0000 7047     		bx	lr
+ 1682              		.cfi_endproc
+ 1683              	.LFE347:
+ 1685              		.section	.bss.s_initialized,"aw",%nobits
+ 1688              	s_initialized:
+ 1689 0000 00       		.space	1
+ 1690              		.section	.bss.s_flash,"aw",%nobits
+ 1691              		.align	2
+ 1694              	s_flash:
+ 1695 0000 00000000 		.space	20
+ 1695      00000000 
+ 1695      00000000 
+ 1695      00000000 
+ 1695      00000000 
+ 1696              		.section	.bss.s_w25q128,"aw",%nobits
+ 1697              		.align	2
+ 1700              	s_w25q128:
+ 1701 0000 00000000 		.space	8
+ 1701      00000000 
+ 1702              		.text
+ 1703              	.Letext0:
+ 1704              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1705              		.file 7 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1706              		.file 8 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1707              		.file 9 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1708              		.file 10 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 1709              		.file 11 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 1710              		.file 12 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 1711              		.file 13 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 1712              		.file 14 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma.h"
+ 1713              		.file 15 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma_ex.h"
+ 1714              		.file 16 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 1715              		.file 17 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_spi.h"
+ 1716              		.file 18 "SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.h"
+ 1717              		.file 19 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 1718              		.file 20 "SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.h"
+ 1719              		.file 21 "SynaptiX_FDK/services/littlefs/lfs.h"
+ 1720              		.file 22 "SynaptiX_FDK/services/logger/logger.h"
+ 1721              		.file 23 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 1722              		.file 24 "SynaptiX_FDK/services/filesystem/sx_fs.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 40
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_ex_storage.c
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:22     .text.sx_gpio_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:27     .text.sx_gpio_write:00000000 sx_gpio_write
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:90     .rodata._check_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:97     .text._check_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:102    .text._check_init:00000000 _check_init
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:138    .text._check_init:0000001c $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1688   .bss.s_initialized:00000000 s_initialized
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:145    .text.file_open:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:150    .text.file_open:00000000 file_open
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:293    .text.file_open:00000080 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:298    .rodata.sx_storage_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:308    .text.sx_storage_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:314    .text.sx_storage_init:00000000 sx_storage_init
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:486    .text.sx_storage_init:0000008c $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1700   .bss.s_w25q128:00000000 s_w25q128
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1694   .bss.s_flash:00000000 s_flash
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:501    .rodata.sx_storage_write.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:505    .text.sx_storage_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:511    .text.sx_storage_write:00000000 sx_storage_write
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:621    .text.sx_storage_write:00000074 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:627    .rodata.sx_storage_append.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:631    .text.sx_storage_append:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:637    .text.sx_storage_append:00000000 sx_storage_append
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:747    .text.sx_storage_append:00000074 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:753    .rodata.sx_storage_read.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:757    .text.sx_storage_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:763    .text.sx_storage_read:00000000 sx_storage_read
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:873    .text.sx_storage_read:00000074 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:879    .text.sx_storage_read_partial:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:885    .text.sx_storage_read_partial:00000000 sx_storage_read_partial
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1025   .text.sx_storage_read_partial:00000098 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1031   .text.sx_storage_delete:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1037   .text.sx_storage_delete:00000000 sx_storage_delete
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1092   .text.sx_storage_delete:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1097   .text.sx_storage_exists:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1103   .text.sx_storage_exists:00000000 sx_storage_exists
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1166   .text.sx_storage_exists:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1173   .text.sx_storage_size:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1179   .text.sx_storage_size:00000000 sx_storage_size
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1257   .text.sx_storage_size:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1264   .text.sx_storage_mkdir:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1270   .text.sx_storage_mkdir:00000000 sx_storage_mkdir
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1325   .text.sx_storage_mkdir:00000030 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1330   .text.sx_storage_list_dir:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1336   .text.sx_storage_list_dir:00000000 sx_storage_list_dir
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1366   .text.sx_storage_list_dir:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1371   .text.sx_storage_free_space:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1377   .text.sx_storage_free_space:00000000 sx_storage_free_space
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1428   .text.sx_storage_free_space:00000028 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1435   .text.sx_storage_total_space:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1441   .text.sx_storage_total_space:00000000 sx_storage_total_space
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1456   .text.sx_storage_total_space:00000008 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1461   .rodata.sx_storage_format.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1468   .text.sx_storage_format:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1474   .text.sx_storage_format:00000000 sx_storage_format
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s 			page 41
+
+
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1538   .text.sx_storage_format:00000044 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1547   .rodata.sx_storage_factory_reset.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1557   .text.sx_storage_factory_reset:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1563   .text.sx_storage_factory_reset:00000000 sx_storage_factory_reset
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1637   .text.sx_storage_factory_reset:00000054 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1648   .text.sx_storage_sleep:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1654   .text.sx_storage_sleep:00000000 sx_storage_sleep
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1667   .text.sx_storage_wake:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1673   .text.sx_storage_wake:00000000 sx_storage_wake
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1689   .bss.s_initialized:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1691   .bss.s_flash:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccpWT3vc.s:1697   .bss.s_w25q128:00000000 $d
+
+UNDEFINED SYMBOLS
+log_func
+malloc
+free
+lfs_file_open
+lfs
+sx_W25Q128_init
+sx_fs_init
+sx_gpio_ops
+sx_spi_ops
+sx_W25Q128_ops
+sx_W25Q128_info
+lfs_file_write
+lfs_file_close
+lfs_file_read
+lfs_file_seek
+lfs_remove
+lfs_file_size
+lfs_mkdir
+fs_list_dir
+lfs_fs_size
+sx_W25Q128_chip_erase

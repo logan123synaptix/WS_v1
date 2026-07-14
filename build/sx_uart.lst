@@ -1,0 +1,518 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_uart.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/peripherals/uart/sx_uart.c"
+  21              		.section	.text.sx_uart_init,"ax",%progbits
+  22              		.align	1
+  23              		.global	sx_uart_init
+  24              		.syntax unified
+  25              		.thumb
+  26              		.thumb_func
+  28              	sx_uart_init:
+  29              	.LVL0:
+  30              	.LFB300:
+   1:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #include "sx_uart.h"
+   2:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #include "sx_mem.h"
+   3:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #include "sx_config.h"
+   4:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #include "sx_delay.h"
+   5:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #include "logger.h"
+   6:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** 
+   7:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** static const char *TAG = "SX_UART";
+   8:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** 
+   9:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 
+  10:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32h5xx_hal.h"
+  11:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32h5xx_hal_uart.h"
+  12:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32H7
+  13:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32h7xx_hal.h"
+  14:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32h7xx_hal_uart.h"
+  15:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32F7
+  16:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32f7xx_hal.h"
+  17:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32f7xx_hal_uart.h"
+  18:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32F4
+  19:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32f4xx_hal.h"
+  20:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32f4xx_hal_uart.h"
+  21:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #elif SX_PLATFORM == SX_PLATFORM_STM32F1
+  22:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32f1xx_hal.h"
+  23:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #include "stm32f1xx_hal_uart.h"
+  24:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #endif
+  25:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** 
+  26:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** void sx_uart_init(sx_uart_t *_uart, sx_uart_config_t *_config, int _rxBufferSize, int _txBufferSize
+  31              		.loc 1 26 101 view -0
+  32              		.cfi_startproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 2
+
+
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 1 26 101 is_stmt 0 view .LVU1
+  36 0000 70B5     		push	{r4, r5, r6, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 16
+  39              		.cfi_offset 4, -16
+  40              		.cfi_offset 5, -12
+  41              		.cfi_offset 6, -8
+  42              		.cfi_offset 14, -4
+  43 0002 0446     		mov	r4, r0
+  44 0004 1646     		mov	r6, r2
+  45 0006 1D46     		mov	r5, r3
+  27:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     _uart->config = _config;
+  46              		.loc 1 27 5 is_stmt 1 view .LVU2
+  47              		.loc 1 27 19 is_stmt 0 view .LVU3
+  48 0008 0160     		str	r1, [r0]
+  28:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     _uart->rxBufferSize = _rxBufferSize;
+  49              		.loc 1 28 5 is_stmt 1 view .LVU4
+  50              		.loc 1 28 25 is_stmt 0 view .LVU5
+  51 000a 8260     		str	r2, [r0, #8]
+  29:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     if(!_uart->rxBuffer) {
+  52              		.loc 1 29 5 is_stmt 1 view .LVU6
+  53              		.loc 1 29 14 is_stmt 0 view .LVU7
+  54 000c 4368     		ldr	r3, [r0, #4]
+  55              	.LVL1:
+  56              		.loc 1 29 7 view .LVU8
+  57 000e 8BB1     		cbz	r3, .L5
+  58              	.LVL2:
+  59              	.L2:
+  30:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         _uart->rxBuffer = sx_malloc(_rxBufferSize);
+  31:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  32:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     cqueue_init_static(&_uart->rxQueue, _uart->rxBuffer, _rxBufferSize, sizeof(uint8_t));  // len=5
+  60              		.loc 1 32 5 is_stmt 1 view .LVU9
+  61 0010 0123     		movs	r3, #1
+  62 0012 3246     		mov	r2, r6
+  63 0014 6168     		ldr	r1, [r4, #4]
+  64 0016 04F10C00 		add	r0, r4, #12
+  65 001a FFF7FEFF 		bl	cqueue_init_static
+  66              	.LVL3:
+  33:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     _uart->txBufferSize = _txBufferSize;
+  67              		.loc 1 33 5 view .LVU10
+  68              		.loc 1 33 25 is_stmt 0 view .LVU11
+  69 001e A562     		str	r5, [r4, #40]
+  34:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     if(!_uart->txBuffer) {
+  70              		.loc 1 34 5 is_stmt 1 view .LVU12
+  71              		.loc 1 34 14 is_stmt 0 view .LVU13
+  72 0020 636A     		ldr	r3, [r4, #36]
+  73              		.loc 1 34 7 view .LVU14
+  74 0022 63B1     		cbz	r3, .L6
+  75              	.L3:
+  35:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         _uart->txBuffer = sx_malloc(_txBufferSize);
+  36:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  37:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     cqueue_init_static(&_uart->txQueue, _uart->txBuffer, _txBufferSize, sizeof(uint8_t));  // len=5
+  76              		.loc 1 37 5 is_stmt 1 view .LVU15
+  77 0024 0123     		movs	r3, #1
+  78 0026 2A46     		mov	r2, r5
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 3
+
+
+  79 0028 616A     		ldr	r1, [r4, #36]
+  80 002a 04F12C00 		add	r0, r4, #44
+  81 002e FFF7FEFF 		bl	cqueue_init_static
+  82              	.LVL4:
+  38:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #if (SX_USE_OS == 1)
+  39:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     sx_os_mutex_new(&_uart->rxMutex);
+  40:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #endif
+  41:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     // log_debug(TAG, "UART initialized with baudrate: %d, bits: %d, parity: %d, stopbits: %d", _co
+  42:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** }
+  83              		.loc 1 42 1 is_stmt 0 view .LVU16
+  84 0032 70BD     		pop	{r4, r5, r6, pc}
+  85              	.LVL5:
+  86              	.L5:
+  30:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  87              		.loc 1 30 9 is_stmt 1 view .LVU17
+  30:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  88              		.loc 1 30 27 is_stmt 0 view .LVU18
+  89 0034 1046     		mov	r0, r2
+  90              	.LVL6:
+  30:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  91              		.loc 1 30 27 view .LVU19
+  92 0036 FFF7FEFF 		bl	sx_malloc
+  93              	.LVL7:
+  30:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  94              		.loc 1 30 25 discriminator 1 view .LVU20
+  95 003a 6060     		str	r0, [r4, #4]
+  96 003c E8E7     		b	.L2
+  97              	.L6:
+  35:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         _uart->txBuffer = sx_malloc(_txBufferSize);
+  98              		.loc 1 35 9 is_stmt 1 view .LVU21
+  35:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         _uart->txBuffer = sx_malloc(_txBufferSize);
+  99              		.loc 1 35 27 is_stmt 0 view .LVU22
+ 100 003e 2846     		mov	r0, r5
+ 101 0040 FFF7FEFF 		bl	sx_malloc
+ 102              	.LVL8:
+  35:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         _uart->txBuffer = sx_malloc(_txBufferSize);
+ 103              		.loc 1 35 25 discriminator 1 view .LVU23
+ 104 0044 6062     		str	r0, [r4, #36]
+ 105 0046 EDE7     		b	.L3
+ 106              		.cfi_endproc
+ 107              	.LFE300:
+ 109              		.section	.text.sx_uart_write,"ax",%progbits
+ 110              		.align	1
+ 111              		.global	sx_uart_write
+ 112              		.syntax unified
+ 113              		.thumb
+ 114              		.thumb_func
+ 116              	sx_uart_write:
+ 117              	.LVL9:
+ 118              	.LFB301:
+  43:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** void sx_uart_write(sx_uart_t *_uart, const uint8_t *_data, int _len){
+ 119              		.loc 1 43 69 is_stmt 1 view -0
+ 120              		.cfi_startproc
+ 121              		@ args = 0, pretend = 0, frame = 0
+ 122              		@ frame_needed = 0, uses_anonymous_args = 0
+ 123              		.loc 1 43 69 is_stmt 0 view .LVU25
+ 124 0000 08B5     		push	{r3, lr}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 4
+
+
+ 125              	.LCFI1:
+ 126              		.cfi_def_cfa_offset 8
+ 127              		.cfi_offset 3, -8
+ 128              		.cfi_offset 14, -4
+  44:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     // log_debug(TAG, "UART write: %d bytes", _len);
+  45:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7 || SX_PLATFORM == SX_P
+  46:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     HAL_UART_Transmit((UART_HandleTypeDef *)_uart->config->pDriver, (uint8_t *)_data, _len, 1000);
+ 129              		.loc 1 46 5 is_stmt 1 view .LVU26
+ 130              		.loc 1 46 50 is_stmt 0 view .LVU27
+ 131 0002 0068     		ldr	r0, [r0]
+ 132              	.LVL10:
+ 133              		.loc 1 46 5 view .LVU28
+ 134 0004 4FF47A73 		mov	r3, #1000
+ 135 0008 92B2     		uxth	r2, r2
+ 136              	.LVL11:
+ 137              		.loc 1 46 5 view .LVU29
+ 138 000a 0068     		ldr	r0, [r0]
+ 139 000c FFF7FEFF 		bl	HAL_UART_Transmit
+ 140              	.LVL12:
+  47:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** #endif
+  48:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** }
+ 141              		.loc 1 48 1 view .LVU30
+ 142 0010 08BD     		pop	{r3, pc}
+ 143              		.cfi_endproc
+ 144              	.LFE301:
+ 146              		.section	.text.sx_uart_read,"ax",%progbits
+ 147              		.align	1
+ 148              		.global	sx_uart_read
+ 149              		.syntax unified
+ 150              		.thumb
+ 151              		.thumb_func
+ 153              	sx_uart_read:
+ 154              	.LVL13:
+ 155              	.LFB302:
+  49:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** int sx_uart_read(sx_uart_t *_uart, uint8_t *_data, int _len, uint32_t _timeoutMS){
+ 156              		.loc 1 49 82 is_stmt 1 view -0
+ 157              		.cfi_startproc
+ 158              		@ args = 0, pretend = 0, frame = 0
+ 159              		@ frame_needed = 0, uses_anonymous_args = 0
+ 160              		.loc 1 49 82 is_stmt 0 view .LVU32
+ 161 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 162              	.LCFI2:
+ 163              		.cfi_def_cfa_offset 24
+ 164              		.cfi_offset 4, -24
+ 165              		.cfi_offset 5, -20
+ 166              		.cfi_offset 6, -16
+ 167              		.cfi_offset 7, -12
+ 168              		.cfi_offset 8, -8
+ 169              		.cfi_offset 14, -4
+ 170 0004 8046     		mov	r8, r0
+ 171 0006 0F46     		mov	r7, r1
+ 172 0008 1546     		mov	r5, r2
+ 173 000a 1E46     		mov	r6, r3
+  50:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #if (SX_USE_OS == 1)
+  51:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     sx_os_mutex_lock(_uart->rxMutex);
+  52:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #endif
+  53:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     int len = 0;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 5
+
+
+ 174              		.loc 1 53 5 is_stmt 1 view .LVU33
+ 175              	.LVL14:
+  54:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     uint32_t time = 0;
+ 176              		.loc 1 54 5 view .LVU34
+  55:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     while(len < _len && time < _timeoutMS){
+ 177              		.loc 1 55 5 view .LVU35
+  53:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     uint32_t time = 0;
+ 178              		.loc 1 53 9 is_stmt 0 view .LVU36
+ 179 000c 0024     		movs	r4, #0
+ 180              		.loc 1 55 10 view .LVU37
+ 181 000e 00E0     		b	.L10
+ 182              	.LVL15:
+ 183              	.L14:
+  56:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_receive(&_uart->rxQueue, _data + len) == false){
+  57:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****             // sx_delay_ms(1);
+  58:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****             // time += 1;
+  59:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****             break;
+  60:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         }
+  61:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         len++;
+ 184              		.loc 1 61 9 is_stmt 1 view .LVU38
+ 185              		.loc 1 61 12 is_stmt 0 view .LVU39
+ 186 0010 0134     		adds	r4, r4, #1
+ 187              	.LVL16:
+ 188              	.L10:
+  55:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_receive(&_uart->rxQueue, _data + len) == false){
+ 189              		.loc 1 55 22 is_stmt 1 view .LVU40
+ 190 0012 AC42     		cmp	r4, r5
+ 191 0014 07DA     		bge	.L9
+  55:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_receive(&_uart->rxQueue, _data + len) == false){
+ 192              		.loc 1 55 22 is_stmt 0 discriminator 1 view .LVU41
+ 193 0016 36B1     		cbz	r6, .L9
+  56:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_receive(&_uart->rxQueue, _data + len) == false){
+ 194              		.loc 1 56 9 is_stmt 1 view .LVU42
+  56:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_receive(&_uart->rxQueue, _data + len) == false){
+ 195              		.loc 1 56 12 is_stmt 0 view .LVU43
+ 196 0018 3919     		adds	r1, r7, r4
+ 197 001a 08F10C00 		add	r0, r8, #12
+ 198 001e FFF7FEFF 		bl	cqueue_receive
+ 199              	.LVL17:
+  56:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_receive(&_uart->rxQueue, _data + len) == false){
+ 200              		.loc 1 56 11 discriminator 1 view .LVU44
+ 201 0022 0028     		cmp	r0, #0
+ 202 0024 F4D1     		bne	.L14
+ 203              	.L9:
+  62:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  63:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #if (SX_USE_OS == 1)
+  64:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     sx_os_mutex_unlock(_uart->rxMutex);
+  65:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     #endif
+  66:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     return len;
+  67:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** }
+ 204              		.loc 1 67 1 view .LVU45
+ 205 0026 2046     		mov	r0, r4
+ 206 0028 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 207              		.loc 1 67 1 view .LVU46
+ 208              		.cfi_endproc
+ 209              	.LFE302:
+ 211              		.section	.text.sx_uart_available,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 6
+
+
+ 212              		.align	1
+ 213              		.global	sx_uart_available
+ 214              		.syntax unified
+ 215              		.thumb
+ 216              		.thumb_func
+ 218              	sx_uart_available:
+ 219              	.LVL18:
+ 220              	.LFB303:
+  68:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** int sx_uart_available(sx_uart_t *_uart){
+ 221              		.loc 1 68 40 is_stmt 1 view -0
+ 222              		.cfi_startproc
+ 223              		@ args = 0, pretend = 0, frame = 0
+ 224              		@ frame_needed = 0, uses_anonymous_args = 0
+ 225              		@ link register save eliminated.
+  69:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     //log_debug(TAG, "UART available: %d bytes", _uart->rxQueue.count);
+  70:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     return _uart->rxQueue.count;
+ 226              		.loc 1 70 5 view .LVU48
+  71:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** }
+ 227              		.loc 1 71 1 is_stmt 0 view .LVU49
+ 228 0000 006A     		ldr	r0, [r0, #32]
+ 229              	.LVL19:
+ 230              		.loc 1 71 1 view .LVU50
+ 231 0002 7047     		bx	lr
+ 232              		.cfi_endproc
+ 233              	.LFE303:
+ 235              		.section	.text.sx_uart_rx_callback,"ax",%progbits
+ 236              		.align	1
+ 237              		.global	sx_uart_rx_callback
+ 238              		.syntax unified
+ 239              		.thumb
+ 240              		.thumb_func
+ 242              	sx_uart_rx_callback:
+ 243              	.LVL20:
+ 244              	.LFB304:
+  72:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** 
+  73:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** int sx_uart_rx_callback(sx_uart_t *_uart, const uint8_t *_data, int _len){
+ 245              		.loc 1 73 74 is_stmt 1 view -0
+ 246              		.cfi_startproc
+ 247              		@ args = 0, pretend = 0, frame = 0
+ 248              		@ frame_needed = 0, uses_anonymous_args = 0
+ 249              		.loc 1 73 74 is_stmt 0 view .LVU52
+ 250 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 251              	.LCFI3:
+ 252              		.cfi_def_cfa_offset 24
+ 253              		.cfi_offset 3, -24
+ 254              		.cfi_offset 4, -20
+ 255              		.cfi_offset 5, -16
+ 256              		.cfi_offset 6, -12
+ 257              		.cfi_offset 7, -8
+ 258              		.cfi_offset 14, -4
+ 259 0002 0746     		mov	r7, r0
+ 260 0004 0E46     		mov	r6, r1
+ 261 0006 1546     		mov	r5, r2
+  74:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     int len = 0;
+ 262              		.loc 1 74 5 is_stmt 1 view .LVU53
+ 263              	.LVL21:
+  75:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     while(len < _len){
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 7
+
+
+ 264              		.loc 1 75 5 view .LVU54
+  74:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     int len = 0;
+ 265              		.loc 1 74 9 is_stmt 0 view .LVU55
+ 266 0008 0024     		movs	r4, #0
+ 267              		.loc 1 75 10 view .LVU56
+ 268 000a 00E0     		b	.L17
+ 269              	.LVL22:
+ 270              	.L21:
+  76:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_send(&_uart->rxQueue, _data + len) == true){
+  77:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****             len++;
+ 271              		.loc 1 77 13 is_stmt 1 view .LVU57
+ 272              		.loc 1 77 16 is_stmt 0 view .LVU58
+ 273 000c 0134     		adds	r4, r4, #1
+ 274              	.LVL23:
+ 275              	.L17:
+  75:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     while(len < _len){
+ 276              		.loc 1 75 15 is_stmt 1 view .LVU59
+ 277 000e AC42     		cmp	r4, r5
+ 278 0010 06DA     		bge	.L16
+  76:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_send(&_uart->rxQueue, _data + len) == true){
+ 279              		.loc 1 76 9 view .LVU60
+  76:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_send(&_uart->rxQueue, _data + len) == true){
+ 280              		.loc 1 76 12 is_stmt 0 view .LVU61
+ 281 0012 3119     		adds	r1, r6, r4
+ 282 0014 07F10C00 		add	r0, r7, #12
+ 283 0018 FFF7FEFF 		bl	cqueue_send
+ 284              	.LVL24:
+  76:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         if(cqueue_send(&_uart->rxQueue, _data + len) == true){
+ 285              		.loc 1 76 11 discriminator 1 view .LVU62
+ 286 001c 0028     		cmp	r0, #0
+ 287 001e F5D1     		bne	.L21
+ 288              	.L16:
+  78:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         } else {
+  79:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****             break;
+  80:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****         }
+  81:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     }
+  82:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     return len;
+  83:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** }
+ 289              		.loc 1 83 1 view .LVU63
+ 290 0020 2046     		mov	r0, r4
+ 291 0022 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 292              		.loc 1 83 1 view .LVU64
+ 293              		.cfi_endproc
+ 294              	.LFE304:
+ 296              		.section	.text.sx_uart_tx_callback,"ax",%progbits
+ 297              		.align	1
+ 298              		.global	sx_uart_tx_callback
+ 299              		.syntax unified
+ 300              		.thumb
+ 301              		.thumb_func
+ 303              	sx_uart_tx_callback:
+ 304              	.LVL25:
+ 305              	.LFB305:
+  84:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** int sx_uart_tx_callback(sx_uart_t *_uart){
+ 306              		.loc 1 84 42 is_stmt 1 view -0
+ 307              		.cfi_startproc
+ 308              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 8
+
+
+ 309              		@ frame_needed = 0, uses_anonymous_args = 0
+ 310              		@ link register save eliminated.
+  85:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     return 0;
+ 311              		.loc 1 85 5 view .LVU66
+  86:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** }
+ 312              		.loc 1 86 1 is_stmt 0 view .LVU67
+ 313 0000 0020     		movs	r0, #0
+ 314              	.LVL26:
+ 315              		.loc 1 86 1 view .LVU68
+ 316 0002 7047     		bx	lr
+ 317              		.cfi_endproc
+ 318              	.LFE305:
+ 320              		.section	.text.sx_uart_flush,"ax",%progbits
+ 321              		.align	1
+ 322              		.global	sx_uart_flush
+ 323              		.syntax unified
+ 324              		.thumb
+ 325              		.thumb_func
+ 327              	sx_uart_flush:
+ 328              	.LVL27:
+ 329              	.LFB306:
+  87:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** 
+  88:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** int sx_uart_flush(sx_uart_t *_uart)
+  89:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** {
+ 330              		.loc 1 89 1 is_stmt 1 view -0
+ 331              		.cfi_startproc
+ 332              		@ args = 0, pretend = 0, frame = 0
+ 333              		@ frame_needed = 0, uses_anonymous_args = 0
+ 334              		.loc 1 89 1 is_stmt 0 view .LVU70
+ 335 0000 08B5     		push	{r3, lr}
+ 336              	.LCFI4:
+ 337              		.cfi_def_cfa_offset 8
+ 338              		.cfi_offset 3, -8
+ 339              		.cfi_offset 14, -4
+  90:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     cqueue_init_static(&_uart->rxQueue, _uart->rxBuffer, _uart->rxBufferSize, sizeof(uint8_t)); 
+ 340              		.loc 1 90 5 is_stmt 1 view .LVU71
+ 341 0002 0123     		movs	r3, #1
+ 342 0004 8268     		ldr	r2, [r0, #8]
+ 343 0006 4168     		ldr	r1, [r0, #4]
+ 344 0008 0C30     		adds	r0, r0, #12
+ 345              	.LVL28:
+ 346              		.loc 1 90 5 is_stmt 0 view .LVU72
+ 347 000a FFF7FEFF 		bl	cqueue_init_static
+ 348              	.LVL29:
+  91:SynaptiX_FDK/components/peripherals/uart/sx_uart.c ****     return 0;
+ 349              		.loc 1 91 5 is_stmt 1 view .LVU73
+  92:SynaptiX_FDK/components/peripherals/uart/sx_uart.c **** }
+ 350              		.loc 1 92 1 is_stmt 0 view .LVU74
+ 351 000e 0020     		movs	r0, #0
+ 352 0010 08BD     		pop	{r3, pc}
+ 353              		.cfi_endproc
+ 354              	.LFE306:
+ 356              		.text
+ 357              	.Letext0:
+ 358              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 359              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 360              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 9
+
+
+ 361              		.file 5 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 362              		.file 6 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
+ 363              		.file 7 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 364              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 365              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma.h"
+ 366              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma_ex.h"
+ 367              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 368              		.file 12 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_uart.h"
+ 369              		.file 13 "SynaptiX_FDK/utils/mem/sx_mem.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s 			page 10
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_uart.c
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:22     .text.sx_uart_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:28     .text.sx_uart_init:00000000 sx_uart_init
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:110    .text.sx_uart_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:116    .text.sx_uart_write:00000000 sx_uart_write
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:147    .text.sx_uart_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:153    .text.sx_uart_read:00000000 sx_uart_read
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:212    .text.sx_uart_available:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:218    .text.sx_uart_available:00000000 sx_uart_available
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:236    .text.sx_uart_rx_callback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:242    .text.sx_uart_rx_callback:00000000 sx_uart_rx_callback
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:297    .text.sx_uart_tx_callback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:303    .text.sx_uart_tx_callback:00000000 sx_uart_tx_callback
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:321    .text.sx_uart_flush:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cclPOrh3.s:327    .text.sx_uart_flush:00000000 sx_uart_flush
+
+UNDEFINED SYMBOLS
+cqueue_init_static
+sx_malloc
+HAL_UART_Transmit
+cqueue_receive
+cqueue_send

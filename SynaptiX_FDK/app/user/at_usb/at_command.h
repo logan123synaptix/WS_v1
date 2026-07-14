@@ -9,6 +9,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "string.h"
 
 #define AT_RX_BUFFER_SIZE 256
 

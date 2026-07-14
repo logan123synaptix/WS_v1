@@ -1,0 +1,2483 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_board.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/board/sx_board.c"
+  21              		.section	.text.log_print,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	log_print:
+  28              	.LVL0:
+  29              	.LFB441:
+   1:SynaptiX_FDK/board/sx_board.c **** #include "sx_board.h"
+   2:SynaptiX_FDK/board/sx_board.c **** #include "stm32h5xx_hal.h"
+   3:SynaptiX_FDK/board/sx_board.c **** #include "tusb.h"
+   4:SynaptiX_FDK/board/sx_board.c **** #include "usb.h"
+   5:SynaptiX_FDK/board/sx_board.c **** #include "sx_user_cdc.h"
+   6:SynaptiX_FDK/board/sx_board.c **** #include "sx_user_msc.h"
+   7:SynaptiX_FDK/board/sx_board.c **** #include "logger.h"
+   8:SynaptiX_FDK/board/sx_board.c **** #include "sx_delay.h"
+   9:SynaptiX_FDK/board/sx_board.c **** #include "sx_gpio.h"
+  10:SynaptiX_FDK/board/sx_board.c **** #include "app.h"
+  11:SynaptiX_FDK/board/sx_board.c **** #include "sx_sleep.h"
+  12:SynaptiX_FDK/board/sx_board.c **** 
+  13:SynaptiX_FDK/board/sx_board.c **** static const char *TAG = "BOARD";
+  14:SynaptiX_FDK/board/sx_board.c **** 
+  15:SynaptiX_FDK/board/sx_board.c **** Board_t board;
+  16:SynaptiX_FDK/board/sx_board.c **** 
+  17:SynaptiX_FDK/board/sx_board.c **** 
+  18:SynaptiX_FDK/board/sx_board.c **** static UART_HandleTypeDef *hal_uart[6] = {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6}; //
+  19:SynaptiX_FDK/board/sx_board.c **** static sx_uart_t *bsp_uart[6];
+  20:SynaptiX_FDK/board/sx_board.c **** static uint8_t uart_rx_char[6];
+  21:SynaptiX_FDK/board/sx_board.c **** 
+  22:SynaptiX_FDK/board/sx_board.c **** static void set_enter_sleep_mode(void);
+  23:SynaptiX_FDK/board/sx_board.c **** static void set_enter_full_mode(void);
+  24:SynaptiX_FDK/board/sx_board.c **** 
+  25:SynaptiX_FDK/board/sx_board.c **** void dcd_fs_msp_init(uint8_t rhport)
+  26:SynaptiX_FDK/board/sx_board.c **** {
+  27:SynaptiX_FDK/board/sx_board.c ****     (void)rhport;
+  28:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "dcd_fs_msp_init called");
+  29:SynaptiX_FDK/board/sx_board.c ****     hpcd_USB_DRD_FS.Instance = USB_DRD_FS;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 2
+
+
+  30:SynaptiX_FDK/board/sx_board.c ****     HAL_PCD_MspInit(&hpcd_USB_DRD_FS);
+  31:SynaptiX_FDK/board/sx_board.c ****     HAL_Delay(100);
+  32:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "MSP init done!");
+  33:SynaptiX_FDK/board/sx_board.c **** }
+  34:SynaptiX_FDK/board/sx_board.c **** 
+  35:SynaptiX_FDK/board/sx_board.c **** void USB_DRD_FS_IRQHandler(void)
+  36:SynaptiX_FDK/board/sx_board.c **** {
+  37:SynaptiX_FDK/board/sx_board.c ****     tud_int_handler(0);
+  38:SynaptiX_FDK/board/sx_board.c **** }
+  39:SynaptiX_FDK/board/sx_board.c **** 
+  40:SynaptiX_FDK/board/sx_board.c **** /* ------------------------------------------------------------------ */
+  41:SynaptiX_FDK/board/sx_board.c **** /*  GPIO Define                                                       */
+  42:SynaptiX_FDK/board/sx_board.c **** /* ------------------------------------------------------------------ */
+  43:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_lte_pwrkey_pin = {.pin = LTE_PWRKEY_Pin, .port = LTE_PWRKEY_Port};
+  44:SynaptiX_FDK/board/sx_board.c **** /* LTE_RESET_Pin (GPIOD PIN_11) — per schematic, drives Q2's base through
+  45:SynaptiX_FDK/board/sx_board.c ****  * R17 (open-collector style switch to GND on the module's own RESET pin).
+  46:SynaptiX_FDK/board/sx_board.c ****  * MCU HIGH -> Q2 on -> module's RESET pin pulled low (native active-low
+  47:SynaptiX_FDK/board/sx_board.c ****  * reset). MCU LOW (default/idle, R19 pulls Q2's base down, CubeMX also
+  48:SynaptiX_FDK/board/sx_board.c ****  * inits this pin LOW at boot) -> Q2 off -> module's RESET pin floats high
+  49:SynaptiX_FDK/board/sx_board.c ****  * via its internal VBAT pull-up -> normal operation. Used only by
+  50:SynaptiX_FDK/board/sx_board.c ****  * a7677s_hard_reset() (modem_ops_t.hard_reset) as a last-resort escalation
+  51:SynaptiX_FDK/board/sx_board.c ****  * when the normal PWRKEY power_off_start()/power_on_start() cycle has
+  52:SynaptiX_FDK/board/sx_board.c ****  * itself failed to recover the modem, or it has stopped responding to AT
+  53:SynaptiX_FDK/board/sx_board.c ****  * entirely — not a routine recovery path. See a7677s_t.resetPin's
+  54:SynaptiX_FDK/board/sx_board.c ****  * doc-comment in a7677s.h for the full timing/state-machine details. */
+  55:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_lte_reset_pin = {.pin = LTE_RESET_Pin, .port = LTE_RESET_Port};
+  56:SynaptiX_FDK/board/sx_board.c **** 
+  57:SynaptiX_FDK/board/sx_board.c **** /* No VBAT-cutoff transistor on this board revision for the modem — see
+  58:SynaptiX_FDK/board/sx_board.c ****  * a7677s_t.hasPowerPin (set to 0 below). A future board revision may add
+  59:SynaptiX_FDK/board/sx_board.c ****  * one back, hence the field stays in modem_t/a7677s_t rather than being
+  60:SynaptiX_FDK/board/sx_board.c ****  * removed outright (see modem.h's own comment on hasPowerPin/powerPin). */
+  61:SynaptiX_FDK/board/sx_board.c **** 
+  62:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_gps_cpw_pin = {.pin = GPS_CPW_Pin, .port = GPS_CPW_Port};
+  63:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_gps_rst_pin = {.pin = GPS_RST_Pin, .port = GPS_RST_Port};
+  64:SynaptiX_FDK/board/sx_board.c **** /* GPS_PPS_Pin is wired but not used by this firmware yet (no 1PPS capture
+  65:SynaptiX_FDK/board/sx_board.c ****  * configured) — no sx_gpio_pin_t declared for it, nothing to pass around
+  66:SynaptiX_FDK/board/sx_board.c ****  * until that feature is implemented. */
+  67:SynaptiX_FDK/board/sx_board.c **** 
+  68:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_spi_cs_pin = {.pin = SPI_CS_Pin, .port = SPI_CS_Port};
+  69:SynaptiX_FDK/board/sx_board.c **** 
+  70:SynaptiX_FDK/board/sx_board.c **** /* RTC and IMU share the same physical reset line (I2C1_RESET_Pin) per the
+  71:SynaptiX_FDK/board/sx_board.c ****  * schematic — one wire, not two independent pins. RTC does not use it at
+  72:SynaptiX_FDK/board/sx_board.c ****  * all (rx8130ce_init() resets itself via an I2C register sequence per the
+  73:SynaptiX_FDK/board/sx_board.c ****  * datasheet, see sx_ex_rtc.c's _software_reset()); only IMU takes this GPIO
+  74:SynaptiX_FDK/board/sx_board.c ****  * as its reset_gpio. Kept as a single sx_gpio_t rather than one per
+  75:SynaptiX_FDK/board/sx_board.c ****  * consumer, since writing it from two independent handles for what is one
+  76:SynaptiX_FDK/board/sx_board.c ****  * physical wire invites the two drivers stepping on each other. */
+  77:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_t     s_i2c1_reset;
+  78:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_i2c1_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RESET_Port};
+  79:SynaptiX_FDK/board/sx_board.c **** 
+  80:SynaptiX_FDK/board/sx_board.c **** /* RS485_RDE_Pin is wired (see sx_board.h) but not yet driven by any init
+  81:SynaptiX_FDK/board/sx_board.c ****  * call in this file — left undeclared here rather than adding an unused
+  82:SynaptiX_FDK/board/sx_board.c ****  * sx_gpio_t/sx_gpio_pin_t pair for a pin nothing reads or writes yet. */
+  83:SynaptiX_FDK/board/sx_board.c **** 
+  84:SynaptiX_FDK/board/sx_board.c **** /* SPS30 power enable — see EN_PW_DUST_Pin's doc-comment in sx_board.h for
+  85:SynaptiX_FDK/board/sx_board.c ****  * the full opto/MOSFET chain and active-HIGH polarity. Defaults LOW at
+  86:SynaptiX_FDK/board/sx_board.c ****  * boot (CubeMX's MX_GPIO_Init resets it low before this file ever runs),
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 3
+
+
+  87:SynaptiX_FDK/board/sx_board.c ****  * so SPS30 stays unpowered until something explicitly drives it HIGH —
+  88:SynaptiX_FDK/board/sx_board.c ****  * that on/off sequencing belongs to the SPS30 business-logic layer
+  89:SynaptiX_FDK/board/sx_board.c ****  * (not yet written), not to board bring-up, so it is only declared here. */
+  90:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_t     s_en_pw_dust;
+  91:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_en_pw_dust_pin = {.pin = EN_PW_DUST_Pin, .port = EN_PW_DUST_Port};
+  92:SynaptiX_FDK/board/sx_board.c **** 
+  93:SynaptiX_FDK/board/sx_board.c **** /* ZE12A mux select lines (TMUX4052 A0/A1) — see gas_sensor_init() in
+  94:SynaptiX_FDK/board/sx_board.c ****  * ze12a.c, which owns and drives these once initialized below. */
+  95:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_uart5_s0_pin = {.pin = UART5_S0_Pin, .port = UART5_S0_Port};
+  96:SynaptiX_FDK/board/sx_board.c **** static sx_gpio_pin_t s_uart5_s1_pin = {.pin = UART5_S1_Pin, .port = UART5_S1_Port};
+  97:SynaptiX_FDK/board/sx_board.c **** 
+  98:SynaptiX_FDK/board/sx_board.c **** static void spi_storage_init(void){
+  99:SynaptiX_FDK/board/sx_board.c ****     board.storage_cfg.cs_pin = s_spi_cs_pin;
+ 100:SynaptiX_FDK/board/sx_board.c ****     board.storage_cfg.hspi = &hspi1;
+ 101:SynaptiX_FDK/board/sx_board.c **** 
+ 102:SynaptiX_FDK/board/sx_board.c ****     sx_storage_init(&board.storage_cfg);
+ 103:SynaptiX_FDK/board/sx_board.c **** }
+ 104:SynaptiX_FDK/board/sx_board.c **** 
+ 105:SynaptiX_FDK/board/sx_board.c **** // USART define
+ 106:SynaptiX_FDK/board/sx_board.c **** 
+ 107:SynaptiX_FDK/board/sx_board.c **** /* ------------------------------------------------------------------ */
+ 108:SynaptiX_FDK/board/sx_board.c **** /*  Board                                                               */
+ 109:SynaptiX_FDK/board/sx_board.c **** /* ------------------------------------------------------------------ */
+ 110:SynaptiX_FDK/board/sx_board.c **** 
+ 111:SynaptiX_FDK/board/sx_board.c **** static void log_print(const char *str)
+ 112:SynaptiX_FDK/board/sx_board.c **** {
+  30              		.loc 1 112 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		.loc 1 112 1 is_stmt 0 view .LVU1
+  35 0000 10B5     		push	{r4, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 4, -8
+  39              		.cfi_offset 14, -4
+  40 0002 0446     		mov	r4, r0
+ 113:SynaptiX_FDK/board/sx_board.c ****     sx_uart_write(&board.log_uart, (const uint8_t *)str, strlen(str));
+  41              		.loc 1 113 5 is_stmt 1 view .LVU2
+  42              		.loc 1 113 58 is_stmt 0 view .LVU3
+  43 0004 FFF7FEFF 		bl	strlen
+  44              	.LVL1:
+  45              		.loc 1 113 58 view .LVU4
+  46 0008 0246     		mov	r2, r0
+  47              		.loc 1 113 5 discriminator 1 view .LVU5
+  48 000a 2146     		mov	r1, r4
+  49 000c 0148     		ldr	r0, .L3
+  50 000e FFF7FEFF 		bl	sx_uart_write
+  51              	.LVL2:
+ 114:SynaptiX_FDK/board/sx_board.c **** }
+  52              		.loc 1 114 1 view .LVU6
+  53 0012 10BD     		pop	{r4, pc}
+  54              	.LVL3:
+  55              	.L4:
+  56              		.loc 1 114 1 view .LVU7
+  57              		.align	2
+  58              	.L3:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 4
+
+
+  59 0014 8CDD0000 		.word	board+56716
+  60              		.cfi_endproc
+  61              	.LFE441:
+  63              		.section	.text.spi_storage_init,"ax",%progbits
+  64              		.align	1
+  65              		.syntax unified
+  66              		.thumb
+  67              		.thumb_func
+  69              	spi_storage_init:
+  70              	.LFB440:
+  98:SynaptiX_FDK/board/sx_board.c ****     board.storage_cfg.cs_pin = s_spi_cs_pin;
+  71              		.loc 1 98 35 is_stmt 1 view -0
+  72              		.cfi_startproc
+  73              		@ args = 0, pretend = 0, frame = 0
+  74              		@ frame_needed = 0, uses_anonymous_args = 0
+  75 0000 08B5     		push	{r3, lr}
+  76              	.LCFI1:
+  77              		.cfi_def_cfa_offset 8
+  78              		.cfi_offset 3, -8
+  79              		.cfi_offset 14, -4
+  99:SynaptiX_FDK/board/sx_board.c ****     board.storage_cfg.hspi = &hspi1;
+  80              		.loc 1 99 5 view .LVU9
+  99:SynaptiX_FDK/board/sx_board.c ****     board.storage_cfg.hspi = &hspi1;
+  81              		.loc 1 99 30 is_stmt 0 view .LVU10
+  82 0002 074B     		ldr	r3, .L7
+  83 0004 0749     		ldr	r1, .L7+4
+  84 0006 03F63C62 		addw	r2, r3, #3644
+  85 000a 03C9     		ldm	r1, {r0, r1}
+  86 000c 82E80300 		stm	r2, {r0, r1}
+ 100:SynaptiX_FDK/board/sx_board.c **** 
+  87              		.loc 1 100 5 is_stmt 1 view .LVU11
+ 100:SynaptiX_FDK/board/sx_board.c **** 
+  88              		.loc 1 100 28 is_stmt 0 view .LVU12
+  89 0010 054A     		ldr	r2, .L7+8
+  90 0012 C3F8202E 		str	r2, [r3, #3616]
+ 102:SynaptiX_FDK/board/sx_board.c **** }
+  91              		.loc 1 102 5 is_stmt 1 view .LVU13
+  92 0016 03F56260 		add	r0, r3, #3616
+  93 001a FFF7FEFF 		bl	sx_storage_init
+  94              	.LVL4:
+ 103:SynaptiX_FDK/board/sx_board.c **** 
+  95              		.loc 1 103 1 is_stmt 0 view .LVU14
+  96 001e 08BD     		pop	{r3, pc}
+  97              	.L8:
+  98              		.align	2
+  99              	.L7:
+ 100 0020 00D00000 		.word	board+53248
+ 101 0024 00000000 		.word	s_spi_cs_pin
+ 102 0028 00000000 		.word	hspi1
+ 103              		.cfi_endproc
+ 104              	.LFE440:
+ 106              		.section	.text.sx_gps_uart_abort,"ax",%progbits
+ 107              		.align	1
+ 108              		.syntax unified
+ 109              		.thumb
+ 110              		.thumb_func
+ 112              	sx_gps_uart_abort:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 5
+
+
+ 113              	.LFB444:
+ 115:SynaptiX_FDK/board/sx_board.c **** 
+ 116:SynaptiX_FDK/board/sx_board.c **** void sx_board_init(void)
+ 117:SynaptiX_FDK/board/sx_board.c **** {
+ 118:SynaptiX_FDK/board/sx_board.c ****     // Initialize Logger
+ 119:SynaptiX_FDK/board/sx_board.c ****     static sx_uart_config_t uart_config[6];
+ 120:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].pDriver = hal_uart[UART_LOG];
+ 121:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].baudrate = 115200;
+ 122:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].bits = 8;
+ 123:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].parity = 0;
+ 124:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].stopbits = 1;
+ 125:SynaptiX_FDK/board/sx_board.c **** 
+ 126:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_LOG] = &board.log_uart;
+ 127:SynaptiX_FDK/board/sx_board.c **** 
+ 128:SynaptiX_FDK/board/sx_board.c ****     sx_uart_init(&board.log_uart, &uart_config[UART_LOG], 512, 512);
+ 129:SynaptiX_FDK/board/sx_board.c ****     logger_init(LOGGER_INFO, log_print);
+ 130:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "Board init start");
+ 131:SynaptiX_FDK/board/sx_board.c ****     
+ 132:SynaptiX_FDK/board/sx_board.c ****     /*  USB  */ 
+ 133:SynaptiX_FDK/board/sx_board.c ****     #if BOARD_USE_MSC
+ 134:SynaptiX_FDK/board/sx_board.c ****     sx_user_msc_init();
+ 135:SynaptiX_FDK/board/sx_board.c ****     sx_user_msc_create_disk(USER_DISK_LABEL_CREATE);
+ 136:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "MSC disk created");
+ 137:SynaptiX_FDK/board/sx_board.c ****     #endif
+ 138:SynaptiX_FDK/board/sx_board.c ****     board.usb_cfg.rx_buf_size = 256;
+ 139:SynaptiX_FDK/board/sx_board.c ****     board.usb_cfg.tx_buf_size = 256;
+ 140:SynaptiX_FDK/board/sx_board.c ****     dcd_fs_msp_init(0);
+ 141:SynaptiX_FDK/board/sx_board.c ****     sx_usb_tiny_init(&board.usb, &board.usb_cfg);
+ 142:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "USB init done");
+ 143:SynaptiX_FDK/board/sx_board.c **** 
+ 144:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].pDriver = hal_uart[UART_LTE];
+ 145:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].baudrate = 115200;
+ 146:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].bits = 8;
+ 147:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].parity = 0;
+ 148:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].stopbits = 1;
+ 149:SynaptiX_FDK/board/sx_board.c **** 
+ 150:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].pDriver = hal_uart[UART_GPS];
+ 151:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].baudrate = 9600;
+ 152:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].bits = 8;
+ 153:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].parity = 0;
+ 154:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].stopbits = 1;
+ 155:SynaptiX_FDK/board/sx_board.c **** 
+ 156:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].pDriver = hal_uart[UART_RS485];
+ 157:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].baudrate = 115200;
+ 158:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].bits = 8;
+ 159:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].parity = 0;
+ 160:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].stopbits = 1;
+ 161:SynaptiX_FDK/board/sx_board.c **** 
+ 162:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].pDriver = hal_uart[UART_DUST];
+ 163:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].baudrate = 115200;
+ 164:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].bits = 8;
+ 165:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].parity = 0;
+ 166:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].stopbits = 1;
+ 167:SynaptiX_FDK/board/sx_board.c **** 
+ 168:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].pDriver = hal_uart[UART_EXTEND];
+ 169:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].baudrate = 9600;
+ 170:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].bits = 8;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 6
+
+
+ 171:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].parity = 0;
+ 172:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].stopbits = 1;
+ 173:SynaptiX_FDK/board/sx_board.c **** 
+ 174:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].pDriver = hal_uart[UART_LOG];
+ 175:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].baudrate = 115200;
+ 176:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].bits = 8;
+ 177:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].parity = 0;
+ 178:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].stopbits = 1;
+ 179:SynaptiX_FDK/board/sx_board.c **** 
+ 180:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_LTE] = &board.a7677s.base.uart;
+ 181:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_GPS] = &board.gps.comm;
+ 182:SynaptiX_FDK/board/sx_board.c **** 
+ 183:SynaptiX_FDK/board/sx_board.c ****     // I2C
+ 184:SynaptiX_FDK/board/sx_board.c ****     sx_i2c_init(&board.i2c1, &sx_i2c_ops, &hi2c1);
+ 185:SynaptiX_FDK/board/sx_board.c **** 
+ 186:SynaptiX_FDK/board/sx_board.c ****     /* Shared I2C1 reset line — see s_i2c1_reset's own comment above. Only
+ 187:SynaptiX_FDK/board/sx_board.c ****      * initialized once here; RTC does not take it (self-resets via I2C),
+ 188:SynaptiX_FDK/board/sx_board.c ****      * only IMU below does. */
+ 189:SynaptiX_FDK/board/sx_board.c ****     sx_gpio_init(&s_i2c1_reset, &sx_gpio_ops, &s_i2c1_reset_pin);
+ 190:SynaptiX_FDK/board/sx_board.c **** 
+ 191:SynaptiX_FDK/board/sx_board.c ****     // RTC — no power-cutoff GPIO on this board (VIO/VDD/VBAT wired
+ 192:SynaptiX_FDK/board/sx_board.c ****     // directly to 3.3V), see sx_ex_rtc.c/.h.
+ 193:SynaptiX_FDK/board/sx_board.c ****     rx8130ce_init(&board.rtc, &board.i2c1);
+ 194:SynaptiX_FDK/board/sx_board.c ****     // IMU reset uses the shared s_i2c1_reset initialized above.
+ 195:SynaptiX_FDK/board/sx_board.c **** 
+ 196:SynaptiX_FDK/board/sx_board.c ****     // Initialize LTE (A7677S)
+ 197:SynaptiX_FDK/board/sx_board.c ****     a7677s_init(&board.a7677s);
+ 198:SynaptiX_FDK/board/sx_board.c ****     board.a7677s.base.hasPowerPin = 0;   /* no VBAT-cutoff transistor on this board */
+ 199:SynaptiX_FDK/board/sx_board.c ****     sx_gpio_init(&board.a7677s.base.pwrPin, &sx_gpio_ops, &s_lte_pwrkey_pin);
+ 200:SynaptiX_FDK/board/sx_board.c ****     sx_gpio_init(&board.a7677s.resetPin, &sx_gpio_ops, &s_lte_reset_pin);
+ 201:SynaptiX_FDK/board/sx_board.c ****     a7677s_set_full_apn(&board.a7677s, APN, USERNAME_APN, PASSWORD_APN);
+ 202:SynaptiX_FDK/board/sx_board.c ****     sx_uart_init(&board.a7677s.base.uart, &uart_config[UART_LTE], 512, 512);
+ 203:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 204:SynaptiX_FDK/board/sx_board.c **** 
+ 205:SynaptiX_FDK/board/sx_board.c ****     board.modem.ops = &a7677s_ops;
+ 206:SynaptiX_FDK/board/sx_board.c ****     board.modem.ctx = &board.a7677s;
+ 207:SynaptiX_FDK/board/sx_board.c **** 
+ 208:SynaptiX_FDK/board/sx_board.c ****     /* Only kick off power-on here — power_on_start() is asynchronous
+ 209:SynaptiX_FDK/board/sx_board.c ****      * (advances through a7677s_power_state_t over several poll() ticks).
+ 210:SynaptiX_FDK/board/sx_board.c ****      * start() is NOT called here: it would be rejected immediately since
+ 211:SynaptiX_FDK/board/sx_board.c ****      * power_state isn't READY yet. The app layer (sx_user_mqtt.c's
+ 212:SynaptiX_FDK/board/sx_board.c ****      * _common_init()) is what actually calls start(), via
+ 213:SynaptiX_FDK/board/sx_board.c ****      * set_on_ready()'s callback firing once the modem is truly ready — see
+ 214:SynaptiX_FDK/board/sx_board.c ****      * modem_ops.h. This keeps board init limited to bringing up hardware,
+ 215:SynaptiX_FDK/board/sx_board.c ****      * not driving application-level sequencing. */
+ 216:SynaptiX_FDK/board/sx_board.c ****     board.modem.ops->power_on_start(board.modem.ctx);
+ 217:SynaptiX_FDK/board/sx_board.c **** 
+ 218:SynaptiX_FDK/board/sx_board.c ****     // Initialize GPS
+ 219:SynaptiX_FDK/board/sx_board.c ****     gps_init(&board.gps, &uart_config[UART_GPS], &sx_gpio_ops, &s_gps_cpw_pin, &s_gps_rst_pin);
+ 220:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ 221:SynaptiX_FDK/board/sx_board.c **** 
+ 222:SynaptiX_FDK/board/sx_board.c ****     spi_storage_init();
+ 223:SynaptiX_FDK/board/sx_board.c ****     bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_i2c1_reset);
+ 224:SynaptiX_FDK/board/sx_board.c **** 
+ 225:SynaptiX_FDK/board/sx_board.c ****     // SPS30 power-enable GPIO — left LOW/unpowered here; the SPS30
+ 226:SynaptiX_FDK/board/sx_board.c ****     // business-logic layer (not yet written) is responsible for driving
+ 227:SynaptiX_FDK/board/sx_board.c ****     // it HIGH before talking to the sensor and LOW when done.
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 7
+
+
+ 228:SynaptiX_FDK/board/sx_board.c ****     sx_gpio_init(&s_en_pw_dust, &sx_gpio_ops, &s_en_pw_dust_pin);
+ 229:SynaptiX_FDK/board/sx_board.c **** 
+ 230:SynaptiX_FDK/board/sx_board.c ****     // SPS30 (UART_DUST) — sensirion_uart_hal_init() stores this sx_uart_t*
+ 231:SynaptiX_FDK/board/sx_board.c ****     // as the port every sensirion_uart_hal_tx/rx() call uses; nothing else
+ 232:SynaptiX_FDK/board/sx_board.c ****     // here needs a bsp_uart[] entry since SPS30 talks through the
+ 233:SynaptiX_FDK/board/sx_board.c ****     // Sensirion HAL layer, not sx_uart_t directly.
+ 234:SynaptiX_FDK/board/sx_board.c ****     sx_uart_init(&board.sps30_uart, &uart_config[UART_DUST], 512, 512);
+ 235:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_DUST] = &board.sps30_uart;
+ 236:SynaptiX_FDK/board/sx_board.c ****     sensirion_uart_hal_init(&board.sps30_uart);
+ 237:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+ 238:SynaptiX_FDK/board/sx_board.c **** 
+ 239:SynaptiX_FDK/board/sx_board.c ****     // SHT3x — shares I2C1 with the RTC/IMU, no separate UART or GPIO.
+ 240:SynaptiX_FDK/board/sx_board.c ****     sht3x_init(&board.sht3x, &board.i2c1);
+ 241:SynaptiX_FDK/board/sx_board.c **** 
+ 242:SynaptiX_FDK/board/sx_board.c ****     // ADS1115 - share I2C1 with the RTC/IMU/SHT3X
+ 243:SynaptiX_FDK/board/sx_board.c ****     ADS1115_Init(&board.ads1115, &board.i2c1, ADS1115_DATA_RATE_250, ADS1115_PGA_TWO);
+ 244:SynaptiX_FDK/board/sx_board.c **** 
+ 245:SynaptiX_FDK/board/sx_board.c ****     // ZE12A (UART_EXTEND) — gas_sensor_init() owns its UART instance and
+ 246:SynaptiX_FDK/board/sx_board.c ****     // both mux-select GPIOs internally (see ze12a.c). bsp_uart[UART_EXTEND]
+ 247:SynaptiX_FDK/board/sx_board.c ****     // is fetched via gas_sensor_get_uart() (valid only after init, which
+ 248:SynaptiX_FDK/board/sx_board.c ****     // just ran above) so HAL_UART_RxCpltCallback() below can route
+ 249:SynaptiX_FDK/board/sx_board.c ****     // received bytes into it the same way it does for LTE/GPS/LOG/DUST.
+ 250:SynaptiX_FDK/board/sx_board.c ****     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
+ 251:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
+ 252:SynaptiX_FDK/board/sx_board.c **** 
+ 253:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+ 254:SynaptiX_FDK/board/sx_board.c **** }
+ 255:SynaptiX_FDK/board/sx_board.c **** 
+ 256:SynaptiX_FDK/board/sx_board.c **** static void sx_lte_uart_abort(void) {
+ 257:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Abort(hal_uart[UART_LTE]);
+ 258:SynaptiX_FDK/board/sx_board.c **** }
+ 259:SynaptiX_FDK/board/sx_board.c **** 
+ 260:SynaptiX_FDK/board/sx_board.c **** static void sx_gps_uart_abort(){
+ 114              		.loc 1 260 32 is_stmt 1 view -0
+ 115              		.cfi_startproc
+ 116              		@ args = 0, pretend = 0, frame = 0
+ 117              		@ frame_needed = 0, uses_anonymous_args = 0
+ 118 0000 08B5     		push	{r3, lr}
+ 119              	.LCFI2:
+ 120              		.cfi_def_cfa_offset 8
+ 121              		.cfi_offset 3, -8
+ 122              		.cfi_offset 14, -4
+ 261:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Abort(hal_uart[UART_GPS]);
+ 123              		.loc 1 261 5 view .LVU16
+ 124 0002 0248     		ldr	r0, .L11
+ 125 0004 FFF7FEFF 		bl	HAL_UART_Abort
+ 126              	.LVL5:
+ 262:SynaptiX_FDK/board/sx_board.c **** }
+ 127              		.loc 1 262 1 is_stmt 0 view .LVU17
+ 128 0008 08BD     		pop	{r3, pc}
+ 129              	.L12:
+ 130 000a 00BF     		.align	2
+ 131              	.L11:
+ 132 000c 00000000 		.word	huart2
+ 133              		.cfi_endproc
+ 134              	.LFE444:
+ 136              		.section	.text.sx_lte_uart_abort,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 8
+
+
+ 137              		.align	1
+ 138              		.syntax unified
+ 139              		.thumb
+ 140              		.thumb_func
+ 142              	sx_lte_uart_abort:
+ 143              	.LFB443:
+ 256:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Abort(hal_uart[UART_LTE]);
+ 144              		.loc 1 256 37 is_stmt 1 view -0
+ 145              		.cfi_startproc
+ 146              		@ args = 0, pretend = 0, frame = 0
+ 147              		@ frame_needed = 0, uses_anonymous_args = 0
+ 148 0000 08B5     		push	{r3, lr}
+ 149              	.LCFI3:
+ 150              		.cfi_def_cfa_offset 8
+ 151              		.cfi_offset 3, -8
+ 152              		.cfi_offset 14, -4
+ 257:SynaptiX_FDK/board/sx_board.c **** }
+ 153              		.loc 1 257 5 view .LVU19
+ 154 0002 0248     		ldr	r0, .L15
+ 155 0004 FFF7FEFF 		bl	HAL_UART_Abort
+ 156              	.LVL6:
+ 258:SynaptiX_FDK/board/sx_board.c **** 
+ 157              		.loc 1 258 1 is_stmt 0 view .LVU20
+ 158 0008 08BD     		pop	{r3, pc}
+ 159              	.L16:
+ 160 000a 00BF     		.align	2
+ 161              	.L15:
+ 162 000c 00000000 		.word	huart1
+ 163              		.cfi_endproc
+ 164              	.LFE443:
+ 166              		.section	.text.sx_gettick,"ax",%progbits
+ 167              		.align	1
+ 168              		.global	sx_gettick
+ 169              		.syntax unified
+ 170              		.thumb
+ 171              		.thumb_func
+ 173              	sx_gettick:
+ 174              	.LFB336:
+ 175              		.file 2 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 9
+
+
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 10
+
+
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 11
+
+
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 176              		.loc 2 186 33 is_stmt 1 view -0
+ 177              		.cfi_startproc
+ 178              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 12
+
+
+ 179              		@ frame_needed = 0, uses_anonymous_args = 0
+ 180 0000 08B5     		push	{r3, lr}
+ 181              	.LCFI4:
+ 182              		.cfi_def_cfa_offset 8
+ 183              		.cfi_offset 3, -8
+ 184              		.cfi_offset 14, -4
+ 185              		.loc 2 186 34 view .LVU22
+ 186              		.loc 2 186 41 is_stmt 0 view .LVU23
+ 187 0002 FFF7FEFF 		bl	HAL_GetTick
+ 188              	.LVL7:
+ 189              		.loc 2 186 55 view .LVU24
+ 190 0006 08BD     		pop	{r3, pc}
+ 191              		.cfi_endproc
+ 192              	.LFE336:
+ 194              		.section	.rodata.dcd_fs_msp_init.str1.4,"aMS",%progbits,1
+ 195              		.align	2
+ 196              	.LC0:
+ 197 0000 6463645F 		.ascii	"dcd_fs_msp_init called\000"
+ 197      66735F6D 
+ 197      73705F69 
+ 197      6E697420 
+ 197      63616C6C 
+ 198 0017 00       		.align	2
+ 199              	.LC1:
+ 200 0018 424F4152 		.ascii	"BOARD\000"
+ 200      4400
+ 201 001e 0000     		.align	2
+ 202              	.LC2:
+ 203 0020 4D535020 		.ascii	"MSP init done!\000"
+ 203      696E6974 
+ 203      20646F6E 
+ 203      652100
+ 204              		.section	.text.dcd_fs_msp_init,"ax",%progbits
+ 205              		.align	1
+ 206              		.global	dcd_fs_msp_init
+ 207              		.syntax unified
+ 208              		.thumb
+ 209              		.thumb_func
+ 211              	dcd_fs_msp_init:
+ 212              	.LVL8:
+ 213              	.LFB438:
+  26:SynaptiX_FDK/board/sx_board.c ****     (void)rhport;
+ 214              		.loc 1 26 1 is_stmt 1 view -0
+ 215              		.cfi_startproc
+ 216              		@ args = 0, pretend = 0, frame = 0
+ 217              		@ frame_needed = 0, uses_anonymous_args = 0
+  26:SynaptiX_FDK/board/sx_board.c ****     (void)rhport;
+ 218              		.loc 1 26 1 is_stmt 0 view .LVU26
+ 219 0000 10B5     		push	{r4, lr}
+ 220              	.LCFI5:
+ 221              		.cfi_def_cfa_offset 8
+ 222              		.cfi_offset 4, -8
+ 223              		.cfi_offset 14, -4
+  27:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "dcd_fs_msp_init called");
+ 224              		.loc 1 27 5 is_stmt 1 view .LVU27
+  28:SynaptiX_FDK/board/sx_board.c ****     hpcd_USB_DRD_FS.Instance = USB_DRD_FS;
+ 225              		.loc 1 28 5 view .LVU28
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 13
+
+
+ 226 0002 0A4C     		ldr	r4, .L21
+ 227 0004 0A4A     		ldr	r2, .L21+4
+ 228 0006 2146     		mov	r1, r4
+ 229 0008 0320     		movs	r0, #3
+ 230              	.LVL9:
+  28:SynaptiX_FDK/board/sx_board.c ****     hpcd_USB_DRD_FS.Instance = USB_DRD_FS;
+ 231              		.loc 1 28 5 is_stmt 0 view .LVU29
+ 232 000a FFF7FEFF 		bl	log_func
+ 233              	.LVL10:
+  29:SynaptiX_FDK/board/sx_board.c ****     HAL_PCD_MspInit(&hpcd_USB_DRD_FS);
+ 234              		.loc 1 29 5 is_stmt 1 view .LVU30
+  29:SynaptiX_FDK/board/sx_board.c ****     HAL_PCD_MspInit(&hpcd_USB_DRD_FS);
+ 235              		.loc 1 29 30 is_stmt 0 view .LVU31
+ 236 000e 0948     		ldr	r0, .L21+8
+ 237 0010 094B     		ldr	r3, .L21+12
+ 238 0012 0360     		str	r3, [r0]
+  30:SynaptiX_FDK/board/sx_board.c ****     HAL_Delay(100);
+ 239              		.loc 1 30 5 is_stmt 1 view .LVU32
+ 240 0014 FFF7FEFF 		bl	HAL_PCD_MspInit
+ 241              	.LVL11:
+  31:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "MSP init done!");
+ 242              		.loc 1 31 5 view .LVU33
+ 243 0018 6420     		movs	r0, #100
+ 244 001a FFF7FEFF 		bl	HAL_Delay
+ 245              	.LVL12:
+  32:SynaptiX_FDK/board/sx_board.c **** }
+ 246              		.loc 1 32 5 view .LVU34
+ 247 001e 074A     		ldr	r2, .L21+16
+ 248 0020 2146     		mov	r1, r4
+ 249 0022 0320     		movs	r0, #3
+ 250 0024 FFF7FEFF 		bl	log_func
+ 251              	.LVL13:
+  33:SynaptiX_FDK/board/sx_board.c **** 
+ 252              		.loc 1 33 1 is_stmt 0 view .LVU35
+ 253 0028 10BD     		pop	{r4, pc}
+ 254              	.L22:
+ 255 002a 00BF     		.align	2
+ 256              	.L21:
+ 257 002c 18000000 		.word	.LC1
+ 258 0030 00000000 		.word	.LC0
+ 259 0034 00000000 		.word	hpcd_USB_DRD_FS
+ 260 0038 00600140 		.word	1073831936
+ 261 003c 20000000 		.word	.LC2
+ 262              		.cfi_endproc
+ 263              	.LFE438:
+ 265              		.section	.text.USB_DRD_FS_IRQHandler,"ax",%progbits
+ 266              		.align	1
+ 267              		.global	USB_DRD_FS_IRQHandler
+ 268              		.syntax unified
+ 269              		.thumb
+ 270              		.thumb_func
+ 272              	USB_DRD_FS_IRQHandler:
+ 273              	.LFB439:
+  36:SynaptiX_FDK/board/sx_board.c ****     tud_int_handler(0);
+ 274              		.loc 1 36 1 is_stmt 1 view -0
+ 275              		.cfi_startproc
+ 276              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 14
+
+
+ 277              		@ frame_needed = 0, uses_anonymous_args = 0
+ 278 0000 08B5     		push	{r3, lr}
+ 279              	.LCFI6:
+ 280              		.cfi_def_cfa_offset 8
+ 281              		.cfi_offset 3, -8
+ 282              		.cfi_offset 14, -4
+  37:SynaptiX_FDK/board/sx_board.c **** }
+ 283              		.loc 1 37 5 view .LVU37
+ 284 0002 0020     		movs	r0, #0
+ 285 0004 FFF7FEFF 		bl	dcd_int_handler
+ 286              	.LVL14:
+  38:SynaptiX_FDK/board/sx_board.c **** 
+ 287              		.loc 1 38 1 is_stmt 0 view .LVU38
+ 288 0008 08BD     		pop	{r3, pc}
+ 289              		.cfi_endproc
+ 290              	.LFE439:
+ 292              		.section	.rodata.sx_board_init.str1.4,"aMS",%progbits,1
+ 293              		.align	2
+ 294              	.LC3:
+ 295 0000 426F6172 		.ascii	"Board init start\000"
+ 295      6420696E 
+ 295      69742073 
+ 295      74617274 
+ 295      00
+ 296 0011 000000   		.align	2
+ 297              	.LC4:
+ 298 0014 56442047 		.ascii	"VD GPS\000"
+ 298      505300
+ 299 001b 00       		.align	2
+ 300              	.LC5:
+ 301 001c 4D534320 		.ascii	"MSC disk created\000"
+ 301      6469736B 
+ 301      20637265 
+ 301      61746564 
+ 301      00
+ 302 002d 000000   		.align	2
+ 303              	.LC6:
+ 304 0030 55534220 		.ascii	"USB init done\000"
+ 304      696E6974 
+ 304      20646F6E 
+ 304      6500
+ 305 003e 0000     		.align	2
+ 306              	.LC7:
+ 307 0040 762D696E 		.ascii	"v-internet\000"
+ 307      7465726E 
+ 307      657400
+ 308              		.section	.text.sx_board_init,"ax",%progbits
+ 309              		.align	1
+ 310              		.global	sx_board_init
+ 311              		.syntax unified
+ 312              		.thumb
+ 313              		.thumb_func
+ 315              	sx_board_init:
+ 316              	.LFB442:
+ 117:SynaptiX_FDK/board/sx_board.c ****     // Initialize Logger
+ 317              		.loc 1 117 1 is_stmt 1 view -0
+ 318              		.cfi_startproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 15
+
+
+ 319              		@ args = 0, pretend = 0, frame = 0
+ 320              		@ frame_needed = 0, uses_anonymous_args = 0
+ 321 0000 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 322              	.LCFI7:
+ 323              		.cfi_def_cfa_offset 36
+ 324              		.cfi_offset 4, -36
+ 325              		.cfi_offset 5, -32
+ 326              		.cfi_offset 6, -28
+ 327              		.cfi_offset 7, -24
+ 328              		.cfi_offset 8, -20
+ 329              		.cfi_offset 9, -16
+ 330              		.cfi_offset 10, -12
+ 331              		.cfi_offset 11, -8
+ 332              		.cfi_offset 14, -4
+ 333 0004 83B0     		sub	sp, sp, #12
+ 334              	.LCFI8:
+ 335              		.cfi_def_cfa_offset 48
+ 119:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].pDriver = hal_uart[UART_LOG];
+ 336              		.loc 1 119 5 view .LVU40
+ 120:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].baudrate = 115200;
+ 337              		.loc 1 120 5 view .LVU41
+ 120:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].baudrate = 115200;
+ 338              		.loc 1 120 35 is_stmt 0 view .LVU42
+ 339 0006 914C     		ldr	r4, .L27
+ 340 0008 914B     		ldr	r3, .L27+4
+ 341 000a E363     		str	r3, [r4, #60]
+ 121:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].bits = 8;
+ 342              		.loc 1 121 5 is_stmt 1 view .LVU43
+ 121:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].bits = 8;
+ 343              		.loc 1 121 36 is_stmt 0 view .LVU44
+ 344 000c 4FF4E139 		mov	r9, #115200
+ 345 0010 C4F84090 		str	r9, [r4, #64]
+ 122:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].parity = 0;
+ 346              		.loc 1 122 5 is_stmt 1 view .LVU45
+ 122:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].parity = 0;
+ 347              		.loc 1 122 32 is_stmt 0 view .LVU46
+ 348 0014 4FF00808 		mov	r8, #8
+ 349 0018 84F84480 		strb	r8, [r4, #68]
+ 123:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].stopbits = 1;
+ 350              		.loc 1 123 5 is_stmt 1 view .LVU47
+ 123:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].stopbits = 1;
+ 351              		.loc 1 123 34 is_stmt 0 view .LVU48
+ 352 001c 0025     		movs	r5, #0
+ 353 001e 84F84550 		strb	r5, [r4, #69]
+ 124:SynaptiX_FDK/board/sx_board.c **** 
+ 354              		.loc 1 124 5 is_stmt 1 view .LVU49
+ 124:SynaptiX_FDK/board/sx_board.c **** 
+ 355              		.loc 1 124 36 is_stmt 0 view .LVU50
+ 356 0022 0127     		movs	r7, #1
+ 357 0024 84F84670 		strb	r7, [r4, #70]
+ 126:SynaptiX_FDK/board/sx_board.c **** 
+ 358              		.loc 1 126 5 is_stmt 1 view .LVU51
+ 126:SynaptiX_FDK/board/sx_board.c **** 
+ 359              		.loc 1 126 24 is_stmt 0 view .LVU52
+ 360 0028 8A48     		ldr	r0, .L27+8
+ 361 002a 8B4B     		ldr	r3, .L27+12
+ 362 002c 5861     		str	r0, [r3, #20]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 16
+
+
+ 128:SynaptiX_FDK/board/sx_board.c ****     logger_init(LOGGER_INFO, log_print);
+ 363              		.loc 1 128 5 is_stmt 1 view .LVU53
+ 364 002e 4FF40073 		mov	r3, #512
+ 365 0032 1A46     		mov	r2, r3
+ 366 0034 04F13C01 		add	r1, r4, #60
+ 367 0038 FFF7FEFF 		bl	sx_uart_init
+ 368              	.LVL15:
+ 129:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "Board init start");
+ 369              		.loc 1 129 5 view .LVU54
+ 370 003c 8749     		ldr	r1, .L27+16
+ 371 003e 0320     		movs	r0, #3
+ 372 0040 FFF7FEFF 		bl	logger_init
+ 373              	.LVL16:
+ 130:SynaptiX_FDK/board/sx_board.c ****     
+ 374              		.loc 1 130 5 view .LVU55
+ 375 0044 DFF874A2 		ldr	r10, .L27+112
+ 376 0048 854A     		ldr	r2, .L27+20
+ 377 004a 5146     		mov	r1, r10
+ 378 004c 0320     		movs	r0, #3
+ 379 004e FFF7FEFF 		bl	log_func
+ 380              	.LVL17:
+ 134:SynaptiX_FDK/board/sx_board.c ****     sx_user_msc_create_disk(USER_DISK_LABEL_CREATE);
+ 381              		.loc 1 134 5 view .LVU56
+ 382 0052 FFF7FEFF 		bl	sx_user_msc_init
+ 383              	.LVL18:
+ 135:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "MSC disk created");
+ 384              		.loc 1 135 5 view .LVU57
+ 385 0056 8348     		ldr	r0, .L27+24
+ 386 0058 FFF7FEFF 		bl	sx_user_msc_create_disk
+ 387              	.LVL19:
+ 136:SynaptiX_FDK/board/sx_board.c ****     #endif
+ 388              		.loc 1 136 5 view .LVU58
+ 389 005c 824A     		ldr	r2, .L27+28
+ 390 005e 5146     		mov	r1, r10
+ 391 0060 0320     		movs	r0, #3
+ 392 0062 FFF7FEFF 		bl	log_func
+ 393              	.LVL20:
+ 138:SynaptiX_FDK/board/sx_board.c ****     board.usb_cfg.tx_buf_size = 256;
+ 394              		.loc 1 138 5 view .LVU59
+ 138:SynaptiX_FDK/board/sx_board.c ****     board.usb_cfg.tx_buf_size = 256;
+ 395              		.loc 1 138 31 is_stmt 0 view .LVU60
+ 396 0066 814E     		ldr	r6, .L27+32
+ 397 0068 06F5504B 		add	fp, r6, #53248
+ 398 006c 4FF48073 		mov	r3, #256
+ 399 0070 CBF8183E 		str	r3, [fp, #3608]
+ 139:SynaptiX_FDK/board/sx_board.c ****     dcd_fs_msp_init(0);
+ 400              		.loc 1 139 5 is_stmt 1 view .LVU61
+ 139:SynaptiX_FDK/board/sx_board.c ****     dcd_fs_msp_init(0);
+ 401              		.loc 1 139 31 is_stmt 0 view .LVU62
+ 402 0074 CBF81C3E 		str	r3, [fp, #3612]
+ 140:SynaptiX_FDK/board/sx_board.c ****     sx_usb_tiny_init(&board.usb, &board.usb_cfg);
+ 403              		.loc 1 140 5 is_stmt 1 view .LVU63
+ 404 0078 2846     		mov	r0, r5
+ 405 007a FFF7FEFF 		bl	dcd_fs_msp_init
+ 406              	.LVL21:
+ 141:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "USB init done");
+ 407              		.loc 1 141 5 view .LVU64
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 17
+
+
+ 408 007e 0BF61861 		addw	r1, fp, #3608
+ 409 0082 A1F14800 		sub	r0, r1, #72
+ 410 0086 FFF7FEFF 		bl	sx_usb_tiny_init
+ 411              	.LVL22:
+ 142:SynaptiX_FDK/board/sx_board.c **** 
+ 412              		.loc 1 142 5 view .LVU65
+ 413 008a 794A     		ldr	r2, .L27+36
+ 414 008c 5146     		mov	r1, r10
+ 415 008e 0320     		movs	r0, #3
+ 416 0090 FFF7FEFF 		bl	log_func
+ 417              	.LVL23:
+ 144:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].baudrate = 115200;
+ 418              		.loc 1 144 5 view .LVU66
+ 144:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].baudrate = 115200;
+ 419              		.loc 1 144 35 is_stmt 0 view .LVU67
+ 420 0094 7749     		ldr	r1, .L27+40
+ 421 0096 2160     		str	r1, [r4]
+ 145:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].bits = 8;
+ 422              		.loc 1 145 5 is_stmt 1 view .LVU68
+ 145:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].bits = 8;
+ 423              		.loc 1 145 36 is_stmt 0 view .LVU69
+ 424 0098 C4F80490 		str	r9, [r4, #4]
+ 146:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].parity = 0;
+ 425              		.loc 1 146 5 is_stmt 1 view .LVU70
+ 146:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].parity = 0;
+ 426              		.loc 1 146 32 is_stmt 0 view .LVU71
+ 427 009c 84F80880 		strb	r8, [r4, #8]
+ 147:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].stopbits = 1;
+ 428              		.loc 1 147 5 is_stmt 1 view .LVU72
+ 147:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LTE].stopbits = 1;
+ 429              		.loc 1 147 34 is_stmt 0 view .LVU73
+ 430 00a0 6572     		strb	r5, [r4, #9]
+ 148:SynaptiX_FDK/board/sx_board.c **** 
+ 431              		.loc 1 148 5 is_stmt 1 view .LVU74
+ 148:SynaptiX_FDK/board/sx_board.c **** 
+ 432              		.loc 1 148 36 is_stmt 0 view .LVU75
+ 433 00a2 A772     		strb	r7, [r4, #10]
+ 150:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].baudrate = 9600;
+ 434              		.loc 1 150 5 is_stmt 1 view .LVU76
+ 150:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].baudrate = 9600;
+ 435              		.loc 1 150 35 is_stmt 0 view .LVU77
+ 436 00a4 7449     		ldr	r1, .L27+44
+ 437 00a6 E160     		str	r1, [r4, #12]
+ 151:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].bits = 8;
+ 438              		.loc 1 151 5 is_stmt 1 view .LVU78
+ 151:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].bits = 8;
+ 439              		.loc 1 151 36 is_stmt 0 view .LVU79
+ 440 00a8 4FF41653 		mov	r3, #9600
+ 441 00ac 2361     		str	r3, [r4, #16]
+ 152:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].parity = 0;
+ 442              		.loc 1 152 5 is_stmt 1 view .LVU80
+ 152:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].parity = 0;
+ 443              		.loc 1 152 32 is_stmt 0 view .LVU81
+ 444 00ae 84F81480 		strb	r8, [r4, #20]
+ 153:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].stopbits = 1;
+ 445              		.loc 1 153 5 is_stmt 1 view .LVU82
+ 153:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_GPS].stopbits = 1;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 18
+
+
+ 446              		.loc 1 153 34 is_stmt 0 view .LVU83
+ 447 00b2 6575     		strb	r5, [r4, #21]
+ 154:SynaptiX_FDK/board/sx_board.c **** 
+ 448              		.loc 1 154 5 is_stmt 1 view .LVU84
+ 154:SynaptiX_FDK/board/sx_board.c **** 
+ 449              		.loc 1 154 36 is_stmt 0 view .LVU85
+ 450 00b4 A775     		strb	r7, [r4, #22]
+ 156:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].baudrate = 115200;
+ 451              		.loc 1 156 5 is_stmt 1 view .LVU86
+ 156:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].baudrate = 115200;
+ 452              		.loc 1 156 37 is_stmt 0 view .LVU87
+ 453 00b6 714A     		ldr	r2, .L27+48
+ 454 00b8 A261     		str	r2, [r4, #24]
+ 157:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].bits = 8;
+ 455              		.loc 1 157 5 is_stmt 1 view .LVU88
+ 157:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].bits = 8;
+ 456              		.loc 1 157 38 is_stmt 0 view .LVU89
+ 457 00ba C4F81C90 		str	r9, [r4, #28]
+ 158:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].parity = 0;
+ 458              		.loc 1 158 5 is_stmt 1 view .LVU90
+ 158:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].parity = 0;
+ 459              		.loc 1 158 34 is_stmt 0 view .LVU91
+ 460 00be 84F82080 		strb	r8, [r4, #32]
+ 159:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].stopbits = 1;
+ 461              		.loc 1 159 5 is_stmt 1 view .LVU92
+ 159:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_RS485].stopbits = 1;
+ 462              		.loc 1 159 36 is_stmt 0 view .LVU93
+ 463 00c2 84F82150 		strb	r5, [r4, #33]
+ 160:SynaptiX_FDK/board/sx_board.c **** 
+ 464              		.loc 1 160 5 is_stmt 1 view .LVU94
+ 160:SynaptiX_FDK/board/sx_board.c **** 
+ 465              		.loc 1 160 38 is_stmt 0 view .LVU95
+ 466 00c6 84F82270 		strb	r7, [r4, #34]
+ 162:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].baudrate = 115200;
+ 467              		.loc 1 162 5 is_stmt 1 view .LVU96
+ 162:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].baudrate = 115200;
+ 468              		.loc 1 162 36 is_stmt 0 view .LVU97
+ 469 00ca 6D49     		ldr	r1, .L27+52
+ 470 00cc 6162     		str	r1, [r4, #36]
+ 163:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].bits = 8;
+ 471              		.loc 1 163 5 is_stmt 1 view .LVU98
+ 163:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].bits = 8;
+ 472              		.loc 1 163 37 is_stmt 0 view .LVU99
+ 473 00ce C4F82890 		str	r9, [r4, #40]
+ 164:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].parity = 0;
+ 474              		.loc 1 164 5 is_stmt 1 view .LVU100
+ 164:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].parity = 0;
+ 475              		.loc 1 164 33 is_stmt 0 view .LVU101
+ 476 00d2 84F82C80 		strb	r8, [r4, #44]
+ 165:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].stopbits = 1;
+ 477              		.loc 1 165 5 is_stmt 1 view .LVU102
+ 165:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_DUST].stopbits = 1;
+ 478              		.loc 1 165 35 is_stmt 0 view .LVU103
+ 479 00d6 84F82D50 		strb	r5, [r4, #45]
+ 166:SynaptiX_FDK/board/sx_board.c **** 
+ 480              		.loc 1 166 5 is_stmt 1 view .LVU104
+ 166:SynaptiX_FDK/board/sx_board.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 19
+
+
+ 481              		.loc 1 166 37 is_stmt 0 view .LVU105
+ 482 00da 84F82E70 		strb	r7, [r4, #46]
+ 168:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].baudrate = 9600;
+ 483              		.loc 1 168 5 is_stmt 1 view .LVU106
+ 168:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].baudrate = 9600;
+ 484              		.loc 1 168 38 is_stmt 0 view .LVU107
+ 485 00de 6949     		ldr	r1, .L27+56
+ 486 00e0 2163     		str	r1, [r4, #48]
+ 169:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].bits = 8;
+ 487              		.loc 1 169 5 is_stmt 1 view .LVU108
+ 169:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].bits = 8;
+ 488              		.loc 1 169 39 is_stmt 0 view .LVU109
+ 489 00e2 6363     		str	r3, [r4, #52]
+ 170:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].parity = 0;
+ 490              		.loc 1 170 5 is_stmt 1 view .LVU110
+ 170:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].parity = 0;
+ 491              		.loc 1 170 35 is_stmt 0 view .LVU111
+ 492 00e4 84F83880 		strb	r8, [r4, #56]
+ 171:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].stopbits = 1;
+ 493              		.loc 1 171 5 is_stmt 1 view .LVU112
+ 171:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_EXTEND].stopbits = 1;
+ 494              		.loc 1 171 37 is_stmt 0 view .LVU113
+ 495 00e8 84F83950 		strb	r5, [r4, #57]
+ 172:SynaptiX_FDK/board/sx_board.c **** 
+ 496              		.loc 1 172 5 is_stmt 1 view .LVU114
+ 172:SynaptiX_FDK/board/sx_board.c **** 
+ 497              		.loc 1 172 39 is_stmt 0 view .LVU115
+ 498 00ec 84F83A70 		strb	r7, [r4, #58]
+ 174:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].baudrate = 115200;
+ 499              		.loc 1 174 5 is_stmt 1 view .LVU116
+ 174:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].baudrate = 115200;
+ 500              		.loc 1 174 35 is_stmt 0 view .LVU117
+ 501 00f0 574A     		ldr	r2, .L27+4
+ 502 00f2 E263     		str	r2, [r4, #60]
+ 175:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].bits = 8;
+ 503              		.loc 1 175 5 is_stmt 1 view .LVU118
+ 175:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].bits = 8;
+ 504              		.loc 1 175 36 is_stmt 0 view .LVU119
+ 505 00f4 C4F84090 		str	r9, [r4, #64]
+ 176:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].parity = 0;
+ 506              		.loc 1 176 5 is_stmt 1 view .LVU120
+ 176:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].parity = 0;
+ 507              		.loc 1 176 32 is_stmt 0 view .LVU121
+ 508 00f8 84F84480 		strb	r8, [r4, #68]
+ 177:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].stopbits = 1;
+ 509              		.loc 1 177 5 is_stmt 1 view .LVU122
+ 177:SynaptiX_FDK/board/sx_board.c ****     uart_config[UART_LOG].stopbits = 1;
+ 510              		.loc 1 177 34 is_stmt 0 view .LVU123
+ 511 00fc 84F84550 		strb	r5, [r4, #69]
+ 178:SynaptiX_FDK/board/sx_board.c **** 
+ 512              		.loc 1 178 5 is_stmt 1 view .LVU124
+ 178:SynaptiX_FDK/board/sx_board.c **** 
+ 513              		.loc 1 178 36 is_stmt 0 view .LVU125
+ 514 0100 84F84670 		strb	r7, [r4, #70]
+ 180:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_GPS] = &board.gps.comm;
+ 515              		.loc 1 180 5 is_stmt 1 view .LVU126
+ 180:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_GPS] = &board.gps.comm;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 20
+
+
+ 516              		.loc 1 180 24 is_stmt 0 view .LVU127
+ 517 0104 06F50179 		add	r9, r6, #516
+ 518 0108 534B     		ldr	r3, .L27+12
+ 519 010a C3F80090 		str	r9, [r3]
+ 181:SynaptiX_FDK/board/sx_board.c **** 
+ 520              		.loc 1 181 5 is_stmt 1 view .LVU128
+ 181:SynaptiX_FDK/board/sx_board.c **** 
+ 521              		.loc 1 181 24 is_stmt 0 view .LVU129
+ 522 010e 0BF6E432 		addw	r2, fp, #3044
+ 523 0112 5A60     		str	r2, [r3, #4]
+ 184:SynaptiX_FDK/board/sx_board.c **** 
+ 524              		.loc 1 184 5 is_stmt 1 view .LVU130
+ 525              	.LVL24:
+ 526              	.LBB12:
+ 527              	.LBI12:
+ 528              		.file 3 "SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h"
+   1:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #ifndef SX_I2C_H
+   2:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #define SX_I2C_H
+   3:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+   7:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+   9:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** typedef struct sx_i2c sx_i2c_t;
+  10:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  11:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** typedef struct sx_i2c_ops{
+  12:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*write)(sx_i2c_t *i2c, uint16_t dev_addr, const uint8_t *data, uint32_t len);
+  13:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*read)(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t *data, uint32_t len);
+  14:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*mem_write)(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t mem_addr_size, c
+  15:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*mem_read)(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t mem_addr_size, ui
+  16:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*is_device_ready)(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t num_trial, uint32_t timeout);
+  17:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** } sx_i2c_ops_t;
+  18:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  19:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** struct sx_i2c{
+  20:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     sx_i2c_ops_t *ops;
+  21:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     void *pDriver;
+  22:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** };
+  23:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  24:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline void sx_i2c_init(sx_i2c_t *i2c, sx_i2c_ops_t *ops, void *pDriver){
+ 529              		.loc 3 24 20 view .LVU131
+ 530              	.LBB13:
+  25:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     i2c->ops = ops;
+ 531              		.loc 3 25 5 view .LVU132
+ 532              		.loc 3 25 14 is_stmt 0 view .LVU133
+ 533 0114 5C4B     		ldr	r3, .L27+60
+ 534 0116 CBF8443E 		str	r3, [fp, #3652]
+  26:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     i2c->pDriver = pDriver;
+ 535              		.loc 3 26 5 is_stmt 1 view .LVU134
+ 536              		.loc 3 26 18 is_stmt 0 view .LVU135
+ 537 011a 5C4B     		ldr	r3, .L27+64
+ 538 011c CBF8483E 		str	r3, [fp, #3656]
+ 539              	.LVL25:
+ 540              		.loc 3 26 18 view .LVU136
+ 541              	.LBE13:
+ 542              	.LBE12:
+ 189:SynaptiX_FDK/board/sx_board.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 21
+
+
+ 543              		.loc 1 189 5 is_stmt 1 view .LVU137
+ 544              	.LBB14:
+ 545              	.LBI14:
+ 546              		.file 4 "SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h"
+   1:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifndef SX_GPIO_H
+   2:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #define SX_GPIO_H
+   3:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   7:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+   9:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef enum SX_GPIO_VALUE{
+  10:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_LOW = 0,
+  11:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_HIGH = 1
+  12:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } SX_GPIO_VALUE;
+  13:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  14:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio sx_gpio_t;
+  15:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  16:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct {
+  17:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void    *port;
+  18:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     uint16_t pin;
+  19:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_pin_t;
+  20:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  21:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio_ops{
+  22:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*write)(sx_gpio_t *gpio, SX_GPIO_VALUE value);
+  23:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*read)(sx_gpio_t *gpio, SX_GPIO_VALUE *value);
+  24:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     int (*toggle)(sx_gpio_t *gpio);
+  25:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_ops_t;
+  26:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  27:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** typedef struct sx_gpio{
+  28:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     sx_gpio_ops_t *ops;
+  29:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     void *pDriver;
+  30:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     SX_GPIO_VALUE value;
+  31:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** } sx_gpio_t;
+  32:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** 
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h **** static inline void sx_gpio_init(sx_gpio_t *gpio, sx_gpio_ops_t *ops, void *pDriver){
+ 547              		.loc 4 33 20 view .LVU138
+ 548              	.LBB15:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 549              		.loc 4 34 5 view .LVU139
+ 550              		.loc 4 34 15 is_stmt 0 view .LVU140
+ 551 0120 DFF89CA1 		ldr	r10, .L27+116
+ 552 0124 DFF89C81 		ldr	r8, .L27+120
+ 553 0128 CAF80080 		str	r8, [r10]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 554              		.loc 4 35 5 is_stmt 1 view .LVU141
+ 555              		.loc 4 35 19 is_stmt 0 view .LVU142
+ 556 012c 584B     		ldr	r3, .L27+68
+ 557 012e CAF80430 		str	r3, [r10, #4]
+  36:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 558              		.loc 4 36 5 is_stmt 1 view .LVU143
+ 559              		.loc 4 36 17 is_stmt 0 view .LVU144
+ 560 0132 8AF80850 		strb	r5, [r10, #8]
+ 561              	.LVL26:
+ 562              		.loc 4 36 17 view .LVU145
+ 563              	.LBE15:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 22
+
+
+ 564              	.LBE14:
+ 193:SynaptiX_FDK/board/sx_board.c ****     // IMU reset uses the shared s_i2c1_reset initialized above.
+ 565              		.loc 1 193 5 is_stmt 1 view .LVU146
+ 566 0136 02F51871 		add	r1, r2, #608
+ 567 013a 01F10800 		add	r0, r1, #8
+ 568 013e FFF7FEFF 		bl	rx8130ce_init
+ 569              	.LVL27:
+ 197:SynaptiX_FDK/board/sx_board.c ****     board.a7677s.base.hasPowerPin = 0;   /* no VBAT-cutoff transistor on this board */
+ 570              		.loc 1 197 5 view .LVU147
+ 571 0142 3046     		mov	r0, r6
+ 572 0144 FFF7FEFF 		bl	a7677s_init
+ 573              	.LVL28:
+ 198:SynaptiX_FDK/board/sx_board.c ****     sx_gpio_init(&board.a7677s.base.pwrPin, &sx_gpio_ops, &s_lte_pwrkey_pin);
+ 574              		.loc 1 198 5 view .LVU148
+ 198:SynaptiX_FDK/board/sx_board.c ****     sx_gpio_init(&board.a7677s.base.pwrPin, &sx_gpio_ops, &s_lte_pwrkey_pin);
+ 575              		.loc 1 198 35 is_stmt 0 view .LVU149
+ 576 0148 86F86052 		strb	r5, [r6, #608]
+ 199:SynaptiX_FDK/board/sx_board.c ****     sx_gpio_init(&board.a7677s.resetPin, &sx_gpio_ops, &s_lte_reset_pin);
+ 577              		.loc 1 199 5 is_stmt 1 view .LVU150
+ 578              	.LVL29:
+ 579              	.LBB16:
+ 580              	.LBI16:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 581              		.loc 4 33 20 view .LVU151
+ 582              	.LBB17:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 583              		.loc 4 34 5 view .LVU152
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 584              		.loc 4 34 15 is_stmt 0 view .LVU153
+ 585 014c C6F84882 		str	r8, [r6, #584]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 586              		.loc 4 35 5 is_stmt 1 view .LVU154
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 587              		.loc 4 35 19 is_stmt 0 view .LVU155
+ 588 0150 504B     		ldr	r3, .L27+72
+ 589 0152 C6F84C32 		str	r3, [r6, #588]
+ 590              		.loc 4 36 5 is_stmt 1 view .LVU156
+ 591              		.loc 4 36 17 is_stmt 0 view .LVU157
+ 592 0156 86F85052 		strb	r5, [r6, #592]
+ 593              	.LVL30:
+ 594              		.loc 4 36 17 view .LVU158
+ 595              	.LBE17:
+ 596              	.LBE16:
+ 200:SynaptiX_FDK/board/sx_board.c ****     a7677s_set_full_apn(&board.a7677s, APN, USERNAME_APN, PASSWORD_APN);
+ 597              		.loc 1 200 5 is_stmt 1 view .LVU159
+ 598              	.LBB18:
+ 599              	.LBI18:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 600              		.loc 4 33 20 view .LVU160
+ 601              	.LBB19:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 602              		.loc 4 34 5 view .LVU161
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 603              		.loc 4 34 15 is_stmt 0 view .LVU162
+ 604 015a C6F87482 		str	r8, [r6, #628]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 605              		.loc 4 35 5 is_stmt 1 view .LVU163
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 23
+
+
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 606              		.loc 4 35 19 is_stmt 0 view .LVU164
+ 607 015e 4E4B     		ldr	r3, .L27+76
+ 608 0160 C6F87832 		str	r3, [r6, #632]
+ 609              		.loc 4 36 5 is_stmt 1 view .LVU165
+ 610              		.loc 4 36 17 is_stmt 0 view .LVU166
+ 611 0164 86F87C52 		strb	r5, [r6, #636]
+ 612              	.LVL31:
+ 613              		.loc 4 36 17 view .LVU167
+ 614              	.LBE19:
+ 615              	.LBE18:
+ 201:SynaptiX_FDK/board/sx_board.c ****     sx_uart_init(&board.a7677s.base.uart, &uart_config[UART_LTE], 512, 512);
+ 616              		.loc 1 201 5 is_stmt 1 view .LVU168
+ 617 0168 2B46     		mov	r3, r5
+ 618 016a 2A46     		mov	r2, r5
+ 619 016c 4B49     		ldr	r1, .L27+80
+ 620 016e 3046     		mov	r0, r6
+ 621 0170 FFF7FEFF 		bl	a7677s_set_full_apn
+ 622              	.LVL32:
+ 202:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 623              		.loc 1 202 5 view .LVU169
+ 624 0174 4FF40073 		mov	r3, #512
+ 625 0178 1A46     		mov	r2, r3
+ 626 017a 2146     		mov	r1, r4
+ 627 017c 4846     		mov	r0, r9
+ 628 017e FFF7FEFF 		bl	sx_uart_init
+ 629              	.LVL33:
+ 203:SynaptiX_FDK/board/sx_board.c **** 
+ 630              		.loc 1 203 5 view .LVU170
+ 631 0182 DFF84491 		ldr	r9, .L27+124
+ 632 0186 3A46     		mov	r2, r7
+ 633 0188 4946     		mov	r1, r9
+ 634 018a 3A48     		ldr	r0, .L27+40
+ 635 018c FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 636              	.LVL34:
+ 205:SynaptiX_FDK/board/sx_board.c ****     board.modem.ctx = &board.a7677s;
+ 637              		.loc 1 205 5 view .LVU171
+ 205:SynaptiX_FDK/board/sx_board.c ****     board.modem.ctx = &board.a7677s;
+ 638              		.loc 1 205 21 is_stmt 0 view .LVU172
+ 639 0190 434B     		ldr	r3, .L27+84
+ 640 0192 CBF8DC3B 		str	r3, [fp, #3036]
+ 206:SynaptiX_FDK/board/sx_board.c **** 
+ 641              		.loc 1 206 5 is_stmt 1 view .LVU173
+ 206:SynaptiX_FDK/board/sx_board.c **** 
+ 642              		.loc 1 206 21 is_stmt 0 view .LVU174
+ 643 0196 CBF8E06B 		str	r6, [fp, #3040]
+ 216:SynaptiX_FDK/board/sx_board.c **** 
+ 644              		.loc 1 216 5 is_stmt 1 view .LVU175
+ 216:SynaptiX_FDK/board/sx_board.c **** 
+ 645              		.loc 1 216 20 is_stmt 0 view .LVU176
+ 646 019a 1B68     		ldr	r3, [r3]
+ 216:SynaptiX_FDK/board/sx_board.c **** 
+ 647              		.loc 1 216 5 view .LVU177
+ 648 019c 3046     		mov	r0, r6
+ 649 019e 9847     		blx	r3
+ 650              	.LVL35:
+ 219:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 24
+
+
+ 651              		.loc 1 219 5 is_stmt 1 view .LVU178
+ 652 01a0 404B     		ldr	r3, .L27+88
+ 653 01a2 0093     		str	r3, [sp]
+ 654 01a4 404B     		ldr	r3, .L27+92
+ 655 01a6 4246     		mov	r2, r8
+ 656 01a8 04F10C01 		add	r1, r4, #12
+ 657 01ac 0BF6E430 		addw	r0, fp, #3044
+ 658 01b0 FFF7FEFF 		bl	gps_init
+ 659              	.LVL36:
+ 220:SynaptiX_FDK/board/sx_board.c **** 
+ 660              		.loc 1 220 5 view .LVU179
+ 661 01b4 3A46     		mov	r2, r7
+ 662 01b6 09EB0701 		add	r1, r9, r7
+ 663 01ba 2F48     		ldr	r0, .L27+44
+ 664 01bc FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 665              	.LVL37:
+ 222:SynaptiX_FDK/board/sx_board.c ****     bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_i2c1_reset);
+ 666              		.loc 1 222 5 view .LVU180
+ 667 01c0 FFF7FEFF 		bl	spi_storage_init
+ 668              	.LVL38:
+ 223:SynaptiX_FDK/board/sx_board.c **** 
+ 669              		.loc 1 223 5 view .LVU181
+ 670 01c4 5346     		mov	r3, r10
+ 671 01c6 5222     		movs	r2, #82
+ 672 01c8 0BF64461 		addw	r1, fp, #3652
+ 673 01cc 01F11800 		add	r0, r1, #24
+ 674 01d0 FFF7FEFF 		bl	bno055_init
+ 675              	.LVL39:
+ 228:SynaptiX_FDK/board/sx_board.c **** 
+ 676              		.loc 1 228 5 view .LVU182
+ 677              	.LBB20:
+ 678              	.LBI20:
+  33:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->ops = ops;
+ 679              		.loc 4 33 20 view .LVU183
+ 680              	.LBB21:
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 681              		.loc 4 34 5 view .LVU184
+  34:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->pDriver = pDriver;
+ 682              		.loc 4 34 15 is_stmt 0 view .LVU185
+ 683 01d4 354B     		ldr	r3, .L27+96
+ 684 01d6 C3F80080 		str	r8, [r3]
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 685              		.loc 4 35 5 is_stmt 1 view .LVU186
+  35:SynaptiX_FDK/components/peripherals/gpio/sx_gpio.h ****     gpio->value = SX_GPIO_LOW;
+ 686              		.loc 4 35 19 is_stmt 0 view .LVU187
+ 687 01da 354A     		ldr	r2, .L27+100
+ 688 01dc 5A60     		str	r2, [r3, #4]
+ 689              		.loc 4 36 5 is_stmt 1 view .LVU188
+ 690              		.loc 4 36 17 is_stmt 0 view .LVU189
+ 691 01de 1D72     		strb	r5, [r3, #8]
+ 692              	.LVL40:
+ 693              		.loc 4 36 17 view .LVU190
+ 694              	.LBE21:
+ 695              	.LBE20:
+ 234:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_DUST] = &board.sps30_uart;
+ 696              		.loc 1 234 5 is_stmt 1 view .LVU191
+ 697 01e0 0BF66C65 		addw	r5, fp, #3692
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 25
+
+
+ 698 01e4 4FF40073 		mov	r3, #512
+ 699 01e8 1A46     		mov	r2, r3
+ 700 01ea 04F12401 		add	r1, r4, #36
+ 701 01ee 2846     		mov	r0, r5
+ 702 01f0 FFF7FEFF 		bl	sx_uart_init
+ 703              	.LVL41:
+ 235:SynaptiX_FDK/board/sx_board.c ****     sensirion_uart_hal_init(&board.sps30_uart);
+ 704              		.loc 1 235 5 view .LVU192
+ 235:SynaptiX_FDK/board/sx_board.c ****     sensirion_uart_hal_init(&board.sps30_uart);
+ 705              		.loc 1 235 25 is_stmt 0 view .LVU193
+ 706 01f4 184E     		ldr	r6, .L27+12
+ 707 01f6 F560     		str	r5, [r6, #12]
+ 236:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+ 708              		.loc 1 236 5 is_stmt 1 view .LVU194
+ 709 01f8 2846     		mov	r0, r5
+ 710 01fa FFF7FEFF 		bl	sensirion_uart_hal_init
+ 711              	.LVL42:
+ 237:SynaptiX_FDK/board/sx_board.c **** 
+ 712              		.loc 1 237 5 view .LVU195
+ 713 01fe 3A46     		mov	r2, r7
+ 714 0200 09F10301 		add	r1, r9, #3
+ 715 0204 1E48     		ldr	r0, .L27+52
+ 716 0206 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 717              	.LVL43:
+ 240:SynaptiX_FDK/board/sx_board.c **** 
+ 718              		.loc 1 240 5 view .LVU196
+ 719 020a A5F12801 		sub	r1, r5, #40
+ 720 020e 01F16C00 		add	r0, r1, #108
+ 721 0212 FFF7FEFF 		bl	sht3x_init
+ 722              	.LVL44:
+ 243:SynaptiX_FDK/board/sx_board.c **** 
+ 723              		.loc 1 243 5 view .LVU197
+ 724 0216 0423     		movs	r3, #4
+ 725 0218 A022     		movs	r2, #160
+ 726 021a A5F12801 		sub	r1, r5, #40
+ 727 021e 01F17800 		add	r0, r1, #120
+ 728 0222 FFF7FEFF 		bl	ADS1115_Init
+ 729              	.LVL45:
+ 250:SynaptiX_FDK/board/sx_board.c ****     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
+ 730              		.loc 1 250 5 view .LVU198
+ 731 0226 234B     		ldr	r3, .L27+104
+ 732 0228 234A     		ldr	r2, .L27+108
+ 733 022a 4146     		mov	r1, r8
+ 734 022c 04F13000 		add	r0, r4, #48
+ 735 0230 FFF7FEFF 		bl	gas_sensor_init
+ 736              	.LVL46:
+ 251:SynaptiX_FDK/board/sx_board.c **** 
+ 737              		.loc 1 251 5 view .LVU199
+ 251:SynaptiX_FDK/board/sx_board.c **** 
+ 738              		.loc 1 251 29 is_stmt 0 view .LVU200
+ 739 0234 FFF7FEFF 		bl	gas_sensor_get_uart
+ 740              	.LVL47:
+ 251:SynaptiX_FDK/board/sx_board.c **** 
+ 741              		.loc 1 251 27 discriminator 1 view .LVU201
+ 742 0238 3061     		str	r0, [r6, #16]
+ 253:SynaptiX_FDK/board/sx_board.c **** }
+ 743              		.loc 1 253 5 is_stmt 1 view .LVU202
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 26
+
+
+ 744 023a 3A46     		mov	r2, r7
+ 745 023c 09F10401 		add	r1, r9, #4
+ 746 0240 1048     		ldr	r0, .L27+56
+ 747 0242 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 748              	.LVL48:
+ 254:SynaptiX_FDK/board/sx_board.c **** 
+ 749              		.loc 1 254 1 is_stmt 0 view .LVU203
+ 750 0246 03B0     		add	sp, sp, #12
+ 751              	.LCFI9:
+ 752              		.cfi_def_cfa_offset 36
+ 753              		@ sp needed
+ 754 0248 BDE8F08F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 755              	.L28:
+ 756              		.align	2
+ 757              	.L27:
+ 758 024c 00000000 		.word	uart_config.0
+ 759 0250 00000000 		.word	huart6
+ 760 0254 8CDD0000 		.word	board+56716
+ 761 0258 00000000 		.word	bsp_uart
+ 762 025c 00000000 		.word	log_print
+ 763 0260 00000000 		.word	.LC3
+ 764 0264 14000000 		.word	.LC4
+ 765 0268 1C000000 		.word	.LC5
+ 766 026c 00000000 		.word	board
+ 767 0270 30000000 		.word	.LC6
+ 768 0274 00000000 		.word	huart1
+ 769 0278 00000000 		.word	huart2
+ 770 027c 00000000 		.word	huart3
+ 771 0280 00000000 		.word	huart4
+ 772 0284 00000000 		.word	huart5
+ 773 0288 00000000 		.word	sx_i2c_ops
+ 774 028c 00000000 		.word	hi2c1
+ 775 0290 00000000 		.word	s_i2c1_reset_pin
+ 776 0294 00000000 		.word	s_lte_pwrkey_pin
+ 777 0298 00000000 		.word	s_lte_reset_pin
+ 778 029c 40000000 		.word	.LC7
+ 779 02a0 00000000 		.word	a7677s_ops
+ 780 02a4 00000000 		.word	s_gps_rst_pin
+ 781 02a8 00000000 		.word	s_gps_cpw_pin
+ 782 02ac 00000000 		.word	s_en_pw_dust
+ 783 02b0 00000000 		.word	s_en_pw_dust_pin
+ 784 02b4 00000000 		.word	s_uart5_s1_pin
+ 785 02b8 00000000 		.word	s_uart5_s0_pin
+ 786 02bc 18000000 		.word	.LC1
+ 787 02c0 00000000 		.word	s_i2c1_reset
+ 788 02c4 00000000 		.word	sx_gpio_ops
+ 789 02c8 00000000 		.word	uart_rx_char
+ 790              		.cfi_endproc
+ 791              	.LFE442:
+ 793              		.section	.text.gps_it_handle,"ax",%progbits
+ 794              		.align	1
+ 795              		.global	gps_it_handle
+ 796              		.syntax unified
+ 797              		.thumb
+ 798              		.thumb_func
+ 800              	gps_it_handle:
+ 801              	.LFB445:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 27
+
+
+ 263:SynaptiX_FDK/board/sx_board.c **** 
+ 264:SynaptiX_FDK/board/sx_board.c **** void gps_it_handle(){
+ 802              		.loc 1 264 21 is_stmt 1 view -0
+ 803              		.cfi_startproc
+ 804              		@ args = 0, pretend = 0, frame = 0
+ 805              		@ frame_needed = 0, uses_anonymous_args = 0
+ 806 0000 08B5     		push	{r3, lr}
+ 807              	.LCFI10:
+ 808              		.cfi_def_cfa_offset 8
+ 809              		.cfi_offset 3, -8
+ 810              		.cfi_offset 14, -4
+ 265:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ 811              		.loc 1 265 5 view .LVU205
+ 812 0002 0122     		movs	r2, #1
+ 813 0004 0249     		ldr	r1, .L31
+ 814 0006 0348     		ldr	r0, .L31+4
+ 815 0008 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 816              	.LVL49:
+ 266:SynaptiX_FDK/board/sx_board.c **** }
+ 817              		.loc 1 266 1 is_stmt 0 view .LVU206
+ 818 000c 08BD     		pop	{r3, pc}
+ 819              	.L32:
+ 820 000e 00BF     		.align	2
+ 821              	.L31:
+ 822 0010 01000000 		.word	uart_rx_char+1
+ 823 0014 00000000 		.word	huart2
+ 824              		.cfi_endproc
+ 825              	.LFE445:
+ 827              		.section	.text.sim_it_handle,"ax",%progbits
+ 828              		.align	1
+ 829              		.global	sim_it_handle
+ 830              		.syntax unified
+ 831              		.thumb
+ 832              		.thumb_func
+ 834              	sim_it_handle:
+ 835              	.LFB446:
+ 267:SynaptiX_FDK/board/sx_board.c **** 
+ 268:SynaptiX_FDK/board/sx_board.c **** void sim_it_handle(){
+ 836              		.loc 1 268 21 is_stmt 1 view -0
+ 837              		.cfi_startproc
+ 838              		@ args = 0, pretend = 0, frame = 0
+ 839              		@ frame_needed = 0, uses_anonymous_args = 0
+ 840 0000 08B5     		push	{r3, lr}
+ 841              	.LCFI11:
+ 842              		.cfi_def_cfa_offset 8
+ 843              		.cfi_offset 3, -8
+ 844              		.cfi_offset 14, -4
+ 269:SynaptiX_FDK/board/sx_board.c ****     HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 845              		.loc 1 269 5 view .LVU208
+ 846 0002 0122     		movs	r2, #1
+ 847 0004 0249     		ldr	r1, .L35
+ 848 0006 0348     		ldr	r0, .L35+4
+ 849 0008 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 850              	.LVL50:
+ 270:SynaptiX_FDK/board/sx_board.c **** }
+ 851              		.loc 1 270 1 is_stmt 0 view .LVU209
+ 852 000c 08BD     		pop	{r3, pc}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 28
+
+
+ 853              	.L36:
+ 854 000e 00BF     		.align	2
+ 855              	.L35:
+ 856 0010 00000000 		.word	uart_rx_char
+ 857 0014 00000000 		.word	huart1
+ 858              		.cfi_endproc
+ 859              	.LFE446:
+ 861              		.section	.text.board_gps_uart_resume_it,"ax",%progbits
+ 862              		.align	1
+ 863              		.global	board_gps_uart_resume_it
+ 864              		.syntax unified
+ 865              		.thumb
+ 866              		.thumb_func
+ 868              	board_gps_uart_resume_it:
+ 869              	.LFB447:
+ 271:SynaptiX_FDK/board/sx_board.c **** 
+ 272:SynaptiX_FDK/board/sx_board.c **** void board_gps_uart_resume_it(void){
+ 870              		.loc 1 272 36 is_stmt 1 view -0
+ 871              		.cfi_startproc
+ 872              		@ args = 0, pretend = 0, frame = 0
+ 873              		@ frame_needed = 0, uses_anonymous_args = 0
+ 874 0000 08B5     		push	{r3, lr}
+ 875              	.LCFI12:
+ 876              		.cfi_def_cfa_offset 8
+ 877              		.cfi_offset 3, -8
+ 878              		.cfi_offset 14, -4
+ 273:SynaptiX_FDK/board/sx_board.c ****     sx_gps_uart_abort();
+ 879              		.loc 1 273 5 view .LVU211
+ 880 0002 FFF7FEFF 		bl	sx_gps_uart_abort
+ 881              	.LVL51:
+ 274:SynaptiX_FDK/board/sx_board.c ****     gps_it_handle();
+ 882              		.loc 1 274 5 view .LVU212
+ 883 0006 FFF7FEFF 		bl	gps_it_handle
+ 884              	.LVL52:
+ 275:SynaptiX_FDK/board/sx_board.c **** }
+ 885              		.loc 1 275 1 is_stmt 0 view .LVU213
+ 886 000a 08BD     		pop	{r3, pc}
+ 887              		.cfi_endproc
+ 888              	.LFE447:
+ 890              		.section	.text.board_sim_uart_resume_it,"ax",%progbits
+ 891              		.align	1
+ 892              		.global	board_sim_uart_resume_it
+ 893              		.syntax unified
+ 894              		.thumb
+ 895              		.thumb_func
+ 897              	board_sim_uart_resume_it:
+ 898              	.LFB448:
+ 276:SynaptiX_FDK/board/sx_board.c **** 
+ 277:SynaptiX_FDK/board/sx_board.c **** void board_sim_uart_resume_it(void){
+ 899              		.loc 1 277 36 is_stmt 1 view -0
+ 900              		.cfi_startproc
+ 901              		@ args = 0, pretend = 0, frame = 0
+ 902              		@ frame_needed = 0, uses_anonymous_args = 0
+ 903 0000 08B5     		push	{r3, lr}
+ 904              	.LCFI13:
+ 905              		.cfi_def_cfa_offset 8
+ 906              		.cfi_offset 3, -8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 29
+
+
+ 907              		.cfi_offset 14, -4
+ 278:SynaptiX_FDK/board/sx_board.c ****     sx_lte_uart_abort();
+ 908              		.loc 1 278 5 view .LVU215
+ 909 0002 FFF7FEFF 		bl	sx_lte_uart_abort
+ 910              	.LVL53:
+ 279:SynaptiX_FDK/board/sx_board.c ****     sim_it_handle();
+ 911              		.loc 1 279 5 view .LVU216
+ 912 0006 FFF7FEFF 		bl	sim_it_handle
+ 913              	.LVL54:
+ 280:SynaptiX_FDK/board/sx_board.c **** }
+ 914              		.loc 1 280 1 is_stmt 0 view .LVU217
+ 915 000a 08BD     		pop	{r3, pc}
+ 916              		.cfi_endproc
+ 917              	.LFE448:
+ 919              		.section	.text.sx_board_uart_resume_it,"ax",%progbits
+ 920              		.align	1
+ 921              		.global	sx_board_uart_resume_it
+ 922              		.syntax unified
+ 923              		.thumb
+ 924              		.thumb_func
+ 926              	sx_board_uart_resume_it:
+ 927              	.LFB449:
+ 281:SynaptiX_FDK/board/sx_board.c **** void sx_board_uart_resume_it(void) {
+ 928              		.loc 1 281 36 is_stmt 1 view -0
+ 929              		.cfi_startproc
+ 930              		@ args = 0, pretend = 0, frame = 0
+ 931              		@ frame_needed = 0, uses_anonymous_args = 0
+ 932 0000 08B5     		push	{r3, lr}
+ 933              	.LCFI14:
+ 934              		.cfi_def_cfa_offset 8
+ 935              		.cfi_offset 3, -8
+ 936              		.cfi_offset 14, -4
+ 282:SynaptiX_FDK/board/sx_board.c ****     // sx_sim76_uart_abort();
+ 283:SynaptiX_FDK/board/sx_board.c ****     // sx_gps_uart_abort();
+ 284:SynaptiX_FDK/board/sx_board.c ****     // HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 285:SynaptiX_FDK/board/sx_board.c ****     // HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ 286:SynaptiX_FDK/board/sx_board.c ****     board_gps_uart_resume_it();
+ 937              		.loc 1 286 5 view .LVU219
+ 938 0002 FFF7FEFF 		bl	board_gps_uart_resume_it
+ 939              	.LVL55:
+ 287:SynaptiX_FDK/board/sx_board.c ****     board_sim_uart_resume_it();
+ 940              		.loc 1 287 5 view .LVU220
+ 941 0006 FFF7FEFF 		bl	board_sim_uart_resume_it
+ 942              	.LVL56:
+ 288:SynaptiX_FDK/board/sx_board.c **** }
+ 943              		.loc 1 288 1 is_stmt 0 view .LVU221
+ 944 000a 08BD     		pop	{r3, pc}
+ 945              		.cfi_endproc
+ 946              	.LFE449:
+ 948              		.section	.rodata.tud_mount_cb.str1.4,"aMS",%progbits,1
+ 949              		.align	2
+ 950              	.LC8:
+ 951 0000 55534220 		.ascii	"USB tiny connected\000"
+ 951      74696E79 
+ 951      20636F6E 
+ 951      6E656374 
+ 951      656400
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 30
+
+
+ 952              		.section	.text.tud_mount_cb,"ax",%progbits
+ 953              		.align	1
+ 954              		.global	tud_mount_cb
+ 955              		.syntax unified
+ 956              		.thumb
+ 957              		.thumb_func
+ 959              	tud_mount_cb:
+ 960              	.LFB450:
+ 289:SynaptiX_FDK/board/sx_board.c **** 
+ 290:SynaptiX_FDK/board/sx_board.c **** // static void set_enter_sleep_mode(void) {
+ 291:SynaptiX_FDK/board/sx_board.c **** //     sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH); 
+ 292:SynaptiX_FDK/board/sx_board.c **** //     sx_gpio_write(&s_charge, SX_GPIO_LOW);
+ 293:SynaptiX_FDK/board/sx_board.c **** //     log_info(TAG, "Enter sleep POWER");
+ 294:SynaptiX_FDK/board/sx_board.c **** // }
+ 295:SynaptiX_FDK/board/sx_board.c **** 
+ 296:SynaptiX_FDK/board/sx_board.c **** /* USB IT CB    */
+ 297:SynaptiX_FDK/board/sx_board.c **** void tud_mount_cb(void) {
+ 961              		.loc 1 297 25 is_stmt 1 view -0
+ 962              		.cfi_startproc
+ 963              		@ args = 0, pretend = 0, frame = 0
+ 964              		@ frame_needed = 0, uses_anonymous_args = 0
+ 965 0000 08B5     		push	{r3, lr}
+ 966              	.LCFI15:
+ 967              		.cfi_def_cfa_offset 8
+ 968              		.cfi_offset 3, -8
+ 969              		.cfi_offset 14, -4
+ 298:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "USB tiny connected");
+ 970              		.loc 1 298 5 view .LVU223
+ 971 0002 034A     		ldr	r2, .L45
+ 972 0004 0349     		ldr	r1, .L45+4
+ 973 0006 0320     		movs	r0, #3
+ 974 0008 FFF7FEFF 		bl	log_func
+ 975              	.LVL57:
+ 299:SynaptiX_FDK/board/sx_board.c **** }
+ 976              		.loc 1 299 1 is_stmt 0 view .LVU224
+ 977 000c 08BD     		pop	{r3, pc}
+ 978              	.L46:
+ 979 000e 00BF     		.align	2
+ 980              	.L45:
+ 981 0010 00000000 		.word	.LC8
+ 982 0014 18000000 		.word	.LC1
+ 983              		.cfi_endproc
+ 984              	.LFE450:
+ 986              		.section	.rodata.tud_umount_cb.str1.4,"aMS",%progbits,1
+ 987              		.align	2
+ 988              	.LC9:
+ 989 0000 55534220 		.ascii	"USB discharge\000"
+ 989      64697363 
+ 989      68617267 
+ 989      6500
+ 990 000e 0000     		.align	2
+ 991              	.LC10:
+ 992 0010 55534220 		.ascii	"USB tiny disconnected\000"
+ 992      74696E79 
+ 992      20646973 
+ 992      636F6E6E 
+ 992      65637465 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 31
+
+
+ 993              		.section	.text.tud_umount_cb,"ax",%progbits
+ 994              		.align	1
+ 995              		.global	tud_umount_cb
+ 996              		.syntax unified
+ 997              		.thumb
+ 998              		.thumb_func
+ 1000              	tud_umount_cb:
+ 1001              	.LFB451:
+ 300:SynaptiX_FDK/board/sx_board.c **** 
+ 301:SynaptiX_FDK/board/sx_board.c **** void tud_umount_cb(void) {
+ 1002              		.loc 1 301 26 is_stmt 1 view -0
+ 1003              		.cfi_startproc
+ 1004              		@ args = 0, pretend = 0, frame = 0
+ 1005              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1006 0000 10B5     		push	{r4, lr}
+ 1007              	.LCFI16:
+ 1008              		.cfi_def_cfa_offset 8
+ 1009              		.cfi_offset 4, -8
+ 1010              		.cfi_offset 14, -4
+ 302:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG,"USB discharge");
+ 1011              		.loc 1 302 5 view .LVU226
+ 1012 0002 074C     		ldr	r4, .L49
+ 1013 0004 074A     		ldr	r2, .L49+4
+ 1014 0006 2146     		mov	r1, r4
+ 1015 0008 0320     		movs	r0, #3
+ 1016 000a FFF7FEFF 		bl	log_func
+ 1017              	.LVL58:
+ 303:SynaptiX_FDK/board/sx_board.c ****     app_request_sleep();
+ 1018              		.loc 1 303 5 view .LVU227
+ 1019 000e FFF7FEFF 		bl	app_request_sleep
+ 1020              	.LVL59:
+ 304:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "USB tiny disconnected");
+ 1021              		.loc 1 304 5 view .LVU228
+ 1022 0012 054A     		ldr	r2, .L49+8
+ 1023 0014 2146     		mov	r1, r4
+ 1024 0016 0320     		movs	r0, #3
+ 1025 0018 FFF7FEFF 		bl	log_func
+ 1026              	.LVL60:
+ 305:SynaptiX_FDK/board/sx_board.c **** }
+ 1027              		.loc 1 305 1 is_stmt 0 view .LVU229
+ 1028 001c 10BD     		pop	{r4, pc}
+ 1029              	.L50:
+ 1030 001e 00BF     		.align	2
+ 1031              	.L49:
+ 1032 0020 18000000 		.word	.LC1
+ 1033 0024 00000000 		.word	.LC9
+ 1034 0028 10000000 		.word	.LC10
+ 1035              		.cfi_endproc
+ 1036              	.LFE451:
+ 1038              		.section	.text.tud_suspend_cb,"ax",%progbits
+ 1039              		.align	1
+ 1040              		.global	tud_suspend_cb
+ 1041              		.syntax unified
+ 1042              		.thumb
+ 1043              		.thumb_func
+ 1045              	tud_suspend_cb:
+ 1046              	.LVL61:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 32
+
+
+ 1047              	.LFB452:
+ 306:SynaptiX_FDK/board/sx_board.c **** 
+ 307:SynaptiX_FDK/board/sx_board.c **** void tud_suspend_cb(bool remote_wakeup_en) {
+ 1048              		.loc 1 307 44 is_stmt 1 view -0
+ 1049              		.cfi_startproc
+ 1050              		@ args = 0, pretend = 0, frame = 0
+ 1051              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1052              		@ link register save eliminated.
+ 308:SynaptiX_FDK/board/sx_board.c **** 
+ 309:SynaptiX_FDK/board/sx_board.c **** }
+ 1053              		.loc 1 309 1 view .LVU231
+ 1054 0000 7047     		bx	lr
+ 1055              		.cfi_endproc
+ 1056              	.LFE452:
+ 1058              		.section	.rodata.tud_resume_cb.str1.4,"aMS",%progbits,1
+ 1059              		.align	2
+ 1060              	.LC11:
+ 1061 0000 55534220 		.ascii	"USB tiny resumed\000"
+ 1061      74696E79 
+ 1061      20726573 
+ 1061      756D6564 
+ 1061      00
+ 1062              		.section	.text.tud_resume_cb,"ax",%progbits
+ 1063              		.align	1
+ 1064              		.global	tud_resume_cb
+ 1065              		.syntax unified
+ 1066              		.thumb
+ 1067              		.thumb_func
+ 1069              	tud_resume_cb:
+ 1070              	.LFB453:
+ 310:SynaptiX_FDK/board/sx_board.c **** 
+ 311:SynaptiX_FDK/board/sx_board.c **** void tud_resume_cb(void) {
+ 1071              		.loc 1 311 26 view -0
+ 1072              		.cfi_startproc
+ 1073              		@ args = 0, pretend = 0, frame = 0
+ 1074              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1075 0000 08B5     		push	{r3, lr}
+ 1076              	.LCFI17:
+ 1077              		.cfi_def_cfa_offset 8
+ 1078              		.cfi_offset 3, -8
+ 1079              		.cfi_offset 14, -4
+ 312:SynaptiX_FDK/board/sx_board.c ****     log_info(TAG, "USB tiny resumed");
+ 1080              		.loc 1 312 5 view .LVU233
+ 1081 0002 034A     		ldr	r2, .L54
+ 1082 0004 0349     		ldr	r1, .L54+4
+ 1083 0006 0320     		movs	r0, #3
+ 1084 0008 FFF7FEFF 		bl	log_func
+ 1085              	.LVL62:
+ 313:SynaptiX_FDK/board/sx_board.c **** }
+ 1086              		.loc 1 313 1 is_stmt 0 view .LVU234
+ 1087 000c 08BD     		pop	{r3, pc}
+ 1088              	.L55:
+ 1089 000e 00BF     		.align	2
+ 1090              	.L54:
+ 1091 0010 00000000 		.word	.LC11
+ 1092 0014 18000000 		.word	.LC1
+ 1093              		.cfi_endproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 33
+
+
+ 1094              	.LFE453:
+ 1096              		.section	.text.HAL_UART_RxCpltCallback,"ax",%progbits
+ 1097              		.align	1
+ 1098              		.global	HAL_UART_RxCpltCallback
+ 1099              		.syntax unified
+ 1100              		.thumb
+ 1101              		.thumb_func
+ 1103              	HAL_UART_RxCpltCallback:
+ 1104              	.LVL63:
+ 1105              	.LFB454:
+ 314:SynaptiX_FDK/board/sx_board.c **** 
+ 315:SynaptiX_FDK/board/sx_board.c **** 
+ 316:SynaptiX_FDK/board/sx_board.c **** void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+ 317:SynaptiX_FDK/board/sx_board.c **** {
+ 1106              		.loc 1 317 1 is_stmt 1 view -0
+ 1107              		.cfi_startproc
+ 1108              		@ args = 0, pretend = 0, frame = 0
+ 1109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1110              		.loc 1 317 1 is_stmt 0 view .LVU236
+ 1111 0000 10B5     		push	{r4, lr}
+ 1112              	.LCFI18:
+ 1113              		.cfi_def_cfa_offset 8
+ 1114              		.cfi_offset 4, -8
+ 1115              		.cfi_offset 14, -4
+ 318:SynaptiX_FDK/board/sx_board.c ****     if(huart == hal_uart[UART_LTE]){
+ 1116              		.loc 1 318 5 is_stmt 1 view .LVU237
+ 1117              		.loc 1 318 7 is_stmt 0 view .LVU238
+ 1118 0002 284B     		ldr	r3, .L68
+ 1119 0004 9842     		cmp	r0, r3
+ 1120 0006 0CD0     		beq	.L63
+ 319:SynaptiX_FDK/board/sx_board.c ****         sx_uart_rx_callback(bsp_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 320:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 321:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_GPS]){
+ 1121              		.loc 1 321 12 is_stmt 1 view .LVU239
+ 1122              		.loc 1 321 14 is_stmt 0 view .LVU240
+ 1123 0008 274B     		ldr	r3, .L68+4
+ 1124 000a 9842     		cmp	r0, r3
+ 1125 000c 16D0     		beq	.L64
+ 322:SynaptiX_FDK/board/sx_board.c ****         sx_uart_rx_callback(bsp_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ 323:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ 324:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_LOG]){
+ 1126              		.loc 1 324 12 is_stmt 1 view .LVU241
+ 1127              		.loc 1 324 14 is_stmt 0 view .LVU242
+ 1128 000e 274B     		ldr	r3, .L68+8
+ 1129 0010 9842     		cmp	r0, r3
+ 1130 0012 20D0     		beq	.L65
+ 325:SynaptiX_FDK/board/sx_board.c ****         sx_uart_rx_callback(bsp_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+ 326:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+ 327:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_DUST]){
+ 1131              		.loc 1 327 12 is_stmt 1 view .LVU243
+ 1132              		.loc 1 327 14 is_stmt 0 view .LVU244
+ 1133 0014 264B     		ldr	r3, .L68+12
+ 1134 0016 9842     		cmp	r0, r3
+ 1135 0018 2AD0     		beq	.L66
+ 328:SynaptiX_FDK/board/sx_board.c ****         sx_uart_rx_callback(bsp_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+ 329:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+ 330:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_EXTEND]){
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 34
+
+
+ 1136              		.loc 1 330 12 is_stmt 1 view .LVU245
+ 1137              		.loc 1 330 14 is_stmt 0 view .LVU246
+ 1138 001a 264B     		ldr	r3, .L68+16
+ 1139 001c 9842     		cmp	r0, r3
+ 1140 001e 34D0     		beq	.L67
+ 1141              	.LVL64:
+ 1142              	.L56:
+ 331:SynaptiX_FDK/board/sx_board.c ****         sx_uart_rx_callback(bsp_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+ 332:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+ 333:SynaptiX_FDK/board/sx_board.c ****     }
+ 334:SynaptiX_FDK/board/sx_board.c **** }
+ 1143              		.loc 1 334 1 view .LVU247
+ 1144 0020 10BD     		pop	{r4, pc}
+ 1145              	.LVL65:
+ 1146              	.L63:
+ 319:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 1147              		.loc 1 319 9 is_stmt 1 view .LVU248
+ 1148 0022 254C     		ldr	r4, .L68+20
+ 1149 0024 0122     		movs	r2, #1
+ 1150 0026 2146     		mov	r1, r4
+ 1151 0028 244B     		ldr	r3, .L68+24
+ 1152 002a 1868     		ldr	r0, [r3]
+ 1153              	.LVL66:
+ 319:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+ 1154              		.loc 1 319 9 is_stmt 0 view .LVU249
+ 1155 002c FFF7FEFF 		bl	sx_uart_rx_callback
+ 1156              	.LVL67:
+ 320:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_GPS]){
+ 1157              		.loc 1 320 9 is_stmt 1 view .LVU250
+ 1158 0030 0122     		movs	r2, #1
+ 1159 0032 2146     		mov	r1, r4
+ 1160 0034 1B48     		ldr	r0, .L68
+ 1161 0036 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 1162              	.LVL68:
+ 1163 003a F1E7     		b	.L56
+ 1164              	.LVL69:
+ 1165              	.L64:
+ 322:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ 1166              		.loc 1 322 9 view .LVU251
+ 1167 003c 204C     		ldr	r4, .L68+28
+ 1168 003e 0122     		movs	r2, #1
+ 1169 0040 2146     		mov	r1, r4
+ 1170 0042 1E4B     		ldr	r3, .L68+24
+ 1171 0044 5868     		ldr	r0, [r3, #4]
+ 1172              	.LVL70:
+ 322:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+ 1173              		.loc 1 322 9 is_stmt 0 view .LVU252
+ 1174 0046 FFF7FEFF 		bl	sx_uart_rx_callback
+ 1175              	.LVL71:
+ 323:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_LOG]){
+ 1176              		.loc 1 323 9 is_stmt 1 view .LVU253
+ 1177 004a 0122     		movs	r2, #1
+ 1178 004c 2146     		mov	r1, r4
+ 1179 004e 1648     		ldr	r0, .L68+4
+ 1180 0050 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 1181              	.LVL72:
+ 1182 0054 E4E7     		b	.L56
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 35
+
+
+ 1183              	.LVL73:
+ 1184              	.L65:
+ 325:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+ 1185              		.loc 1 325 9 view .LVU254
+ 1186 0056 1B4C     		ldr	r4, .L68+32
+ 1187 0058 0122     		movs	r2, #1
+ 1188 005a 2146     		mov	r1, r4
+ 1189 005c 174B     		ldr	r3, .L68+24
+ 1190 005e 5869     		ldr	r0, [r3, #20]
+ 1191              	.LVL74:
+ 325:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+ 1192              		.loc 1 325 9 is_stmt 0 view .LVU255
+ 1193 0060 FFF7FEFF 		bl	sx_uart_rx_callback
+ 1194              	.LVL75:
+ 326:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_DUST]){
+ 1195              		.loc 1 326 9 is_stmt 1 view .LVU256
+ 1196 0064 0122     		movs	r2, #1
+ 1197 0066 2146     		mov	r1, r4
+ 1198 0068 1048     		ldr	r0, .L68+8
+ 1199 006a FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 1200              	.LVL76:
+ 1201 006e D7E7     		b	.L56
+ 1202              	.LVL77:
+ 1203              	.L66:
+ 328:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+ 1204              		.loc 1 328 9 view .LVU257
+ 1205 0070 154C     		ldr	r4, .L68+36
+ 1206 0072 0122     		movs	r2, #1
+ 1207 0074 2146     		mov	r1, r4
+ 1208 0076 114B     		ldr	r3, .L68+24
+ 1209 0078 D868     		ldr	r0, [r3, #12]
+ 1210              	.LVL78:
+ 328:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+ 1211              		.loc 1 328 9 is_stmt 0 view .LVU258
+ 1212 007a FFF7FEFF 		bl	sx_uart_rx_callback
+ 1213              	.LVL79:
+ 329:SynaptiX_FDK/board/sx_board.c ****     } else if(huart == hal_uart[UART_EXTEND]){
+ 1214              		.loc 1 329 9 is_stmt 1 view .LVU259
+ 1215 007e 0122     		movs	r2, #1
+ 1216 0080 2146     		mov	r1, r4
+ 1217 0082 0B48     		ldr	r0, .L68+12
+ 1218 0084 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 1219              	.LVL80:
+ 1220 0088 CAE7     		b	.L56
+ 1221              	.LVL81:
+ 1222              	.L67:
+ 331:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+ 1223              		.loc 1 331 9 view .LVU260
+ 1224 008a 104C     		ldr	r4, .L68+40
+ 1225 008c 0122     		movs	r2, #1
+ 1226 008e 2146     		mov	r1, r4
+ 1227 0090 0A4B     		ldr	r3, .L68+24
+ 1228 0092 1869     		ldr	r0, [r3, #16]
+ 1229              	.LVL82:
+ 331:SynaptiX_FDK/board/sx_board.c ****         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+ 1230              		.loc 1 331 9 is_stmt 0 view .LVU261
+ 1231 0094 FFF7FEFF 		bl	sx_uart_rx_callback
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 36
+
+
+ 1232              	.LVL83:
+ 332:SynaptiX_FDK/board/sx_board.c ****     }
+ 1233              		.loc 1 332 9 is_stmt 1 view .LVU262
+ 1234 0098 0122     		movs	r2, #1
+ 1235 009a 2146     		mov	r1, r4
+ 1236 009c 0548     		ldr	r0, .L68+16
+ 1237 009e FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 1238              	.LVL84:
+ 1239              		.loc 1 334 1 is_stmt 0 view .LVU263
+ 1240 00a2 BDE7     		b	.L56
+ 1241              	.L69:
+ 1242              		.align	2
+ 1243              	.L68:
+ 1244 00a4 00000000 		.word	huart1
+ 1245 00a8 00000000 		.word	huart2
+ 1246 00ac 00000000 		.word	huart6
+ 1247 00b0 00000000 		.word	huart4
+ 1248 00b4 00000000 		.word	huart5
+ 1249 00b8 00000000 		.word	uart_rx_char
+ 1250 00bc 00000000 		.word	bsp_uart
+ 1251 00c0 01000000 		.word	uart_rx_char+1
+ 1252 00c4 05000000 		.word	uart_rx_char+5
+ 1253 00c8 03000000 		.word	uart_rx_char+3
+ 1254 00cc 04000000 		.word	uart_rx_char+4
+ 1255              		.cfi_endproc
+ 1256              	.LFE454:
+ 1258              		.section	.rodata.tud_cdc_line_state_cb.str1.4,"aMS",%progbits,1
+ 1259              		.align	2
+ 1260              	.LC12:
+ 1261 0000 43444320 		.ascii	"CDC line state: dtr=%d rts=%d\000"
+ 1261      6C696E65 
+ 1261      20737461 
+ 1261      74653A20 
+ 1261      6474723D 
+ 1262 001e 0000     		.align	2
+ 1263              	.LC13:
+ 1264 0020 55534200 		.ascii	"USB\000"
+ 1265              		.section	.text.tud_cdc_line_state_cb,"ax",%progbits
+ 1266              		.align	1
+ 1267              		.global	tud_cdc_line_state_cb
+ 1268              		.syntax unified
+ 1269              		.thumb
+ 1270              		.thumb_func
+ 1272              	tud_cdc_line_state_cb:
+ 1273              	.LVL85:
+ 1274              	.LFB455:
+ 335:SynaptiX_FDK/board/sx_board.c **** 
+ 336:SynaptiX_FDK/board/sx_board.c **** void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
+ 1275              		.loc 1 336 61 is_stmt 1 view -0
+ 1276              		.cfi_startproc
+ 1277              		@ args = 0, pretend = 0, frame = 0
+ 1278              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1279              		.loc 1 336 61 is_stmt 0 view .LVU265
+ 1280 0000 00B5     		push	{lr}
+ 1281              	.LCFI19:
+ 1282              		.cfi_def_cfa_offset 4
+ 1283              		.cfi_offset 14, -4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 37
+
+
+ 1284 0002 83B0     		sub	sp, sp, #12
+ 1285              	.LCFI20:
+ 1286              		.cfi_def_cfa_offset 16
+ 1287 0004 0B46     		mov	r3, r1
+ 337:SynaptiX_FDK/board/sx_board.c ****     log_info("USB", "CDC line state: dtr=%d rts=%d", dtr, rts);
+ 1288              		.loc 1 337 5 is_stmt 1 view .LVU266
+ 1289 0006 0092     		str	r2, [sp]
+ 1290 0008 034A     		ldr	r2, .L72
+ 1291              	.LVL86:
+ 1292              		.loc 1 337 5 is_stmt 0 view .LVU267
+ 1293 000a 0449     		ldr	r1, .L72+4
+ 1294              	.LVL87:
+ 1295              		.loc 1 337 5 view .LVU268
+ 1296 000c 0320     		movs	r0, #3
+ 1297              	.LVL88:
+ 1298              		.loc 1 337 5 view .LVU269
+ 1299 000e FFF7FEFF 		bl	log_func
+ 1300              	.LVL89:
+ 338:SynaptiX_FDK/board/sx_board.c **** }...
+ 1301              		.loc 1 338 1 view .LVU270
+ 1302 0012 03B0     		add	sp, sp, #12
+ 1303              	.LCFI21:
+ 1304              		.cfi_def_cfa_offset 4
+ 1305              		@ sp needed
+ 1306 0014 00BD     		pop	{pc}
+ 1307              	.L73:
+ 1308 0016 00BF     		.align	2
+ 1309              	.L72:
+ 1310 0018 00000000 		.word	.LC12
+ 1311 001c 20000000 		.word	.LC13
+ 1312              		.cfi_endproc
+ 1313              	.LFE455:
+ 1315              		.section	.bss.uart_config.0,"aw",%nobits
+ 1316              		.align	2
+ 1319              	uart_config.0:
+ 1320 0000 00000000 		.space	72
+ 1320      00000000 
+ 1320      00000000 
+ 1320      00000000 
+ 1320      00000000 
+ 1321              		.section	.data.s_uart5_s1_pin,"aw"
+ 1322              		.align	2
+ 1325              	s_uart5_s1_pin:
+ 1326 0000 00080242 		.word	1107429376
+ 1327 0004 1000     		.short	16
+ 1328 0006 0000     		.space	2
+ 1329              		.section	.data.s_uart5_s0_pin,"aw"
+ 1330              		.align	2
+ 1333              	s_uart5_s0_pin:
+ 1334 0000 00000242 		.word	1107427328
+ 1335 0004 8000     		.short	128
+ 1336 0006 0000     		.space	2
+ 1337              		.section	.data.s_en_pw_dust_pin,"aw"
+ 1338              		.align	2
+ 1341              	s_en_pw_dust_pin:
+ 1342 0000 00000242 		.word	1107427328
+ 1343 0004 0002     		.short	512
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 38
+
+
+ 1344 0006 0000     		.space	2
+ 1345              		.section	.bss.s_en_pw_dust,"aw",%nobits
+ 1346              		.align	2
+ 1349              	s_en_pw_dust:
+ 1350 0000 00000000 		.space	12
+ 1350      00000000 
+ 1350      00000000 
+ 1351              		.section	.data.s_i2c1_reset_pin,"aw"
+ 1352              		.align	2
+ 1355              	s_i2c1_reset_pin:
+ 1356 0000 00040242 		.word	1107428352
+ 1357 0004 0001     		.short	256
+ 1358 0006 0000     		.space	2
+ 1359              		.section	.bss.s_i2c1_reset,"aw",%nobits
+ 1360              		.align	2
+ 1363              	s_i2c1_reset:
+ 1364 0000 00000000 		.space	12
+ 1364      00000000 
+ 1364      00000000 
+ 1365              		.section	.rodata.s_spi_cs_pin,"a"
+ 1366              		.align	2
+ 1369              	s_spi_cs_pin:
+ 1370 0000 00080242 		.word	1107429376
+ 1371 0004 0010     		.short	4096
+ 1372 0006 0000     		.space	2
+ 1373              		.section	.data.s_gps_rst_pin,"aw"
+ 1374              		.align	2
+ 1377              	s_gps_rst_pin:
+ 1378 0000 00080242 		.word	1107429376
+ 1379 0004 0020     		.short	8192
+ 1380 0006 0000     		.space	2
+ 1381              		.section	.data.s_gps_cpw_pin,"aw"
+ 1382              		.align	2
+ 1385              	s_gps_cpw_pin:
+ 1386 0000 00080242 		.word	1107429376
+ 1387 0004 0010     		.short	4096
+ 1388 0006 0000     		.space	2
+ 1389              		.section	.data.s_lte_reset_pin,"aw"
+ 1390              		.align	2
+ 1393              	s_lte_reset_pin:
+ 1394 0000 000C0242 		.word	1107430400
+ 1395 0004 0008     		.short	2048
+ 1396 0006 0000     		.space	2
+ 1397              		.section	.data.s_lte_pwrkey_pin,"aw"
+ 1398              		.align	2
+ 1401              	s_lte_pwrkey_pin:
+ 1402 0000 000C0242 		.word	1107430400
+ 1403 0004 0010     		.short	4096
+ 1404 0006 0000     		.space	2
+ 1405              		.section	.bss.uart_rx_char,"aw",%nobits
+ 1406              		.align	2
+ 1409              	uart_rx_char:
+ 1410 0000 00000000 		.space	6
+ 1410      0000
+ 1411              		.section	.bss.bsp_uart,"aw",%nobits
+ 1412              		.align	2
+ 1415              	bsp_uart:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 39
+
+
+ 1416 0000 00000000 		.space	24
+ 1416      00000000 
+ 1416      00000000 
+ 1416      00000000 
+ 1416      00000000 
+ 1417              		.global	board
+ 1418              		.section	.bss.board,"aw",%nobits
+ 1419              		.align	2
+ 1422              	board:
+ 1423 0000 00000000 		.space	57032
+ 1423      00000000 
+ 1423      00000000 
+ 1423      00000000 
+ 1423      00000000 
+ 1424              		.text
+ 1425              	.Letext0:
+ 1426              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1427              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1428              		.file 7 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1429              		.file 8 "Drivers/CMSIS/Device/ST/STM32H5xx/Include/stm32h563xx.h"
+ 1430              		.file 9 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_def.h"
+ 1431              		.file 10 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma.h"
+ 1432              		.file 11 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_dma_ex.h"
+ 1433              		.file 12 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_i2c.h"
+ 1434              		.file 13 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 1435              		.file 14 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_spi.h"
+ 1436              		.file 15 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_uart.h"
+ 1437              		.file 16 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_usb.h"
+ 1438              		.file 17 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal_pcd.h"
+ 1439              		.file 18 "Core/Inc/usart.h"
+ 1440              		.file 19 "SynaptiX_FDK/components/peripherals/spi/sx_spi.h"
+ 1441              		.file 20 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 1442              		.file 21 "SynaptiX_FDK/components/peripherals/uart/sx_uart.h"
+ 1443              		.file 22 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 1444              		.file 23 "SynaptiX_FDK/components/modules/gps/minmea.h"
+ 1445              		.file 24 "SynaptiX_FDK/components/modules/gps/gps.h"
+ 1446              		.file 25 "SynaptiX_FDK/components/modules/modem/modem.h"
+ 1447              		.file 26 "SynaptiX_FDK/components/modules/modem_ops/modem_ops.h"
+ 1448              		.file 27 "SynaptiX_FDK/components/modules/a76xx/a7677s.h"
+ 1449              		.file 28 "SynaptiX_FDK/components/modules/external_flash/sx_W25Q128.h"
+ 1450              		.file 29 "SynaptiX_FDK/app/user/sx_ex_storage/sx_ex_storage.h"
+ 1451              		.file 30 "SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.h"
+ 1452              		.file 31 "Core/Inc/spi.h"
+ 1453              		.file 32 "Core/Inc/i2c.h"
+ 1454              		.file 33 "SynaptiX_FDK/components/modules/rtc/sx_ex_rtc.h"
+ 1455              		.file 34 "SynaptiX_FDK/components/modules/imu/bno055.h"
+ 1456              		.file 35 "SynaptiX_FDK/components/modules/sps30/sensirion_uart_portdescriptor.h"
+ 1457              		.file 36 "SynaptiX_FDK/components/modules/sht3x/sht3x.h"
+ 1458              		.file 37 "SynaptiX_FDK/components/modules/ads1115/ads1115.h"
+ 1459              		.file 38 "Core/Inc/usb.h"
+ 1460              		.file 39 "SynaptiX_FDK/app/user/sx_msc/sx_user_msc.h"
+ 1461              		.file 40 "SynaptiX_FDK/services/logger/logger.h"
+ 1462              		.file 41 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 1463              		.file 42 "SynaptiX_FDK/components/modules/ze12a/ze12a.h"
+ 1464              		.file 43 "SynaptiX_FDK/components/modules/sps30/sensirion_uart_hal.h"
+ 1465              		.file 44 "SynaptiX_FDK/lib/tinyusb/src/device/usbd.h"
+ 1466              		.file 45 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 40
+
+
+ 1467              		.file 46 "SynaptiX_FDK/app/app.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 41
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_board.c
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:22     .text.log_print:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:27     .text.log_print:00000000 log_print
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:59     .text.log_print:00000014 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1422   .bss.board:00000000 board
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:64     .text.spi_storage_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:69     .text.spi_storage_init:00000000 spi_storage_init
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:100    .text.spi_storage_init:00000020 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1369   .rodata.s_spi_cs_pin:00000000 s_spi_cs_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:107    .text.sx_gps_uart_abort:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:112    .text.sx_gps_uart_abort:00000000 sx_gps_uart_abort
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:132    .text.sx_gps_uart_abort:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:137    .text.sx_lte_uart_abort:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:142    .text.sx_lte_uart_abort:00000000 sx_lte_uart_abort
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:162    .text.sx_lte_uart_abort:0000000c $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:167    .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:173    .text.sx_gettick:00000000 sx_gettick
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:195    .rodata.dcd_fs_msp_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:205    .text.dcd_fs_msp_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:211    .text.dcd_fs_msp_init:00000000 dcd_fs_msp_init
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:257    .text.dcd_fs_msp_init:0000002c $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:266    .text.USB_DRD_FS_IRQHandler:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:272    .text.USB_DRD_FS_IRQHandler:00000000 USB_DRD_FS_IRQHandler
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:293    .rodata.sx_board_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:309    .text.sx_board_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:315    .text.sx_board_init:00000000 sx_board_init
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:758    .text.sx_board_init:0000024c $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1319   .bss.uart_config.0:00000000 uart_config.0
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1415   .bss.bsp_uart:00000000 bsp_uart
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1355   .data.s_i2c1_reset_pin:00000000 s_i2c1_reset_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1401   .data.s_lte_pwrkey_pin:00000000 s_lte_pwrkey_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1393   .data.s_lte_reset_pin:00000000 s_lte_reset_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1377   .data.s_gps_rst_pin:00000000 s_gps_rst_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1385   .data.s_gps_cpw_pin:00000000 s_gps_cpw_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1349   .bss.s_en_pw_dust:00000000 s_en_pw_dust
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1341   .data.s_en_pw_dust_pin:00000000 s_en_pw_dust_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1325   .data.s_uart5_s1_pin:00000000 s_uart5_s1_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1333   .data.s_uart5_s0_pin:00000000 s_uart5_s0_pin
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1363   .bss.s_i2c1_reset:00000000 s_i2c1_reset
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1409   .bss.uart_rx_char:00000000 uart_rx_char
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:794    .text.gps_it_handle:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:800    .text.gps_it_handle:00000000 gps_it_handle
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:822    .text.gps_it_handle:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:828    .text.sim_it_handle:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:834    .text.sim_it_handle:00000000 sim_it_handle
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:856    .text.sim_it_handle:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:862    .text.board_gps_uart_resume_it:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:868    .text.board_gps_uart_resume_it:00000000 board_gps_uart_resume_it
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:891    .text.board_sim_uart_resume_it:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:897    .text.board_sim_uart_resume_it:00000000 board_sim_uart_resume_it
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:920    .text.sx_board_uart_resume_it:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:926    .text.sx_board_uart_resume_it:00000000 sx_board_uart_resume_it
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:949    .rodata.tud_mount_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:953    .text.tud_mount_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:959    .text.tud_mount_cb:00000000 tud_mount_cb
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:981    .text.tud_mount_cb:00000010 $d
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 42
+
+
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:987    .rodata.tud_umount_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:994    .text.tud_umount_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1000   .text.tud_umount_cb:00000000 tud_umount_cb
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1032   .text.tud_umount_cb:00000020 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1039   .text.tud_suspend_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1045   .text.tud_suspend_cb:00000000 tud_suspend_cb
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1059   .rodata.tud_resume_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1063   .text.tud_resume_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1069   .text.tud_resume_cb:00000000 tud_resume_cb
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1091   .text.tud_resume_cb:00000010 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1097   .text.HAL_UART_RxCpltCallback:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1103   .text.HAL_UART_RxCpltCallback:00000000 HAL_UART_RxCpltCallback
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1244   .text.HAL_UART_RxCpltCallback:000000a4 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1259   .rodata.tud_cdc_line_state_cb.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1266   .text.tud_cdc_line_state_cb:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1272   .text.tud_cdc_line_state_cb:00000000 tud_cdc_line_state_cb
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1310   .text.tud_cdc_line_state_cb:00000018 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1316   .bss.uart_config.0:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1322   .data.s_uart5_s1_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1330   .data.s_uart5_s0_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1338   .data.s_en_pw_dust_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1346   .bss.s_en_pw_dust:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1352   .data.s_i2c1_reset_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1360   .bss.s_i2c1_reset:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1366   .rodata.s_spi_cs_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1374   .data.s_gps_rst_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1382   .data.s_gps_cpw_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1390   .data.s_lte_reset_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1398   .data.s_lte_pwrkey_pin:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1406   .bss.uart_rx_char:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1412   .bss.bsp_uart:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s:1419   .bss.board:00000000 $d
+
+UNDEFINED SYMBOLS
+strlen
+sx_uart_write
+sx_storage_init
+hspi1
+HAL_UART_Abort
+huart2
+huart1
+HAL_GetTick
+log_func
+HAL_PCD_MspInit
+HAL_Delay
+hpcd_USB_DRD_FS
+dcd_int_handler
+sx_uart_init
+logger_init
+sx_user_msc_init
+sx_user_msc_create_disk
+sx_usb_tiny_init
+rx8130ce_init
+a7677s_init
+a7677s_set_full_apn
+HAL_UART_Receive_IT
+gps_init
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccSsJ5lh.s 			page 43
+
+
+bno055_init
+sensirion_uart_hal_init
+sht3x_init
+ADS1115_Init
+gas_sensor_init
+gas_sensor_get_uart
+huart6
+huart3
+huart4
+huart5
+sx_i2c_ops
+hi2c1
+a7677s_ops
+sx_gpio_ops
+app_request_sleep
+sx_uart_rx_callback

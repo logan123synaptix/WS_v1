@@ -1,0 +1,1652 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sx_usb_tiny_cdc.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c"
+  21              		.section	.rodata.usb_rx_task.str1.4,"aMS",%progbits,1
+  22              		.align	2
+  23              	.LC1:
+  24 0000 636F6E6E 		.ascii	"connected=%d available=%d\000"
+  24      65637465 
+  24      643D2564 
+  24      20617661 
+  24      696C6162 
+  25 001a 0000     		.align	2
+  26              	.LC2:
+  27 001c 53585F55 		.ascii	"SX_USB_TINY\000"
+  27      53425F54 
+  27      494E5900 
+  28              		.align	2
+  29              	.LC3:
+  30 0028 52582071 		.ascii	"RX queue full, byte dropped\000"
+  30      75657565 
+  30      2066756C 
+  30      6C2C2062 
+  30      79746520 
+  31              		.section	.text.usb_rx_task,"ax",%progbits
+  32              		.align	1
+  33              		.syntax unified
+  34              		.thumb
+  35              		.thumb_func
+  37              	usb_rx_task:
+  38              	.LVL0:
+  39              	.LFB434:
+   1:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include "sx_usb_tiny_cdc.h"
+   2:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include "sx_mem.h"
+   3:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include "sx_config.h"
+   4:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include "logger.h"
+   5:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include <string.h>
+   6:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include <stdarg.h>
+   7:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include <stdio.h>
+   8:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #include "sx_delay.h"
+   9:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** static const char *TAG = "SX_USB_TINY";
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 2
+
+
+  10:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  11:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #if (SX_PLATFORM == SX_PLATFORM_STM32H5) 
+  12:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     #include "stm32h5xx_hal.h"
+  13:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     #include "tusb.h"
+  14:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     #include "usb.h"
+  15:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #elif (SX_PLATFORM == SX_PLATFORM_STM32H7)
+  16:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     #include "stm32h7xx_hal_uart.h"
+  17:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #endif
+  18:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  19:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** void sx_usb_tiny_init(sx_usb_tiny_t *_usb, sx_usb_tiny_config_t *_config)
+  20:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** {
+  21:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->config    = _config;
+  22:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->connected = false;
+  23:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  24:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->rxBuffer = sx_malloc(_config->rx_buf_size);
+  25:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->rxQueue, _usb->rxBuffer,
+  26:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****                         _config->rx_buf_size, 1);
+  27:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  28:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->txBuffer = sx_malloc(_config->tx_buf_size);
+  29:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->txQueue, _usb->txBuffer,
+  30:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****                         _config->tx_buf_size, 1);
+  31:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  32:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     #if (SX_USE_OS == 1)
+  33:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     sx_os_mutex_new(&_usb->rxMutex);
+  34:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     #endif
+  35:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  36:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7
+  37:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     //dcd_fs_msp_init(0);
+  38:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  39:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     tusb_rhport_init_t dev_init = {
+  40:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         .role  = TUSB_ROLE_DEVICE,
+  41:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         .speed = TUSB_SPEED_AUTO,
+  42:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     };
+  43:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     tusb_init(BOARD_TUD_RHPORT, &dev_init);
+  44:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #endif
+  45:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  46:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     log_info(TAG, "CDC initialized, rx_buf=%lu tx_buf=%lu",
+  47:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****              _config->rx_buf_size, _config->tx_buf_size);
+  48:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+  49:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  50:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** /*RX_TASK*/
+  51:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** static void usb_rx_task(sx_usb_tiny_t *_usb)
+  52:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** {
+  40              		.loc 1 52 1 view -0
+  41              		.cfi_startproc
+  42              		@ args = 0, pretend = 0, frame = 64
+  43              		@ frame_needed = 0, uses_anonymous_args = 0
+  44              		.loc 1 52 1 is_stmt 0 view .LVU1
+  45 0000 70B5     		push	{r4, r5, r6, lr}
+  46              	.LCFI0:
+  47              		.cfi_def_cfa_offset 16
+  48              		.cfi_offset 4, -16
+  49              		.cfi_offset 5, -12
+  50              		.cfi_offset 6, -8
+  51              		.cfi_offset 14, -4
+  52 0002 92B0     		sub	sp, sp, #72
+  53              	.LCFI1:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 3
+
+
+  54              		.cfi_def_cfa_offset 88
+  55 0004 0546     		mov	r5, r0
+  53:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7
+  54:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     if(!tud_cdc_connected()) return;
+  56              		.loc 1 54 5 is_stmt 1 view .LVU2
+  57              	.LBB26:
+  58              	.LBI26:
+  59              		.file 2 "SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h"
+   1:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** /*
+   2:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * The MIT License (MIT)
+   3:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  *
+   4:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * Copyright (c) 2019 Ha Thach (tinyusb.org)
+   5:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  *
+   6:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * Permission is hereby granted, free of charge, to any person obtaining a copy
+   7:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * of this software and associated documentation files (the "Software"), to deal
+   8:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * in the Software without restriction, including without limitation the rights
+   9:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  10:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * copies of the Software, and to permit persons to whom the Software is
+  11:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * furnished to do so, subject to the following conditions:
+  12:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  *
+  13:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * The above copyright notice and this permission notice shall be included in
+  14:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * all copies or substantial portions of the Software.
+  15:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  *
+  16:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  17:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  18:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  19:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  20:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  21:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  22:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * THE SOFTWARE.
+  23:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  *
+  24:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  * This file is part of the TinyUSB stack.
+  25:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  */
+  26:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  27:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef TUSB_CDC_DEVICE_H_
+  28:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #define TUSB_CDC_DEVICE_H_
+  29:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  30:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #include "cdc.h"
+  31:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  32:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifdef __cplusplus
+  33:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  extern "C" {
+  34:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  35:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  36:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** //--------------------------------------------------------------------+
+  37:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Class Driver Configuration
+  38:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** //--------------------------------------------------------------------+
+  39:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_NOTIFY
+  40:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #define CFG_TUD_CDC_NOTIFY    0
+  41:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  42:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  43:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_TX_BUFSIZE
+  44:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #define CFG_TUD_CDC_TX_BUFSIZE TUD_EPSIZE_BULK_MAX
+  45:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  46:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  47:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_RX_BUFSIZE
+  48:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #define CFG_TUD_CDC_RX_BUFSIZE TUD_EPSIZE_BULK_MAX
+  49:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 4
+
+
+  50:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  51:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // EP_BUFSIZE is separated to RX_EPSIZE and TX_EPSIZE
+  52:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_RX_EPSIZE
+  53:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #ifdef CFG_TUD_CDC_EP_BUFSIZE
+  54:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****     #define CFG_TUD_CDC_RX_EPSIZE CFG_TUD_CDC_EP_BUFSIZE
+  55:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #else
+  56:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****     #define CFG_TUD_CDC_RX_EPSIZE TUD_EPSIZE_BULK_MAX
+  57:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #endif
+  58:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  59:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  60:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_TX_EPSIZE
+  61:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #ifdef CFG_TUD_CDC_EP_BUFSIZE
+  62:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****     #define CFG_TUD_CDC_TX_EPSIZE  CFG_TUD_CDC_EP_BUFSIZE
+  63:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #else
+  64:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****     #define CFG_TUD_CDC_TX_EPSIZE TUD_EPSIZE_BULK_MAX
+  65:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #endif
+  66:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  67:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  68:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Enable multi-packet RX transfer with ZLP termination for better throughput. Requires host suppor
+  69:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_RX_NEED_ZLP
+  70:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #define CFG_TUD_CDC_RX_NEED_ZLP 0
+  71:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  72:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  73:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Keep rx fifo data even with bus reset or disconnect
+  74:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_RX_PERSISTENT
+  75:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #define CFG_TUD_CDC_RX_PERSISTENT 0
+  76:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  77:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  78:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Keep tx fifo data even with bus reset or disconnect
+  79:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_TX_PERSISTENT
+  80:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #define CFG_TUD_CDC_TX_PERSISTENT 0
+  81:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  82:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  83:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // If not connected, tx fifo can be overwritten
+  84:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #ifndef CFG_TUD_CDC_TX_OVERWRITABLE_IF_NOT_CONNECTED
+  85:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   #define CFG_TUD_CDC_TX_OVERWRITABLE_IF_NOT_CONNECTED 1
+  86:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+  87:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  88:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Backward compatible: tud_cdc_configure_t and tud_cdc_configure() are no longer used.
+  89:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Configuration is now done via compile-time macros above.
+  90:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** typedef struct {
+  91:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   bool rx_persistent;
+  92:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   bool tx_persistent;
+  93:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   bool tx_overwritabe_if_not_connected;
+  94:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** } tud_cdc_configure_t;
+  95:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+  96:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #define tud_cdc_configure(_cfg)          ((void)(_cfg))
+  97:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #define tud_cdc_configure_fifo_t         tud_cdc_configure_t
+  98:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #define tud_cdc_configure_fifo(_cfg)     ((void)(_cfg))
+  99:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 100:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** //--------------------------------------------------------------------+
+ 101:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Application API (Multiple Ports) i.e. CFG_TUD_CDC > 1
+ 102:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** //--------------------------------------------------------------------+
+ 103:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 104:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Check if the interface is ready
+ 105:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** bool tud_cdc_n_ready(uint8_t itf);
+ 106:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 5
+
+
+ 107:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Check if the terminal is connected to this port
+ 108:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** bool tud_cdc_n_connected(uint8_t itf);
+ 109:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 110:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Get the current line state. Bit 0:  DTR (Data Terminal Ready), Bit 1: RTS (Request to Send)
+ 111:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** uint8_t tud_cdc_n_get_line_state(uint8_t itf);
+ 112:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 113:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Get current line encoding: bit rate, stop bits parity etc ..
+ 114:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** void tud_cdc_n_get_line_coding(uint8_t itf, cdc_line_coding_t* coding);
+ 115:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 116:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Set special character that will trigger tud_cdc_rx_wanted_cb() callback on receiving
+ 117:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** void tud_cdc_n_set_wanted_char(uint8_t itf, char wanted);
+ 118:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 119:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Get the number of bytes available for reading
+ 120:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** uint32_t tud_cdc_n_available(uint8_t itf);
+ 121:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 122:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Read received bytes
+ 123:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** uint32_t tud_cdc_n_read(uint8_t itf, void* buffer, uint32_t bufsize);
+ 124:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 125:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Read a byte, return -1 if there is none
+ 126:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline int32_t tud_cdc_n_read_char(uint8_t itf) {
+ 127:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   uint8_t ch;
+ 128:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_read(itf, &ch, 1) ? (int32_t) ch : -1;
+ 129:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 130:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 131:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Clear the received FIFO
+ 132:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** void tud_cdc_n_read_flush(uint8_t itf);
+ 133:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 134:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Get a byte from FIFO without removing it
+ 135:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** bool tud_cdc_n_peek(uint8_t itf, uint8_t* ui8);
+ 136:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 137:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Write bytes to TX FIFO, data may remain in the FIFO for a while
+ 138:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** uint32_t tud_cdc_n_write(uint8_t itf, void const* buffer, uint32_t bufsize);
+ 139:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 140:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Write a byte
+ 141:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_n_write_char(uint8_t itf, char ch) {
+ 142:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_write(itf, &ch, 1);
+ 143:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 144:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 145:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Write a null-terminated string
+ 146:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_n_write_str(uint8_t itf, char const* str) {
+ 147:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_write(itf, str, strlen(str));
+ 148:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 149:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 150:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Force sending data if possible, return number of forced bytes
+ 151:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** uint32_t tud_cdc_n_write_flush(uint8_t itf);
+ 152:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 153:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Return the number of bytes (characters) available for writing to TX FIFO buffer in a single n_wr
+ 154:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** uint32_t tud_cdc_n_write_available(uint8_t itf);
+ 155:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 156:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Clear the TX FIFO
+ 157:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** bool tud_cdc_n_write_clear(uint8_t itf);
+ 158:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 159:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #if CFG_TUD_CDC_NOTIFY
+ 160:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** bool tud_cdc_n_notify_msg(uint8_t itf, cdc_notify_msg_t *msg);
+ 161:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 162:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Send UART status notification: DCD, DSR etc ..
+ 163:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_cdc_n_notify_uart_state(uint8_t                       
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 6
+
+
+ 164:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****                                                                      const cdc_notify_uart_state_t 
+ 165:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   cdc_notify_msg_t notify_msg;
+ 166:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.bmRequestType = CDC_REQ_TYPE_NOTIF;
+ 167:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.bRequest      = CDC_NOTIF_SERIAL_STATE;
+ 168:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.wValue        = 0;
+ 169:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.wIndex        = 0; // filled later
+ 170:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.wLength       = sizeof(cdc_notify_uart_state_t);
+ 171:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.serial_state          = *state;
+ 172:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_notify_msg(itf, &notify_msg);
+ 173:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 174:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 175:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Send connection speed change notification
+ 176:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool
+ 177:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** tud_cdc_n_notify_conn_speed_change(uint8_t itf, const cdc_notify_conn_speed_change_t *conn_speed_ch
+ 178:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   cdc_notify_msg_t notify_msg;
+ 179:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.bmRequestType = CDC_REQ_TYPE_NOTIF;
+ 180:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.bRequest      = CDC_NOTIF_CONNECTION_SPEED_CHANGE;
+ 181:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.wValue        = 0;
+ 182:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.wIndex        = 0; // filled later
+ 183:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.request.wLength       = sizeof(cdc_notify_conn_speed_change_t);
+ 184:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   notify_msg.conn_speed_change     = *conn_speed_change;
+ 185:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_notify_msg(itf, &notify_msg);
+ 186:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 187:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 188:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_cdc_notify_msg(cdc_notify_msg_t *msg) {
+ 189:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_notify_msg(0, msg);
+ 190:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 191:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 192:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_cdc_notify_uart_state(const cdc_notify_uart_state_t* s
+ 193:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****  return tud_cdc_n_notify_uart_state(0, state);
+ 194:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 195:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 196:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_cdc_notify_conn_speed_change(const cdc_notify_conn_spe
+ 197:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_notify_conn_speed_change(0, conn_speed_change);
+ 198:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 199:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** #endif
+ 200:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 201:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** //--------------------------------------------------------------------+
+ 202:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** // Application API (Single Port)
+ 203:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** //--------------------------------------------------------------------+
+ 204:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 205:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_cdc_ready(void) {
+ 206:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_ready(0);
+ 207:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 208:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 209:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_cdc_connected(void) {
+  60              		.loc 2 209 42 view .LVU3
+  61              	.LBB27:
+ 210:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_connected(0);
+  62              		.loc 2 210 3 view .LVU4
+  63              		.loc 2 210 10 is_stmt 0 view .LVU5
+  64 0006 0020     		movs	r0, #0
+  65              	.LVL1:
+  66              		.loc 2 210 10 view .LVU6
+  67 0008 FFF7FEFF 		bl	tud_cdc_n_connected
+  68              	.LVL2:
+  69              	.LBE27:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 7
+
+
+  70              	.LBE26:
+  71              		.loc 1 54 7 discriminator 1 view .LVU7
+  72 000c 08B9     		cbnz	r0, .L9
+  73              	.L1:
+  55:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     if(!tud_cdc_available()) return;
+  56:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  57:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint8_t buf[64];
+  58:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     log_debug(TAG, "connected=%d available=%d", tud_cdc_connected(), tud_cdc_available());
+  59:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t count = tud_cdc_read(buf, sizeof(buf));
+  60:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     for(uint32_t i=0; i<count; i++){
+  62:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if (cqueue_send(&_usb->rxQueue, &buf[i]) == false) {
+  63:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             log_warn(TAG, "RX queue full, byte dropped");
+  64:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             break;
+  65:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         }
+  66:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     }
+  67:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #endif
+  68:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+  74              		.loc 1 68 1 view .LVU8
+  75 000e 12B0     		add	sp, sp, #72
+  76              	.LCFI2:
+  77              		.cfi_remember_state
+  78              		.cfi_def_cfa_offset 16
+  79              		@ sp needed
+  80 0010 70BD     		pop	{r4, r5, r6, pc}
+  81              	.LVL3:
+  82              	.L9:
+  83              	.LCFI3:
+  84              		.cfi_restore_state
+  55:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     if(!tud_cdc_available()) return;
+  85              		.loc 1 55 5 is_stmt 1 view .LVU9
+  86              	.LBB28:
+  87              	.LBI28:
+ 211:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 212:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 213:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint8_t tud_cdc_get_line_state(void) {
+ 214:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_get_line_state(0);
+ 215:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 216:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 217:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline void tud_cdc_get_line_coding(cdc_line_coding_t* coding) {
+ 218:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   tud_cdc_n_get_line_coding(0, coding);
+ 219:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 220:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 221:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline void tud_cdc_set_wanted_char(char wanted) {
+ 222:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   tud_cdc_n_set_wanted_char(0, wanted);
+ 223:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 224:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 225:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_available(void) {
+  88              		.loc 2 225 46 view .LVU10
+  89              	.LBB29:
+ 226:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_available(0);
+  90              		.loc 2 226 3 view .LVU11
+  91              		.loc 2 226 10 is_stmt 0 view .LVU12
+  92 0012 0020     		movs	r0, #0
+  93 0014 FFF7FEFF 		bl	tud_cdc_n_available
+  94              	.LVL4:
+  95              	.LBE29:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 8
+
+
+  96              	.LBE28:
+  55:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     if(!tud_cdc_available()) return;
+  97              		.loc 1 55 7 discriminator 1 view .LVU13
+  98 0018 0028     		cmp	r0, #0
+  99 001a F8D0     		beq	.L1
+  57:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     log_debug(TAG, "connected=%d available=%d", tud_cdc_connected(), tud_cdc_available());
+ 100              		.loc 1 57 5 is_stmt 1 view .LVU14
+  58:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t count = tud_cdc_read(buf, sizeof(buf));
+ 101              		.loc 1 58 5 view .LVU15
+ 102              	.LBB30:
+ 103              	.LBI30:
+ 209:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_connected(0);
+ 104              		.loc 2 209 42 view .LVU16
+ 105              	.LBB31:
+ 210:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 106              		.loc 2 210 3 view .LVU17
+ 210:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 107              		.loc 2 210 10 is_stmt 0 view .LVU18
+ 108 001c 0020     		movs	r0, #0
+ 109 001e FFF7FEFF 		bl	tud_cdc_n_connected
+ 110              	.LVL5:
+ 111 0022 0446     		mov	r4, r0
+ 112              	.LBE31:
+ 113              	.LBE30:
+ 114              	.LBB32:
+ 115              	.LBI32:
+ 225:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_available(0);
+ 116              		.loc 2 225 46 is_stmt 1 view .LVU19
+ 117              	.LBB33:
+ 118              		.loc 2 226 3 view .LVU20
+ 119              		.loc 2 226 10 is_stmt 0 view .LVU21
+ 120 0024 0020     		movs	r0, #0
+ 121 0026 FFF7FEFF 		bl	tud_cdc_n_available
+ 122              	.LVL6:
+ 123              	.LBE33:
+ 124              	.LBE32:
+  58:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t count = tud_cdc_read(buf, sizeof(buf));
+ 125              		.loc 1 58 5 discriminator 2 view .LVU22
+ 126 002a 0090     		str	r0, [sp]
+ 127 002c 2346     		mov	r3, r4
+ 128 002e 0E4A     		ldr	r2, .L11
+ 129 0030 0E49     		ldr	r1, .L11+4
+ 130 0032 0420     		movs	r0, #4
+ 131 0034 FFF7FEFF 		bl	log_func
+ 132              	.LVL7:
+  59:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 133              		.loc 1 59 5 is_stmt 1 view .LVU23
+ 134              	.LBB34:
+ 135              	.LBI34:
+ 227:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 228:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 229:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline int32_t tud_cdc_read_char(void) {
+ 230:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_read_char(0);
+ 231:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 232:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 233:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_read(void* buffer, uint32_t bufsize) {
+ 136              		.loc 2 233 46 view .LVU24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 9
+
+
+ 137              	.LBB35:
+ 234:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_read(0, buffer, bufsize);
+ 138              		.loc 2 234 3 view .LVU25
+ 139              		.loc 2 234 10 is_stmt 0 view .LVU26
+ 140 0038 4022     		movs	r2, #64
+ 141 003a 02A9     		add	r1, sp, #8
+ 142              	.LVL8:
+ 143              		.loc 2 234 10 view .LVU27
+ 144 003c 0020     		movs	r0, #0
+ 145 003e FFF7FEFF 		bl	tud_cdc_n_read
+ 146              	.LVL9:
+ 147              		.loc 2 234 10 view .LVU28
+ 148 0042 0646     		mov	r6, r0
+ 149              	.LVL10:
+ 150              		.loc 2 234 10 view .LVU29
+ 151              	.LBE35:
+ 152              	.LBE34:
+  61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if (cqueue_send(&_usb->rxQueue, &buf[i]) == false) {
+ 153              		.loc 1 61 5 is_stmt 1 view .LVU30
+ 154              	.LBB36:
+  61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if (cqueue_send(&_usb->rxQueue, &buf[i]) == false) {
+ 155              		.loc 1 61 9 view .LVU31
+  61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if (cqueue_send(&_usb->rxQueue, &buf[i]) == false) {
+ 156              		.loc 1 61 18 is_stmt 0 view .LVU32
+ 157 0044 0024     		movs	r4, #0
+ 158              	.LVL11:
+ 159              	.L3:
+  61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if (cqueue_send(&_usb->rxQueue, &buf[i]) == false) {
+ 160              		.loc 1 61 24 is_stmt 1 discriminator 1 view .LVU33
+ 161 0046 B442     		cmp	r4, r6
+ 162 0048 E1D2     		bcs	.L1
+  62:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             log_warn(TAG, "RX queue full, byte dropped");
+ 163              		.loc 1 62 9 view .LVU34
+  62:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             log_warn(TAG, "RX queue full, byte dropped");
+ 164              		.loc 1 62 13 is_stmt 0 view .LVU35
+ 165 004a 02A9     		add	r1, sp, #8
+ 166 004c 2144     		add	r1, r1, r4
+ 167 004e 05F10800 		add	r0, r5, #8
+ 168 0052 FFF7FEFF 		bl	cqueue_send
+ 169              	.LVL12:
+  62:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             log_warn(TAG, "RX queue full, byte dropped");
+ 170              		.loc 1 62 12 discriminator 1 view .LVU36
+ 171 0056 08B1     		cbz	r0, .L10
+  61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if (cqueue_send(&_usb->rxQueue, &buf[i]) == false) {
+ 172              		.loc 1 61 33 is_stmt 1 discriminator 2 view .LVU37
+ 173 0058 0134     		adds	r4, r4, #1
+ 174              	.LVL13:
+  61:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if (cqueue_send(&_usb->rxQueue, &buf[i]) == false) {
+ 175              		.loc 1 61 33 is_stmt 0 discriminator 2 view .LVU38
+ 176 005a F4E7     		b	.L3
+ 177              	.LVL14:
+ 178              	.L10:
+  63:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             break;
+ 179              		.loc 1 63 13 is_stmt 1 view .LVU39
+ 180 005c 044A     		ldr	r2, .L11+8
+ 181 005e 0349     		ldr	r1, .L11+4
+ 182 0060 0220     		movs	r0, #2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 10
+
+
+ 183 0062 FFF7FEFF 		bl	log_func
+ 184              	.LVL15:
+  64:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         }
+ 185              		.loc 1 64 13 view .LVU40
+ 186 0066 D2E7     		b	.L1
+ 187              	.L12:
+ 188              		.align	2
+ 189              	.L11:
+ 190 0068 00000000 		.word	.LC1
+ 191 006c 1C000000 		.word	.LC2
+ 192 0070 28000000 		.word	.LC3
+ 193              	.LBE36:
+ 194              		.cfi_endproc
+ 195              	.LFE434:
+ 197              		.section	.text.sx_gettick,"ax",%progbits
+ 198              		.align	1
+ 199              		.global	sx_gettick
+ 200              		.syntax unified
+ 201              		.thumb
+ 202              		.thumb_func
+ 204              	sx_gettick:
+ 205              	.LFB336:
+ 206              		.file 3 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 11
+
+
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 12
+
+
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 13
+
+
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 207              		.loc 3 186 33 view -0
+ 208              		.cfi_startproc
+ 209              		@ args = 0, pretend = 0, frame = 0
+ 210              		@ frame_needed = 0, uses_anonymous_args = 0
+ 211 0000 08B5     		push	{r3, lr}
+ 212              	.LCFI4:
+ 213              		.cfi_def_cfa_offset 8
+ 214              		.cfi_offset 3, -8
+ 215              		.cfi_offset 14, -4
+ 216              		.loc 3 186 34 view .LVU42
+ 217              		.loc 3 186 41 is_stmt 0 view .LVU43
+ 218 0002 FFF7FEFF 		bl	HAL_GetTick
+ 219              	.LVL16:
+ 220              		.loc 3 186 55 view .LVU44
+ 221 0006 08BD     		pop	{r3, pc}
+ 222              		.cfi_endproc
+ 223              	.LFE336:
+ 225              		.section	.rodata.sx_usb_tiny_init.str1.4,"aMS",%progbits,1
+ 226              		.align	2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 14
+
+
+ 227              	.LC4:
+ 228 0000 43444320 		.ascii	"CDC initialized, rx_buf=%lu tx_buf=%lu\000"
+ 228      696E6974 
+ 228      69616C69 
+ 228      7A65642C 
+ 228      2072785F 
+ 229              		.section	.text.sx_usb_tiny_init,"ax",%progbits
+ 230              		.align	1
+ 231              		.global	sx_usb_tiny_init
+ 232              		.syntax unified
+ 233              		.thumb
+ 234              		.thumb_func
+ 236              	sx_usb_tiny_init:
+ 237              	.LVL17:
+ 238              	.LFB433:
+  20:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->config    = _config;
+ 239              		.loc 1 20 1 is_stmt 1 view -0
+ 240              		.cfi_startproc
+ 241              		@ args = 0, pretend = 0, frame = 8
+ 242              		@ frame_needed = 0, uses_anonymous_args = 0
+  20:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->config    = _config;
+ 243              		.loc 1 20 1 is_stmt 0 view .LVU46
+ 244 0000 70B5     		push	{r4, r5, r6, lr}
+ 245              	.LCFI5:
+ 246              		.cfi_def_cfa_offset 16
+ 247              		.cfi_offset 4, -16
+ 248              		.cfi_offset 5, -12
+ 249              		.cfi_offset 6, -8
+ 250              		.cfi_offset 14, -4
+ 251 0002 84B0     		sub	sp, sp, #16
+ 252              	.LCFI6:
+ 253              		.cfi_def_cfa_offset 32
+ 254 0004 0546     		mov	r5, r0
+ 255 0006 0C46     		mov	r4, r1
+  21:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->connected = false;
+ 256              		.loc 1 21 5 is_stmt 1 view .LVU47
+  21:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->connected = false;
+ 257              		.loc 1 21 21 is_stmt 0 view .LVU48
+ 258 0008 0160     		str	r1, [r0]
+  22:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 259              		.loc 1 22 5 is_stmt 1 view .LVU49
+  22:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 260              		.loc 1 22 21 is_stmt 0 view .LVU50
+ 261 000a 0026     		movs	r6, #0
+ 262 000c 80F83C60 		strb	r6, [r0, #60]
+  24:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->rxQueue, _usb->rxBuffer,
+ 263              		.loc 1 24 5 is_stmt 1 view .LVU51
+  24:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->rxQueue, _usb->rxBuffer,
+ 264              		.loc 1 24 22 is_stmt 0 view .LVU52
+ 265 0010 0868     		ldr	r0, [r1]
+ 266              	.LVL18:
+  24:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->rxQueue, _usb->rxBuffer,
+ 267              		.loc 1 24 22 view .LVU53
+ 268 0012 FFF7FEFF 		bl	sx_malloc
+ 269              	.LVL19:
+  24:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->rxQueue, _usb->rxBuffer,
+ 270              		.loc 1 24 22 view .LVU54
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 15
+
+
+ 271 0016 0146     		mov	r1, r0
+  24:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->rxQueue, _usb->rxBuffer,
+ 272              		.loc 1 24 20 discriminator 1 view .LVU55
+ 273 0018 6860     		str	r0, [r5, #4]
+  25:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****                         _config->rx_buf_size, 1);
+ 274              		.loc 1 25 5 is_stmt 1 view .LVU56
+ 275 001a 0123     		movs	r3, #1
+ 276 001c 2268     		ldr	r2, [r4]
+ 277 001e 05F10800 		add	r0, r5, #8
+ 278 0022 FFF7FEFF 		bl	cqueue_init_static
+ 279              	.LVL20:
+  28:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->txQueue, _usb->txBuffer,
+ 280              		.loc 1 28 5 view .LVU57
+  28:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->txQueue, _usb->txBuffer,
+ 281              		.loc 1 28 22 is_stmt 0 view .LVU58
+ 282 0026 6068     		ldr	r0, [r4, #4]
+ 283 0028 FFF7FEFF 		bl	sx_malloc
+ 284              	.LVL21:
+ 285 002c 0146     		mov	r1, r0
+  28:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     cqueue_init_static(&_usb->txQueue, _usb->txBuffer,
+ 286              		.loc 1 28 20 discriminator 1 view .LVU59
+ 287 002e 2862     		str	r0, [r5, #32]
+  29:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****                         _config->tx_buf_size, 1);
+ 288              		.loc 1 29 5 is_stmt 1 view .LVU60
+ 289 0030 0123     		movs	r3, #1
+ 290 0032 6268     		ldr	r2, [r4, #4]
+ 291 0034 05F12400 		add	r0, r5, #36
+ 292 0038 FFF7FEFF 		bl	cqueue_init_static
+ 293              	.LVL22:
+  39:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         .role  = TUSB_ROLE_DEVICE,
+ 294              		.loc 1 39 5 view .LVU61
+  39:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         .role  = TUSB_ROLE_DEVICE,
+ 295              		.loc 1 39 24 is_stmt 0 view .LVU62
+ 296 003c 084B     		ldr	r3, .L17
+ 297 003e 1B88     		ldrh	r3, [r3]
+ 298 0040 ADF80C30 		strh	r3, [sp, #12]	@ movhi
+  43:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #endif
+ 299              		.loc 1 43 5 is_stmt 1 view .LVU63
+ 300 0044 03A9     		add	r1, sp, #12
+ 301 0046 3046     		mov	r0, r6
+ 302 0048 FFF7FEFF 		bl	tusb_rhport_init
+ 303              	.LVL23:
+  46:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****              _config->rx_buf_size, _config->tx_buf_size);
+ 304              		.loc 1 46 5 view .LVU64
+ 305 004c 6368     		ldr	r3, [r4, #4]
+ 306 004e 0093     		str	r3, [sp]
+ 307 0050 2368     		ldr	r3, [r4]
+ 308 0052 044A     		ldr	r2, .L17+4
+ 309 0054 0449     		ldr	r1, .L17+8
+ 310 0056 0320     		movs	r0, #3
+ 311 0058 FFF7FEFF 		bl	log_func
+ 312              	.LVL24:
+  48:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 313              		.loc 1 48 1 is_stmt 0 view .LVU65
+ 314 005c 04B0     		add	sp, sp, #16
+ 315              	.LCFI7:
+ 316              		.cfi_def_cfa_offset 16
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 16
+
+
+ 317              		@ sp needed
+ 318 005e 70BD     		pop	{r4, r5, r6, pc}
+ 319              	.LVL25:
+ 320              	.L18:
+  48:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 321              		.loc 1 48 1 view .LVU66
+ 322              		.align	2
+ 323              	.L17:
+ 324 0060 00000000 		.word	.LANCHOR0
+ 325 0064 00000000 		.word	.LC4
+ 326 0068 1C000000 		.word	.LC2
+ 327              		.cfi_endproc
+ 328              	.LFE433:
+ 330              		.section	.text.sx_usb_tiny_read,"ax",%progbits
+ 331              		.align	1
+ 332              		.global	sx_usb_tiny_read
+ 333              		.syntax unified
+ 334              		.thumb
+ 335              		.thumb_func
+ 337              	sx_usb_tiny_read:
+ 338              	.LVL26:
+ 339              	.LFB437:
+  69:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  70:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** void sx_usb_tiny_process(sx_usb_tiny_t *_usb){
+  71:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7
+  72:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     tud_task();
+  73:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->connected = sx_usb_tiny_connected(_usb);
+  74:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     usb_rx_task(_usb);
+  75:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #endif
+  76:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+  77:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  78:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** void sx_usb_tiny_write(sx_usb_tiny_t *_usb, const uint8_t *_data, uint32_t _len){
+  79:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     if(!sx_usb_tiny_connected(_usb)) 
+  80:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         return;
+  81:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     log_debug(TAG, "USB write: %lu bytes", _len);
+  82:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  83:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7
+  84:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t sent = 0;
+  85:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     while(sent < _len){
+  86:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         uint32_t written = tud_cdc_write(_data + sent, _len - sent);
+  87:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         sent += written;
+  88:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         tud_cdc_write_flush();
+  89:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if(written == 0)
+  90:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             tud_task();
+  91:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     }
+  92:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #endif
+  93:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+  94:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+  95:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** int sx_usb_tiny_read(sx_usb_tiny_t *_usb, uint8_t *_data,
+  96:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****                      uint32_t _len, uint32_t _timeoutMS)
+  97:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** {
+ 340              		.loc 1 97 1 is_stmt 1 view -0
+ 341              		.cfi_startproc
+ 342              		@ args = 0, pretend = 0, frame = 0
+ 343              		@ frame_needed = 0, uses_anonymous_args = 0
+ 344              		.loc 1 97 1 is_stmt 0 view .LVU68
+ 345 0000 2DE9F843 		push	{r3, r4, r5, r6, r7, r8, r9, lr}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 17
+
+
+ 346              	.LCFI8:
+ 347              		.cfi_def_cfa_offset 32
+ 348              		.cfi_offset 3, -32
+ 349              		.cfi_offset 4, -28
+ 350              		.cfi_offset 5, -24
+ 351              		.cfi_offset 6, -20
+ 352              		.cfi_offset 7, -16
+ 353              		.cfi_offset 8, -12
+ 354              		.cfi_offset 9, -8
+ 355              		.cfi_offset 14, -4
+ 356 0004 8146     		mov	r9, r0
+ 357 0006 8846     		mov	r8, r1
+ 358 0008 1646     		mov	r6, r2
+ 359 000a 1F46     		mov	r7, r3
+  98:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t len  = 0;
+ 360              		.loc 1 98 5 is_stmt 1 view .LVU69
+ 361              	.LVL27:
+  99:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t time = 0;
+ 362              		.loc 1 99 5 view .LVU70
+ 100:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     while(len < _len && time < _timeoutMS){
+ 363              		.loc 1 100 5 view .LVU71
+  99:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t time = 0;
+ 364              		.loc 1 99 14 is_stmt 0 view .LVU72
+ 365 000c 0025     		movs	r5, #0
+  98:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     uint32_t len  = 0;
+ 366              		.loc 1 98 14 view .LVU73
+ 367 000e 2C46     		mov	r4, r5
+ 368              		.loc 1 100 10 view .LVU74
+ 369 0010 05E0     		b	.L20
+ 370              	.LVL28:
+ 371              	.L21:
+ 101:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if(cqueue_receive(&_usb->rxQueue, _data + len)){
+ 102:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             len++;
+ 103:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         } else {
+ 104:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             tud_task();
+ 372              		.loc 1 104 13 is_stmt 1 view .LVU75
+ 373              	.LBB37:
+ 374              	.LBI37:
+ 375              		.file 4 "SynaptiX_FDK/lib/tinyusb/src/device/usbd.h"
+   1:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** /*
+   2:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * The MIT License (MIT)
+   3:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  *
+   4:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * Copyright (c) 2019 Ha Thach (tinyusb.org)
+   5:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  *
+   6:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * Permission is hereby granted, free of charge, to any person obtaining a copy
+   7:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * of this software and associated documentation files (the "Software"), to deal
+   8:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * in the Software without restriction, including without limitation the rights
+   9:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  10:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * copies of the Software, and to permit persons to whom the Software is
+  11:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * furnished to do so, subject to the following conditions:
+  12:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  *
+  13:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * The above copyright notice and this permission notice shall be included in
+  14:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * all copies or substantial portions of the Software.
+  15:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  *
+  16:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  17:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  18:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 18
+
+
+  19:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  20:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  21:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  22:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * THE SOFTWARE.
+  23:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  *
+  24:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  * This file is part of the TinyUSB stack.
+  25:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****  */
+  26:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  27:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** #ifndef TUSB_USBD_H_
+  28:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** #define TUSB_USBD_H_
+  29:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  30:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** #include "common/tusb_common.h"
+  31:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  32:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** #ifdef __cplusplus
+  33:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** extern "C" {
+  34:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** #endif
+  35:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  36:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // ConfigID for tud_configure()
+  37:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** enum {
+  38:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   TUD_CFGID_INVALID = 0,
+  39:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   TUD_CFGID_DWC2 = 100,
+  40:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** };
+  41:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  42:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** typedef struct {
+  43:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   uint16_t bm_double_buffered; // bitmap of IN endpoints to be double buffered, only effective for 
+  44:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   bool vbus_sensing; // Vbus pin is used for device connection detection, mandatory for tud_umount_
+  45:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** } tud_configure_dwc2_t;
+  46:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  47:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   #ifndef CFG_TUD_CONFIGURE_DWC2_DEFAULT
+  48:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****     #define CFG_TUD_CONFIGURE_DWC2_DEFAULT {.bm_double_buffered = 0, .vbus_sensing = CFG_TUD_VBUS_D
+  49:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   #endif
+  50:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  51:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** typedef union {
+  52:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   tud_configure_dwc2_t dwc2;
+  53:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** } tud_configure_param_t;
+  54:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  55:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** //--------------------------------------------------------------------+
+  56:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Application API
+  57:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** //--------------------------------------------------------------------+
+  58:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  59:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Configure device stack behavior with dynamic or port-specific parameters.
+  60:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Should be called before initialization of the device stack
+  61:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // - cfg_id   : configure ID from TUD_CFGID_* enum values
+  62:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // - cfg_param: configure data, structure depends on the ID
+  63:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** bool tud_configure(uint8_t rhport, uint32_t cfg_id, const void* cfg_param);
+  64:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  65:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // New API to replace tud_init() to init device stack on specific roothub port
+  66:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Must be called in the same task/context as tud_task() if RTOS is used
+  67:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** bool tud_rhport_init(uint8_t rhport, const tusb_rhport_init_t* rh_init);
+  68:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  69:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Init device stack on roothub port
+  70:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** #if TUSB_VERSION_NUMBER > 2000  // 0.20.0
+  71:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** TU_ATTR_DEPRECATED("Please use tusb_init(rhport, rh_init) instead")
+  72:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** #endif
+  73:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_init (uint8_t rhport) {
+  74:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   const tusb_rhport_init_t rh_init = {
+  75:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****     .role = TUSB_ROLE_DEVICE,
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 19
+
+
+  76:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****     .speed = TUD_OPT_HIGH_SPEED ? TUSB_SPEED_HIGH : TUSB_SPEED_FULL
+  77:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   };
+  78:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   return tud_rhport_init(rhport, &rh_init);
+  79:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** }
+  80:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  81:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Deinit device stack on roothub port
+  82:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Must be called in the same task/context as tud_task() if RTOS is used
+  83:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** bool tud_deinit(uint8_t rhport);
+  84:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  85:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Check if device stack is already initialized
+  86:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** bool tud_inited(void);
+  87:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  88:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Task function should be called in main/rtos loop, extended version of tud_task()
+  89:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // - timeout_ms: millisecond to wait, zero = no wait, 0xFFFFFFFF = wait forever
+  90:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // - in_isr: if function is called in ISR
+  91:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** void tud_task_ext(uint32_t timeout_ms, bool in_isr);
+  92:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** 
+  93:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** // Task function should be called in main/rtos loop
+  94:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** TU_ATTR_ALWAYS_INLINE static inline
+  95:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h **** void tud_task (void) {
+ 376              		.loc 4 95 6 view .LVU76
+ 377              	.LBB38:
+  96:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   tud_task_ext(UINT32_MAX, false);
+ 378              		.loc 4 96 3 view .LVU77
+ 379 0012 0021     		movs	r1, #0
+ 380 0014 4FF0FF30 		mov	r0, #-1
+ 381 0018 FFF7FEFF 		bl	tud_task_ext
+ 382              	.LVL29:
+ 383              	.LBE38:
+ 384              	.LBE37:
+ 105:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             //sx_delay_ms(1);
+ 106:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             time++;
+ 385              		.loc 1 106 13 view .LVU78
+ 386              		.loc 1 106 17 is_stmt 0 view .LVU79
+ 387 001c 0135     		adds	r5, r5, #1
+ 388              	.LVL30:
+ 389              	.L20:
+ 100:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if(cqueue_receive(&_usb->rxQueue, _data + len)){
+ 390              		.loc 1 100 22 is_stmt 1 view .LVU80
+ 391 001e B442     		cmp	r4, r6
+ 392 0020 0BD2     		bcs	.L23
+ 100:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if(cqueue_receive(&_usb->rxQueue, _data + len)){
+ 393              		.loc 1 100 22 is_stmt 0 discriminator 1 view .LVU81
+ 394 0022 BD42     		cmp	r5, r7
+ 395 0024 09D2     		bcs	.L23
+ 101:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             len++;
+ 396              		.loc 1 101 9 is_stmt 1 view .LVU82
+ 101:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             len++;
+ 397              		.loc 1 101 12 is_stmt 0 view .LVU83
+ 398 0026 08EB0401 		add	r1, r8, r4
+ 399 002a 09F10800 		add	r0, r9, #8
+ 400 002e FFF7FEFF 		bl	cqueue_receive
+ 401              	.LVL31:
+ 101:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             len++;
+ 402              		.loc 1 101 11 discriminator 1 view .LVU84
+ 403 0032 0028     		cmp	r0, #0
+ 404 0034 EDD0     		beq	.L21
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 20
+
+
+ 102:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         } else {
+ 405              		.loc 1 102 13 is_stmt 1 view .LVU85
+ 102:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         } else {
+ 406              		.loc 1 102 16 is_stmt 0 view .LVU86
+ 407 0036 0134     		adds	r4, r4, #1
+ 408              	.LVL32:
+ 102:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         } else {
+ 409              		.loc 1 102 16 view .LVU87
+ 410 0038 F1E7     		b	.L20
+ 411              	.L23:
+ 107:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         }
+ 108:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     }
+ 109:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     return (int)len;
+ 412              		.loc 1 109 5 is_stmt 1 view .LVU88
+ 110:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+ 413              		.loc 1 110 1 is_stmt 0 view .LVU89
+ 414 003a 2046     		mov	r0, r4
+ 415 003c BDE8F883 		pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+ 416              		.loc 1 110 1 view .LVU90
+ 417              		.cfi_endproc
+ 418              	.LFE437:
+ 420              		.section	.text.sx_usb_tiny_connected,"ax",%progbits
+ 421              		.align	1
+ 422              		.global	sx_usb_tiny_connected
+ 423              		.syntax unified
+ 424              		.thumb
+ 425              		.thumb_func
+ 427              	sx_usb_tiny_connected:
+ 428              	.LVL33:
+ 429              	.LFB438:
+ 111:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 112:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** bool sx_usb_tiny_connected(sx_usb_tiny_t *_usb){
+ 430              		.loc 1 112 48 is_stmt 1 view -0
+ 431              		.cfi_startproc
+ 432              		@ args = 0, pretend = 0, frame = 0
+ 433              		@ frame_needed = 0, uses_anonymous_args = 0
+ 434              		.loc 1 112 48 is_stmt 0 view .LVU92
+ 435 0000 08B5     		push	{r3, lr}
+ 436              	.LCFI9:
+ 437              		.cfi_def_cfa_offset 8
+ 438              		.cfi_offset 3, -8
+ 439              		.cfi_offset 14, -4
+ 113:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     return tud_cdc_connected();
+ 440              		.loc 1 113 5 is_stmt 1 view .LVU93
+ 441              	.LBB39:
+ 442              	.LBI39:
+ 209:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_connected(0);
+ 443              		.loc 2 209 42 view .LVU94
+ 444              	.LBB40:
+ 210:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 445              		.loc 2 210 3 view .LVU95
+ 210:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 446              		.loc 2 210 10 is_stmt 0 view .LVU96
+ 447 0002 0020     		movs	r0, #0
+ 448              	.LVL34:
+ 210:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 449              		.loc 2 210 10 view .LVU97
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 21
+
+
+ 450 0004 FFF7FEFF 		bl	tud_cdc_n_connected
+ 451              	.LVL35:
+ 452              	.LBE40:
+ 453              	.LBE39:
+ 114:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+ 454              		.loc 1 114 1 view .LVU98
+ 455 0008 08BD     		pop	{r3, pc}
+ 456              		.cfi_endproc
+ 457              	.LFE438:
+ 459              		.section	.text.sx_usb_tiny_process,"ax",%progbits
+ 460              		.align	1
+ 461              		.global	sx_usb_tiny_process
+ 462              		.syntax unified
+ 463              		.thumb
+ 464              		.thumb_func
+ 466              	sx_usb_tiny_process:
+ 467              	.LVL36:
+ 468              	.LFB435:
+  70:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7
+ 469              		.loc 1 70 46 is_stmt 1 view -0
+ 470              		.cfi_startproc
+ 471              		@ args = 0, pretend = 0, frame = 0
+ 472              		@ frame_needed = 0, uses_anonymous_args = 0
+  70:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7
+ 473              		.loc 1 70 46 is_stmt 0 view .LVU100
+ 474 0000 10B5     		push	{r4, lr}
+ 475              	.LCFI10:
+ 476              		.cfi_def_cfa_offset 8
+ 477              		.cfi_offset 4, -8
+ 478              		.cfi_offset 14, -4
+ 479 0002 0446     		mov	r4, r0
+  72:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     _usb->connected = sx_usb_tiny_connected(_usb);
+ 480              		.loc 1 72 5 is_stmt 1 view .LVU101
+ 481              	.LBB41:
+ 482              	.LBI41:
+  95:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   tud_task_ext(UINT32_MAX, false);
+ 483              		.loc 4 95 6 view .LVU102
+ 484              	.LBB42:
+ 485              		.loc 4 96 3 view .LVU103
+ 486 0004 0021     		movs	r1, #0
+ 487 0006 4FF0FF30 		mov	r0, #-1
+ 488              	.LVL37:
+ 489              		.loc 4 96 3 is_stmt 0 view .LVU104
+ 490 000a FFF7FEFF 		bl	tud_task_ext
+ 491              	.LVL38:
+ 492              	.LBE42:
+ 493              	.LBE41:
+  73:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     usb_rx_task(_usb);
+ 494              		.loc 1 73 5 is_stmt 1 view .LVU105
+  73:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     usb_rx_task(_usb);
+ 495              		.loc 1 73 23 is_stmt 0 view .LVU106
+ 496 000e 2046     		mov	r0, r4
+ 497 0010 FFF7FEFF 		bl	sx_usb_tiny_connected
+ 498              	.LVL39:
+  73:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     usb_rx_task(_usb);
+ 499              		.loc 1 73 21 discriminator 1 view .LVU107
+ 500 0014 84F83C00 		strb	r0, [r4, #60]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 22
+
+
+  74:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** #endif
+ 501              		.loc 1 74 5 is_stmt 1 view .LVU108
+ 502 0018 2046     		mov	r0, r4
+ 503 001a FFF7FEFF 		bl	usb_rx_task
+ 504              	.LVL40:
+  76:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 505              		.loc 1 76 1 is_stmt 0 view .LVU109
+ 506 001e 10BD     		pop	{r4, pc}
+  76:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 507              		.loc 1 76 1 view .LVU110
+ 508              		.cfi_endproc
+ 509              	.LFE435:
+ 511              		.section	.rodata.sx_usb_tiny_write.str1.4,"aMS",%progbits,1
+ 512              		.align	2
+ 513              	.LC5:
+ 514 0000 55534220 		.ascii	"USB write: %lu bytes\000"
+ 514      77726974 
+ 514      653A2025 
+ 514      6C752062 
+ 514      79746573 
+ 515              		.section	.text.sx_usb_tiny_write,"ax",%progbits
+ 516              		.align	1
+ 517              		.global	sx_usb_tiny_write
+ 518              		.syntax unified
+ 519              		.thumb
+ 520              		.thumb_func
+ 522              	sx_usb_tiny_write:
+ 523              	.LVL41:
+ 524              	.LFB436:
+  78:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     if(!sx_usb_tiny_connected(_usb)) 
+ 525              		.loc 1 78 81 is_stmt 1 view -0
+ 526              		.cfi_startproc
+ 527              		@ args = 0, pretend = 0, frame = 0
+ 528              		@ frame_needed = 0, uses_anonymous_args = 0
+  78:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     if(!sx_usb_tiny_connected(_usb)) 
+ 529              		.loc 1 78 81 is_stmt 0 view .LVU112
+ 530 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 531              	.LCFI11:
+ 532              		.cfi_def_cfa_offset 24
+ 533              		.cfi_offset 3, -24
+ 534              		.cfi_offset 4, -20
+ 535              		.cfi_offset 5, -16
+ 536              		.cfi_offset 6, -12
+ 537              		.cfi_offset 7, -8
+ 538              		.cfi_offset 14, -4
+ 539 0002 0F46     		mov	r7, r1
+ 540 0004 1646     		mov	r6, r2
+  79:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         return;
+ 541              		.loc 1 79 5 is_stmt 1 view .LVU113
+  79:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         return;
+ 542              		.loc 1 79 9 is_stmt 0 view .LVU114
+ 543 0006 FFF7FEFF 		bl	sx_usb_tiny_connected
+ 544              	.LVL42:
+  79:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         return;
+ 545              		.loc 1 79 7 discriminator 1 view .LVU115
+ 546 000a 00B9     		cbnz	r0, .L36
+ 547              	.L30:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 23
+
+
+  93:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 548              		.loc 1 93 1 view .LVU116
+ 549 000c F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 550              	.LVL43:
+ 551              	.L36:
+  81:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 552              		.loc 1 81 5 is_stmt 1 view .LVU117
+ 553 000e 3346     		mov	r3, r6
+ 554 0010 0D4A     		ldr	r2, .L38
+ 555 0012 0E49     		ldr	r1, .L38+4
+ 556 0014 0420     		movs	r0, #4
+ 557 0016 FFF7FEFF 		bl	log_func
+ 558              	.LVL44:
+  84:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     while(sent < _len){
+ 559              		.loc 1 84 5 view .LVU118
+  85:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         uint32_t written = tud_cdc_write(_data + sent, _len - sent);
+ 560              		.loc 1 85 5 view .LVU119
+  84:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     while(sent < _len){
+ 561              		.loc 1 84 14 is_stmt 0 view .LVU120
+ 562 001a 0024     		movs	r4, #0
+  85:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         uint32_t written = tud_cdc_write(_data + sent, _len - sent);
+ 563              		.loc 1 85 10 view .LVU121
+ 564 001c 04E0     		b	.L32
+ 565              	.LVL45:
+ 566              	.L37:
+ 567              	.LBB43:
+  90:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     }
+ 568              		.loc 1 90 13 is_stmt 1 view .LVU122
+ 569              	.LBB44:
+ 570              	.LBI44:
+  95:SynaptiX_FDK/lib/tinyusb/src/device/usbd.h ****   tud_task_ext(UINT32_MAX, false);
+ 571              		.loc 4 95 6 view .LVU123
+ 572              	.LBB45:
+ 573              		.loc 4 96 3 view .LVU124
+ 574 001e 0021     		movs	r1, #0
+ 575 0020 4FF0FF30 		mov	r0, #-1
+ 576 0024 FFF7FEFF 		bl	tud_task_ext
+ 577              	.LVL46:
+ 578              	.L32:
+ 579              		.loc 4 96 3 is_stmt 0 view .LVU125
+ 580              	.LBE45:
+ 581              	.LBE44:
+ 582              	.LBE43:
+  85:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         uint32_t written = tud_cdc_write(_data + sent, _len - sent);
+ 583              		.loc 1 85 16 is_stmt 1 view .LVU126
+ 584 0028 B442     		cmp	r4, r6
+ 585 002a EFD2     		bcs	.L30
+ 586              	.LBB50:
+  86:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         sent += written;
+ 587              		.loc 1 86 9 view .LVU127
+ 588              	.LVL47:
+ 589              	.LBB46:
+ 590              	.LBI46:
+ 235:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 236:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 237:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline void tud_cdc_read_flush(void) {
+ 238:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   tud_cdc_n_read_flush(0);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 24
+
+
+ 239:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 240:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 241:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline bool tud_cdc_peek(uint8_t* ui8) {
+ 242:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_peek(0, ui8);
+ 243:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 244:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 245:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_write_char(char ch) {
+ 246:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_write_char(0, ch);
+ 247:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 248:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 249:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_write(void const* buffer, uint32_t bufsize) {
+ 591              		.loc 2 249 46 view .LVU128
+ 592              	.LBB47:
+ 250:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_write(0, buffer, bufsize);
+ 593              		.loc 2 250 3 view .LVU129
+ 594              		.loc 2 250 10 is_stmt 0 view .LVU130
+ 595 002c 321B     		subs	r2, r6, r4
+ 596              	.LVL48:
+ 597              		.loc 2 250 10 view .LVU131
+ 598 002e 3919     		adds	r1, r7, r4
+ 599              	.LVL49:
+ 600              		.loc 2 250 10 view .LVU132
+ 601 0030 0020     		movs	r0, #0
+ 602 0032 FFF7FEFF 		bl	tud_cdc_n_write
+ 603              	.LVL50:
+ 604              		.loc 2 250 10 view .LVU133
+ 605 0036 0546     		mov	r5, r0
+ 606              	.LVL51:
+ 607              		.loc 2 250 10 view .LVU134
+ 608              	.LBE47:
+ 609              	.LBE46:
+  87:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         tud_cdc_write_flush();
+ 610              		.loc 1 87 9 is_stmt 1 view .LVU135
+  87:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         tud_cdc_write_flush();
+ 611              		.loc 1 87 14 is_stmt 0 view .LVU136
+ 612 0038 0444     		add	r4, r4, r0
+ 613              	.LVL52:
+  88:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****         if(written == 0)
+ 614              		.loc 1 88 9 is_stmt 1 view .LVU137
+ 615              	.LBB48:
+ 616              	.LBI48:
+ 251:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 252:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 253:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_write_str(char const* str) {
+ 254:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_write_str(0, str);
+ 255:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** }
+ 256:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** 
+ 257:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h **** TU_ATTR_ALWAYS_INLINE static inline uint32_t tud_cdc_write_flush(void) {
+ 617              		.loc 2 257 46 view .LVU138
+ 618              	.LBB49:
+ 258:SynaptiX_FDK/lib/tinyusb/src/class/cdc/cdc_device.h ****   return tud_cdc_n_write_flush(0);
+ 619              		.loc 2 258 3 view .LVU139
+ 620              		.loc 2 258 10 is_stmt 0 view .LVU140
+ 621 003a 0020     		movs	r0, #0
+ 622              	.LVL53:
+ 623              		.loc 2 258 10 view .LVU141
+ 624 003c FFF7FEFF 		bl	tud_cdc_n_write_flush
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 25
+
+
+ 625              	.LVL54:
+ 626              	.LBE49:
+ 627              	.LBE48:
+  89:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             tud_task();
+ 628              		.loc 1 89 9 is_stmt 1 view .LVU142
+  89:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****             tud_task();
+ 629              		.loc 1 89 11 is_stmt 0 view .LVU143
+ 630 0040 002D     		cmp	r5, #0
+ 631 0042 F1D1     		bne	.L32
+ 632 0044 EBE7     		b	.L37
+ 633              	.L39:
+ 634 0046 00BF     		.align	2
+ 635              	.L38:
+ 636 0048 00000000 		.word	.LC5
+ 637 004c 1C000000 		.word	.LC2
+ 638              	.LBE50:
+ 639              		.cfi_endproc
+ 640              	.LFE436:
+ 642              		.section	.text.sx_usb_tiny_available,"ax",%progbits
+ 643              		.align	1
+ 644              		.global	sx_usb_tiny_available
+ 645              		.syntax unified
+ 646              		.thumb
+ 647              		.thumb_func
+ 649              	sx_usb_tiny_available:
+ 650              	.LVL55:
+ 651              	.LFB439:
+ 115:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 116:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** int sx_usb_tiny_available(sx_usb_tiny_t *_usb){
+ 652              		.loc 1 116 47 is_stmt 1 view -0
+ 653              		.cfi_startproc
+ 654              		@ args = 0, pretend = 0, frame = 0
+ 655              		@ frame_needed = 0, uses_anonymous_args = 0
+ 656              		@ link register save eliminated.
+ 117:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     //log_debug(TAG, "USB available: %d bytes", _usb->rxQueue.count);
+ 118:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     return _usb->rxQueue.count;
+ 657              		.loc 1 118 5 view .LVU145
+ 119:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     //return tud_cdc_available();
+ 120:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+ 658              		.loc 1 120 1 is_stmt 0 view .LVU146
+ 659 0000 C069     		ldr	r0, [r0, #28]
+ 660              	.LVL56:
+ 661              		.loc 1 120 1 view .LVU147
+ 662 0002 7047     		bx	lr
+ 663              		.cfi_endproc
+ 664              	.LFE439:
+ 666              		.section	.text.sx_usb_tiny_printf,"ax",%progbits
+ 667              		.align	1
+ 668              		.global	sx_usb_tiny_printf
+ 669              		.syntax unified
+ 670              		.thumb
+ 671              		.thumb_func
+ 673              	sx_usb_tiny_printf:
+ 674              	.LVL57:
+ 675              	.LFB440:
+ 121:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** 
+ 122:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** void sx_usb_tiny_printf(sx_usb_tiny_t *_usb, const char *fmt, ...){
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 26
+
+
+ 676              		.loc 1 122 67 is_stmt 1 view -0
+ 677              		.cfi_startproc
+ 678              		@ args = 4, pretend = 12, frame = 264
+ 679              		@ frame_needed = 0, uses_anonymous_args = 1
+ 680              		.loc 1 122 67 is_stmt 0 view .LVU149
+ 681 0000 0EB4     		push	{r1, r2, r3}
+ 682              	.LCFI12:
+ 683              		.cfi_def_cfa_offset 12
+ 684              		.cfi_offset 1, -12
+ 685              		.cfi_offset 2, -8
+ 686              		.cfi_offset 3, -4
+ 687 0002 30B5     		push	{r4, r5, lr}
+ 688              	.LCFI13:
+ 689              		.cfi_def_cfa_offset 24
+ 690              		.cfi_offset 4, -24
+ 691              		.cfi_offset 5, -20
+ 692              		.cfi_offset 14, -16
+ 693 0004 C2B0     		sub	sp, sp, #264
+ 694              	.LCFI14:
+ 695              		.cfi_def_cfa_offset 288
+ 696 0006 0446     		mov	r4, r0
+ 697 0008 45AB     		add	r3, sp, #276
+ 698 000a 53F8042B 		ldr	r2, [r3], #4
+ 123:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     char buf[256];
+ 699              		.loc 1 123 5 is_stmt 1 view .LVU150
+ 124:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     va_list ap;
+ 700              		.loc 1 124 5 view .LVU151
+ 125:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     va_start(ap, fmt);
+ 701              		.loc 1 125 5 view .LVU152
+ 702 000e 0193     		str	r3, [sp, #4]
+ 126:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     vsnprintf(buf, sizeof(buf), fmt, ap);
+ 703              		.loc 1 126 5 view .LVU153
+ 704 0010 02AD     		add	r5, sp, #8
+ 705 0012 4FF48071 		mov	r1, #256
+ 706 0016 2846     		mov	r0, r5
+ 707              	.LVL58:
+ 708              		.loc 1 126 5 is_stmt 0 view .LVU154
+ 709 0018 FFF7FEFF 		bl	vsnprintf
+ 710              	.LVL59:
+ 127:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     va_end(ap);
+ 711              		.loc 1 127 5 is_stmt 1 view .LVU155
+ 128:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c ****     sx_usb_tiny_write(_usb, (uint8_t *)buf, strlen(buf));
+ 712              		.loc 1 128 5 view .LVU156
+ 713              		.loc 1 128 45 is_stmt 0 view .LVU157
+ 714 001c 2846     		mov	r0, r5
+ 715 001e FFF7FEFF 		bl	strlen
+ 716              	.LVL60:
+ 717 0022 0246     		mov	r2, r0
+ 718              		.loc 1 128 5 discriminator 1 view .LVU158
+ 719 0024 2946     		mov	r1, r5
+ 720 0026 2046     		mov	r0, r4
+ 721 0028 FFF7FEFF 		bl	sx_usb_tiny_write
+ 722              	.LVL61:
+ 129:SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c **** }
+ 723              		.loc 1 129 1 view .LVU159
+ 724 002c 42B0     		add	sp, sp, #264
+ 725              	.LCFI15:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 27
+
+
+ 726              		.cfi_def_cfa_offset 24
+ 727              		@ sp needed
+ 728 002e BDE83040 		pop	{r4, r5, lr}
+ 729              	.LCFI16:
+ 730              		.cfi_restore 14
+ 731              		.cfi_restore 5
+ 732              		.cfi_restore 4
+ 733              		.cfi_def_cfa_offset 12
+ 734              	.LVL62:
+ 735              		.loc 1 129 1 view .LVU160
+ 736 0032 03B0     		add	sp, sp, #12
+ 737              	.LCFI17:
+ 738              		.cfi_restore 3
+ 739              		.cfi_restore 2
+ 740              		.cfi_restore 1
+ 741              		.cfi_def_cfa_offset 0
+ 742 0034 7047     		bx	lr
+ 743              		.cfi_endproc
+ 744              	.LFE440:
+ 746              		.section	.rodata
+ 747              		.align	2
+ 748              		.set	.LANCHOR0,. + 0
+ 749              	.LC0:
+ 750 0000 01       		.byte	1
+ 751 0001 AA       		.byte	-86
+ 752              		.text
+ 753              	.Letext0:
+ 754              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 755              		.file 6 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 756              		.file 7 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 757              		.file 8 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 758              		.file 9 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 759              		.file 10 "SynaptiX_FDK/utils/cqueue/cqueue.h"
+ 760              		.file 11 "SynaptiX_FDK/lib/tinyusb/src/common/tusb_types.h"
+ 761              		.file 12 "SynaptiX_FDK/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.h"
+ 762              		.file 13 "SynaptiX_FDK/services/logger/logger.h"
+ 763              		.file 14 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 764              		.file 15 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eab
+ 765              		.file 16 "SynaptiX_FDK/lib/tinyusb/src/tusb.h"
+ 766              		.file 17 "SynaptiX_FDK/utils/mem/sx_mem.h"
+ 767              		.file 18 "<built-in>"
+ 768              		.file 19 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s 			page 28
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sx_usb_tiny_cdc.c
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:22     .rodata.usb_rx_task.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:32     .text.usb_rx_task:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:37     .text.usb_rx_task:00000000 usb_rx_task
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:190    .text.usb_rx_task:00000068 $d
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:198    .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:204    .text.sx_gettick:00000000 sx_gettick
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:226    .rodata.sx_usb_tiny_init.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:230    .text.sx_usb_tiny_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:236    .text.sx_usb_tiny_init:00000000 sx_usb_tiny_init
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:324    .text.sx_usb_tiny_init:00000060 $d
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:331    .text.sx_usb_tiny_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:337    .text.sx_usb_tiny_read:00000000 sx_usb_tiny_read
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:421    .text.sx_usb_tiny_connected:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:427    .text.sx_usb_tiny_connected:00000000 sx_usb_tiny_connected
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:460    .text.sx_usb_tiny_process:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:466    .text.sx_usb_tiny_process:00000000 sx_usb_tiny_process
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:512    .rodata.sx_usb_tiny_write.str1.4:00000000 $d
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:516    .text.sx_usb_tiny_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:522    .text.sx_usb_tiny_write:00000000 sx_usb_tiny_write
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:636    .text.sx_usb_tiny_write:00000048 $d
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:643    .text.sx_usb_tiny_available:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:649    .text.sx_usb_tiny_available:00000000 sx_usb_tiny_available
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:667    .text.sx_usb_tiny_printf:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:673    .text.sx_usb_tiny_printf:00000000 sx_usb_tiny_printf
+C:\Users\DELL\AppData\Local\Temp\cc6Hx7PP.s:747    .rodata:00000000 $d
+
+UNDEFINED SYMBOLS
+tud_cdc_n_connected
+tud_cdc_n_available
+log_func
+tud_cdc_n_read
+cqueue_send
+HAL_GetTick
+sx_malloc
+cqueue_init_static
+tusb_rhport_init
+tud_task_ext
+cqueue_receive
+tud_cdc_n_write
+tud_cdc_n_write_flush
+vsnprintf
+strlen

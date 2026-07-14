@@ -1,0 +1,1161 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sht3x.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/modules/sht3x/sht3x.c"
+  21              		.section	.text.sx_i2c_write,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sx_i2c_write:
+  28              	.LVL0:
+  29              	.LFB1:
+  30              		.file 2 "SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h"
+   1:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #ifndef SX_I2C_H
+   2:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #define SX_I2C_H
+   3:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #ifdef __cplusplus
+   4:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** extern "C" {
+   5:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #endif
+   6:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+   7:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** #include <stdint.h>
+   8:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+   9:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** typedef struct sx_i2c sx_i2c_t;
+  10:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  11:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** typedef struct sx_i2c_ops{
+  12:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*write)(sx_i2c_t *i2c, uint16_t dev_addr, const uint8_t *data, uint32_t len);
+  13:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*read)(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t *data, uint32_t len);
+  14:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*mem_write)(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t mem_addr_size, c
+  15:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*mem_read)(sx_i2c_t *i2c, uint16_t dev_addr, uint16_t mem_addr, uint16_t mem_addr_size, ui
+  16:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     int (*is_device_ready)(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t num_trial, uint32_t timeout);
+  17:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** } sx_i2c_ops_t;
+  18:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  19:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** struct sx_i2c{
+  20:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     sx_i2c_ops_t *ops;
+  21:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     void *pDriver;
+  22:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** };
+  23:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  24:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline void sx_i2c_init(sx_i2c_t *i2c, sx_i2c_ops_t *ops, void *pDriver){
+  25:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     i2c->ops = ops;
+  26:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     i2c->pDriver = pDriver;
+  27:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+  28:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 2
+
+
+  29:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline int sx_i2c_write(sx_i2c_t *i2c, uint16_t dev_addr, const uint8_t *data, uint32_t len)
+  31              		.loc 2 29 100 view -0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 0
+  34              		@ frame_needed = 0, uses_anonymous_args = 0
+  35              		.loc 2 29 100 is_stmt 0 view .LVU1
+  36 0000 10B5     		push	{r4, lr}
+  37              	.LCFI0:
+  38              		.cfi_def_cfa_offset 8
+  39              		.cfi_offset 4, -8
+  40              		.cfi_offset 14, -4
+  30:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     if(i2c->ops && i2c->ops->write)
+  41              		.loc 2 30 5 is_stmt 1 view .LVU2
+  42              		.loc 2 30 11 is_stmt 0 view .LVU3
+  43 0002 0468     		ldr	r4, [r0]
+  44              		.loc 2 30 7 view .LVU4
+  45 0004 1CB1     		cbz	r4, .L3
+  46              		.loc 2 30 28 discriminator 1 view .LVU5
+  47 0006 2468     		ldr	r4, [r4]
+  48              		.loc 2 30 17 discriminator 1 view .LVU6
+  49 0008 24B1     		cbz	r4, .L4
+  31:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****         return i2c->ops->write(i2c, dev_addr, data, len);
+  50              		.loc 2 31 9 is_stmt 1 view .LVU7
+  51              		.loc 2 31 16 is_stmt 0 view .LVU8
+  52 000a A047     		blx	r4
+  53              	.LVL1:
+  54              	.L1:
+  32:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  33:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+  55              		.loc 2 33 1 view .LVU9
+  56 000c 10BD     		pop	{r4, pc}
+  57              	.LVL2:
+  58              	.L3:
+  32:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  59              		.loc 2 32 12 view .LVU10
+  60 000e 4FF0FF30 		mov	r0, #-1
+  61              	.LVL3:
+  32:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  62              		.loc 2 32 12 view .LVU11
+  63 0012 FBE7     		b	.L1
+  64              	.LVL4:
+  65              	.L4:
+  32:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  66              		.loc 2 32 12 view .LVU12
+  67 0014 4FF0FF30 		mov	r0, #-1
+  68              	.LVL5:
+  32:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  69              		.loc 2 32 12 view .LVU13
+  70 0018 F8E7     		b	.L1
+  71              		.cfi_endproc
+  72              	.LFE1:
+  74              		.section	.text.sx_i2c_read,"ax",%progbits
+  75              		.align	1
+  76              		.syntax unified
+  77              		.thumb
+  78              		.thumb_func
+  80              	sx_i2c_read:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 3
+
+
+  81              	.LVL6:
+  82              	.LFB2:
+  34:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** 
+  35:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** static inline int sx_i2c_read(sx_i2c_t *i2c, uint16_t dev_addr, uint8_t *data, uint32_t len){
+  83              		.loc 2 35 93 is_stmt 1 view -0
+  84              		.cfi_startproc
+  85              		@ args = 0, pretend = 0, frame = 0
+  86              		@ frame_needed = 0, uses_anonymous_args = 0
+  87              		.loc 2 35 93 is_stmt 0 view .LVU15
+  88 0000 10B5     		push	{r4, lr}
+  89              	.LCFI1:
+  90              		.cfi_def_cfa_offset 8
+  91              		.cfi_offset 4, -8
+  92              		.cfi_offset 14, -4
+  36:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     if(i2c->ops && i2c->ops->read)
+  93              		.loc 2 36 5 is_stmt 1 view .LVU16
+  94              		.loc 2 36 11 is_stmt 0 view .LVU17
+  95 0002 0468     		ldr	r4, [r0]
+  96              		.loc 2 36 7 view .LVU18
+  97 0004 1CB1     		cbz	r4, .L8
+  98              		.loc 2 36 28 discriminator 1 view .LVU19
+  99 0006 6468     		ldr	r4, [r4, #4]
+ 100              		.loc 2 36 17 discriminator 1 view .LVU20
+ 101 0008 24B1     		cbz	r4, .L9
+  37:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****         return i2c->ops->read(i2c, dev_addr, data, len);
+ 102              		.loc 2 37 9 is_stmt 1 view .LVU21
+ 103              		.loc 2 37 16 is_stmt 0 view .LVU22
+ 104 000a A047     		blx	r4
+ 105              	.LVL7:
+ 106              	.L6:
+  38:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+  39:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h **** }
+ 107              		.loc 2 39 1 view .LVU23
+ 108 000c 10BD     		pop	{r4, pc}
+ 109              	.LVL8:
+ 110              	.L8:
+  38:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 111              		.loc 2 38 12 view .LVU24
+ 112 000e 4FF0FF30 		mov	r0, #-1
+ 113              	.LVL9:
+  38:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 114              		.loc 2 38 12 view .LVU25
+ 115 0012 FBE7     		b	.L6
+ 116              	.LVL10:
+ 117              	.L9:
+  38:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 118              		.loc 2 38 12 view .LVU26
+ 119 0014 4FF0FF30 		mov	r0, #-1
+ 120              	.LVL11:
+  38:SynaptiX_FDK/components/peripherals/i2c/sx_i2c.h ****     return -1;
+ 121              		.loc 2 38 12 view .LVU27
+ 122 0018 F8E7     		b	.L6
+ 123              		.cfi_endproc
+ 124              	.LFE2:
+ 126              		.section	.text.calculate_crc,"ax",%progbits
+ 127              		.align	1
+ 128              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 4
+
+
+ 129              		.thumb
+ 130              		.thumb_func
+ 132              	calculate_crc:
+ 133              	.LVL12:
+ 134              	.LFB337:
+   1:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** #include "sht3x.h"
+   2:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** #include "sx_board.h"
+   3:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** #include <string.h>
+   4:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+   5:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** static uint8_t calculate_crc(const uint8_t *data, uint8_t length)
+   6:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** {
+ 135              		.loc 1 6 1 is_stmt 1 view -0
+ 136              		.cfi_startproc
+ 137              		@ args = 0, pretend = 0, frame = 0
+ 138              		@ frame_needed = 0, uses_anonymous_args = 0
+ 139              		.loc 1 6 1 is_stmt 0 view .LVU29
+ 140 0000 00B5     		push	{lr}
+ 141              	.LCFI2:
+ 142              		.cfi_def_cfa_offset 4
+ 143              		.cfi_offset 14, -4
+ 144 0002 8646     		mov	lr, r0
+   7:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     uint8_t crc = 0xFF;
+ 145              		.loc 1 7 5 is_stmt 1 view .LVU30
+ 146              	.LVL13:
+   8:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     for (uint8_t i = 0; i < length; i++) {
+ 147              		.loc 1 8 5 view .LVU31
+ 148              	.LBB6:
+ 149              		.loc 1 8 10 view .LVU32
+ 150              		.loc 1 8 18 is_stmt 0 view .LVU33
+ 151 0004 4FF0000C 		mov	ip, #0
+ 152              	.LBE6:
+   7:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     uint8_t crc = 0xFF;
+ 153              		.loc 1 7 13 view .LVU34
+ 154 0008 FF20     		movs	r0, #255
+ 155              	.LVL14:
+ 156              	.LBB9:
+ 157              		.loc 1 8 5 view .LVU35
+ 158 000a 11E0     		b	.L12
+ 159              	.LVL15:
+ 160              	.L20:
+ 161              	.LBB7:
+   9:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         crc ^= data[i];
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         for (uint8_t j = 0; j < 8; j++) {
+  11:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+  12:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****                 crc = (crc << 1) ^ 0x31;
+ 162              		.loc 1 12 17 is_stmt 1 view .LVU36
+ 163              		.loc 1 12 34 is_stmt 0 view .LVU37
+ 164 000c 5200     		lsls	r2, r2, #1
+ 165 000e 82F03102 		eor	r2, r2, #49
+ 166              		.loc 1 12 21 view .LVU38
+ 167 0012 D0B2     		uxtb	r0, r2
+ 168              	.LVL16:
+ 169              	.L15:
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ 170              		.loc 1 10 37 is_stmt 1 discriminator 2 view .LVU39
+ 171 0014 0133     		adds	r3, r3, #1
+ 172              	.LVL17:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 5
+
+
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ 173              		.loc 1 10 37 is_stmt 0 discriminator 2 view .LVU40
+ 174 0016 DBB2     		uxtb	r3, r3
+ 175              	.LVL18:
+ 176              	.L13:
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ 177              		.loc 1 10 31 is_stmt 1 discriminator 1 view .LVU41
+ 178 0018 072B     		cmp	r3, #7
+ 179 001a 05D8     		bhi	.L19
+  11:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****                 crc = (crc << 1) ^ 0x31;
+ 180              		.loc 1 11 13 view .LVU42
+  11:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****                 crc = (crc << 1) ^ 0x31;
+ 181              		.loc 1 11 17 is_stmt 0 view .LVU43
+ 182 001c 42B2     		sxtb	r2, r0
+  11:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****                 crc = (crc << 1) ^ 0x31;
+ 183              		.loc 1 11 16 view .LVU44
+ 184 001e 002A     		cmp	r2, #0
+ 185 0020 F4DB     		blt	.L20
+  13:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             } else {
+  14:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****                 crc <<= 1;
+ 186              		.loc 1 14 17 is_stmt 1 view .LVU45
+ 187              		.loc 1 14 21 is_stmt 0 view .LVU46
+ 188 0022 4000     		lsls	r0, r0, #1
+ 189              	.LVL19:
+ 190              		.loc 1 14 21 view .LVU47
+ 191 0024 C0B2     		uxtb	r0, r0
+ 192 0026 F5E7     		b	.L15
+ 193              	.LVL20:
+ 194              	.L19:
+ 195              		.loc 1 14 21 view .LVU48
+ 196              	.LBE7:
+   8:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         crc ^= data[i];
+ 197              		.loc 1 8 38 is_stmt 1 discriminator 2 view .LVU49
+ 198 0028 0CF1010C 		add	ip, ip, #1
+ 199              	.LVL21:
+   8:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         crc ^= data[i];
+ 200              		.loc 1 8 38 is_stmt 0 discriminator 2 view .LVU50
+ 201 002c 5FFA8CFC 		uxtb	ip, ip
+ 202              	.LVL22:
+ 203              	.L12:
+   8:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         crc ^= data[i];
+ 204              		.loc 1 8 27 is_stmt 1 discriminator 1 view .LVU51
+ 205 0030 8C45     		cmp	ip, r1
+ 206 0032 04D2     		bcs	.L21
+   9:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         for (uint8_t j = 0; j < 8; j++) {
+ 207              		.loc 1 9 9 view .LVU52
+   9:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         for (uint8_t j = 0; j < 8; j++) {
+ 208              		.loc 1 9 20 is_stmt 0 view .LVU53
+ 209 0034 1EF80C30 		ldrb	r3, [lr, ip]	@ zero_extendqisi2
+   9:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         for (uint8_t j = 0; j < 8; j++) {
+ 210              		.loc 1 9 13 view .LVU54
+ 211 0038 5840     		eors	r0, r0, r3
+ 212              	.LVL23:
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ 213              		.loc 1 10 9 is_stmt 1 view .LVU55
+ 214              	.LBB8:
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 6
+
+
+ 215              		.loc 1 10 14 view .LVU56
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ 216              		.loc 1 10 22 is_stmt 0 view .LVU57
+ 217 003a 0023     		movs	r3, #0
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ 218              		.loc 1 10 9 view .LVU58
+ 219 003c ECE7     		b	.L13
+ 220              	.LVL24:
+ 221              	.L21:
+  10:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             if (crc & 0x80) {
+ 222              		.loc 1 10 9 view .LVU59
+ 223              	.LBE8:
+ 224              	.LBE9:
+  15:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****             }
+  16:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         }
+  17:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+  18:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return crc;
+ 225              		.loc 1 18 5 is_stmt 1 view .LVU60
+  19:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 226              		.loc 1 19 1 is_stmt 0 view .LVU61
+ 227 003e 00BD     		pop	{pc}
+ 228              		.cfi_endproc
+ 229              	.LFE337:
+ 231              		.section	.text.sht3x_send_cmd,"ax",%progbits
+ 232              		.align	1
+ 233              		.syntax unified
+ 234              		.thumb
+ 235              		.thumb_func
+ 237              	sht3x_send_cmd:
+ 238              	.LVL25:
+ 239              	.LFB338:
+  20:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  21:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** /* Send 2 bytes command */
+  22:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** static SHT3X_STATUS_T sht3x_send_cmd(SHT3X_T *sht3x, SHT3X_COMMAND_T cmd)
+  23:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** {
+ 240              		.loc 1 23 1 is_stmt 1 view -0
+ 241              		.cfi_startproc
+ 242              		@ args = 0, pretend = 0, frame = 8
+ 243              		@ frame_needed = 0, uses_anonymous_args = 0
+ 244              		.loc 1 23 1 is_stmt 0 view .LVU63
+ 245 0000 00B5     		push	{lr}
+ 246              	.LCFI3:
+ 247              		.cfi_def_cfa_offset 4
+ 248              		.cfi_offset 14, -4
+ 249 0002 83B0     		sub	sp, sp, #12
+ 250              	.LCFI4:
+ 251              		.cfi_def_cfa_offset 16
+  24:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     uint8_t buf[2] = {(cmd >> 8) & 0xFF, cmd & 0xFF};
+ 252              		.loc 1 24 5 is_stmt 1 view .LVU64
+ 253              		.loc 1 24 13 is_stmt 0 view .LVU65
+ 254 0004 0B0A     		lsrs	r3, r1, #8
+ 255 0006 8DF80430 		strb	r3, [sp, #4]
+ 256 000a 8DF80510 		strb	r1, [sp, #5]
+  25:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return sx_i2c_write(sht3x->i2c, SHT3X_DEVICE_ADDR, buf, 2) == 0 ? SHT3X_OK : SHT3X_ERR;
+ 257              		.loc 1 25 5 is_stmt 1 view .LVU66
+ 258              		.loc 1 25 12 is_stmt 0 view .LVU67
+ 259 000e 0223     		movs	r3, #2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 7
+
+
+ 260 0010 01AA     		add	r2, sp, #4
+ 261 0012 8821     		movs	r1, #136
+ 262              	.LVL26:
+ 263              		.loc 1 25 12 view .LVU68
+ 264 0014 0068     		ldr	r0, [r0]
+ 265              	.LVL27:
+ 266              		.loc 1 25 12 view .LVU69
+ 267 0016 FFF7FEFF 		bl	sx_i2c_write
+ 268              	.LVL28:
+  26:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 269              		.loc 1 26 1 view .LVU70
+ 270 001a 0038     		subs	r0, r0, #0
+ 271 001c 18BF     		it	ne
+ 272 001e 0120     		movne	r0, #1
+ 273 0020 03B0     		add	sp, sp, #12
+ 274              	.LCFI5:
+ 275              		.cfi_def_cfa_offset 4
+ 276              		@ sp needed
+ 277 0022 00BD     		pop	{pc}
+ 278              		.cfi_endproc
+ 279              	.LFE338:
+ 281              		.section	.text.sx_gettick,"ax",%progbits
+ 282              		.align	1
+ 283              		.global	sx_gettick
+ 284              		.syntax unified
+ 285              		.thumb
+ 286              		.thumb_func
+ 288              	sx_gettick:
+ 289              	.LFB336:
+ 290              		.file 3 "SynaptiX_FDK/board/sx_board.h"
+   1:SynaptiX_FDK/board/sx_board.h **** #ifndef SX_BOARD_H
+   2:SynaptiX_FDK/board/sx_board.h **** #define SX_BOARD_H
+   3:SynaptiX_FDK/board/sx_board.h **** 
+   4:SynaptiX_FDK/board/sx_board.h **** #ifdef __cplusplus
+   5:SynaptiX_FDK/board/sx_board.h **** extern "C" {
+   6:SynaptiX_FDK/board/sx_board.h **** #endif
+   7:SynaptiX_FDK/board/sx_board.h **** 
+   8:SynaptiX_FDK/board/sx_board.h **** #include <stdint.h>
+   9:SynaptiX_FDK/board/sx_board.h **** #include "main.h"
+  10:SynaptiX_FDK/board/sx_board.h **** #include "usart.h"
+  11:SynaptiX_FDK/board/sx_board.h **** #include "gpio.h"
+  12:SynaptiX_FDK/board/sx_board.h **** #include "app_config.h"
+  13:SynaptiX_FDK/board/sx_board.h **** #include "sx_spi.h"
+  14:SynaptiX_FDK/board/sx_board.h **** #include "sx_gpio.h"
+  15:SynaptiX_FDK/board/sx_board.h **** #include "sx_uart.h"
+  16:SynaptiX_FDK/board/sx_board.h **** #include "gps.h"
+  17:SynaptiX_FDK/board/sx_board.h **** #include "a7677s.h"
+  18:SynaptiX_FDK/board/sx_board.h **** #include "modem_ops.h"
+  19:SynaptiX_FDK/board/sx_board.h **** #include "sx_delay.h"
+  20:SynaptiX_FDK/board/sx_board.h **** #include "sx_W25Q128.h"
+  21:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_storage.h"
+  22:SynaptiX_FDK/board/sx_board.h **** #include "sx_usb_tiny_cdc.h"
+  23:SynaptiX_FDK/board/sx_board.h **** // #include "adc.h"
+  24:SynaptiX_FDK/board/sx_board.h **** #include "spi.h"
+  25:SynaptiX_FDK/board/sx_board.h **** #include "i2c.h"
+  26:SynaptiX_FDK/board/sx_board.h **** #include "sx_ex_rtc.h"
+  27:SynaptiX_FDK/board/sx_board.h **** #include "bno055.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 8
+
+
+  28:SynaptiX_FDK/board/sx_board.h **** #include "sx_filter.h"
+  29:SynaptiX_FDK/board/sx_board.h **** #include "sx_read_bat.h"
+  30:SynaptiX_FDK/board/sx_board.h **** #include "sensirion_uart_hal.h"
+  31:SynaptiX_FDK/board/sx_board.h **** #include "sht3x.h"
+  32:SynaptiX_FDK/board/sx_board.h **** #include "ze12a.h"
+  33:SynaptiX_FDK/board/sx_board.h **** #include "ads1115.h"
+  34:SynaptiX_FDK/board/sx_board.h **** 
+  35:SynaptiX_FDK/board/sx_board.h **** typedef struct {
+  36:SynaptiX_FDK/board/sx_board.h ****     volatile uint32_t raw_adc;
+  37:SynaptiX_FDK/board/sx_board.h ****     volatile float v_adc;
+  38:SynaptiX_FDK/board/sx_board.h ****     volatile float v_bat;
+  39:SynaptiX_FDK/board/sx_board.h **** }voltage_t;
+  40:SynaptiX_FDK/board/sx_board.h **** 
+  41:SynaptiX_FDK/board/sx_board.h **** typedef struct Board{
+  42:SynaptiX_FDK/board/sx_board.h ****     /* Concrete driver instance + the modem_ops_t handle service/app layers
+  43:SynaptiX_FDK/board/sx_board.h ****      * actually use (sx_mqtt.c, sx_user_mqtt.c, sx_sleep_manager.c — see
+  44:SynaptiX_FDK/board/sx_board.h ****      * modem_ops.h). Swapping to a different modem module later means
+  45:SynaptiX_FDK/board/sx_board.h ****      * replacing a7677s below with the new driver's type and pointing
+  46:SynaptiX_FDK/board/sx_board.h ****      * modem.ops/modem.ctx at it — nothing outside this file changes. */
+  47:SynaptiX_FDK/board/sx_board.h ****     a7677s_t        a7677s;
+  48:SynaptiX_FDK/board/sx_board.h ****     modem_handle_t  modem;
+  49:SynaptiX_FDK/board/sx_board.h ****     sx_gps_t gps;
+  50:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t log_uart;
+  51:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  52:SynaptiX_FDK/board/sx_board.h ****     voltage_t voltage;
+  53:SynaptiX_FDK/board/sx_board.h ****     #endif
+  54:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_t usb;
+  55:SynaptiX_FDK/board/sx_board.h ****     sx_W25Q128_t  q128;
+  56:SynaptiX_FDK/board/sx_board.h ****     sx_usb_tiny_config_t usb_cfg;
+  57:SynaptiX_FDK/board/sx_board.h ****     sx_storage_cfg_t    storage_cfg;
+  58:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t            i2c1;
+  59:SynaptiX_FDK/board/sx_board.h ****     rx8130ce_t          rtc;
+  60:SynaptiX_FDK/board/sx_board.h ****     sx_i2c_t    rtc_i2c;
+  61:SynaptiX_FDK/board/sx_board.h ****     bno055_t    imu;
+  62:SynaptiX_FDK/board/sx_board.h ****     #if USE_READ_PIN
+  63:SynaptiX_FDK/board/sx_board.h ****     sx_adc_reader_t s_adc_reader;
+  64:SynaptiX_FDK/board/sx_board.h ****     #endif
+  65:SynaptiX_FDK/board/sx_board.h ****     /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+  66:SynaptiX_FDK/board/sx_board.h ****      * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+  67:SynaptiX_FDK/board/sx_board.h ****      * sx_uart_t instance is owned here and its address passed to
+  68:SynaptiX_FDK/board/sx_board.h ****      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+  69:SynaptiX_FDK/board/sx_board.h ****     sx_uart_t   sps30_uart;
+  70:SynaptiX_FDK/board/sx_board.h ****     SHT3X_T     sht3x;
+  71:SynaptiX_FDK/board/sx_board.h ****     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+  72:SynaptiX_FDK/board/sx_board.h ****      * GPIOs are owned as private statics inside ze12a.c (s_comm,
+  73:SynaptiX_FDK/board/sx_board.h ****      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+  74:SynaptiX_FDK/board/sx_board.h ****      * descriptors below and wires them up internally, so no field is
+  75:SynaptiX_FDK/board/sx_board.h ****      * needed here. */
+  76:SynaptiX_FDK/board/sx_board.h ****     /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+  77:SynaptiX_FDK/board/sx_board.h ****      * per this board's .ioc, so this driver only ever polls the OS bit,
+  78:SynaptiX_FDK/board/sx_board.h ****      * never uses the comparator/alert function).
+  79:SynaptiX_FDK/board/sx_board.h ****      *
+  80:SynaptiX_FDK/board/sx_board.h ****      * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+  81:SynaptiX_FDK/board/sx_board.h ****      *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+  82:SynaptiX_FDK/board/sx_board.h ****      *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+  83:SynaptiX_FDK/board/sx_board.h ****      *   series on the +12V rail, before the rest of the board); OUT
+  84:SynaptiX_FDK/board/sx_board.h ****      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 9
+
+
+  85:SynaptiX_FDK/board/sx_board.h ****      *   resistor, not the shunt itself).
+  86:SynaptiX_FDK/board/sx_board.h ****      *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+  87:SynaptiX_FDK/board/sx_board.h ****      *   an answer: R16's actual resistance value has not been confirmed.
+  88:SynaptiX_FDK/board/sx_board.h ****      *   User initially said "0 ohm" for this discussion, but Vout = Gain
+  89:SynaptiX_FDK/board/sx_board.h ****      *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+  90:SynaptiX_FDK/board/sx_board.h ****      *   for any current — i.e. the current-sense channel would never
+  91:SynaptiX_FDK/board/sx_board.h ****      *   read anything. This is very likely a mix-up with R9 (which
+  92:SynaptiX_FDK/board/sx_board.h ****      *   legitimately is 0R on the schematic, but sits on the output
+  93:SynaptiX_FDK/board/sx_board.h ****      *   side, not the shunt). User said they'd confirm this in a future
+  94:SynaptiX_FDK/board/sx_board.h ****      *   conversation. Until R16's real value is confirmed:
+  95:SynaptiX_FDK/board/sx_board.h ****      *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+  96:SynaptiX_FDK/board/sx_board.h ****      *       AIN2 for now — NOT derived from any confirmed R16 value.
+  97:SynaptiX_FDK/board/sx_board.h ****      *     - Treat every AIN1/adc_current reading as unverified — do not
+  98:SynaptiX_FDK/board/sx_board.h ****      *       trust it for any real current measurement or safety logic
+  99:SynaptiX_FDK/board/sx_board.h ****      *       (e.g. overcurrent cutoff) until this is resolved.
+ 100:SynaptiX_FDK/board/sx_board.h ****      *
+ 101:SynaptiX_FDK/board/sx_board.h ****      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+ 102:SynaptiX_FDK/board/sx_board.h ****      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+ 103:SynaptiX_FDK/board/sx_board.h ****      *   with user — the divider node feeds AIN2 directly).
+ 104:SynaptiX_FDK/board/sx_board.h ****      *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+ 105:SynaptiX_FDK/board/sx_board.h ****      *   2.5V at a 15V worst-case rail — comfortably under both this
+ 106:SynaptiX_FDK/board/sx_board.h ****      *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+ 107:SynaptiX_FDK/board/sx_board.h ****      *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+ 108:SynaptiX_FDK/board/sx_board.h ****      *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+ 109:SynaptiX_FDK/board/sx_board.h ****      *   this range well. */
+ 110:SynaptiX_FDK/board/sx_board.h ****     ADS1115_T   ads1115;
+ 111:SynaptiX_FDK/board/sx_board.h **** }Board_t;
+ 112:SynaptiX_FDK/board/sx_board.h **** 
+ 113:SynaptiX_FDK/board/sx_board.h **** typedef enum{
+ 114:SynaptiX_FDK/board/sx_board.h ****     UART_LTE = 0,
+ 115:SynaptiX_FDK/board/sx_board.h ****     UART_GPS,
+ 116:SynaptiX_FDK/board/sx_board.h ****     UART_RS485,
+ 117:SynaptiX_FDK/board/sx_board.h ****     UART_DUST,
+ 118:SynaptiX_FDK/board/sx_board.h ****     UART_EXTEND, // gas sensor ZE12A
+ 119:SynaptiX_FDK/board/sx_board.h ****     UART_LOG
+ 120:SynaptiX_FDK/board/sx_board.h **** }BSP_NUM_UART;
+ 121:SynaptiX_FDK/board/sx_board.h **** 
+ 122:SynaptiX_FDK/board/sx_board.h **** #define NUM_UART                6
+ 123:SynaptiX_FDK/board/sx_board.h **** 
+ 124:SynaptiX_FDK/board/sx_board.h **** /*  MODE USB    */
+ 125:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_CDC           1
+ 126:SynaptiX_FDK/board/sx_board.h **** #define BOARD_USE_MSC           1
+ 127:SynaptiX_FDK/board/sx_board.h **** 
+ 128:SynaptiX_FDK/board/sx_board.h **** /*  LTE GPIO    */   
+ 129:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Port         GPIOD
+ 130:SynaptiX_FDK/board/sx_board.h **** #define LTE_PWRKEY_Pin          GPIO_PIN_12
+ 131:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Port          GPIOD
+ 132:SynaptiX_FDK/board/sx_board.h **** #define LTE_RESET_Pin           GPIO_PIN_11
+ 133:SynaptiX_FDK/board/sx_board.h **** 
+ 134:SynaptiX_FDK/board/sx_board.h **** /*  GPS GPIO    */
+ 135:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Port            GPIOC
+ 136:SynaptiX_FDK/board/sx_board.h **** #define GPS_PPS_Pin             GPIO_PIN_11
+ 137:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Port            GPIOC
+ 138:SynaptiX_FDK/board/sx_board.h **** #define GPS_CPW_Pin             GPIO_PIN_12
+ 139:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Port            GPIOC
+ 140:SynaptiX_FDK/board/sx_board.h **** #define GPS_RST_Pin             GPIO_PIN_13
+ 141:SynaptiX_FDK/board/sx_board.h **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 10
+
+
+ 142:SynaptiX_FDK/board/sx_board.h **** /*  I2C PIN    */
+ 143:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Port         GPIOB
+ 144:SynaptiX_FDK/board/sx_board.h **** #define I2C1_RESET_Pin          GPIO_PIN_8
+ 145:SynaptiX_FDK/board/sx_board.h **** 
+ 146:SynaptiX_FDK/board/sx_board.h **** /*  SPI */
+ 147:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Port             GPIOC
+ 148:SynaptiX_FDK/board/sx_board.h **** #define SPI_CS_Pin              GPIO_PIN_12
+ 149:SynaptiX_FDK/board/sx_board.h **** 
+ 150:SynaptiX_FDK/board/sx_board.h **** /*  RS485 DE    */
+ 151:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Port          GPIOB
+ 152:SynaptiX_FDK/board/sx_board.h **** #define RS485_RDE_Pin           GPIO_PIN_2
+ 153:SynaptiX_FDK/board/sx_board.h **** 
+ 154:SynaptiX_FDK/board/sx_board.h **** /*  SPS30 power enable (EN_PW_DUST, per schematic)
+ 155:SynaptiX_FDK/board/sx_board.h ****  *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ 156:SynaptiX_FDK/board/sx_board.h ****  *  (12V side) -> its output phototransistor turns on -> forms a divider
+ 157:SynaptiX_FDK/board/sx_board.h ****  *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ 158:SynaptiX_FDK/board/sx_board.h ****  *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ 159:SynaptiX_FDK/board/sx_board.h ****  *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ 160:SynaptiX_FDK/board/sx_board.h ****  *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ 161:SynaptiX_FDK/board/sx_board.h ****  *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+ 162:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Port         GPIOA
+ 163:SynaptiX_FDK/board/sx_board.h **** #define EN_PW_DUST_Pin          GPIO_PIN_9
+ 164:SynaptiX_FDK/board/sx_board.h **** 
+ 165:SynaptiX_FDK/board/sx_board.h **** /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ 166:SynaptiX_FDK/board/sx_board.h ****  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ 167:SynaptiX_FDK/board/sx_board.h ****  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+ 168:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Port           GPIOA
+ 169:SynaptiX_FDK/board/sx_board.h **** #define UART5_S0_Pin            GPIO_PIN_7
+ 170:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Port           GPIOC
+ 171:SynaptiX_FDK/board/sx_board.h **** #define UART5_S1_Pin            GPIO_PIN_4
+ 172:SynaptiX_FDK/board/sx_board.h **** 
+ 173:SynaptiX_FDK/board/sx_board.h **** /* USB */
+ 174:SynaptiX_FDK/board/sx_board.h **** void dcd_fs_msp_init(uint8_t rhport);
+ 175:SynaptiX_FDK/board/sx_board.h **** void USB_DRD_FS_IRQHandler(void);
+ 176:SynaptiX_FDK/board/sx_board.h **** 
+ 177:SynaptiX_FDK/board/sx_board.h **** /* Board */
+ 178:SynaptiX_FDK/board/sx_board.h **** void sx_board_init(void);
+ 179:SynaptiX_FDK/board/sx_board.h **** void read_vol_pin(uint32_t time_stamp);
+ 180:SynaptiX_FDK/board/sx_board.h **** void gps_it_handle(void);
+ 181:SynaptiX_FDK/board/sx_board.h **** void sim_it_handle(void);
+ 182:SynaptiX_FDK/board/sx_board.h **** void board_gps_uart_resume_it(void);
+ 183:SynaptiX_FDK/board/sx_board.h **** void board_sim_uart_resume_it(void);
+ 184:SynaptiX_FDK/board/sx_board.h **** 
+ 185:SynaptiX_FDK/board/sx_board.h **** inline void sx_delay(uint32_t time_delay_ms){HAL_Delay(time_delay_ms);}
+ 186:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 291              		.loc 3 186 33 is_stmt 1 view -0
+ 292              		.cfi_startproc
+ 293              		@ args = 0, pretend = 0, frame = 0
+ 294              		@ frame_needed = 0, uses_anonymous_args = 0
+ 295 0000 08B5     		push	{r3, lr}
+ 296              	.LCFI6:
+ 297              		.cfi_def_cfa_offset 8
+ 298              		.cfi_offset 3, -8
+ 299              		.cfi_offset 14, -4
+ 300              		.loc 3 186 34 view .LVU72
+ 301              		.loc 3 186 41 is_stmt 0 view .LVU73
+ 302 0002 FFF7FEFF 		bl	HAL_GetTick
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 11
+
+
+ 303              	.LVL29:
+ 304              		.loc 3 186 55 view .LVU74
+ 305 0006 08BD     		pop	{r3, pc}
+ 306              		.cfi_endproc
+ 307              	.LFE336:
+ 309              		.section	.text.sht3x_soft_reset,"ax",%progbits
+ 310              		.align	1
+ 311              		.global	sht3x_soft_reset
+ 312              		.syntax unified
+ 313              		.thumb
+ 314              		.thumb_func
+ 316              	sht3x_soft_reset:
+ 317              	.LVL30:
+ 318              	.LFB340:
+  27:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  28:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** SHT3X_STATUS_T sht3x_init(SHT3X_T *sht3x, sx_i2c_t *i2c)
+  29:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** {
+  30:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (sht3x == NULL || i2c == NULL) return SHT3X_ERR;
+  31:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  32:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->i2c = i2c;
+  33:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->humidity = 0.0f;
+  34:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->temperature = 0.0f;
+  35:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  36:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     // Soft reset
+  37:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (sht3x_soft_reset(sht3x) != SHT3X_OK) {
+  38:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+  39:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+  40:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  41:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sx_delay(20);  
+  42:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  43:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+  44:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+  45:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  46:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** SHT3X_STATUS_T sht3x_soft_reset(SHT3X_T *sht3x)
+  47:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** {
+ 319              		.loc 1 47 1 is_stmt 1 view -0
+ 320              		.cfi_startproc
+ 321              		@ args = 0, pretend = 0, frame = 0
+ 322              		@ frame_needed = 0, uses_anonymous_args = 0
+ 323              		.loc 1 47 1 is_stmt 0 view .LVU76
+ 324 0000 08B5     		push	{r3, lr}
+ 325              	.LCFI7:
+ 326              		.cfi_def_cfa_offset 8
+ 327              		.cfi_offset 3, -8
+ 328              		.cfi_offset 14, -4
+  48:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return sht3x_send_cmd(sht3x, SHT3X_CMD_SOFT_RESET);
+ 329              		.loc 1 48 5 is_stmt 1 view .LVU77
+ 330              		.loc 1 48 12 is_stmt 0 view .LVU78
+ 331 0002 43F2A201 		movw	r1, #12450
+ 332 0006 FFF7FEFF 		bl	sht3x_send_cmd
+ 333              	.LVL31:
+  49:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 334              		.loc 1 49 1 view .LVU79
+ 335 000a 08BD     		pop	{r3, pc}
+ 336              		.cfi_endproc
+ 337              	.LFE340:
+ 339              		.section	.text.sht3x_init,"ax",%progbits
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 12
+
+
+ 340              		.align	1
+ 341              		.global	sht3x_init
+ 342              		.syntax unified
+ 343              		.thumb
+ 344              		.thumb_func
+ 346              	sht3x_init:
+ 347              	.LVL32:
+ 348              	.LFB339:
+  29:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (sht3x == NULL || i2c == NULL) return SHT3X_ERR;
+ 349              		.loc 1 29 1 is_stmt 1 view -0
+ 350              		.cfi_startproc
+ 351              		@ args = 0, pretend = 0, frame = 0
+ 352              		@ frame_needed = 0, uses_anonymous_args = 0
+  29:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (sht3x == NULL || i2c == NULL) return SHT3X_ERR;
+ 353              		.loc 1 29 1 is_stmt 0 view .LVU81
+ 354 0000 10B5     		push	{r4, lr}
+ 355              	.LCFI8:
+ 356              		.cfi_def_cfa_offset 8
+ 357              		.cfi_offset 4, -8
+ 358              		.cfi_offset 14, -4
+  30:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 359              		.loc 1 30 5 is_stmt 1 view .LVU82
+  30:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 360              		.loc 1 30 8 is_stmt 0 view .LVU83
+ 361 0002 78B1     		cbz	r0, .L30
+  30:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 362              		.loc 1 30 23 discriminator 2 view .LVU84
+ 363 0004 81B1     		cbz	r1, .L31
+  32:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->humidity = 0.0f;
+ 364              		.loc 1 32 5 is_stmt 1 view .LVU85
+  32:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->humidity = 0.0f;
+ 365              		.loc 1 32 16 is_stmt 0 view .LVU86
+ 366 0006 0160     		str	r1, [r0]
+  33:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->temperature = 0.0f;
+ 367              		.loc 1 33 5 is_stmt 1 view .LVU87
+  33:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->temperature = 0.0f;
+ 368              		.loc 1 33 21 is_stmt 0 view .LVU88
+ 369 0008 0022     		movs	r2, #0
+ 370 000a 4260     		str	r2, [r0, #4]	@ float
+  34:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 371              		.loc 1 34 5 is_stmt 1 view .LVU89
+  34:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 372              		.loc 1 34 24 is_stmt 0 view .LVU90
+ 373 000c 8260     		str	r2, [r0, #8]	@ float
+  37:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+ 374              		.loc 1 37 5 is_stmt 1 view .LVU91
+  37:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+ 375              		.loc 1 37 9 is_stmt 0 view .LVU92
+ 376 000e FFF7FEFF 		bl	sht3x_soft_reset
+ 377              	.LVL33:
+  37:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+ 378              		.loc 1 37 8 discriminator 1 view .LVU93
+ 379 0012 0446     		mov	r4, r0
+ 380 0014 10B1     		cbz	r0, .L34
+  38:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+ 381              		.loc 1 38 16 view .LVU94
+ 382 0016 0124     		movs	r4, #1
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 13
+
+
+ 383              	.L29:
+  44:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 384              		.loc 1 44 1 view .LVU95
+ 385 0018 2046     		mov	r0, r4
+ 386 001a 10BD     		pop	{r4, pc}
+ 387              	.L34:
+  41:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 388              		.loc 1 41 5 is_stmt 1 view .LVU96
+ 389              	.LVL34:
+ 390              	.LBB10:
+ 391              	.LBI10:
+ 185:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 392              		.loc 3 185 13 view .LVU97
+ 393              	.LBB11:
+ 185:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 394              		.loc 3 185 46 view .LVU98
+ 395 001c 1420     		movs	r0, #20
+ 396 001e FFF7FEFF 		bl	HAL_Delay
+ 397              	.LVL35:
+ 185:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 398              		.loc 3 185 46 is_stmt 0 view .LVU99
+ 399              	.LBE11:
+ 400              	.LBE10:
+  43:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 401              		.loc 1 43 5 is_stmt 1 view .LVU100
+  43:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 402              		.loc 1 43 12 is_stmt 0 view .LVU101
+ 403 0022 F9E7     		b	.L29
+ 404              	.LVL36:
+ 405              	.L30:
+  30:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 406              		.loc 1 30 46 discriminator 3 view .LVU102
+ 407 0024 0124     		movs	r4, #1
+ 408 0026 F7E7     		b	.L29
+ 409              	.L31:
+ 410 0028 0124     		movs	r4, #1
+ 411 002a F5E7     		b	.L29
+ 412              		.cfi_endproc
+ 413              	.LFE339:
+ 415              		.section	.text.sht3x_read_status,"ax",%progbits
+ 416              		.align	1
+ 417              		.global	sht3x_read_status
+ 418              		.syntax unified
+ 419              		.thumb
+ 420              		.thumb_func
+ 422              	sht3x_read_status:
+ 423              	.LVL37:
+ 424              	.LFB341:
+  50:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  51:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** SHT3X_STATUS_T sht3x_read_status(SHT3X_T *sht3x, uint16_t *status)
+  52:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** {
+ 425              		.loc 1 52 1 is_stmt 1 view -0
+ 426              		.cfi_startproc
+ 427              		@ args = 0, pretend = 0, frame = 8
+ 428              		@ frame_needed = 0, uses_anonymous_args = 0
+ 429              		.loc 1 52 1 is_stmt 0 view .LVU104
+ 430 0000 70B5     		push	{r4, r5, r6, lr}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 14
+
+
+ 431              	.LCFI9:
+ 432              		.cfi_def_cfa_offset 16
+ 433              		.cfi_offset 4, -16
+ 434              		.cfi_offset 5, -12
+ 435              		.cfi_offset 6, -8
+ 436              		.cfi_offset 14, -4
+ 437 0002 82B0     		sub	sp, sp, #8
+ 438              	.LCFI10:
+ 439              		.cfi_def_cfa_offset 24
+ 440 0004 0446     		mov	r4, r0
+ 441 0006 0E46     		mov	r6, r1
+  53:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     uint8_t buf[3];
+ 442              		.loc 1 53 5 is_stmt 1 view .LVU105
+  54:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (sht3x_send_cmd(sht3x, SHT3X_CMD_READ_STATUS) != SHT3X_OK) {
+ 443              		.loc 1 54 5 view .LVU106
+ 444              		.loc 1 54 9 is_stmt 0 view .LVU107
+ 445 0008 4FF22D31 		movw	r1, #62253
+ 446              	.LVL38:
+ 447              		.loc 1 54 9 view .LVU108
+ 448 000c FFF7FEFF 		bl	sht3x_send_cmd
+ 449              	.LVL39:
+ 450              		.loc 1 54 8 discriminator 1 view .LVU109
+ 451 0010 18B1     		cbz	r0, .L41
+  55:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+ 452              		.loc 1 55 16 view .LVU110
+ 453 0012 0125     		movs	r5, #1
+ 454              	.LVL40:
+ 455              	.L36:
+  56:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+  57:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  58:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sx_delay(1);
+  59:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  60:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (sx_i2c_read(sht3x->i2c, SHT3X_DEVICE_ADDR, buf, 3) != 0) {
+  61:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+  62:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+  63:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  64:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (buf[2] != calculate_crc(buf, 2)) {
+  65:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR_CRC;
+  66:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+  67:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  68:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     *status = (buf[0] << 8) | buf[1];
+  69:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+  70:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 456              		.loc 1 70 1 view .LVU111
+ 457 0014 2846     		mov	r0, r5
+ 458 0016 02B0     		add	sp, sp, #8
+ 459              	.LCFI11:
+ 460              		.cfi_remember_state
+ 461              		.cfi_def_cfa_offset 16
+ 462              		@ sp needed
+ 463 0018 70BD     		pop	{r4, r5, r6, pc}
+ 464              	.LVL41:
+ 465              	.L41:
+ 466              	.LCFI12:
+ 467              		.cfi_restore_state
+ 468              		.loc 1 70 1 view .LVU112
+ 469 001a 0546     		mov	r5, r0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 15
+
+
+  58:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+ 470              		.loc 1 58 5 is_stmt 1 view .LVU113
+ 471              	.LVL42:
+ 472              	.LBB12:
+ 473              	.LBI12:
+ 185:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 474              		.loc 3 185 13 view .LVU114
+ 475              	.LBB13:
+ 185:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 476              		.loc 3 185 46 view .LVU115
+ 477 001c 0120     		movs	r0, #1
+ 478 001e FFF7FEFF 		bl	HAL_Delay
+ 479              	.LVL43:
+ 185:SynaptiX_FDK/board/sx_board.h **** inline uint32_t sx_gettick(void){return HAL_GetTick();}
+ 480              		.loc 3 185 46 is_stmt 0 view .LVU116
+ 481              	.LBE13:
+ 482              	.LBE12:
+  60:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+ 483              		.loc 1 60 5 is_stmt 1 view .LVU117
+  60:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+ 484              		.loc 1 60 9 is_stmt 0 view .LVU118
+ 485 0022 0323     		movs	r3, #3
+ 486 0024 01AA     		add	r2, sp, #4
+ 487 0026 8821     		movs	r1, #136
+ 488 0028 2068     		ldr	r0, [r4]
+ 489 002a FFF7FEFF 		bl	sx_i2c_read
+ 490              	.LVL44:
+  60:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+ 491              		.loc 1 60 8 discriminator 1 view .LVU119
+ 492 002e 78B9     		cbnz	r0, .L38
+  64:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR_CRC;
+ 493              		.loc 1 64 5 is_stmt 1 view .LVU120
+  64:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR_CRC;
+ 494              		.loc 1 64 12 is_stmt 0 view .LVU121
+ 495 0030 9DF80640 		ldrb	r4, [sp, #6]	@ zero_extendqisi2
+ 496              	.LVL45:
+  64:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR_CRC;
+ 497              		.loc 1 64 19 view .LVU122
+ 498 0034 0221     		movs	r1, #2
+ 499 0036 01A8     		add	r0, sp, #4
+ 500 0038 FFF7FEFF 		bl	calculate_crc
+ 501              	.LVL46:
+  64:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR_CRC;
+ 502              		.loc 1 64 8 discriminator 1 view .LVU123
+ 503 003c 8442     		cmp	r4, r0
+ 504 003e 09D1     		bne	.L39
+  68:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+ 505              		.loc 1 68 5 is_stmt 1 view .LVU124
+  68:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+ 506              		.loc 1 68 19 is_stmt 0 view .LVU125
+ 507 0040 9DF80420 		ldrb	r2, [sp, #4]	@ zero_extendqisi2
+  68:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+ 508              		.loc 1 68 34 view .LVU126
+ 509 0044 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+  68:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+ 510              		.loc 1 68 29 view .LVU127
+ 511 0048 43EA0223 		orr	r3, r3, r2, lsl #8
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 16
+
+
+  68:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+ 512              		.loc 1 68 13 view .LVU128
+ 513 004c 3380     		strh	r3, [r6]	@ movhi
+  69:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 514              		.loc 1 69 5 is_stmt 1 view .LVU129
+  69:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 515              		.loc 1 69 12 is_stmt 0 view .LVU130
+ 516 004e E1E7     		b	.L36
+ 517              	.LVL47:
+ 518              	.L38:
+  61:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+ 519              		.loc 1 61 16 view .LVU131
+ 520 0050 0125     		movs	r5, #1
+ 521 0052 DFE7     		b	.L36
+ 522              	.LVL48:
+ 523              	.L39:
+  65:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+ 524              		.loc 1 65 16 view .LVU132
+ 525 0054 0225     		movs	r5, #2
+ 526 0056 DDE7     		b	.L36
+ 527              		.cfi_endproc
+ 528              	.LFE341:
+ 530              		.section	.text.sht3x_measure_single_shot,"ax",%progbits
+ 531              		.align	1
+ 532              		.global	sht3x_measure_single_shot
+ 533              		.syntax unified
+ 534              		.thumb
+ 535              		.thumb_func
+ 537              	sht3x_measure_single_shot:
+ 538              	.LVL49:
+ 539              	.LFB342:
+  71:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  72:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** SHT3X_STATUS_T sht3x_measure_single_shot(SHT3X_T *sht3x, SHT3X_COMMAND_T cmd)
+  73:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** {
+ 540              		.loc 1 73 1 is_stmt 1 view -0
+ 541              		.cfi_startproc
+ 542              		@ args = 0, pretend = 0, frame = 0
+ 543              		@ frame_needed = 0, uses_anonymous_args = 0
+ 544              		.loc 1 73 1 is_stmt 0 view .LVU134
+ 545 0000 08B5     		push	{r3, lr}
+ 546              	.LCFI13:
+ 547              		.cfi_def_cfa_offset 8
+ 548              		.cfi_offset 3, -8
+ 549              		.cfi_offset 14, -4
+  74:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return sht3x_send_cmd(sht3x, cmd);
+ 550              		.loc 1 74 5 is_stmt 1 view .LVU135
+ 551              		.loc 1 74 12 is_stmt 0 view .LVU136
+ 552 0002 FFF7FEFF 		bl	sht3x_send_cmd
+ 553              	.LVL50:
+  75:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }
+ 554              		.loc 1 75 1 view .LVU137
+ 555 0006 08BD     		pop	{r3, pc}
+ 556              		.cfi_endproc
+ 557              	.LFE342:
+ 559              		.section	.text.sht3x_read_measurement,"ax",%progbits
+ 560              		.align	1
+ 561              		.global	sht3x_read_measurement
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 17
+
+
+ 562              		.syntax unified
+ 563              		.thumb
+ 564              		.thumb_func
+ 566              	sht3x_read_measurement:
+ 567              	.LVL51:
+ 568              	.LFB343:
+  76:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  77:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** SHT3X_STATUS_T sht3x_read_measurement(SHT3X_T *sht3x)
+  78:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** {
+ 569              		.loc 1 78 1 is_stmt 1 view -0
+ 570              		.cfi_startproc
+ 571              		@ args = 0, pretend = 0, frame = 8
+ 572              		@ frame_needed = 0, uses_anonymous_args = 0
+ 573              		.loc 1 78 1 is_stmt 0 view .LVU139
+ 574 0000 30B5     		push	{r4, r5, lr}
+ 575              	.LCFI14:
+ 576              		.cfi_def_cfa_offset 12
+ 577              		.cfi_offset 4, -12
+ 578              		.cfi_offset 5, -8
+ 579              		.cfi_offset 14, -4
+ 580 0002 83B0     		sub	sp, sp, #12
+ 581              	.LCFI15:
+ 582              		.cfi_def_cfa_offset 24
+ 583 0004 0446     		mov	r4, r0
+  79:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     uint8_t buf[6];
+ 584              		.loc 1 79 5 is_stmt 1 view .LVU140
+  80:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (sx_i2c_read(sht3x->i2c, SHT3X_DEVICE_ADDR, buf, 6) != 0) {
+ 585              		.loc 1 80 5 view .LVU141
+ 586              		.loc 1 80 9 is_stmt 0 view .LVU142
+ 587 0006 0623     		movs	r3, #6
+ 588 0008 6A46     		mov	r2, sp
+ 589 000a 8821     		movs	r1, #136
+ 590 000c 0068     		ldr	r0, [r0]
+ 591              	.LVL52:
+ 592              		.loc 1 80 9 view .LVU143
+ 593 000e FFF7FEFF 		bl	sx_i2c_read
+ 594              	.LVL53:
+ 595              		.loc 1 80 8 discriminator 1 view .LVU144
+ 596 0012 E0BB     		cbnz	r0, .L46
+  81:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR;
+  82:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+  83:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  84:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     //Check CRC
+  85:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     if (buf[2] != calculate_crc(buf, 2) || buf[5] != calculate_crc(buf + 3, 2)) {
+ 597              		.loc 1 85 5 is_stmt 1 view .LVU145
+ 598              		.loc 1 85 12 is_stmt 0 view .LVU146
+ 599 0014 9DF80250 		ldrb	r5, [sp, #2]	@ zero_extendqisi2
+ 600              		.loc 1 85 19 view .LVU147
+ 601 0018 0221     		movs	r1, #2
+ 602 001a 6846     		mov	r0, sp
+ 603 001c FFF7FEFF 		bl	calculate_crc
+ 604              	.LVL54:
+ 605              		.loc 1 85 8 discriminator 1 view .LVU148
+ 606 0020 8542     		cmp	r5, r0
+ 607 0022 37D1     		bne	.L47
+ 608              		.loc 1 85 47 discriminator 1 view .LVU149
+ 609 0024 9DF80550 		ldrb	r5, [sp, #5]	@ zero_extendqisi2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 18
+
+
+ 610              		.loc 1 85 54 discriminator 1 view .LVU150
+ 611 0028 0221     		movs	r1, #2
+ 612 002a 0DF10300 		add	r0, sp, #3
+ 613 002e FFF7FEFF 		bl	calculate_crc
+ 614              	.LVL55:
+ 615              		.loc 1 85 41 discriminator 1 view .LVU151
+ 616 0032 8542     		cmp	r5, r0
+ 617 0034 30D1     		bne	.L48
+  86:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR_CRC;
+  87:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+  88:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  89:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     uint16_t raw_temp = (buf[0] << 8) | buf[1];
+ 618              		.loc 1 89 5 is_stmt 1 view .LVU152
+ 619              		.loc 1 89 29 is_stmt 0 view .LVU153
+ 620 0036 9DF80020 		ldrb	r2, [sp]	@ zero_extendqisi2
+ 621              		.loc 1 89 44 view .LVU154
+ 622 003a 9DF80130 		ldrb	r3, [sp, #1]	@ zero_extendqisi2
+ 623              		.loc 1 89 14 view .LVU155
+ 624 003e 43EA0223 		orr	r3, r3, r2, lsl #8
+ 625 0042 07EE103A 		vmov	s14, r3	@ int
+ 626              	.LVL56:
+  90:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     uint16_t raw_hum  = (buf[3] << 8) | buf[4];
+ 627              		.loc 1 90 5 is_stmt 1 view .LVU156
+ 628              		.loc 1 90 29 is_stmt 0 view .LVU157
+ 629 0046 9DF80320 		ldrb	r2, [sp, #3]	@ zero_extendqisi2
+ 630              		.loc 1 90 44 view .LVU158
+ 631 004a 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 632              		.loc 1 90 14 view .LVU159
+ 633 004e 43EA0223 		orr	r3, r3, r2, lsl #8
+ 634              	.LVL57:
+  91:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  92:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->temperature = -45.0f + 175.0f * (raw_temp / 65535.0f);
+ 635              		.loc 1 92 5 is_stmt 1 view .LVU160
+ 636              		.loc 1 92 54 is_stmt 0 view .LVU161
+ 637 0052 B8EEC77A 		vcvt.f32.s32	s14, s14
+ 638              	.LVL58:
+ 639              		.loc 1 92 54 view .LVU162
+ 640 0056 DFED116A 		vldr.32	s13, .L50
+ 641 005a C7EE267A 		vdiv.f32	s15, s14, s13
+ 642              		.loc 1 92 42 view .LVU163
+ 643 005e 9FED107A 		vldr.32	s14, .L50+4
+ 644 0062 67EE877A 		vmul.f32	s15, s15, s14
+ 645              		.loc 1 92 33 view .LVU164
+ 646 0066 9FED0F7A 		vldr.32	s14, .L50+8
+ 647 006a 77EEC77A 		vsub.f32	s15, s15, s14
+ 648              		.loc 1 92 24 view .LVU165
+ 649 006e C4ED027A 		vstr.32	s15, [r4, #8]
+  93:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     sht3x->humidity    = 100.0f * (raw_hum / 65535.0f);
+ 650              		.loc 1 93 5 is_stmt 1 view .LVU166
+ 651              		.loc 1 93 44 is_stmt 0 view .LVU167
+ 652 0072 07EE903A 		vmov	s15, r3	@ int
+ 653 0076 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 654 007a 87EEA67A 		vdiv.f32	s14, s15, s13
+ 655              		.loc 1 93 33 view .LVU168
+ 656 007e DFED0A7A 		vldr.32	s15, .L50+12
+ 657 0082 67EE277A 		vmul.f32	s15, s14, s15
+ 658              		.loc 1 93 24 view .LVU169
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 19
+
+
+ 659 0086 C4ED017A 		vstr.32	s15, [r4, #4]
+  94:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** 
+  95:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     return SHT3X_OK;
+ 660              		.loc 1 95 5 is_stmt 1 view .LVU170
+ 661              		.loc 1 95 12 is_stmt 0 view .LVU171
+ 662 008a 0020     		movs	r0, #0
+ 663 008c 00E0     		b	.L45
+ 664              	.LVL59:
+ 665              	.L46:
+  81:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****     }
+ 666              		.loc 1 81 16 view .LVU172
+ 667 008e 0120     		movs	r0, #1
+ 668              	.L45:
+  96:SynaptiX_FDK/components/modules/sht3x/sht3x.c **** }...
+ 669              		.loc 1 96 1 view .LVU173
+ 670 0090 03B0     		add	sp, sp, #12
+ 671              	.LCFI16:
+ 672              		.cfi_remember_state
+ 673              		.cfi_def_cfa_offset 12
+ 674              		@ sp needed
+ 675 0092 30BD     		pop	{r4, r5, pc}
+ 676              	.LVL60:
+ 677              	.L47:
+ 678              	.LCFI17:
+ 679              		.cfi_restore_state
+  86:SynaptiX_FDK/components/modules/sht3x/sht3x.c ****         return SHT3X_ERR_CRC;
+ 680              		.loc 1 86 16 view .LVU174
+ 681 0094 0220     		movs	r0, #2
+ 682 0096 FBE7     		b	.L45
+ 683              	.L48:
+ 684 0098 0220     		movs	r0, #2
+ 685 009a F9E7     		b	.L45
+ 686              	.L51:
+ 687              		.align	2
+ 688              	.L50:
+ 689 009c 00FF7F47 		.word	1199570688
+ 690 00a0 00002F43 		.word	1127153664
+ 691 00a4 00003442 		.word	1110704128
+ 692 00a8 0000C842 		.word	1120403456
+ 693              		.cfi_endproc
+ 694              	.LFE343:
+ 696              		.text
+ 697              	.Letext0:
+ 698              		.file 4 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 699              		.file 5 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 700              		.file 6 "SynaptiX_FDK/components/modules/sht3x/sht3x.h"
+ 701              		.file 7 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_ll_lptim.h"
+ 702              		.file 8 "Drivers/STM32H5xx_HAL_Driver/Inc/stm32h5xx_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s 			page 20
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sht3x.c
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:22     .text.sx_i2c_write:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:27     .text.sx_i2c_write:00000000 sx_i2c_write
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:75     .text.sx_i2c_read:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:80     .text.sx_i2c_read:00000000 sx_i2c_read
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:127    .text.calculate_crc:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:132    .text.calculate_crc:00000000 calculate_crc
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:232    .text.sht3x_send_cmd:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:237    .text.sht3x_send_cmd:00000000 sht3x_send_cmd
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:282    .text.sx_gettick:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:288    .text.sx_gettick:00000000 sx_gettick
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:310    .text.sht3x_soft_reset:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:316    .text.sht3x_soft_reset:00000000 sht3x_soft_reset
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:340    .text.sht3x_init:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:346    .text.sht3x_init:00000000 sht3x_init
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:416    .text.sht3x_read_status:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:422    .text.sht3x_read_status:00000000 sht3x_read_status
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:531    .text.sht3x_measure_single_shot:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:537    .text.sht3x_measure_single_shot:00000000 sht3x_measure_single_shot
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:560    .text.sht3x_read_measurement:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:566    .text.sht3x_read_measurement:00000000 sht3x_read_measurement
+C:\Users\DELL\AppData\Local\Temp\ccqtkz11.s:689    .text.sht3x_read_measurement:0000009c $d
+
+UNDEFINED SYMBOLS
+HAL_GetTick
+HAL_Delay

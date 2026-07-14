@@ -39,6 +39,7 @@ extern "C"
 #endif
 
 #include "stdint.h"
+#include "stdio.h"
 #include "sx_i2c.h"
 
 /*

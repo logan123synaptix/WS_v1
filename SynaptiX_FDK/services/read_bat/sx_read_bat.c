@@ -1,3 +1,4 @@
+#if USE_READ_PIN
 #include "sx_read_bat.h"
 #include "logger.h"
 #include "sx_board.h"
@@ -76,3 +77,4 @@ void sx_adc_reader_process(sx_adc_reader_t *reader, void *hal_adc, uint32_t time
         log_info(TAG, "Vbat = %.4f V", reader->v_bat_filtered);
     }
 }
+#endif

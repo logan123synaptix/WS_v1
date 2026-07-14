@@ -1,0 +1,2567 @@
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 1
+
+
+   1              		.cpu cortex-m33
+   2              		.arch armv8-m.main
+   3              		.fpu fpv5-sp-d16
+   4              		.arch_extension dsp
+   5              		.eabi_attribute 27, 1
+   6              		.eabi_attribute 28, 1
+   7              		.eabi_attribute 20, 1
+   8              		.eabi_attribute 21, 1
+   9              		.eabi_attribute 23, 3
+  10              		.eabi_attribute 24, 1
+  11              		.eabi_attribute 25, 1
+  12              		.eabi_attribute 26, 1
+  13              		.eabi_attribute 30, 1
+  14              		.eabi_attribute 34, 1
+  15              		.eabi_attribute 18, 4
+  16              		.file	"sensirion_shdlc.c"
+  17              		.text
+  18              	.Ltext0:
+  19              		.cfi_sections	.debug_frame
+  20              		.file 1 "SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c"
+  21              		.section	.text.sensirion_shdlc_checksum,"ax",%progbits
+  22              		.align	1
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	sensirion_shdlc_checksum:
+  28              	.LVL0:
+  29              	.LFB3:
+   1:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** /*
+   2:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * Copyright (c) 2018, Sensirion AG
+   3:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * All rights reserved.
+   4:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *
+   5:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * Redistribution and use in source and binary forms, with or without
+   6:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * modification, are permitted provided that the following conditions are met:
+   7:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *
+   8:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * * Redistributions of source code must retain the above copyright notice, this
+   9:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *   list of conditions and the following disclaimer.
+  10:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *
+  11:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * * Redistributions in binary form must reproduce the above copyright notice,
+  12:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *   this list of conditions and the following disclaimer in the documentation
+  13:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *   and/or other materials provided with the distribution.
+  14:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *
+  15:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * * Neither the name of Sensirion AG nor the names of its
+  16:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *   contributors may be used to endorse or promote products derived from
+  17:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *   this software without specific prior written permission.
+  18:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  *
+  19:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  20:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  21:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  22:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  23:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  24:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  25:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  26:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  27:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  28:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  29:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  * POSSIBILITY OF SUCH DAMAGE.
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 2
+
+
+  30:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****  */
+  31:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  32:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #include "sensirion_shdlc.h"
+  33:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #include "sensirion_common.h"
+  34:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #include "sensirion_config.h"
+  35:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #include "sensirion_uart_hal.h"
+  36:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  37:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #define SHDLC_START 0x7e
+  38:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #define SHDLC_STOP 0x7e
+  39:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  40:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #define SHDLC_MIN_TX_FRAME_SIZE 6
+  41:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** /** start/stop + (4 header + 255 data) * 2 because of byte stuffing */
+  42:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #define SHDLC_FRAME_MAX_TX_FRAME_SIZE (2 + (4 + 255) * 2)
+  43:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  44:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** /** start/stop + (5 header + 255 data) * 2 because of byte stuffing */
+  45:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #define SHDLC_FRAME_MAX_RX_FRAME_SIZE (2 + (5 + 255) * 2)
+  46:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  47:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** #define RX_DELAY_US 20000
+  48:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  49:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** static uint8_t sensirion_shdlc_checksum(uint8_t header_sum, uint8_t data_len,
+  50:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                         const uint8_t* data) {
+  30              		.loc 1 50 62 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+  51:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     header_sum += data_len;
+  35              		.loc 1 51 5 view .LVU1
+  36              		.loc 1 51 16 is_stmt 0 view .LVU2
+  37 0000 0844     		add	r0, r0, r1
+  38              	.LVL1:
+  39              		.loc 1 51 16 view .LVU3
+  40 0002 C0B2     		uxtb	r0, r0
+  41              	.LVL2:
+  52:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  53:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     while (data_len--)
+  42              		.loc 1 53 5 is_stmt 1 view .LVU4
+  43              		.loc 1 53 11 is_stmt 0 view .LVU5
+  44 0004 04E0     		b	.L2
+  45              	.LVL3:
+  46              	.L3:
+  54:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         header_sum += *(data++);
+  47              		.loc 1 54 9 is_stmt 1 view .LVU6
+  48              		.loc 1 54 23 is_stmt 0 view .LVU7
+  49 0006 12F8011B 		ldrb	r1, [r2], #1	@ zero_extendqisi2
+  50              	.LVL4:
+  51              		.loc 1 54 20 view .LVU8
+  52 000a 0844     		add	r0, r0, r1
+  53              	.LVL5:
+  54              		.loc 1 54 20 view .LVU9
+  55 000c C0B2     		uxtb	r0, r0
+  56              	.LVL6:
+  53:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         header_sum += *(data++);
+  57              		.loc 1 53 20 view .LVU10
+  58 000e 1946     		mov	r1, r3
+  59              	.LVL7:
+  60              	.L2:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 3
+
+
+  53:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         header_sum += *(data++);
+  61              		.loc 1 53 12 is_stmt 1 view .LVU11
+  53:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         header_sum += *(data++);
+  62              		.loc 1 53 20 is_stmt 0 view .LVU12
+  63 0010 4B1E     		subs	r3, r1, #1
+  64 0012 DBB2     		uxtb	r3, r3
+  65              	.LVL8:
+  53:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         header_sum += *(data++);
+  66              		.loc 1 53 12 view .LVU13
+  67 0014 0029     		cmp	r1, #0
+  68 0016 F6D1     		bne	.L3
+  55:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  56:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return ~header_sum;
+  69              		.loc 1 56 5 is_stmt 1 view .LVU14
+  70              		.loc 1 56 12 is_stmt 0 view .LVU15
+  71 0018 C043     		mvns	r0, r0
+  72              	.LVL9:
+  57:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+  73              		.loc 1 57 1 view .LVU16
+  74 001a C0B2     		uxtb	r0, r0
+  75              	.LVL10:
+  76              		.loc 1 57 1 view .LVU17
+  77 001c 7047     		bx	lr
+  78              		.cfi_endproc
+  79              	.LFE3:
+  81              		.section	.text.sensirion_shdlc_stuff_data,"ax",%progbits
+  82              		.align	1
+  83              		.syntax unified
+  84              		.thumb
+  85              		.thumb_func
+  87              	sensirion_shdlc_stuff_data:
+  88              	.LVL11:
+  89              	.LFB4:
+  58:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  59:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** static uint16_t sensirion_shdlc_stuff_data(uint8_t data_len,
+  60:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                            const uint8_t* data,
+  61:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                            uint8_t* stuffed_data) {
+  90              		.loc 1 61 67 is_stmt 1 view -0
+  91              		.cfi_startproc
+  92              		@ args = 0, pretend = 0, frame = 0
+  93              		@ frame_needed = 0, uses_anonymous_args = 0
+  94              		.loc 1 61 67 is_stmt 0 view .LVU19
+  95 0000 0346     		mov	r3, r0
+  62:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t output_data_len = 0;
+  96              		.loc 1 62 5 is_stmt 1 view .LVU20
+  97              	.LVL12:
+  63:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  64:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     while (data_len--) {
+  98              		.loc 1 64 5 view .LVU21
+  62:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t output_data_len = 0;
+  99              		.loc 1 62 14 is_stmt 0 view .LVU22
+ 100 0002 0020     		movs	r0, #0
+ 101              	.LVL13:
+ 102              		.loc 1 64 12 is_stmt 1 view .LVU23
+ 103              		.loc 1 64 20 is_stmt 0 view .LVU24
+ 104 0004 03F1FF3C 		add	ip, r3, #-1
+ 105 0008 5FFA8CFC 		uxtb	ip, ip
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 4
+
+
+ 106              	.LVL14:
+ 107              		.loc 1 64 12 view .LVU25
+ 108 000c 2BB3     		cbz	r3, .L15
+  61:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t output_data_len = 0;
+ 109              		.loc 1 61 67 view .LVU26
+ 110 000e 10B5     		push	{r4, lr}
+ 111              	.LCFI0:
+ 112              		.cfi_def_cfa_offset 8
+ 113              		.cfi_offset 4, -8
+ 114              		.cfi_offset 14, -4
+ 115 0010 16E0     		b	.L10
+ 116              	.LVL15:
+ 117              	.L7:
+ 118              	.LBB2:
+  65:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         uint8_t c = *(data++);
+  66:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         switch (c) {
+ 119              		.loc 1 66 9 view .LVU27
+ 120 0012 A3F17D0E 		sub	lr, r3, #125
+ 121 0016 5FFA8EFE 		uxtb	lr, lr
+ 122 001a BEF1010F 		cmp	lr, #1
+ 123 001e 16D8     		bhi	.L8
+ 124              	.L6:
+  67:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             case 0x11:
+  68:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             case 0x13:
+  69:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             case 0x7d:
+  70:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             case 0x7e:
+  71:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 /* byte stuffing is done by inserting 0x7d and inverting bit 5
+  72:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                  */
+  73:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 *(stuffed_data++) = 0x7d;
+ 125              		.loc 1 73 17 is_stmt 1 view .LVU28
+ 126              	.LVL16:
+ 127              		.loc 1 73 35 is_stmt 0 view .LVU29
+ 128 0020 9646     		mov	lr, r2
+ 129 0022 7D24     		movs	r4, #125
+ 130 0024 0EF8024B 		strb	r4, [lr], #2
+  74:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 *(stuffed_data++) = c ^ (1 << 5);
+ 131              		.loc 1 74 17 is_stmt 1 view .LVU30
+ 132              	.LVL17:
+ 133              		.loc 1 74 35 is_stmt 0 view .LVU31
+ 134 0028 83F02003 		eor	r3, r3, #32
+ 135              	.LVL18:
+ 136              		.loc 1 74 35 view .LVU32
+ 137 002c 5370     		strb	r3, [r2, #1]
+  75:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 output_data_len += 2;
+ 138              		.loc 1 75 17 is_stmt 1 view .LVU33
+ 139              		.loc 1 75 33 is_stmt 0 view .LVU34
+ 140 002e 0230     		adds	r0, r0, #2
+ 141              	.LVL19:
+ 142              		.loc 1 75 33 view .LVU35
+ 143 0030 80B2     		uxth	r0, r0
+ 144              	.LVL20:
+  76:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 break;
+ 145              		.loc 1 76 17 is_stmt 1 view .LVU36
+  74:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 *(stuffed_data++) = c ^ (1 << 5);
+ 146              		.loc 1 74 31 is_stmt 0 view .LVU37
+ 147 0032 7246     		mov	r2, lr
+ 148              	.LVL21:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 5
+
+
+ 149              	.L9:
+  74:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 *(stuffed_data++) = c ^ (1 << 5);
+ 150              		.loc 1 74 31 view .LVU38
+ 151 0034 6346     		mov	r3, ip
+  74:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 *(stuffed_data++) = c ^ (1 << 5);
+ 152              		.loc 1 74 31 view .LVU39
+ 153              	.LBE2:
+  64:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         uint8_t c = *(data++);
+ 154              		.loc 1 64 12 is_stmt 1 view .LVU40
+  64:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         uint8_t c = *(data++);
+ 155              		.loc 1 64 20 is_stmt 0 view .LVU41
+ 156 0036 0CF1FF3C 		add	ip, ip, #-1
+ 157              	.LVL22:
+  64:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         uint8_t c = *(data++);
+ 158              		.loc 1 64 20 view .LVU42
+ 159 003a 5FFA8CFC 		uxtb	ip, ip
+ 160              	.LVL23:
+  64:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         uint8_t c = *(data++);
+ 161              		.loc 1 64 12 view .LVU43
+ 162 003e 5BB1     		cbz	r3, .L16
+ 163              	.LVL24:
+ 164              	.L10:
+ 165              	.LBB3:
+  65:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         switch (c) {
+ 166              		.loc 1 65 9 is_stmt 1 view .LVU44
+  65:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         switch (c) {
+ 167              		.loc 1 65 17 is_stmt 0 view .LVU45
+ 168 0040 11F8013B 		ldrb	r3, [r1], #1	@ zero_extendqisi2
+ 169              	.LVL25:
+  66:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             case 0x11:
+ 170              		.loc 1 66 9 is_stmt 1 view .LVU46
+ 171 0044 132B     		cmp	r3, #19
+ 172 0046 EBD0     		beq	.L6
+ 173 0048 E3D8     		bhi	.L7
+ 174 004a 112B     		cmp	r3, #17
+ 175 004c E8D0     		beq	.L6
+ 176              	.L8:
+  77:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             default:
+  78:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 *(stuffed_data++) = c;
+ 177              		.loc 1 78 17 view .LVU47
+ 178              	.LVL26:
+ 179              		.loc 1 78 35 is_stmt 0 view .LVU48
+ 180 004e 02F8013B 		strb	r3, [r2], #1
+ 181              	.LVL27:
+  79:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 output_data_len += 1;
+ 182              		.loc 1 79 17 is_stmt 1 view .LVU49
+ 183              		.loc 1 79 33 is_stmt 0 view .LVU50
+ 184 0052 0130     		adds	r0, r0, #1
+ 185              	.LVL28:
+ 186              		.loc 1 79 33 view .LVU51
+ 187 0054 80B2     		uxth	r0, r0
+ 188              	.LVL29:
+ 189              		.loc 1 79 33 view .LVU52
+ 190 0056 EDE7     		b	.L9
+ 191              	.LVL30:
+ 192              	.L16:
+ 193              		.loc 1 79 33 view .LVU53
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 6
+
+
+ 194              	.LBE3:
+  80:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+  81:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+  82:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return output_data_len;
+ 195              		.loc 1 82 5 is_stmt 1 view .LVU54
+  83:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 196              		.loc 1 83 1 is_stmt 0 view .LVU55
+ 197 0058 10BD     		pop	{r4, pc}
+ 198              	.LVL31:
+ 199              	.L15:
+ 200              	.LCFI1:
+ 201              		.cfi_def_cfa_offset 0
+ 202              		.cfi_restore 4
+ 203              		.cfi_restore 14
+ 204              		.loc 1 83 1 view .LVU56
+ 205 005a 7047     		bx	lr
+ 206              		.cfi_endproc
+ 207              	.LFE4:
+ 209              		.section	.text.sensirion_shdlc_check_unstuff,"ax",%progbits
+ 210              		.align	1
+ 211              		.syntax unified
+ 212              		.thumb
+ 213              		.thumb_func
+ 215              	sensirion_shdlc_check_unstuff:
+ 216              	.LVL32:
+ 217              	.LFB5:
+  84:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  85:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** static uint8_t sensirion_shdlc_check_unstuff(uint8_t data) {
+ 218              		.loc 1 85 60 is_stmt 1 view -0
+ 219              		.cfi_startproc
+ 220              		@ args = 0, pretend = 0, frame = 0
+ 221              		@ frame_needed = 0, uses_anonymous_args = 0
+ 222              		@ link register save eliminated.
+  86:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return data == 0x7d;
+ 223              		.loc 1 86 5 view .LVU58
+  87:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 224              		.loc 1 87 1 is_stmt 0 view .LVU59
+ 225 0000 7D28     		cmp	r0, #125
+ 226 0002 14BF     		ite	ne
+ 227 0004 0020     		movne	r0, #0
+ 228              	.LVL33:
+ 229              		.loc 1 87 1 view .LVU60
+ 230 0006 0120     		moveq	r0, #1
+ 231 0008 7047     		bx	lr
+ 232              		.cfi_endproc
+ 233              	.LFE5:
+ 235              		.section	.text.sensirion_shdlc_unstuff_byte,"ax",%progbits
+ 236              		.align	1
+ 237              		.syntax unified
+ 238              		.thumb
+ 239              		.thumb_func
+ 241              	sensirion_shdlc_unstuff_byte:
+ 242              	.LVL34:
+ 243              	.LFB6:
+  88:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+  89:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** static uint8_t sensirion_shdlc_unstuff_byte(uint8_t data) {
+ 244              		.loc 1 89 59 is_stmt 1 view -0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 7
+
+
+ 245              		.cfi_startproc
+ 246              		@ args = 0, pretend = 0, frame = 0
+ 247              		@ frame_needed = 0, uses_anonymous_args = 0
+ 248              		@ link register save eliminated.
+  90:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     switch (data) {
+ 249              		.loc 1 90 5 view .LVU62
+ 250 0000 5D28     		cmp	r0, #93
+ 251 0002 0AD0     		beq	.L21
+ 252 0004 05D8     		bhi	.L20
+ 253 0006 3128     		cmp	r0, #49
+ 254 0008 09D0     		beq	.L22
+ 255 000a 3328     		cmp	r0, #51
+ 256 000c 08D1     		bne	.L19
+  91:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x31:
+  92:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return 0x11;
+  93:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x33:
+  94:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return 0x13;
+ 257              		.loc 1 94 20 is_stmt 0 view .LVU63
+ 258 000e 1320     		movs	r0, #19
+ 259              	.LVL35:
+ 260              		.loc 1 94 20 view .LVU64
+ 261 0010 7047     		bx	lr
+ 262              	.LVL36:
+ 263              	.L20:
+  90:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     switch (data) {
+ 264              		.loc 1 90 5 view .LVU65
+ 265 0012 5E28     		cmp	r0, #94
+ 266 0014 04D1     		bne	.L19
+  95:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x5d:
+  96:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return 0x7d;
+  97:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x5e:
+  98:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return 0x7e;
+ 267              		.loc 1 98 20 view .LVU66
+ 268 0016 7E20     		movs	r0, #126
+ 269              	.LVL37:
+ 270              		.loc 1 98 20 view .LVU67
+ 271 0018 7047     		bx	lr
+ 272              	.LVL38:
+ 273              	.L21:
+  96:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x5e:
+ 274              		.loc 1 96 20 view .LVU68
+ 275 001a 7D20     		movs	r0, #125
+ 276              	.LVL39:
+  96:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x5e:
+ 277              		.loc 1 96 20 view .LVU69
+ 278 001c 7047     		bx	lr
+ 279              	.LVL40:
+ 280              	.L22:
+  90:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x31:
+ 281              		.loc 1 90 5 view .LVU70
+ 282 001e 1120     		movs	r0, #17
+ 283              	.LVL41:
+ 284              	.L19:
+  99:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         default:
+ 100:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return data;
+ 101:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 102:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 8
+
+
+ 285              		.loc 1 102 1 view .LVU71
+ 286 0020 7047     		bx	lr
+ 287              		.cfi_endproc
+ 288              	.LFE6:
+ 290              		.section	.text.sensirion_shdlc_stuff_byte,"ax",%progbits
+ 291              		.align	1
+ 292              		.syntax unified
+ 293              		.thumb
+ 294              		.thumb_func
+ 296              	sensirion_shdlc_stuff_byte:
+ 297              	.LVL42:
+ 298              	.LFB10:
+ 103:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 104:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** int16_t sensirion_shdlc_xcv(uint8_t addr, uint8_t cmd, uint8_t tx_data_len,
+ 105:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                             const uint8_t* tx_data, uint8_t max_rx_data_len,
+ 106:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                             struct sensirion_shdlc_rx_header* rx_header,
+ 107:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                             uint8_t* rx_data) {
+ 108:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t ret;
+ 109:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 110:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     ret = sensirion_shdlc_tx(addr, cmd, tx_data_len, tx_data);
+ 111:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (ret != 0)
+ 112:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return ret;
+ 113:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 114:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_uart_hal_sleep_usec(RX_DELAY_US);
+ 115:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return sensirion_shdlc_rx(max_rx_data_len, rx_header, rx_data);
+ 116:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 117:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 118:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** int16_t sensirion_shdlc_tx(uint8_t addr, uint8_t cmd, uint8_t data_len,
+ 119:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                            const uint8_t* data) {
+ 120:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t len = 0;
+ 121:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t ret;
+ 122:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t crc;
+ 123:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t tx_frame_buf[SHDLC_FRAME_MAX_TX_FRAME_SIZE];
+ 124:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     crc = sensirion_shdlc_checksum(addr + cmd, data_len, data);
+ 126:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 127:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame_buf[len++] = SHDLC_START;
+ 128:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &addr, tx_frame_buf + len);
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &cmd, tx_frame_buf + len);
+ 130:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &data_len, tx_frame_buf + len);
+ 131:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(data_len, data, tx_frame_buf + len);
+ 132:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &crc, tx_frame_buf + len);
+ 133:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame_buf[len++] = SHDLC_STOP;
+ 134:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 135:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     ret = sensirion_uart_hal_tx(len, tx_frame_buf);
+ 136:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (ret < 0)
+ 137:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return ret;
+ 138:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (ret != len)
+ 139:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 140:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return 0;
+ 141:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 142:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 143:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** int16_t sensirion_shdlc_rx(uint8_t max_data_len,
+ 144:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                            struct sensirion_shdlc_rx_header* rxh,
+ 145:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                            uint8_t* data) {
+ 146:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t len;
+ 147:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t i;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 9
+
+
+ 148:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t rx_frame[SHDLC_FRAME_MAX_RX_FRAME_SIZE];
+ 149:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t* rx_header = (uint8_t*)rxh;
+ 150:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t j;
+ 151:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t crc;
+ 152:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t unstuff_next;
+ 153:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len = sensirion_uart_hal_rx(2 + (5 + (uint16_t)max_data_len) * 2, rx_frame);
+ 155:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (len < 1 || rx_frame[0] != SHDLC_START)
+ 156:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 157:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     for (unstuff_next = 0, i = 1, j = 0; j < sizeof(*rxh) && i < len - 2; ++i) {
+ 159:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             rx_header[j++] = sensirion_shdlc_unstuff_byte(rx_frame[i]);
+ 161:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 162:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         } else {
+ 163:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = sensirion_shdlc_check_unstuff(rx_frame[i]);
+ 164:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             if (!unstuff_next)
+ 165:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 rx_header[j++] = rx_frame[i];
+ 166:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 167:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (j != sizeof(*rxh) || unstuff_next)
+ 169:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 170:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 171:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (max_data_len < rxh->data_len)
+ 172:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_FRAME_TOO_LONG; /* more data than expected */
+ 173:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     for (unstuff_next = 0, j = 0; j < rxh->data_len && i < len - 2; ++i) {
+ 175:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             data[j++] = sensirion_shdlc_unstuff_byte(rx_frame[i]);
+ 177:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 178:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         } else {
+ 179:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = sensirion_shdlc_check_unstuff(rx_frame[i]);
+ 180:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             if (!unstuff_next)
+ 181:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 data[j++] = rx_frame[i];
+ 182:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 183:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 184:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 185:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (unstuff_next)
+ 186:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 187:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 188:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (j < rxh->data_len)
+ 189:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 190:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 191:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     crc = rx_frame[i++];
+ 192:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (sensirion_shdlc_check_unstuff(crc))
+ 193:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         crc = sensirion_shdlc_unstuff_byte(rx_frame[i++]);
+ 194:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (sensirion_shdlc_checksum(rxh->addr + rxh->cmd + rxh->state,
+ 196:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 197:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_CRC_MISMATCH;
+ 198:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 199:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (i >= len || rx_frame[i] != SHDLC_STOP)
+ 200:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 201:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 202:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (0x7F & rxh->state) {
+ 203:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_EXECUTION_FAILURE;
+ 204:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 10
+
+
+ 205:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 206:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return 0;
+ 207:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 208:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 209:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** static void sensirion_shdlc_stuff_byte(struct sensirion_shdlc_buffer* tx_frame,
+ 210:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                        uint8_t data) {
+ 299              		.loc 1 210 54 is_stmt 1 view -0
+ 300              		.cfi_startproc
+ 301              		@ args = 0, pretend = 0, frame = 0
+ 302              		@ frame_needed = 0, uses_anonymous_args = 0
+ 303              		@ link register save eliminated.
+ 211:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     switch (data) {
+ 304              		.loc 1 211 5 view .LVU73
+ 305 0000 1329     		cmp	r1, #19
+ 306 0002 0FD0     		beq	.L26
+ 307 0004 09D8     		bhi	.L27
+ 308 0006 1129     		cmp	r1, #17
+ 309 0008 0CD0     		beq	.L26
+ 310              	.L28:
+ 212:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x11:
+ 213:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x13:
+ 214:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x7d:
+ 215:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x7e:
+ 216:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             /* byte stuffing is done by inserting 0x7d and inverting bit 5 */
+ 217:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = 0x7d;
+ 218:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = data ^ (1 << 5);
+ 219:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 220:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         default:
+ 221:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = data;
+ 311              		.loc 1 221 13 view .LVU74
+ 312              		.loc 1 221 21 is_stmt 0 view .LVU75
+ 313 000a 0268     		ldr	r2, [r0]
+ 314              		.loc 1 221 36 view .LVU76
+ 315 000c 8388     		ldrh	r3, [r0, #4]
+ 316              		.loc 1 221 44 view .LVU77
+ 317 000e 03F1010C 		add	ip, r3, #1
+ 318 0012 A0F804C0 		strh	ip, [r0, #4]	@ movhi
+ 319              		.loc 1 221 48 view .LVU78
+ 320 0016 D154     		strb	r1, [r2, r3]
+ 222:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 321              		.loc 1 222 13 is_stmt 1 view .LVU79
+ 223:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 224:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 322              		.loc 1 224 1 is_stmt 0 view .LVU80
+ 323 0018 7047     		bx	lr
+ 324              	.L27:
+ 211:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         case 0x11:
+ 325              		.loc 1 211 5 view .LVU81
+ 326 001a A1F17D03 		sub	r3, r1, #125
+ 327 001e DBB2     		uxtb	r3, r3
+ 328 0020 012B     		cmp	r3, #1
+ 329 0022 F2D8     		bhi	.L28
+ 330              	.L26:
+ 217:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = data ^ (1 << 5);
+ 331              		.loc 1 217 13 is_stmt 1 view .LVU82
+ 217:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = data ^ (1 << 5);
+ 332              		.loc 1 217 21 is_stmt 0 view .LVU83
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 11
+
+
+ 333 0024 0268     		ldr	r2, [r0]
+ 217:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = data ^ (1 << 5);
+ 334              		.loc 1 217 36 view .LVU84
+ 335 0026 8388     		ldrh	r3, [r0, #4]
+ 217:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = data ^ (1 << 5);
+ 336              		.loc 1 217 44 view .LVU85
+ 337 0028 03F1010C 		add	ip, r3, #1
+ 338 002c A0F804C0 		strh	ip, [r0, #4]	@ movhi
+ 217:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             tx_frame->data[tx_frame->offset++] = data ^ (1 << 5);
+ 339              		.loc 1 217 48 view .LVU86
+ 340 0030 4FF07D0C 		mov	ip, #125
+ 341 0034 02F803C0 		strb	ip, [r2, r3]
+ 218:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 342              		.loc 1 218 13 is_stmt 1 view .LVU87
+ 218:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 343              		.loc 1 218 21 is_stmt 0 view .LVU88
+ 344 0038 0268     		ldr	r2, [r0]
+ 218:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 345              		.loc 1 218 36 view .LVU89
+ 346 003a 8388     		ldrh	r3, [r0, #4]
+ 218:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 347              		.loc 1 218 44 view .LVU90
+ 348 003c 03F1010C 		add	ip, r3, #1
+ 349 0040 A0F804C0 		strh	ip, [r0, #4]	@ movhi
+ 218:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 350              		.loc 1 218 48 view .LVU91
+ 351 0044 81F02001 		eor	r1, r1, #32
+ 352              	.LVL43:
+ 218:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             return;
+ 353              		.loc 1 218 48 view .LVU92
+ 354 0048 D154     		strb	r1, [r2, r3]
+ 219:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         default:
+ 355              		.loc 1 219 13 is_stmt 1 view .LVU93
+ 356 004a 7047     		bx	lr
+ 357              		.cfi_endproc
+ 358              	.LFE10:
+ 360              		.section	.text.sensirion_shdlc_unstuff_next_byte,"ax",%progbits
+ 361              		.align	1
+ 362              		.syntax unified
+ 363              		.thumb
+ 364              		.thumb_func
+ 366              	sensirion_shdlc_unstuff_next_byte:
+ 367              	.LVL44:
+ 368              	.LFB22:
+ 225:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 226:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_uint8_t_to_frame(
+ 227:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     struct sensirion_shdlc_buffer* tx_frame, uint8_t data) {
+ 228:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 229:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_stuff_byte(tx_frame, data);
+ 230:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->checksum += data;
+ 231:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 232:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 233:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_begin_frame(struct sensirion_shdlc_buffer* tx_frame,
+ 234:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  uint8_t* buffer, uint8_t command,
+ 235:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  uint8_t address, uint8_t data_length) {
+ 236:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data = buffer;
+ 237:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->checksum = 0;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 12
+
+
+ 238:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->offset = 0;
+ 239:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data[tx_frame->offset++] = SHDLC_START;
+ 240:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, address);
+ 241:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, command);
+ 242:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data_length);
+ 243:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 244:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 245:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_bool_to_frame(struct sensirion_shdlc_buffer* tx_frame,
+ 246:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                        bool data) {
+ 247:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data);
+ 248:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 249:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 250:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_uint32_t_to_frame(
+ 251:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     struct sensirion_shdlc_buffer* tx_frame, uint32_t data) {
+ 252:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 253:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame,
+ 254:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0xFF000000) >> 24));
+ 255:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame,
+ 256:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x00FF0000) >> 16));
+ 257:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame,
+ 258:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x0000FF00) >> 8));
+ 259:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame,
+ 260:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x000000FF) >> 0));
+ 261:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 262:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 263:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_int32_t_to_frame(
+ 264:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     struct sensirion_shdlc_buffer* tx_frame, int32_t data) {
+ 265:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 266:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint32_t_to_frame(tx_frame, (uint32_t)data);
+ 267:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 268:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 269:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_uint16_t_to_frame(
+ 270:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     struct sensirion_shdlc_buffer* tx_frame, uint16_t data) {
+ 271:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 272:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame,
+ 273:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0xFF00) >> 8));
+ 274:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame,
+ 275:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x00FF) >> 0));
+ 276:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 277:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 278:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_int16_t_to_frame(
+ 279:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     struct sensirion_shdlc_buffer* tx_frame, int16_t data) {
+ 280:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 281:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint16_t_to_frame(tx_frame, (uint16_t)data);
+ 282:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 283:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 284:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_float_to_frame(struct sensirion_shdlc_buffer* tx_frame,
+ 285:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                         float data) {
+ 286:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     union {
+ 287:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         uint32_t uint32_data;
+ 288:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         float float_data;
+ 289:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     } convert;
+ 290:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 291:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     convert.float_data = data;
+ 292:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint32_t_to_frame(tx_frame, convert.uint32_data);
+ 293:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 294:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 13
+
+
+ 295:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_add_bytes_to_frame(struct sensirion_shdlc_buffer* tx_frame,
+ 296:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                         const uint8_t* data,
+ 297:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                         uint16_t data_length) {
+ 298:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t i;
+ 299:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 300:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     for (i = 0; i < data_length; i++) {
+ 301:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data[i]);
+ 302:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 303:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 304:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 305:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** void sensirion_shdlc_finish_frame(struct sensirion_shdlc_buffer* tx_frame) {
+ 306:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, ~(tx_frame->checksum));
+ 307:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data[tx_frame->offset++] = SHDLC_STOP;
+ 308:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 309:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 310:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** int16_t sensirion_shdlc_tx_frame(struct sensirion_shdlc_buffer* tx_frame) {
+ 311:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 312:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t tx_length;
+ 313:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 314:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_length = sensirion_uart_hal_tx(tx_frame->offset, tx_frame->data);
+ 315:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (tx_length < 0) {
+ 316:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return tx_length;
+ 317:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 318:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (tx_length != tx_frame->offset) {
+ 319:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 320:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 321:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return NO_ERROR;
+ 322:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 323:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 324:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** static uint8_t
+ 325:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** sensirion_shdlc_unstuff_next_byte(struct sensirion_shdlc_buffer* rx_frame) {
+ 369              		.loc 1 325 76 view -0
+ 370              		.cfi_startproc
+ 371              		@ args = 0, pretend = 0, frame = 0
+ 372              		@ frame_needed = 0, uses_anonymous_args = 0
+ 373              		@ link register save eliminated.
+ 374              		.loc 1 325 76 is_stmt 0 view .LVU95
+ 375 0000 10B4     		push	{r4}
+ 376              	.LCFI2:
+ 377              		.cfi_def_cfa_offset 4
+ 378              		.cfi_offset 4, -4
+ 379 0002 0346     		mov	r3, r0
+ 326:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 327:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t data = rx_frame->data[rx_frame->offset++];
+ 380              		.loc 1 327 5 is_stmt 1 view .LVU96
+ 381              		.loc 1 327 28 is_stmt 0 view .LVU97
+ 382 0004 0468     		ldr	r4, [r0]
+ 383              		.loc 1 327 43 view .LVU98
+ 384 0006 8188     		ldrh	r1, [r0, #4]
+ 385              		.loc 1 327 51 view .LVU99
+ 386 0008 4A1C     		adds	r2, r1, #1
+ 387 000a 92B2     		uxth	r2, r2
+ 388 000c 8280     		strh	r2, [r0, #4]	@ movhi
+ 389              		.loc 1 327 13 view .LVU100
+ 390 000e 605C     		ldrb	r0, [r4, r1]	@ zero_extendqisi2
+ 391              	.LVL45:
+ 328:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 14
+
+
+ 329:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (data == 0x7d) {
+ 392              		.loc 1 329 5 is_stmt 1 view .LVU101
+ 393              		.loc 1 329 8 is_stmt 0 view .LVU102
+ 394 0010 7D28     		cmp	r0, #125
+ 395 0012 05D0     		beq	.L33
+ 396              	.LVL46:
+ 397              	.L31:
+ 330:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         data = rx_frame->data[rx_frame->offset++];
+ 331:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         data = data ^ (1 << 5);
+ 332:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 333:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     rx_frame->checksum += data;
+ 398              		.loc 1 333 5 is_stmt 1 view .LVU103
+ 399              		.loc 1 333 13 is_stmt 0 view .LVU104
+ 400 0014 9A79     		ldrb	r2, [r3, #6]	@ zero_extendqisi2
+ 401              		.loc 1 333 24 view .LVU105
+ 402 0016 0244     		add	r2, r2, r0
+ 403 0018 9A71     		strb	r2, [r3, #6]
+ 334:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return data;
+ 404              		.loc 1 334 5 is_stmt 1 view .LVU106
+ 335:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 405              		.loc 1 335 1 is_stmt 0 view .LVU107
+ 406 001a 5DF8044B 		ldr	r4, [sp], #4
+ 407 001e 7047     		bx	lr
+ 408              	.L33:
+ 330:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         data = rx_frame->data[rx_frame->offset++];
+ 409              		.loc 1 330 9 is_stmt 1 view .LVU108
+ 330:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         data = rx_frame->data[rx_frame->offset++];
+ 410              		.loc 1 330 47 is_stmt 0 view .LVU109
+ 411 0020 0231     		adds	r1, r1, #2
+ 412 0022 9980     		strh	r1, [r3, #4]	@ movhi
+ 330:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         data = rx_frame->data[rx_frame->offset++];
+ 413              		.loc 1 330 14 view .LVU110
+ 414 0024 A05C     		ldrb	r0, [r4, r2]	@ zero_extendqisi2
+ 415              	.LVL47:
+ 331:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 416              		.loc 1 331 9 is_stmt 1 view .LVU111
+ 331:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 417              		.loc 1 331 14 is_stmt 0 view .LVU112
+ 418 0026 80F02000 		eor	r0, r0, #32
+ 419 002a F3E7     		b	.L31
+ 420              		.cfi_endproc
+ 421              	.LFE22:
+ 423              		.section	.text.sensirion_shdlc_tx,"ax",%progbits
+ 424              		.align	1
+ 425              		.global	sensirion_shdlc_tx
+ 426              		.syntax unified
+ 427              		.thumb
+ 428              		.thumb_func
+ 430              	sensirion_shdlc_tx:
+ 431              	.LVL48:
+ 432              	.LFB8:
+ 119:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t len = 0;
+ 433              		.loc 1 119 49 is_stmt 1 view -0
+ 434              		.cfi_startproc
+ 435              		@ args = 0, pretend = 0, frame = 536
+ 436              		@ frame_needed = 0, uses_anonymous_args = 0
+ 119:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t len = 0;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 15
+
+
+ 437              		.loc 1 119 49 is_stmt 0 view .LVU114
+ 438 0000 2DE9F043 		push	{r4, r5, r6, r7, r8, r9, lr}
+ 439              	.LCFI3:
+ 440              		.cfi_def_cfa_offset 28
+ 441              		.cfi_offset 4, -28
+ 442              		.cfi_offset 5, -24
+ 443              		.cfi_offset 6, -20
+ 444              		.cfi_offset 7, -16
+ 445              		.cfi_offset 8, -12
+ 446              		.cfi_offset 9, -8
+ 447              		.cfi_offset 14, -4
+ 448 0004 ADF5077D 		sub	sp, sp, #540
+ 449              	.LCFI4:
+ 450              		.cfi_def_cfa_offset 568
+ 451 0008 9846     		mov	r8, r3
+ 452 000a 0DF10704 		add	r4, sp, #7
+ 453 000e 8DF80700 		strb	r0, [sp, #7]
+ 454 0012 0DF10609 		add	r9, sp, #6
+ 455 0016 8DF80610 		strb	r1, [sp, #6]
+ 456 001a 0DF10507 		add	r7, sp, #5
+ 457 001e 8DF80520 		strb	r2, [sp, #5]
+ 120:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t ret;
+ 458              		.loc 1 120 5 is_stmt 1 view .LVU115
+ 459              	.LVL49:
+ 121:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t crc;
+ 460              		.loc 1 121 5 view .LVU116
+ 122:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t tx_frame_buf[SHDLC_FRAME_MAX_TX_FRAME_SIZE];
+ 461              		.loc 1 122 5 view .LVU117
+ 123:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 462              		.loc 1 123 5 view .LVU118
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 463              		.loc 1 125 5 view .LVU119
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 464              		.loc 1 125 11 is_stmt 0 view .LVU120
+ 465 0022 C0B2     		uxtb	r0, r0
+ 466              	.LVL50:
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 467              		.loc 1 125 11 view .LVU121
+ 468 0024 CBB2     		uxtb	r3, r1
+ 469              	.LVL51:
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 470              		.loc 1 125 11 view .LVU122
+ 471 0026 1844     		add	r0, r0, r3
+ 472 0028 4246     		mov	r2, r8
+ 473              	.LVL52:
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 474              		.loc 1 125 11 view .LVU123
+ 475 002a 9DF80510 		ldrb	r1, [sp, #5]	@ zero_extendqisi2
+ 476              	.LVL53:
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 477              		.loc 1 125 11 view .LVU124
+ 478 002e C0B2     		uxtb	r0, r0
+ 479 0030 FFF7FEFF 		bl	sensirion_shdlc_checksum
+ 480              	.LVL54:
+ 125:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 481              		.loc 1 125 9 discriminator 1 view .LVU125
+ 482 0034 8DF81702 		strb	r0, [sp, #535]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 16
+
+
+ 127:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &addr, tx_frame_buf + len);
+ 483              		.loc 1 127 5 is_stmt 1 view .LVU126
+ 484              	.LVL55:
+ 127:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &addr, tx_frame_buf + len);
+ 485              		.loc 1 127 25 is_stmt 0 view .LVU127
+ 486 0038 03AD     		add	r5, sp, #12
+ 487 003a 7E26     		movs	r6, #126
+ 488 003c 8DF80C60 		strb	r6, [sp, #12]
+ 128:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &cmd, tx_frame_buf + len);
+ 489              		.loc 1 128 5 is_stmt 1 view .LVU128
+ 128:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &cmd, tx_frame_buf + len);
+ 490              		.loc 1 128 12 is_stmt 0 view .LVU129
+ 491 0040 0DF10D02 		add	r2, sp, #13
+ 492 0044 2146     		mov	r1, r4
+ 493 0046 0120     		movs	r0, #1
+ 494 0048 FFF7FEFF 		bl	sensirion_shdlc_stuff_data
+ 495              	.LVL56:
+ 128:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &cmd, tx_frame_buf + len);
+ 496              		.loc 1 128 9 discriminator 1 view .LVU130
+ 497 004c 441C     		adds	r4, r0, #1
+ 498 004e A4B2     		uxth	r4, r4
+ 499              	.LVL57:
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &data_len, tx_frame_buf + len);
+ 500              		.loc 1 129 5 is_stmt 1 view .LVU131
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &data_len, tx_frame_buf + len);
+ 501              		.loc 1 129 12 is_stmt 0 view .LVU132
+ 502 0050 2A19     		adds	r2, r5, r4
+ 503 0052 4946     		mov	r1, r9
+ 504 0054 0120     		movs	r0, #1
+ 505 0056 FFF7FEFF 		bl	sensirion_shdlc_stuff_data
+ 506              	.LVL58:
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &data_len, tx_frame_buf + len);
+ 507              		.loc 1 129 9 discriminator 1 view .LVU133
+ 508 005a 0444     		add	r4, r4, r0
+ 509              	.LVL59:
+ 129:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &data_len, tx_frame_buf + len);
+ 510              		.loc 1 129 9 discriminator 1 view .LVU134
+ 511 005c A4B2     		uxth	r4, r4
+ 512              	.LVL60:
+ 130:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(data_len, data, tx_frame_buf + len);
+ 513              		.loc 1 130 5 is_stmt 1 view .LVU135
+ 130:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(data_len, data, tx_frame_buf + len);
+ 514              		.loc 1 130 12 is_stmt 0 view .LVU136
+ 515 005e 2A19     		adds	r2, r5, r4
+ 516 0060 3946     		mov	r1, r7
+ 517 0062 0120     		movs	r0, #1
+ 518 0064 FFF7FEFF 		bl	sensirion_shdlc_stuff_data
+ 519              	.LVL61:
+ 130:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(data_len, data, tx_frame_buf + len);
+ 520              		.loc 1 130 9 discriminator 1 view .LVU137
+ 521 0068 0444     		add	r4, r4, r0
+ 522              	.LVL62:
+ 130:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(data_len, data, tx_frame_buf + len);
+ 523              		.loc 1 130 9 discriminator 1 view .LVU138
+ 524 006a A4B2     		uxth	r4, r4
+ 525              	.LVL63:
+ 131:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &crc, tx_frame_buf + len);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 17
+
+
+ 526              		.loc 1 131 5 is_stmt 1 view .LVU139
+ 131:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &crc, tx_frame_buf + len);
+ 527              		.loc 1 131 12 is_stmt 0 view .LVU140
+ 528 006c 2A19     		adds	r2, r5, r4
+ 529 006e 4146     		mov	r1, r8
+ 530 0070 9DF80500 		ldrb	r0, [sp, #5]	@ zero_extendqisi2
+ 531 0074 FFF7FEFF 		bl	sensirion_shdlc_stuff_data
+ 532              	.LVL64:
+ 131:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &crc, tx_frame_buf + len);
+ 533              		.loc 1 131 9 discriminator 1 view .LVU141
+ 534 0078 0444     		add	r4, r4, r0
+ 535              	.LVL65:
+ 131:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     len += sensirion_shdlc_stuff_data(1, &crc, tx_frame_buf + len);
+ 536              		.loc 1 131 9 discriminator 1 view .LVU142
+ 537 007a A4B2     		uxth	r4, r4
+ 538              	.LVL66:
+ 132:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame_buf[len++] = SHDLC_STOP;
+ 539              		.loc 1 132 5 is_stmt 1 view .LVU143
+ 132:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame_buf[len++] = SHDLC_STOP;
+ 540              		.loc 1 132 12 is_stmt 0 view .LVU144
+ 541 007c 2A19     		adds	r2, r5, r4
+ 542 007e 0DF21721 		addw	r1, sp, #535
+ 543 0082 0120     		movs	r0, #1
+ 544 0084 FFF7FEFF 		bl	sensirion_shdlc_stuff_data
+ 545              	.LVL67:
+ 132:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame_buf[len++] = SHDLC_STOP;
+ 546              		.loc 1 132 9 discriminator 1 view .LVU145
+ 547 0088 0444     		add	r4, r4, r0
+ 548              	.LVL68:
+ 132:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame_buf[len++] = SHDLC_STOP;
+ 549              		.loc 1 132 9 discriminator 1 view .LVU146
+ 550 008a A4B2     		uxth	r4, r4
+ 551              	.LVL69:
+ 133:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 552              		.loc 1 133 5 is_stmt 1 view .LVU147
+ 133:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 553              		.loc 1 133 21 is_stmt 0 view .LVU148
+ 554 008c 671C     		adds	r7, r4, #1
+ 555 008e BFB2     		uxth	r7, r7
+ 556              	.LVL70:
+ 133:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 557              		.loc 1 133 25 view .LVU149
+ 558 0090 2E55     		strb	r6, [r5, r4]
+ 135:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (ret < 0)
+ 559              		.loc 1 135 5 is_stmt 1 view .LVU150
+ 135:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (ret < 0)
+ 560              		.loc 1 135 11 is_stmt 0 view .LVU151
+ 561 0092 2946     		mov	r1, r5
+ 562 0094 3846     		mov	r0, r7
+ 563 0096 FFF7FEFF 		bl	sensirion_uart_hal_tx
+ 564              	.LVL71:
+ 136:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return ret;
+ 565              		.loc 1 136 5 is_stmt 1 view .LVU152
+ 136:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return ret;
+ 566              		.loc 1 136 8 is_stmt 0 view .LVU153
+ 567 009a 0028     		cmp	r0, #0
+ 136:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return ret;
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 18
+
+
+ 568              		.loc 1 136 8 view .LVU154
+ 569 009c 02DB     		blt	.L35
+ 138:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 570              		.loc 1 138 5 is_stmt 1 view .LVU155
+ 138:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 571              		.loc 1 138 8 is_stmt 0 view .LVU156
+ 572 009e B842     		cmp	r0, r7
+ 573 00a0 04D1     		bne	.L36
+ 140:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 574              		.loc 1 140 12 view .LVU157
+ 575 00a2 0020     		movs	r0, #0
+ 576              	.LVL72:
+ 577              	.L35:
+ 141:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 578              		.loc 1 141 1 view .LVU158
+ 579 00a4 0DF5077D 		add	sp, sp, #540
+ 580              	.LCFI5:
+ 581              		.cfi_remember_state
+ 582              		.cfi_def_cfa_offset 28
+ 583              		@ sp needed
+ 584 00a8 BDE8F083 		pop	{r4, r5, r6, r7, r8, r9, pc}
+ 585              	.LVL73:
+ 586              	.L36:
+ 587              	.LCFI6:
+ 588              		.cfi_restore_state
+ 139:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return 0;
+ 589              		.loc 1 139 16 view .LVU159
+ 590 00ac 6FF00500 		mvn	r0, #5
+ 591              	.LVL74:
+ 139:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return 0;
+ 592              		.loc 1 139 16 view .LVU160
+ 593 00b0 F8E7     		b	.L35
+ 594              		.cfi_endproc
+ 595              	.LFE8:
+ 597              		.section	.text.sensirion_shdlc_rx,"ax",%progbits
+ 598              		.align	1
+ 599              		.global	sensirion_shdlc_rx
+ 600              		.syntax unified
+ 601              		.thumb
+ 602              		.thumb_func
+ 604              	sensirion_shdlc_rx:
+ 605              	.LVL75:
+ 606              	.LFB9:
+ 145:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t len;
+ 607              		.loc 1 145 43 is_stmt 1 view -0
+ 608              		.cfi_startproc
+ 609              		@ args = 0, pretend = 0, frame = 528
+ 610              		@ frame_needed = 0, uses_anonymous_args = 0
+ 145:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t len;
+ 611              		.loc 1 145 43 is_stmt 0 view .LVU162
+ 612 0000 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 613              	.LCFI7:
+ 614              		.cfi_def_cfa_offset 36
+ 615              		.cfi_offset 4, -36
+ 616              		.cfi_offset 5, -32
+ 617              		.cfi_offset 6, -28
+ 618              		.cfi_offset 7, -24
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 19
+
+
+ 619              		.cfi_offset 8, -20
+ 620              		.cfi_offset 9, -16
+ 621              		.cfi_offset 10, -12
+ 622              		.cfi_offset 11, -8
+ 623              		.cfi_offset 14, -4
+ 624 0004 ADF5057D 		sub	sp, sp, #532
+ 625              	.LCFI8:
+ 626              		.cfi_def_cfa_offset 568
+ 627 0008 8146     		mov	r9, r0
+ 628 000a 0F46     		mov	r7, r1
+ 629 000c 9046     		mov	r8, r2
+ 146:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t i;
+ 630              		.loc 1 146 5 is_stmt 1 view .LVU163
+ 147:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t rx_frame[SHDLC_FRAME_MAX_RX_FRAME_SIZE];
+ 631              		.loc 1 147 5 view .LVU164
+ 148:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t* rx_header = (uint8_t*)rxh;
+ 632              		.loc 1 148 5 view .LVU165
+ 149:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t j;
+ 633              		.loc 1 149 5 view .LVU166
+ 634              	.LVL76:
+ 150:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t crc;
+ 635              		.loc 1 150 5 view .LVU167
+ 151:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint8_t unstuff_next;
+ 636              		.loc 1 151 5 view .LVU168
+ 152:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 637              		.loc 1 152 5 view .LVU169
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (len < 1 || rx_frame[0] != SHDLC_START)
+ 638              		.loc 1 154 5 view .LVU170
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (len < 1 || rx_frame[0] != SHDLC_START)
+ 639              		.loc 1 154 35 is_stmt 0 view .LVU171
+ 640 000e 0630     		adds	r0, r0, #6
+ 641              	.LVL77:
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (len < 1 || rx_frame[0] != SHDLC_START)
+ 642              		.loc 1 154 11 view .LVU172
+ 643 0010 01A9     		add	r1, sp, #4
+ 644              	.LVL78:
+ 154:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (len < 1 || rx_frame[0] != SHDLC_START)
+ 645              		.loc 1 154 11 view .LVU173
+ 646 0012 4000     		lsls	r0, r0, #1
+ 647 0014 FFF7FEFF 		bl	sensirion_uart_hal_rx
+ 648              	.LVL79:
+ 155:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 649              		.loc 1 155 5 is_stmt 1 view .LVU174
+ 155:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 650              		.loc 1 155 8 is_stmt 0 view .LVU175
+ 651 0018 061E     		subs	r6, r0, #0
+ 652 001a 40F38E80 		ble	.L51
+ 155:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 653              		.loc 1 155 28 discriminator 1 view .LVU176
+ 654 001e 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 155:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 655              		.loc 1 155 17 discriminator 1 view .LVU177
+ 656 0022 7E2B     		cmp	r3, #126
+ 657 0024 40F08C80 		bne	.L52
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 658              		.loc 1 158 23 view .LVU178
+ 659 0028 4FF0000A 		mov	r10, #0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 20
+
+
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 660              		.loc 1 158 37 view .LVU179
+ 661 002c 5546     		mov	r5, r10
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 662              		.loc 1 158 30 view .LVU180
+ 663 002e 0124     		movs	r4, #1
+ 664 0030 0DE0     		b	.L40
+ 665              	.LVL80:
+ 666              	.L41:
+ 163:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             if (!unstuff_next)
+ 667              		.loc 1 163 13 is_stmt 1 view .LVU181
+ 163:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             if (!unstuff_next)
+ 668              		.loc 1 163 28 is_stmt 0 view .LVU182
+ 669 0032 01AB     		add	r3, sp, #4
+ 670 0034 13F802B0 		ldrb	fp, [r3, r2]	@ zero_extendqisi2
+ 671 0038 5846     		mov	r0, fp
+ 672 003a FFF7FEFF 		bl	sensirion_shdlc_check_unstuff
+ 673              	.LVL81:
+ 164:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 rx_header[j++] = rx_frame[i];
+ 674              		.loc 1 164 13 is_stmt 1 view .LVU183
+ 164:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 rx_header[j++] = rx_frame[i];
+ 675              		.loc 1 164 16 is_stmt 0 view .LVU184
+ 676 003e 8246     		mov	r10, r0
+ 677 0040 18B9     		cbnz	r0, .L42
+ 165:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 678              		.loc 1 165 17 is_stmt 1 view .LVU185
+ 165:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 679              		.loc 1 165 28 is_stmt 0 view .LVU186
+ 680 0042 6B1C     		adds	r3, r5, #1
+ 681              	.LVL82:
+ 165:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 682              		.loc 1 165 32 view .LVU187
+ 683 0044 07F805B0 		strb	fp, [r7, r5]
+ 165:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 684              		.loc 1 165 28 view .LVU188
+ 685 0048 DDB2     		uxtb	r5, r3
+ 686              	.LVL83:
+ 687              	.L42:
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 688              		.loc 1 158 75 is_stmt 1 discriminator 2 view .LVU189
+ 689 004a 0134     		adds	r4, r4, #1
+ 690              	.LVL84:
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 691              		.loc 1 158 75 is_stmt 0 discriminator 2 view .LVU190
+ 692 004c A4B2     		uxth	r4, r4
+ 693              	.LVL85:
+ 694              	.L40:
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 695              		.loc 1 158 59 is_stmt 1 discriminator 1 view .LVU191
+ 696 004e 032D     		cmp	r5, #3
+ 697 0050 13D8     		bhi	.L43
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 698              		.loc 1 158 64 is_stmt 0 discriminator 3 view .LVU192
+ 699 0052 2246     		mov	r2, r4
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 700              		.loc 1 158 70 discriminator 3 view .LVU193
+ 701 0054 B31E     		subs	r3, r6, #2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 21
+
+
+ 158:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 702              		.loc 1 158 59 discriminator 3 view .LVU194
+ 703 0056 9C42     		cmp	r4, r3
+ 704 0058 0FDA     		bge	.L43
+ 159:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             rx_header[j++] = sensirion_shdlc_unstuff_byte(rx_frame[i]);
+ 705              		.loc 1 159 9 is_stmt 1 view .LVU195
+ 159:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             rx_header[j++] = sensirion_shdlc_unstuff_byte(rx_frame[i]);
+ 706              		.loc 1 159 12 is_stmt 0 view .LVU196
+ 707 005a BAF1000F 		cmp	r10, #0
+ 708 005e E8D0     		beq	.L41
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 709              		.loc 1 160 13 is_stmt 1 view .LVU197
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 710              		.loc 1 160 24 is_stmt 0 view .LVU198
+ 711 0060 05F1010A 		add	r10, r5, #1
+ 712              	.LVL86:
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 713              		.loc 1 160 24 view .LVU199
+ 714 0064 5FFA8AFA 		uxtb	r10, r10
+ 715              	.LVL87:
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 716              		.loc 1 160 30 view .LVU200
+ 717 0068 01AB     		add	r3, sp, #4
+ 718 006a 185D     		ldrb	r0, [r3, r4]	@ zero_extendqisi2
+ 719 006c FFF7FEFF 		bl	sensirion_shdlc_unstuff_byte
+ 720              	.LVL88:
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 721              		.loc 1 160 28 discriminator 1 view .LVU201
+ 722 0070 7855     		strb	r0, [r7, r5]
+ 161:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         } else {
+ 723              		.loc 1 161 13 is_stmt 1 view .LVU202
+ 724              	.LVL89:
+ 160:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 725              		.loc 1 160 24 is_stmt 0 view .LVU203
+ 726 0072 5546     		mov	r5, r10
+ 161:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         } else {
+ 727              		.loc 1 161 26 view .LVU204
+ 728 0074 4FF0000A 		mov	r10, #0
+ 729              	.LVL90:
+ 161:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         } else {
+ 730              		.loc 1 161 26 view .LVU205
+ 731 0078 E7E7     		b	.L42
+ 732              	.LVL91:
+ 733              	.L43:
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 734              		.loc 1 168 5 is_stmt 1 view .LVU206
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 735              		.loc 1 168 8 is_stmt 0 view .LVU207
+ 736 007a 042D     		cmp	r5, #4
+ 737 007c 63D1     		bne	.L53
+ 168:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 738              		.loc 1 168 27 discriminator 1 view .LVU208
+ 739 007e BAF1000F 		cmp	r10, #0
+ 740 0082 63D1     		bne	.L54
+ 171:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_FRAME_TOO_LONG; /* more data than expected */
+ 741              		.loc 1 171 5 is_stmt 1 view .LVU209
+ 171:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_FRAME_TOO_LONG; /* more data than expected */
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 22
+
+
+ 742              		.loc 1 171 27 is_stmt 0 view .LVU210
+ 743 0084 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 171:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_FRAME_TOO_LONG; /* more data than expected */
+ 744              		.loc 1 171 8 view .LVU211
+ 745 0086 4B45     		cmp	r3, r9
+ 746 0088 63D8     		bhi	.L55
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 747              		.loc 1 174 23 view .LVU212
+ 748 008a 5346     		mov	r3, r10
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 749              		.loc 1 174 30 view .LVU213
+ 750 008c 5546     		mov	r5, r10
+ 751              	.LVL92:
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 752              		.loc 1 174 30 view .LVU214
+ 753 008e 0DE0     		b	.L45
+ 754              	.LVL93:
+ 755              	.L46:
+ 179:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             if (!unstuff_next)
+ 756              		.loc 1 179 13 is_stmt 1 view .LVU215
+ 179:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             if (!unstuff_next)
+ 757              		.loc 1 179 28 is_stmt 0 view .LVU216
+ 758 0090 01AB     		add	r3, sp, #4
+ 759              	.LVL94:
+ 179:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             if (!unstuff_next)
+ 760              		.loc 1 179 28 view .LVU217
+ 761 0092 13F80190 		ldrb	r9, [r3, r1]	@ zero_extendqisi2
+ 762 0096 4846     		mov	r0, r9
+ 763 0098 FFF7FEFF 		bl	sensirion_shdlc_check_unstuff
+ 764              	.LVL95:
+ 180:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 data[j++] = rx_frame[i];
+ 765              		.loc 1 180 13 is_stmt 1 view .LVU218
+ 180:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                 data[j++] = rx_frame[i];
+ 766              		.loc 1 180 16 is_stmt 0 view .LVU219
+ 767 009c 0346     		mov	r3, r0
+ 768 009e 18B9     		cbnz	r0, .L47
+ 181:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 769              		.loc 1 181 17 is_stmt 1 view .LVU220
+ 181:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 770              		.loc 1 181 23 is_stmt 0 view .LVU221
+ 771 00a0 6A1C     		adds	r2, r5, #1
+ 772              	.LVL96:
+ 181:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 773              		.loc 1 181 27 view .LVU222
+ 774 00a2 08F80590 		strb	r9, [r8, r5]
+ 181:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         }
+ 775              		.loc 1 181 23 view .LVU223
+ 776 00a6 D5B2     		uxtb	r5, r2
+ 777              	.LVL97:
+ 778              	.L47:
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 779              		.loc 1 174 69 is_stmt 1 discriminator 2 view .LVU224
+ 780 00a8 0134     		adds	r4, r4, #1
+ 781              	.LVL98:
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 782              		.loc 1 174 69 is_stmt 0 discriminator 2 view .LVU225
+ 783 00aa A4B2     		uxth	r4, r4
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 23
+
+
+ 784              	.LVL99:
+ 785              	.L45:
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 786              		.loc 1 174 53 is_stmt 1 discriminator 1 view .LVU226
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 787              		.loc 1 174 42 is_stmt 0 discriminator 1 view .LVU227
+ 788 00ac 97F80390 		ldrb	r9, [r7, #3]	@ zero_extendqisi2
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 789              		.loc 1 174 53 discriminator 1 view .LVU228
+ 790 00b0 A945     		cmp	r9, r5
+ 791 00b2 12D9     		bls	.L48
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 792              		.loc 1 174 58 discriminator 3 view .LVU229
+ 793 00b4 2146     		mov	r1, r4
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 794              		.loc 1 174 64 discriminator 3 view .LVU230
+ 795 00b6 B21E     		subs	r2, r6, #2
+ 174:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         if (unstuff_next) {
+ 796              		.loc 1 174 53 discriminator 3 view .LVU231
+ 797 00b8 9442     		cmp	r4, r2
+ 798 00ba 0EDA     		bge	.L48
+ 175:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             data[j++] = sensirion_shdlc_unstuff_byte(rx_frame[i]);
+ 799              		.loc 1 175 9 is_stmt 1 view .LVU232
+ 175:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             data[j++] = sensirion_shdlc_unstuff_byte(rx_frame[i]);
+ 800              		.loc 1 175 12 is_stmt 0 view .LVU233
+ 801 00bc 002B     		cmp	r3, #0
+ 802 00be E7D0     		beq	.L46
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 803              		.loc 1 176 13 is_stmt 1 view .LVU234
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 804              		.loc 1 176 19 is_stmt 0 view .LVU235
+ 805 00c0 05F10109 		add	r9, r5, #1
+ 806 00c4 5FFA89F9 		uxtb	r9, r9
+ 807              	.LVL100:
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 808              		.loc 1 176 25 view .LVU236
+ 809 00c8 01AB     		add	r3, sp, #4
+ 810              	.LVL101:
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 811              		.loc 1 176 25 view .LVU237
+ 812 00ca 185D     		ldrb	r0, [r3, r4]	@ zero_extendqisi2
+ 813 00cc FFF7FEFF 		bl	sensirion_shdlc_unstuff_byte
+ 814              	.LVL102:
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 815              		.loc 1 176 23 discriminator 1 view .LVU238
+ 816 00d0 08F80500 		strb	r0, [r8, r5]
+ 177:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         } else {
+ 817              		.loc 1 177 13 is_stmt 1 view .LVU239
+ 818              	.LVL103:
+ 177:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         } else {
+ 819              		.loc 1 177 26 is_stmt 0 view .LVU240
+ 820 00d4 5346     		mov	r3, r10
+ 176:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****             unstuff_next = 0;
+ 821              		.loc 1 176 19 view .LVU241
+ 822 00d6 4D46     		mov	r5, r9
+ 823 00d8 E6E7     		b	.L47
+ 824              	.LVL104:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 24
+
+
+ 825              	.L48:
+ 185:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 826              		.loc 1 185 5 is_stmt 1 view .LVU242
+ 185:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 827              		.loc 1 185 8 is_stmt 0 view .LVU243
+ 828 00da 002B     		cmp	r3, #0
+ 829 00dc 3CD1     		bne	.L56
+ 188:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 830              		.loc 1 188 5 is_stmt 1 view .LVU244
+ 188:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 831              		.loc 1 188 8 is_stmt 0 view .LVU245
+ 832 00de A945     		cmp	r9, r5
+ 833 00e0 3DD8     		bhi	.L57
+ 191:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (sensirion_shdlc_check_unstuff(crc))
+ 834              		.loc 1 191 5 is_stmt 1 view .LVU246
+ 191:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (sensirion_shdlc_check_unstuff(crc))
+ 835              		.loc 1 191 21 is_stmt 0 view .LVU247
+ 836 00e2 651C     		adds	r5, r4, #1
+ 837              	.LVL105:
+ 191:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (sensirion_shdlc_check_unstuff(crc))
+ 838              		.loc 1 191 21 view .LVU248
+ 839 00e4 ADB2     		uxth	r5, r5
+ 840              	.LVL106:
+ 191:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (sensirion_shdlc_check_unstuff(crc))
+ 841              		.loc 1 191 9 view .LVU249
+ 842 00e6 01AB     		add	r3, sp, #4
+ 843              	.LVL107:
+ 191:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (sensirion_shdlc_check_unstuff(crc))
+ 844              		.loc 1 191 9 view .LVU250
+ 845 00e8 13F804A0 		ldrb	r10, [r3, r4]	@ zero_extendqisi2
+ 846              	.LVL108:
+ 192:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         crc = sensirion_shdlc_unstuff_byte(rx_frame[i++]);
+ 847              		.loc 1 192 5 is_stmt 1 view .LVU251
+ 192:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         crc = sensirion_shdlc_unstuff_byte(rx_frame[i++]);
+ 848              		.loc 1 192 9 is_stmt 0 view .LVU252
+ 849 00ec 5046     		mov	r0, r10
+ 850 00ee FFF7FEFF 		bl	sensirion_shdlc_check_unstuff
+ 851              	.LVL109:
+ 192:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         crc = sensirion_shdlc_unstuff_byte(rx_frame[i++]);
+ 852              		.loc 1 192 8 discriminator 1 view .LVU253
+ 853 00f2 38B1     		cbz	r0, .L50
+ 193:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 854              		.loc 1 193 9 is_stmt 1 view .LVU254
+ 193:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 855              		.loc 1 193 54 is_stmt 0 view .LVU255
+ 856 00f4 0234     		adds	r4, r4, #2
+ 857 00f6 A4B2     		uxth	r4, r4
+ 858              	.LVL110:
+ 193:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 859              		.loc 1 193 15 view .LVU256
+ 860 00f8 01AB     		add	r3, sp, #4
+ 861 00fa 585D     		ldrb	r0, [r3, r5]	@ zero_extendqisi2
+ 862 00fc FFF7FEFF 		bl	sensirion_shdlc_unstuff_byte
+ 863              	.LVL111:
+ 864 0100 8246     		mov	r10, r0
+ 865              	.LVL112:
+ 193:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 25
+
+
+ 866              		.loc 1 193 54 view .LVU257
+ 867 0102 2546     		mov	r5, r4
+ 868              	.LVL113:
+ 869              	.L50:
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 870              		.loc 1 195 5 is_stmt 1 view .LVU258
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 871              		.loc 1 195 37 is_stmt 0 view .LVU259
+ 872 0104 3878     		ldrb	r0, [r7]	@ zero_extendqisi2
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 873              		.loc 1 195 49 view .LVU260
+ 874 0106 7B78     		ldrb	r3, [r7, #1]	@ zero_extendqisi2
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 875              		.loc 1 195 44 view .LVU261
+ 876 0108 1844     		add	r0, r0, r3
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 877              		.loc 1 195 60 view .LVU262
+ 878 010a BC78     		ldrb	r4, [r7, #2]	@ zero_extendqisi2
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 879              		.loc 1 195 9 view .LVU263
+ 880 010c 54FA80F0 		uxtab	r0, r4, r0
+ 881 0110 4246     		mov	r2, r8
+ 882 0112 4946     		mov	r1, r9
+ 883 0114 C0B2     		uxtb	r0, r0
+ 884 0116 FFF7FEFF 		bl	sensirion_shdlc_checksum
+ 885              	.LVL114:
+ 195:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                  rxh->data_len, data) != crc)
+ 886              		.loc 1 195 8 discriminator 1 view .LVU264
+ 887 011a 5045     		cmp	r0, r10
+ 888 011c 22D1     		bne	.L58
+ 199:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 889              		.loc 1 199 5 is_stmt 1 view .LVU265
+ 199:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 890              		.loc 1 199 8 is_stmt 0 view .LVU266
+ 891 011e B542     		cmp	r5, r6
+ 892 0120 23DA     		bge	.L59
+ 199:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 893              		.loc 1 199 29 discriminator 1 view .LVU267
+ 894 0122 01AB     		add	r3, sp, #4
+ 895 0124 5B5D     		ldrb	r3, [r3, r5]	@ zero_extendqisi2
+ 199:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 896              		.loc 1 199 18 discriminator 1 view .LVU268
+ 897 0126 7E2B     		cmp	r3, #126
+ 898 0128 22D1     		bne	.L60
+ 202:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_EXECUTION_FAILURE;
+ 899              		.loc 1 202 5 is_stmt 1 view .LVU269
+ 202:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_EXECUTION_FAILURE;
+ 900              		.loc 1 202 8 is_stmt 0 view .LVU270
+ 901 012a 14F07F0F 		tst	r4, #127
+ 902 012e 22D1     		bne	.L61
+ 206:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 903              		.loc 1 206 12 view .LVU271
+ 904 0130 0020     		movs	r0, #0
+ 905              	.LVL115:
+ 906              	.L39:
+ 207:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 907              		.loc 1 207 1 view .LVU272
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 26
+
+
+ 908 0132 0DF5057D 		add	sp, sp, #532
+ 909              	.LCFI9:
+ 910              		.cfi_remember_state
+ 911              		.cfi_def_cfa_offset 36
+ 912              		@ sp needed
+ 913 0136 BDE8F08F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 914              	.LVL116:
+ 915              	.L51:
+ 916              	.LCFI10:
+ 917              		.cfi_restore_state
+ 156:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 918              		.loc 1 156 16 view .LVU273
+ 919 013a 6FF00100 		mvn	r0, #1
+ 920              	.LVL117:
+ 156:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 921              		.loc 1 156 16 view .LVU274
+ 922 013e F8E7     		b	.L39
+ 923              	.LVL118:
+ 924              	.L52:
+ 156:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 925              		.loc 1 156 16 view .LVU275
+ 926 0140 6FF00100 		mvn	r0, #1
+ 927              	.LVL119:
+ 156:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 928              		.loc 1 156 16 view .LVU276
+ 929 0144 F5E7     		b	.L39
+ 930              	.LVL120:
+ 931              	.L53:
+ 169:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 932              		.loc 1 169 16 view .LVU277
+ 933 0146 6FF00400 		mvn	r0, #4
+ 934 014a F2E7     		b	.L39
+ 935              	.L54:
+ 936 014c 6FF00400 		mvn	r0, #4
+ 937 0150 EFE7     		b	.L39
+ 938              	.L55:
+ 172:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 939              		.loc 1 172 16 view .LVU278
+ 940 0152 6FF00600 		mvn	r0, #6
+ 941 0156 ECE7     		b	.L39
+ 942              	.LVL121:
+ 943              	.L56:
+ 186:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 944              		.loc 1 186 16 view .LVU279
+ 945 0158 6FF00400 		mvn	r0, #4
+ 946 015c E9E7     		b	.L39
+ 947              	.L57:
+ 189:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 948              		.loc 1 189 16 view .LVU280
+ 949 015e 6FF00400 		mvn	r0, #4
+ 950 0162 E6E7     		b	.L39
+ 951              	.LVL122:
+ 952              	.L58:
+ 197:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 953              		.loc 1 197 16 view .LVU281
+ 954 0164 6FF00300 		mvn	r0, #3
+ 955 0168 E3E7     		b	.L39
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 27
+
+
+ 956              	.L59:
+ 200:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 957              		.loc 1 200 16 view .LVU282
+ 958 016a 6FF00200 		mvn	r0, #2
+ 959 016e E0E7     		b	.L39
+ 960              	.L60:
+ 961 0170 6FF00200 		mvn	r0, #2
+ 962 0174 DDE7     		b	.L39
+ 963              	.L61:
+ 203:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 964              		.loc 1 203 16 view .LVU283
+ 965 0176 6FF00700 		mvn	r0, #7
+ 966 017a DAE7     		b	.L39
+ 967              		.cfi_endproc
+ 968              	.LFE9:
+ 970              		.section	.text.sensirion_shdlc_xcv,"ax",%progbits
+ 971              		.align	1
+ 972              		.global	sensirion_shdlc_xcv
+ 973              		.syntax unified
+ 974              		.thumb
+ 975              		.thumb_func
+ 977              	sensirion_shdlc_xcv:
+ 978              	.LVL123:
+ 979              	.LFB7:
+ 107:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t ret;
+ 980              		.loc 1 107 47 is_stmt 1 view -0
+ 981              		.cfi_startproc
+ 982              		@ args = 12, pretend = 0, frame = 0
+ 983              		@ frame_needed = 0, uses_anonymous_args = 0
+ 107:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t ret;
+ 984              		.loc 1 107 47 is_stmt 0 view .LVU285
+ 985 0000 08B5     		push	{r3, lr}
+ 986              	.LCFI11:
+ 987              		.cfi_def_cfa_offset 8
+ 988              		.cfi_offset 3, -8
+ 989              		.cfi_offset 14, -4
+ 108:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 990              		.loc 1 108 5 is_stmt 1 view .LVU286
+ 110:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (ret != 0)
+ 991              		.loc 1 110 5 view .LVU287
+ 110:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (ret != 0)
+ 992              		.loc 1 110 11 is_stmt 0 view .LVU288
+ 993 0002 FFF7FEFF 		bl	sensirion_shdlc_tx
+ 994              	.LVL124:
+ 111:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return ret;
+ 995              		.loc 1 111 5 is_stmt 1 view .LVU289
+ 111:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return ret;
+ 996              		.loc 1 111 8 is_stmt 0 view .LVU290
+ 997 0006 00B1     		cbz	r0, .L66
+ 998              	.L64:
+ 116:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 999              		.loc 1 116 1 view .LVU291
+ 1000 0008 08BD     		pop	{r3, pc}
+ 1001              	.LVL125:
+ 1002              	.L66:
+ 114:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return sensirion_shdlc_rx(max_rx_data_len, rx_header, rx_data);
+ 1003              		.loc 1 114 5 is_stmt 1 view .LVU292
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 28
+
+
+ 1004 000a 44F62060 		movw	r0, #20000
+ 1005 000e FFF7FEFF 		bl	sensirion_uart_hal_sleep_usec
+ 1006              	.LVL126:
+ 115:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1007              		.loc 1 115 5 view .LVU293
+ 115:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1008              		.loc 1 115 12 is_stmt 0 view .LVU294
+ 1009 0012 049A     		ldr	r2, [sp, #16]
+ 1010 0014 0399     		ldr	r1, [sp, #12]
+ 1011 0016 9DF80800 		ldrb	r0, [sp, #8]	@ zero_extendqisi2
+ 1012 001a FFF7FEFF 		bl	sensirion_shdlc_rx
+ 1013              	.LVL127:
+ 1014 001e F3E7     		b	.L64
+ 1015              		.cfi_endproc
+ 1016              	.LFE7:
+ 1018              		.section	.text.sensirion_shdlc_add_uint8_t_to_frame,"ax",%progbits
+ 1019              		.align	1
+ 1020              		.global	sensirion_shdlc_add_uint8_t_to_frame
+ 1021              		.syntax unified
+ 1022              		.thumb
+ 1023              		.thumb_func
+ 1025              	sensirion_shdlc_add_uint8_t_to_frame:
+ 1026              	.LVL128:
+ 1027              	.LFB11:
+ 227:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1028              		.loc 1 227 60 is_stmt 1 view -0
+ 1029              		.cfi_startproc
+ 1030              		@ args = 0, pretend = 0, frame = 0
+ 1031              		@ frame_needed = 0, uses_anonymous_args = 0
+ 227:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1032              		.loc 1 227 60 is_stmt 0 view .LVU296
+ 1033 0000 38B5     		push	{r3, r4, r5, lr}
+ 1034              	.LCFI12:
+ 1035              		.cfi_def_cfa_offset 16
+ 1036              		.cfi_offset 3, -16
+ 1037              		.cfi_offset 4, -12
+ 1038              		.cfi_offset 5, -8
+ 1039              		.cfi_offset 14, -4
+ 1040 0002 0446     		mov	r4, r0
+ 1041 0004 0D46     		mov	r5, r1
+ 229:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->checksum += data;
+ 1042              		.loc 1 229 5 is_stmt 1 view .LVU297
+ 1043 0006 FFF7FEFF 		bl	sensirion_shdlc_stuff_byte
+ 1044              	.LVL129:
+ 230:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1045              		.loc 1 230 5 view .LVU298
+ 230:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1046              		.loc 1 230 13 is_stmt 0 view .LVU299
+ 1047 000a A379     		ldrb	r3, [r4, #6]	@ zero_extendqisi2
+ 230:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1048              		.loc 1 230 24 view .LVU300
+ 1049 000c 5919     		adds	r1, r3, r5
+ 1050 000e A171     		strb	r1, [r4, #6]
+ 231:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1051              		.loc 1 231 1 view .LVU301
+ 1052 0010 38BD     		pop	{r3, r4, r5, pc}
+ 231:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 29
+
+
+ 1053              		.loc 1 231 1 view .LVU302
+ 1054              		.cfi_endproc
+ 1055              	.LFE11:
+ 1057              		.section	.text.sensirion_shdlc_begin_frame,"ax",%progbits
+ 1058              		.align	1
+ 1059              		.global	sensirion_shdlc_begin_frame
+ 1060              		.syntax unified
+ 1061              		.thumb
+ 1062              		.thumb_func
+ 1064              	sensirion_shdlc_begin_frame:
+ 1065              	.LVL130:
+ 1066              	.LFB12:
+ 235:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data = buffer;
+ 1067              		.loc 1 235 72 is_stmt 1 view -0
+ 1068              		.cfi_startproc
+ 1069              		@ args = 4, pretend = 0, frame = 0
+ 1070              		@ frame_needed = 0, uses_anonymous_args = 0
+ 235:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data = buffer;
+ 1071              		.loc 1 235 72 is_stmt 0 view .LVU304
+ 1072 0000 58B5     		push	{r3, r4, r6, lr}
+ 1073              	.LCFI13:
+ 1074              		.cfi_def_cfa_offset 16
+ 1075              		.cfi_offset 3, -16
+ 1076              		.cfi_offset 4, -12
+ 1077              		.cfi_offset 6, -8
+ 1078              		.cfi_offset 14, -4
+ 1079 0002 0446     		mov	r4, r0
+ 1080 0004 1646     		mov	r6, r2
+ 236:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->checksum = 0;
+ 1081              		.loc 1 236 5 is_stmt 1 view .LVU305
+ 236:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->checksum = 0;
+ 1082              		.loc 1 236 20 is_stmt 0 view .LVU306
+ 1083 0006 0160     		str	r1, [r0]
+ 237:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->offset = 0;
+ 1084              		.loc 1 237 5 is_stmt 1 view .LVU307
+ 237:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->offset = 0;
+ 1085              		.loc 1 237 24 is_stmt 0 view .LVU308
+ 1086 0008 0022     		movs	r2, #0
+ 1087              	.LVL131:
+ 237:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->offset = 0;
+ 1088              		.loc 1 237 24 view .LVU309
+ 1089 000a 8271     		strb	r2, [r0, #6]
+ 238:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data[tx_frame->offset++] = SHDLC_START;
+ 1090              		.loc 1 238 5 is_stmt 1 view .LVU310
+ 238:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data[tx_frame->offset++] = SHDLC_START;
+ 1091              		.loc 1 238 22 is_stmt 0 view .LVU311
+ 1092 000c 8280     		strh	r2, [r0, #4]	@ movhi
+ 239:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, address);
+ 1093              		.loc 1 239 5 is_stmt 1 view .LVU312
+ 239:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, address);
+ 1094              		.loc 1 239 36 is_stmt 0 view .LVU313
+ 1095 000e 0122     		movs	r2, #1
+ 1096 0010 8280     		strh	r2, [r0, #4]	@ movhi
+ 239:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, address);
+ 1097              		.loc 1 239 40 view .LVU314
+ 1098 0012 7E22     		movs	r2, #126
+ 1099 0014 0A70     		strb	r2, [r1]
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 30
+
+
+ 240:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, command);
+ 1100              		.loc 1 240 5 is_stmt 1 view .LVU315
+ 1101 0016 1946     		mov	r1, r3
+ 1102              	.LVL132:
+ 240:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, command);
+ 1103              		.loc 1 240 5 is_stmt 0 view .LVU316
+ 1104 0018 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1105              	.LVL133:
+ 241:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data_length);
+ 1106              		.loc 1 241 5 is_stmt 1 view .LVU317
+ 1107 001c 3146     		mov	r1, r6
+ 1108 001e 2046     		mov	r0, r4
+ 1109 0020 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1110              	.LVL134:
+ 242:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1111              		.loc 1 242 5 view .LVU318
+ 1112 0024 9DF81010 		ldrb	r1, [sp, #16]	@ zero_extendqisi2
+ 1113 0028 2046     		mov	r0, r4
+ 1114 002a FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1115              	.LVL135:
+ 243:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1116              		.loc 1 243 1 is_stmt 0 view .LVU319
+ 1117 002e 58BD     		pop	{r3, r4, r6, pc}
+ 243:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1118              		.loc 1 243 1 view .LVU320
+ 1119              		.cfi_endproc
+ 1120              	.LFE12:
+ 1122              		.section	.text.sensirion_shdlc_add_bool_to_frame,"ax",%progbits
+ 1123              		.align	1
+ 1124              		.global	sensirion_shdlc_add_bool_to_frame
+ 1125              		.syntax unified
+ 1126              		.thumb
+ 1127              		.thumb_func
+ 1129              	sensirion_shdlc_add_bool_to_frame:
+ 1130              	.LVL136:
+ 1131              	.LFB13:
+ 246:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data);
+ 1132              		.loc 1 246 51 is_stmt 1 view -0
+ 1133              		.cfi_startproc
+ 1134              		@ args = 0, pretend = 0, frame = 0
+ 1135              		@ frame_needed = 0, uses_anonymous_args = 0
+ 246:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data);
+ 1136              		.loc 1 246 51 is_stmt 0 view .LVU322
+ 1137 0000 08B5     		push	{r3, lr}
+ 1138              	.LCFI14:
+ 1139              		.cfi_def_cfa_offset 8
+ 1140              		.cfi_offset 3, -8
+ 1141              		.cfi_offset 14, -4
+ 247:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1142              		.loc 1 247 5 is_stmt 1 view .LVU323
+ 1143 0002 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1144              	.LVL137:
+ 248:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1145              		.loc 1 248 1 is_stmt 0 view .LVU324
+ 1146 0006 08BD     		pop	{r3, pc}
+ 1147              		.cfi_endproc
+ 1148              	.LFE13:
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 31
+
+
+ 1150              		.section	.text.sensirion_shdlc_add_uint32_t_to_frame,"ax",%progbits
+ 1151              		.align	1
+ 1152              		.global	sensirion_shdlc_add_uint32_t_to_frame
+ 1153              		.syntax unified
+ 1154              		.thumb
+ 1155              		.thumb_func
+ 1157              	sensirion_shdlc_add_uint32_t_to_frame:
+ 1158              	.LVL138:
+ 1159              	.LFB14:
+ 251:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1160              		.loc 1 251 61 is_stmt 1 view -0
+ 1161              		.cfi_startproc
+ 1162              		@ args = 0, pretend = 0, frame = 0
+ 1163              		@ frame_needed = 0, uses_anonymous_args = 0
+ 251:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1164              		.loc 1 251 61 is_stmt 0 view .LVU326
+ 1165 0000 38B5     		push	{r3, r4, r5, lr}
+ 1166              	.LCFI15:
+ 1167              		.cfi_def_cfa_offset 16
+ 1168              		.cfi_offset 3, -16
+ 1169              		.cfi_offset 4, -12
+ 1170              		.cfi_offset 5, -8
+ 1171              		.cfi_offset 14, -4
+ 1172 0002 0546     		mov	r5, r0
+ 1173 0004 0C46     		mov	r4, r1
+ 253:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0xFF000000) >> 24));
+ 1174              		.loc 1 253 5 is_stmt 1 view .LVU327
+ 1175 0006 090E     		lsrs	r1, r1, #24
+ 1176              	.LVL139:
+ 253:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0xFF000000) >> 24));
+ 1177              		.loc 1 253 5 is_stmt 0 view .LVU328
+ 1178 0008 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1179              	.LVL140:
+ 255:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x00FF0000) >> 16));
+ 1180              		.loc 1 255 5 is_stmt 1 view .LVU329
+ 1181 000c C4F30741 		ubfx	r1, r4, #16, #8
+ 1182 0010 2846     		mov	r0, r5
+ 1183 0012 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1184              	.LVL141:
+ 257:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x0000FF00) >> 8));
+ 1185              		.loc 1 257 5 view .LVU330
+ 1186 0016 C4F30721 		ubfx	r1, r4, #8, #8
+ 1187 001a 2846     		mov	r0, r5
+ 1188 001c FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1189              	.LVL142:
+ 259:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x000000FF) >> 0));
+ 1190              		.loc 1 259 5 view .LVU331
+ 1191 0020 E1B2     		uxtb	r1, r4
+ 1192 0022 2846     		mov	r0, r5
+ 1193 0024 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1194              	.LVL143:
+ 261:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1195              		.loc 1 261 1 is_stmt 0 view .LVU332
+ 1196 0028 38BD     		pop	{r3, r4, r5, pc}
+ 261:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1197              		.loc 1 261 1 view .LVU333
+ 1198              		.cfi_endproc
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 32
+
+
+ 1199              	.LFE14:
+ 1201              		.section	.text.sensirion_shdlc_add_int32_t_to_frame,"ax",%progbits
+ 1202              		.align	1
+ 1203              		.global	sensirion_shdlc_add_int32_t_to_frame
+ 1204              		.syntax unified
+ 1205              		.thumb
+ 1206              		.thumb_func
+ 1208              	sensirion_shdlc_add_int32_t_to_frame:
+ 1209              	.LVL144:
+ 1210              	.LFB15:
+ 264:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1211              		.loc 1 264 60 is_stmt 1 view -0
+ 1212              		.cfi_startproc
+ 1213              		@ args = 0, pretend = 0, frame = 0
+ 1214              		@ frame_needed = 0, uses_anonymous_args = 0
+ 264:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1215              		.loc 1 264 60 is_stmt 0 view .LVU335
+ 1216 0000 08B5     		push	{r3, lr}
+ 1217              	.LCFI16:
+ 1218              		.cfi_def_cfa_offset 8
+ 1219              		.cfi_offset 3, -8
+ 1220              		.cfi_offset 14, -4
+ 266:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1221              		.loc 1 266 5 is_stmt 1 view .LVU336
+ 1222 0002 FFF7FEFF 		bl	sensirion_shdlc_add_uint32_t_to_frame
+ 1223              	.LVL145:
+ 267:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1224              		.loc 1 267 1 is_stmt 0 view .LVU337
+ 1225 0006 08BD     		pop	{r3, pc}
+ 1226              		.cfi_endproc
+ 1227              	.LFE15:
+ 1229              		.section	.text.sensirion_shdlc_add_uint16_t_to_frame,"ax",%progbits
+ 1230              		.align	1
+ 1231              		.global	sensirion_shdlc_add_uint16_t_to_frame
+ 1232              		.syntax unified
+ 1233              		.thumb
+ 1234              		.thumb_func
+ 1236              	sensirion_shdlc_add_uint16_t_to_frame:
+ 1237              	.LVL146:
+ 1238              	.LFB16:
+ 270:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1239              		.loc 1 270 61 is_stmt 1 view -0
+ 1240              		.cfi_startproc
+ 1241              		@ args = 0, pretend = 0, frame = 0
+ 1242              		@ frame_needed = 0, uses_anonymous_args = 0
+ 270:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1243              		.loc 1 270 61 is_stmt 0 view .LVU339
+ 1244 0000 38B5     		push	{r3, r4, r5, lr}
+ 1245              	.LCFI17:
+ 1246              		.cfi_def_cfa_offset 16
+ 1247              		.cfi_offset 3, -16
+ 1248              		.cfi_offset 4, -12
+ 1249              		.cfi_offset 5, -8
+ 1250              		.cfi_offset 14, -4
+ 1251 0002 0546     		mov	r5, r0
+ 1252 0004 0C46     		mov	r4, r1
+ 272:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0xFF00) >> 8));
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 33
+
+
+ 1253              		.loc 1 272 5 is_stmt 1 view .LVU340
+ 1254 0006 090A     		lsrs	r1, r1, #8
+ 1255              	.LVL147:
+ 272:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0xFF00) >> 8));
+ 1256              		.loc 1 272 5 is_stmt 0 view .LVU341
+ 1257 0008 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1258              	.LVL148:
+ 274:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                          (uint8_t)((data & 0x00FF) >> 0));
+ 1259              		.loc 1 274 5 is_stmt 1 view .LVU342
+ 1260 000c E1B2     		uxtb	r1, r4
+ 1261 000e 2846     		mov	r0, r5
+ 1262 0010 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1263              	.LVL149:
+ 276:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1264              		.loc 1 276 1 is_stmt 0 view .LVU343
+ 1265 0014 38BD     		pop	{r3, r4, r5, pc}
+ 276:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1266              		.loc 1 276 1 view .LVU344
+ 1267              		.cfi_endproc
+ 1268              	.LFE16:
+ 1270              		.section	.text.sensirion_shdlc_add_int16_t_to_frame,"ax",%progbits
+ 1271              		.align	1
+ 1272              		.global	sensirion_shdlc_add_int16_t_to_frame
+ 1273              		.syntax unified
+ 1274              		.thumb
+ 1275              		.thumb_func
+ 1277              	sensirion_shdlc_add_int16_t_to_frame:
+ 1278              	.LVL150:
+ 1279              	.LFB17:
+ 279:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1280              		.loc 1 279 60 is_stmt 1 view -0
+ 1281              		.cfi_startproc
+ 1282              		@ args = 0, pretend = 0, frame = 0
+ 1283              		@ frame_needed = 0, uses_anonymous_args = 0
+ 279:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1284              		.loc 1 279 60 is_stmt 0 view .LVU346
+ 1285 0000 08B5     		push	{r3, lr}
+ 1286              	.LCFI18:
+ 1287              		.cfi_def_cfa_offset 8
+ 1288              		.cfi_offset 3, -8
+ 1289              		.cfi_offset 14, -4
+ 281:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1290              		.loc 1 281 5 is_stmt 1 view .LVU347
+ 1291 0002 89B2     		uxth	r1, r1
+ 281:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1292              		.loc 1 281 5 is_stmt 0 view .LVU348
+ 1293 0004 FFF7FEFF 		bl	sensirion_shdlc_add_uint16_t_to_frame
+ 1294              	.LVL151:
+ 282:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1295              		.loc 1 282 1 view .LVU349
+ 1296 0008 08BD     		pop	{r3, pc}
+ 1297              		.cfi_endproc
+ 1298              	.LFE17:
+ 1300              		.section	.text.sensirion_shdlc_add_float_to_frame,"ax",%progbits
+ 1301              		.align	1
+ 1302              		.global	sensirion_shdlc_add_float_to_frame
+ 1303              		.syntax unified
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 34
+
+
+ 1304              		.thumb
+ 1305              		.thumb_func
+ 1307              	sensirion_shdlc_add_float_to_frame:
+ 1308              	.LVL152:
+ 1309              	.LFB18:
+ 285:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     union {
+ 1310              		.loc 1 285 53 is_stmt 1 view -0
+ 1311              		.cfi_startproc
+ 1312              		@ args = 0, pretend = 0, frame = 0
+ 1313              		@ frame_needed = 0, uses_anonymous_args = 0
+ 285:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     union {
+ 1314              		.loc 1 285 53 is_stmt 0 view .LVU351
+ 1315 0000 08B5     		push	{r3, lr}
+ 1316              	.LCFI19:
+ 1317              		.cfi_def_cfa_offset 8
+ 1318              		.cfi_offset 3, -8
+ 1319              		.cfi_offset 14, -4
+ 286:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         uint32_t uint32_data;
+ 1320              		.loc 1 286 5 is_stmt 1 view .LVU352
+ 291:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint32_t_to_frame(tx_frame, convert.uint32_data);
+ 1321              		.loc 1 291 5 view .LVU353
+ 292:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1322              		.loc 1 292 5 view .LVU354
+ 1323 0002 10EE101A 		vmov	r1, s0	@ int
+ 1324 0006 FFF7FEFF 		bl	sensirion_shdlc_add_uint32_t_to_frame
+ 1325              	.LVL153:
+ 293:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1326              		.loc 1 293 1 is_stmt 0 view .LVU355
+ 1327 000a 08BD     		pop	{r3, pc}
+ 1328              		.cfi_endproc
+ 1329              	.LFE18:
+ 1331              		.section	.text.sensirion_shdlc_add_bytes_to_frame,"ax",%progbits
+ 1332              		.align	1
+ 1333              		.global	sensirion_shdlc_add_bytes_to_frame
+ 1334              		.syntax unified
+ 1335              		.thumb
+ 1336              		.thumb_func
+ 1338              	sensirion_shdlc_add_bytes_to_frame:
+ 1339              	.LVL154:
+ 1340              	.LFB19:
+ 297:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t i;
+ 1341              		.loc 1 297 63 is_stmt 1 view -0
+ 1342              		.cfi_startproc
+ 1343              		@ args = 0, pretend = 0, frame = 0
+ 1344              		@ frame_needed = 0, uses_anonymous_args = 0
+ 297:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t i;
+ 1345              		.loc 1 297 63 is_stmt 0 view .LVU357
+ 1346 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 1347              	.LCFI20:
+ 1348              		.cfi_def_cfa_offset 24
+ 1349              		.cfi_offset 3, -24
+ 1350              		.cfi_offset 4, -20
+ 1351              		.cfi_offset 5, -16
+ 1352              		.cfi_offset 6, -12
+ 1353              		.cfi_offset 7, -8
+ 1354              		.cfi_offset 14, -4
+ 1355 0002 0746     		mov	r7, r0
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 35
+
+
+ 1356 0004 0E46     		mov	r6, r1
+ 1357 0006 1546     		mov	r5, r2
+ 298:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1358              		.loc 1 298 5 is_stmt 1 view .LVU358
+ 300:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data[i]);
+ 1359              		.loc 1 300 5 view .LVU359
+ 1360              	.LVL155:
+ 300:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data[i]);
+ 1361              		.loc 1 300 12 is_stmt 0 view .LVU360
+ 1362 0008 0024     		movs	r4, #0
+ 300:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data[i]);
+ 1363              		.loc 1 300 5 view .LVU361
+ 1364 000a 05E0     		b	.L84
+ 1365              	.LVL156:
+ 1366              	.L85:
+ 301:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 1367              		.loc 1 301 9 is_stmt 1 view .LVU362
+ 1368 000c 315D     		ldrb	r1, [r6, r4]	@ zero_extendqisi2
+ 1369 000e 3846     		mov	r0, r7
+ 1370 0010 FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1371              	.LVL157:
+ 300:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data[i]);
+ 1372              		.loc 1 300 35 discriminator 3 view .LVU363
+ 1373 0014 0134     		adds	r4, r4, #1
+ 1374              	.LVL158:
+ 300:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data[i]);
+ 1375              		.loc 1 300 35 is_stmt 0 discriminator 3 view .LVU364
+ 1376 0016 A4B2     		uxth	r4, r4
+ 1377              	.LVL159:
+ 1378              	.L84:
+ 300:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         sensirion_shdlc_add_uint8_t_to_frame(tx_frame, data[i]);
+ 1379              		.loc 1 300 19 is_stmt 1 discriminator 1 view .LVU365
+ 1380 0018 AC42     		cmp	r4, r5
+ 1381 001a F7D3     		bcc	.L85
+ 303:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1382              		.loc 1 303 1 is_stmt 0 view .LVU366
+ 1383 001c F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 303:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1384              		.loc 1 303 1 view .LVU367
+ 1385              		.cfi_endproc
+ 1386              	.LFE19:
+ 1388              		.section	.text.sensirion_shdlc_finish_frame,"ax",%progbits
+ 1389              		.align	1
+ 1390              		.global	sensirion_shdlc_finish_frame
+ 1391              		.syntax unified
+ 1392              		.thumb
+ 1393              		.thumb_func
+ 1395              	sensirion_shdlc_finish_frame:
+ 1396              	.LVL160:
+ 1397              	.LFB20:
+ 305:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, ~(tx_frame->checksum));
+ 1398              		.loc 1 305 76 is_stmt 1 view -0
+ 1399              		.cfi_startproc
+ 1400              		@ args = 0, pretend = 0, frame = 0
+ 1401              		@ frame_needed = 0, uses_anonymous_args = 0
+ 305:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_add_uint8_t_to_frame(tx_frame, ~(tx_frame->checksum));
+ 1402              		.loc 1 305 76 is_stmt 0 view .LVU369
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 36
+
+
+ 1403 0000 10B5     		push	{r4, lr}
+ 1404              	.LCFI21:
+ 1405              		.cfi_def_cfa_offset 8
+ 1406              		.cfi_offset 4, -8
+ 1407              		.cfi_offset 14, -4
+ 1408 0002 0446     		mov	r4, r0
+ 306:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data[tx_frame->offset++] = SHDLC_STOP;
+ 1409              		.loc 1 306 5 is_stmt 1 view .LVU370
+ 306:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data[tx_frame->offset++] = SHDLC_STOP;
+ 1410              		.loc 1 306 62 is_stmt 0 view .LVU371
+ 1411 0004 8179     		ldrb	r1, [r0, #6]	@ zero_extendqisi2
+ 306:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     tx_frame->data[tx_frame->offset++] = SHDLC_STOP;
+ 1412              		.loc 1 306 5 view .LVU372
+ 1413 0006 C943     		mvns	r1, r1
+ 1414 0008 C9B2     		uxtb	r1, r1
+ 1415 000a FFF7FEFF 		bl	sensirion_shdlc_add_uint8_t_to_frame
+ 1416              	.LVL161:
+ 307:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1417              		.loc 1 307 5 is_stmt 1 view .LVU373
+ 307:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1418              		.loc 1 307 13 is_stmt 0 view .LVU374
+ 1419 000e 2268     		ldr	r2, [r4]
+ 307:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1420              		.loc 1 307 28 view .LVU375
+ 1421 0010 A388     		ldrh	r3, [r4, #4]
+ 307:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1422              		.loc 1 307 36 view .LVU376
+ 1423 0012 591C     		adds	r1, r3, #1
+ 1424 0014 A180     		strh	r1, [r4, #4]	@ movhi
+ 307:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1425              		.loc 1 307 40 view .LVU377
+ 1426 0016 7E21     		movs	r1, #126
+ 1427 0018 D154     		strb	r1, [r2, r3]
+ 308:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1428              		.loc 1 308 1 view .LVU378
+ 1429 001a 10BD     		pop	{r4, pc}
+ 308:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1430              		.loc 1 308 1 view .LVU379
+ 1431              		.cfi_endproc
+ 1432              	.LFE20:
+ 1434              		.section	.text.sensirion_shdlc_tx_frame,"ax",%progbits
+ 1435              		.align	1
+ 1436              		.global	sensirion_shdlc_tx_frame
+ 1437              		.syntax unified
+ 1438              		.thumb
+ 1439              		.thumb_func
+ 1441              	sensirion_shdlc_tx_frame:
+ 1442              	.LVL162:
+ 1443              	.LFB21:
+ 310:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1444              		.loc 1 310 75 is_stmt 1 view -0
+ 1445              		.cfi_startproc
+ 1446              		@ args = 0, pretend = 0, frame = 0
+ 1447              		@ frame_needed = 0, uses_anonymous_args = 0
+ 310:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1448              		.loc 1 310 75 is_stmt 0 view .LVU381
+ 1449 0000 10B5     		push	{r4, lr}
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 37
+
+
+ 1450              	.LCFI22:
+ 1451              		.cfi_def_cfa_offset 8
+ 1452              		.cfi_offset 4, -8
+ 1453              		.cfi_offset 14, -4
+ 1454 0002 0446     		mov	r4, r0
+ 312:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1455              		.loc 1 312 5 is_stmt 1 view .LVU382
+ 314:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (tx_length < 0) {
+ 1456              		.loc 1 314 5 view .LVU383
+ 314:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (tx_length < 0) {
+ 1457              		.loc 1 314 17 is_stmt 0 view .LVU384
+ 1458 0004 0168     		ldr	r1, [r0]
+ 1459 0006 8088     		ldrh	r0, [r0, #4]
+ 1460              	.LVL163:
+ 314:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (tx_length < 0) {
+ 1461              		.loc 1 314 17 view .LVU385
+ 1462 0008 FFF7FEFF 		bl	sensirion_uart_hal_tx
+ 1463              	.LVL164:
+ 315:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return tx_length;
+ 1464              		.loc 1 315 5 is_stmt 1 view .LVU386
+ 315:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return tx_length;
+ 1465              		.loc 1 315 8 is_stmt 0 view .LVU387
+ 1466 000c 0028     		cmp	r0, #0
+ 315:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return tx_length;
+ 1467              		.loc 1 315 8 view .LVU388
+ 1468 000e 03DB     		blt	.L90
+ 318:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 1469              		.loc 1 318 5 is_stmt 1 view .LVU389
+ 318:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 1470              		.loc 1 318 30 is_stmt 0 view .LVU390
+ 1471 0010 A388     		ldrh	r3, [r4, #4]
+ 318:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_TX_INCOMPLETE;
+ 1472              		.loc 1 318 8 view .LVU391
+ 1473 0012 9842     		cmp	r0, r3
+ 1474 0014 01D1     		bne	.L91
+ 321:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }
+ 1475              		.loc 1 321 12 view .LVU392
+ 1476 0016 0020     		movs	r0, #0
+ 1477              	.LVL165:
+ 1478              	.L90:
+ 322:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 1479              		.loc 1 322 1 view .LVU393
+ 1480 0018 10BD     		pop	{r4, pc}
+ 1481              	.LVL166:
+ 1482              	.L91:
+ 319:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 1483              		.loc 1 319 16 view .LVU394
+ 1484 001a 6FF00500 		mvn	r0, #5
+ 1485              	.LVL167:
+ 319:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 1486              		.loc 1 319 16 view .LVU395
+ 1487 001e FBE7     		b	.L90
+ 1488              		.cfi_endproc
+ 1489              	.LFE21:
+ 1491              		.section	.text.sensirion_shdlc_rx_inplace,"ax",%progbits
+ 1492              		.align	1
+ 1493              		.global	sensirion_shdlc_rx_inplace
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 38
+
+
+ 1494              		.syntax unified
+ 1495              		.thumb
+ 1496              		.thumb_func
+ 1498              	sensirion_shdlc_rx_inplace:
+ 1499              	.LVL168:
+ 1500              	.LFB23:
+ 336:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 337:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** int16_t sensirion_shdlc_rx_inplace(struct sensirion_shdlc_buffer* rx_frame,
+ 338:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                    uint8_t expected_data_length,
+ 339:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                    struct sensirion_shdlc_rx_header* header) {
+ 1501              		.loc 1 339 78 is_stmt 1 view -0
+ 1502              		.cfi_startproc
+ 1503              		@ args = 0, pretend = 0, frame = 0
+ 1504              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1505              		.loc 1 339 78 is_stmt 0 view .LVU397
+ 1506 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 1507              	.LCFI23:
+ 1508              		.cfi_def_cfa_offset 24
+ 1509              		.cfi_offset 4, -24
+ 1510              		.cfi_offset 5, -20
+ 1511              		.cfi_offset 6, -16
+ 1512              		.cfi_offset 7, -12
+ 1513              		.cfi_offset 8, -8
+ 1514              		.cfi_offset 14, -4
+ 1515 0004 0546     		mov	r5, r0
+ 1516 0006 0C46     		mov	r4, r1
+ 1517 0008 1646     		mov	r6, r2
+ 340:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     int16_t rx_length;
+ 1518              		.loc 1 340 5 is_stmt 1 view .LVU398
+ 341:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     uint16_t i;
+ 1519              		.loc 1 341 5 view .LVU399
+ 342:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     rx_frame->offset = 0;
+ 1520              		.loc 1 342 5 view .LVU400
+ 1521              		.loc 1 342 22 is_stmt 0 view .LVU401
+ 1522 000a 0023     		movs	r3, #0
+ 1523 000c 8380     		strh	r3, [r0, #4]	@ movhi
+ 343:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     rx_frame->checksum = 0;
+ 1524              		.loc 1 343 5 is_stmt 1 view .LVU402
+ 1525              		.loc 1 343 24 is_stmt 0 view .LVU403
+ 1526 000e 8371     		strb	r3, [r0, #6]
+ 344:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 345:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     rx_length = sensirion_uart_hal_rx(
+ 1527              		.loc 1 345 5 is_stmt 1 view .LVU404
+ 346:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         2 + (5 + (uint16_t)expected_data_length) * 2, rx_frame->data);
+ 1528              		.loc 1 346 11 is_stmt 0 view .LVU405
+ 1529 0010 881D     		adds	r0, r1, #6
+ 1530              	.LVL169:
+ 345:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         2 + (5 + (uint16_t)expected_data_length) * 2, rx_frame->data);
+ 1531              		.loc 1 345 17 view .LVU406
+ 1532 0012 2968     		ldr	r1, [r5]
+ 1533              	.LVL170:
+ 345:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         2 + (5 + (uint16_t)expected_data_length) * 2, rx_frame->data);
+ 1534              		.loc 1 345 17 view .LVU407
+ 1535 0014 4000     		lsls	r0, r0, #1
+ 1536 0016 FFF7FEFF 		bl	sensirion_uart_hal_rx
+ 1537              	.LVL171:
+ 347:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (rx_length < 1 || rx_frame->data[rx_frame->offset++] != SHDLC_START) {
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 39
+
+
+ 1538              		.loc 1 347 5 is_stmt 1 view .LVU408
+ 1539              		.loc 1 347 8 is_stmt 0 view .LVU409
+ 1540 001a 071E     		subs	r7, r0, #0
+ 1541 001c 1ADD     		ble	.L94
+ 1542              		.loc 1 347 34 discriminator 1 view .LVU410
+ 1543 001e 2A68     		ldr	r2, [r5]
+ 1544              		.loc 1 347 49 discriminator 1 view .LVU411
+ 1545 0020 AB88     		ldrh	r3, [r5, #4]
+ 1546              		.loc 1 347 57 discriminator 1 view .LVU412
+ 1547 0022 591C     		adds	r1, r3, #1
+ 1548 0024 A980     		strh	r1, [r5, #4]	@ movhi
+ 1549              		.loc 1 347 40 discriminator 1 view .LVU413
+ 1550 0026 D35C     		ldrb	r3, [r2, r3]	@ zero_extendqisi2
+ 1551              		.loc 1 347 23 discriminator 1 view .LVU414
+ 1552 0028 7E2B     		cmp	r3, #126
+ 1553 002a 13D1     		bne	.L94
+ 348:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_START;
+ 349:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 350:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 351:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     header->addr = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1554              		.loc 1 351 5 is_stmt 1 view .LVU415
+ 1555              		.loc 1 351 20 is_stmt 0 view .LVU416
+ 1556 002c 2846     		mov	r0, r5
+ 1557              	.LVL172:
+ 1558              		.loc 1 351 20 view .LVU417
+ 1559 002e FFF7FEFF 		bl	sensirion_shdlc_unstuff_next_byte
+ 1560              	.LVL173:
+ 1561              		.loc 1 351 18 discriminator 1 view .LVU418
+ 1562 0032 3070     		strb	r0, [r6]
+ 352:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     header->cmd = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1563              		.loc 1 352 5 is_stmt 1 view .LVU419
+ 1564              		.loc 1 352 19 is_stmt 0 view .LVU420
+ 1565 0034 2846     		mov	r0, r5
+ 1566 0036 FFF7FEFF 		bl	sensirion_shdlc_unstuff_next_byte
+ 1567              	.LVL174:
+ 1568              		.loc 1 352 17 discriminator 1 view .LVU421
+ 1569 003a 7070     		strb	r0, [r6, #1]
+ 353:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     header->state = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1570              		.loc 1 353 5 is_stmt 1 view .LVU422
+ 1571              		.loc 1 353 21 is_stmt 0 view .LVU423
+ 1572 003c 2846     		mov	r0, r5
+ 1573 003e FFF7FEFF 		bl	sensirion_shdlc_unstuff_next_byte
+ 1574              	.LVL175:
+ 1575              		.loc 1 353 19 discriminator 1 view .LVU424
+ 1576 0042 B070     		strb	r0, [r6, #2]
+ 354:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     header->data_len = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1577              		.loc 1 354 5 is_stmt 1 view .LVU425
+ 1578              		.loc 1 354 24 is_stmt 0 view .LVU426
+ 1579 0044 2846     		mov	r0, r5
+ 1580 0046 FFF7FEFF 		bl	sensirion_shdlc_unstuff_next_byte
+ 1581              	.LVL176:
+ 1582              		.loc 1 354 22 discriminator 1 view .LVU427
+ 1583 004a F070     		strb	r0, [r6, #3]
+ 355:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 356:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (expected_data_length < header->data_len) {
+ 1584              		.loc 1 356 5 is_stmt 1 view .LVU428
+ 1585              		.loc 1 356 8 is_stmt 0 view .LVU429
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 40
+
+
+ 1586 004c A042     		cmp	r0, r4
+ 1587 004e 2BD8     		bhi	.L100
+ 357:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_FRAME_TOO_LONG; /* more data than
+ 358:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****                                                       expected */
+ 359:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 360:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     for (i = 0; i < header->data_len && rx_frame->offset < rx_length - 2; i++) {
+ 1588              		.loc 1 361 12 view .LVU430
+ 1589 0050 0024     		movs	r4, #0
+ 1590              	.LVL177:
+ 1591              		.loc 1 361 12 view .LVU431
+ 1592 0052 0BE0     		b	.L97
+ 1593              	.LVL178:
+ 1594              	.L94:
+ 348:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 1595              		.loc 1 348 9 is_stmt 1 view .LVU432
+ 348:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 1596              		.loc 1 348 16 is_stmt 0 view .LVU433
+ 1597 0054 6FF00100 		mvn	r0, #1
+ 1598              	.LVL179:
+ 348:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 1599              		.loc 1 348 16 view .LVU434
+ 1600 0058 24E0     		b	.L96
+ 1601              	.LVL180:
+ 1602              	.L99:
+ 362:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1603              		.loc 1 362 9 is_stmt 1 view .LVU435
+ 1604              		.loc 1 362 17 is_stmt 0 view .LVU436
+ 1605 005a D5F80080 		ldr	r8, [r5]
+ 1606              		.loc 1 362 29 view .LVU437
+ 1607 005e 2846     		mov	r0, r5
+ 1608 0060 FFF7FEFF 		bl	sensirion_shdlc_unstuff_next_byte
+ 1609              	.LVL181:
+ 1610              		.loc 1 362 27 discriminator 1 view .LVU438
+ 1611 0064 08F80400 		strb	r0, [r8, r4]
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1612              		.loc 1 361 76 is_stmt 1 discriminator 4 view .LVU439
+ 1613 0068 0134     		adds	r4, r4, #1
+ 1614              	.LVL182:
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1615              		.loc 1 361 76 is_stmt 0 discriminator 4 view .LVU440
+ 1616 006a A4B2     		uxth	r4, r4
+ 1617              	.LVL183:
+ 1618              	.L97:
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1619              		.loc 1 361 38 is_stmt 1 discriminator 1 view .LVU441
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1620              		.loc 1 361 27 is_stmt 0 discriminator 1 view .LVU442
+ 1621 006c F378     		ldrb	r3, [r6, #3]	@ zero_extendqisi2
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1622              		.loc 1 361 38 discriminator 1 view .LVU443
+ 1623 006e A342     		cmp	r3, r4
+ 1624 0070 04D9     		bls	.L98
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1625              		.loc 1 361 49 discriminator 3 view .LVU444
+ 1626 0072 B5F804C0 		ldrh	ip, [r5, #4]
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 41
+
+
+ 1627              		.loc 1 361 70 discriminator 3 view .LVU445
+ 1628 0076 B91E     		subs	r1, r7, #2
+ 361:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[i] = sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1629              		.loc 1 361 38 discriminator 3 view .LVU446
+ 1630 0078 8C45     		cmp	ip, r1
+ 1631 007a EEDB     		blt	.L99
+ 1632              	.L98:
+ 363:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 364:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 365:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (i < header->data_len) {
+ 1633              		.loc 1 365 5 is_stmt 1 view .LVU447
+ 1634              		.loc 1 365 8 is_stmt 0 view .LVU448
+ 1635 007c A342     		cmp	r3, r4
+ 1636 007e 16D8     		bhi	.L101
+ 366:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 367:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 368:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 369:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     sensirion_shdlc_unstuff_next_byte(rx_frame);
+ 1637              		.loc 1 369 5 is_stmt 1 view .LVU449
+ 1638 0080 2846     		mov	r0, r5
+ 1639 0082 FFF7FEFF 		bl	sensirion_shdlc_unstuff_next_byte
+ 1640              	.LVL184:
+ 370:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 371:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     /* (CHECKSUM + ~CHECKSUM) = 0xFF */
+ 372:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (rx_frame->checksum != 0xFF) {
+ 1641              		.loc 1 372 5 view .LVU450
+ 1642              		.loc 1 372 17 is_stmt 0 view .LVU451
+ 1643 0086 AB79     		ldrb	r3, [r5, #6]	@ zero_extendqisi2
+ 1644              		.loc 1 372 8 view .LVU452
+ 1645 0088 FF2B     		cmp	r3, #255
+ 1646 008a 13D1     		bne	.L102
+ 373:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_CRC_MISMATCH;
+ 374:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 375:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 376:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (rx_frame->offset >= rx_length ||
+ 1647              		.loc 1 376 5 is_stmt 1 view .LVU453
+ 1648              		.loc 1 376 17 is_stmt 0 view .LVU454
+ 1649 008c AB88     		ldrh	r3, [r5, #4]
+ 1650              		.loc 1 376 8 view .LVU455
+ 1651 008e BB42     		cmp	r3, r7
+ 1652 0090 13DA     		bge	.L103
+ 377:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[rx_frame->offset] != SHDLC_STOP) {
+ 1653              		.loc 1 377 17 view .LVU456
+ 1654 0092 2A68     		ldr	r2, [r5]
+ 1655              		.loc 1 377 23 view .LVU457
+ 1656 0094 D35C     		ldrb	r3, [r2, r3]	@ zero_extendqisi2
+ 376:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         rx_frame->data[rx_frame->offset] != SHDLC_STOP) {
+ 1657              		.loc 1 376 39 discriminator 1 view .LVU458
+ 1658 0096 7E2B     		cmp	r3, #126
+ 1659 0098 12D1     		bne	.L104
+ 378:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 379:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 380:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 381:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     if (0x7F & header->state) {
+ 1660              		.loc 1 381 5 is_stmt 1 view .LVU459
+ 1661              		.loc 1 381 22 is_stmt 0 view .LVU460
+ 1662 009a B378     		ldrb	r3, [r6, #2]	@ zero_extendqisi2
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 42
+
+
+ 1663              		.loc 1 381 8 view .LVU461
+ 1664 009c 13F07F0F 		tst	r3, #127
+ 1665 00a0 11D1     		bne	.L105
+ 382:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_EXECUTION_FAILURE;
+ 383:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     }
+ 384:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** 
+ 385:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****     return NO_ERROR;
+ 1666              		.loc 1 385 12 view .LVU462
+ 1667 00a2 0020     		movs	r0, #0
+ 1668              	.LVL185:
+ 1669              	.L96:
+ 386:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c **** }...
+ 1670              		.loc 1 386 1 view .LVU463
+ 1671 00a4 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1672              	.LVL186:
+ 1673              	.L100:
+ 357:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_FRAME_TOO_LONG; /* more data than
+ 1674              		.loc 1 357 16 view .LVU464
+ 1675 00a8 6FF00600 		mvn	r0, #6
+ 1676 00ac FAE7     		b	.L96
+ 1677              	.LVL187:
+ 1678              	.L101:
+ 366:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_ENCODING_ERROR;
+ 1679              		.loc 1 366 16 view .LVU465
+ 1680 00ae 6FF00400 		mvn	r0, #4
+ 1681 00b2 F7E7     		b	.L96
+ 1682              	.L102:
+ 373:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_CRC_MISMATCH;
+ 1683              		.loc 1 373 16 view .LVU466
+ 1684 00b4 6FF00300 		mvn	r0, #3
+ 1685 00b8 F4E7     		b	.L96
+ 1686              	.L103:
+ 378:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_MISSING_STOP;
+ 1687              		.loc 1 378 16 view .LVU467
+ 1688 00ba 6FF00200 		mvn	r0, #2
+ 1689 00be F1E7     		b	.L96
+ 1690              	.L104:
+ 1691 00c0 6FF00200 		mvn	r0, #2
+ 1692 00c4 EEE7     		b	.L96
+ 1693              	.L105:
+ 382:SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.c ****         return SENSIRION_SHDLC_ERR_EXECUTION_FAILURE;
+ 1694              		.loc 1 382 16 view .LVU468
+ 1695 00c6 6FF00700 		mvn	r0, #7
+ 1696 00ca EBE7     		b	.L96
+ 1697              		.cfi_endproc
+ 1698              	.LFE23:
+ 1700              		.text
+ 1701              	.Letext0:
+ 1702              		.file 2 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1703              		.file 3 "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\GNU-tools-for-STM32\\bin\\../lib/gcc/arm-none-eabi
+ 1704              		.file 4 "SynaptiX_FDK/components/modules/sps30/sensirion_shdlc.h"
+ 1705              		.file 5 "SynaptiX_FDK/components/modules/sps30/sensirion_uart_hal.h"
+ARM GAS  C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s 			page 43
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sensirion_shdlc.c
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:22     .text.sensirion_shdlc_checksum:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:27     .text.sensirion_shdlc_checksum:00000000 sensirion_shdlc_checksum
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:82     .text.sensirion_shdlc_stuff_data:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:87     .text.sensirion_shdlc_stuff_data:00000000 sensirion_shdlc_stuff_data
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:210    .text.sensirion_shdlc_check_unstuff:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:215    .text.sensirion_shdlc_check_unstuff:00000000 sensirion_shdlc_check_unstuff
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:236    .text.sensirion_shdlc_unstuff_byte:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:241    .text.sensirion_shdlc_unstuff_byte:00000000 sensirion_shdlc_unstuff_byte
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:291    .text.sensirion_shdlc_stuff_byte:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:296    .text.sensirion_shdlc_stuff_byte:00000000 sensirion_shdlc_stuff_byte
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:361    .text.sensirion_shdlc_unstuff_next_byte:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:366    .text.sensirion_shdlc_unstuff_next_byte:00000000 sensirion_shdlc_unstuff_next_byte
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:424    .text.sensirion_shdlc_tx:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:430    .text.sensirion_shdlc_tx:00000000 sensirion_shdlc_tx
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:598    .text.sensirion_shdlc_rx:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:604    .text.sensirion_shdlc_rx:00000000 sensirion_shdlc_rx
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:971    .text.sensirion_shdlc_xcv:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:977    .text.sensirion_shdlc_xcv:00000000 sensirion_shdlc_xcv
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1019   .text.sensirion_shdlc_add_uint8_t_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1025   .text.sensirion_shdlc_add_uint8_t_to_frame:00000000 sensirion_shdlc_add_uint8_t_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1058   .text.sensirion_shdlc_begin_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1064   .text.sensirion_shdlc_begin_frame:00000000 sensirion_shdlc_begin_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1123   .text.sensirion_shdlc_add_bool_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1129   .text.sensirion_shdlc_add_bool_to_frame:00000000 sensirion_shdlc_add_bool_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1151   .text.sensirion_shdlc_add_uint32_t_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1157   .text.sensirion_shdlc_add_uint32_t_to_frame:00000000 sensirion_shdlc_add_uint32_t_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1202   .text.sensirion_shdlc_add_int32_t_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1208   .text.sensirion_shdlc_add_int32_t_to_frame:00000000 sensirion_shdlc_add_int32_t_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1230   .text.sensirion_shdlc_add_uint16_t_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1236   .text.sensirion_shdlc_add_uint16_t_to_frame:00000000 sensirion_shdlc_add_uint16_t_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1271   .text.sensirion_shdlc_add_int16_t_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1277   .text.sensirion_shdlc_add_int16_t_to_frame:00000000 sensirion_shdlc_add_int16_t_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1301   .text.sensirion_shdlc_add_float_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1307   .text.sensirion_shdlc_add_float_to_frame:00000000 sensirion_shdlc_add_float_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1332   .text.sensirion_shdlc_add_bytes_to_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1338   .text.sensirion_shdlc_add_bytes_to_frame:00000000 sensirion_shdlc_add_bytes_to_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1389   .text.sensirion_shdlc_finish_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1395   .text.sensirion_shdlc_finish_frame:00000000 sensirion_shdlc_finish_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1435   .text.sensirion_shdlc_tx_frame:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1441   .text.sensirion_shdlc_tx_frame:00000000 sensirion_shdlc_tx_frame
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1492   .text.sensirion_shdlc_rx_inplace:00000000 $t
+C:\Users\DELL\AppData\Local\Temp\ccdExnUt.s:1498   .text.sensirion_shdlc_rx_inplace:00000000 sensirion_shdlc_rx_inplace
+
+UNDEFINED SYMBOLS
+sensirion_uart_hal_tx
+sensirion_uart_hal_rx
+sensirion_uart_hal_sleep_usec

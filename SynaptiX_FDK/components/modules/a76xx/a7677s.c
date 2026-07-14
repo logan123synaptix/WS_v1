@@ -156,6 +156,9 @@ static void cb_csq            (modem_t *modem, const char *response, modem_respo
 static void cb_cfun_0         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cfun_1         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 
+/*Implit declaration*/
+static bool a7677s_is_ready(void *ctx);
+
 /* ------------------------------------------------------------------ */
 /*  Init                                                                */
 /* ------------------------------------------------------------------ */

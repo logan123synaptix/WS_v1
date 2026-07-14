@@ -162,6 +162,7 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/app/user/sx_mqtt \
 			  -I$(SYNAPTIX_DIR)/app/user/sx_ex_storage \
 			  -I$(SYNAPTIX_DIR)/app/user/at_usb \
+			  -I$(SYNAPTIX_DIR)/app/user/sx_sleep_manager \
 			  -I$(SYNAPTIX_DIR)/board \
 			  -I$(SYNAPTIX_DIR)/services/logger \
 			  -I$(SYNAPTIX_DIR)/services/littlefs \
@@ -199,7 +200,8 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/components/modules/sht3x \
 			  -I$(SYNAPTIX_DIR)/components/modules/sps30 \
 			  -I$(SYNAPTIX_DIR)/components/modules/ze12a \
-			  -I$(SYNAPTIX_DIR)/components/modules/ads1115
+			  -I$(SYNAPTIX_DIR)/components/modules/ads1115 \
+			  -I$(SYNAPTIX_DIR)/components/modules/pump 
 #USB tiny
 C_INCLUDES += -I$(USB_TINY_DIR)/src \
 			  -I$(USB_TINY_DIR)/src/common \

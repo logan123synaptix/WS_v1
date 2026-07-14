@@ -5,8 +5,8 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			${SYNAPTIX_DIR}/app/user/sx_ex_storage/sx_ex_storage.c \
 			${SYNAPTIX_DIR}/app/user/at_usb/test_at.c \
 			${SYNAPTIX_DIR}/app/user/at_usb/at_command.c \
-			${SYNAPTIX_DIR}/app/user/thingsboard/thingsboard_client.c
-			
+			${SYNAPTIX_DIR}/app/user/thingsboard/thingsboard_client.c \
+			${SYNAPTIX_DIR}/app/user/sx_sleep_manager/sx_sleep_manager.c
 
 BOARD_FILES = ${SYNAPTIX_DIR}/board/sx_board.c
 
@@ -36,7 +36,8 @@ COMPONENT_FILES = \
 				  $(SYNAPTIX_DIR)/components/modules/sensirion_uart_hal.c \
 				  $(SYNAPTIX_DIR)/components/modules/sps30_uart.c \
 				  $(SYNAPTIX_DIR)/components/modules/ze12a/ze12a.c \
-				  $(SYNAPTIX_DIR)/components/modules/ads1115/ads1115.c 
+				  $(SYNAPTIX_DIR)/components/modules/ads1115/ads1115.c \
+				  $(SYNAPTIX_DIR)/components/modules/pump/sx_pump.c
 
 SERVICES_FILES = ${SYNAPTIX_DIR}/services/logger/logger.c \
 				 ${SYNAPTIX_DIR}/services/littlefs/lfs.c \

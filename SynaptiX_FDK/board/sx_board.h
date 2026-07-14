@@ -20,6 +20,7 @@ extern "C" {
 #include "sx_W25Q128.h"
 #include "sx_ex_storage.h"
 #include "sx_usb_tiny_cdc.h"
+#include "sx_sleep.h"
 // #include "adc.h"
 #include "spi.h"
 #include "i2c.h"
@@ -31,7 +32,7 @@ extern "C" {
 #include "sht3x.h"
 #include "ze12a.h"
 #include "ads1115.h"
-#include "pump.h"
+#include "sx_pump.h"
 
 typedef struct {
     volatile uint32_t raw_adc;

@@ -3,6 +3,8 @@
 
 #define USER_DISK_LABEL_CREATE         "VD GPS"   
 
+#define SLEEP_TIME_MS                   5*60*1000     // 5 minutes                 
+
 /*USE MQTT*/
 #define USE_THINGSBOARD 1
 

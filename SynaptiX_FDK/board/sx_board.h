@@ -26,6 +26,9 @@ extern "C" {
 #include "bno055.h"
 #include "sx_filter.h"
 #include "sx_read_bat.h"
+#include "sensirion_uart_hal.h"
+#include "sht3x.h"
+#include "ze12a.h"
 
 typedef struct {
     volatile uint32_t raw_adc;
@@ -53,6 +56,17 @@ typedef struct Board{
     sx_i2c_t    rtc_i2c;
     bno055_t    imu;
     sx_adc_reader_t s_adc_reader;
+    /* SPS30 (UART_DUST): the Sensirion HAL layer (sensirion_uart_hal.c)
+     * only needs a UartDescr = sx_uart_t* to talk over, so a concrete
+     * sx_uart_t instance is owned here and its address passed to
+     * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
+    sx_uart_t   sps30_uart;
+    SHT3X_T     sht3x;
+    /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
+     * GPIOs are owned as private statics inside ze12a.c (s_comm,
+     * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
+     * descriptors below and wires them up internally, so no field is
+     * needed here. */
 }Board_t;
 
 typedef enum{
@@ -95,6 +109,25 @@ typedef enum{
 /*  RS485 DE    */
 #define RS485_RDE_Port          GPIOB
 #define RS485_RDE_Pin           GPIO_PIN_2
+
+/*  SPS30 power enable (EN_PW_DUST, per schematic)
+ *  Active-HIGH: MCU drives this HIGH -> opto OP3's internal LED conducts
+ *  (12V side) -> its output phototransistor turns on -> forms a divider
+ *  with R11/R19 that pulls G1 of the AO4828 N-channel MOSFET high enough
+ *  (VG > VS) -> MOSFET conducts D1(+5V) -> S1 -> feeds +5V to the SPS30
+ *  (connector SENSOR pin 4) through D4/C20/C25 filtering. MCU LOW (also
+ *  the default/idle state) -> opto off -> R19 pulls G1 back down -> MOSFET
+ *  off -> SPS30 unpowered. Confirmed against the schematic, not assumed. */
+#define EN_PW_DUST_Port         GPIOA
+#define EN_PW_DUST_Pin          GPIO_PIN_9
+
+/*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
+ *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
+ *  Pin assignment per CubeMX-generated Core/Inc/main.h. */
+#define UART5_S0_Port           GPIOA
+#define UART5_S0_Pin            GPIO_PIN_7
+#define UART5_S1_Port           GPIOC
+#define UART5_S1_Pin            GPIO_PIN_4
 
 /* USB */
 void dcd_fs_msp_init(uint8_t rhport);

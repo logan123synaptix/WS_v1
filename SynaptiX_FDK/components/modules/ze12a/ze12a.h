@@ -68,6 +68,14 @@ void gas_sensor_poll(uint32_t time_stamp_ms);
 int gas_sensor_read_value(GasSensor_t *sensor, uint16_t *value);
 void gas_sensor_start_calibration(GasSensor_t *sensor, bool isZeroCalib);
 
+/* Returns the sx_uart_t instance owned internally by gas_sensor_init()
+ * (the module's private s_comm). Needed by sx_board.c's
+ * HAL_UART_RxCpltCallback() to route received UART_EXTEND bytes into
+ * this module via sx_uart_rx_callback() — s_comm itself stays private/
+ * static, only its address is exposed. Only valid to call after
+ * gas_sensor_init() has run; returns NULL before that. */
+sx_uart_t *gas_sensor_get_uart(void);
+
 extern GasSensor_t gas_sensor[GAS_SENSOR_COUNT];
 
 #ifdef __cplusplus

@@ -15,6 +15,7 @@ GasSensor_t gas_sensor[GAS_SENSOR_COUNT];
 static sx_uart_t s_comm;
 static sx_gpio_t s_mux_s0;   /* mux A0 */
 static sx_gpio_t s_mux_s1;   /* mux A1 */
+static bool s_initialized;   /* set true once gas_sensor_init() has run */
 
 static uint8_t s_mux_channel;          /* 0..GAS_SENSOR_MUX_CHANNEL_COUNT-1, currently selected */
 static uint32_t s_channel_dwell_ms;    /* time spent on current channel so far */
@@ -78,7 +79,14 @@ void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
     s_rx_state = GAS_SENSOR_RX_WAIT_START;
     s_rx_count = 0;
 
+    s_initialized = true;
+
     log_debug(TAG, "Initializing");
+}
+
+sx_uart_t *gas_sensor_get_uart(void)
+{
+    return s_initialized ? &s_comm : NULL;
 }
 
 /* Parses one complete 9-byte frame already sitting in s_rx_buf, verifies

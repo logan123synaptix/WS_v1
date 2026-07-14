@@ -82,6 +82,20 @@ static sx_gpio_pin_t s_i2c1_reset_pin = {.pin = I2C1_RESET_Pin, .port = I2C1_RES
  * call in this file — left undeclared here rather than adding an unused
  * sx_gpio_t/sx_gpio_pin_t pair for a pin nothing reads or writes yet. */
 
+/* SPS30 power enable — see EN_PW_DUST_Pin's doc-comment in sx_board.h for
+ * the full opto/MOSFET chain and active-HIGH polarity. Defaults LOW at
+ * boot (CubeMX's MX_GPIO_Init resets it low before this file ever runs),
+ * so SPS30 stays unpowered until something explicitly drives it HIGH —
+ * that on/off sequencing belongs to the SPS30 business-logic layer
+ * (not yet written), not to board bring-up, so it is only declared here. */
+static sx_gpio_t     s_en_pw_dust;
+static sx_gpio_pin_t s_en_pw_dust_pin = {.pin = EN_PW_DUST_Pin, .port = EN_PW_DUST_Port};
+
+/* ZE12A mux select lines (TMUX4052 A0/A1) — see gas_sensor_init() in
+ * ze12a.c, which owns and drives these once initialized below. */
+static sx_gpio_pin_t s_uart5_s0_pin = {.pin = UART5_S0_Pin, .port = UART5_S0_Port};
+static sx_gpio_pin_t s_uart5_s1_pin = {.pin = UART5_S1_Pin, .port = UART5_S1_Port};
+
 static void spi_storage_init(void){
     board.storage_cfg.cs_pin = s_spi_cs_pin;
     board.storage_cfg.hspi = &hspi1;
@@ -208,6 +222,32 @@ void sx_board_init(void)
 
     spi_storage_init();
     bno055_init(&board.imu, &board.i2c1, BNO055_I2C_ADDR_DEFAULT, &s_i2c1_reset);
+
+    // SPS30 power-enable GPIO — left LOW/unpowered here; the SPS30
+    // business-logic layer (not yet written) is responsible for driving
+    // it HIGH before talking to the sensor and LOW when done.
+    sx_gpio_init(&s_en_pw_dust, &sx_gpio_ops, &s_en_pw_dust_pin);
+
+    // SPS30 (UART_DUST) — sensirion_uart_hal_init() stores this sx_uart_t*
+    // as the port every sensirion_uart_hal_tx/rx() call uses; nothing else
+    // here needs a bsp_uart[] entry since SPS30 talks through the
+    // Sensirion HAL layer, not sx_uart_t directly.
+    sx_uart_init(&board.sps30_uart, &uart_config[UART_DUST], 512, 512);
+    bsp_uart[UART_DUST] = &board.sps30_uart;
+    sensirion_uart_hal_init(&board.sps30_uart);
+    HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+
+    // SHT3x — shares I2C1 with the RTC/IMU, no separate UART or GPIO.
+    sht3x_init(&board.sht3x, &board.i2c1);
+
+    // ZE12A (UART_EXTEND) — gas_sensor_init() owns its UART instance and
+    // both mux-select GPIOs internally (see ze12a.c). bsp_uart[UART_EXTEND]
+    // is fetched via gas_sensor_get_uart() (valid only after init, which
+    // just ran above) so HAL_UART_RxCpltCallback() below can route
+    // received bytes into it the same way it does for LTE/GPS/LOG/DUST.
+    gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
+    bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
+    HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
 }
 
 static void sx_lte_uart_abort(void) {
@@ -281,6 +321,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     } else if(huart == hal_uart[UART_LOG]){
         sx_uart_rx_callback(bsp_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
         HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+    } else if(huart == hal_uart[UART_DUST]){
+        sx_uart_rx_callback(bsp_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+        HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+    } else if(huart == hal_uart[UART_EXTEND]){
+        sx_uart_rx_callback(bsp_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+        HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
     }
 }
 

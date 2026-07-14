@@ -3,8 +3,35 @@
 
 #define USER_DISK_LABEL_CREATE         "VD GPS"   
 
-#define MQTT_HOST                       "iot.coreflux.cloud"//"broker.emqx.io"//"test.mosquitto.org"//"103.226.248.21" "broker.hivemq.com"
+/*USE MQTT*/
+#define USE_THINGSBOARD 0
+
+#define MQTT_ID                         "1234"
 #define MQTT_PORT                       1883//1993
+#define MQTT_PUSHLISH_TIME              10000
+#define THINGSBOARD_KEEP_ALIVE_S        10
+
+#if USE_THINGSBOARD
+#define ATTRIBUTE_UPDATE_API "synaptix/demo/attributes/"MQTT_ID
+#define ATTRIBUTE_REQUEST_API "synaptix/demo/attributes/response/"MQTT_ID
+#define ATTRIBUTE_FW_REQUEST_API "v2/fw/request/chunk" // v2/fw/request/${requestId}/chunk/${chunkIndex}
+#define TELEMETRY_API "synaptix/demo/telemetry/"MQTT_ID
+
+#define TELEMETRY_IO_API "synaptix/demo/telemetry/"MQTT_ID"/IO/%d"
+#define TELEMETRY_4_20mA_API "synaptix/demo/telemetry/"MQTT_ID"/4_20mA/%d"
+#define TELEMETRY_THS_API "synaptix/demo/telemetry/"MQTT_ID"/THS/%d"
+
+#define RPC_REQUEST_API "synaptix/demo/request/"MQTT_ID
+#define RPC_RESPONSE_API "synaptix/demo/response/"MQTT_ID
+
+#define THINGSBOARD_USER_NAME_SIZE  128
+#define THINGSBOARD_PASSWORD_SIZE   128
+#define THINGSBOARD_CLIENTID_SIZE   128
+#define THINGSBOARD_HOST_SIZE       256
+#define TOPIC_DEFAULT_SIZE          256
+#define PAYLOAD_DEFAULT_SIZE        256
+#else
+#define MQTT_HOST                       "iot.coreflux.cloud"//"broker.emqx.io"//"test.mosquitto.org"//"103.226.248.21" "broker.hivemq.com"
 #define MQTT_CLIENT_ID                  "vin_station_xxx"
 #define MQTT_USER                       NULL
 #define MQTT_PASS                       NULL
@@ -12,6 +39,8 @@
 #define MQTT_STATION_DATA_TOPIC         "hanoi/air_quality/data/"
 #define MQTT_STATION_HEARTBEAT_TOPIC    "vindynamic/tracking/gps/"
 #define MQTT_SUB_TOPIC                  "stm32/cmd/#"
+#endif
+
 #define APN                             "v-internet"
 
 #define USERNAME_APN                    NULL

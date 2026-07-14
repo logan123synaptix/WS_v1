@@ -95,6 +95,10 @@ static sx_gpio_pin_t s_en_pw_dust_pin = {.pin = EN_PW_DUST_Pin, .port = EN_PW_DU
 static sx_gpio_pin_t s_uart5_s0_pin = {.pin = UART5_S0_Pin, .port = UART5_S0_Port};
 static sx_gpio_pin_t s_uart5_s1_pin = {.pin = UART5_S1_Pin, .port = UART5_S1_Port};
 
+/* Pump */
+static sx_gpio_t     s_en_pw_pump;
+static sx_gpio_pin_t s_en_pw_pump_pin;
+
 static void spi_storage_init(void){
     board.storage_cfg.cs_pin = s_spi_cs_pin;
     board.storage_cfg.hspi = &hspi1;
@@ -249,8 +253,10 @@ void sx_board_init(void)
     // received bytes into it the same way it does for LTE/GPS/LOG/DUST.
     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
-
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+
+    // Pump init
+    sx_gpio_init(&s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin);
 }
 
 static void sx_lte_uart_abort(void) {
@@ -287,12 +293,6 @@ void sx_board_uart_resume_it(void) {
     board_sim_uart_resume_it();
 }
 
-// static void set_enter_sleep_mode(void) {
-//     sx_gpio_write(&s_dis_charge, SX_GPIO_HIGH); 
-//     sx_gpio_write(&s_charge, SX_GPIO_LOW);
-//     log_info(TAG, "Enter sleep POWER");
-// }
-
 /* USB IT CB    */
 void tud_mount_cb(void) {
     log_info(TAG, "USB tiny connected");
@@ -311,7 +311,6 @@ void tud_suspend_cb(bool remote_wakeup_en) {
 void tud_resume_cb(void) {
     log_info(TAG, "USB tiny resumed");
 }
-
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {

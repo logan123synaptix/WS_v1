@@ -22,6 +22,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
+ *  Ported to the sx_i2c_t abstraction (STM32 HAL accessed only through
+ *  sx_i2c.h, see sx_i2c.c) and to this project's non-RTOS bare-metal
+ *  polling model — no FreeRTOS/semaphore dependency, unlike the WS_v0
+ *  reference this was ported from. Register map, PGA/data-rate encodings,
+ *  and voltage-coefficient table are unchanged from the original and
+ *  verified against the TI datasheet.
  *  */
 
 #ifndef ADS1115_H
@@ -33,18 +39,25 @@ extern "C"
 #endif
 
 #include "stdint.h"
+#include "sx_i2c.h"
 
 /*
-According to datasheet: 
+According to datasheet:
 - If the address pin connect to GND, the device address will be: 1001000b
 - If the address pin connect to VDD, the device address will be: 1001001b
 - If the address pin connect to SDA, the device address will be: 1001010b
 - If the address pin connect to SCL, the device address will be: 1001011b
-*/
-#define ADS1115_DEVICE_ADDR     0b1001000   //The address pin connect to GND
+
+Confirmed against this board's schematic: ADDR pin is tied to GND.
+
+Per this project's convention (see SHT3X_DEVICE_ADDR in sht3x.h), device
+address macros are pre-shifted to the 8-bit HAL format (7-bit address in
+bits [7:1], R/W bit in bit 0) since sx_i2c_write/read/mem_write/mem_read
+(sx_i2c.c) pass dev_addr straight through to HAL_I2C_Master_*/HAL_I2C_Mem_*
+without shifting it themselves. */
+#define ADS1115_DEVICE_ADDR (0b1001000 << 1) // ADDR pin connected to GND
 
 /* Definitions */
-#define ADS1115_DEVICE_ADDR     0b1001000
 #define ADS1115_OS (0b1 << 7) // Default
 
 #define ADS1115_MUX_AIN0 (0b100 << 4)		// Analog input 1
@@ -79,12 +92,28 @@ According to datasheet:
 #define ADS1115_CONVER_REG 0x0
 #define ADS1115_CONFIG_REG 0x1
 
-/* TIMEOUT */
-#define ADS1115_TIMEOUT 1 // Timeout for HAL I2C functions.
+/* Max iterations to poll the OS (conversion-ready) bit before giving up.
+ * Matches the reference driver's cnt==100 ceiling; at typical I2C poll
+ * spacing this comfortably exceeds the conversion time of even the
+ * slowest data rate (8SPS -> 125ms). */
+#define ADS1115_MAX_POLL_ATTEMPTS 100
+
+typedef struct {
+    sx_i2c_t *i2c;
+    uint16_t dataRate;
+    uint16_t pga;
+    float voltCoef;
+} ADS1115_T;
+
+typedef enum {
+    ADS1115_OK = 0,
+    ADS1115_ERR,
+    ADS1115_ERR_TIMEOUT
+} ADS1115_STATUS_T;
 
 /* Function prototypes. */
-int ADS1115_Init(void *handler, uint16_t setDataRate, uint16_t setPGA);
-int ADS1115_readSingleEnded(uint16_t muxPort, float *voltage);
+ADS1115_STATUS_T ADS1115_Init(ADS1115_T *ads1115, sx_i2c_t *i2c, uint16_t setDataRate, uint16_t setPGA);
+ADS1115_STATUS_T ADS1115_readSingleEnded(ADS1115_T *ads1115, uint16_t muxPort, float *voltage);
 
 
 #ifdef __cplusplus

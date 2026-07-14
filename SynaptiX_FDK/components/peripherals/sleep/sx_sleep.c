@@ -80,6 +80,7 @@ static void _enter_stop(sx_sleep_t *mgr)
         mgr->post_wake_hook(mgr->hook_ctx);
     }
 }
+
 static void _set_rtc_wake(sx_sleep_t *mgr, uint32_t period_sec){
     // (void)mgr;
     // s_cancel_wakeup(&hrtc);

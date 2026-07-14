@@ -10,6 +10,8 @@
 #define MQTT_PORT                       1883//1993
 #define MQTT_PUSHLISH_TIME              10000
 #define THINGSBOARD_KEEP_ALIVE_S        10
+#define TOPIC_DEFAULT_SIZE              256
+#define PAYLOAD_DEFAULT_SIZE            256
 
 #if USE_THINGSBOARD
 #define ATTRIBUTE_UPDATE_API "synaptix/demo/attributes/"MQTT_ID
@@ -28,8 +30,6 @@
 #define THINGSBOARD_PASSWORD_SIZE   128
 #define THINGSBOARD_CLIENTID_SIZE   128
 #define THINGSBOARD_HOST_SIZE       256
-#define TOPIC_DEFAULT_SIZE          256
-#define PAYLOAD_DEFAULT_SIZE        256
 #else
 #define MQTT_HOST                       "iot.coreflux.cloud"//"broker.emqx.io"//"test.mosquitto.org"//"103.226.248.21" "broker.hivemq.com"
 #define MQTT_CLIENT_ID                  "vin_station_xxx"

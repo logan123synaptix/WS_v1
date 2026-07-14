@@ -240,6 +240,9 @@ void sx_board_init(void)
     // SHT3x — shares I2C1 with the RTC/IMU, no separate UART or GPIO.
     sht3x_init(&board.sht3x, &board.i2c1);
 
+    // ADS1115 - share I2C1 with the RTC/IMU/SHT3X
+    ADS1115_Init(&board.ads1115, &board.i2c1, ADS1115_DATA_RATE_250, ADS1115_PGA_TWO);
+
     // ZE12A (UART_EXTEND) — gas_sensor_init() owns its UART instance and
     // both mux-select GPIOs internally (see ze12a.c). bsp_uart[UART_EXTEND]
     // is fetched via gas_sensor_get_uart() (valid only after init, which
@@ -247,6 +250,7 @@ void sx_board_init(void)
     // received bytes into it the same way it does for LTE/GPS/LOG/DUST.
     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
+
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
 }
 

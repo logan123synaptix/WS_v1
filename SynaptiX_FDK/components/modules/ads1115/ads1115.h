@@ -53,7 +53,8 @@ Confirmed against this board's schematic: ADDR pin is tied to GND.
 Per this project's convention (see SHT3X_DEVICE_ADDR in sht3x.h), device
 address macros are pre-shifted to the 8-bit HAL format (7-bit address in
 bits [7:1], R/W bit in bit 0) since sx_i2c_write/read/mem_write/mem_read
-(sx_i2c.c) pass dev_addr straight through to HAL_I2C_Master_*/HAL_I2C_Mem_*
+(sx_i2c.c) pass dev_addr straight through to HAL_I2C_Master_
+HAL_I2C_Mem_*
 without shifting it themselves. */
 #define ADS1115_DEVICE_ADDR (0b1001000 << 1) // ADDR pin connected to GND
 

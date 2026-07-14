@@ -180,22 +180,26 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/utils/def \
 			  -I$(SYNAPTIX_DIR)/utils/delay \
 			  -I$(SYNAPTIX_DIR)/utils/filter \
-			  -I$(SYNAPTIX_DIR)/components/can \
-			  -I$(SYNAPTIX_DIR)/components/flash \
-			  -I$(SYNAPTIX_DIR)/components/gpio \
-			  -I$(SYNAPTIX_DIR)/components/i2c \
-			  -I$(SYNAPTIX_DIR)/components/spi \
-			  -I$(SYNAPTIX_DIR)/components/uart \
-			  -I$(SYNAPTIX_DIR)/components/timer \
-			  -I$(SYNAPTIX_DIR)/components/gps \
-			  -I$(SYNAPTIX_DIR)/components/modem \
-			  -I$(SYNAPTIX_DIR)/components/sim76xx \
-			  -I$(SYNAPTIX_DIR)/components/usb_cdc_tiny \
-			  -I$(SYNAPTIX_DIR)/components/usb_msc_tiny \
-			  -I$(SYNAPTIX_DIR)/components/external_flash \
-		      -I$(SYNAPTIX_DIR)/components/sleep \
-			  -I$(SYNAPTIX_DIR)/components/imu \
-			  -I$(SYNAPTIX_DIR)/components/rtc \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/flash \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/gpio \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/i2c \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/spi \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/uart \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/timer \
+			  -I$(SYNAPTIX_DIR)/components/modules/gps \
+			  -I$(SYNAPTIX_DIR)/components/modules/modem \
+			  -I$(SYNAPTIX_DIR)/components/modules/modem_ops \
+			  -I$(SYNAPTIX_DIR)/components/modules/a76xx \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/usb_cdc_tiny \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/usb_msc_tiny \
+			  -I$(SYNAPTIX_DIR)/components/modules/external_flash \
+		      -I$(SYNAPTIX_DIR)/components/peripherals/sleep \
+			  -I$(SYNAPTIX_DIR)/components/modules/imu \
+			  -I$(SYNAPTIX_DIR)/components/modules/rtc \
+			  -I$(SYNAPTIX_DIR)/components/modules/sht3x \
+			  -I$(SYNAPTIX_DIR)/components/modules/sps30 \
+			  -I$(SYNAPTIX_DIR)/components/modules/ze12a \
+			  -I$(SYNAPTIX_DIR)/components/modules/ads1115
 #USB tiny
 C_INCLUDES += -I$(USB_TINY_DIR)/src \
 			  -I$(USB_TINY_DIR)/src/common \

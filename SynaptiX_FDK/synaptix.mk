@@ -5,28 +5,38 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			${SYNAPTIX_DIR}/app/user/sx_ex_storage/sx_ex_storage.c \
 			${SYNAPTIX_DIR}/app/user/at_usb/test_at.c \
 			${SYNAPTIX_DIR}/app/user/at_usb/at_command.c \
+			${SYNAPTIX_DIR}/app/user/thingsboard/thingsboard_client.c
 			
 
 BOARD_FILES = ${SYNAPTIX_DIR}/board/sx_board.c
 
-COMPONENT_FILES = ${SYNAPTIX_DIR}/components/can/sx_can.c \
-				  ${SYNAPTIX_DIR}/components/flash/sx_flash.c \
-				  ${SYNAPTIX_DIR}/components/gpio/sx_gpio.c \
-				  ${SYNAPTIX_DIR}/components/i2c/sx_i2c.c \
-				  ${SYNAPTIX_DIR}/components/spi/sx_spi.c \
-				  ${SYNAPTIX_DIR}/components/uart/sx_uart.c \
-				  ${SYNAPTIX_DIR}/components/timer/sx_timer.c \
-				  ${SYNAPTIX_DIR}/components/gps/gps.c \
-				  ${SYNAPTIX_DIR}/components/gps/minmea.c \
-				  ${SYNAPTIX_DIR}/components/modem/modem.c \
-				  ${SYNAPTIX_DIR}/components/sim76xx/sim76xx.c \
-				  ${SYNAPTIX_DIR}/components/usb_cdc_tiny/sx_usb_tiny_cdc.c \
-				  ${SYNAPTIX_DIR}/components/usb_cdc_tiny/usb_descriptor.c \
-				  ${SYNAPTIX_DIR}/components/usb_msc_tiny/sx_usb_tiny_msc.c \
-				  ${SYNAPTIX_DIR}/components/external_flash/sx_W25Q128.c\
-				  $(SYNAPTIX_DIR)/components/sleep/sx_sleep.c \
-				  $(SYNAPTIX_DIR)/components/imu/bno055.c \
-				  $(SYNAPTIX_DIR)/components/rtc/sx_ex_rtc.c \
+COMPONENT_FILES = \
+				  ${SYNAPTIX_DIR}/components/peripherals/flash/sx_flash.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/gpio/sx_gpio.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/i2c/sx_i2c.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/spi/sx_spi.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/uart/sx_uart.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/timer/sx_timer.c \
+				  ${SYNAPTIX_DIR}/components/modules/gps/gps.c \
+				  ${SYNAPTIX_DIR}/components/modules/gps/minmea.c \
+				  ${SYNAPTIX_DIR}/components/modules/modem/modem.c \
+				  ${SYNAPTIX_DIR}/components/modules/a76xx/a7677s.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/usb_cdc_tiny/usb_descriptor.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c \
+				  ${SYNAPTIX_DIR}/components/modules/external_flash/sx_W25Q128.c\
+				  $(SYNAPTIX_DIR)/components/peripherals/sleep/sx_sleep.c \
+				  $(SYNAPTIX_DIR)/components/modules/imu/bno055.c \
+				  $(SYNAPTIX_DIR)/components/modules/rtc/sx_ex_rtc.c \
+				  $(SYNAPTIX_DIR)/components/modules/sht3x/sht3x.c \
+				  $(SYNAPTIX_DIR)/components/modules/sps30/sensirion_common.c \
+				  $(SYNAPTIX_DIR)/components/modules/sensirion_shdlc.c \
+				  $(SYNAPTIX_DIR)/components/modules/sensirion_streaming_shdlc.c \
+				  $(SYNAPTIX_DIR)/components/modules/sensirion_streaming.c \
+				  $(SYNAPTIX_DIR)/components/modules/sensirion_uart_hal.c \
+				  $(SYNAPTIX_DIR)/components/modules/sps30_uart.c \
+				  $(SYNAPTIX_DIR)/components/modules/ze12a.c \
+				  $(SYNAPTIX_DIR)/components/modules/ads1115.c 
 
 SERVICES_FILES = ${SYNAPTIX_DIR}/services/logger/logger.c \
 				 ${SYNAPTIX_DIR}/services/littlefs/lfs.c \

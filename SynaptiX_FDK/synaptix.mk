@@ -53,7 +53,7 @@ SERVICES_FILES = ${SYNAPTIX_DIR}/services/logger/logger.c \
 				 ${SYNAPTIX_DIR}/services/sx_fatfs/sx_diskio.c \
 				 ${SYNAPTIX_DIR}/services/sx_fatfs/sx_fatfs.c \
 				 ${SYNAPTIX_DIR}/services/mqtt/sx_mqtt.c \
-				 ${SYNAPTIX_DIR}/services/sleepmanager/sx_sleep_manager.c \
+				 ${SYNAPTIX_DIR}/services/sleep_service/sx_sleep_service.c \
 				 ${SYNAPTIX_DIR}/services/read_bat/sx_read_bat.c \
 
 UTILS_FILES = ${SYNAPTIX_DIR}/utils/cqueue/cqueue.c \

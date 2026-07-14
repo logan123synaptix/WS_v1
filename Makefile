@@ -172,7 +172,7 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/services/fatfs \
 			  -I$(SYNAPTIX_DIR)/services/sx_fatfs \
 			  -I$(SYNAPTIX_DIR)/services/mqtt \
-			  -I$(SYNAPTIX_DIR)/services/sleepmanager \
+			  -I$(SYNAPTIX_DIR)/services/sleep_service \
 			  -I${SYNAPTIX_DIR}/services/read_bat \
 			  -I$(SYNAPTIX_DIR)/utils/cqueue \
 			  -I$(SYNAPTIX_DIR)/utils/mem \

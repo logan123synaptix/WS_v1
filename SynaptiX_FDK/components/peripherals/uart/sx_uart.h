@@ -45,6 +45,7 @@ int sx_uart_available(sx_uart_t *_uart);
 int sx_uart_rx_callback(sx_uart_t *_uart, const uint8_t *_data, int _len);
 int sx_uart_tx_callback(sx_uart_t *_uart);
 int sx_uart_flush(sx_uart_t *_uart);
+int sx_uart_abort(sx_uart_t *_uart);
 #ifdef __cplusplus
 }
 #endif

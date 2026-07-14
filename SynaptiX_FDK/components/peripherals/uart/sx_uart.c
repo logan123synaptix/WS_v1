@@ -90,3 +90,7 @@ int sx_uart_flush(sx_uart_t *_uart)
     cqueue_init_static(&_uart->rxQueue, _uart->rxBuffer, _uart->rxBufferSize, sizeof(uint8_t)); 
     return 0;
 }
+
+int sx_uart_abort(sx_uart_t *_uart){
+    HAL_UART_Abort((UART_HandleTypeDef *)_uart->config->pDriver);
+}

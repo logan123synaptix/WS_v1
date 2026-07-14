@@ -97,7 +97,7 @@ static sx_gpio_pin_t s_uart5_s1_pin = {.pin = UART5_S1_Pin, .port = UART5_S1_Por
 
 /* Pump */
 static sx_gpio_t     s_en_pw_pump;
-static sx_gpio_pin_t s_en_pw_pump_pin;
+static sx_gpio_pin_t s_en_pw_pump_pin = {.pin = EN_PW_PUMP_Pin, .port = EN_PW_PUMP_Port};
 
 static void spi_storage_init(void){
     board.storage_cfg.cs_pin = s_spi_cs_pin;

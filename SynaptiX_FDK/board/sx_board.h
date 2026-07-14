@@ -163,6 +163,10 @@ typedef enum{
 #define EN_PW_DUST_Port         GPIOA
 #define EN_PW_DUST_Pin          GPIO_PIN_9
 
+/*PUMP PIN*/
+#define EN_PW_PUMP_Port         GPIOA
+#define EN_PW_PUMP_Pin          GPIO_PIN_8
+
 /*  ZE12A mux select (TMUX4052 A0/A1) — see ze12a.c for the channel
  *  truth table (A1=0,A0=0 -> SR1; 0,1 -> SR2; 1,0 -> SR3; 1,1 -> unused).
  *  Pin assignment per CubeMX-generated Core/Inc/main.h. */

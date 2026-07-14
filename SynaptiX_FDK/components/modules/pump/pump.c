@@ -9,5 +9,5 @@ void pump_on(sx_gpio_t *gpio){
 }
 
 void pump_off(sx_gpio_t *gpio){
-    sx_gpio_write(gpio, PUMP_TURN_ON);
+    sx_gpio_write(gpio, PUMP_TURN_OFF);
 }

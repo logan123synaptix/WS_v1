@@ -1,276 +1,271 @@
-HANDOFF PROMPT — SPS30 Dust Sensor Driver Integration (Weather Station V2, WS_v1)
-(Viết bởi Claude phiên trước, bàn giao cho phiên sau. Đây là bổ sung cho handoff chính
-"Weather Station V2 + Modem Abstraction Layer" đã có — KHÔNG thay thế nó, chỉ tập trung
-riêng vào phần SPS30 vừa làm.)
+HANDOFF PROMPT — Refactor kiến trúc SLEEP 3 tầng (Weather Station V2, WS_v1)
+(Viết bởi Claude phiên trước, bàn giao cho phiên sau. Đây là bổ sung riêng cho phần
+refactor sleep — KHÔNG phải toàn bộ trạng thái dự án. Vẫn còn các handoff khác (SPS30,
+v.v.) mô tả các phần không liên quan; đọc thêm nếu cần nhưng đừng lẫn lộn phạm vi.)
 
-repo hiện tại: https://github.com/logan123synaptix/WS_v1.git
-repo mẫu: https://github.com/logan123synaptix/WS_v0.git
+============================================================
+QUY TẮC BẮT BUỘC — ĐỌC TRƯỚC KHI LÀM BẤT CỨ GÌ
+============================================================
+1. KHÔNG tin bất kỳ mô tả "tiến độ" nào trong bản này. Luôn tự
+   `git fetch origin` + `git log --oneline -10` + đọc code thật (view/grep)
+   trước khi kết luận bất cứ điều gì. Người dùng tự commit/push trực tiếp
+   rất thường xuyên song song với Claude, không báo trước — đã xảy ra nhiều
+   lần trong phiên vừa rồi (người dùng lấy đúng code Claude vừa viết trong
+   container rồi tự commit/push trên máy họ, hoặc tự sửa độc lập).
+2. Không sửa âm thầm. Phát hiện bug/lệch thiết kế → trình bày rõ → hỏi lại
+   người dùng → chỉ code sau khi có xác nhận.
+3. Toàn bộ comment code bằng tiếng Anh. Trao đổi với người dùng bằng tiếng
+   Việt.
+4. Không có compiler thật trong container Claude (thiếu STM32 HAL headers)
+   — chỉ đọc/grep để rà soát. Người dùng build thật trên máy Windows của họ
+   (STM32CubeCLT) và dán log lỗi lại khi cần.
+5. Repo: https://github.com/logan123synaptix/WS_v1.git (nhánh main).
+   Repo mẫu tham khảo (không phải nơi code chính): WS_v0.
 
-QUY TẮC BẮT BUỘC — GIỐNG HANDOFF CHÍNH, NHẮC LẠI VÌ QUAN TRỌNG
-1. KHÔNG tin bất kỳ mô tả "tiến độ" nào trong bản này. Luôn tự git fetch + git log
-   --oneline -10 + đọc code thật (view/grep) trước khi kết luận bất cứ điều gì.
-   Người dùng tự commit/push trực tiếp rất thường xuyên, không qua Claude.
-2. Không sửa âm thầm. Phát hiện bug/lệch thiết kế → trình bày rõ → hỏi lại người dùng
-   → chỉ code sau khi có xác nhận.
-3. present_files có thể lỗi hiển thị ở UI dù file trên đĩa hợp lệ — CHỈ dùng
-   present_files (không dán nội dung file vào chat) trừ khi người dùng yêu cầu khác.
-   Lưu ý: người dùng đã đổi ý giữa các lượt về việc này — kiểm tra yêu cầu gần nhất
-   của người dùng trong hội thoại trước khi quyết định.
-4. Toàn bộ comment code bằng tiếng Anh. Trao đổi với người dùng bằng tiếng Việt.
-5. Không có compiler thật trong container (thiếu STM32 HAL headers) — chỉ đọc/grep để
-   rà soát, không đề nghị build từng bước nhỏ.
-6. Người dùng đã nói rõ: chỉ build khi đã hoàn thiện các components/services.
+============================================================
+BỐI CẢNH — TẠI SAO ĐANG REFACTOR SLEEP
+============================================================
+Người dùng nhận thấy code sleep hiện tại (trước refactor) "rất lung tung":
+1 file `components/peripherals/sleep/sx_sleep.c` (tầng thấp nhất, lẽ ra phải
+generic — không biết board có gì) lại hard-code thẳng UART1 (LTE)/UART2
+(GPS)/USB IRQ ngay trong hàm `_enter_stop()`. Nếu board khác không dùng
+UART/USB kiểu này thì gần như phải viết lại từ đầu, không tái sử dụng được.
 
-BỐI CẢNH: TẠI SAO SPS30 LẠI ĐI THEO KIẾN TRÚC "NHIỀU FILE SENSIRION"
-Ban đầu Claude phiên trước đề xuất gộp SPS30 thành 1 file duy nhất (sps30.c/.h) theo
-đúng pattern các module khác trong dự án (gps.c/.h, bno055.c/.h...). NGƯỜI DÙNG ĐÃ TỪ
-CHỐI hướng này ở giữa chừng, nói rõ "tôi thích kiến trúc của họ [Sensirion]" — tức là
-giữ nguyên kiến trúc phân lớp gốc của Sensirion (SHDLC layer tách khỏi UART HAL layer
-tách khỏi command layer), thay vì gộp lại. Quyết định này đã chốt, KHÔNG đề xuất gộp
-lại thành 1 file nữa trừ khi người dùng chủ động đổi ý lần nữa.
+MỤC TIÊU: tách sleep thành đúng 3 tầng, theo pattern đã có sẵn trong dự án ở
+chỗ khác (ví dụ `modem_ops.h` — vtable interface, driver cụ thể (a7677s.c)
+implement, service/app chỉ gọi qua interface, không biết driver cụ thể là
+gì):
 
-Vì giữ kiến trúc Sensirion gốc, dự án hiện có RẤT NHIỀU file nhỏ trong
-components/modules/sps30/, mỗi file đảm nhiệm đúng 1 lớp trách nhiệm hẹp — đây là CHỦ
-Ý, không phải sai sót cần "dọn gọn".
+  Tầng 1 — components/peripherals/sleep/sx_sleep.c/.h
+    Chỉ biết: HAL STOP mode, RTC wakeup timer, suspend/resume tick.
+    KHÔNG được biết: UART, USB, GPS, modem, MQTT, hay bất kỳ ngoại vi cụ
+    thể nào tồn tại. Đây là phần DUY NHẤT project khác có thể tái sử dụng
+    y nguyên không sửa gì.
 
-NGUỒN THAM KHẢO
-- Toàn bộ code Sensirion gốc được copy nguyên vẹn (không sửa 1 dòng nào, chỉ khác xuống
-  dòng cuối file) từ repo tham khảo WS_v0 (https://github.com/logan123synaptix/WS_v0.git),
-  cụ thể tại SynaptiX/board/SPS30/.
-- Datasheet SPS30 đầy đủ đã có sẵn tại Documents/SPS30_dust_sensor (1).md trong repo
-  WS_v1 — ĐỌC FILE NÀY trước khi đưa ra bất kỳ quyết định kỹ thuật nào về giao thức
-  SHDLC, Device Status Register, hay Measurement Output Format.
+  Tầng 2 — services/sx_sleep_service/ (TÊN MỚI, người dùng muốn đặt tên
+    này — thay thế "sleepmanager" cũ)
+    Generic wake/sleep ORCHESTRATION ENGINE. Biết "có một chuỗi bước phải
+    hoàn thành trước khi được phép ngủ / sau khi thức dậy", nhưng KHÔNG
+    biết bước đó là gì cụ thể (không biết GPS, không biết SIM/modem).
+    Interface bằng callback/step-array, xem thiết kế đề xuất bên dưới.
+
+  Tầng 3 — app/.../sx_sleep_manager.c/.h (chưa quyết định path chính xác,
+    có thể để trong app/user/sleep/ hay tương tự — HỎI người dùng nếu chưa
+    rõ, đừng tự đặt path rồi lỡ trùng với ý định khác)
+    Nơi DUY NHẤT biết cụ thể GPS/modem/MQTT/`published` flag của project
+    WS_v1 này là gì. Định nghĩa các step cụ thể (GPS wake, SIM wake, GPS
+    sleep, modem sleep...) rồi đăng ký vào tầng 2.
 
 ============================================================
 TRẠNG THÁI GIT THẬT TẠI THỜI ĐIỂM VIẾT HANDOFF NÀY (tự xác minh lại)
 ============================================================
-Remote WS_v1 ở commit 9e20e53 ("modify sensirion_uart_hal"). Các commit liên quan SPS30,
-gần nhất trước:
-  9e20e53 modify sensirion_uart_hal
-  aa32bdb duplicate sensirion_streaming.h/.c & sensirion_streaming_shdlc.h/.c
-  3411bac need edit & modify sps30 sensirion
-  ca36268 edit sps30
-  e5b4623 sps30
+Remote WS_v1 ở commit 4236cf2 ("sx_sleep.h modified"). Các commit liên quan
+sleep, gần nhất trước:
+  4236cf2 sx_sleep.h modified      <-- người dùng tự commit, LẤY ĐÚNG bản
+                                        Claude phiên trước vừa viết trong
+                                        container rồi push lên máy họ (đã
+                                        verify bằng diff nội dung, giống
+                                        100% — không phải người dùng tự
+                                        viết khác đi)
+  fde6257 refactor sxsleep         <-- cùng tình huống như trên
+  aa1542b modify sleep             <-- người dùng tự sửa TRƯỚC KHI Claude
+                                        phiên trước bắt đầu refactor (đổi
+                                        tên biến sx_sleep_manager ->
+                                        sx_sleep_service trong 2 dòng
+                                        comment của sx_board.h/modem_ops.h
+                                        — CHỈ ĐỔI TÊN TRONG COMMENT, chưa
+                                        thực sự tạo file/thư mục
+                                        sx_sleep_service nào; cũng sửa
+                                        sx_sleep.c/.h thêm field
+                                        uarts_to_abort — bước đệm trước khi
+                                        refactor triệt để hơn ở fde6257/
+                                        4236cf2)
+  4fddff7 add sx_uart_abort in sx_uart
+  dceb340 add pump port & pump pin & fix pump_off
 
 ============================================================
-LỖI QUAN TRỌNG NHẤT CẦN SỬA NGAY — SAI TÊN FILE, CHẶN COMPILE
+ĐÃ HOÀN THÀNH — TẦNG 1 (components/peripherals/sleep) — XONG, ĐÃ PUSH
 ============================================================
-Claude phiên trước (khi viết sensirion_uart_hal.c mới) đã tạo 2 file mới:
-  - sensirion_uart_hal.c (đúng, không có vấn đề)
-  - sensirion_uart_portdescriptor.h (tên Claude ĐỊNH đặt)
+File: SynaptiX_FDK/components/peripherals/sleep/sx_sleep.h
+File: SynaptiX_FDK/components/peripherals/sleep/sx_sleep.c
 
-Nhưng khi người dùng/công cụ push code lên remote, file thứ 2 đã bị lưu SAI TÊN thành:
-  SynaptiX_FDK/components/modules/sps30/sensirion_uart_descriptor.h   (THIẾU CHỮ "port")
+Đã tự xác minh bằng diff: nội dung trên remote (commit 4236cf2/fde6257) và
+nội dung Claude phiên trước viết trong container GIỐNG NHAU 100%. Không cần
+làm lại tầng này trừ khi phát hiện bug mới.
 
-Trong khi đó sensirion_uart_hal.h (dòng 36, copy nguyên bản Sensirion, KHÔNG sửa) có:
-  #include "sensirion_uart_portdescriptor.h"
+THAY ĐỔI CHÍNH:
+- Xóa field `sx_uart_t **uarts_to_abort` + `uarts_to_abort_count` khỏi
+  struct `sx_sleep` — đây là board-cụ-thể, không thuộc tầng 1.
+- Xóa `#include "sx_uart.h"` và `#include "usart.h"` khỏi sx_sleep.c/.h —
+  tầng 1 giờ KHÔNG BIẾT UART là gì nữa, đúng như mục tiêu.
+- Thêm 2 hook generic vào struct `sx_sleep`:
+    typedef void (*sx_sleep_hook_t)(void *hook_ctx);
+    sx_sleep_hook_t pre_stop_hook;   // gọi ngay trước khi enter STOP
+    sx_sleep_hook_t post_wake_hook;  // gọi ngay sau khi wake + clock restore
+    void *hook_ctx;                  // truyền nguyên vẹn, tầng 1 không đọc
+- `sx_sleep_init()` đổi chữ ký, nhận thêm pre_stop_hook/post_wake_hook/
+  hook_ctx thay vì uarts_to_abort/uarts_to_abort_count:
+    void sx_sleep_init(sx_sleep_t *mgr, sx_sleep_ops_t *ops, void *pDriver,
+                        sx_sleep_hook_t pre_stop_hook,
+                        sx_sleep_hook_t post_wake_hook, void *hook_ctx);
+- `_enter_stop()` trong sx_sleep.c co lại chỉ còn: reset wake_reason, gọi
+  pre_stop_hook, clear pending SysTick (`SCB->ICSR`), suspend/resume tick,
+  gọi HAL_PWR_EnterSTOPMode, restore SystemClock_Config(), gọi
+  post_wake_hook. KHÔNG còn dòng nào biết USART1/2/USB tồn tại.
 
-=> Nếu build đúng như trạng thái hiện tại trên remote, sẽ lỗi compile ngay ở dòng include
-   này ("file not found"), vì tên file trên đĩa và tên trong #include không khớp.
+ĐÃ WIRING VÀO BOARD LAYER (sx_board.c/.h) — CŨNG XONG, ĐÃ PUSH:
+- Thêm field `sx_sleep_t sleep;` vào `Board_t` (sx_board.h) — TRƯỚC ĐÂY
+  KHÔNG CÓ INSTANCE NÀO CỦA sx_sleep_t Ở ĐÂU CẢ trong toàn bộ codebase, đây
+  là lần đầu tiên nó thực sự được khởi tạo.
+- Thêm 2 hàm static trong sx_board.c — đây là nơi kiến thức "board này có
+  UART1(LTE)/UART2(GPS)/USB cần quiesce trước khi ngủ" thực sự nằm:
+    static void board_sleep_pre_stop_hook(void *hook_ctx)
+    {
+        sx_lte_uart_abort();  // đã có sẵn từ trước
+        sx_gps_uart_abort();  // đã có sẵn từ trước
+        __HAL_UART_CLEAR_IT(&huart1, UART_CLEAR_OREF|UART_CLEAR_NEF|UART_CLEAR_PEF);
+        __HAL_UART_CLEAR_IT(&huart2, UART_CLEAR_OREF|UART_CLEAR_NEF|UART_CLEAR_PEF);
+        HAL_NVIC_ClearPendingIRQ(USART1_IRQn);
+        HAL_NVIC_ClearPendingIRQ(USART2_IRQn);
+        HAL_NVIC_DisableIRQ(USB_DRD_FS_IRQn);
+        HAL_NVIC_ClearPendingIRQ(USB_DRD_FS_IRQn);
+    }
+    static void board_sleep_post_wake_hook(void *hook_ctx)
+    {
+        HAL_NVIC_EnableIRQ(USB_DRD_FS_IRQn);
+    }
+- Gọi ở cuối `sx_board_init()`:
+    sx_sleep_init(&board.sleep, &sx_sleep_ops, NULL,
+                  board_sleep_pre_stop_hook, board_sleep_post_wake_hook, NULL);
+- Nội dung 2 hook = ĐÚNG NGUYÊN VẸN đoạn code đã bị xóa khỏi sx_sleep.c cũ,
+  chỉ chuyển vị trí — không đổi logic, không đổi hành vi runtime.
 
-VIỆC ĐẦU TIÊN CẦN LÀM: xác nhận lại bằng git fetch + ls xem tên file thật trên remote lúc
-tiếp nhận handoff là gì (có thể người dùng đã tự đổi tên giữa chừng, ĐỪNG giả định vẫn
-còn sai như mô tả ở đây). Nếu vẫn sai, đổi tên file thành sensirion_uart_portdescriptor.h
-(hoặc sửa dòng #include trong sensirion_uart_hal.h cho khớp tên hiện có — nhưng ưu tiên
-đổi tên file vì "portdescriptor" là tên gốc chuẩn Sensirion, ít gây nhầm lẫn hơn về sau).
-
-============================================================
-DANH SÁCH ĐẦY ĐỦ FILE TRONG components/modules/sps30/ VÀ VAI TRÒ TỪNG FILE
-============================================================
-(Tất cả đường dẫn tương đối so với SynaptiX_FDK/components/modules/sps30/)
-
---- COPY NGUYÊN VẸN TỪ WS_v0, KHÔNG SỬA GÌ — ĐÃ XÁC NHẬN BẰNG diff, CHỈ KHÁC NEWLINE CUỐI FILE ---
-
-1. sensirion_common.c/.h (119/196 dòng)
-   Hàm chuyển đổi byte-order thuần túy: bytes_to_uint16/32_t, bytes_to_float (IEEE754
-   union trick), bytes_to_int16/32_t, và chiều ngược lại (xxx_to_bytes). Không phụ
-   thuộc UART/RTOS gì cả — dùng chung cho mọi thứ cần encode/decode SHDLC payload.
-
-2. sensirion_config.h (87 dòng)
-   Macro cấu hình build chung của SDK Sensirion (bật/tắt tính năng). Chưa rà soát kỹ
-   xem có macro nào cần tùy biến riêng cho STM32 không — NÊN ĐỌC LẠI file này nếu gặp
-   lỗi compile lạ liên quan macro thiếu định nghĩa.
-
-3. sensirion_shdlc.c/.h (385/278 dòng)
-   API "buffer-based" gốc của Sensirion (sensirion_shdlc_tx/rx/xcv,
-   sensirion_shdlc_begin_frame/add_xxx_to_frame/finish_frame/tx_frame,
-   sensirion_shdlc_rx_inplace). ĐANG LÀ CODE CHẾT — sps30_uart.c hiện KHÔNG gọi bất kỳ
-   hàm nào ở đây, nó dùng API streaming (xem file 4-5 dưới) thay thế. Không gây lỗi
-   compile (chỉ compile ra rồi không dùng), nhưng là code thừa. Chưa hỏi người dùng có
-   muốn xóa hẳn cho gọn hay giữ lại làm tài liệu tham khảo — ĐỪNG tự ý xóa, hỏi trước.
-
-4. sensirion_streaming.c/.h (85/142 dòng)
-   Định nghĩa struct sensirion_streaming_state và interface con trỏ hàm
-   stream.read/stream.write mà lớp streaming_shdlc (file 5) dùng.
-
-5. sensirion_streaming_shdlc.c/.h (206/95 dòng)
-   API "streaming" của Sensirion — ĐÂY LÀ API THẬT SỰ ĐANG ĐƯỢC sps30_uart.c SỬ DỤNG:
-   sensirion_shdlc_begin_stream, sensirion_shdlc_write_request,
-   sensirion_shdlc_read_response. Khác bản buffer-based (file 3) ở chỗ ghi/đọc từng
-   byte trực tiếp qua stream.read/write thay vì buffer toàn bộ trước.
-   QUAN TRỌNG: sensirion_shdlc_read_response() (trong .c) có VÒNG LẶP CHỜ RIÊNG bên
-   trong nó (biến "retries", gọi sensirion_uart_hal_sleep_usec() lặp lại) để chờ đủ
-   dữ liệu tới trước khi timeout. Đây là lý do sensirion_uart_hal_rx() (file 8) được
-   phép non-blocking (đọc 1 lần rồi trả về ngay) — lớp này phía trên đã tự lo việc chờ
-   rồi, không cần lớp HAL bên dưới chờ hộ.
-
-6. sps30_uart.c/.h (334/325 dòng)
-   Lớp command cụ thể của SPS30 — mọi hàm public mà code nghiệp vụ cấp cao sẽ gọi:
-     sps30_wake_up_sequence()          -- gọi wake_up_communication() rồi wake_up()
-     sps30_wake_up_communication()     -- gửi 1 SHDLC frame với cmd=0xFF, KHÔNG đọc
-                                          response (cố ý) — đây là mẹo "đánh thức UART
-                                          vật lý", không phải lệnh SHDLC chuẩn theo
-                                          datasheet, nhưng đóng gói thành SHDLC frame
-                                          hoàn chỉnh (có checksum/stuffing) thay vì gửi
-                                          1 byte thô đơn giản. Cách này VẪN HỢP LỆ vì
-                                          bản thân có tín hiệu UART là đủ đánh thức
-                                          receiver — module không cần hiểu nội dung.
-     sps30_wake_up()                   -- lệnh SHDLC Wake-up thật, cmd=0x11 theo
-                                          datasheet, có đọc response
-     sps30_start_measurement(fmt)      -- cmd=0x00, tham số sps30_output_format (dùng
-                                          SPS30_OUTPUT_FORMAT_FLOAT — chưa xác nhận tên
-                                          hằng số chính xác trong sps30_uart.h, GREP LẠI
-                                          trước khi dùng, đừng đoán tên)
-     sps30_stop_measurement()          -- cmd=0x01
-     sps30_read_measurement_values_uint16(...) / _float(...) -- cmd=0x03, 2 biến thể
-                                          định dạng response (20 byte uint16 hay 40 byte
-                                          float) — NÊN DÙNG BẢN _float, khớp
-                                          SPS30_OUTPUT_FORMAT_FLOAT đã chọn khi start
-     sps30_sleep()                     -- cmd=0x10
-     sps30_start_fan_cleaning()        -- cmd=0x56
-     sps30_read_auto_cleaning_interval() / write_...()  -- cmd=0x80 (Read/Write)
-     sps30_read_product_type() / read_serial_number() / read_version()
-                                        -- cmd=0xD0/thông tin thiết bị, chưa dùng tới
-     sps30_read_device_status_register(clear, *reg, *reserved)  -- cmd=0xD2, ĐÂY LÀ
-                                          CƠ CHẾ CHÍNH THỨC để phát hiện lỗi SPEED/
-                                          LASER/FAN — xem phần "HEURISTIC SAI CẦN
-                                          TRÁNH" bên dưới, quan trọng
-     sps30_device_reset()               -- cmd=0xD3
-
---- FILE MỚI, CLAUDE PHIÊN TRƯỚC TỰ VIẾT (KHÔNG PHẢI COPY TỪ SENSIRION) ---
-
-7. sensirion_uart_portdescriptor.h (31 dòng, XEM LẠI VẤN ĐỀ TÊN FILE Ở TRÊN)
-   Thay thế bản gốc Sensirion (định nghĩa UartDescr = const char* path kiểu Linux
-   "/dev/ttyUSB0", vô nghĩa trên STM32 bare-metal). Bản mới: typedef sx_uart_t *UartDescr
-   — con trỏ tới instance sx_uart_t đã được sx_board.c cấu hình sẵn (ví dụ
-   bsp_uart[UART_DUST]).
-
-8. sensirion_uart_hal.c (80 dòng) — ĐÃ XÁC NHẬN NỘI DUNG ĐÚNG, KHỚP BẢN CLAUDE VIẾT
-   Implement 5 hàm mà sensirion_uart_hal.h khai báo:
-     sensirion_uart_hal_init(port)     -- lưu port (sx_uart_t*) vào biến static s_port
-     sensirion_uart_hal_free()         -- reset s_port = NULL
-     sensirion_uart_hal_tx(len, data)  -- gọi sx_uart_write() (BLOCKING, vì
-                                          sx_uart_write() bên dưới gọi thẳng
-                                          HAL_UART_Transmit với timeout HAL nội bộ
-                                          1000ms — đã CHẤP NHẬN block ngắn này, vì SPS30
-                                          chỉ gửi lệnh vài chục byte, không phải trong
-                                          vòng lặp gấp)
-     sensirion_uart_hal_rx(max_len, data) -- gọi sx_uart_read(..., timeout=0) — CHỈ 1
-                                          lần đọc KHÔNG chờ, trả về ngay số byte đang
-                                          có (có thể 0). KHÔNG được tự thêm vòng lặp
-                                          chờ ở đây — lớp sensirion_streaming_shdlc.c
-                                          (file 5) đã tự retry/chờ rồi, viết thêm ở đây
-                                          sẽ gây double-wait hoặc hành vi khó đoán
-     sensirion_uart_hal_sleep_usec(us) -- quy đổi ra ms (làm tròn LÊN, (us+999)/1000),
-                                          gọi sx_delay_ms(). Lý do: dự án chỉ có
-                                          sx_delay_ms (không có delay us thật). Đã xác
-                                          nhận qua đọc lại code tham khảo WS_v0/board.h:
-                                          NGAY CẢ bsp_delay_us() ở bản gốc WS_v0 cũng
-                                          THỰC CHẤT gọi HAL_Delay(x) (delay theo x
-                                          MILI giây, không phải micro giây — đây là
-                                          lỗi/thiếu chính xác có sẵn trong code tham
-                                          khảo gốc). Cách quy đổi hiện tại trong
-                                          WS_v1 CHÍNH XÁC HƠN bản gốc WS_v0 (tỷ lệ
-                                          đúng 1:1000 thay vì coi 1us = 1ms). KHÔNG
-                                          CẦN SỬA GÌ THÊM Ở ĐIỂM NÀY.
+ĐÃ KIỂM TRA:
+- grep toàn repo: không còn tham chiếu `uarts_to_abort` ở bất kỳ đâu.
+- grep toàn repo: chỉ có ĐÚNG 1 lời gọi `sx_sleep_init()` (trong
+  sx_board.c), khớp chữ ký mới — không có lời gọi nào khác dùng chữ ký cũ
+  có thể gây lỗi compile.
+- CHƯA build thật được (không có compiler trong container) — người dùng
+  cần tự build trên máy họ để xác nhận tầng 1 không lỗi. Việc phát hiện lỗi
+  build (nếu có) và fix thuộc về việc kế tiếp trong danh sách dưới.
 
 ============================================================
-FILE ĐÃ XÓA (KHÔNG DÙNG NỮA) — KHÔNG TỰ Ý TẠO LẠI
+CHƯA LÀM — TẦNG 2 VÀ TẦNG 3 (CHƯA VIẾT 1 DÒNG CODE NÀO)
 ============================================================
-sps30.h (từng tồn tại 1 thời gian ngắn) — đây là bản Claude phiên trước viết theo kiến
-trúc GỘP 1 FILE (tương tự gps.h), TRƯỚC KHI người dùng nói rõ muốn giữ kiến trúc
-Sensirion phân lớp. Đã bị Claude xóa sau khi người dùng chốt hướng đi. ĐỪNG viết lại
-file này trừ khi người dùng chủ động yêu cầu quay về kiến trúc gộp.
+Đã BÀN THIẾT KẾ với người dùng (người dùng đồng ý shape, nhưng CHƯA CODE):
 
-============================================================
-HEURISTIC SAI CẦN TRÁNH — ĐÃ QUYẾT ĐỊNH, KHÔNG PORT SANG WS_v1
-============================================================
-Trong WS_v0/SynaptiX/apps/sps30/sps30_app.c (CHƯA copy sang WS_v1, và THEO QUYẾT ĐỊNH
-ĐÃ CHỐT thì KHÔNG NÊN copy y nguyên phần này khi viết lớp nghiệp vụ cấp cao sau này) có
-đoạn: nếu mc_pm10p0 == mc_pm2p5 (giá trị PM10 và PM2.5 đọc được trùng nhau) thì coi là
-"dữ liệu không hợp lệ", tự ý cộng thêm 1.5 vào mc_10p0 rồi đo lại.
+--- TẦNG 2: services/sx_sleep_service/ (tên file/path CHÍNH XÁC CHƯA CHỐT,
+    hỏi người dùng — có thể muốn sx_sleep_service.c/.h, hoặc theo cấu trúc
+    thư mục hiện có kiểu services/sleepmanager/ đổi tên thành
+    services/sleep_service/) ---
 
-Đã tự đọc kỹ Documents/SPS30_dust_sensor (1).md để xác minh: ĐÂY KHÔNG PHẢI CƠ CHẾ
-CHÍNH THỨC của Sensirion. Datasheet định nghĩa lỗi qua Device Status Register (bit
-SPEED=fan speed sai / LASER=dòng laser bất thường / FAN=fan hỏng cơ khí, đọc qua lệnh
-0xD2) và Error-Flag bit trong state byte của mọi response frame — không có chỗ nào nói
-PM10==PM2.5 là dấu hiệu lỗi. Về vật lý, 2 giá trị này trùng nhau hoàn toàn có thể là kết
-quả ĐÚNG (không khí rất sạch, không có hạt >2.5um). Khi viết lớp nghiệp vụ cấp cao
-(business logic: chu trình wake→start→đo định kỳ→stop→sleep) cho WS_v1 sau này, KHÔNG
-port heuristic này. Thay vào đó dùng sps30_read_device_status_register() định kỳ và
-kiểm tra 3 bit Error thật (SPS30_STATUS_BIT_SPEED/LASER/FAN — nếu đặt tên hằng số này,
-grep xác nhận tên thật trước khi dùng, đừng đoán).
+Thiết kế đã thống nhất (thảo luận trong hội thoại, CHƯA CODE):
 
-============================================================
-VIỆC CHƯA LÀM — CÒN LẠI ĐỂ HOÀN THIỆN SPS30
-============================================================
-1. SỬA LỖI TÊN FILE Ở TRÊN (ưu tiên cao nhất, chặn compile).
-2. Lớp nghiệp vụ cấp cao (business logic / state machine): hiện sps30_uart.c chỉ có
-   các hàm command đơn lẻ (mỗi hàm tự start+stop 1 giao dịch SHDLC hoàn chỉnh, blocking
-   ngắn hạn ~20-50ms mỗi lần gọi theo datasheet). CHƯA CÓ vòng đời quản lý tổng thể:
-   khi nào gọi wake_up_sequence(), khi nào start_measurement(), polling định kỳ
-   read_measurement_values_float() mỗi bao lâu, khi nào kiểm tra
-   read_device_status_register(), khi nào sleep(). Cần hỏi người dùng muốn đặt lớp này
-   ở đâu (thêm file mới kiểu sps30_app.c riêng, hay tích hợp thẳng vào sx_board.c/app
-   layer nào đó) trước khi code — ĐÂY LÀ QUYẾT ĐỊNH KIẾN TRÚC CẦN NGƯỜI DÙNG XÁC NHẬN,
-   không tự ý chọn.
-3. Wiring vào sx_board.c/.h: struct Board_t CHƯA có field nào cho SPS30 (đã grep xác
-   nhận ở phiên trước, có thể đã đổi — TỰ GREP LẠI TRƯỚC KHI TIN). UART_DUST (UART4,
-   115200 baud) đã được cấu hình sẵn trong sx_board.c's uart_config[] nhưng chưa gán
-   instance driver nào vào đó.
-4. sensirion_shdlc.c/.h (bản buffer-based, mục 3 ở trên) đang là code chết — hỏi người
-   dùng có muốn xóa không, đừng tự ý xóa.
+    typedef struct {
+        void    (*start)(void *ctx);       // kick off step (non-blocking)
+        uint8_t (*is_done)(void *ctx);      // poll: xong chưa?
+        void    *ctx;                       // opaque, service không đụng vào
+        const char *name;                   // chỉ để log
+    } sx_sleep_step_t;
 
-============================================================
-VIỆC KHÔNG LIÊN QUAN SPS30 NHƯNG CŨNG ĐANG DANG DỞ TRONG CÙNG NHÁNH GIT
-============================================================
-- ads1115.c/.h (components/modules/ads1115/) — thư viện mới (tác giả Ahmet Batuhan
-  Günaltay, GPLv3, khác hẳn bản trong WS_v0), .c GẦN NHƯ RỖNG (chỉ có #include, chưa
-  implement ADS1115_Init()/ADS1115_readSingleEnded()). Có 1 lỗi nhỏ vô hại: macro
-  ADS1115_DEVICE_ADDR bị #define 2 LẦN LIÊN TIẾP (dòng 44 và 47 trong ads1115.h), cùng
-  giá trị nên không gây lỗi compile, nhưng nên dọn khi có dịp.
-- Documents/ads1115.pdf mới được thêm — datasheet ADS1115 thật, dùng để đối chiếu khi
-  implement.
-- Vai trò thật của ADS1115 trong hệ thống CHƯA được người dùng xác nhận rõ (có thể liên
-  quan đọc Vout analog (0-2V) của module ZE12A — xem ảnh schematic người dùng đã gửi
-  trong hội thoại trước, có 3 module ZE12A (SR1/SR2/SR3) qua mux TMUX4052 dùng chung
-  UART5, nhưng Vout của chúng KHÔNG thấy nối đi đâu trong ảnh schematic đó — cần hỏi
-  người dùng có board/kết nối nào khác nối 3 Vout này vào ADS1115 không).
-- ZE12A: chỉ có ze12a.h (47 dòng khai báo), ze12a.c HOÀN TOÀN RỖNG (0 dòng). Đã xác
-  nhận qua ảnh schematic người dùng gửi: 3 module ZE12A vật lý (SR1/SR2/SR3), dùng
-  chung UART5 qua IC mux TMUX4052 (U3), chọn kênh bằng 2 GPIO UART5_S0/UART5_S1 (=A0/A1
-  của mux), EN nối GND cố định (luôn enable). Bảng chọn kênh đã xác nhận từ datasheet
-  TI thật (Table 8-2, TMUX4052 Truth Table):
-    A1=0 A0=0 -> SR1 (ZE12A TX1/RX1)
-    A1=0 A0=1 -> SR2 (ZE12A TX2/RX2)
-    A1=1 A0=0 -> SR3 (ZE12A TX3/RX3)
-    A1=1 A0=1 -> không dùng (dư)
-  CHƯA viết bất kỳ dòng code nào cho ze12a.c. Cần hỏi người dùng: loại khí cụ thể mỗi
-  module SR1/SR2/SR3 đang đo (CO/SO2/NO2/O3/H2S...) trước khi code, vì có thể ảnh hưởng
-  đơn vị/công thức chuyển đổi ppm theo datasheet ze12a-electrochemical-module-manual-
-  v1_0.md đã có sẵn trong Documents/.
-- SHT3x: driver components/modules/sht3x/sht3x.c/.h ĐÃ HOÀN THIỆN, đã đối chiếu đúng cả
-  datasheet lẫn code tham khảo WS_v0, KHÔNG CẦN SỬA GÌ. Chỉ còn thiếu wiring vào
-  sx_board.c/.h (chưa có instance nào trong Board_t).
+    typedef struct {
+        sx_sleep_t      *sleep;             // tầng 1
+        sx_sleep_step_t *wake_steps;         // mảng do caller sở hữu, theo thứ tự
+        uint8_t          wake_step_count;
+        uint8_t          current_step;
+        uint32_t         step_elapsed_ms;
+        uint32_t         step_timeout_ms;    // per-step timeout, 0 = không giới hạn
+    } sx_sleep_service_t;
+
+    void    sx_sleep_service_init(sx_sleep_service_t *svc, sx_sleep_t *sleep,
+                                   sx_sleep_step_t *wake_steps, uint8_t count,
+                                   uint32_t step_timeout_ms);
+    void    sx_sleep_service_enter_sleep(sx_sleep_service_t *svc, uint32_t sleep_sec);
+    void    sx_sleep_service_wake_process(sx_sleep_service_t *svc, uint32_t delta_ms);
+    uint8_t sx_sleep_service_is_wake_done(sx_sleep_service_t *svc);
+    void    sx_sleep_service_reset_wake(sx_sleep_service_t *svc);
+
+Nguyên tắc quan trọng ĐÃ THỐNG NHẤT, đừng làm khác:
+- `wake_process()` CHỈ làm việc generic: gọi `start()` của step hiện tại
+  đúng 1 lần khi mới vào step, poll `is_done()` mỗi tick, hết bước thì
+  `current_step++`, quá `step_timeout_ms` thì cũng coi là xong (tránh treo
+  vô hạn) — KHÔNG được biết bên trong step nào có GPS/SIM gì cả.
+- `enter_sleep()` (đi ngủ) CHỈ còn: gọi `sx_sleep_set_rtc_wake()` +
+  `sx_sleep_enter_stop()` (tầng 1). Phần tắt-nguồn-GPS/modem-trước-khi-ngủ
+  hiện đang hard-code trong `sx_sleep_manager_enter()` cũ (xem bên dưới)
+  PHẢI chuyển thành "sleep steps" (tương tự wake steps), do tầng 3 đăng ký
+  — KHÔNG được để lại hard-code trong service.
+- CHƯA CHỐT: sleep-steps (trước khi ngủ) và wake-steps (sau khi thức) có
+  dùng chung 1 kiểu mảng `sx_sleep_step_t` hay tách 2 mảng riêng — hỏi
+  người dùng hoặc tự đề xuất rồi xác nhận trước khi code, đừng tự quyết.
+
+--- TẦNG 3: app/.../sx_sleep_manager.c/.h (path CHƯA CHỐT — hỏi người
+    dùng) ---
+
+Đây là nơi giữ nguyên logic cụ thể của WS_v1 hiện đang nằm trong
+`services/sleepmanager/sx_sleep_manager.c/.h` (CHƯA ĐỘNG VÀO, file này vẫn y
+nguyên bản cũ), gồm:
+- Wake step machine cụ thể: SX_WAKE_STEP_GPS_ON_FIRST -> GPS_WAIT ->
+  UART_RESUME -> SIM_WAKE -> DONE. Cần viết lại thành các
+  `sx_sleep_step_t` cụ thể (gps_wake_step, sim_wake_step, ...), MỖI STEP
+  implement đúng cặp hàm `start()`/`is_done()` mà tầng 2 yêu cầu, rồi đăng
+  ký mảng đó vào `sx_sleep_service_init()`.
+- `sx_sleep_manager_enter()` hiện tại hard-code gọi
+  `gps_power_off()`/`modem->ops->power_off_start()` trước khi ngủ — chuyển
+  thành sleep-steps tương tự.
+- `mgr->published` flag: hiện CHỈ được set về 0 (ở init/reset), CHƯA CÓ AI
+  ĐỌC HOẶC SET NÓ THÀNH 1 Ở ĐÂU CẢ (đã grep xác nhận, KHÔNG suy đoán tiếp
+  nếu chưa tự grep lại). Ý định người dùng (xác nhận trong hội thoại):
+  "publish đầy đủ thông tin thì sẽ set trigger để device vào sleep mode" —
+  tức là: `sx_user_mqtt_cfg_t.on_publish` callback (đã có sẵn trong
+  sx_user_mqtt.h, kiểu `void (*)(int success)`) là nơi tầng 3 cần set
+  published=1 (hoặc tương đương) khi thấy publish thành công, rồi từ đó
+  trigger enter_sleep(). CHƯA VIẾT CODE PHẦN NÀY.
+
+--- app.c (services/app orchestration) ---
+`SynaptiX_FDK/app/app.c` hiện TẠI THỜI ĐIỂM VIẾT HANDOFF NÀY chỉ có:
+    void app_init(void){ log_info(TAG, "APP initializing ...."); }
+    void app_process(uint32_t delta_ms){ }
+Đây là NGƯỜI DÙNG tự viết (không phải Claude), thay thế bản stub 5-hàm mà
+Claude phiên trước từng viết tạm để qua lỗi link — người dùng đã xác nhận
+muốn XÓA HẲN 4 hàm `app_notify_usb_connected/app_request_sleep/
+app_sync_gps_log_to_disk/app_mode_full_pw` khỏi app.h vì "project hiện tại
+không dùng trigger qua USB như cũ mà sẽ sleep và wakeup theo kiểu khác"
+(dựa trên publish MQTT xong thì sleep, thời gian sleep đã define trong
+app_config.h là SLEEP_TIME_MS = 5*60*1000). NHƯNG TỰ GREP LẠI app.h TRƯỚC
+KHI TIN — tại thời điểm viết handoff này việc xóa 4 khai báo đó trong app.h
+CHƯA ĐƯỢC XÁC NHẬN LÀ ĐÃ LÀM (câu trả lời "xóa hết" của người dùng đến
+NGAY TRƯỚC KHI Claude phiên trước bị người dùng ngắt để đổi hướng sang bàn
+kiến trúc lại từ đầu — có thể người dùng đã tự làm hoặc chưa, PHẢI TỰ KIỂM
+TRA, đừng giả định).
+
+app_process() cuối cùng cần gọi tầng 2/tầng 3 mỗi tick — CHƯA VIẾT, đây là
+việc sau khi tầng 2/3 xong.
 
 ============================================================
 VIỆC ĐẦU TIÊN KHI TIẾP NHẬN — THEO ĐÚNG THỨ TỰ
 ============================================================
-1. git fetch origin, git log --oneline -10, so sánh với commit 9e20e53 nêu trên — nếu
-   khác, đọc lại code thật trước khi tin bất kỳ điều gì trong handoff này.
-2. Kiểm tra ngay vấn đề tên file sensirion_uart_descriptor.h vs
-   sensirion_uart_portdescriptor.h — xem trạng thái thật trên remote lúc này, báo cáo
-   và xin xác nhận hướng sửa (đổi tên file hay sửa #include) trước khi động tay.
-3. Đọc lại toàn bộ 8 nhóm file đã liệt kê ở trên bằng view/grep, đừng chỉ tin mô tả này.
-4. Hỏi người dùng về hướng đi cho lớp nghiệp vụ cấp cao SPS30 (mục "VIỆC CHƯA LÀM" #2)
-   trước khi code bất kỳ dòng nào mới.
+1. git fetch origin && git log --oneline -10, so sánh với commit 4236cf2
+   nêu trên — nếu khác, đọc lại code thật trước khi tin bất kỳ điều gì
+   trong handoff này. Đặc biệt kiểm tra app.h/app.c và
+   services/sleepmanager/ xem người dùng đã tự sửa gì thêm chưa.
+2. Đọc lại toàn bộ sx_sleep.h/.c (tầng 1, đã xong) và sx_board.c/.h phần
+   liên quan sleep bằng view/grep, xác nhận khớp mô tả ở trên.
+3. Đọc lại services/sleepmanager/sx_sleep_manager.c/.h (chưa refactor,
+   logic cụ thể GPS/SIM cần giữ lại tinh thần khi viết tầng 3 mới).
+4. Hỏi người dùng xác nhận path/tên file chính xác cho tầng 2
+   (services/sx_sleep_service/... ?) và tầng 3 (app/.../sx_sleep_manager...?)
+   trước khi tạo file mới — ĐỪNG tự đặt path rồi tạo file, người dùng có
+   thể có ý định cấu trúc thư mục khác.
+5. Sau khi thống nhất path, viết tầng 2 trước (generic, không phụ thuộc
+   GPS/modem/MQTT gì cả) — dễ review độc lập vì không cần biết chi tiết
+   project. Rồi mới viết tầng 3 (di chuyển + refactor logic từ
+   sx_sleep_manager.c cũ sang, dùng step callback thay vì enum cứng).
+6. Sau khi tầng 3 xong, quay lại wiring app.c: app_init() tạo instance
+   sx_sleep_service_t + mảng steps + gọi sx_sleep_service_init(); trong
+   sx_user_mqtt on_publish callback set trạng thái "sẵn sàng ngủ"; 
+   app_process() poll trạng thái đó, khi true thì gọi
+   sx_sleep_service_enter_sleep(SLEEP_TIME_MS/1000).
+7. Nhắc người dùng tự build trên máy họ sau mỗi bước lớn (không có compiler
+   trong container Claude) — dán log lỗi lại nếu có, chẩn đoán bằng đọc
+   code thật, đừng đoán nguyên nhân khi chưa xem dòng lỗi cụ thể.

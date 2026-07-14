@@ -19,13 +19,9 @@ typedef enum {
 void app_init(void);
 void app_process(uint32_t delta_ms);
 
-void app_notify_usb_connected(void);
-
 void app_request_sleep(void);
 
 void app_sync_gps_log_to_disk(void);
-
-void app_mode_full_pw(void);
 
 #ifdef __cplusplus
 }

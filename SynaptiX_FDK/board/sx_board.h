@@ -29,6 +29,7 @@ extern "C" {
 #include "sensirion_uart_hal.h"
 #include "sht3x.h"
 #include "ze12a.h"
+#include "ads1115.h"
 
 typedef struct {
     volatile uint32_t raw_adc;
@@ -67,6 +68,41 @@ typedef struct Board{
      * s_mux_s0, s_mux_s1) — gas_sensor_init() takes the raw config/pin
      * descriptors below and wires them up internally, so no field is
      * needed here. */
+    /* ADS1115 (shared I2C1, no dedicated GPIO — no ALERT/RDY pin wired
+     * per this board's .ioc, so this driver only ever polls the OS bit,
+     * never uses the comparator/alert function).
+     *
+     * AIN1 = adc_current (current-sense input, via INA180A1 U2, gain
+     *   20V/V per TI's Device Comparison table — SOT23-5, pinout A).
+     *   IN+/IN- sense the voltage drop across shunt resistor R16 (in
+     *   series on the +12V rail, before the rest of the board); OUT
+     *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
+     *   resistor, not the shunt itself).
+     *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
+     *   an answer: R16's actual resistance value has not been confirmed.
+     *   User initially said "0 ohm" for this discussion, but Vout = Gain
+     *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
+     *   for any current — i.e. the current-sense channel would never
+     *   read anything. This is very likely a mix-up with R9 (which
+     *   legitimately is 0R on the schematic, but sits on the output
+     *   side, not the shunt). User said they'd confirm this in a future
+     *   conversation. Until R16's real value is confirmed:
+     *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
+     *       AIN2 for now — NOT derived from any confirmed R16 value.
+     *     - Treat every AIN1/adc_current reading as unverified — do not
+     *       trust it for any real current measurement or safety logic
+     *       (e.g. overcurrent cutoff) until this is resolved.
+     *
+     * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
+     *   divider: R14=100K top / R15=20K bottom per schematic, confirmed
+     *   with user — the divider node feeds AIN2 directly).
+     *   Vout = Vin * 20k/(100k+20k) = Vin/6 -> 2.0V at 12V nominal,
+     *   2.5V at a 15V worst-case rail — comfortably under both this
+     *   board's VDD (3.3V) and the ADS1115's absolute maximum analog
+     *   input rating of VDD+0.3V=3.6V (Documents/ads1115.pdf, Absolute
+     *   Maximum Ratings table). ADS1115_PGA_TWO (FSR +-2.048V) matches
+     *   this range well. */
+    ADS1115_T   ads1115;
 }Board_t;
 
 typedef enum{

@@ -3,6 +3,9 @@ HANDOFF PROMPT — SPS30 Dust Sensor Driver Integration (Weather Station V2, WS_
 "Weather Station V2 + Modem Abstraction Layer" đã có — KHÔNG thay thế nó, chỉ tập trung
 riêng vào phần SPS30 vừa làm.)
 
+repo hiện tại: https://github.com/logan123synaptix/WS_v1.git
+repo mẫu: https://github.com/logan123synaptix/WS_v0.git
+
 QUY TẮC BẮT BUỘC — GIỐNG HANDOFF CHÍNH, NHẮC LẠI VÌ QUAN TRỌNG
 1. KHÔNG tin bất kỳ mô tả "tiến độ" nào trong bản này. Luôn tự git fetch + git log
    --oneline -10 + đọc code thật (view/grep) trước khi kết luận bất cứ điều gì.

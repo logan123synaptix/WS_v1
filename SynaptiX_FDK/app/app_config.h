@@ -4,7 +4,7 @@
 #define USER_DISK_LABEL_CREATE         "VD GPS"   
 
 /*USE MQTT*/
-#define USE_THINGSBOARD 0
+#define USE_THINGSBOARD 1
 
 #define MQTT_ID                         "1234"
 #define MQTT_PORT                       1883//1993

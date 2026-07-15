@@ -5,6 +5,19 @@
 
 #define SLEEP_TIME_MS                   5*60*1000     // 5 minutes                 
 
+/* ------------------------------------------------------------------ */
+/*  Main app state machine timing (app.c's APP_MODE_FULL_POWER cycle)  */
+/* ------------------------------------------------------------------ */
+/* NOTE (per discussion with the user): these are fixed defaults for now.
+ * Planned follow-up — NOT implemented yet — is to make these overridable
+ * at runtime via USB CDC (typed command, e.g. "set pump 30") and/or USB
+ * MSC (editing a config file on the exposed disk), since both sx_cdc and
+ * sx_msc already exist in this project. Until that lands, changing these
+ * values requires reflashing. */
+#define APP_CYCLE_PERIOD_MS             SLEEP_TIME_MS  /* time between successive SENDING states, i.e. one full IDLE->ON_PUMP->SENSING->SENDING lap */
+#define APP_PUMP_ON_MS                  30000U         /* how long the pump stays on before sensing starts */
+#define APP_SENSING_MS                  60000U         /* how long SENSING runs (SPS30 measurement cycle + other sensors settle) */
+
 /*USE MQTT*/
 #define USE_THINGSBOARD 1
 

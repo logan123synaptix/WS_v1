@@ -14,6 +14,7 @@
 #include "sx_user_mqtt.h"
 #include "network_config.h"
 #include "ze12a.h"
+#include "gps.h"
 #include "cJSON.h"
 #include <string.h>
 
@@ -89,13 +90,23 @@ static sx_sleep_manager_t  s_sleep_mgr;
  *     the same follow-up. */
 
 typedef enum {
-    APP_CYCLE_IDLE = 0,
-    APP_CYCLE_ON_PUMP,
+    APP_CYCLE_ON_PUMP = 0,
     APP_CYCLE_SENSING,
     APP_CYCLE_SENDING,
+    APP_CYCLE_SLEEPING,
+    APP_CYCLE_WAKING,
 } app_cycle_state_t;
 
-static app_cycle_state_t s_cycle_state   = APP_CYCLE_IDLE;
+/* Starts in ON_PUMP rather than IDLE — per the user, the whole board
+ * (STM32 + peripherals) actually sleeps between cycles now, so there is
+ * no separate "wait for the next cycle" IDLE state anymore: SLEEPING
+ * itself (via sx_sleep_manager_enter_sleep()'s RTC wakeup timer, using
+ * APP_CYCLE_PERIOD_MS as the sleep duration) is what used to be IDLE's
+ * job. On boot (first lap, before any sleep has happened yet) this just
+ * starts the pump immediately rather than waiting out a "time until next
+ * lap" window — acceptable since there is no prior telemetry to protect
+ * a cadence around on the very first lap. */
+static app_cycle_state_t s_cycle_state   = APP_CYCLE_ON_PUMP;
 static uint32_t          s_cycle_tick_ms = 0;
 static volatile app_mode_t s_app_mode    = APP_MODE_FULL_POWER;
 
@@ -162,6 +173,11 @@ static const char *build_telemetry_payload(void)
     cJSON_AddStringToObject(root, "motionState",
                              accel_app_is_movement_detected(&s_accel_app) ? "moving" : "stationary");
 
+    /* GPS fix (see gps_process() call in app_process()) — WS_v0's
+     * dataPayload() gated this on weatherstation.gps.isReady; sx_gps_t
+     * here has no such flag (see board.gps in sx_board.h), so this uses
+     * the same "non-zero lat/long" liveness check sx_sleep_manager.c's
+     * _gps_wait_is_done() already uses for the same purpose. */
     if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
         cJSON_AddNumberToObject(root, "latitude", board.gps.latitude);
         cJSON_AddNumberToObject(root, "longitude", board.gps.longtitude);
@@ -176,21 +192,32 @@ static const char *build_telemetry_payload(void)
     return s_telemetry_json;
 }
 
+/* ===================== FULL_POWER cycle: ON_PUMP -> SENSING -> SENDING
+ * ===================== SLEEPING -> WAKING -> back to ON_PUMP
+ *
+ * Per the user (2026-07-15): the whole board sleeps between cycles, not
+ * just individual peripherals independently — SLEEPING here calls
+ * sx_sleep_manager_enter_sleep() (tier 3), which runs every registered
+ * sleep_step (GPS/modem power-down, SPS30 SHDLC-sleep+EN_PW_DUST-low,
+ * pump off, ZE12A to QA mode, BNO055 to suspend — see
+ * sx_sleep_manager.c) and then actually parks the STM32 itself in STOP
+ * mode via tier 1 (sx_sleep_enter_stop()). sx_sleep_manager_enter_sleep()
+ * is blocking: it does not return until the RTC wakeup timer fires and
+ * the MCU resumes — so app_process() below only calls it once per
+ * SLEEPING-state entry and then waits out the following WAKING state
+ * once execution resumes on the other side of that call. */
 static void app_cycle_process(uint32_t delta_ms)
 {
     switch (s_cycle_state) {
-    case APP_CYCLE_IDLE:
+    case APP_CYCLE_ON_PUMP:
         s_cycle_tick_ms += delta_ms;
-        if (s_cycle_tick_ms >= (APP_CYCLE_PERIOD_MS - APP_PUMP_ON_MS - APP_SENSING_MS)) {
-            s_cycle_tick_ms = 0;
-            s_cycle_state = APP_CYCLE_ON_PUMP;
+        if (s_cycle_tick_ms == delta_ms) {
+            /* First tick after entering this state (including the very
+             * first lap after boot, and every lap after WAKING) —
+             * kick the pump on exactly once. */
             pump_on(sx_board_get_pump_gpio());
             log_info(TAG, "Pump on");
         }
-        break;
-
-    case APP_CYCLE_ON_PUMP:
-        s_cycle_tick_ms += delta_ms;
         if (s_cycle_tick_ms >= APP_PUMP_ON_MS) {
             s_cycle_tick_ms = 0;
             s_cycle_state = APP_CYCLE_SENSING;
@@ -227,12 +254,36 @@ static void app_cycle_process(uint32_t delta_ms)
             log_warn(TAG, "MQTT not connected, telemetry dropped: %s", payload);
         }
         sps30_app_reset(&s_sps30_app);
-        s_cycle_state = APP_CYCLE_IDLE;
+        s_cycle_state = APP_CYCLE_SLEEPING;
+        s_app_mode    = APP_MODE_ENTER_SLEEP;
+        /* app_process() below acts on APP_MODE_ENTER_SLEEP right after
+         * this switch returns — see the comment there for why the
+         * actual sx_sleep_manager_enter_sleep() call lives in
+         * app_process() rather than here. */
         break;
     }
 
+    case APP_CYCLE_SLEEPING:
+        /* Handled directly in app_process() (APP_MODE_ENTER_SLEEP branch)
+         * — sx_sleep_manager_enter_sleep() is a blocking call, not
+         * something to poll here across ticks. This case only exists so
+         * s_cycle_state has a defined value while that blocking call is
+         * in flight/about to happen; app_cycle_process() itself is not
+         * re-entered until it returns (see app_process()). */
+        break;
+
+    case APP_CYCLE_WAKING:
+        if (sx_sleep_manager_is_wake_done(&s_sleep_mgr)) {
+            sx_sleep_manager_reset_wake(&s_sleep_mgr);
+            s_cycle_tick_ms = 0;
+            s_cycle_state   = APP_CYCLE_ON_PUMP;
+            s_app_mode      = APP_MODE_FULL_POWER;
+            log_info(TAG, "Wake sequence complete - resuming cycle");
+        }
+        break;
+
     default:
-        s_cycle_state = APP_CYCLE_IDLE;
+        s_cycle_state = APP_CYCLE_ON_PUMP;
         break;
     }
 }
@@ -309,6 +360,11 @@ void app_process(uint32_t delta_ms){
     accel_app_poll(&s_accel_app, delta_ms);
     sx_temp_humi_poll(&s_temp_humi, delta_ms);
     power_monitor_app_poll(&s_power_monitor, delta_ms);
+    /* Was missing entirely before — GPS must keep parsing NMEA sentences
+     * every tick regardless of app_mode/cycle state, same reasoning as
+     * every other "*_poll() every tick" call here (mirrors WS_v0's
+     * reading_sensor_task calling gnss_poll(1) unconditionally). */
+    gps_process(&board.gps, delta_ms);
 
     /* Plain MQTT poll, not thingsboard_client_poll() — see app_init()'s
      * comment on why Thingsboard isn't used yet. */

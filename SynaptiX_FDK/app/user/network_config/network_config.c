@@ -76,18 +76,25 @@ static void build_defaults(network_config_t *cfg)
     cfg->version = NETWORK_CONFIG_VERSION;
 }
 
+/* Per the user: read the file if it exists and has content, and use it
+ * directly — do not try to detect/reject a "stale version" record. If
+ * the file does not exist, or exists but is empty (size <= 0), fall back
+ * to app_config.h-derived defaults. This is the whole rule; no extra
+ * validation layer beyond "does a non-empty file exist". */
 void network_config_init(void)
 {
-    if (sx_storage_exists(NETWORK_CONFIG_FLASH_PATH)) {
+    int32_t size = sx_storage_size(NETWORK_CONFIG_FLASH_PATH);
+
+    if (size > 0) {
         sx_storage_err_t err = sx_storage_read(NETWORK_CONFIG_FLASH_PATH, &s_cfg, sizeof(s_cfg));
-        if (err == SX_STORAGE_OK && s_cfg.version == NETWORK_CONFIG_VERSION) {
+        if (err == SX_STORAGE_OK) {
             log_info(TAG, "Loaded network config from flash (host=%s port=%u)",
                       s_cfg.host, s_cfg.port);
             return;
         }
-        log_warn(TAG, "Stored network config missing/stale (err=%d) - using defaults", err);
+        log_warn(TAG, "Failed to read stored network config (err=%d) - using defaults", err);
     } else {
-        log_info(TAG, "No stored network config - using defaults");
+        log_info(TAG, "No network config file (or empty) - using defaults");
     }
 
     build_defaults(&s_cfg);

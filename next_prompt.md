@@ -306,3 +306,5 @@ VIỆC ĐẦU TIÊN KHI TIẾP NHẬN — THEO ĐÚNG THỨ TỰ
    code — đặc biệt câu hỏi ở bước 3 (có cần abort UART_DUST không nếu đã cắt điện) và
    bước 5 (đặt sps30_app_t/sx_temp_humi_t instance ở đâu).
 HANDOFF_EOF
+
+Đã push code lên git, đồng thời bạn ko hiểu ý tưởng à. Đầu tiên nó sẽ chạy với các thông số được config trong app_config, sau đó (mở rộng sau này) sau khi truyển host, port,.... từ tầng application UI xuống thì nó nhận và lưu vào flash rồi dùng cái đấy về sau, có nghĩa hướng code sẽ là phải đọc file nếu có file đấy tồn tại thì đọc file rồi dùng các thông số đã lưu, nếu ko có file hoặc có file nhưng rỗng thì dùng default, đồng thời ở trong app tôi chưa thấy bạn poll gps và tiếp nữa vấn đề sleep bạn vẫn chưa giải quyết được theo ý của tôi, bạn phải hiểu là khi mạch sleep , master là stm32 sleep, thì các module đi kèm mới sleep theo ví dụ khi publish xong các thông tin (những thông tin gì thì bạn tự đọc repo mẫu để biết), sau khi pub xong nó sẽ rơi vào sleep (cả mạch luôn)

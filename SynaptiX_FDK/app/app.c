@@ -343,7 +343,7 @@ void app_init(void){
         sx_user_mqtt_nontls_init(&mqtt_cfg);
     }
 
-    s_cycle_state   = APP_CYCLE_IDLE;
+    s_cycle_state   = APP_CYCLE_ON_PUMP;
     s_cycle_tick_ms = 0;
     s_app_mode      = APP_MODE_FULL_POWER;
 }
@@ -370,10 +370,35 @@ void app_process(uint32_t delta_ms){
      * comment on why Thingsboard isn't used yet. */
     sx_user_mqtt_poll(delta_ms);
 
-    /* Main cycle only runs in APP_MODE_FULL_POWER — the other app_mode_t
-     * states (ENTER_SLEEP/SLEEP/WAKE_PUBLISH) are not yet driven from
-     * here, see the doc-comment above (point 6). */
+    /* Main cycle only runs in APP_MODE_FULL_POWER. The other app_mode_t
+     * states drive the sleep/wake transition below:
+     *
+     *  - APP_MODE_ENTER_SLEEP: set once by app_cycle_process()'s SENDING
+     *    case right after publish. sx_sleep_manager_enter_sleep() is a
+     *    BLOCKING call — it runs every registered sleep_step (GPS/modem
+     *    power-down, SPS30 SHDLC-sleep+EN_PW_DUST-low, pump off, ZE12A to
+     *    QA mode, accel suspend) and then parks the STM32 itself in STOP
+     *    mode via tier 1. It does not return until the RTC wakeup timer
+     *    fires (sleep_sec derived from APP_CYCLE_PERIOD_MS) and the MCU
+     *    resumes — so this call itself is where "the whole board sleeps"
+     *    actually happens; everything after it below is post-wake.
+     *  - APP_MODE_WAKEUP: drives sx_sleep_manager_wake_process() every
+     *    tick until sx_sleep_manager_is_wake_done() reports the wake
+     *    step sequence (GPS on, modem on + wait ready, gas sensor back to
+     *    active mode, accel resume) has finished; app_cycle_process()'s
+     *    APP_CYCLE_WAKING case then resets state and flips s_app_mode back
+     *    to FULL_POWER, resuming the ON_PUMP->SENSING->SENDING lap. */
     if (s_app_mode == APP_MODE_FULL_POWER) {
+        app_cycle_process(delta_ms);
+    } else if (s_app_mode == APP_MODE_ENTER_SLEEP) {
+        log_info(TAG, "Entering sleep for %lu ms", (unsigned long)APP_CYCLE_PERIOD_MS);
+        sx_sleep_manager_enter_sleep(&s_sleep_mgr, APP_CYCLE_PERIOD_MS / 1000);
+        /* Execution resumes here after the RTC wakeup timer fires. */
+        s_app_mode    = APP_MODE_WAKEUP;
+        s_cycle_state = APP_CYCLE_WAKING;
+        log_info(TAG, "Woke up - running wake sequence");
+    } else if (s_app_mode == APP_MODE_WAKEUP) {
+        sx_sleep_manager_wake_process(&s_sleep_mgr, delta_ms);
         app_cycle_process(delta_ms);
     }
 }

@@ -14,7 +14,7 @@
  * MSC (editing a config file on the exposed disk), since both sx_cdc and
  * sx_msc already exist in this project. Until that lands, changing these
  * values requires reflashing. */
-#define APP_CYCLE_PERIOD_MS             SLEEP_TIME_MS  /* time between successive SENDING states, i.e. one full IDLE->ON_PUMP->SENSING->SENDING lap */
+#define APP_CYCLE_PERIOD_MS             SLEEP_TIME_MS  /* how long the board stays in STOP mode per lap (sleep duration itself, NOT the total ON_PUMP->SENSING->SENDING->sleep lap time — the full lap is longer by APP_PUMP_ON_MS+APP_SENSING_MS+publish time). Runtime-configurable is planned (see NOTE above) but not implemented yet — currently a fixed compile-time value. */
 #define APP_PUMP_ON_MS                  30000U         /* how long the pump stays on before sensing starts */
 #define APP_SENSING_MS                  60000U         /* how long SENSING runs (SPS30 measurement cycle + other sensors settle) */
 

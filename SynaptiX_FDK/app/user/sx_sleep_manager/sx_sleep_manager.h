@@ -29,7 +29,6 @@ typedef struct {
     modem_handle_t *modem;
     sx_gps_t       *gps;
     sx_gpio_t      pump_io;
-    SHT3X_T        *sht3x;
     /* SPS30 app-layer state machine — sleep_steps calls its own
      * sps30_app_sleep_step_start()/is_done() pair directly (already
      * matches sx_sleep_step_t's signature, see sps30_app.h), this

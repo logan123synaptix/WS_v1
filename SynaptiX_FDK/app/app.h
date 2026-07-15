@@ -11,12 +11,13 @@ typedef enum {
     APP_MODE_FULL_POWER = 0,
     APP_MODE_ENTER_SLEEP,
     APP_MODE_SLEEP,
-    APP_MODE_WAKE_PUBLISH,
+    APP_MODE_WAKEUP,
 } app_mode_t;
 
 //extern volatile app_mode_t app_mode;
 
 void app_init(void);
+
 void app_process(uint32_t delta_ms);
 
 void app_request_sleep(void);

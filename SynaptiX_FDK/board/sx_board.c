@@ -402,17 +402,19 @@ void tud_mount_cb(void) {
 }
 
 void tud_umount_cb(void) {
-    log_info(TAG,"USB discharge");
-    app_request_sleep();
     log_info(TAG, "USB tiny disconnected");
 }
 
 void tud_suspend_cb(bool remote_wakeup_en) {
-
+    log_info(TAG, "USB tiny suspend");
 }
 
 void tud_resume_cb(void) {
     log_info(TAG, "USB tiny resumed");
+}
+
+void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
+    log_info("USB", "CDC line state: dtr=%d rts=%d", dtr, rts);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -433,8 +435,4 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         sx_uart_rx_callback(bsp_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
     }
-}
-
-void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
-    log_info("USB", "CDC line state: dtr=%d rts=%d", dtr, rts);
 }

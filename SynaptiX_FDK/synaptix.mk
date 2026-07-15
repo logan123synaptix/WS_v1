@@ -10,7 +10,8 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			${SYNAPTIX_DIR}/app/user/gas_sensor_app/gas_sensor_app.c \
 			${SYNAPTIX_DIR}/app/user/sps30_app/sps30_app.c \
 			${SYNAPTIX_DIR}/app/user/sx_temp_humi/sx_temp_humi.c \
-			$(SYNAPTIX_DIR)/app/user/thingsboard/thingsboard_client.c
+			$(SYNAPTIX_DIR)/app/user/thingsboard/thingsboard_client.c \
+			$(SYNAPTIX_DIR)/app/user/accelerometer_app/accel_app.c 
 
 BOARD_FILES = ${SYNAPTIX_DIR}/board/sx_board.c
 

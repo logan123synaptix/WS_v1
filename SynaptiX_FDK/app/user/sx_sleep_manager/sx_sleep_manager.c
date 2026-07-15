@@ -1,9 +1,9 @@
 #include "sx_sleep_manager.h"
+#include "ze12a.h"
 #include "app_config.h"
 #include "sx_board.h"
 #include "sx_delay.h"
 #include "sx_pump.h"
-#include "ze12a.h"
 #include "logger.h"
 
 static const char *TAG = "SX_SLEEP_MGR";

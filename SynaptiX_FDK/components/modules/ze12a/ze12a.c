@@ -201,6 +201,37 @@ void gas_sensor_poll(uint32_t time_stamp_ms)
     }
 }
 
+/* Table 5 / Table 6 command frames — Documents/ze12a-electrochemical-
+ * module-manual-v1_0.md (Winsen ZE12 User's Manual V1.2, "Communication
+ * Specification" section), verified against the checksum algorithm
+ * above (ze12a_checksum: two's complement of the sum of bytes 1..7).
+ * Frame layout: {0xFF, 0x01, 0x78, <mode_byte>, 0x00, 0x00, 0x00, 0x00,
+ * <check>} — byte3=0x41 selects Q&A mode (table 5), byte3=0x40 selects
+ * Active Upload mode (table 6); the leading 0xFF/0x01/0x78 and trailing
+ * reserved zero bytes are identical between the two. */
+static const uint8_t CMD_SWITCH_TO_QA_MODE[9] =
+    { 0xFF, 0x01, 0x78, 0x41, 0x00, 0x00, 0x00, 0x00, 0x46 };
+static const uint8_t CMD_SWITCH_TO_ACTIVE_MODE[9] =
+    { 0xFF, 0x01, 0x78, 0x40, 0x00, 0x00, 0x00, 0x00, 0x47 };
+
+void gas_sensor_switch_to_qa_mode(void)
+{
+    if (!s_initialized) {
+        return;
+    }
+    sx_uart_write(&s_comm, CMD_SWITCH_TO_QA_MODE, sizeof(CMD_SWITCH_TO_QA_MODE));
+    log_info(TAG, "switched to Q&A mode");
+}
+
+void gas_sensor_switch_to_active_mode(void)
+{
+    if (!s_initialized) {
+        return;
+    }
+    sx_uart_write(&s_comm, CMD_SWITCH_TO_ACTIVE_MODE, sizeof(CMD_SWITCH_TO_ACTIVE_MODE));
+    log_info(TAG, "switched to Active Upload mode");
+}
+
 int gas_sensor_read_value(GasSensor_t *sensor, uint16_t *value)
 {
     *value = sensor->value;

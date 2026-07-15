@@ -162,6 +162,10 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/app/user/sx_mqtt \
 			  -I$(SYNAPTIX_DIR)/app/user/sx_ex_storage \
 			  -I$(SYNAPTIX_DIR)/app/user/at_usb \
+			  -I$(SYNAPTIX_DIR)/app/user/sps30_app \
+			  -I$(SYNAPTIX_DIR)/app/user/gas_sensor_app \
+			  -I$(SYNAPTIX_DIR)/app/user/sx_temp_humi \
+			  -I$(SYNAPTIX_DIR)/app/user/thingsboard \
 			  -I$(SYNAPTIX_DIR)/app/user/sx_sleep_manager \
 			  -I$(SYNAPTIX_DIR)/board \
 			  -I$(SYNAPTIX_DIR)/services/logger \

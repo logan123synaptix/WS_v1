@@ -5,6 +5,7 @@
 #include "sps30_app.h"
 #include "sx_temp_humi.h"
 #include "sx_sleep_manager.h"
+#include "gas_sensor_app.h"
 
 static const char *TAG = "APP";
 
@@ -16,6 +17,9 @@ static const char *TAG = "APP";
 static sps30_app_t       s_sps30_app;
 static sx_temp_humi_t    s_temp_humi;
 static sx_sleep_manager_t s_sleep_mgr;
+/* No gas_sensor_app_t instance — gas_sensor_app.c has no state of its
+ * own, see gas_sensor_app.h's doc-comment (all runtime state already
+ * lives in ze12a.c's statics + the gas_sensor[] array it owns). */
 
 void app_init(void){
     log_info(TAG, "APP initializing ....");
@@ -27,5 +31,12 @@ void app_init(void){
                            &s_sps30_app, sx_board_get_pump_gpio());
 }
 void app_process(uint32_t delta_ms){
-
+    /* Only the sensors that need per-tick driving from the app layer.
+     * gas_sensor_app_poll() must run every tick regardless of the main
+     * app state machine (not yet written — see next_prompt.md item 6)
+     * so ZE12A's mux round-robin + byte assembly keeps advancing and
+     * its GAS_SENSOR_TIMEOUT_MS connection-loss detection stays
+     * accurate, the same reasoning as gps_process()/sim polling
+     * elsewhere in this project running unconditionally every tick. */
+    gas_sensor_app_poll(delta_ms);
 }

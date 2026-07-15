@@ -47,11 +47,6 @@ static void ze12a_select_mux_channel(uint8_t channel)
     sx_gpio_write(&s_mux_s1, (channel & 0x02U) ? SX_GPIO_HIGH : SX_GPIO_LOW);
 }
 
-static void ze12a_send_command(uint8_t *cmd, uint8_t len){
-    sx_uart_write(&s_comm, cmd, len);
-    sx_delay_ms(20);
-}
-
 void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
                      void *_s0_arg, void *_s1_arg)
 {
@@ -221,13 +216,3 @@ void gas_sensor_start_calibration(GasSensor_t *sensor, bool isZeroCalib)
     (void)sensor;
     (void)isZeroCalib;
 }
-
-void gas_sensor_switch_to_qa_mode(void){
-    ze12a_send_command(CMD_SWITCH_TO_QA, sizeof(CMD_SWITCH_TO_QA));
-    log_info(TAG, "Send cmd switch to QA mode");
-}
-
-void gas_sensor_request_reading(void){
-    ze12a_send_command(CMD_READ_GAS, sizeof(CMD_READ_GAS));
-}
-

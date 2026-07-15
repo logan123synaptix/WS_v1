@@ -9,6 +9,7 @@ extern "C" {
 #include "sx_sleep_service.h"
 #include "modem_ops.h"
 #include "gps.h"
+#include "sht3x.h"
 
 /* Tier 3 of the 3-tier sleep architecture (see sx_sleep_service.h for the
  * full tier breakdown). This is the ONLY place in the sleep stack that

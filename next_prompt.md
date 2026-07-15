@@ -1,310 +1,250 @@
-HANDOFF PROMPT — Sleep Architecture + Sensor App Layer (Weather Station V2, WS_v1)
-(Viết bởi Claude phiên trước, bàn giao cho phiên sau vì gần hết token. Đây THAY THẾ
-hoàn toàn các next_prompt.md trước đó — nội dung cũ đã lỗi thời, những gì nó mô tả là
-"việc chưa làm" phần lớn đã xong. KHÔNG đọc các phiên bản next_prompt.md cũ.)
+HANDOFF PROMPT — Sleep/Wake wiring fix + config/bootloader research (WS_v1)
+(Viết bởi Claude phiên này, bàn giao cho phiên sau. Đây THAY THẾ hoàn toàn nội dung
+"HANDOFF_EOF" cũ từng nằm trong lịch sử chat — bản đó đã lỗi thời ngay từ lúc viết ra,
+phần lớn "việc chưa làm" nó liệt kê thực ra đã xong từ lâu qua nhiều commit sau đó.
+KHÔNG tin nội dung mô tả tiến độ trong bất kỳ handoff nào, kể cả bản này — luôn tự
+`git fetch` + đọc code thật trước khi kết luận.)
 
-repo hiện tại: https://github.com/logan123synaptix/WS_v1.git
+repo chính: https://github.com/logan123synaptix/WS_v1.git (nhánh main)
 repo mẫu (tham khảo, KHÔNG port nguyên xi): https://github.com/logan123synaptix/WS_v0.git
 
 ============================================================
-QUY TẮC BẮT BUỘC — ĐỌC KỸ, ĐÂY LÀ BÀI HỌC THẬT TỪ CÁC PHIÊN TRƯỚC
+QUY TẮC BẮT BUỘC (không đổi so với các phiên trước)
 ============================================================
-1. KHÔNG tin bất kỳ mô tả "tiến độ" nào trong bản này. Luôn tự `git fetch` +
-   `git log --oneline -15` + đọc code thật (view/grep) trước khi kết luận bất cứ điều
-   gì. Người dùng tự commit/push trực tiếp RẤT THƯỜNG XUYÊN, kể cả song song trong
-   lúc Claude đang làm việc — đã xảy ra nhiều lần thật trong các phiên trước.
-2. TRƯỚC KHI PULL: luôn `git fetch origin` rồi `git diff HEAD origin/main --stat` để
-   biết phạm vi khác biệt. Nếu có local changes chưa commit VÀ remote có commit mới:
-   - Nếu diff cho thấy remote là superset của local (không mất gì) → an toàn
-     `git checkout -- .` rồi `git pull` thẳng.
-   - Nếu có khả năng xung đột thật → `git stash` → `git pull` → `git stash pop` để
-     lộ rõ conflict markers.
-   - TUYỆT ĐỐI KHÔNG dùng regex/script tự động xóa conflict marker hàng loạt nếu file
-     có NHIỀU HƠN 1 block conflict cách xa nhau — đã xảy ra sự cố thật: regex greedy
-     gộp nhầm 2 block ở xa nhau, xóa mất `typedef struct Board{` và nhiều field khác
-     trong sx_board.h. Resolve TỪNG block bằng str_replace thủ công, đọc kỹ 2 bên
-     trước khi quyết định giữ bên nào.
-   - Sau khi resolve, LUÔN `grep -c "<<<<<<<\|=======\|>>>>>>>"` phải ra 0 cho MỌI
-     file từng có conflict, và đọc lại toàn bộ file bằng `view` để xác nhận cấu trúc
-     nguyên vẹn (đếm brace, đếm typedef struct...).
-3. Không sửa âm thầm. Phát hiện bug/lệch thiết kế → trình bày rõ → hỏi lại người dùng
-   → chỉ code sau khi có xác nhận. Người dùng đánh giá cao việc bị chặn lại khi phát
-   hiện vấn đề an toàn phần cứng thật (xem vụ ADS1115 divider bên dưới) — đừng ngại
-   dừng lại hỏi khi có nghi vấn thật, nhưng cũng đừng hỏi những gì đã có bằng chứng
-   rõ ràng để tự trả lời được (grep/đọc datasheet trước khi hỏi).
-4. Toàn bộ comment code bằng tiếng Anh. Trao đổi với người dùng bằng tiếng Việt.
-5. Không có compiler thật trong container (thiếu STM32 HAL headers) — chỉ đọc/grep để
-   rà soát, không đề nghị build từng bước nhỏ. Người dùng tự build ở máy họ và đã xác
-   nhận build thành công nhiều lần trong các phiên trước.
-6. Trước khi tạo/sửa bất kỳ file nào, ĐỌC lại file thật bằng `view` — đừng tin nội
-   dung mô tả trong handoff này, nó có thể đã lỗi thời ngay khi bạn đọc.
-7. present_files chỉ dùng khi người dùng yêu cầu xem file.
-8. QUAN TRỌNG: khi tra cứu datasheet/tài liệu kỹ thuật (SPS30, SHT3x, ZE12A, ADS1115,
-   STM32H5 reference manual), LUÔN đọc trực tiếp file trong Documents/ hoặc web_search
-   nguồn chính thức trước khi khẳng định con số/hành vi kỹ thuật. Nhiều lần trong các
-   phiên trước, việc "nhớ nhầm" hoặc bỏ sót 1 phần tài liệu (ví dụ ZE12A's Question &
-   Answer mode) đã dẫn tới kết luận sai ban đầu — chỉ được sửa đúng sau khi người dùng
-   chỉ ra và Claude tra cứu lại. Luôn ưu tiên tra cứu lại thay vì tin trí nhớ.
+1. KHÔNG tin mô tả "tiến độ" trong handoff. Luôn `git fetch origin` + `git log
+   --oneline -15` + đọc code thật (view/grep) trước khi kết luận bất cứ điều gì.
+   Người dùng tự commit/push trực tiếp rất thường xuyên.
+2. Không sửa âm thầm. Phát hiện bug → trình bày rõ → hỏi lại người dùng → chỉ code
+   sau khi có xác nhận, TRỪ những lỗi compile rành rành (ví dụ enum không tồn tại)
+   thì có thể sửa thẳng nhưng phải báo cáo rõ đã sửa gì trong response.
+3. Toàn bộ comment code bằng tiếng Anh. Trao đổi với người dùng bằng tiếng Việt.
+4. Không có compiler thật trong container (thiếu STM32 HAL headers) — chỉ đọc/grep,
+   không đề nghị build. Người dùng tự build ở máy họ.
+5. Khi tra cứu datasheet/tài liệu kỹ thuật, luôn đọc trực tiếp nguồn hoặc web_search
+   chính thức trước khi khẳng định con số/hành vi kỹ thuật.
+6. Trước khi tạo/sửa bất kỳ file nào, ĐỌC lại file thật bằng `view`.
 
 ============================================================
 TRẠNG THÁI GIT THẬT TẠI THỜI ĐIỂM VIẾT HANDOFF NÀY (tự xác minh lại)
 ============================================================
-Remote WS_v1 ở commit 6d6accd ("fix miss ;"). Local container tại thời điểm viết
-handoff này có các file sau ĐÃ SỬA NHƯNG CHƯA COMMIT (do hết token giữa chừng):
-  - SynaptiX_FDK/app/user/sps30_app/sps30_app.c       (MỚI VIẾT — xem mục "sps30_app" bên dưới)
-  - SynaptiX_FDK/app/user/sps30_app/sps30_app.h       (MỚI VIẾT)
-  - SynaptiX_FDK/app/user/sx_temp_humi/sx_temp_humi.c (MỚI VIẾT — xem mục "sx_temp_humi" bên dưới)
-  - SynaptiX_FDK/app/user/sx_temp_humi/sx_temp_humi.h (MỚI VIẾT)
-  - SynaptiX_FDK/app/user/sx_sleep_manager/sx_sleep_manager.h (sửa nhỏ: thêm #include "sht3x.h")
-  - SynaptiX_FDK/board/sx_board.c   (thêm hàm sx_board_get_sps30_power_gpio())
-  - SynaptiX_FDK/board/sx_board.h   (thêm khai báo hàm trên)
-  - SynaptiX_FDK/components/modules/ze12a/ze12a.c (thêm gas_sensor_switch_to_active_mode(),
-    chuyển 3 mảng CMD_* từ .h sang .c làm static const, sửa ze12a_send_command nhận const)
-  - SynaptiX_FDK/components/modules/ze12a/ze12a.h (bỏ mảng const khỏi header, thêm khai báo
-    gas_sensor_switch_to_active_mode())
+Remote WS_v1 ở commit 7bfa5dd ("fix flow") — đây là commit người dùng tự push để giải
+quyết 3 việc: (a) network config đọc-flash-nếu-có/default-nếu-không, (b) poll GPS mỗi
+tick, (c) sleep cả board sau khi publish. (a) và (b) đã làm đúng. (c) có 1 lỗ hổng +
+1 bug compile mà Claude phiên này đã tìm ra và VÁ, nhưng CHƯA COMMIT/PUSH — chỉ nằm
+trong container tạm của phiên trước, sẽ MẤT khi phiên đó kết thúc. Việc đầu tiên của
+phiên này là hỏi người dùng đã tự áp lại các sửa này chưa, hoặc áp lại giúp họ.
 
-VIỆC ĐẦU TIÊN: `git status` xem còn đúng như trên không. Nếu đúng, hỏi người dùng có
-muốn Claude commit các file này luôn không (gợi ý message: "add sps30_app, sx_temp_humi,
-sps30 power gpio getter, ze12a active-mode switch + header cleanup") trước khi làm việc
-mới, để tránh trộn lẫn nhiều việc khác nhau trong 1 commit sau này.
+Nội dung 2 chỗ sửa (cả hai đều trong app_process()/app_init() thuộc
+SynaptiX_FDK/app/app.c, cộng 1 dòng comment trong SynaptiX_FDK/app/app_config.h):
+
+--- Sửa 1 (bug compile thật) ---
+File: SynaptiX_FDK/app/app.c, trong app_init()
+Trước: s_cycle_state   = APP_CYCLE_IDLE;
+Sau:   s_cycle_state   = APP_CYCLE_ON_PUMP;
+Lý do: APP_CYCLE_IDLE không tồn tại trong enum app_cycle_state_t (chỉ có ON_PUMP/
+SENSING/SENDING/SLEEPING/WAKING — IDLE đã bị bỏ từ một refactor trước, có comment giải
+thích rõ tại dòng ~100-108 của app.c). Dòng cũ sẽ KHÔNG BUILD ĐƯỢC nếu để nguyên.
+
+--- Sửa 2 (lỗ hổng logic: sleep không bao giờ thực sự chạy) ---
+File: SynaptiX_FDK/app/app.c, trong app_process()
+Vấn đề: app_cycle_process()'s case APP_CYCLE_SENDING (dòng ~256-258, code người dùng
+tự viết, ĐÚNG và không cần sửa) set s_app_mode = APP_MODE_ENTER_SLEEP ngay sau khi
+publish MQTT xong. Nhưng app_process() (hàm gọi app_cycle_process()) TRƯỚC ĐÂY chỉ có
+"if (s_app_mode == APP_MODE_FULL_POWER) { app_cycle_process(delta_ms); }" — không có
+nhánh nào xử lý APP_MODE_ENTER_SLEEP hay APP_MODE_WAKEUP. Kết quả: s_app_mode đổi
+thành ENTER_SLEEP nhưng không ai đọc/dùng giá trị đó — sx_sleep_manager_enter_sleep()
+(hàm blocking, ĐÃ VIẾT ĐẦY ĐỦ, đúng implementation, nằm ở sx_sleep_manager.c dòng 282)
+KHÔNG BAO GIỜ ĐƯỢC GỌI. Board không bao giờ thực sự vào STOP mode; chương trình đứng
+yên ở trạng thái lơ lửng vô hạn.
+
+Đã thêm 2 nhánh else-if còn thiếu vào cuối app_process():
+
+    if (s_app_mode == APP_MODE_FULL_POWER) {
+        app_cycle_process(delta_ms);
+    } else if (s_app_mode == APP_MODE_ENTER_SLEEP) {
+        log_info(TAG, "Entering sleep for %lu ms", (unsigned long)APP_CYCLE_PERIOD_MS);
+        sx_sleep_manager_enter_sleep(&s_sleep_mgr, APP_CYCLE_PERIOD_MS / 1000);
+        /* Execution resumes here after the RTC wakeup timer fires. */
+        s_app_mode    = APP_MODE_WAKEUP;
+        s_cycle_state = APP_CYCLE_WAKING;
+        log_info(TAG, "Woke up - running wake sequence");
+    } else if (s_app_mode == APP_MODE_WAKEUP) {
+        sx_sleep_manager_wake_process(&s_sleep_mgr, delta_ms);
+        app_cycle_process(delta_ms);
+    }
+
+Luồng đầy đủ sau khi vá (đã người dùng xác nhận đúng ý — xem "BỐI CẢNH: SLEEP" bên
+dưới): SENDING (publish xong) → set ENTER_SLEEP → app_process() gọi
+sx_sleep_manager_enter_sleep() (blocking: chạy hết 6 sleep_steps [gps_power_off,
+modem_power_off, sps30_power_off, pump_off, gas_sensor_qa_mode, accel_suspend] RỒI MỚI
+cho MCU vào STOP mode thật qua tier-1 sx_sleep_enter_stop(), dùng RTC wakeup timer =
+APP_CYCLE_PERIOD_MS/1000 giây) → khi RTC bắn, MCU dậy, hàm return → APP_MODE_WAKEUP →
+mỗi tick gọi sx_sleep_manager_wake_process() chạy 6 wake_steps [gps_on, gps_wait_fix,
+modem_power_on, modem_wait_ready, gas_sensor_active_mode, accel_resume] → khi
+sx_sleep_manager_is_wake_done() true, APP_CYCLE_WAKING tự reset về FULL_POWER/ON_PUMP,
+lặp lại từ đầu.
+
+--- Sửa 3 (dọn comment sai lệch, không đổi logic) ---
+File: SynaptiX_FDK/app/app_config.h, dòng định nghĩa APP_CYCLE_PERIOD_MS
+Comment cũ ghi nhầm APP_CYCLE_PERIOD_MS là "thời gian giữa 2 lần SENDING" (tức chu kỳ
+TỔNG). Người dùng đã xác nhận trực tiếp: SLEEP_TIME_MS/APP_CYCLE_PERIOD_MS là THỜI
+LƯỢNG NGỦ THẬT SỰ (sleep duration), KHÔNG PHẢI chu kỳ tổng — chu kỳ tổng dài hơn giá
+trị này (cộng thêm APP_PUMP_ON_MS + APP_SENSING_MS + thời gian publish). Đã sửa lại
+comment cho khớp. Người dùng cũng nói muốn giá trị này config được lúc runtime sau
+này (giống hướng flash-config đã làm cho network_config) — CHƯA LÀM, xem "VIỆC CẦN
+LÀM" bên dưới.
+
+VIỆC ĐẦU TIÊN: `git status`/`git diff` xem 3 sửa trên còn ở trạng thái uncommitted hay
+đã được người dùng tự áp dụng/commit chưa. Nếu remote (`git log origin/main`) đã có
+commit mới hơn 7bfa5dd, đọc lại toàn bộ app.c/app_config.h bằng `view` để xem người
+dùng đã tự sửa theo cách nào — CÓ THỂ KHÁC với bản vá trên, không giả định giống hệt.
 
 ============================================================
-BỐI CẢNH: KIẾN TRÚC 3-TẦNG SLEEP (đã hoàn thiện phần lớn, người dùng tự thiết kế phần
-                                    lớn kiến trúc này, Claude chỉ hỗ trợ + sửa lỗi)
+BỐI CẢNH: KIẾN TRÚC SLEEP 3-TẦNG (đã hoàn thiện, đã verify đọc code thật phiên này)
 ============================================================
-Người dùng chủ động đề xuất kiến trúc 3 tầng để sx_sleep có thể TÁI SỬ DỤNG ĐƯỢC cho
-các mạch/dự án khác trong tương lai (không hard-code riêng cho board WS_v1 này). Claude
-đồng tình đây là hướng tốt hơn đề xuất ban đầu của mình. Đã hoàn thiện:
-
   Tier 1 — components/peripherals/sleep/sx_sleep.c/.h
-    Chỉ biết về STOP mode + RTC wakeup timer của STM32H5. ZERO kiến thức về UART/I2C/
-    SPI/USB nào cả. Dùng cơ chế HOOK (pre_stop_hook/post_wake_hook, kiểu con trỏ hàm
-    sx_sleep_hook_t) để board tự cắm logic riêng vào — đây là thiết kế linh hoạt hơn
-    cách Claude phiên trước từng đề xuất (mảng UART cố định), người dùng/Claude Code tự
-    chuyển sang cách này. sx_sleep_init() nhận (ops, pDriver, pre_stop_hook,
-    post_wake_hook, hook_ctx).
+    Chỉ biết STOP mode + RTC wakeup timer STM32H5. Dùng hook (pre_stop_hook/
+    post_wake_hook) để board cắm logic riêng vào (UART abort/resume, USB IRQ).
 
   Tier 2 — services/sleep_service/sx_sleep_service.c/.h
-    Generic step-sequencing ENGINE. Biết có 1 mảng wake_steps[] và 1 mảng sleep_steps[]
-    cần chạy tuần tự, nhưng KHÔNG biết từng step làm gì cụ thể (không GPS, không modem,
-    không SPS30 — không gì cả). Mỗi step là 1 cặp {start(ctx), is_done(ctx), ctx, name}
-    (struct sx_sleep_step_t). Đây LÀ NƠI TÁI SỬ DỤNG ĐƯỢC cho dự án khác.
-    (Lưu ý: thư mục dịch chuyển từ services/sleepmanager/ sang services/sleep_service/,
-    tên struct/hàm đổi từ sx_sleep_manager_* sang sx_sleep_service_* — ĐÃ ĐỔI XONG bởi
-    người dùng/Claude Code, không phải việc cần làm nữa.)
+    Generic step-sequencing engine. Không biết GPS/modem/SPS30 là gì, chỉ chạy tuần
+    tự 1 mảng sx_sleep_step_t[] cho wake và 1 mảng cho sleep.
 
   Tier 3 — app/user/sx_sleep_manager/sx_sleep_manager.c/.h
-    Đây là nơi DUY NHẤT trong toàn bộ sleep stack biết cụ thể "GPS wake step" hay "modem
-    power-down step" là gì. Build mảng sx_sleep_step_t[] rồi giao cho tier 2.
-    HIỆN TẠI (đã xác nhận đọc code thật): sx_sleep_manager_t chỉ sequencing GPS + modem
-    (4 wake_steps: gps_on, gps_wait_fix, modem_power_on, modem_wait_ready; 2 sleep_steps:
-    gps_power_off, modem_power_off). CHƯA tích hợp SPS30/SHT3x/ZE12A/ADS1115/pump vào
-    step nào cả — đây chính là VIỆC TIẾP THEO cần làm, xem mục "VIỆC CẦN LÀM" bên dưới.
-    Struct sx_sleep_manager_t đã có sẵn field pump_io (sx_gpio_t) và sht3x (SHT3X_T*)
-    NHƯNG HOÀN TOÀN CHƯA ĐƯỢC DÙNG trong .c — có vẻ người dùng/Claude Code đã chuẩn bị
-    chỗ trống cho việc này nhưng chưa điền logic. TỰ ĐỌC LẠI FILE THẬT để xác nhận.
+    Biết cụ thể GPS/modem/SPS30/pump/ZE12A/accel là gì. Build 6 wake_steps + 6
+    sleep_steps (đã liệt kê ở trên), API chính:
+      sx_sleep_manager_init(mgr, sleep, modem, gps, sps30_app, pump_gpio, accel_app)
+      sx_sleep_manager_enter_sleep(mgr, sleep_sec)   // BLOCKING
+      sx_sleep_manager_wake_process(mgr, delta_ms)   // gọi mỗi tick khi đang wake
+      sx_sleep_manager_is_wake_done(mgr)
+      sx_sleep_manager_reset_wake(mgr)
 
-    QUAN TRỌNG: sx_sleep_manager_init() CHƯA ĐƯỢC GỌI Ở ĐÂU CẢ trong sx_board.c hay
-    app.c (đã grep xác nhận lúc viết handoff này) — toàn bộ hạ tầng sleep 3-tầng đã
-    xây xong nhưng CHƯA được kích hoạt thật trong luồng chạy. sx_board.c hiện chỉ gọi
-    sx_sleep_init() (tier 1) với board_sleep_pre_stop_hook/board_sleep_post_wake_hook
-    (2 hàm này CHỈ abort UART_LTE + UART_GPS, KHÔNG có UART_DUST/UART_EXTEND/I2C1/SPI1
-    — đã xác nhận đọc code thật).
+sx_board.c's board_sleep_pre_stop_hook()/post_wake_hook() (tier-1 hooks) ĐÃ abort cả
+4 UART (LTE/GPS/DUST/EXTEND) trước STOP mode và có 4 hàm board_*_uart_resume_it() gọi
+on-demand từ đúng wake_steps tương ứng — đã verify đọc code thật, KHÔNG cần sửa gì.
 
-============================================================
-BỐI CẢNH: HÀNH VI SLEEP CỦA TỪNG SENSOR (đã tra cứu kỹ, đã người dùng xác nhận đúng)
-============================================================
-- SPS30: CÓ mạch cắt điện vật lý riêng (EN_PW_DUST, opto TLP181 + MOSFET N-channel
-  AO4828, active-HIGH — đã xác nhận qua ảnh schematic người dùng gửi, không phải đoán).
-  Trước khi sleep: sps30_stop_measurement() -> sps30_sleep() (SHDLC cmd 0x10) -> cắt
-  EN_PW_DUST xuống LOW. Đã viết đầy đủ trong sps30_app.c (xem bên dưới).
-
-- Pump: CÓ mạch cắt điện vật lý riêng (EN_PW_PUMP, cùng cơ chế opto+MOSFET). Chỉ cần
-  gọi pump_off() (sx_pump.c — LƯU Ý tên file đã đổi từ pump.c/.h sang sx_pump.c/.h bởi
-  người dùng, xem "TRẠNG THÁI GIT" ở next_prompt.md CŨ để biết nhưng đã lỗi thời, tự
-  grep lại tên file thật) trước khi sleep. CHƯA được gọi ở đâu trong sleep flow.
-
-- SHT3x: KHÔNG có mạch cắt điện riêng (dùng chung I2C1). Nhưng driver dùng
-  sht3x_measure_single_shot() (không phải periodic mode) — theo tài liệu Sensirion/
-  RIOT-OS driver (đã web-search xác nhận), single-shot mode khiến sensor TỰ ĐỘNG về
-  trạng thái idle/low-power giữa các lần đo, KHÔNG CẦN gọi SHT3X_CMD_BREAK hay bất kỳ
-  lệnh sleep nào trước khi vào STOP mode. Người dùng đã tự chỉ ra và Claude xác nhận
-  đúng — đây là điểm quan trọng, ĐỪNG thêm sht3x_sleep()/CMD_BREAK vào step nào, không
-  cần thiết. (I2C1 tự mất clock trong STOP mode bất kể trạng thái SHT3x, không có gì để
-  "sleep" thêm ở tầng ứng dụng.)
-
-- ADS1115: tương tự SHT3x — single-shot mode (ADS1115_readSingleEnded() gửi config rồi
-  tự polling bit OS), không có "chế độ đo liên tục" đang chạy cần dừng. Không cần step
-  sleep riêng.
-
-- ZE12A: CÓ 2 chế độ vận hành, chuyển qua lệnh UART (Documents/
-  ze12a-electrochemical-module-manual-v1_0.md, table 5/6/7) — Active Upload mode (mặc
-  định, tự phát khung liên tục — đây là mode gas_sensor_poll() hiện tại giả định) và
-  Question & Answer mode (chỉ trả lời khi được hỏi). ĐÃ THÊM 2 hàm vào ze12a.c/.h:
-  gas_sensor_switch_to_qa_mode() (table 5) và gas_sensor_switch_to_active_mode() (table
-  6, MỚI THÊM bởi Claude phiên này vì thiếu). Ý định đã xác nhận với người dùng: trước
-  sleep gọi switch_to_qa_mode(), sau khi wake gọi switch_to_active_mode() để
-  gas_sensor_poll() hoạt động lại bình thường. CHƯA được gọi ở đâu trong sleep flow —
-  cần thêm vào sx_sleep_manager's step arrays.
-  LƯU Ý: cảm biến điện hóa bên trong ZE12A vẫn tiêu thụ điện bình thường dù ở QA mode —
-  QA mode chỉ giảm tải UART/xử lý, KHÔNG PHẢI tiết kiệm điện thật của bản thân cảm biến
-  (không có cơ chế nào làm được điều đó, đã tra datasheet xác nhận không có lệnh
-  sleep/standby thật).
+sps30_app_start_cycle() (app/user/sps30_app/sps30_app.c) tự re-arm UART_DUST + bật lại
+EN_PW_DUST mỗi khi được gọi — không cần wake_step riêng cho SPS30, vì ON_PUMP→SENSING
+(gọi start_cycle()) chạy ngay sau APP_CYCLE_WAKING xong.
 
 ============================================================
-BỐI CẢNH: HAI FILE MỚI VỪA VIẾT XONG TRONG PHIÊN NÀY
+BỐI CẢNH: NETWORK CONFIG (đã đúng, không cần sửa)
 ============================================================
-
---- SynaptiX_FDK/app/user/sx_temp_humi/sx_temp_humi.c/.h ---
-State machine non-blocking 2 trạng thái: IDLE (đếm tới SX_TEMP_HUMI_SAMPLE_PERIOD_MS=
-5000ms) -> MEASURING (gửi sht3x_measure_single_shot(HIGHREP_STRETCH), đợi
-SX_TEMP_HUMI_MEASURE_WAIT_MS=20ms) -> đọc sht3x_read_measurement() -> quay lại IDLE.
-KHÔNG có hàm sleep (lý do: xem mục "HÀNH VI SLEEP" ở trên). API:
-  sx_temp_humi_init(sx_temp_humi_t*, SHT3X_T*)
-  sx_temp_humi_poll(sx_temp_humi_t*, uint32_t delta_ms)
-  sx_temp_humi_is_ready() / get_temperature() / get_humidity()
-CHƯA được instantiate/gọi ở sx_board.c hay app.c — cần 1 biến sx_temp_humi_t toàn cục
-(hoặc trong Board_t/AppState nào đó) + gọi init() 1 lần + poll() mỗi tick.
-
---- SynaptiX_FDK/app/user/sps30_app/sps30_app.c/.h ---
-State machine non-blocking 8 trạng thái, port từ WS_v0's sps30_app.c NHƯNG:
-  - ĐÃ BỎ heuristic mc_pm10p0==mc_pm2p5 (quyết định đã chốt từ nhiều phiên trước, xác
-    nhận lại qua đọc datasheet: không phải cơ chế lỗi chính thức, chỉ là suy đoán sai
-    của code cũ — không port).
-  - THÊM 2 state POWER_ON/SLEEP bao quanh state machine gốc, vì board WS_v1 CÓ mạch
-    EN_PW_DUST mà board tham khảo WS_v0 KHÔNG có.
-Trình tự: IDLE -> POWER_ON (bật EN_PW_DUST, đợi SPS30_APP_POWER_ON_SETTLE_MS=1000ms,
-GIÁ TRỊ NÀY KHÔNG CÓ TRONG DATASHEET, chỉ là ước lượng bảo thủ theo giá trị WS_v0 từng
-dùng — CẦN NGƯỜI DÙNG XÁC NHẬN/TEST TRÊN PHẦN CỨNG THẬT) -> WAKE_UP
-(sps30_wake_up_sequence()) -> START_MEASUREMENT -> WAIT_MEASUREMENT (5000ms, cũng là
-giá trị kinh nghiệm từ WS_v0, datasheet nói "typical" 8s cho số đọc ổn định) ->
-READ_MEASUREMENT -> STOP_MEASUREMENT -> DONE.
-API:
-  sps30_app_init(sps30_app_t*, sx_gpio_t *power_gpio)  // power_gpio lấy từ
-                                                         // sx_board_get_sps30_power_gpio()
-  sps30_app_start_cycle(sps30_app_t*)   // bắt đầu 1 chu kỳ đo, no-op nếu đang chạy dở
-  sps30_app_poll(sps30_app_t*, uint32_t delta_ms)
-  sps30_app_is_cycle_done() / has_measurement() / get_measurement()
-  sps30_app_reset()  // dọn lại IDLE sau khi đã xử lý xong DONE
-  sps30_app_sleep_step_start(void *ctx) / sps30_app_sleep_step_is_done(void *ctx)
-      // ĐÚNG CHỮ KÝ sx_sleep_step_t — gọi trực tiếp được từ sx_sleep_manager's
-      // sleep_steps[] array, không cần viết wrapper riêng. Cảnh báo: chỉ nên gọi khi
-      // cycle đang IDLE/DONE, không phải giữa chừng đo (sẽ log_warn nhưng vẫn cắt điện,
-      // caller/sx_sleep_manager chịu trách nhiệm không gọi sai lúc).
-CHƯA được instantiate/gọi ở sx_board.c hay app.c.
-
-Trong lúc viết, Claude phát hiện + tự sửa 1 lỗi thiết kế nhỏ trong chính code mình viết
-(không phải lỗi người dùng): cách "phát hiện lần đầu vào state POWER_ON" ban đầu dùng
-so sánh `state_elapsed_ms == delta_ms` (mong manh, có thể sai nếu delta_ms thay đổi) —
-đã sửa bằng cách chuyển hành động bật GPIO sang sps30_app_start_cycle() (chỉ chạy đúng
-1 lần/chu kỳ theo bản chất lời gọi, không cần đoán từ thời gian). Đã sửa xong, không
-cần làm gì thêm ở điểm này.
+app/user/network_config/network_config.c: network_config_init() đọc
+sx_storage_size(NETWORK_CONFIG_FLASH_PATH) — nếu >0 thì sx_storage_read() dùng luôn,
+nếu không (file không tồn tại hoặc rỗng) thì build_defaults() từ app_config.h's
+MQTT_HOST/MQTT_PORT/... rồi network_config_save() ghi lại ngay. Không có kiểm tra
+version phức tạp — đúng như người dùng yêu cầu ("đọc file nếu có, dùng default nếu
+không có/rỗng"). sx_storage_init() được gọi trong sx_board.c's spi_storage_init()
+TRƯỚC app_init() — thứ tự đúng. LƯU Ý NHỎ (không phải bug chặn, chỉ là thiếu
+observability): return code của sx_storage_init() bị bỏ qua ở sx_board.c dòng 112,
+nếu SPI/flash lỗi lúc boot sẽ tự động rơi về default một cách im lặng, không log lỗi
+rõ ràng cho biết phần cứng flash có vấn đề.
 
 ============================================================
-BỐI CẢNH: CÁC MODULE DRIVER (KHÔNG PHẢI APP LAYER) — ĐÃ HOÀN THIỆN, CHỈ CẦN BIẾT VỊ TRÍ
+BỐI CẢNH: VIỆC CHƯA LÀM — RUNTIME CONFIG QUA CLI/RPC (đối chiếu WS_v0)
 ============================================================
-- components/modules/sps30/ — Sensirion SHDLC driver đầy đủ (sps30_uart.c/.h,
-  sensirion_uart_hal.c/.h, sensirion_streaming_shdlc.c/.h...). Kiến trúc nhiều-file cố
-  ý (người dùng chọn giữ nguyên kiến trúc gốc Sensirion, đã chốt nhiều phiên trước,
-  ĐỪNG đề xuất gộp lại thành 1 file).
-- components/modules/sht3x/ — driver I2C hoàn thiện, dùng sx_i2c_t abstraction.
-- components/modules/ze12a/ — driver UART qua mux TMUX4052 hoàn thiện, giờ có thêm
-  QA-mode/active-mode switch (xem trên).
-- components/modules/ads1115/ — ĐÃ REFACTOR HOÀN TOÀN từ bản gốc WS_v0 (bỏ biến toàn
-  cục + FreeRTOS mutex, chuyển sang struct ADS1115_T + sx_i2c_t, non-RTOS). R16 (shunt
-  cho kênh dòng AIN1/adc_current qua INA180A1 gain=20V/V) đã được người dùng xác nhận
-  = 0.1 ohm, data rate = 250SPS (xem commit "ADS init in board with R16=0.1ohm & data
-  rate: 250" trên git log) — KHÔNG CÒN LÀ OPEN QUESTION NỮA, nhưng comment cũ trong
-  sx_board.h có thể vẫn còn ghi "OPEN QUESTION, UNRESOLVED" — TỰ ĐỌC LẠI, có thể cần dọn
-  comment đó cho khớp giá trị đã chốt (không phải việc bắt buộc, chỉ là dọn dẹp).
-- components/modules/pump/sx_pump.c/.h — (đổi tên từ pump.c/.h) đơn giản, chỉ bật/tắt
-  GPIO qua EN_PW_PUMP.
+Đã đọc kỹ WS_v0 (SynaptiX/apps/app_settings.c/.h + cli_shell_command.c + app.c's
+RPCHandle()) theo yêu cầu người dùng "trước đây repo mẫu set config bằng cách nào".
+Kết luận:
 
-============================================================
-BỐI CẢNH: CÁC PHẦN KHÁC ĐÃ CÓ SẴN, CHƯA GHÉP VÀO LUỒNG CHẠY THẬT
-============================================================
-- app/user/thingsboard/thingsboard_client.c/.h — ĐÃ VIẾT HOÀN CHỈNH (thin layer đúng
-  phạm vi: init/poll/is_connected/publish_telemetry/publish_channel/publish_attribute/
-  stop, dùng sx_user_mqtt.h bên dưới). CHƯA có nơi nào gọi nó — app.c hiện chỉ có khung
-  app_init()/app_process() gần rỗng (11 dòng). Cờ USE_THINGSBOARD trong app_config.h
-  hiện đang tắt (=0) — người dùng sẽ tự bật khi cần, KHÔNG PHẢI quyết định của Claude.
-- app_config.h có sẵn SLEEP_TIME_MS = 5*60*1000 (5 phút) — do người dùng tự thêm, dùng
-  cho chu kỳ sleep chính (khác SX_TIME_IN_SLEEP=60000 mặc định của tier-1, cái đó vẫn
-  còn trong sx_sleep.h nhưng SLEEP_TIME_MS mới là giá trị business logic cần dùng).
-- RS485 (UART3) — người dùng nói "cứ để lại chưa cần động đến bây giờ". Đã có cấu hình
-  baudrate 115200 trong sx_board.c nhưng CHƯA sx_uart_init(), CHƯA driver GPIO cho chân
-  DE (RS485_RDE_Pin), CHƯA có module Modbus nào dùng nó.
-- sensirion_shdlc.c/.h (bản buffer-based API của Sensirion, KHÔNG dùng — sps30_uart.c
-  chỉ dùng streaming API) — code chết, người dùng chưa xác nhận muốn xóa, ĐỪNG tự ý xóa.
+WS_v0 dùng 1 struct global APP_Settings_t app_setting (timeSendDataSeconds,
+timeSendHeartbeatSeconds, dutyCyclePercent, timeOnPumpSeconds, timeSensingSeconds) với
+pattern load y hệt network_config.c của WS_v1 hiện tại (đọc file /settings.json qua
+littlefs, kiểm magic_number, nếu sai/thiếu thì dùng default từ app_config.h rồi save
+lại) — WS_v1 đã port đúng ý tưởng này cho network_config, CHƯA port cho timing config
+(APP_PUMP_ON_MS/APP_SENSING_MS/SLEEP_TIME_MS vẫn là #define compile-time cứng).
+
+WS_v0 có 2 KÊNH ghi runtime vào app_setting, cả hai cuối cùng đều gọi
+app_setting_save():
+  1. CLI shell qua UART console: lệnh `settings -c -data <n> -pump <n> -sensing <n>
+     -duty <n> -hearbeat <n>` (cli_shell_command.c's cli_settings()), có validate ràng
+     buộc lẫn nhau (vd: pump < timeSendData - timeSensing).
+  2. Thingsboard RPC qua MQTT: app.c's RPCHandle(), method "setParams", nhận JSON qua
+     topic RPC_REQUEST_API, parse từng field bằng cJSON, ghi vào app_setting, publish
+     lại RPC_RESPONSE_API.
+
+WS_v1 CHƯA có kênh nào trong 2 kênh này. app_config.h's comment (dòng ~11-16, không
+đổi bởi Claude) ghi rõ đây là "planned follow-up — NOT implemented yet — qua USB CDC/
+MSC (sx_cdc/sx_msc đã tồn tại sẵn trong project), người dùng nói chưa cần code ngay
+lúc trước — CẦN HỎI LẠI người dùng có muốn bắt đầu việc này trong phiên tới không, và
+nếu có thì qua kênh nào (CDC console kiểu WS_v0's CLI, MQTT RPC giống Thingsboard
+style, hay USB MSC file-edit).
 
 ============================================================
-VIỆC CẦN LÀM TIẾP THEO — THEO THỨ TỰ ĐỀ XUẤT
+BỐI CẢNH: BOOTLOADER / OTA — CHỈ CÓ Ở WS_v0, WS_v1 CHƯA CÓ GÌ CẢ
 ============================================================
+Người dùng hỏi WS_v0 có OTA/bootloader không — đã điều tra kỹ bằng cách đọc LINKER
+SCRIPT THẬT (theo đúng gợi ý của người dùng, không chỉ nhìn tên file .c), kết luận:
 
-1. (Nếu chưa làm) Commit các file đang staged/modified liệt kê ở mục "TRẠNG THÁI GIT".
+WS_v0 có 2 CƠ CHẾ RIÊNG BIỆT:
 
-2. Mở rộng sx_sleep_manager (tier 3) để tích hợp SPS30/pump/ZE12A vào sleep/wake flow:
-   - Thêm sleep_step gọi sps30_app_sleep_step_start()/is_done() (đã có sẵn, chữ ký
-     khớp thẳng sx_sleep_step_t, chỉ cần thêm vào mảng s_sleep_steps[] và tăng count).
-   - Thêm sleep_step gọi pump_off() (sx_pump.c) — cần viết wrapper start()/is_done()
-     nhỏ vì pump_off() không có sẵn chữ ký khớp sx_sleep_step_t.
-   - Thêm sleep_step gọi gas_sensor_switch_to_qa_mode() — tương tự, cần wrapper.
-   - Thêm wake_step gọi gas_sensor_switch_to_active_mode() — tương tự.
-   - KHÔNG cần thêm step cho SHT3x/ADS1115 (xem lý do ở mục "HÀNH VI SLEEP").
-   - Cập nhật sx_sleep_manager_init() để nhận thêm con trỏ sps30_app_t*, sx_gpio_t*
-     (pump), và không cần gì thêm cho ZE12A (module đó tự quản lý state nội bộ qua
-     static, giống UART instance).
-   - Struct sx_sleep_manager_t đã có sẵn field pump_io/sht3x chưa dùng — QUYẾT ĐỊNH:
-     có dùng field sht3x đã khai báo sẵn không (nếu không cần sleep step cho SHT3x theo
-     kết luận trên, field này có thể thừa — hỏi người dùng có muốn xóa field sht3x khỏi
-     struct hay giữ lại phòng khi cần sau này).
+1. Bootloader UART-frame tự viết, CÓ HOẠT ĐỘNG THẬT (implementation đầy đủ, không
+   phải stub):
+   - Thư mục bootloader/ là 1 PROJECT BUILD RIÊNG, có Makefile riêng
+     (bootloader/Makefile) và linker script riêng (bootloader/STM32H523xx_FLASH.ld:
+     FLASH ORIGIN=0x8000000, LENGTH=32K).
+   - Giao thức: frame nhị phân qua UART1 (start=0x7C, end=0xF7, checksum byte-sum đơn
+     giản), lệnh READ_FW/ERASE_FW/WRITE_FW/CONNECT_FW/JUMP_FW
+     (bootloader/bootloader.h/.c).
+   - Kích hoạt: đọc chân PA12 lúc boot — HIGH thì vào chế độ nhận firmware qua UART1,
+     LOW thì goto_application() (set MSP+VTOR rồi nhảy tới APPLICATION_ADDRESS =
+     0x08008000, set trong bootloader.h).
+   - Có IWDG watchdog refresh trong cả 2 nhánh (chờ nút và lúc update).
 
-3. Mở rộng board_sleep_pre_stop_hook()/post_wake_hook() (sx_board.c) để abort/resume
-   thêm UART_DUST (SPS30) và UART_EXTEND (ZE12A) — hiện chỉ có UART_LTE/UART_GPS. Cân
-   nhắc: SPS30 UART có cần abort không nếu EN_PW_DUST đã cắt điện hoàn toàn trước đó
-   (qua sps30_app_sleep_step_start(), chạy TRƯỚC khi vào STOP mode)? Có thể không cần
-   abort UART riêng nếu nguồn đã cắt — nhưng ZE12A vẫn có điện (không cắt được), UART
-   của nó có thể cần abort để tránh nhận byte rác trong lúc STOP mode. Đây là quyết
-   định thiết kế cần hỏi người dùng, không tự ý chọn.
+2. USB DFU class chuẩn qua TinyUSB/AL94 Composite — CÓ ĐĂNG KÝ THẬT lên USB bus
+   (usb_device.c dòng 139 gọi USBD_DFU_RegisterMedia(&hUsbDevice, &USBD_DFU_fops)),
+   NHƯNG toàn bộ 6 hàm callback thật (MEM_If_Init/DeInit/Erase/Write/Read/GetStatus,
+   trong Middlewares/.../usbd_dfu_if.c) LÀ STUB RỖNG CHƯA ĐƯỢC LẬP TRÌNH — chỉ trả về
+   USBD_OK, không đọc/ghi/xóa gì thật (MEM_If_Read còn trả về (uint8_t*)USBD_OK = con
+   trỏ NULL, sẽ crash nếu bị gọi thật). Đây là template CubeMX generate sẵn, enumerate
+   được trên máy tính (dfu-util sẽ thấy thiết bị) nhưng KHÔNG update được firmware
+   thật nào.
 
-4. Gọi sx_sleep_manager_init() thật ở đâu đó (sx_board.c cuối sx_board_init(), hoặc
-   app.c's app_init()) — hiện CHƯA được gọi ở đâu cả. Cần các con trỏ: &board.modem,
-   &board.gps, sx_board_get_sps30_power_gpio() (đã có), và biến sps30_app_t/sx_temp_humi_t
-   toàn cục nào đó cần được khai báo trước.
+BUG THẬT PHÁT HIỆN TRONG WS_v0 (không phải WS_v1, chỉ để tham khảo, KHÔNG port bug
+này sang): linker script app chính (./STM32H523xx_FLASH.ld, dùng bởi root Makefile)
+có FLASH ORIGIN=0x8000000 — GIỐNG HỆT bootloader, KHÔNG dịch lên 0x08008000 dù
+bootloader.h's APPLICATION_ADDRESS=0x08008000 giả định app nằm ở đó. Đồng thời
+Core/Src/system_stm32h5xx.c's VECT_TAB_OFFSET=0x00 (không đổi cho app). Nếu build+flash
+đúng nguyên trạng 2 project này, app sẽ ĐÈ LÊN bootloader thay vì nằm nối tiếp sau nó
+— cấu hình build của app root trong repo mẫu CHƯA HOÀN THIỆN đúng ý đồ dual-image, dù
+cấu trúc project (2 Makefile + 2 .ld riêng) đúng hướng dual-image thật.
 
-5. Instantiate sx_temp_humi_t và sps30_app_t ở đâu đó (gợi ý: Board_t trong sx_board.h,
-   hoặc biến static trong app.c — CHƯA QUYẾT ĐỊNH, hỏi người dùng theo đúng tinh thần
-   "app layer không nên biết chi tiết driver, nhưng cũng không nên mọi thứ đều nhét
-   vào Board_t" đã thảo luận trước đây khi thiết kế thư mục app/user/*).
+WS_v1 HIỆN TẠI: KHÔNG có thư mục bootloader/ nào (chưa port gì từ WS_v0's
+bootloader/). thư viện lib/tinyusb/src/class/dfu/ tồn tại NHƯNG chỉ là mã nguồn
+TinyUSB gốc chưa được kích hoạt — đã grep xác nhận KHÔNG có CFG_TUD_DFU nào được định
+nghĩa, không có descriptor nào gắn class DFU trong code của project (ngoài thư viện).
+OTA/bootloader là MẢNG HOÀN TOÀN CHƯA LÀM ở WS_v1, chưa được người dùng yêu cầu bắt
+đầu — chỉ mới dừng ở bước điều tra/so sánh với repo mẫu.
 
-6. Viết state machine chính trong app.c (hiện gần như rỗng): IDLE -> ON_PUMP ->
-   SENSING -> SENDING -> SLEEPING -> WAKING -> IDLE, gọi vào sps30_app/sx_temp_humi/
-   gas_sensor/power_monitor (CHƯA VIẾT, xem mục 7) + thingsboard_client + sx_sleep_manager.
-   Tham khảo state machine gốc WS_v0/SynaptiX/apps/app.c (đã đọc kỹ ở phiên trước, có
-   sensor_task + reading_sensor_task 2 task riêng — nhưng WS_v1 non-RTOS nên cần viết
-   lại thành 1 hàm poll tuần tự, không phải 2 task song song).
-
-7. CHƯA VIẾT: gas_sensor_app (poll ZE12A, tương đương lớp app cho driver ze12a.c —
-   hiện gas_sensor_poll() được gọi trực tiếp từ đâu đó hay chưa gọi ở đâu cả, cần grep
-   xác nhận) và power_monitor_app (đọc ADS1115: adc_vol/adc_current). Tên thư mục đã
-   thống nhất với người dùng ở phiên trước: gas_sensor_app/, power_monitor_app/ (khác
-   với sx_temp_humi/sps30_app đã dùng tên người dùng tự đặt, không theo đúng convention
-   "_app" suffix — đây là bình thường, người dùng có quyền đặt tên khác lúc code thật).
+============================================================
+VIỆC CẦN LÀM TIẾP THEO — CẦN HỎI NGƯỜI DÙNG THỨ TỰ ƯU TIÊN
+============================================================
+1. (Nếu chưa) Áp lại/commit 3 sửa ở mục "TRẠNG THÁI GIT" phía trên.
+2. Runtime config cho timing (APP_PUMP_ON_MS/APP_SENSING_MS/SLEEP_TIME_MS) — người
+   dùng đã xác nhận muốn SLEEP_TIME_MS config được lúc runtime. Cần hỏi: qua kênh nào
+   (CDC console, MQTT RPC, USB MSC file), và có gộp chung với network_config_t hay
+   tạo 1 config struct riêng (giống WS_v0's tách biệt network vs app_setting)?
+3. Bootloader/OTA — CHƯA được yêu cầu bắt đầu, chỉ mới điều tra xong. Hỏi người dùng
+   có muốn bắt đầu port bootloader UART-frame kiểu WS_v0 sang WS_v1 không (khuyến
+   nghị hướng này hơn DFU vì nó THẬT SỰ hoạt động trong repo mẫu, DFU chỉ là stub
+   rỗng chưa ai lập trình) — và nếu làm, cần thiết kế lại linker/vector-offset đúng
+   (KHÔNG lặp lại bug ORIGIN=0x8000000 trùng lặp đã phát hiện ở WS_v0).
+4. (Từ handoff cũ, có thể đã lỗi thời — TỰ VERIFY LẠI bằng code thật, đừng tin thẳng):
+   offline-queue khi mất mạng (SENDING hiện chỉ log_warn rồi drop nếu MQTT không kết
+   nối, không có fallback lưu file/littlefs để gửi lại sau — xem app.c dòng ~251-254),
+   và CDC/MSC input layer để sửa network_config lúc runtime (network_config có sẵn
+   setter/save nhưng chưa ai gọi chúng từ đâu ngoài code — verify lại bằng grep trước
+   khi báo cáo).
 
 ============================================================
 VIỆC ĐẦU TIÊN KHI TIẾP NHẬN — THEO ĐÚNG THỨ TỰ
 ============================================================
-1. git fetch origin + git log --oneline -15 + git status — xác nhận trạng thái thật,
-   so sánh với mục "TRẠNG THÁI GIT" ở trên, KHÔNG tin nếu khác.
-2. Đọc lại toàn bộ sx_sleep_manager.c/.h, sx_sleep_service.c/.h, sx_sleep.c/.h bằng
-   view — xác nhận đúng kiến trúc 3-tầng mô tả ở trên còn nguyên vẹn.
-3. Đọc sps30_app.c/.h và sx_temp_humi.c/.h (mới viết trong phiên này) bằng view —
-   xác nhận đúng nội dung mô tả, đừng tin tóm tắt trong handoff.
-4. Grep tìm gas_sensor_poll() và ADS1115_readSingleEnded() được gọi ở đâu hiện tại
-   (có thể chưa có ở đâu cả — cần xác nhận thay vì giả định).
-5. Hỏi người dùng xác nhận thứ tự ưu tiên trong mục "VIỆC CẦN LÀM TIẾP THEO" trước khi
-   code — đặc biệt câu hỏi ở bước 3 (có cần abort UART_DUST không nếu đã cắt điện) và
-   bước 5 (đặt sps30_app_t/sx_temp_humi_t instance ở đâu).
-HANDOFF_EOF
-
-Đã push code lên git, đồng thời bạn ko hiểu ý tưởng à. Đầu tiên nó sẽ chạy với các thông số được config trong app_config, sau đó (mở rộng sau này) sau khi truyển host, port,.... từ tầng application UI xuống thì nó nhận và lưu vào flash rồi dùng cái đấy về sau, có nghĩa hướng code sẽ là phải đọc file nếu có file đấy tồn tại thì đọc file rồi dùng các thông số đã lưu, nếu ko có file hoặc có file nhưng rỗng thì dùng default, đồng thời ở trong app tôi chưa thấy bạn poll gps và tiếp nữa vấn đề sleep bạn vẫn chưa giải quyết được theo ý của tôi, bạn phải hiểu là khi mạch sleep , master là stm32 sleep, thì các module đi kèm mới sleep theo ví dụ khi publish xong các thông tin (những thông tin gì thì bạn tự đọc repo mẫu để biết), sau khi pub xong nó sẽ rơi vào sleep (cả mạch luôn)
+1. git fetch origin + git log --oneline -15 + git status/git diff — xác nhận trạng
+   thái thật của app.c/app_config.h, so với mục "TRẠNG THÁI GIT" ở trên.
+2. Nếu 3 sửa (bug compile APP_CYCLE_IDLE, thiếu nhánh ENTER_SLEEP/WAKEUP, comment
+   APP_CYCLE_PERIOD_MS) chưa có trên remote lẫn chưa uncommitted trong container —
+   hỏi người dùng có muốn Claude áp lại không (nội dung chính xác đã ghi đầy đủ ở
+   trên, có thể copy thẳng).
+3. Hỏi người dùng ưu tiên nào trong "VIỆC CẦN LÀM TIẾP THEO" (mục 2/3/4) trước khi
+   code bất cứ gì mới.

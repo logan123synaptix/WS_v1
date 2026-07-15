@@ -12,6 +12,7 @@ extern "C" {
 #include "sht3x.h"
 #include "sx_gpio.h"
 #include "sps30_app.h"
+#include "accel_app.h"
 
 /* Tier 3 of the 3-tier sleep architecture (see sx_sleep_service.h for the
  * full tier breakdown). This is the ONLY place in the sleep stack that
@@ -40,6 +41,12 @@ typedef struct {
      * drives it low via pump_off() in its own sleep-step wrapper, since
      * pump_off()'s signature doesn't match sx_sleep_step_t directly. */
     sx_gpio_t      *pump_gpio;
+    /* BNO055 app-layer accel/movement reader — sleep_steps/wake_steps call
+     * its own accel_app_sleep_step_*()/accel_app_wake_step_*() pairs
+     * directly (already match sx_sleep_step_t's signature, see
+     * accel_app.h), this pointer is only kept so sx_sleep_manager_init()
+     * can pass it as those steps' ctx. */
+    accel_app_t    *accel_app;
     sx_sleep_service_t svc;
 
     /* Elapsed time for the currently-running GPS-fix-wait step; owned by
@@ -65,6 +72,10 @@ typedef struct {
  *      poll is_ready(), hard-reset and retry once after 90s with no reply
  *   5. ZE12A back to Active Upload mode (gas_sensor_switch_to_active_mode())
  *      — cheap fire-and-forget UART command, always reports done.
+ *   6. BNO055 resume — PWR_MODE=NORMAL then re-select NDOF operation mode
+ *      (accel_app_wake_step_start/is_done). Needed because leaving suspend
+ *      only restores power per the datasheet; the fusion operation mode
+ *      does not resume on its own (see accel_app.h).
  *
  * sleep_steps run, in order, before every sx_sleep_manager_enter_sleep():
  *   1. Power down GPS (zero out last fix so a stale fix isn't reused)
@@ -77,17 +88,23 @@ typedef struct {
  *   5. ZE12A to Question & Answer mode (gas_sensor_switch_to_qa_mode())
  *      — reduces UART/processing load; does NOT reduce the electrochemical
  *      cell's own power draw (no such command exists per the datasheet).
+ *   6. BNO055 to Suspend mode (accel_app_sleep_step_start/is_done) — a
+ *      real power-down per the datasheet's Suspend Mode section (all
+ *      sensors + the chip's internal MCU sleep), unlike ZE12A's QA mode.
  *
  * SHT3x and ADS1115 have no sleep_step here: both only ever run in
  * single-shot mode (no continuous conversion to stop), and I2C1 loses
  * clock in STOP mode regardless — see the sps30_app/sx_temp_humi handoff
- * notes for the datasheet/driver reasoning behind this. */
+ * notes for the datasheet/driver reasoning behind this. BNO055 is on the
+ * same I2C1 bus but, unlike SHT3x/ADS1115, has a real suspend state worth
+ * explicitly entering/leaving (see accel_app.h), hence its own step pair. */
 void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_sleep_t         *sleep,
                             modem_handle_t     *modem,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
-                            sx_gpio_t          *pump_gpio);
+                            sx_gpio_t          *pump_gpio,
+                            accel_app_t        *accel_app);
 
 /* Runs the sleep_steps then enters STOP mode via tier 2/1. Blocking, same
  * as the old sx_sleep_manager_enter() — returns only after waking. */

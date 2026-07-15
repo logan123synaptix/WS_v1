@@ -6,6 +6,7 @@
 #include "sx_temp_humi.h"
 #include "sx_sleep_manager.h"
 #include "gas_sensor_app.h"
+#include "accel_app.h"
 
 static const char *TAG = "APP";
 
@@ -16,6 +17,7 @@ static const char *TAG = "APP";
  * (tier 3 of the sleep architecture) should live. */
 static sps30_app_t       s_sps30_app;
 static sx_temp_humi_t    s_temp_humi;
+static accel_app_t       s_accel_app;
 static sx_sleep_manager_t s_sleep_mgr;
 /* No gas_sensor_app_t instance — gas_sensor_app.c has no state of its
  * own, see gas_sensor_app.h's doc-comment (all runtime state already
@@ -26,9 +28,10 @@ void app_init(void){
 
     sps30_app_init(&s_sps30_app, sx_board_get_sps30_power_gpio());
     sx_temp_humi_init(&s_temp_humi, &board.sht3x);
+    accel_app_init(&s_accel_app, &board.imu);
 
     sx_sleep_manager_init(&s_sleep_mgr, &board.sleep, &board.modem, &board.gps,
-                           &s_sps30_app, sx_board_get_pump_gpio());
+                           &s_sps30_app, sx_board_get_pump_gpio(), &s_accel_app);
 }
 void app_process(uint32_t delta_ms){
     /* Only the sensors that need per-tick driving from the app layer.
@@ -39,4 +42,11 @@ void app_process(uint32_t delta_ms){
      * accurate, the same reasoning as gps_process()/sim polling
      * elsewhere in this project running unconditionally every tick. */
     gas_sensor_app_poll(delta_ms);
+
+    /* Same reasoning as gas_sensor_app_poll() above — runs unconditionally
+     * every tick rather than being gated by the main app state machine
+     * (not yet written), so accel_app_t's low-pass filter keeps sampling
+     * at its fixed ACCEL_APP_SAMPLE_PERIOD_MS cadence regardless of what
+     * state that machine will eventually be in. */
+    accel_app_poll(&s_accel_app, delta_ms);
 }

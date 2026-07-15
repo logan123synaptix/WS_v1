@@ -192,12 +192,19 @@ void sx_board_init(void);
 void read_vol_pin(uint32_t time_stamp);
 void gps_it_handle(void);
 void sim_it_handle(void);
+void dust_it_handle(void);
+void extend_it_handle(void);
 void board_gps_uart_resume_it(void);
 void board_sim_uart_resume_it(void);
+void board_dust_uart_resume_it(void);
+void board_extend_uart_resume_it(void);
 
 void sx_board_uart_abort(void);
 void sx_board_uart_resume_it(void);
 void check_charge(void);
+
+sx_gpio_t *sx_board_get_sps30_power_gpio(void);
+sx_gpio_t *sx_board_get_pump_gpio(void);
 
 extern Board_t board;
 

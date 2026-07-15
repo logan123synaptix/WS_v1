@@ -2,6 +2,8 @@
 #include "app_config.h"
 #include "sx_board.h"
 #include "sx_delay.h"
+#include "sx_pump.h"
+#include "ze12a.h"
 #include "logger.h"
 
 static const char *TAG = "SX_SLEEP_MGR";
@@ -118,6 +120,27 @@ static uint8_t _modem_wait_ready_is_done(void *ctx)
     return 0;
 }
 
+/* Step 5: ZE12A back to Active Upload mode. Cheap one-shot UART command
+ * (no reply to wait for per the datasheet's table 6) — always reports
+ * done on the first poll, same fire-and-forget style as gps_on/
+ * modem_power_on above. */
+static void _gas_sensor_active_mode_start(void *ctx)
+{
+    (void)ctx;
+    /* Re-arm UART_EXTEND in case board_sleep_pre_stop_hook() aborted it
+     * — mirrors the LTE/GPS resume calls in the wake steps above; ZE12A
+     * has no "start_cycle" equivalent of its own, so this wake step is
+     * the first point that needs the UART live again. */
+    board_extend_uart_resume_it();
+    gas_sensor_switch_to_active_mode();
+}
+
+static uint8_t _gas_sensor_active_mode_is_done(void *ctx)
+{
+    (void)ctx;
+    return 1;
+}
+
 /* ===================== sleep steps ===================== */
 
 /* Step 1: power down GPS, clear last fix so a stale position isn't reused
@@ -151,6 +174,41 @@ static uint8_t _modem_power_off_is_done(void *ctx)
     return 1;
 }
 
+/* Step 3: SPS30 power-down — sps30_app.h's start()/is_done() pair already
+ * matches sx_sleep_step_t's signature exactly, wired in directly below
+ * with mgr->sps30_app as ctx. No wrapper needed for this one. */
+
+/* Step 4: pump off. pump_off()'s signature (sx_gpio_t*) doesn't match
+ * sx_sleep_step_t (void (*)(void*)), so this thin wrapper adapts it —
+ * same reasoning as the ZE12A wrapper above/below. */
+static void _pump_off_start(void *ctx)
+{
+    sx_sleep_manager_t *mgr = (sx_sleep_manager_t *)ctx;
+    pump_off(mgr->pump_gpio);
+}
+
+static uint8_t _pump_off_is_done(void *ctx)
+{
+    (void)ctx;
+    return 1;
+}
+
+/* Step 5: ZE12A to Question & Answer mode, before SPS30/pump so the UART
+ * command still has a quiet bus (SPS30's own UART is separate, no
+ * conflict either way — order here just mirrors the gps/modem powerdown
+ * pattern of "signal peripherals down last"). */
+static void _gas_sensor_qa_mode_start(void *ctx)
+{
+    (void)ctx;
+    gas_sensor_switch_to_qa_mode();
+}
+
+static uint8_t _gas_sensor_qa_mode_is_done(void *ctx)
+{
+    (void)ctx;
+    return 1;
+}
+
 /* ===================== step tables ===================== */
 
 /* NOTE on elapsed-time bookkeeping: sx_sleep_service's generic
@@ -159,16 +217,20 @@ static uint8_t _modem_power_off_is_done(void *ctx)
  * Instead, this module ticks mgr->gps_wait_elapsed_ms/sim_wait_elapsed_ms
  * itself, in sx_sleep_manager_wake_process() below, before delegating to
  * sx_sleep_service_wake_process(). */
-static sx_sleep_step_t s_wake_steps[4];
-static sx_sleep_step_t s_sleep_steps[2];
+static sx_sleep_step_t s_wake_steps[5];
+static sx_sleep_step_t s_sleep_steps[5];
 
 void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_sleep_t         *sleep,
                             modem_handle_t     *modem,
-                            sx_gps_t           *gps)
+                            sx_gps_t           *gps,
+                            sps30_app_t        *sps30_app,
+                            sx_gpio_t          *pump_gpio)
 {
-    mgr->modem = modem;
-    mgr->gps   = gps;
+    mgr->modem     = modem;
+    mgr->gps       = gps;
+    mgr->sps30_app = sps30_app;
+    mgr->pump_gpio = pump_gpio;
     mgr->gps_wait_elapsed_ms = 0;
     mgr->sim_wait_elapsed_ms = 0;
     mgr->sim_start_sent      = 0;
@@ -177,9 +239,13 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
     s_wake_steps[1] = (sx_sleep_step_t){ .start = _gps_wait_start,        .is_done = _gps_wait_is_done,        .ctx = mgr, .name = "gps_wait_fix" };
     s_wake_steps[2] = (sx_sleep_step_t){ .start = _modem_power_on_start,  .is_done = _modem_power_on_is_done,  .ctx = mgr, .name = "modem_power_on" };
     s_wake_steps[3] = (sx_sleep_step_t){ .start = _modem_wait_ready_start,.is_done = _modem_wait_ready_is_done,.ctx = mgr, .name = "modem_wait_ready" };
+    s_wake_steps[4] = (sx_sleep_step_t){ .start = _gas_sensor_active_mode_start, .is_done = _gas_sensor_active_mode_is_done, .ctx = mgr, .name = "gas_sensor_active_mode" };
 
     s_sleep_steps[0] = (sx_sleep_step_t){ .start = _gps_power_off_start,   .is_done = _gps_power_off_is_done,   .ctx = mgr, .name = "gps_power_off" };
     s_sleep_steps[1] = (sx_sleep_step_t){ .start = _modem_power_off_start, .is_done = _modem_power_off_is_done, .ctx = mgr, .name = "modem_power_off" };
+    s_sleep_steps[2] = (sx_sleep_step_t){ .start = sps30_app_sleep_step_start, .is_done = sps30_app_sleep_step_is_done, .ctx = mgr->sps30_app, .name = "sps30_power_off" };
+    s_sleep_steps[3] = (sx_sleep_step_t){ .start = _pump_off_start,        .is_done = _pump_off_is_done,        .ctx = mgr, .name = "pump_off" };
+    s_sleep_steps[4] = (sx_sleep_step_t){ .start = _gas_sensor_qa_mode_start, .is_done = _gas_sensor_qa_mode_is_done, .ctx = mgr, .name = "gas_sensor_qa_mode" };
 
     /* step_timeout_ms = 0 (no shared timeout) passed to sx_sleep_service:
      * every step here manages its own completion criteria (gps_on/
@@ -190,8 +256,8 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
      * the modem step run needlessly long; keeping it per-step avoids
      * that mismatch entirely. */
     sx_sleep_service_init(&mgr->svc, sleep,
-                           s_wake_steps, 4,
-                           s_sleep_steps, 2,
+                           s_wake_steps, 5,
+                           s_sleep_steps, 5,
                            0);
 
     log_info(TAG, "init OK");

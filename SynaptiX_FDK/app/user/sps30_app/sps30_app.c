@@ -1,6 +1,7 @@
 #include "sps30_app.h"
 #include "sps30_uart.h"
 #include "sensirion_common.h"
+#include "sx_board.h"
 #include "logger.h"
 
 static const char *TAG = "SPS30_APP";
@@ -47,6 +48,14 @@ void sps30_app_start_cycle(sps30_app_t *app)
                  app->state);
         return;
     }
+
+    /* Re-arm UART_DUST in case a prior sleep cycle aborted it (see
+     * board_sleep_pre_stop_hook() in sx_board.c) — mirrors
+     * _gps_on_start()'s board_gps_uart_resume_it() call in
+     * sx_sleep_manager.c, done here since start_cycle() is this module's
+     * one entry point for "about to use the UART again", whether or not
+     * the prior gap was actually a sleep. */
+    board_dust_uart_resume_it();
 
     sx_gpio_write(app->power_gpio, SX_GPIO_HIGH);
     log_info(TAG, "EN_PW_DUST high, waiting %lu ms to settle",

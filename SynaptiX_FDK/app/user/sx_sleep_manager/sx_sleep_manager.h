@@ -10,6 +10,8 @@ extern "C" {
 #include "modem_ops.h"
 #include "gps.h"
 #include "sht3x.h"
+#include "sx_gpio.h"
+#include "sps30_app.h"
 
 /* Tier 3 of the 3-tier sleep architecture (see sx_sleep_service.h for the
  * full tier breakdown). This is the ONLY place in the sleep stack that
@@ -28,6 +30,17 @@ typedef struct {
     sx_gps_t       *gps;
     sx_gpio_t      pump_io;
     SHT3X_T        *sht3x;
+    /* SPS30 app-layer state machine — sleep_steps calls its own
+     * sps30_app_sleep_step_start()/is_done() pair directly (already
+     * matches sx_sleep_step_t's signature, see sps30_app.h), this
+     * pointer is only kept so sx_sleep_manager_init() can pass it as
+     * that step's ctx. */
+    sps30_app_t    *sps30_app;
+    /* Pump power-enable GPIO (EN_PW_PUMP), already sx_gpio_init()'d by
+     * the caller (mirrors power_gpio in sps30_app_t) — this module only
+     * drives it low via pump_off() in its own sleep-step wrapper, since
+     * pump_off()'s signature doesn't match sx_sleep_step_t directly. */
+    sx_gpio_t      *pump_gpio;
     sx_sleep_service_t svc;
 
     /* Elapsed time for the currently-running GPS-fix-wait step; owned by
@@ -51,15 +64,31 @@ typedef struct {
  *   3. Resume LTE UART + power on modem
  *   4. Wait for modem ready — send start() once power_on_start() settles,
  *      poll is_ready(), hard-reset and retry once after 90s with no reply
+ *   5. ZE12A back to Active Upload mode (gas_sensor_switch_to_active_mode())
+ *      — cheap fire-and-forget UART command, always reports done.
  *
  * sleep_steps run, in order, before every sx_sleep_manager_enter_sleep():
  *   1. Power down GPS (zero out last fix so a stale fix isn't reused)
  *   2. Power down modem
- */
+ *   3. SPS30 power-down (sps30_app_sleep_step_start/is_done — SHDLC
+ *      sleep() then EN_PW_DUST low). Caller must only trigger sleep once
+ *      any in-progress SPS30 measurement cycle is DONE/IDLE (see
+ *      sps30_app.h) — not enforced here, this module just runs the step.
+ *   4. Pump off (EN_PW_PUMP low, via pump_off())
+ *   5. ZE12A to Question & Answer mode (gas_sensor_switch_to_qa_mode())
+ *      — reduces UART/processing load; does NOT reduce the electrochemical
+ *      cell's own power draw (no such command exists per the datasheet).
+ *
+ * SHT3x and ADS1115 have no sleep_step here: both only ever run in
+ * single-shot mode (no continuous conversion to stop), and I2C1 loses
+ * clock in STOP mode regardless — see the sps30_app/sx_temp_humi handoff
+ * notes for the datasheet/driver reasoning behind this. */
 void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_sleep_t         *sleep,
                             modem_handle_t     *modem,
-                            sx_gps_t           *gps);
+                            sx_gps_t           *gps,
+                            sps30_app_t        *sps30_app,
+                            sx_gpio_t          *pump_gpio);
 
 /* Runs the sleep_steps then enters STOP mode via tier 2/1. Blocking, same
  * as the old sx_sleep_manager_enter() — returns only after waking. */

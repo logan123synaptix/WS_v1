@@ -280,22 +280,42 @@ static void sx_gps_uart_abort(){
     HAL_UART_Abort(hal_uart[UART_GPS]);
 }
 
+static void sx_dust_uart_abort(void) {
+    HAL_UART_Abort(hal_uart[UART_DUST]);
+}
+
+static void sx_extend_uart_abort(void) {
+    HAL_UART_Abort(hal_uart[UART_EXTEND]);
+}
+
 /* Called by sx_sleep.c's _enter_stop() right before actually entering STOP
- * mode. This board's own knowledge of what needs quiescing: LTE (USART1)
- * and GPS (USART2) UARTs, plus USB. Moved here (out of
- * components/peripherals/sleep) since that module must not know these
- * peripherals exist — a board without USB/these UARTs would just supply a
- * different hook, without touching sx_sleep.c at all. */
+ * mode. This board's own knowledge of what needs quiescing: LTE (USART1),
+ * GPS (USART2), SPS30/dust (UART4), ZE12A/extend (UART5), plus USB. Moved
+ * here (out of components/peripherals/sleep) since that module must not
+ * know these peripherals exist — a board without USB/these UARTs would
+ * just supply a different hook, without touching sx_sleep.c at all.
+ *
+ * UART_DUST/UART_EXTEND are aborted here the same way as LTE/GPS —
+ * per user decision, treat all four UARTs identically regardless of
+ * SPS30 already having its own EN_PW_DUST power-cut (sx_sleep_manager's
+ * sps30_power_off sleep_step runs earlier, before this hook) — aborting
+ * here is still cheap and avoids a stale pending byte/IRQ either way. */
 static void board_sleep_pre_stop_hook(void *hook_ctx)
 {
     (void)hook_ctx;
 
     sx_lte_uart_abort();
     sx_gps_uart_abort();
+    sx_dust_uart_abort();
+    sx_extend_uart_abort();
     __HAL_UART_CLEAR_IT(&huart1, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
     __HAL_UART_CLEAR_IT(&huart2, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
+    __HAL_UART_CLEAR_IT(&huart4, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
+    __HAL_UART_CLEAR_IT(&huart5, UART_CLEAR_OREF | UART_CLEAR_NEF | UART_CLEAR_PEF);
     HAL_NVIC_ClearPendingIRQ(USART1_IRQn);
     HAL_NVIC_ClearPendingIRQ(USART2_IRQn);
+    HAL_NVIC_ClearPendingIRQ(UART4_IRQn);
+    HAL_NVIC_ClearPendingIRQ(UART5_IRQn);
 
     HAL_NVIC_DisableIRQ(USB_DRD_FS_IRQn);
     HAL_NVIC_ClearPendingIRQ(USB_DRD_FS_IRQn);
@@ -321,6 +341,14 @@ void sim_it_handle(){
     HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
 }
 
+void dust_it_handle(){
+    HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+}
+
+void extend_it_handle(){
+    HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+}
+
 void board_gps_uart_resume_it(void){
     sx_gps_uart_abort();
     gps_it_handle();
@@ -329,6 +357,35 @@ void board_gps_uart_resume_it(void){
 void board_sim_uart_resume_it(void){
     sx_lte_uart_abort();
     sim_it_handle();
+}
+
+/* Same "re-arm on demand" style as GPS/LTE above, not called
+ * unconditionally from post_wake_hook() — sx_sleep_manager's wake_steps
+ * call these when SPS30/ZE12A are actually needed again (mirrors GPS/
+ * modem's board_gps_uart_resume_it()/board_sim_uart_resume_it() pattern). */
+void board_dust_uart_resume_it(void){
+    sx_dust_uart_abort();
+    dust_it_handle();
+}
+
+void board_extend_uart_resume_it(void){
+    sx_extend_uart_abort();
+    extend_it_handle();
+}
+
+/* Getters for board-owned GPIOs that app-layer modules (sps30_app.h,
+ * sx_sleep_manager.h) need a pointer to but must not own/init themselves
+ * — s_en_pw_dust/s_en_pw_pump stay static to this file, already
+ * sx_gpio_init()'d/pump_init()'d in sx_board_init() above; these just
+ * expose the address. */
+sx_gpio_t *sx_board_get_sps30_power_gpio(void)
+{
+    return &s_en_pw_dust;
+}
+
+sx_gpio_t *sx_board_get_pump_gpio(void)
+{
+    return &s_en_pw_pump;
 }
 void sx_board_uart_resume_it(void) {
     // sx_sim76_uart_abort();

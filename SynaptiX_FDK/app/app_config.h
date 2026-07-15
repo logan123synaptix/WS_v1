@@ -19,6 +19,17 @@
 #define APP_SENSING_MS                  60000U         /* how long SENSING runs (SPS30 measurement cycle + other sensors settle) */
 
 /*USE MQTT*/
+/* NOTE (2026-07-15, per the user): Thingsboard is NOT actually in use yet
+ * — no real Thingsboard broker exists for this project to point at. Even
+ * with USE_THINGSBOARD==1 here, app.c currently initializes plain MQTT
+ * (sx_user_mqtt_nontls_init()/tls_init(), via network_config.h — a new
+ * flash-backed, runtime-editable connection-settings module) rather than
+ * thingsboard_client_init(). This flag is left at 1 rather than flipped to
+ * 0 since thingsboard_client.c's behavior is gated on it and the user may
+ * want to swap back once a real broker is available — flip app.c's
+ * app_init() back to thingsboard_client_init() at that point, not this
+ * flag alone (this flag only controls which app_config.h macros/topics
+ * exist, not which client app.c actually calls). */
 #define USE_THINGSBOARD 1
 
 #define MQTT_ID                         "1234"

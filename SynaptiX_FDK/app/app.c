@@ -11,6 +11,8 @@
 #include "power_monitor_app.h"
 #include "sx_pump.h"
 #include "thingsboard_client.h"
+#include "sx_user_mqtt.h"
+#include "network_config.h"
 #include "ze12a.h"
 #include "cJSON.h"
 #include <string.h>
@@ -210,14 +212,19 @@ static void app_cycle_process(uint32_t delta_ms)
 
     case APP_CYCLE_SENDING: {
         const char *payload = build_telemetry_payload();
-        if (thingsboard_client_is_connected()) {
-            thingsboard_client_publish_telemetry(payload);
+        /* Plain MQTT publish, not thingsboard_client_publish_telemetry()
+         * — see app_init()'s comment on why Thingsboard isn't used yet.
+         * Topic is a fixed default for now (no Thingsboard-style topic
+         * convention applies without a real Thingsboard broker); revisit
+         * once network_config/CDC-MSC input can also carry a topic. */
+        if (sx_user_mqtt_is_connected()) {
+            sx_user_mqtt_publish("weatherstation/telemetry", payload);
             log_info(TAG, "Telemetry published: %s", payload);
         } else {
             /* No offline-queue fallback yet (unlike WS_v0's SPIF/littlefs
              * save-to-file-on-failure) — see the module doc-comment above,
              * point 4. */
-            log_warn(TAG, "Thingsboard not connected, telemetry dropped: %s", payload);
+            log_warn(TAG, "MQTT not connected, telemetry dropped: %s", payload);
         }
         sps30_app_reset(&s_sps30_app);
         s_cycle_state = APP_CYCLE_IDLE;
@@ -241,26 +248,49 @@ void app_init(void){
     sx_sleep_manager_init(&s_sleep_mgr, &board.sleep, &board.modem, &board.gps,
                            &s_sps30_app, sx_board_get_pump_gpio(), &s_accel_app);
 
-#if USE_THINGSBOARD
-    sx_user_mqtt_cfg_t tb_cfg = {0};
-    /* TODO(needs user decision): MQTT_HOST is only #defined in
-     * app_config.h's #else branch (USE_THINGSBOARD==0) — with
-     * USE_THINGSBOARD==1 (current setting) there is no broker host
-     * macro defined at all. This is a pre-existing gap in
-     * app_config.h, not something introduced here — flagging rather
-     * than silently adding a #define, since the right broker
-     * host/URL for Thingsboard use isn't this module's decision to
-     * make. Hardcoded placeholder below so this at least compiles;
-     * MUST be replaced with the real Thingsboard broker host before
-     * this is trusted to actually connect. */
-    tb_cfg.broker    = "REPLACE_ME_THINGSBOARD_BROKER_HOST";
-    tb_cfg.port      = MQTT_PORT;
-    tb_cfg.client_id = MQTT_ID;
-    /* username/password left NULL — Thingsboard access-token auth via
-     * MQTT username is not yet wired up here; follow-up work, not part
-     * of this cycle's scope. */
-    thingsboard_client_init(&tb_cfg);
-#endif
+    /* Per the user (2026-07-15): Thingsboard is NOT used for now — no real
+     * Thingsboard broker exists yet, and app_config.h's USE_THINGSBOARD==1
+     * branch doesn't even define a broker host macro (see the TODO this
+     * replaces, and network_config.h's doc-comment for the full reasoning).
+     * Using the plain-MQTT broker from network_config instead (flash-backed,
+     * runtime-editable — host/port/client_id/user/pass/APN can all change
+     * without reflashing, though the actual CDC/MSC input mechanism to edit
+     * them live is deliberately not wired up yet, per the user — "note lại
+     * chưa cần code ngay"). Swap back to thingsboard_client_init() once a
+     * real Thingsboard broker is available; thingsboard_client.c itself is
+     * untouched and ready for that. */
+    network_config_init();
+    const network_config_t *net_cfg = network_config_get();
+
+    /* Re-apply APN from network_config, overriding the APN/USERNAME_APN/
+     * PASSWORD_APN macros sx_board_init() already set via
+     * a7677s_set_full_apn() before app_init() runs (see Core/Src/main.c:
+     * sx_board_init() then app_init()) — this way, once network_config's
+     * flash-stored APN differs from the compile-time default (e.g. after
+     * a future CDC/MSC edit + reboot), the modem picks up the stored value
+     * rather than the hardcoded one. No-op on a fresh flash (network_config
+     * falls back to the same APN/USERNAME_APN/PASSWORD_APN defaults
+     * sx_board_init() already used). */
+    a7677s_set_full_apn(&board.a7677s, net_cfg->apn,
+                         net_cfg->apn_username[0] ? net_cfg->apn_username : NULL,
+                         net_cfg->apn_password[0] ? net_cfg->apn_password : NULL);
+
+    sx_user_mqtt_cfg_t mqtt_cfg = {0};
+    mqtt_cfg.broker     = net_cfg->host;
+    mqtt_cfg.port       = net_cfg->port;
+    mqtt_cfg.client_id  = net_cfg->client_id;
+    mqtt_cfg.username   = net_cfg->username[0] ? net_cfg->username : NULL;
+    mqtt_cfg.password   = net_cfg->password[0] ? net_cfg->password : NULL;
+    mqtt_cfg.keepalive  = net_cfg->keepalive_s;
+    mqtt_cfg.use_ssl    = net_cfg->use_tls ? 1 : 0;
+    if (net_cfg->use_tls) {
+        sx_user_mqtt_tls_init(&mqtt_cfg,
+                               net_cfg->ca_cert_len ? (char *)net_cfg->ca_cert : NULL,
+                               net_cfg->client_cert_len ? (char *)net_cfg->client_cert : NULL,
+                               net_cfg->client_key_len ? (char *)net_cfg->client_key : NULL);
+    } else {
+        sx_user_mqtt_nontls_init(&mqtt_cfg);
+    }
 
     s_cycle_state   = APP_CYCLE_IDLE;
     s_cycle_tick_ms = 0;
@@ -280,9 +310,9 @@ void app_process(uint32_t delta_ms){
     sx_temp_humi_poll(&s_temp_humi, delta_ms);
     power_monitor_app_poll(&s_power_monitor, delta_ms);
 
-#if USE_THINGSBOARD
-    thingsboard_client_poll(delta_ms);
-#endif
+    /* Plain MQTT poll, not thingsboard_client_poll() — see app_init()'s
+     * comment on why Thingsboard isn't used yet. */
+    sx_user_mqtt_poll(delta_ms);
 
     /* Main cycle only runs in APP_MODE_FULL_POWER — the other app_mode_t
      * states (ENTER_SLEEP/SLEEP/WAKE_PUBLISH) are not yet driven from
@@ -294,9 +324,11 @@ void app_process(uint32_t delta_ms){
 
 void app_request_sleep(void)
 {
-    /* Not yet acted upon — see the doc-comment above (point 6). Logged so
-     * the request is at least visible/traceable while this is being
-     * built out; sx_board.c's tud_umount_cb() already calls this. */
+    /* Not yet acted upon — see the doc-comment above (point 6) and
+     * network_config.h's note on app_request_sleep() currently being
+     * unused (its former tud_umount_cb() caller was removed per the
+     * user). Logged so the request is at least visible/traceable while
+     * this is being built out. */
     log_info(TAG, "app_request_sleep() called - sleep-on-request not implemented yet");
 }
 

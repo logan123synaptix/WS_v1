@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
 #include "a7677s.h"
 #include "sx_gpio.h"
 #include "logger.h"
@@ -25,7 +26,9 @@ static const char *TAG = "A7677S";
 #define CMD_CGSN            9    /* AT+CGSN - read IMEI, once during start() */
 #define CMD_CGPADDR         10   /* AT+CGPADDR=1 - read PDP IP, once during start() */
 #define CMD_CSQ             11   /* AT+CSQ - read signal quality, polled periodically once ready */
-#define CMD_DYNAMIC         12   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
+#define CMD_CTZU            12   /* AT+CTZU=1 - enable automatic network time (NITZ), once during start() */
+#define CMD_CCLK            13   /* AT+CCLK? - read back network time, once during start() */
+#define CMD_DYNAMIC         14   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
 
 static modem_command_t command[] = {
     [CMD_AT]            = {.cmd = "AT\r\n",              .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
@@ -40,6 +43,8 @@ static modem_command_t command[] = {
     [CMD_CGSN]          = {.cmd = "AT+CGSN\r\n",         .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CGPADDR]       = {.cmd = "AT+CGPADDR=1\r\n",    .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CSQ]           = {.cmd = "AT+CSQ\r\n",          .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CTZU]          = {.cmd = "AT+CTZU=1\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CCLK]          = {.cmd = "AT+CCLK?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_DYNAMIC]       = {0},
 };
 
@@ -152,6 +157,8 @@ static void cb_cops_query     (modem_t *modem, const char *response, modem_respo
 static void cb_cgdcont_query  (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_get_imei       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_get_ip         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_ctzu           (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cclk           (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_csq            (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cfun_0         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cfun_1         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
@@ -781,6 +788,104 @@ static void cb_get_ip(modem_t *modem, const char *response, modem_response_st_t 
         log_warn(TAG, "AT+CGPADDR failed (non-fatal)");
     }
 
+    dce->init_state = A7677S_INIT_CTZU;
+    send_init_cmd(dce, CMD_CTZU, cb_ctzu, A7677S_TIMEOUT_AT);
+}
+
+/* AT+CTZU=1 — enables automatic network time (NITZ). Non-fatal on failure:
+ * proceeds to A7677S_INIT_CCLK regardless, since AT+CCLK? itself still
+ * works (just won't have been triggered by NITZ) and get_time_synced()
+ * already reports false by default if nothing valid comes back — no need
+ * to special-case a CTZU failure separately from a CCLK failure. */
+static void cb_ctzu(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    (void)response;
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_warn(TAG, "AT+CTZU=1 failed (non-fatal, network time may still be unavailable)");
+    }
+
+    dce->init_state = A7677S_INIT_CCLK;
+    send_init_cmd(dce, CMD_CCLK, cb_cclk, A7677S_TIMEOUT_AT);
+}
+
+/* AT+CCLK? — reads back the module's RTC, which NITZ (if the network
+ * supports it and AT+CTZU=1 above succeeded) keeps synced to network time.
+ * Response format per a76xx_at_cmd.md 3.2.10:
+ *   +CCLK: "yy/MM/dd,hh:mm:ss+zz"
+ * <zz> is the network's timezone offset from GMT, in quarter-hours, and can
+ * be negative (e.g. "+32" = +8:00, "-04" = -1:00). Per the datasheet note,
+ * the factory-default timezone is invalid (before any NITZ update) — this
+ * is the only reliable signal available here that no real network time has
+ * been received yet, so a raw two-digit "00" WITHOUT a sign is treated as
+ * "not yet synced" (a genuinely valid GMT+0 always prints with a sign, "+00"
+ * per the datasheet's own note 2) rather than as a real UTC+0 reading.
+ * Non-fatal on failure/unparseable response: leaves dce->time_synced as
+ * whatever it already was (0 on the very first attempt), does not block
+ * is_ready(), matching the imei/ip precedent immediately above this
+ * function in the init sequence. */
+static void cb_cclk(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        const char *p = strstr(response, "+CCLK:");
+        if (p) {
+            p += strlen("+CCLK:");
+            while (*p == ' ' || *p == '\"') p++; /* skip space and opening quote */
+
+            int yy, mon, day, hh, mm, ss, tz_quarters;
+            char sign;
+            /* "yy/MM/dd,hh:mm:ss<sign>zz" — sign is captured separately
+             * since sscanf's %d does not reliably distinguish "+00" from
+             * "00" the way this parsing needs to (see the "not yet synced"
+             * note above). */
+            int n = sscanf(p, "%d/%d/%d,%d:%d:%d%c%d",
+                            &yy, &mon, &day, &hh, &mm, &ss, &sign, &tz_quarters);
+            if (n == 8 && (sign == '+' || sign == '-')) {
+                struct tm t = {0};
+                t.tm_year = yy + 2000 - 1900; /* AT+CCLK's yy is 2-digit, 3GPP TS 27.007 assumes 20xx */
+                t.tm_mon  = mon - 1;
+                t.tm_mday = day;
+                t.tm_hour = hh;
+                t.tm_min  = mm;
+                t.tm_sec  = ss;
+                t.tm_isdst = 0;
+
+                /* Convert to plain UTC per modem_ops.h's get_synced_time()
+                 * contract — subtract the network's offset (quarter-hours
+                 * -> minutes) via mktime()/normalization through time_t,
+                 * rather than hand-rolling day/month rollover math. */
+                int offset_minutes = tz_quarters * 15;
+                if (sign == '-') offset_minutes = -offset_minutes;
+                t.tm_min -= offset_minutes;
+
+                time_t as_time = mktime(&t); /* normalizes any out-of-range tm_min/tm_hour/tm_mday */
+                if (as_time != (time_t)-1) {
+                    struct tm *utc = gmtime(&as_time);
+                    if (utc) {
+                        dce->synced_time = *utc;
+                        dce->time_synced = 1;
+                        log_info(TAG, "Network time synced (UTC): %04d-%02d-%02d %02d:%02d:%02d",
+                                 dce->synced_time.tm_year + 1900, dce->synced_time.tm_mon + 1,
+                                 dce->synced_time.tm_mday, dce->synced_time.tm_hour,
+                                 dce->synced_time.tm_min, dce->synced_time.tm_sec);
+                    }
+                } else {
+                    log_warn(TAG, "CCLK time failed to normalize (non-fatal)");
+                }
+            } else {
+                log_warn(TAG, "CCLK response not yet network-synced or unparseable: %s", response);
+            }
+        } else {
+            log_warn(TAG, "CCLK response missing +CCLK: prefix: %s", response);
+        }
+    } else {
+        log_warn(TAG, "AT+CCLK? failed (non-fatal)");
+    }
+
     dce->init_state = A7677S_INIT_READY;
     log_info(TAG, "Network attach complete, ready for MQTT");
 }
@@ -964,6 +1069,27 @@ static const char *a7677s_get_ip(void *ctx)
 {
     a7677s_t *dce = (a7677s_t *)ctx;
     return dce->ip;
+}
+
+/* modem_ops_t.get_time_synced/get_synced_time — see modem_ops.h's
+ * doc-comment on both. Same "cached, never blocks" contract as
+ * get_imei/get_rssi/get_ip above; dce->time_synced/synced_time are set
+ * once by cb_cclk() during the A7677S_INIT_CCLK init step (or left at
+ * their zero-init default if the network never provides NITZ). */
+static bool a7677s_get_time_synced(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    return dce->time_synced != 0;
+}
+
+static bool a7677s_get_synced_time(void *ctx, struct tm *out)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    if (!dce->time_synced || !out) {
+        return false;
+    }
+    *out = dce->synced_time;
+    return true;
 }
 
 static int a7677s_enter_low_power(void *ctx, power_mode_cb_t cb)
@@ -2246,6 +2372,9 @@ const modem_ops_t a7677s_ops = {
     .get_imei         = a7677s_get_imei,
     .get_rssi         = a7677s_get_rssi,
     .get_ip           = a7677s_get_ip,
+
+    .get_time_synced  = a7677s_get_time_synced,
+    .get_synced_time  = a7677s_get_synced_time,
 
     .poll             = a7677s_poll,
 };

@@ -170,6 +170,8 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/app/user/accelerometer_app \
 			  -I$(SYNAPTIX_DIR)/app/user/network_config \
 			  -I$(SYNAPTIX_DIR)/app/user/power_monitor_app \
+			  -I$(SYNAPTIX_DIR)/app/user/shell_app \
+			  -I$(SYNAPTIX_DIR)/app/user/time_synch \
 			  -I$(SYNAPTIX_DIR)/board \
 			  -I$(SYNAPTIX_DIR)/services/logger \
 			  -I$(SYNAPTIX_DIR)/services/littlefs \

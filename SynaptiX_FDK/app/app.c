@@ -14,6 +14,7 @@
 #include "sx_user_mqtt.h"
 #include "network_config.h"
 #include "shell_app.h"
+#include "time_sync.h"
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
@@ -31,6 +32,7 @@ static sx_temp_humi_t      s_temp_humi;
 static accel_app_t         s_accel_app;
 static power_monitor_app_t s_power_monitor;
 static sx_sleep_manager_t  s_sleep_mgr;
+static time_sync_t         s_time_sync;
 /* No gas_sensor_app_t instance — gas_sensor_app.c has no state of its
  * own, see gas_sensor_app.h's doc-comment (all runtime state already
  * lives in ze12a.c's statics + the gas_sensor[] array it owns). */
@@ -346,6 +348,11 @@ void app_init(void){
     } else {
         sx_user_mqtt_nontls_init(&mqtt_cfg);
     }
+
+    /* Time sync (RTC set once from modem NITZ, falling back to GPS UTC) —
+     * see app/user/time_sync/. board.modem/board.gps/board.rtc are all
+     * already initialized by sx_board_init() before app_init() runs. */
+    time_sync_init(&s_time_sync, &board.modem, &board.gps, &board.rtc);
 
     /* USB CDC CLI ("settings -i/-c", "restart", "help") — see
      * app/user/shell_app/. Placed after network_config_init() so the

@@ -6,6 +6,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 
 /*
  * modem_ops.h
@@ -232,6 +233,37 @@ typedef struct {
      * if the driver detects the PDN was re-attached. Pointer remains valid
      * for the lifetime of ctx. */
     const char *(*get_ip)(void *ctx);
+
+    /* --- Network time (NITZ), read once during the AT init sequence ---
+     *
+     * The driver enables automatic network time (AT+CTZU=1) and reads it
+     * back (AT+CCLK?) as a one-shot, non-fatal step of start()'s attach
+     * sequence — same "cached, never blocks" contract as get_imei/get_ip
+     * above, and same "does not block is_ready() on failure" treatment as
+     * those two (NITZ support is optional and network-dependent per
+     * 3GPP TS 24.008 — a driver/network that doesn't provide it must not
+     * prevent the modem from otherwise becoming ready).
+     *
+     * A driver with no network-time capability at all (e.g. a future modem
+     * that doesn't support NITZ) may implement get_time_synced() as an
+     * always-false no-op; callers must treat that the same as "network
+     * hasn't provided a valid time yet" and fall back to another time
+     * source (e.g. GPS UTC) rather than assuming a bug. */
+
+    /* True once a valid network time has actually been read back (i.e.
+     * AT+CCLK? returned a real network-provided time, not the module's
+     * factory-invalid default — see the concrete driver for how it tells
+     * the two apart). False before that point, or if the network never
+     * provides NITZ. Never blocks. */
+    bool (*get_time_synced)(void *ctx);
+
+    /* Fills *out with the last network-provided time (UTC — any network
+     * timezone offset is already applied by the driver before this is
+     * returned, so callers never need to interpret <zz> themselves).
+     * Returns true and fills *out only if get_time_synced() is also true;
+     * returns false (leaving *out untouched) otherwise. tm_isdst is always
+     * set to 0 (NITZ carries a fixed UTC offset, not a DST flag). */
+    bool (*get_synced_time)(void *ctx, struct tm *out);
 
     /* --- Mandatory poll, called continuously from the main loop --- */
 

@@ -167,6 +167,8 @@ typedef enum {
      * attach itself succeeded. --- */
     A7677S_INIT_GET_IMEI,       /* AT+CGSN - cached into dce->imei, see get_imei() */
     A7677S_INIT_GET_IP,         /* AT+CGPADDR=1 - cached into dce->ip, see get_ip() */
+    A7677S_INIT_CTZU,           /* AT+CTZU=1 - enable automatic network time (NITZ) */
+    A7677S_INIT_CCLK,           /* AT+CCLK? - read back network time, see get_synced_time()/get_synced_time() */
     A7677S_INIT_READY,          /* attach sequence complete, is_ready() true */
 } a7677s_init_state_t;
 
@@ -334,6 +336,20 @@ struct a7677s
     int     rssi;
     uint32_t rssi_poll_elapsed;
     uint8_t  rssi_cmd_pending;
+
+    /* --- Network time (NITZ), exposed via modem_ops_t.get_time_synced()/
+     * get_synced_time() (see modem_ops.h). Read once during start()
+     * (A7677S_INIT_CTZU enables it, A7677S_INIT_CCLK reads it back) — same
+     * one-shot, non-fatal-on-failure treatment as imei/ip above. AT+CCLK's
+     * <zz> quarter-hour-offset-from-GMT is subtracted out in cb_cclk() so
+     * synced_time is always plain UTC, per get_synced_time()'s contract in
+     * modem_ops.h — callers never need to re-apply any offset themselves.
+     * time_synced stays false if the network never provides NITZ (e.g. the
+     * module returns its factory-invalid default clock, or the AT command
+     * itself fails) — this is expected/non-fatal, not a driver bug; see
+     * modem_ops.h's get_time_synced() doc-comment. */
+    struct tm synced_time;
+    uint8_t   time_synced;
     /* Consecutive AT+CSQ failures (no/failed response, i.e. res !=
      * MODEM_RESPONSE_SUCCESS — NOT a successful response that merely failed
      * to parse, which is a format-mismatch bug, not a sign the modem is

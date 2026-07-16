@@ -20,7 +20,6 @@
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
-#include "file_io.h"
 #include <string.h>
 
 static const char *TAG = "APP";
@@ -130,13 +129,16 @@ static char s_telemetry_json[TELEMETRY_JSON_BUFF_SIZE];
 /* ===================== offline telemetry queue =====================
  * Ported from WS_v0's push_last_telemetry_json()/its SENDING-state save-
  * on-fail block (SynaptiX/apps/app.c), re-targeted at this project's
- * sx_storage_* API (network_config.c's flash layer) for single-file ops
- * (write/read/delete/size) and direct lfs_dir_open()/_read()/_close()
- * calls (see offline_queue_save()'s note on why — file_io.h's opendir()/
- * readdir()/closedir() macros looked like the natural fit but don't
- * actually match lfs_dir_open()'s real signature) for the directory scan,
- * since sx_storage.h has no directory-iteration API of its own
- * (sx_storage_list_dir() only logs, returns nothing usable).
+ * sx_storage_* API (network_config.c's flash layer) for both single-file
+ * ops (write/read/delete/size) and directory scanning via
+ * sx_storage_list() (sx_ex_storage.h) — added specifically for this
+ * feature, since sx_storage_list_dir() only logs and returns nothing
+ * usable to a caller. An earlier version of this code called
+ * lfs_dir_open()/_read()/_close() directly instead, working around a
+ * file_io.h opendir() macro bug (missing the required lfs_dir_t*
+ * argument); that macro has since been fixed at the source and
+ * sx_storage_list() now wraps it, so this file no longer touches
+ * littlefs or file_io.h directly.
  *
  * One file per failed publish, named by a monotonic tick counter rather
  * than wall-clock time (WS_v0 used uptime_seconds for the same "make each
@@ -165,38 +167,23 @@ static void offline_queue_save(const char *payload)
      * never silently fails to save the newest reading instead of the
      * oldest one.
      *
-     * NOTE: file_io.h's opendir()/readdir()/closedir() macros were tried
-     * here first but don't actually work — opendir(path) expands to
-     * lfs_dir_open(CONFIG_LITTLEFS, path), which is missing the lfs_dir_t*
-     * argument lfs_dir_open()'s real signature
-     * (lfs_dir_open(lfs_t*, lfs_dir_t*, const char*)) requires, and the
-     * macro doesn't return anything DIR*-shaped to hold across
-     * readdir()/closedir() calls anyway. That's a pre-existing bug in
-     * file_io.h, not touched here (unclear what else may already assume
-     * its current shape) — calling lfs_dir_open/_read/_close directly
-     * instead, same as WS_v0's push_last_telemetry_json() does. */
-    lfs_dir_t dir;
-    if (lfs_dir_open(CONFIG_LITTLEFS, &dir, OFFLINE_QUEUE_DIR) == LFS_ERR_OK) {
-        struct lfs_info info;
-        uint32_t count = 0;
-        char oldest_name[LFS_NAME_MAX + 1] = {0};
-        while (lfs_dir_read(CONFIG_LITTLEFS, &dir, &info) > 0) {
-            if (info.type != LFS_TYPE_REG) {
-                continue;
-            }
-            count++;
-            if (oldest_name[0] == '\0') {
-                strncpy(oldest_name, info.name, sizeof(oldest_name) - 1);
-            }
-        }
-        lfs_dir_close(CONFIG_LITTLEFS, &dir);
+     * "Oldest" here just means "first regular file the directory scan
+     * returns" (see sx_storage_list()'s doc-comment on littlefs not
+     * guaranteeing order, but returning creation order in practice). */
+    sx_storage_entry_t entries[OFFLINE_QUEUE_MAX_FILES + 1];
+    int32_t count = sx_storage_list(OFFLINE_QUEUE_DIR, entries, OFFLINE_QUEUE_MAX_FILES + 1);
 
-        if (count >= OFFLINE_QUEUE_MAX_FILES && oldest_name[0] != '\0') {
-            char path[96];
-            snprintf(path, sizeof(path), "%s/%s", OFFLINE_QUEUE_DIR, oldest_name);
-            log_warn(TAG, "Offline queue full (%lu files), dropping oldest: %s",
-                     (unsigned long)count, path);
-            sx_storage_delete(path);
+    if (count > 0 && (uint32_t)count >= OFFLINE_QUEUE_MAX_FILES) {
+        /* First non-dir entry found is treated as oldest. */
+        for (int32_t i = 0; i < count; i++) {
+            if (!entries[i].is_dir) {
+                char path[96];
+                snprintf(path, sizeof(path), "%s/%s", OFFLINE_QUEUE_DIR, entries[i].name);
+                log_warn(TAG, "Offline queue full (%ld files), dropping oldest: %s",
+                         (long)count, path);
+                sx_storage_delete(path);
+                break;
+            }
         }
     }
 
@@ -220,23 +207,21 @@ static void offline_queue_save(const char *payload)
  * report and useful for future logging/metrics. */
 static int offline_queue_resend_one(void)
 {
-    lfs_dir_t dir;
-    if (lfs_dir_open(CONFIG_LITTLEFS, &dir, OFFLINE_QUEUE_DIR) != LFS_ERR_OK) {
-        return 0;
+    sx_storage_entry_t entries[OFFLINE_QUEUE_MAX_FILES + 1];
+    int32_t count = sx_storage_list(OFFLINE_QUEUE_DIR, entries, OFFLINE_QUEUE_MAX_FILES + 1);
+    if (count <= 0) {
+        return 0; /* queue empty or list failed */
     }
 
-    struct lfs_info info;
-    char name[LFS_NAME_MAX + 1] = {0};
-    while (lfs_dir_read(CONFIG_LITTLEFS, &dir, &info) > 0) {
-        if (info.type == LFS_TYPE_REG) {
-            strncpy(name, info.name, sizeof(name) - 1);
+    const char *name = NULL;
+    for (int32_t i = 0; i < count; i++) {
+        if (!entries[i].is_dir) {
+            name = entries[i].name;
             break;
         }
     }
-    lfs_dir_close(CONFIG_LITTLEFS, &dir);
-
-    if (name[0] == '\0') {
-        return 0; /* queue empty */
+    if (name == NULL) {
+        return 0; /* queue empty (only subdirs, if any) */
     }
 
     char path[96];

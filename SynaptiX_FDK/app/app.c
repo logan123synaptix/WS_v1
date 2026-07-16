@@ -13,11 +13,14 @@
 #include "thingsboard_client.h"
 #include "sx_user_mqtt.h"
 #include "network_config.h"
+#include "sx_ex_storage.h"
 #include "shell_app.h"
 #include "time_sync.h"
+#include "mqtt_rpc.h"
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
+#include "file_io.h"
 #include <string.h>
 
 static const char *TAG = "APP";
@@ -68,14 +71,19 @@ static time_sync_t         s_time_sync;
  *     closer in spirit to WS_v0's runtime-adjustable app_setting struct
  *     though there is no MQTT-RPC input channel yet, only the CLI. The
  *     app_config.h #defines now only seed the flash default on a fresh
- *     board — see network_config.h's build_defaults().
+ *     board — see network_config.h's build_defaults(). As of 2026-07-16
+ *     a second input channel exists too — MQTT RPC (app/user/mqtt_rpc/,
+ *     "setParams" method, same flag set/units as the CLI's "settings -c")
+ *     — both end up at the same network_config_set_*()/_save() calls.
  *
  *  4. WS_v0's SENDING state falls back to saving telemetry JSON to SPIF/
- *     littlefs when the publish fails, for later retry. WS_v1 has no
- *     filesystem-on-flash equivalent wired up yet, so a failed publish here
- *     is just logged and dropped — no offline-queue fallback yet. Flagged
- *     as a gap, not silently "fixed" — matches WS_v0's intent, just not a
- *     feature WS_v1 has the infrastructure for yet.
+ *     littlefs when the publish fails, for later retry. As of 2026-07-16
+ *     WS_v1 does the same — see OFFLINE_QUEUE_DIR/offline_queue_save()/
+ *     offline_queue_resend_one() below. One file per failed publish
+ *     (OFFLINE_QUEUE_DIR/telemetry_<tick>.json), and one queued file is
+ *     resent per SENDING pass when connected (same "one at a time" shape
+ *     as WS_v0's push_last_telemetry_json(), not a batch-drain), oldest
+ *     first by directory scan order.
  *
  *  5. sps30_app_t's cycle here is driven directly (start_cycle/poll/
  *     is_cycle_done/reset), matching its existing non-blocking contract in
@@ -118,6 +126,141 @@ static volatile app_mode_t s_app_mode    = APP_MODE_FULL_POWER;
 
 #define TELEMETRY_JSON_BUFF_SIZE 512
 static char s_telemetry_json[TELEMETRY_JSON_BUFF_SIZE];
+
+/* ===================== offline telemetry queue =====================
+ * Ported from WS_v0's push_last_telemetry_json()/its SENDING-state save-
+ * on-fail block (SynaptiX/apps/app.c), re-targeted at this project's
+ * sx_storage_* API (network_config.c's flash layer) for single-file ops
+ * (write/read/delete/size) and direct lfs_dir_open()/_read()/_close()
+ * calls (see offline_queue_save()'s note on why — file_io.h's opendir()/
+ * readdir()/closedir() macros looked like the natural fit but don't
+ * actually match lfs_dir_open()'s real signature) for the directory scan,
+ * since sx_storage.h has no directory-iteration API of its own
+ * (sx_storage_list_dir() only logs, returns nothing usable).
+ *
+ * One file per failed publish, named by a monotonic tick counter rather
+ * than wall-clock time (WS_v0 used uptime_seconds for the same "make each
+ * filename unique" purpose — this project has no wall clock at the point
+ * SENDING runs early in the cycle, only s_cycle_tick_ms which resets each
+ * lap, so a separate ever-incrementing counter is used instead).
+ *
+ * Resend is one file per SENDING pass, oldest-first by directory scan
+ * order (littlefs doesn't guarangee a particular order, but in practice
+ * files are returned in creation order for this filesystem) — same
+ * "one at a time, not a batch drain" shape as WS_v0, so a long backlog
+ * drains gradually across several cycles rather than trying to flush
+ * everything (and blocking the cycle) the moment connectivity returns. */
+#define OFFLINE_QUEUE_DIR       "/queue"
+#define OFFLINE_QUEUE_MAX_FILES 20   /* oldest file dropped once this many are queued, so a long outage can't fill the flash */
+
+static uint32_t s_offline_queue_seq = 0;
+
+/* Saves payload as a new file in OFFLINE_QUEUE_DIR. Silently gives up (logs
+ * only) if the write itself fails — same as WS_v0's fopen()==NULL branch,
+ * there is no further fallback beyond this one layer of persistence. */
+static void offline_queue_save(const char *payload)
+{
+    /* Drop the oldest queued file first if already at the cap, so this
+     * save always has room — checked before, not after, so a full queue
+     * never silently fails to save the newest reading instead of the
+     * oldest one.
+     *
+     * NOTE: file_io.h's opendir()/readdir()/closedir() macros were tried
+     * here first but don't actually work — opendir(path) expands to
+     * lfs_dir_open(CONFIG_LITTLEFS, path), which is missing the lfs_dir_t*
+     * argument lfs_dir_open()'s real signature
+     * (lfs_dir_open(lfs_t*, lfs_dir_t*, const char*)) requires, and the
+     * macro doesn't return anything DIR*-shaped to hold across
+     * readdir()/closedir() calls anyway. That's a pre-existing bug in
+     * file_io.h, not touched here (unclear what else may already assume
+     * its current shape) — calling lfs_dir_open/_read/_close directly
+     * instead, same as WS_v0's push_last_telemetry_json() does. */
+    lfs_dir_t dir;
+    if (lfs_dir_open(CONFIG_LITTLEFS, &dir, OFFLINE_QUEUE_DIR) == LFS_ERR_OK) {
+        struct lfs_info info;
+        uint32_t count = 0;
+        char oldest_name[LFS_NAME_MAX + 1] = {0};
+        while (lfs_dir_read(CONFIG_LITTLEFS, &dir, &info) > 0) {
+            if (info.type != LFS_TYPE_REG) {
+                continue;
+            }
+            count++;
+            if (oldest_name[0] == '\0') {
+                strncpy(oldest_name, info.name, sizeof(oldest_name) - 1);
+            }
+        }
+        lfs_dir_close(CONFIG_LITTLEFS, &dir);
+
+        if (count >= OFFLINE_QUEUE_MAX_FILES && oldest_name[0] != '\0') {
+            char path[96];
+            snprintf(path, sizeof(path), "%s/%s", OFFLINE_QUEUE_DIR, oldest_name);
+            log_warn(TAG, "Offline queue full (%lu files), dropping oldest: %s",
+                     (unsigned long)count, path);
+            sx_storage_delete(path);
+        }
+    }
+
+    char path[64];
+    snprintf(path, sizeof(path), "%s/telemetry_%lu.json",
+             OFFLINE_QUEUE_DIR, (unsigned long)s_offline_queue_seq++);
+
+    if (sx_storage_write(path, payload, strlen(payload)) == SX_STORAGE_OK) {
+        log_info(TAG, "Saved telemetry to offline queue: %s", path);
+    } else {
+        log_error(TAG, "Failed to save telemetry to offline queue: %s", path);
+    }
+}
+
+/* Resends at most one queued file over MQTT, deleting it on success.
+ * Called only while sx_user_mqtt_is_connected() (checked by the caller),
+ * same precondition WS_v0's push_last_telemetry_json() effectively relied
+ * on via tb_publish()'s own connectivity check. No-op if the queue is
+ * empty. Returns 1 if a file was found (sent or not), 0 if the queue was
+ * empty — callers don't currently use the return value but it's cheap to
+ * report and useful for future logging/metrics. */
+static int offline_queue_resend_one(void)
+{
+    lfs_dir_t dir;
+    if (lfs_dir_open(CONFIG_LITTLEFS, &dir, OFFLINE_QUEUE_DIR) != LFS_ERR_OK) {
+        return 0;
+    }
+
+    struct lfs_info info;
+    char name[LFS_NAME_MAX + 1] = {0};
+    while (lfs_dir_read(CONFIG_LITTLEFS, &dir, &info) > 0) {
+        if (info.type == LFS_TYPE_REG) {
+            strncpy(name, info.name, sizeof(name) - 1);
+            break;
+        }
+    }
+    lfs_dir_close(CONFIG_LITTLEFS, &dir);
+
+    if (name[0] == '\0') {
+        return 0; /* queue empty */
+    }
+
+    char path[96];
+    snprintf(path, sizeof(path), "%s/%s", OFFLINE_QUEUE_DIR, name);
+
+    static char buf[TELEMETRY_JSON_BUFF_SIZE];
+    int32_t size = sx_storage_size(path);
+    if (size <= 0 || (uint32_t)size >= sizeof(buf)) {
+        log_error(TAG, "Offline queue file %s has bad size (%ld), dropping", path, (long)size);
+        sx_storage_delete(path);
+        return 1;
+    }
+    memset(buf, 0, sizeof(buf));
+    if (sx_storage_read(path, buf, (uint32_t)size) != SX_STORAGE_OK) {
+        log_error(TAG, "Failed to read offline queue file %s, dropping", path);
+        sx_storage_delete(path);
+        return 1;
+    }
+
+    sx_user_mqtt_publish("weatherstation/telemetry", buf);
+    log_info(TAG, "Resent queued telemetry: %s", path);
+    sx_storage_delete(path);
+    return 1;
+}
 
 /* Builds the telemetry JSON payload from whatever each sensor app's
  * *_is_ready()/*_is_connected()/*_has_*() getters currently report —
@@ -251,13 +394,18 @@ static void app_cycle_process(uint32_t delta_ms)
          * convention applies without a real Thingsboard broker); revisit
          * once network_config/CDC-MSC input can also carry a topic. */
         if (sx_user_mqtt_is_connected()) {
+            /* Drain one backlog file first, same "one at a time" shape as
+             * WS_v0's push_last_telemetry_json() — see its doc-comment
+             * above build_telemetry_payload(). Done before publishing
+             * this cycle's fresh reading so the backlog gets a turn every
+             * cycle instead of only when nothing new needs sending. */
+            offline_queue_resend_one();
+
             sx_user_mqtt_publish("weatherstation/telemetry", payload);
             log_info(TAG, "Telemetry published: %s", payload);
         } else {
-            /* No offline-queue fallback yet (unlike WS_v0's SPIF/littlefs
-             * save-to-file-on-failure) — see the module doc-comment above,
-             * point 4. */
-            log_warn(TAG, "MQTT not connected, telemetry dropped: %s", payload);
+            offline_queue_save(payload);
+            log_warn(TAG, "MQTT not connected, telemetry queued: %s", payload);
         }
         sps30_app_reset(&s_sps30_app);
         s_cycle_state = APP_CYCLE_SLEEPING;
@@ -319,6 +467,14 @@ void app_init(void){
     network_config_init();
     const network_config_t *net_cfg = network_config_get();
 
+    /* Offline telemetry queue directory — see APP_CYCLE_SENDING and
+     * offline_queue_resend_one()/offline_queue_save() below. Created once
+     * here; sx_storage_mkdir() on an already-existing dir is expected to
+     * just report it exists (same flash already sx_storage_init()'d by
+     * sx_board_init() before app_init() runs, per network_config's own
+     * assumption above). */
+    sx_storage_mkdir(OFFLINE_QUEUE_DIR);
+
     /* Re-apply APN from network_config, overriding the APN/USERNAME_APN/
      * PASSWORD_APN macros sx_board_init() already set via
      * a7677s_set_full_apn() before app_init() runs (see Core/Src/main.c:
@@ -340,6 +496,21 @@ void app_init(void){
     mqtt_cfg.password   = net_cfg->password[0] ? net_cfg->password : NULL;
     mqtt_cfg.keepalive  = net_cfg->keepalive_s;
     mqtt_cfg.use_ssl    = net_cfg->use_tls ? 1 : 0;
+    /* MQTT RPC config-set channel (app/user/mqtt_rpc/) — a second input
+     * path alongside the USB CDC CLI (shell_app), both ending up at the
+     * same network_config_set_*()/network_config_save() calls.
+     *
+     * on_connected (not a direct mqtt_rpc_init() call right after
+     * *_init() below) is deliberate: sx_user_mqtt_nontls_init()/
+     * _tls_init() only start the connection sequence, they don't block
+     * until connected (the actual handshake happens across later
+     * sx_user_mqtt_poll() ticks) — sx_user_mqtt_subscribe() itself is a
+     * no-op (logs a warning, does nothing else) if called before the
+     * client reports connected. Hooking on_connected guarantees the
+     * subscribe happens exactly when it can succeed, including on any
+     * future reconnect after a drop. */
+    mqtt_cfg.on_message   = mqtt_rpc_on_message;
+    mqtt_cfg.on_connected = mqtt_rpc_init;
     if (net_cfg->use_tls) {
         sx_user_mqtt_tls_init(&mqtt_cfg,
                                net_cfg->ca_cert_len ? (char *)net_cfg->ca_cert : NULL,

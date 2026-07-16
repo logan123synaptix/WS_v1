@@ -41,7 +41,22 @@ int32_t          sx_storage_size         (const char *path);
 
 /*  Directory operation */
 sx_storage_err_t sx_storage_mkdir        (const char *path);
-void             sx_storage_list_dir     (const char *path);
+void             sx_storage_list_dir     (const char *path); // log-only listing, does not return entries to caller
+
+/* One directory entry as returned by sx_storage_list(). "." and ".." are skipped. */
+typedef struct {
+    char     name[64]; /* entry filename only, no path prefix */
+    bool     is_dir;
+    uint32_t size;      /* file size in bytes; 0 if is_dir is true */
+} sx_storage_entry_t;
+
+/* Lists up to max_entries entries of directory `path` into the caller-provided
+ * `entries` array. Returns the number of entries written (0..max_entries) on
+ * success, or -1 on error (not initialized, invalid path, or directory open
+ * failure). If the directory has more entries than max_entries, only the
+ * first max_entries are returned (no indication is given that entries were
+ * truncated - call with a larger buffer if this matters). */
+int32_t sx_storage_list(const char *path, sx_storage_entry_t *entries, uint32_t max_entries);
 
 /*  Fillesystem info    */
 int32_t          sx_storage_free_space   (void);  

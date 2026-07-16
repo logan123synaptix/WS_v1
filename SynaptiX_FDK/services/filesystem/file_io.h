@@ -84,7 +84,7 @@ static inline int file_puts(const char *s,lfs_file_t *file) {
 #define ftell(stream) lfs_file_tell(CONFIG_LITTLEFS, (lfs_file_t *)stream) // Get the current position in a file
 #define mkdir(path) lfs_mkdir(CONFIG_LITTLEFS, path) // Create a directory
 #define rmdir(path) lfs_remove(CONFIG_LITTLEFS, path) // Remove a directory
-#define opendir(path) lfs_dir_open(CONFIG_LITTLEFS, path) // Open a directory
+#define opendir(dir, path) lfs_dir_open(CONFIG_LITTLEFS, dir, path) // Open a directory. dir must be a caller-owned lfs_dir_t*, e.g.: lfs_dir_t d; if (opendir(&d, "/x") == LFS_ERR_OK) { ... closedir(&d); }
 #define closedir(dir) lfs_dir_close(CONFIG_LITTLEFS, dir) // Close a directory
 #define readdir(dir, info) lfs_dir_read(CONFIG_LITTLEFS, dir, info) // Read a directory entry
 #define dir_seek(dir, off) lfs_dir_seek(CONFIG_LITTLEFS, dir, off) // Seek in a directory

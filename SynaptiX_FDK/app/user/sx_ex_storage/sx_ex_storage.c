@@ -159,6 +159,55 @@ void sx_storage_list_dir(const char *path)
     fs_list_dir(path);
 }
 
+int32_t sx_storage_list(const char *path, sx_storage_entry_t *entries, uint32_t max_entries)
+{
+    if (!s_initialized || path == NULL || entries == NULL || max_entries == 0) return -1;
+
+    lfs_dir_t dir;
+    struct lfs_info info;
+    int err;
+    uint32_t count = 0;
+
+    err = opendir(&dir, path);
+    if (err < 0) {
+        log_error(TAG, "sx_storage_list: failed to open dir %s, err=%d", path, err);
+        return -1;
+    }
+
+    while (count < max_entries) {
+        err = readdir(&dir, &info);
+        if (err < 0) {
+            log_error(TAG, "sx_storage_list: read dir error %d", err);
+            closedir(&dir);
+            return -1;
+        }
+        if (err == 0) {
+            /* end of directory */
+            break;
+        }
+
+        /* Skip "." and ".." - littlefs returns them as regular DIR entries */
+        if (info.name[0] == '.' &&
+            (info.name[1] == '\0' || (info.name[1] == '.' && info.name[2] == '\0'))) {
+            continue;
+        }
+
+        sx_storage_entry_t *e = &entries[count];
+        /* info.name can be up to LFS_NAME_MAX+1 (256) bytes; entries[].name is
+         * only 64 bytes, so truncate defensively rather than overflow. This is
+         * a real limitation if filenames in `path` can exceed 63 chars. */
+        strncpy(e->name, info.name, sizeof(e->name) - 1);
+        e->name[sizeof(e->name) - 1] = '\0';
+        e->is_dir = (info.type == LFS_TYPE_DIR);
+        e->size   = e->is_dir ? 0 : (uint32_t)info.size;
+
+        count++;
+    }
+
+    closedir(&dir);
+    return (int32_t)count;
+}
+
 int32_t sx_storage_free_space(void)
 {
     if (!s_initialized) return -1;

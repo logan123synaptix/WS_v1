@@ -73,6 +73,10 @@ static void build_defaults(network_config_t *cfg)
     safe_strcpy(cfg->apn_username, sizeof(cfg->apn_username), USERNAME_APN ? USERNAME_APN : "");
     safe_strcpy(cfg->apn_password, sizeof(cfg->apn_password), PASSWORD_APN ? PASSWORD_APN : "");
 
+    cfg->pump_on_ms = APP_PUMP_ON_MS;
+    cfg->sensing_ms = APP_SENSING_MS;
+    cfg->sleep_ms   = APP_CYCLE_PERIOD_MS;
+
     cfg->version = NETWORK_CONFIG_VERSION;
 }
 
@@ -187,6 +191,21 @@ void network_config_set_apn_username(const char *apn_username)
 void network_config_set_apn_password(const char *apn_password)
 {
     safe_strcpy(s_cfg.apn_password, sizeof(s_cfg.apn_password), apn_password);
+}
+
+void network_config_set_pump_on_ms(uint32_t pump_on_ms)
+{
+    s_cfg.pump_on_ms = pump_on_ms;
+}
+
+void network_config_set_sensing_ms(uint32_t sensing_ms)
+{
+    s_cfg.sensing_ms = sensing_ms;
+}
+
+void network_config_set_sleep_ms(uint32_t sleep_ms)
+{
+    s_cfg.sleep_ms = sleep_ms;
 }
 
 bool network_config_save(void)

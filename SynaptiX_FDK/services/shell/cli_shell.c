@@ -1,6 +1,3 @@
-
-
-
 #include "cli_shell.h"
 
 
@@ -127,7 +124,9 @@ void cli_shell_receive_char(ShellContext_t *s_shell,char c) {
   prv_echo(s_shell,c);
 
   if (c == '\b') {
-    s_shell->rx_buffer[--s_shell->rx_size] = '\0';
+    if (s_shell->rx_size > 0) {
+      s_shell->rx_buffer[--s_shell->rx_size] = '\0';
+    }
     return;
   }
 

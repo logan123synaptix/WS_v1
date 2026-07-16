@@ -13,6 +13,7 @@
 #include "thingsboard_client.h"
 #include "sx_user_mqtt.h"
 #include "network_config.h"
+#include "shell_app.h"
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
@@ -56,13 +57,16 @@ static sx_sleep_manager_t  s_sleep_mgr;
  *     PWM duty cycle exists on this board's pump circuit, so ON_PUMP here
  *     just does pump_on() at full drive.
  *
- *  3. Timing (pump-on duration, sensing duration, overall cycle period) is
- *     APP_PUMP_ON_MS/APP_SENSING_MS/APP_CYCLE_PERIOD_MS fixed #defines
- *     (app_config.h) rather than WS_v0's runtime-adjustable app_setting
- *     struct (loaded from flash, changeable via Thingsboard RPC). Per the
- *     user: fixed defaults for now, with USB CDC/MSC runtime override
- *     planned as later, separate work — see app_config.h's note at the
- *     APP_*_MS defines.
+ *  3. Timing (pump-on duration, sensing duration, sleep duration) used to
+ *     be APP_PUMP_ON_MS/APP_SENSING_MS/APP_CYCLE_PERIOD_MS fixed #defines
+ *     (app_config.h). As of 2026-07-16 these are runtime-editable via
+ *     network_config_t's pump_on_ms/sensing_ms/sleep_ms fields (flash-
+ *     persisted, same struct as the MQTT broker settings) and a USB CDC
+ *     CLI (app/user/shell_app/ — "settings -c -pump/-sensing/-data ..."),
+ *     closer in spirit to WS_v0's runtime-adjustable app_setting struct
+ *     though there is no MQTT-RPC input channel yet, only the CLI. The
+ *     app_config.h #defines now only seed the flash default on a fresh
+ *     board — see network_config.h's build_defaults().
  *
  *  4. WS_v0's SENDING state falls back to saving telemetry JSON to SPIF/
  *     littlefs when the publish fails, for later retry. WS_v1 has no
@@ -218,7 +222,7 @@ static void app_cycle_process(uint32_t delta_ms)
             pump_on(sx_board_get_pump_gpio());
             log_info(TAG, "Pump on");
         }
-        if (s_cycle_tick_ms >= APP_PUMP_ON_MS) {
+        if (s_cycle_tick_ms >= network_config_get()->pump_on_ms) {
             s_cycle_tick_ms = 0;
             s_cycle_state = APP_CYCLE_SENSING;
             sps30_app_start_cycle(&s_sps30_app);
@@ -229,7 +233,7 @@ static void app_cycle_process(uint32_t delta_ms)
     case APP_CYCLE_SENSING:
         sps30_app_poll(&s_sps30_app, delta_ms);
         s_cycle_tick_ms += delta_ms;
-        if (s_cycle_tick_ms >= APP_SENSING_MS) {
+        if (s_cycle_tick_ms >= network_config_get()->sensing_ms) {
             s_cycle_tick_ms = 0;
             s_cycle_state = APP_CYCLE_SENDING;
             pump_off(sx_board_get_pump_gpio());
@@ -343,6 +347,12 @@ void app_init(void){
         sx_user_mqtt_nontls_init(&mqtt_cfg);
     }
 
+    /* USB CDC CLI ("settings -i/-c", "restart", "help") — see
+     * app/user/shell_app/. Placed after network_config_init() so the
+     * shell always has a live, already-loaded config to read/write from
+     * the moment it becomes usable. */
+    shell_app_init(&board.usb);
+
     s_cycle_state   = APP_CYCLE_ON_PUMP;
     s_cycle_tick_ms = 0;
     s_app_mode      = APP_MODE_FULL_POWER;
@@ -370,6 +380,11 @@ void app_process(uint32_t delta_ms){
      * comment on why Thingsboard isn't used yet. */
     sx_user_mqtt_poll(delta_ms);
 
+    /* USB CDC CLI — same "every tick regardless of app_mode" reasoning
+     * as the other *_poll() calls above. No-op while the board is
+     * actually parked in STOP mode (execution is paused then anyway). */
+    shell_app_poll();
+
     /* Main cycle only runs in APP_MODE_FULL_POWER. The other app_mode_t
      * states drive the sleep/wake transition below:
      *
@@ -391,8 +406,11 @@ void app_process(uint32_t delta_ms){
     if (s_app_mode == APP_MODE_FULL_POWER) {
         app_cycle_process(delta_ms);
     } else if (s_app_mode == APP_MODE_ENTER_SLEEP) {
-        log_info(TAG, "Entering sleep for %lu ms", (unsigned long)APP_CYCLE_PERIOD_MS);
-        sx_sleep_manager_enter_sleep(&s_sleep_mgr, APP_CYCLE_PERIOD_MS / 1000);
+        {
+            uint32_t sleep_ms = network_config_get()->sleep_ms;
+            log_info(TAG, "Entering sleep for %lu ms", (unsigned long)sleep_ms);
+            sx_sleep_manager_enter_sleep(&s_sleep_mgr, sleep_ms / 1000);
+        }
         /* Execution resumes here after the RTC wakeup timer fires. */
         s_app_mode    = APP_MODE_WAKEUP;
         s_cycle_state = APP_CYCLE_WAKING;

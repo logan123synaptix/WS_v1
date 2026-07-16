@@ -28,17 +28,18 @@ extern "C" {
  *    (already available and already sx_storage_init()'d in
  *    sx_board_init(), see sx_board.c).
  *
- *  - NOT part of this pass (explicitly deferred, per the user — "note
- *    lại chưa cần code ngay"): the actual runtime *input* mechanism
- *    (USB CDC typed commands, e.g. "set host 1.2.3.4", and/or USB MSC —
- *    editing a config file on the exposed disk — both already exist in
- *    this project as sx_cdc/sx_msc). This module only provides the
- *    storage + get/set/save API beneath that future input layer; no
- *    CDC command parser or MSC file-watcher is wired up here yet.
- *    Whoever adds that later should call network_config_set_*() +
- *    network_config_save(), or write network_config_t fields directly
- *    then call network_config_save() once, rather than writing to flash
- *    directly themselves.
+ *  - Runtime *input* is now implemented via a USB CDC CLI, see
+ *    app/user/shell_app/ (shell_app.c/.h + shell_commands.c) — command
+ *    "settings -c -host/-port/-... -pump/-sensing/-data ..." calls the
+ *    setters below then network_config_save() once. USB MSC (editing a
+ *    config file on the exposed disk) is not wired up — the CLI covers
+ *    this need for now.
+ *
+ *  - Also carries the main cycle timing (pump_on_ms/sensing_ms/sleep_ms)
+ *    per the user's decision to consolidate all runtime-editable config
+ *    into this one struct/flash file, even though the struct is no
+ *    longer purely "network" config — kept the module name to avoid
+ *    touching every include site.
  *
  *  - TLS certs are stored as raw blobs (ca_cert/client_cert/client_key),
  *    sized generously (NETWORK_CONFIG_CERT_MAX_LEN) since real cert PEM
@@ -85,6 +86,17 @@ typedef struct {
     char     apn_username[NETWORK_CONFIG_USER_MAX_LEN];  /* empty string = NULL to a7677s_set_full_apn() */
     char     apn_password[NETWORK_CONFIG_PASS_MAX_LEN];  /* empty string = NULL to a7677s_set_full_apn() */
 
+    /* Main cycle timing (ms) — replaces app_config.h's APP_PUMP_ON_MS/
+     * APP_SENSING_MS/APP_CYCLE_PERIOD_MS #defines at runtime. Per the
+     * user's decision, these live in this same struct/flash file rather
+     * than a separate one, even though the struct is no longer purely
+     * "network" config. app_config.h's #defines now only seed
+     * build_defaults() below for a fresh/empty flash; app.c reads these
+     * fields via network_config_get() instead of the #defines directly. */
+    uint32_t pump_on_ms;   /* how long the pump stays on before sensing starts */
+    uint32_t sensing_ms;   /* how long SENSING runs (SPS30 cycle + other sensors settle) */
+    uint32_t sleep_ms;     /* STOP-mode sleep duration itself (not the total lap time) */
+
     /* Bumped whenever this struct's layout changes, so a future firmware
      * update can detect a stale/incompatible record in flash and fall
      * back to defaults instead of misinterpreting old bytes. Not
@@ -130,6 +142,14 @@ void network_config_set_client_key(const char *pem, uint32_t len);
 void network_config_set_apn(const char *apn);
 void network_config_set_apn_username(const char *apn_username);
 void network_config_set_apn_password(const char *apn_password);
+
+/* Cycle timing setters (ms). 0 is rejected by the CLI layer before it
+ * ever reaches here (see shell_app/shell_commands.c) — these setters
+ * themselves do not validate, same "thin" spirit as the rest of this
+ * module. */
+void network_config_set_pump_on_ms(uint32_t pump_on_ms);
+void network_config_set_sensing_ms(uint32_t sensing_ms);
+void network_config_set_sleep_ms(uint32_t sleep_ms);
 
 /* Persists the current in-RAM config to flash (NETWORK_CONFIG_FLASH_PATH).
  * Returns true on success. Callers should batch several set_*() calls

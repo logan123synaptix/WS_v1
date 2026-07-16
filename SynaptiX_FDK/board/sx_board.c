@@ -196,8 +196,10 @@ void sx_board_init(void)
     // I2C
     sx_i2c_init(&board.i2c1, &sx_i2c_ops, &hi2c1);
 
-    // TIMER
-    sx_timer_init(&board.sx_timer, &sx_timer_ops, &sx_tim1, );
+    // TIMER + PWM (software) — moved after Pump init below, since
+    // sx_pwm_software_init() needs the pump's already-initialized sx_gpio_t*
+    // (s_en_pw_pump), and the timer's callback/arg need &board.sx_pwm_sw to
+    // exist as a valid struct before the timer can start ticking it.
 
     /* Shared I2C1 reset line — see s_i2c1_reset's own comment above. Only
      * initialized once here; RTC does not take it (self-resets via I2C),

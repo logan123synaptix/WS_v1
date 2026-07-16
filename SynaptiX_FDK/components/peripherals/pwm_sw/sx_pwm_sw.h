@@ -47,8 +47,15 @@ extern "C" {
  *     logic doesn't special-case those) — negligible CPU cost per tick,
  *     but worth knowing this isn't "stop ticking when idle". */
 
+/* NOTE: no longer used to derive period_ticks (see sx_pwm_software_init()
+ * below) — period_ticks is now computed from timer->tick_hz directly, so
+ * it reflects whatever real tick rate the caller's sx_timer_t actually
+ * runs at (e.g. 1MHz/1us-per-tick on this project's TIM1, not 1ms). Kept
+ * only as the default assumed tick period for callers that still reason
+ * in ms and haven't been updated to pass an sx_timer_t with a known
+ * tick_hz; not read by this file's own logic anymore. */
 #ifndef SX_PWM_SOFTWARE_TICK_MS
-#define SX_PWM_SOFTWARE_TICK_MS 1U /* underlying sx_timer_t tick period, ms */
+#define SX_PWM_SOFTWARE_TICK_MS 1U /* legacy/default assumed tick period, ms */
 #endif
 
 typedef struct {
@@ -56,7 +63,9 @@ typedef struct {
     sx_timer_t *timer;       /* caller-owned, already sx_timer_init()'d with
                                * this module's tick callback (see
                                * sx_pwm_software_init()'s doc-comment) */
-    uint32_t    period_ticks; /* period_ms / SX_PWM_SOFTWARE_TICK_MS, >=1 */
+    uint32_t    period_ticks; /* round(timer->tick_hz * period_ms / 1000), >=1 —
+                               * computed from the timer's REAL tick_hz, not
+                               * SX_PWM_SOFTWARE_TICK_MS (see sx_pwm_software_init()) */
     uint32_t    on_ticks;     /* ticks per period the GPIO is driven HIGH */
     volatile uint32_t tick_count; /* current position within the period,
                                     * 0..period_ticks-1. volatile: written
@@ -72,10 +81,16 @@ typedef struct {
  *
  *   sx_pwm_software_t pwm;
  *   sx_gpio_init(&gpio, &sx_gpio_ops, pump_pin_driver);
- *   sx_timer_init(&timer, &sx_timer_ops, timer_pdriver, SX_PWM_SOFTWARE_TICK_MS,
+ *   sx_timer_init(&timer, &sx_timer_ops, timer_pdriver, tick_hz, 1,
  *                 sx_pwm_software_tick_cb, &pwm);
  *   sx_pwm_software_init(&pwm, &gpio, &timer, period_ms, duty_percent);
  *   sx_pwm_software_start(&pwm);
+ *
+ * (`tick_hz` above is the timer's real counter frequency, e.g. 1000000 for
+ * a 1us tick — see sx_timer.h's doc-comment on sx_timer_ops_t for how to
+ * derive it from an existing CubeMX init; the timeout_ms argument (1
+ * above) is only a placeholder here since sx_pwm_software_start() applies
+ * its own period via sx_timer_start_ticks(), not sx_timer_start().)
  *
  * `pump_pin_driver`/`timer_pdriver` are whatever pDriver type the
  * currently-linked sx_gpio_ops/sx_timer_ops driver expects (e.g. a
@@ -84,14 +99,19 @@ typedef struct {
  * casts pDriver itself, it only ever calls through sx_gpio_t/sx_timer_t's
  * own ops functions.
  *
- * period_ms must be a multiple of SX_PWM_SOFTWARE_TICK_MS and >=
- * SX_PWM_SOFTWARE_TICK_MS (period_ticks must be >=1); duty_percent is
- * clamped to [0, 100]. */
+ * period_ms is converted to period_ticks via timer->tick_hz (rounded to
+ * the nearest tick, floored to 1 if the result would be 0 — e.g. a
+ * period_ms too short to represent even one tick at this tick_hz);
+ * duty_percent is clamped to [0, 100]. */
 void sx_pwm_software_init(sx_pwm_software_t *pwm, sx_gpio_t *gpio, sx_timer_t *timer,
                            uint32_t period_ms, uint8_t duty_percent);
 
-/* Starts the underlying sx_timer_t (sx_timer_start()) and resets
- * tick_count to 0 so the new PWM cycle begins cleanly. */
+/* Starts the underlying sx_timer_t via sx_timer_start_ticks(pwm->timer,
+ * pwm->period_ticks) — applies the exact period_ticks computed in
+ * sx_pwm_software_init()/_set_duty() directly (bypassing sx_timer_t's
+ * timeout_ms/ms-rounding path entirely, see sx_timer.h's doc-comment on
+ * set_period_ticks), and resets tick_count to 0 so the new PWM cycle
+ * begins cleanly. */
 void sx_pwm_software_start(sx_pwm_software_t *pwm);
 
 /* Stops the underlying sx_timer_t and forces the GPIO LOW (not left in

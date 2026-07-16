@@ -81,10 +81,42 @@ static int _sx_timer_stop(sx_timer_t *timer){
     return (HAL_TIM_Base_Stop_IT(htim) == HAL_OK) ? 0 : -1;
 }
 
+/* Same ARR-programming as _sx_timer_set_period() but takes an exact tick
+ * count directly instead of deriving it from timeout_ms — see
+ * sx_timer_ops_t's doc-comment in sx_timer.h for why this path exists
+ * (callers like sx_pwm_sw that already computed period_ticks from
+ * timer->tick_hz themselves, needing sub-ms precision the ms path can't
+ * express). Deliberately does not touch timer->timeout_ms, since ticks
+ * aren't that field's unit. */
+static int _sx_timer_set_period_ticks(sx_timer_t *timer, uint32_t period_ticks){
+    TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)timer->pDriver;
+    if (htim == NULL || period_ticks == 0) {
+        return -1;
+    }
+    __HAL_TIM_SET_COUNTER(htim, 0);
+    __HAL_TIM_SET_AUTORELOAD(htim, period_ticks - 1);
+    return 0;
+}
+
+/* Enables the timer without touching ARR/PSC — the caller must have
+ * already applied the period via set_period()/set_period_ticks() first
+ * (see sx_timer_ops_t's doc-comment). Used by sx_timer_start_ticks() so
+ * that path doesn't re-apply timeout_ms's ms-rounded period on top of the
+ * exact period_ticks just set. */
+static int _sx_timer_start_hw(sx_timer_t *timer){
+    TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)timer->pDriver;
+    if (htim == NULL) {
+        return -1;
+    }
+    return (HAL_TIM_Base_Start_IT(htim) == HAL_OK) ? 0 : -1;
+}
+
 sx_timer_ops_t sx_timer_ops = {
-    .start      = _sx_timer_start,
-    .stop       = _sx_timer_stop,
-    .set_period = _sx_timer_set_period,
+    .start            = _sx_timer_start,
+    .stop             = _sx_timer_stop,
+    .set_period       = _sx_timer_set_period,
+    .set_period_ticks = _sx_timer_set_period_ticks,
+    .start_hw         = _sx_timer_start_hw,
 };
 
 /* See sx_timer.h's doc-comment for the full contract. Picks the smallest

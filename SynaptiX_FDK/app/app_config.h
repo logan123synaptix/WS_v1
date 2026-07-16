@@ -8,12 +8,17 @@
 /* ------------------------------------------------------------------ */
 /*  Main app state machine timing (app.c's APP_MODE_FULL_POWER cycle)  */
 /* ------------------------------------------------------------------ */
-/* NOTE (per discussion with the user): these are fixed defaults for now.
- * Planned follow-up — NOT implemented yet — is to make these overridable
- * at runtime via USB CDC (typed command, e.g. "set pump 30") and/or USB
- * MSC (editing a config file on the exposed disk), since both sx_cdc and
- * sx_msc already exist in this project. Until that lands, changing these
- * values requires reflashing. */
+/* NOTE (per discussion with the user): these were fixed compile-time
+ * defaults; runtime override is now implemented (2026-07-16) via the USB
+ * CDC CLI ("settings -c -pump/-sensing/-data ...", see
+ * app/user/cli_commands/), which reads/writes network_config_t's
+ * pump_on_ms/sensing_ms/sleep_ms fields (network_config.h) rather than
+ * these #defines directly. These 3 values below now only supply
+ * network_config's build_defaults() with its fallback for a fresh/empty
+ * flash — app.c no longer reads APP_PUMP_ON_MS/APP_SENSING_MS/
+ * APP_CYCLE_PERIOD_MS itself, see app.c's doc-comment point 3. USB MSC
+ * (editing a config file on the exposed disk) is not wired up — CLI
+ * covers this need for now. */
 #define APP_CYCLE_PERIOD_MS             SLEEP_TIME_MS  /* how long the board stays in STOP mode per lap (sleep duration itself, NOT the total ON_PUMP->SENSING->SENDING->sleep lap time — the full lap is longer by APP_PUMP_ON_MS+APP_SENSING_MS+publish time). Runtime-configurable is planned (see NOTE above) but not implemented yet — currently a fixed compile-time value. */
 #define APP_PUMP_ON_MS                  30000U         /* how long the pump stays on before sensing starts */
 #define APP_SENSING_MS                  60000U         /* how long SENSING runs (SPS30 measurement cycle + other sensors settle) */

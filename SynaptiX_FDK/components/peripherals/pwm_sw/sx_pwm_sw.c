@@ -1,4 +1,4 @@
-#include "sx_pwm_software.h"
+#include "sx_pwm_sw.h"
 
 static uint32_t _clamp_duty_to_ticks(uint32_t period_ticks, uint8_t duty_percent){
     if (duty_percent > 100) {

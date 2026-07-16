@@ -28,6 +28,7 @@ COMPONENT_FILES = \
 				  ${SYNAPTIX_DIR}/components/peripherals/spi/sx_spi.c \
 				  ${SYNAPTIX_DIR}/components/peripherals/uart/sx_uart.c \
 				  ${SYNAPTIX_DIR}/components/peripherals/timer/sx_timer.c \
+				  ${SYNAPTIX_DIR}/components/peripherals/pwm_sw/sx_pwm_sw.c \
 				  ${SYNAPTIX_DIR}/components/modules/gps/gps.c \
 				  ${SYNAPTIX_DIR}/components/modules/gps/minmea.c \
 				  ${SYNAPTIX_DIR}/components/modules/modem/modem.c \

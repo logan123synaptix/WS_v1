@@ -17,13 +17,16 @@ extern "C" {
  *
  * How it works: sx_timer_t is configured to tick every
  * SX_PWM_SOFTWARE_TICK_MS (see below) and calls sx_pwm_software_tick_cb()
- * (via the caller's HAL_TIM_PeriodElapsedCallback() -> sx_timer_irq_handle()
- * -> this module's registered callback, same indirection sx_timer.h
- * documents). Each tick increments an internal tick counter modulo
- * period_ticks (period_ms / SX_PWM_SOFTWARE_TICK_MS); the GPIO is driven
- * HIGH for the first on_ticks of each period and LOW for the rest —
- * classic leading-edge PWM, just computed by ISR-tick counting instead of
- * a hardware compare register.
+ * from whatever ISR/ops-layer mechanism the currently-linked sx_timer_ops
+ * driver uses to fire sx_timer_irq_handle() (see sx_timer.h — this module
+ * only ever talks to sx_timer_t/sx_gpio_t's ops interfaces, never to any
+ * platform HAL directly, so it builds unchanged against any sx_timer_ops/
+ * sx_gpio_ops driver, STM32 or otherwise). Each tick increments an
+ * internal tick counter modulo period_ticks (period_ms /
+ * SX_PWM_SOFTWARE_TICK_MS); the GPIO is driven HIGH for the first
+ * on_ticks of each period and LOW for the rest — classic leading-edge
+ * PWM, just computed by ISR-tick counting instead of a hardware compare
+ * register.
  *
  * Resolution/timing tradeoffs, spelled out since this is a real limitation
  * of doing PWM in software rather than hardware:
@@ -68,11 +71,18 @@ typedef struct {
  * sx_pwm_software_tick_cb with `arg` == this same sx_pwm_software_t*, e.g.:
  *
  *   sx_pwm_software_t pwm;
- *   sx_gpio_init(&gpio, &sx_gpio_ops, &pump_pin);
- *   sx_timer_init(&timer, &sx_timer_ops, &htim3, SX_PWM_SOFTWARE_TICK_MS,
+ *   sx_gpio_init(&gpio, &sx_gpio_ops, pump_pin_driver);
+ *   sx_timer_init(&timer, &sx_timer_ops, timer_pdriver, SX_PWM_SOFTWARE_TICK_MS,
  *                 sx_pwm_software_tick_cb, &pwm);
  *   sx_pwm_software_init(&pwm, &gpio, &timer, period_ms, duty_percent);
  *   sx_pwm_software_start(&pwm);
+ *
+ * `pump_pin_driver`/`timer_pdriver` are whatever pDriver type the
+ * currently-linked sx_gpio_ops/sx_timer_ops driver expects (e.g. a
+ * sx_gpio_pin_t* and a TIM_HandleTypeDef* on the STM32 HAL driver this
+ * project currently builds against) — this module never inspects or
+ * casts pDriver itself, it only ever calls through sx_gpio_t/sx_timer_t's
+ * own ops functions.
  *
  * period_ms must be a multiple of SX_PWM_SOFTWARE_TICK_MS and >=
  * SX_PWM_SOFTWARE_TICK_MS (period_ticks must be >=1); duty_percent is

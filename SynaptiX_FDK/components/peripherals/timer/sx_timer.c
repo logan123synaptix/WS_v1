@@ -67,9 +67,7 @@ static int _sx_timer_start(sx_timer_t *timer){
     if (htim == NULL) {
         return -1;
     }
-    if (_sx_timer_set_period(timer, timer->timeout_ms) != 0) {
-        return -1;
-    }
+    
     return (HAL_TIM_Base_Start_IT(htim) == HAL_OK) ? 0 : -1;
 }
 

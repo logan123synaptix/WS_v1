@@ -196,11 +196,6 @@ void sx_board_init(void)
     // I2C
     sx_i2c_init(&board.i2c1, &sx_i2c_ops, &hi2c1);
 
-    // TIMER + PWM (software) — moved after Pump init below, since
-    // sx_pwm_software_init() needs the pump's already-initialized sx_gpio_t*
-    // (s_en_pw_pump), and the timer's callback/arg need &board.sx_pwm_sw to
-    // exist as a valid struct before the timer can start ticking it.
-
     /* Shared I2C1 reset line — see s_i2c1_reset's own comment above. Only
      * initialized once here; RTC does not take it (self-resets via I2C),
      * only IMU below does. */
@@ -269,9 +264,34 @@ void sx_board_init(void)
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
 
-    // Pump init
-    pump_init(&s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin);
-    pump_off(&s_en_pw_pump);
+    // TIMER (TIM1) — sx_timer_init_freq() derives PSC/ARR itself from
+    // _input_clock_hz/_freq_hz rather than requiring tick_hz to be known
+    // up front from tim.c's CubeMX-configured Prescaler; 32MHz/10kHz here
+    // matches tim.c's own Prescaler=31/Period=99 (32MHz/(31+1)=1MHz tick,
+    // 1MHz/(99+1)=10kHz interrupt) — see sx_timer.c's doc-comment on
+    // sx_timer_init_freq(). callback/arg are set to the PWM tick callback
+    // and &board.sx_pwm_sw below, AFTER pump_init() has initialized that
+    // struct — sx_timer_t has no "set callback later" API, so init order
+    // matters: PWM struct must exist as a valid target before the timer
+    // is told to call into it (an ISR firing into an uninitialized struct
+    // would read garbage).
+    sx_timer_init_freq(&board.sx_timer, &sx_timer_ops, sx_tim1,
+                        32000000U, 10000U, NULL, NULL);
+
+    // Pump init — owns s_en_pw_pump's GPIO init and board.sx_pwm_sw's PWM
+    // struct init (period_ms=10 -> 100Hz PWM / 1% duty resolution at this
+    // timer's 1MHz tick_hz, see sx_pump.c). Wire the timer's callback to
+    // drive this PWM struct now that it's a valid init'd target.
+    pump_init(&board.sx_pwm_sw, &s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin,
+              &board.sx_timer);
+    board.sx_timer.callback = sx_pwm_software_tick_cb;
+    board.sx_timer.arg = &board.sx_pwm_sw;
+
+    // Board bring-up: run the pump at 40% duty from boot for timer/PWM
+    // hardware verification. Not app-cycle-driven yet — app.c's
+    // APP_CYCLE_ON_PUMP state below still owns steady-state pump on/off
+    // via pump_on()/pump_off() once the sensing cycle starts.
+    pump_set_power(&board.sx_pwm_sw, 40U);
 
     // Tier-1 generic sleep driver — this board's pre_stop/post_wake hooks
     // (defined below) are what actually know about LTE (USART1) + GPS

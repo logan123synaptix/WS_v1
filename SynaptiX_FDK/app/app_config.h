@@ -116,10 +116,10 @@
 #define GPS_LOG_FILE_PATH           "/log_gps"
 #define IMU_CALIB_FILE_PATH         "/imu_calib"
 
-#define GPS_CSV_FILE_PATH    "log_gps.csv"   
-// #define GPS_CSV_HEADER       "fix,lat,lon,rssi,time,date\n"
-#define GPS_CSV_HEADER        "fix,lat,lon,alt,spd,sat,time,date\n"
-#define GPS_LOG_READ_CHUNK    256U 
+#define GPS_CSV_FILE_PATH           "log_gps.csv"   
+// #define GPS_CSV_HEADER           "fix,lat,lon,rssi,time,date\n"
+#define GPS_CSV_HEADER              "fix,lat,lon,alt,spd,sat,time,date\n"
+#define GPS_LOG_READ_CHUNK          256U 
 
 // #define GPS_LOG_MAX_ENTRIES 10
 

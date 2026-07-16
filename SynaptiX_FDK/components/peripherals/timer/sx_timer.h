@@ -41,9 +41,26 @@ typedef void (*sx_timer_callback_t)(void *arg);
  * and assumed constant for the life of the sx_timer_t (matching whatever
  * Prescaler the caller's CubeMX init already set and never changes). */
 typedef struct sx_timer_ops{
+    /* Applies timer->timeout_ms as ARR (via set_period()) THEN enables the
+     * timer (interrupt mode) - the ms-based path, used by sx_timer_start(). */
     int (*start)(sx_timer_t *timer);
     int (*stop)(sx_timer_t *timer);
     int (*set_period)(sx_timer_t *timer, uint32_t timeout_ms);
+    /* Same as set_period() but takes an exact tick count instead of ms -
+     * for callers that already computed period_ticks from timer->tick_hz
+     * themselves (e.g. sx_pwm_sw, which needs sub-ms precision that whole
+     * milliseconds can't express) and don't want it re-derived/rounded
+     * through the ms path. Does not touch timer->timeout_ms (that field
+     * stays whatever it was, since it's not this path's unit) and does
+     * NOT start the timer - see start_hw() below for that. */
+    int (*set_period_ticks)(sx_timer_t *timer, uint32_t period_ticks);
+    /* Enables the timer (HAL_TIM_Base_Start_IT or equivalent) WITHOUT
+     * touching ARR/PSC at all - the caller must have already applied the
+     * period it wants via set_period() or set_period_ticks() beforehand.
+     * Used by both sx_timer_start() (after set_period()) and
+     * sx_timer_start_ticks() (after set_period_ticks()), so neither path
+     * re-applies the other's period unit on top of what was just set. */
+    int (*start_hw)(sx_timer_t *timer);
 } sx_timer_ops_t;
 
 struct sx_timer{
@@ -113,6 +130,32 @@ static inline int sx_timer_stop(sx_timer_t *_timer){
 static inline int sx_timer_set_period(sx_timer_t *_timer, uint32_t _timeout_ms){
     if(_timer->ops && _timer->ops->set_period){
         return _timer->ops->set_period(_timer, _timeout_ms);
+    }
+    return -1;
+}
+static inline int sx_timer_set_period_ticks(sx_timer_t *_timer, uint32_t _period_ticks){
+    if(_timer->ops && _timer->ops->set_period_ticks){
+        return _timer->ops->set_period_ticks(_timer, _period_ticks);
+    }
+    return -1;
+}
+/* Starts the timer with ARR set directly from an explicit tick count
+ * (period_ticks) via set_period_ticks(), bypassing the timeout_ms/ms
+ * rounding path entirely — see set_period_ticks's doc-comment above.
+ * Use this instead of sx_timer_start() when the caller (e.g. sx_pwm_sw)
+ * already computed an exact period_ticks from timer->tick_hz and needs
+ * that exact value applied, not timer->timeout_ms's separately-rounded
+ * ms value. Does not modify timer->timeout_ms. */
+static inline int sx_timer_start_ticks(sx_timer_t *_timer, uint32_t _period_ticks){
+    if (_timer->ops && _timer->ops->set_period_ticks) {
+        if (_timer->ops->set_period_ticks(_timer, _period_ticks) != 0) {
+            return -1;
+        }
+    } else {
+        return -1;
+    }
+    if(_timer->ops && _timer->ops->start_hw){
+        return _timer->ops->start_hw(_timer);
     }
     return -1;
 }

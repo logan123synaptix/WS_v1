@@ -24,6 +24,8 @@ extern "C" {
 // #include "adc.h"
 #include "spi.h"
 #include "i2c.h"
+#include "sx_timer.h"
+#include "sx_pwm_sw.h"
 #include "sx_ex_rtc.h"
 #include "bno055.h"
 #include "sx_filter.h"
@@ -69,6 +71,10 @@ typedef struct Board{
      * sx_uart_t instance is owned here and its address passed to
      * sensirion_uart_hal_init(). See sensirion_uart_portdescriptor.h. */
     sx_uart_t   sps30_uart;
+
+    sx_timer_t  sx_timer;
+    sx_pwm_software_t sx_pwm_sw;
+
     SHT3X_T     sht3x;
     /* ZE12A (gas_sensor / UART_EXTEND): its UART instance and mux-select
      * GPIOs are owned as private statics inside ze12a.c (s_comm,

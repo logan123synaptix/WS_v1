@@ -16,6 +16,9 @@ Board_t board;
 
 
 static UART_HandleTypeDef *hal_uart[6] = {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6}; // lte, gps, rs485, dust-sensor, extend-uart, log
+
+
+
 static sx_uart_t *bsp_uart[6];
 static uint8_t uart_rx_char[6];
 

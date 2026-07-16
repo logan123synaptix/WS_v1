@@ -17,7 +17,7 @@ Board_t board;
 
 static UART_HandleTypeDef *hal_uart[6] = {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6}; // lte, gps, rs485, dust-sensor, extend-uart, log
 
-
+static TIM_HandleTypeDef *sx_tim1 = &htim1;
 
 static sx_uart_t *bsp_uart[6];
 static uint8_t uart_rx_char[6];
@@ -195,6 +195,9 @@ void sx_board_init(void)
 
     // I2C
     sx_i2c_init(&board.i2c1, &sx_i2c_ops, &hi2c1);
+
+    // TIMER
+    sx_timer_init(&board.sx_timer, &sx_timer_ops, &sx_tim1, );
 
     /* Shared I2C1 reset line — see s_i2c1_reset's own comment above. Only
      * initialized once here; RTC does not take it (self-resets via I2C),

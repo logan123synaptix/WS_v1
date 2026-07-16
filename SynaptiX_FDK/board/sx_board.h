@@ -24,6 +24,7 @@ extern "C" {
 // #include "adc.h"
 #include "spi.h"
 #include "i2c.h"
+#include "tim.h"
 #include "sx_timer.h"
 #include "sx_pwm_sw.h"
 #include "sx_ex_rtc.h"

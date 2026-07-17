@@ -112,7 +112,7 @@ Bootloader_t *dfu_boot = NULL;
  
 void dfu_app_init(void)
 {
-  log_info("dfu_app_init");
+  LOGI(TAG, "dfu_app_init");
   _write_addr = APP_START_ADDR;
 }
  
@@ -121,7 +121,7 @@ void dfu_app_init(void)
 uint32_t tud_dfu_get_timeout_cb(uint8_t alt, uint8_t state)
 {
     (void) alt;
-    log_info("tud_dfu_get_timeout_cb\r\n");
+    LOGI(TAG, "tud_dfu_get_timeout_cb\r\n");
     if (state == DFU_DNBUSY) return 50; // erase/program time budget per block
     return 0;
 }
@@ -132,7 +132,7 @@ uint32_t tud_dfu_get_timeout_cb(uint8_t alt, uint8_t state)
 void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, uint16_t length)
 {
     (void) alt;
-    log_info("tud_dfu_download_cb\r\n");
+    LOGI(TAG, "tud_dfu_download_cb\r\n");
     if (block_num == 0)
     {
         dfu_app_init();
@@ -165,7 +165,7 @@ void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, u
 void tud_dfu_manifest_cb(uint8_t alt)
 {
     (void) alt;
-    log_info("tud_dfu_manifest_cb");
+    LOGI(TAG, "tud_dfu_manifest_cb");
     // HAL_FLASH_Unlock();
     // flush_quadword(); // write any trailing partial quad-word
     // HAL_FLASH_Lock();
@@ -188,7 +188,7 @@ void tud_dfu_manifest_cb(uint8_t alt)
 uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t *data, uint16_t length)
 {
     (void) alt;
-    log_info("tud_dfu_upload_cb\r\n");
+    LOGI(TAG, "tud_dfu_upload_cb\r\n");
     uint32_t addr = APP_START_ADDR + (uint32_t) block_num * length;
  
     if (addr >= APP_START_ADDR + APP_MAX_SIZE) return 0;
@@ -203,14 +203,14 @@ uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t *data, uint1
 void tud_dfu_abort_cb(uint8_t alt)
 {
     (void) alt;
-    log_info("tud_dfu_abort_cb\r\n");
+    LOGI(TAG, "tud_dfu_abort_cb\r\n");
     dfu_app_init();
 }
  
 // Only used if CFG_TUD_DFU_RUNTIME is enabled instead of/alongside DFU mode.
 void tud_dfu_detach_cb(void)
 {
-  log_info("tud_dfu_detach_cb\r\n");
+  LOGI(TAG, "tud_dfu_detach_cb\r\n");
   NVIC_SystemReset();
 }
 
@@ -402,7 +402,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
-    //  ex: log_info("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    //  ex: LOGI("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

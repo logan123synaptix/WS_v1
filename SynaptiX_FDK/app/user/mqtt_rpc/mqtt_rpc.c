@@ -6,15 +6,35 @@
 #include "cJSON.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 static const char *TAG = "MQTT_RPC";
 
 #define RPC_RESPONSE_BUFF_SIZE 256
+#define RPC_TOPIC_BUFF_SIZE    64  /* "synaptix/demo/request/" + device_id (max NETWORK_CONFIG_DEVICE_ID_MAX_LEN=32) fits well within this */
+
+/* Builds "<RPC_REQUEST_API><device_id>" into a caller-owned buffer. Reads
+ * network_config_get()->device_id fresh each call (not cached), so the
+ * topic always reflects the current device_id — see app_config.h's
+ * doc-comment above RPC_REQUEST_API for why a device_id change still
+ * requires a manual restart to take effect on the *subscription* itself
+ * (mqtt_rpc_init() only runs once per connect). */
+static void build_rpc_request_topic(char *out, size_t out_size)
+{
+    snprintf(out, out_size, "%s%s", RPC_REQUEST_API, network_config_get()->device_id);
+}
+
+static void build_rpc_response_topic(char *out, size_t out_size)
+{
+    snprintf(out, out_size, "%s%s", RPC_RESPONSE_API, network_config_get()->device_id);
+}
 
 void mqtt_rpc_init(void)
 {
-    sx_user_mqtt_subscribe(RPC_REQUEST_API);
-    log_info(TAG, "Subscribed to %s", RPC_REQUEST_API);
+    char topic[RPC_TOPIC_BUFF_SIZE];
+    build_rpc_request_topic(topic, sizeof(topic));
+    sx_user_mqtt_subscribe(topic);
+    log_info(TAG, "Subscribed to %s", topic);
 }
 
 /* Applies one "-flag": value pair from the params object, same flag
@@ -160,12 +180,16 @@ static void publish_response(const char *result)
     cJSON_PrintPreallocated(root, buff, sizeof(buff), 0);
     cJSON_Delete(root);
 
-    sx_user_mqtt_publish(RPC_RESPONSE_API, buff);
+    char topic[RPC_TOPIC_BUFF_SIZE];
+    build_rpc_response_topic(topic, sizeof(topic));
+    sx_user_mqtt_publish(topic, buff);
 }
 
 void mqtt_rpc_on_message(const char *topic, const char *message)
 {
-    if (strcmp(topic, RPC_REQUEST_API) != 0) {
+    char expected_topic[RPC_TOPIC_BUFF_SIZE];
+    build_rpc_request_topic(expected_topic, sizeof(expected_topic));
+    if (strcmp(topic, expected_topic) != 0) {
         return;
     }
 

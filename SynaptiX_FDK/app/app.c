@@ -21,6 +21,7 @@
 #include "gps.h"
 #include "cJSON.h"
 #include <string.h>
+#include <stdio.h>
 
 static const char *TAG = "APP";
 
@@ -133,6 +134,25 @@ static volatile app_mode_t s_app_mode    = APP_MODE_FULL_POWER;
 #define TELEMETRY_JSON_BUFF_SIZE 512
 static char s_telemetry_json[TELEMETRY_JSON_BUFF_SIZE];
 
+/* MQTT_STATION_DATA_TOPIC/MQTT_STATION_HEARTBEAT_TOPIC (app_config.h) are
+ * prefixes only — the actual topic is "<prefix><device_id>" so multiple
+ * stations sharing one broker publish to distinct topics, same pattern as
+ * mqtt_rpc.c's build_rpc_request_topic()/build_rpc_response_topic(). A
+ * device_id change via CLI/RPC takes effect on the next publish
+ * immediately (unlike mqtt_rpc's subscribe, this isn't a one-time
+ * subscription — every call rebuilds the topic fresh). */
+#define TOPIC_BUFF_SIZE 64  /* longest prefix here + NETWORK_CONFIG_DEVICE_ID_MAX_LEN=32 fits well within this */
+
+static void build_telemetry_topic(char *out, size_t out_size)
+{
+    snprintf(out, out_size, "%s%s", MQTT_STATION_DATA_TOPIC, network_config_get()->device_id);
+}
+
+static void build_heartbeat_topic(char *out, size_t out_size)
+{
+    snprintf(out, out_size, "%s%s", MQTT_STATION_HEARTBEAT_TOPIC, network_config_get()->device_id);
+}
+
 /* ===================== offline telemetry queue =====================
  * Ported from WS_v0's push_last_telemetry_json()/its SENDING-state save-
  * on-fail block (SynaptiX/apps/app.c), re-targeted at this project's
@@ -163,6 +183,17 @@ static char s_telemetry_json[TELEMETRY_JSON_BUFF_SIZE];
 #define OFFLINE_QUEUE_MAX_FILES 20   /* oldest file dropped once this many are queued, so a long outage can't fill the flash */
 
 static uint32_t s_offline_queue_seq = 0;
+
+/* Heartbeat is sent every HEARTBEAT_CYCLE_INTERVAL SENDING passes, not
+ * every cycle — see build_heartbeat_payload()'s doc-comment for why.
+ * Per the user, ~4 cycles at the current APP_CYCLE_PERIOD_MS/
+ * APP_PUMP_ON_MS/APP_SENSING_MS defaults works out to roughly 27 minutes
+ * between heartbeats. Counts cycles rather than wall-clock ms, so if
+ * those timings become runtime-configurable later (see app_config.h's
+ * NOTE on that) this interval scales automatically instead of needing a
+ * separate ms-based recompute. */
+#define HEARTBEAT_CYCLE_INTERVAL 4U
+static uint32_t s_sending_cycle_count = 0;
 
 /* Saves payload as a new file in OFFLINE_QUEUE_DIR. Silently gives up (logs
  * only) if the write itself fails — same as WS_v0's fopen()==NULL branch,
@@ -248,10 +279,40 @@ static int offline_queue_resend_one(void)
         return 1;
     }
 
-    sx_user_mqtt_publish("weatherstation/telemetry", buf);
+    char topic[TOPIC_BUFF_SIZE];
+    build_telemetry_topic(topic, sizeof(topic));
+    sx_user_mqtt_publish(topic, buf);
     log_info(TAG, "Resent queued telemetry: %s", path);
     sx_storage_delete(path);
     return 1;
+}
+
+/* Formats board.rtc (rx8130ce, see sx_ex_rtc.h) as an ISO-8601 UTC string
+ * ("YYYY-MM-DDTHH:MM:SSZ") into a caller-owned buffer, returning true on
+ * success. Returns false (buffer left untouched) if the RTC hasn't been
+ * validly set yet — rx8130ce_is_time_valid() reflects the chip's own
+ * voltage-loss flag (RX8130CE_FLAG_VLF), so this also catches a
+ * brand-new/battery-drained RTC that time_sync.c hasn't stamped yet.
+ * WS_v0 had no equivalent normalized format (its ntp_get_time() just
+ * stored the modem's raw AT-command string verbatim) — ISO-8601 is this
+ * project's own choice, not a port.
+ * rx8130ce_time_t's year field is 2-digit (e.g. 25 = 2025, see
+ * sx_ex_rtc.h), so 2000 is added here. */
+static bool format_timestamp(char *out, size_t out_size)
+{
+    bool valid = false;
+    if (rx8130ce_is_time_valid(&board.rtc, &valid) != RX8130CE_OK || !valid) {
+        return false;
+    }
+
+    rx8130ce_time_t t;
+    if (rx8130ce_get_time(&board.rtc, &t) != RX8130CE_OK) {
+        return false;
+    }
+
+    snprintf(out, out_size, "%04u-%02u-%02uT%02u:%02u:%02uZ",
+             2000U + t.year, t.month, t.day, t.hour, t.min, t.sec);
+    return true;
 }
 
 /* Builds the telemetry JSON payload from whatever each sensor app's
@@ -263,6 +324,13 @@ static const char *build_telemetry_payload(void)
     cJSON *root = cJSON_CreateObject();
 
     cJSON_AddStringToObject(root, "deviceID", network_config_get()->device_id);
+
+    char timestamp[32];
+    if (format_timestamp(timestamp, sizeof(timestamp))) {
+        cJSON_AddStringToObject(root, "timestamp", timestamp);
+    } else {
+        cJSON_AddNullToObject(root, "timestamp");
+    }
 
     if (sx_temp_humi_is_ready(&s_temp_humi)) {
         cJSON_AddNumberToObject(root, "temperature", sx_temp_humi_get_temperature(&s_temp_humi));
@@ -335,6 +403,115 @@ static const char *build_telemetry_payload(void)
     return s_telemetry_json;
 }
 
+#define HEARTBEAT_JSON_BUFF_SIZE 512
+static char s_heartbeat_json[HEARTBEAT_JSON_BUFF_SIZE];
+
+/* Builds the periodic device-health payload (uptime, firmware version,
+ * signal strength, power rail, per-sensor connected/ready status),
+ * separate from build_telemetry_payload()'s measurement data — same split
+ * WS_v0 had (its heartBeatPayload() vs dataPayload()). Sent every
+ * HEARTBEAT_CYCLE_INTERVAL cycles (see APP_CYCLE_SENDING), not every
+ * cycle, since a device that's reachable enough to publish telemetry is
+ * already known-alive; heartbeat exists to catch outages, not to repeat
+ * that signal every lap.
+ *
+ * uptimeMs uses HAL_GetTick() (ms since boot/reset) rather than the RTC —
+ * this is "how long since last boot", not wall-clock time, and stays
+ * valid even before time_sync has run. Sensor status fields reuse the
+ * same *_is_ready()/*_is_connected()/*_has_*() getters
+ * build_telemetry_payload() already calls, so a sensor reported "moving"
+ * for motionState there and "ok" here always agree. */
+static const char *build_heartbeat_payload(void)
+{
+    cJSON *root = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(root, "deviceID", network_config_get()->device_id);
+
+    char timestamp[32];
+    if (format_timestamp(timestamp, sizeof(timestamp))) {
+        cJSON_AddStringToObject(root, "timestamp", timestamp);
+    } else {
+        cJSON_AddNullToObject(root, "timestamp");
+    }
+
+    cJSON_AddNumberToObject(root, "uptimeMs", (double)HAL_GetTick());
+    cJSON_AddStringToObject(root, "firmwareVersion", APP_FW_VERSION);
+
+    /* sx_user_mqtt_get_rssi() reads board.modem.ops->get_rssi() under the
+     * hood (see sx_user_mqtt.c) — only meaningful once the modem reports
+     * ready, same caveat a7677s.h documents for get_rssi() itself. No
+     * "is ready" gate exists at this layer, so this is published as-is;
+     * a not-yet-ready modem's cached value is whatever a7677s_get_rssi()
+     * defaults to (see its doc-comment in a7677s.c). */
+    cJSON_AddNumberToObject(root, "signalStrength", sx_user_mqtt_get_rssi());
+
+    if (power_monitor_app_has_voltage_reading(&s_power_monitor)) {
+        cJSON_AddNumberToObject(root, "railVoltage",
+                                 power_monitor_app_get_rail_voltage_v(&s_power_monitor));
+    } else {
+        cJSON_AddNullToObject(root, "railVoltage");
+    }
+    if (power_monitor_app_has_current_reading(&s_power_monitor)) {
+        cJSON_AddNumberToObject(root, "railCurrent",
+                                 power_monitor_app_get_current_a(&s_power_monitor));
+    } else {
+        cJSON_AddNullToObject(root, "railCurrent");
+    }
+
+    /* Per-sensor OK/FAIL status, same channel set as build_telemetry_payload()
+     * (see gas_channels[] there) plus temp/humidity, SPS30, and accel. */
+    cJSON *sensors = cJSON_CreateObject();
+    cJSON_AddBoolToObject(sensors, "tempHumi", sx_temp_humi_is_ready(&s_temp_humi));
+    cJSON_AddBoolToObject(sensors, "sps30", sps30_app_has_measurement(&s_sps30_app));
+    cJSON_AddBoolToObject(sensors, "co", gas_sensor_app_is_connected(GAS_SENSOR_CO));
+    cJSON_AddBoolToObject(sensors, "so2", gas_sensor_app_is_connected(GAS_SENSOR_SO2));
+    cJSON_AddBoolToObject(sensors, "no2", gas_sensor_app_is_connected(GAS_SENSOR_NO2));
+    cJSON_AddBoolToObject(sensors, "o3", gas_sensor_app_is_connected(GAS_SENSOR_O3));
+    cJSON_AddBoolToObject(sensors, "h2s", gas_sensor_app_is_connected(GAS_SENSOR_H2S));
+    /* No "accel" status field: accel_app_t has a has_reading bool
+     * internally (see accel_app.h) but exposes no public getter for it —
+     * only accel_app_is_movement_detected(), which answers a different
+     * question ("is it currently moving", not "is the sensor working").
+     * Faking this field would break the "don't fake data" convention
+     * every other field here follows. Add accel_app_has_reading() to
+     * accel_app.h/.c if this is wanted — flagging for the user rather
+     * than guessing at the getter's semantics. */
+    cJSON_AddItemToObject(root, "sensors", sensors);
+
+    memset(s_heartbeat_json, 0, sizeof(s_heartbeat_json));
+    cJSON_PrintPreallocated(root, s_heartbeat_json, HEARTBEAT_JSON_BUFF_SIZE, 0);
+    cJSON_Delete(root);
+    return s_heartbeat_json;
+}
+
+/* Unlike telemetry, a heartbeat that fails to send (not connected) is
+ * simply skipped for this cycle, not queued — same as WS_v0's
+ * push_last_telemetry_json() (its heartbeat publish returns early on
+ * failure with no persistence, only telemetry uses the /data queue). A
+ * heartbeat describes current device health; a stale one delivered late
+ * from a queue would misreport uptime/signal/power as of some earlier
+ * moment, so there is little value in persisting it the way a telemetry
+ * *reading* (still historically valid whenever it arrives) has. */
+static void send_heartbeat_if_due(void)
+{
+    s_sending_cycle_count++;
+    if (s_sending_cycle_count < HEARTBEAT_CYCLE_INTERVAL) {
+        return;
+    }
+    s_sending_cycle_count = 0;
+
+    if (!sx_user_mqtt_is_connected()) {
+        log_warn(TAG, "MQTT not connected, heartbeat skipped this cycle");
+        return;
+    }
+
+    const char *payload = build_heartbeat_payload();
+    char topic[TOPIC_BUFF_SIZE];
+    build_heartbeat_topic(topic, sizeof(topic));
+    sx_user_mqtt_publish(topic, payload);
+    log_info(TAG, "Heartbeat published: %s", payload);
+}
+
 /* ===================== FULL_POWER cycle: ON_PUMP -> SENSING -> SENDING
  * ===================== SLEEPING -> WAKING -> back to ON_PUMP
  *
@@ -387,9 +564,9 @@ static void app_cycle_process(uint32_t delta_ms)
         const char *payload = build_telemetry_payload();
         /* Plain MQTT publish, not thingsboard_client_publish_telemetry()
          * — see app_init()'s comment on why Thingsboard isn't used yet.
-         * Topic is a fixed default for now (no Thingsboard-style topic
-         * convention applies without a real Thingsboard broker); revisit
-         * once network_config/CDC-MSC input can also carry a topic. */
+         * Topic is MQTT_STATION_DATA_TOPIC + device_id (see
+         * build_telemetry_topic()), so multiple stations sharing one
+         * broker land on distinct topics. */
         if (sx_user_mqtt_is_connected()) {
             /* Drain one backlog file first, same "one at a time" shape as
              * WS_v0's push_last_telemetry_json() — see its doc-comment
@@ -398,12 +575,15 @@ static void app_cycle_process(uint32_t delta_ms)
              * cycle instead of only when nothing new needs sending. */
             offline_queue_resend_one();
 
-            sx_user_mqtt_publish("weatherstation/telemetry", payload);
+            char topic[TOPIC_BUFF_SIZE];
+            build_telemetry_topic(topic, sizeof(topic));
+            sx_user_mqtt_publish(topic, payload);
             log_info(TAG, "Telemetry published: %s", payload);
         } else {
             offline_queue_save(payload);
             log_warn(TAG, "MQTT not connected, telemetry queued: %s", payload);
         }
+        send_heartbeat_if_due();
         sps30_app_reset(&s_sps30_app);
         s_cycle_state = APP_CYCLE_SLEEPING;
         s_app_mode    = APP_MODE_ENTER_SLEEP;

@@ -15,10 +15,15 @@ extern "C" {
  * Unlike WS_v0 (which used Thingsboard's RPC_REQUEST_API/RPC_RESPONSE_API
  * topic convention via its thingsboard-client.c layer), this subscribes
  * directly on plain sx_user_mqtt — WS_v1 does not use thingsboard_client
- * yet (see app_init()'s comment on why). The topic strings themselves
- * (RPC_REQUEST_API/RPC_RESPONSE_API) are still taken from app_config.h,
- * since those macros already exist there and aren't Thingsboard-specific
- * in shape (just "<request-topic>"/"<response-topic>").
+ * yet (see app_init()'s comment on why). The topic *prefixes*
+ * (RPC_REQUEST_API/RPC_RESPONSE_API) are taken from app_config.h, but the
+ * actual topic used on the wire is built at runtime as
+ * "<prefix><device_id>" (network_config_get()->device_id) — see
+ * build_rpc_request_topic()/build_rpc_response_topic() in mqtt_rpc.c —
+ * so multiple stations sharing one broker don't collide. A device_id
+ * change via CLI/RPC does not retroactively re-subscribe; per the user,
+ * a manual restart is required for it to take effect, same as every
+ * other network_config field.
  *
  * There is no polling function here — this module is purely reactive,
  * driven by sx_user_mqtt_cfg_t's on_message callback (wired in app_init()).

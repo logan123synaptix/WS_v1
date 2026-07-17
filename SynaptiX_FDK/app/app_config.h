@@ -45,6 +45,11 @@
 #define PAYLOAD_DEFAULT_SIZE            256
 #define DEVICE_ID                       "001"
 
+/* Reported as "firmwareVersion" in the heartbeat payload (app.c's
+ * build_heartbeat_payload()) — bump manually on release, there is no
+ * build-system-generated version yet. */
+#define APP_FW_VERSION                  "0.1.0"
+
 #if USE_THINGSBOARD
 #define ATTRIBUTE_UPDATE_API "synaptix/demo/attributes/"MQTT_ID
 #define ATTRIBUTE_REQUEST_API "synaptix/demo/attributes/response/"MQTT_ID
@@ -55,8 +60,20 @@
 #define TELEMETRY_4_20mA_API "synaptix/demo/telemetry/"MQTT_ID"/4_20mA/%d"
 #define TELEMETRY_THS_API "synaptix/demo/telemetry/"MQTT_ID"/THS/%d"
 
-#define RPC_REQUEST_API "synaptix/demo/request/"MQTT_ID
-#define RPC_RESPONSE_API "synaptix/demo/response/"MQTT_ID
+/* NOTE: these three topic prefixes are runtime-suffixed with
+ * network_config_get()->device_id (not the compile-time MQTT_ID above)
+ * by their callers — app.c's build_telemetry_payload()/
+ * build_heartbeat_payload() and mqtt_rpc.c's mqtt_rpc_init()/
+ * mqtt_rpc_on_message()/publish_response(). See network_config.h's
+ * device_id doc-comment for why device_id (not MQTT_ID) is the multi-
+ * station identity. Changing device_id at runtime does NOT
+ * re-subscribe mqtt_rpc's topic — per the user, a manual restart
+ * (CLI's "restart" command) is required after any network_config
+ * change, same as host/port/client_id/etc. */
+#define RPC_REQUEST_API "synaptix/demo/request/"
+#define RPC_RESPONSE_API "synaptix/demo/response/"
+#define MQTT_STATION_DATA_TOPIC      "hanoi/air_quality/data/"
+#define MQTT_STATION_HEARTBEAT_TOPIC "hanoi/air_quality/heartbeat/"
 
 #define THINGSBOARD_USER_NAME_SIZE  128
 #define THINGSBOARD_PASSWORD_SIZE   128
@@ -68,8 +85,6 @@
 #define MQTT_USER                       NULL
 #define MQTT_PASS                       NULL
 #define MQTT_KEEPALIVE                  60          /* seconds */
-#define MQTT_STATION_DATA_TOPIC         "hanoi/air_quality/data/"
-#define MQTT_STATION_HEARTBEAT_TOPIC    "hanoi/air_quality/heartbeat/" + 
 #define MQTT_SUB_TOPIC                  "stm32/cmd/#"
 #endif
 

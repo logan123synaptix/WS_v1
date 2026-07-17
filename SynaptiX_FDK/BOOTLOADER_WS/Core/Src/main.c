@@ -25,7 +25,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "bootloader.h"
+#include "tusb.h"
+#include "stm32h5xx_hal.h"
+#include "flash_define.h"
+#include "boot_debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,7 +62,150 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+__attribute__((optimize("O0"))) static void goto_application(volatile uint32_t address)
+{
+  BOOT_DEBUG("Gonna Jump to Application 0x%08X",(unsigned int)address);
+  volatile void (*app_reset_handler)(void) = (void *)(*((volatile uint32_t *)(address + 4U)));
+  // __disable_irq();
+  /* Reset the Clock */
+  BSP_COM_DeInit(COM1);
+  BSP_LED_DeInit(LED_GREEN);
+  BSP_LED_DeInit(LED_YELLOW);
+  BSP_LED_DeInit(LED_RED);
+  HAL_ICACHE_Disable();
+  HAL_RCC_DeInit();
+  HAL_DeInit();
+  
+  SysTick->CTRL = 0;
+  SysTick->LOAD = 0;
+  SysTick->VAL = 0;
+  
+  __set_MSP(*(volatile uint32_t *)address);
+  /* Jump to application */
+  SCB->VTOR = address;
+  // __enable_irq();
+  app_reset_handler(); // call the app reset handler
+}
+#define APP_START_ADDR      PRIMARY_APP_FLASH_START_ADDRESS   // bootloader occupies 0x08000000-0x0800FFFF (64KB)
+#define APP_MAX_SIZE        PRIMARY_APP_FLASH_SIZE // rest of bank 1, adjust to your map
+// #define FLASH_SECTOR_SIZE   0x2000UL        // 8KB sectors on H5
+#define QUADWORD_SIZE       16U             // 128-bit program width
+ 
+static uint32_t _write_addr;                // next flash address to write
+Bootloader_t *dfu_boot = NULL;
+//--------------------------------------------------------------------
+// TinyUSB DFU callbacks
+//--------------------------------------------------------------------
+ 
+void dfu_app_init(void)
+{
+  // printf("dfu_app_init");
+  _write_addr = APP_START_ADDR;
+}
+ 
+// Called before DFU_DNLOAD is acked. Return time (ms) host should wait
+// before sending GET_STATUS; use it to stretch out flash erase time.
+uint32_t tud_dfu_get_timeout_cb(uint8_t alt, uint8_t state)
+{
+    (void) alt;
+    // printf("tud_dfu_get_timeout_cb\r\n");
+    if (state == DFU_DNBUSY) return 50; // erase/program time budget per block
+    return 0;
+}
+ 
+// Invoked when DFU_DNLOAD request is received.
+// Must call tud_dfu_finish_flashing() when done (can be immediate here
+// since HAL_FLASH_Program is blocking).
+void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, uint16_t length)
+{
+    (void) alt;
+    // printf("tud_dfu_download_cb\r\n");
+    if (block_num == 0)
+    {
+        dfu_app_init();
+        HAL_FLASH_Unlock();
+        FLASH_EraseInitTypeDef erase = {0};
+        uint32_t sector_error = 0;
+ 
+        erase.TypeErase   = FLASH_TYPEERASE_SECTORS;
+        erase.Banks        = FLASH_BANK_1;               // adjust if APP_START_ADDR crosses into bank 2
+        erase.Sector       = PRIMARY_APP_FLASH_START_ADDRESS / FLASH_SECTOR_SIZE;
+        erase.NbSectors    = PRIMARY_APP_FLASH_NUMBER_OF_SECTORS;
+ 
+        HAL_FLASHEx_Erase(&erase, &sector_error);
+        HAL_FLASH_Lock();
+    }
+ 
+    if (_write_addr + length - APP_START_ADDR > APP_MAX_SIZE)
+    {
+        tud_dfu_finish_flashing(DFU_STATUS_ERR_ADDRESS);
+        return;
+    }
+    // flash_write(data, length);
+    boot_flash_write(&dfu_boot->boot_flash,_write_addr,data,length);
+    _write_addr += length;
+    tud_dfu_finish_flashing(DFU_STATUS_OK);
+}
+ 
+// Invoked when download process is complete, host sends DFU_DNLOAD with
+// length 0. App now should complete the flashing process and reboot.
+void tud_dfu_manifest_cb(uint8_t alt)
+{
+    (void) alt;
+    // printf("tud_dfu_manifest_cb");
+    // HAL_FLASH_Unlock();
+    // flush_quadword(); // write any trailing partial quad-word
+    // HAL_FLASH_Lock();
+    dfu_boot->boot_flash.partition.isUpgradeInProgress = false;
+    bootloader_save_partition(dfu_boot);
+    // Tell TinyUSB we're done manifesting (no separate reboot needed since
+    // DFU_ATTR_MANIFESTATION_TOLERANT is set — host can still GET_STATUS).
+    tud_dfu_finish_flashing(DFU_STATUS_OK);
+ 
+    // Give the host a moment to read the final GET_STATUS, then jump.
+    HAL_Delay(200);
+    bootloader_jump_to_application(dfu_boot);
+    // NVIC_SystemReset();   // simplest: reset and let bootloader decide to
+                           // jump to APP_START_ADDR based on valid vector table
+}
+ 
+// Invoked when receiving DFU_UPLOAD request, application should fill
+// buffer of length and return the actual number of bytes available.
+// Return 0 to stop further uploads (used for firmware read-back/verify).
+uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t *data, uint16_t length)
+{
+    (void) alt;
+    // printf("tud_dfu_upload_cb\r\n");
+    uint32_t addr = APP_START_ADDR + (uint32_t) block_num * length;
+ 
+    if (addr >= APP_START_ADDR + APP_MAX_SIZE) return 0;
+ 
+    uint32_t remain = (APP_START_ADDR + APP_MAX_SIZE) - addr;
+    uint16_t n = (remain < length) ? (uint16_t) remain : length;
+ 
+    memcpy(data, (void const *) addr, n);
+    return n;
+}
+ 
+void tud_dfu_abort_cb(uint8_t alt)
+{
+    (void) alt;
+    // printf("tud_dfu_abort_cb\r\n");
+    dfu_app_init();
+}
+ 
+// Only used if CFG_TUD_DFU_RUNTIME is enabled instead of/alongside DFU mode.
+void tud_dfu_detach_cb(void)
+{
+  // printf("tud_dfu_detach_cb\r\n");
+    // e.g. set a flag in a backup register / noinit RAM and reset so the
+    // bootloader re-enumerates with the DFU-mode descriptor set.
+  NVIC_SystemReset();
+}
 
+int read_boot_button(){
+  return (int) !BSP_PB_GetState(BUTTON_USER);
+}
 /* USER CODE END 0 */
 
 /**
@@ -97,7 +244,33 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
+  /* Initialize leds */
+  BSP_LED_Init(LED_GREEN);
+  BSP_LED_Init(LED_YELLOW);
+  BSP_LED_Init(LED_RED);
 
+  /* Initialize USER push-button, will be used to trigger an interrupt each time it's pressed.*/
+  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI);
+
+  /* Initialize COM1 port (115200, 8 bits (7-bit data + 1 stop bit), no parity */
+  BspCOMInit.BaudRate   = 115200;
+  BspCOMInit.WordLength = COM_WORDLENGTH_8B;
+  BspCOMInit.StopBits   = COM_STOPBITS_1;
+  BspCOMInit.Parity     = COM_PARITY_NONE;
+  BspCOMInit.HwFlowCtl  = COM_HWCONTROL_NONE;
+  if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
+  {
+    Error_Handler();
+  }
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  // tusb_init(BOARD_TUD_RHPORT);
+  dfu_app_init();
+  tusb_init();
+  Bootloader_t bootloader;
+  bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
+  dfu_boot = &bootloader;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,6 +280,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    tud_task();
+    bootloader_process(&bootloader);
   }
   /* USER CODE END 3 */
 }

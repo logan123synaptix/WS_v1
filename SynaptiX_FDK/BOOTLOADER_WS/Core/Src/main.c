@@ -213,7 +213,7 @@ void tud_dfu_detach_cb(void)
 }
 
 int read_boot_button(){
-  return (int) !0;
+  return (int) 1;
 }
 
 void USB_DRD_FS_IRQHandler(void)

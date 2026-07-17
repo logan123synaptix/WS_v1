@@ -470,6 +470,22 @@ static const char *build_heartbeat_payload(void)
         cJSON_AddNullToObject(root, "railCurrent");
     }
 
+    /* motionState/gps: same getters and same "non-zero lat/long means fix"
+     * liveness check build_telemetry_payload() uses above (see its
+     * doc-comment there) — kept identical so both payloads always agree,
+     * matching WS_v0's heartBeatPayload() which publishes both fields too
+     * (not just dataPayload()). */
+    cJSON_AddStringToObject(root, "motionState",
+                             accel_app_is_movement_detected(&s_accel_app) ? "moving" : "stationary");
+
+    if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
+        cJSON_AddNumberToObject(root, "latitude", board.gps.latitude);
+        cJSON_AddNumberToObject(root, "longitude", board.gps.longtitude);
+    } else {
+        cJSON_AddNullToObject(root, "latitude");
+        cJSON_AddNullToObject(root, "longitude");
+    }
+
     /* Per-sensor OK/FAIL status, same channel set as build_telemetry_payload()
      * (see gas_channels[] there) plus temp/humidity, SPS30, and accel. */
     cJSON *sensors = cJSON_CreateObject();

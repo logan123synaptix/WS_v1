@@ -9,6 +9,7 @@
 #include "cli_shell.h"
 #include "network_config.h"
 #include "sx_board.h"
+#include "ota_trigger.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,10 +18,12 @@
 
 static int cli_cmd_restart(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_settings(ShellContext_t *shell, int argc, char *argv[]);
+static int cli_cmd_ota(ShellContext_t *shell, int argc, char *argv[]);
 
 static const Cli_Shell_Cmd s_shell_commands[] = {
     {"help",     cli_shell_help_handler, "Lists all commands\r\n"},
     {"restart",  cli_cmd_restart,        "Restart device\r\n"},
+    {"ota",      cli_cmd_ota,            "Reboot into bootloader DFU update mode (no physical DFU button on this board)\r\n"},
     {"settings", cli_cmd_settings,
         "settings -i : show current settings\r\n"
         "settings -c : configure settings (any subset of flags below)\r\n"

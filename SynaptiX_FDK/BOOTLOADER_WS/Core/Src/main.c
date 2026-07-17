@@ -30,6 +30,9 @@
 #include "stm32h5xx_hal.h"
 #include "flash_define.h"
 #include "boot_debug.h"
+#include "logger.h"
+#include "stdio.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,16 +65,22 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+UART_HandleTypeDef *log_uart = &huart3;
+
+void bsp_log_send(const char *str){
+  HAL_UART_Transmit(log_uart, str, strlen(str), 10);
+}
+
 __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t address)
 {
   BOOT_DEBUG("Gonna Jump to Application 0x%08X",(unsigned int)address);
   volatile void (*app_reset_handler)(void) = (void *)(*((volatile uint32_t *)(address + 4U)));
   // __disable_irq();
   /* Reset the Clock */
-  BSP_COM_DeInit(COM1);
-  BSP_LED_DeInit(LED_GREEN);
-  BSP_LED_DeInit(LED_YELLOW);
-  BSP_LED_DeInit(LED_RED);
+
+  /*Clear UART, ......, peripherals*/
+
   HAL_ICACHE_Disable();
   HAL_RCC_DeInit();
   HAL_DeInit();
@@ -86,13 +95,15 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
   // __enable_irq();
   app_reset_handler(); // call the app reset handler
 }
+
 #define APP_START_ADDR      PRIMARY_APP_FLASH_START_ADDRESS   // bootloader occupies 0x08000000-0x0800FFFF (64KB)
-#define APP_MAX_SIZE        PRIMARY_APP_FLASH_SIZE // rest of bank 1, adjust to your map
-// #define FLASH_SECTOR_SIZE   0x2000UL        // 8KB sectors on H5
-#define QUADWORD_SIZE       16U             // 128-bit program width
+#define APP_MAX_SIZE        PRIMARY_APP_FLASH_SIZE            // rest of bank 1, adjust to your map
+// #define FLASH_SECTOR_SIZE   0x2000UL                       // 8KB sectors on H5
+#define QUADWORD_SIZE       16U                               // 128-bit program width
  
-static uint32_t _write_addr;                // next flash address to write
+static uint32_t _write_addr;                                  // next flash address to write
 Bootloader_t *dfu_boot = NULL;
+
 //--------------------------------------------------------------------
 // TinyUSB DFU callbacks
 //--------------------------------------------------------------------
@@ -206,6 +217,12 @@ void tud_dfu_detach_cb(void)
 int read_boot_button(){
   return (int) !BSP_PB_GetState(BUTTON_USER);
 }
+
+void USB_DRD_FS_IRQHandler(void)
+{
+    tud_int_handler(0);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -243,7 +260,11 @@ int main(void)
   MX_ICACHE_Init();
   MX_USART1_UART_Init();
   MX_USB_PCD_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  logger_init(LOGGER_DEBUG, bsp_log_send);
+
   /* Initialize leds */
   BSP_LED_Init(LED_GREEN);
   BSP_LED_Init(LED_YELLOW);
@@ -262,6 +283,16 @@ int main(void)
   {
     Error_Handler();
   }
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  // tusb_init(BOARD_TUD_RHPORT);
+  dfu_app_init();
+  tusb_init();
+  Bootloader_t bootloader;
+  bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
+  dfu_boot = &bootloader;
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */

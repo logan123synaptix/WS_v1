@@ -65,15 +65,39 @@ BÀI HỌC TỪ CÁC PHIÊN GẦN ĐÂY — ĐỌC KỸ TRƯỚC KHI LÀM GÌ
    (kể cả do Claude tự viết ở phiên trước) cũng phải đối chiếu với code thật, không
    suy diễn "đã confirm trong chat thì chắc đúng".
 
+4. MODULE "TỒN TẠI VÀ BUILD ĐƯỢC" KHÔNG CÓ NGHĨA LÀ ĐÃ WIRING (lặp lại kiểu bug
+   mqtt_rpc trước đây, lần này ở BOOTLOADER_WS/): logic bootloader
+   (`bootloader/bootloader.c`, `boot_flash.c`) và cấu hình TinyUSB DFU
+   (`TUSB/tusb_config.h`, `usb_descriptors.c`) đều viết xong, đọc độc lập thấy hợp
+   lý — nhưng `Core/Src/main.c` chỉ init HAL/GPIO/ICACHE/UART/USB-PCD rồi rơi vào
+   `while(1){}` RỖNG, không hề gọi `bootloader_init()`/`bootloader_process()`,
+   không có `tud_init()`/`tud_task()` nào cả, và không có implementation thật cho
+   `jump_to_application`/`read_boot_pin` (2 tham số bắt buộc của
+   `bootloader_init()`). Xem mục "BOOTLOADER_WS — TRẠNG THÁI THẬT" bên dưới để biết
+   chính xác còn thiếu gì trước khi tin bootloader đã "xong".
+
 ============================================================
 TRẠNG THÁI GIT THẬT TẠI THỜI ĐIỂM VIẾT HANDOFF NÀY (tự xác minh lại)
 ============================================================
-Remote WS_v1 ở commit 5e3a034 ("modify topic heartbeat"), sau các commit gần đây:
+Remote WS_v1 ở commit f873e2c ("add submodule tiny usb in BOOTLOADER_WS"), sau các
+commit gần đây:
+  f873e2c add submodule tiny usb in BOOTLOADER_WS  <- .gitmodules mới, trỏ
+                                                        SynaptiX_FDK/BOOTLOADER_WS/
+                                                        libs/tinyusb/tinyusb tới
+                                                        https://github.com/hathach/
+                                                        tinyusb.git (PHẢI
+                                                        `git submodule update --init
+                                                        --recursive` sau khi clone/
+                                                        pull, nếu không thư mục đó
+                                                        sẽ trống)
+  acbdb0f modify handoff prompt                      <- người dùng tự áp bản handoff
+                                                        do Claude viết ở phiên trước,
+                                                        không tự sửa thêm gì khác
   5e3a034 modify topic heartbeat
   cf96953 add modify according claude   <- gồm cả BOOTLOADER_WS/ (do người dùng tự
                                             thêm, không phải Claude) + phần operator
-                                            getter dưới đây (do Claude phiên trước
-                                            viết, người dùng tự áp + push)
+                                            getter (do Claude phiên trước viết,
+                                            người dùng tự áp + push)
   d5b3c5d apply mqtt_rpc_timestamp_heartbeat.patch
   49ee824 delete old code version
   40dccda modify add topic device id
@@ -157,10 +181,81 @@ Trạng thái hiện tại — TẤT CẢ field có ý nghĩa của v0 đã có 
 khoảng trống field-level nào cần lấp thêm ở mục này, TRỪ KHI người dùng muốn thêm
 field hoàn toàn mới không có trong v0 (không thuộc phạm vi "đạt parity với v0").
 
-VIỆC ĐẦU TIÊN CỦA PHIÊN NÀY: `git fetch origin` + `git log --oneline -15` + đọc
-lại app.c/a7677s.c/a7677s.h/modem_ops.h/sx_user_mqtt.c bằng `view` để tự xác nhận
-những gì handoff này mô tả vẫn khớp code thật — ĐỪNG giả định mô tả trên là chính
-xác mãi mãi, người dùng có thể đã tự sửa thêm gì đó sau khi handoff này được viết.
+--- 5. BOOTLOADER_WS/ — TRẠNG THÁI THẬT (người dùng tự viết/tự push, Claude chỉ
+       ĐỌC và báo cáo, KHÔNG tự sửa gì) ---
+Thư mục SynaptiX_FDK/BOOTLOADER_WS/ là dự án con RIÊNG BIỆT (CMake project độc lập,
+CMAKE_PROJECT_NAME=bootloader), không phải phần của app chính WS_v1 firmware.
+Người dùng tự viết toàn bộ, Claude phiên này chỉ đọc để nắm tình hình theo yêu cầu.
+KHÔNG chủ động sửa/thêm gì vào thư mục này trừ khi người dùng yêu cầu cụ thể.
+
+Mục đích (theo readme.md): bootloader STM32H563 hỗ trợ cập nhật firmware qua USB
+DFU, dùng partition A/B (primary/secondary) + factory fallback + vùng scratch
+trung gian để swap an toàn.
+
+Layout flash thật (bootloader/flash_define.h, tổng 189/256 sector 8KB):
+  0x08000000  bootloader           7 sector  (56 KB)
+  +56KB       partition metadata   1 sector  (8 KB)   — có magic number 0xDEADBEEF
+  +8KB        primary app          60 sector (480 KB)
+  +480KB      secondary app        60 sector (480 KB)
+  +480KB      factory app          60 sector (480 KB)
+  +480KB      scratch              1 sector  (8 KB)
+
+Kiến trúc logic (bootloader/*.c/.h) — ĐÃ VIẾT XONG, đọc độc lập thấy hợp lý:
+  - boot_flash.h/.c: vtable BootFlashFunctions_t (init/erase/write/read) tách khỏi
+    logic partition. Nhánh CFG_BOOT_MCU==BOOT_MCU_H5 có implementation thật dùng
+    HAL_FLASH_Program(FLASH_TYPEPROGRAM_QUADWORD, ...), xử lý đúng 2-bank layout
+    của STM32H5 (sector > 127 → bank 2, erase_init.Sector = sector % 128).
+    LƯU Ý: flash_define.h dòng ~53 có `// #define CFG_BOOT_MCU BOOT_MCU_H5` bị
+    COMMENT — đây KHÔNG phải bug, macro được inject qua
+    bootloader/CMakeLists.txt's target_compile_definitions
+    (CFG_BOOT_MCU=BOOT_MCU_H5), dòng comment trong header chỉ là dead/không cần
+    thiết. Đã verify: build thật KHÔNG rơi vào nhánh "no specific implementation"
+    ở cuối boot_flash.c.
+  - bootloader.c: bootloader_init() đọc lại partition từ flash, tự phát hiện
+    corruption/lần boot đầu qua magic_number mismatch và tự khởi tạo lại toàn bộ
+    partition table + ghi xuống flash. boot_swap_firmware() (chỉ compile khi
+    SECONDARY_FLASH && SCRATCH_FLASH đều 1) swap primary<->secondary từng block
+    kích thước = scratch_size, qua scratch làm trung gian — không cần đủ RAM chứa
+    cả 2 ảnh cùng lúc, cách làm chuẩn cho MCU RAM hạn chế.
+  - boot_err.h: mã lỗi rõ ràng, không có gì bất thường.
+
+VẤN ĐỀ THẬT — CHƯA WIRING, kiểm tra bằng grep trực tiếp trong Core/ và TUSB/, xác
+nhận 0 kết quả cho các hàm dưới:
+  1. Core/Src/main.c KHÔNG gọi bootloader_init()/bootloader_process() ở bất kỳ đâu.
+     Toàn bộ nội dung main() sau khi init HAL/MPU/clock/GPIO/ICACHE/UART/USB-PCD
+     là `while(1) {}` RỖNG. Bootloader_t chưa từng được khai báo/khởi tạo trong
+     Core/.
+  2. TinyUSB app-layer CHƯA init: usb.c (Core/Src/) chỉ dừng ở tầng PCD (HAL
+     peripheral controller — HAL_PCD_Init), KHÔNG có tud_init()/tud_task() ở đâu
+     cả, dù TUSB/tusb_config.h đã bật CFG_TUD_DFU=1 (standalone DFU-mode) với
+     CFG_TUD_DFU_XFER_BUFSIZE=8192 và usb_descriptors.c đã có device/config/string
+     descriptor đầy đủ (VID=0xCAFE/PID=0x4DF0 — comment ghi "replace with your
+     VID", vẫn là giá trị mẫu, CHƯA đổi; 1 alt-setting DFU tên "Application").
+     Các callback tud_dfu_*_cb (get_timeout/download/upload — nơi thật sự ghi dữ
+     liệu nhận từ host vào flash qua boot_flash_write()) CHƯA thấy implementation
+     nào trong repo.
+  3. Không có implementation cụ thể nào cho 2 tham số bắt buộc của
+     bootloader_init(): `jump_to_application` (con trỏ hàm nhảy sang địa chỉ ứng
+     dụng — thường cần set MSP + VTOR rồi branch, chưa thấy) và `read_boot_pin`
+     (đọc GPIO để vào chế độ update — ENTER_BOOT_UPDATE_MODE=0 đã định nghĩa
+     trong bootloader.h nhưng chưa thấy hàm đọc GPIO thật nào gọi tới nó).
+
+=> KẾT LUẬN: phần "não" (bootloader.c/boot_flash.c) và phần cấu hình DFU tĩnh
+(tusb_config.h/usb_descriptors.c) đã viết xong độc lập, nhưng CHƯA CÓ CẦU NỐI —
+main.c chưa gọi tới bootloader hay TinyUSB app-layer nào cả. Đây đúng kiểu bug
+"module tồn tại, build được, nhưng không bao giờ được gọi" mà dự án này đã gặp
+trước đây với mqtt_rpc (xem BÀI HỌC mục 1 và mục 4). Nếu người dùng báo bootloader
+đã dùng được, phiên sau PHẢI tự đọc lại Core/Src/main.c bằng `view` để xác nhận đã
+có wiring thật (không suy đoán từ chỗ "trước có ghi chưa xong" mà bỏ qua khả năng
+người dùng đã tự thêm phần thiếu).
+
+VIỆC ĐẦU TIÊN CỦA PHIÊN NÀY: `git fetch origin` + `git log --oneline -15` +
+`git submodule update --init --recursive` (bắt buộc nếu cần đọc
+BOOTLOADER_WS/libs/tinyusb/tinyusb/, submodule mới thêm ở f873e2c) + đọc lại
+app.c/a7677s.c/a7677s.h/modem_ops.h/sx_user_mqtt.c VÀ BOOTLOADER_WS/Core/Src/
+main.c/usb.c bằng `view` để tự xác nhận những gì handoff này mô tả vẫn khớp code
+thật — ĐỪNG giả định mô tả trên là chính xác mãi mãi, người dùng có thể đã tự sửa
+thêm gì đó sau khi handoff này được viết.
 
 ============================================================
 VIỆC CẦN LÀM TIẾP THEO — CẦN HỎI NGƯỜI DÙNG THỨ TỰ ƯU TIÊN

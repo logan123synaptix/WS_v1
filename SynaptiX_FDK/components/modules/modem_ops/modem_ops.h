@@ -234,6 +234,14 @@ typedef struct {
      * for the lifetime of ctx. */
     const char *(*get_ip)(void *ctx);
 
+    /* Returns the registered network operator name (AT+COPS?, long
+     * alphanumeric format), NUL-terminated, or "" if not yet read (e.g.
+     * still waiting on start() to finish) or if the read failed. Read once
+     * during start()'s attach sequence and cached — same "cached, never
+     * blocks" contract as get_imei/get_ip above. Pointer remains valid for
+     * the lifetime of ctx. */
+    const char *(*get_operator)(void *ctx);
+
     /* --- Network time (NITZ), read once during the AT init sequence ---
      *
      * The driver enables automatic network time (AT+CTZU=1) and reads it

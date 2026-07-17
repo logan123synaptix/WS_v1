@@ -35,7 +35,7 @@ static modem_command_t command[] = {
     [CMD_CPOF]          = {.cmd = "AT+CPOF\r\n",         .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CREG_SET]      = {.cmd = "AT+CREG=1\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CREG_POLL]     = {.cmd = "AT+CREG?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
-    [CMD_COPS_SET]      = {.cmd = "AT+COPS=0\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_COPS_SET]      = {.cmd = "AT+COPS=0,0\r\n",     .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_COPS_QUERY]    = {.cmd = "AT+COPS?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CGDCONT_QUERY] = {.cmd = "AT+CGDCONT?\r\n",     .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CFUN_0]        = {.cmd = "AT+CFUN=0\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
@@ -695,6 +695,37 @@ static void cb_cops_query(modem_t *modem, const char *response, modem_response_s
     if (response) {
         log_info(TAG, "COPS: %s", response);
     }
+
+    /* Response format: +COPS:<mode>,<format>,"<oper>"[,<AcT>]
+     * (a76xx_at_cmd.md 4.2.2, e.g. "+COPS:0,0,\"Viettel Mobile\",7"). CMD_
+     * COPS_SET requests format=0 (long alphanumeric) via "AT+COPS=0,0", so
+     * <oper> here is a human-readable name, not numeric MCC/MNC. <oper> is
+     * quoted, so find the first '"' after "+COPS:" and copy up to the
+     * closing '"' — non-fatal on failure, leaves dce->operator_name as ""
+     * (already the case from a7677s_init()'s zero-init, or a previous
+     * failed attempt), same treatment as imei/ip in cb_get_imei()/
+     * cb_get_ip(). */
+    dce->operator_name[0] = '\0';
+    if (response) {
+        const char *p = strstr(response, "+COPS:");
+        if (p) {
+            p = strchr(p, '"');
+            if (p) {
+                p++; /* skip opening quote, now at the start of <oper> */
+                int i = 0;
+                while (*p && *p != '"' && i < (int)(A7677S_OPERATOR_LEN - 1)) {
+                    dce->operator_name[i++] = *p++;
+                }
+                dce->operator_name[i] = '\0';
+            }
+        }
+        if (dce->operator_name[0] != '\0') {
+            log_info(TAG, "Operator: %s", dce->operator_name);
+        } else {
+            log_warn(TAG, "COPS response did not parse an operator name: %s", response);
+        }
+    }
+
     dce->init_state = A7677S_INIT_CGDCONT_QUERY;
     send_init_cmd(dce, CMD_CGDCONT_QUERY, cb_cgdcont_query, A7677S_TIMEOUT_AT);
 }
@@ -1069,6 +1100,12 @@ static const char *a7677s_get_ip(void *ctx)
 {
     a7677s_t *dce = (a7677s_t *)ctx;
     return dce->ip;
+}
+
+static const char *a7677s_get_operator(void *ctx)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+    return dce->operator_name;
 }
 
 /* modem_ops_t.get_time_synced/get_synced_time — see modem_ops.h's
@@ -2372,6 +2409,7 @@ const modem_ops_t a7677s_ops = {
     .get_imei         = a7677s_get_imei,
     .get_rssi         = a7677s_get_rssi,
     .get_ip           = a7677s_get_ip,
+    .get_operator     = a7677s_get_operator,
 
     .get_time_synced  = a7677s_get_time_synced,
     .get_synced_time  = a7677s_get_synced_time,

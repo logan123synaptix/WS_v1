@@ -219,6 +219,10 @@ int sx_user_mqtt_get_rssi(void) {
     return board.modem.ops->get_rssi(board.modem.ctx);
 }
 
+const char *sx_user_mqtt_get_operator(void) {
+    return board.modem.ops->get_operator(board.modem.ctx);
+}
+
 int sx_user_mqtt_nontls_init(const sx_user_mqtt_cfg_t *cfg){
     static sx_mqtt_config_t mqtt_cfg;
     memset(&mqtt_cfg, 0, sizeof(mqtt_cfg));

@@ -48,6 +48,7 @@ typedef struct {
 const char *sx_user_mqtt_get_ip      (void);
 const char *sx_user_mqtt_get_imei    (void);
 int sx_user_mqtt_get_rssi    (void);
+const char *sx_user_mqtt_get_operator(void);
 uint8_t sx_user_mqtt_is_connected(void);
 
 /*  API */

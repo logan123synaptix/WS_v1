@@ -105,6 +105,11 @@ extern "C" {
  * with PDP type "IP", not "IPV4V6"), so no IPv6 buffer is needed. */
 #define A7677S_IMEI_LEN         16U
 #define A7677S_IP_LEN           16U
+/* AT+COPS?'s <oper> in long alphanumeric format (a76xx_at_cmd.md 4.2.2)
+ * doesn't document an explicit max length; 3GPP TS 27.007 (the reference
+ * this command is based on) allows up to 16 chars for the long alphanumeric
+ * form, so 32+NUL leaves comfortable headroom. */
+#define A7677S_OPERATOR_LEN     33U
 /* AT+CSQ's own documented sentinel for "not known or not detectable"
  * (a76xx_at_cmd.md 3.2.2) — used as the cached value before the first
  * successful AT+CSQ poll completes, and again if a poll fails. */
@@ -158,7 +163,7 @@ typedef enum {
     A7677S_INIT_CGACT,          /* AT+CGACT=1,1 */
     A7677S_INIT_CREG_SET,       /* AT+CREG=1 - enables the unsolicited report only */
     A7677S_INIT_CREG_POLL,      /* AT+CREG? - polled until <stat> == 1 or 5 */
-    A7677S_INIT_COPS_SET,       /* AT+COPS=0 (automatic operator selection) */
+    A7677S_INIT_COPS_SET,       /* AT+COPS=0,0 (automatic operator selection, long alphanumeric format) */
     A7677S_INIT_COPS_QUERY,     /* AT+COPS? */
     A7677S_INIT_CGDCONT_QUERY,  /* AT+CGDCONT? - final read-back */
     /* --- one-shot device info, read once right before READY. Neither step
@@ -336,6 +341,13 @@ struct a7677s
     int     rssi;
     uint32_t rssi_poll_elapsed;
     uint8_t  rssi_cmd_pending;
+    /* Network operator name (long alphanumeric, e.g. "Viettel Mobile"),
+     * read once during A7677S_INIT_COPS_QUERY (see cb_cops_query()) —
+     * same "cached, empty until read, non-fatal on failure" contract as
+     * imei/ip above. Requires CMD_COPS_SET to send "AT+COPS=0,0" (format=0,
+     * long alphanumeric) rather than bare "AT+COPS=0" (which would leave
+     * the read-back in numeric MCC/MNC format instead). */
+    char    operator_name[A7677S_OPERATOR_LEN];
 
     /* --- Network time (NITZ), exposed via modem_ops_t.get_time_synced()/
      * get_synced_time() (see modem_ops.h). Read once during start()

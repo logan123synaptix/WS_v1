@@ -445,6 +445,18 @@ static const char *build_heartbeat_payload(void)
      * defaults to (see its doc-comment in a7677s.c). */
     cJSON_AddNumberToObject(root, "signalStrength", sx_user_mqtt_get_rssi());
 
+    /* sx_user_mqtt_get_operator() reads board.modem.ops->get_operator()
+     * under the hood — same "cached, no readiness gate here" caveat as
+     * signalStrength above. "" until A7677S_INIT_COPS_QUERY has run (or if
+     * it failed to parse), matching cb_cops_query()'s doc-comment in
+     * a7677s.c. */
+    const char *op = sx_user_mqtt_get_operator();
+    if (op && op[0] != '\0') {
+        cJSON_AddStringToObject(root, "operator", op);
+    } else {
+        cJSON_AddNullToObject(root, "operator");
+    }
+
     if (power_monitor_app_has_voltage_reading(&s_power_monitor)) {
         cJSON_AddNumberToObject(root, "railVoltage",
                                  power_monitor_app_get_rail_voltage_v(&s_power_monitor));

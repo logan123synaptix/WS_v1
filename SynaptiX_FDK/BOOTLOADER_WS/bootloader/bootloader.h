@@ -16,6 +16,8 @@ typedef struct Bootloader {
 
 int bootloader_init(Bootloader_t *bootloader, void (*jump_to_application)(uint32_t address),int (*read_boot_pin)(void),BootFlashFunctions_t *boot_flash_functions);
 
+int boot_swap_firmware(Bootloader_t *bootloader);
+
 static inline int bootloader_check_for_new_firmware(Bootloader_t *bootloader){
     return boot_flash_is_new_firmware_available(&bootloader->boot_flash);
 }

@@ -296,16 +296,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  // tusb_init(BOARD_TUD_RHPORT);
-  dfu_app_init();
-  tusb_init();
-  Bootloader_t bootloader;
-  bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
-  dfu_boot = &bootloader;
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */

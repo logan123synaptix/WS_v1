@@ -24,6 +24,7 @@ static const Cli_Shell_Cmd s_shell_commands[] = {
     {"settings", cli_cmd_settings,
         "settings -i : show current settings\r\n"
         "settings -c : configure settings (any subset of flags below)\r\n"
+        "\t\t-deviceid [str]      device ID (reported in payloads)\r\n"
         "\t\t-pump [seconds]      pump-on duration\r\n"
         "\t\t-duty [0-100]        pump PWM strength (%)\r\n"
         "\t\t-sensing [seconds]   sensing duration\r\n"
@@ -57,6 +58,7 @@ static void print_settings(ShellContext_t *shell)
     const network_config_t *cfg = network_config_get();
     cli_shell_printf(shell,
         "---- Application Settings ----\r\n"
+        "Device ID: %s\r\n"
         "Pump on (s): %lu\r\n"
         "Pump duty (%%): %u\r\n"
         "Sensing (s): %lu\r\n"
@@ -71,6 +73,7 @@ static void print_settings(ShellContext_t *shell)
         "APN username: %s\r\n"
         "APN password: %s\r\n"
         "------------------------------\r\n",
+        cfg->device_id,
         (unsigned long)(cfg->pump_on_ms / 1000U),
         cfg->pump_duty_percent,
         (unsigned long)(cfg->sensing_ms / 1000U),
@@ -108,7 +111,9 @@ static int cli_cmd_settings(ShellContext_t *shell, int argc, char *argv[])
         const char *flag = argv[i];
         const char *val  = argv[i + 1];
 
-        if (strcmp(flag, "-pump") == 0) {
+        if (strcmp(flag, "-deviceid") == 0) {
+            network_config_set_device_id(val);
+        } else if (strcmp(flag, "-pump") == 0) {
             long seconds = strtol(val, NULL, 10);
             if (seconds <= 0) {
                 cli_shell_printf(shell, "-pump must be > 0\r\n");

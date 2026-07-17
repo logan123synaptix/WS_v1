@@ -35,6 +35,16 @@ static int apply_param(cJSON *params, const char *flag)
 
     /* Timing flags: seconds in JSON, ms in network_config_t, same unit
      * convention as shell_commands.c's CLI. */
+    /* Device identity — string, see network_config_t's device_id
+     * doc-comment for why. */
+    if (strcmp(flag, "-deviceid") == 0) {
+        if (cJSON_IsString(item)) {
+            network_config_set_device_id(item->valuestring);
+            log_info(TAG, "Set device_id to %s", item->valuestring);
+        }
+        return 1;
+    }
+
     if (strcmp(flag, "-pump") == 0) {
         if (!cJSON_IsNumber(item) || item->valueint <= 0) {
             log_warn(TAG, "-pump must be a positive number");
@@ -196,6 +206,7 @@ void mqtt_rpc_on_message(const char *topic, const char *message)
      * and logged, not fatal to the whole request — see apply_param()'s
      * doc-comment). */
     static const char *const flags[] = {
+        "-deviceid",
         "-pump", "-duty", "-sensing", "-sleep",
         "-host", "-port", "-clientid", "-user", "-pass", "-keepalive",
         "-apn", "-apnuser", "-apnpass",

@@ -43,6 +43,7 @@
 #define THINGSBOARD_KEEP_ALIVE_S        10
 #define TOPIC_DEFAULT_SIZE              256
 #define PAYLOAD_DEFAULT_SIZE            256
+#define DEVICE_ID                       "001"
 
 #if USE_THINGSBOARD
 #define ATTRIBUTE_UPDATE_API "synaptix/demo/attributes/"MQTT_ID

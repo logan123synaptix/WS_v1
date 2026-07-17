@@ -262,6 +262,8 @@ static const char *build_telemetry_payload(void)
 {
     cJSON *root = cJSON_CreateObject();
 
+    cJSON_AddStringToObject(root, "deviceID", network_config_get()->device_id);
+
     if (sx_temp_humi_is_ready(&s_temp_humi)) {
         cJSON_AddNumberToObject(root, "temperature", sx_temp_humi_get_temperature(&s_temp_humi));
         cJSON_AddNumberToObject(root, "humidity", sx_temp_humi_get_humidity(&s_temp_humi));

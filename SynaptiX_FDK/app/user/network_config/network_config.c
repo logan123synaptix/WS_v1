@@ -42,6 +42,8 @@ static void build_defaults(network_config_t *cfg)
 {
     memset(cfg, 0, sizeof(*cfg));
 
+    safe_strcpy(cfg->device_id, sizeof(cfg->device_id), DEVICE_ID);
+
 #if !USE_THINGSBOARD
     safe_strcpy(cfg->host, sizeof(cfg->host), MQTT_HOST);
     cfg->port = MQTT_PORT;
@@ -115,6 +117,11 @@ void network_config_init(void)
 const network_config_t *network_config_get(void)
 {
     return &s_cfg;
+}
+
+void network_config_set_device_id(const char *device_id)
+{
+    safe_strcpy(s_cfg.device_id, sizeof(s_cfg.device_id), device_id);
 }
 
 void network_config_set_host(const char *host)

@@ -54,6 +54,7 @@ extern "C" {
 #define NETWORK_CONFIG_PASS_MAX_LEN       64U
 #define NETWORK_CONFIG_APN_MAX_LEN        32U
 #define NETWORK_CONFIG_CERT_MAX_LEN       4096U
+#define NETWORK_CONFIG_DEVICE_ID_MAX_LEN  32U
 
 /* Flash path this config is persisted to/from (sx_ex_storage / littlefs,
  * see sx_storage_write()/sx_storage_read() in sx_ex_storage.h). Stored as
@@ -63,6 +64,15 @@ extern "C" {
 #define NETWORK_CONFIG_FLASH_PATH  "/network_config.bin"
 
 typedef struct {
+    /* Device identity, reported as JSON "deviceID" in telemetry/heartbeat
+     * payloads (see app.c's build_telemetry_payload()/
+     * build_heartbeat_payload()). String, not numeric — DEVICE_ID
+     * (app_config.h) is defined as "001" specifically so a leading zero
+     * survives; storing this as an integer would silently truncate that.
+     * Runtime-editable via the CLI's "-deviceid" and MQTT RPC's
+     * "-deviceid", same as every other field in this struct. */
+    char     device_id[NETWORK_CONFIG_DEVICE_ID_MAX_LEN];
+
     /* Broker connection */
     char     host[NETWORK_CONFIG_HOST_MAX_LEN];
     uint16_t port;
@@ -136,6 +146,7 @@ const network_config_t *network_config_get(void);
  * handler can update one field at a time without needing the full
  * struct on hand. Every string setter truncates to the field's *_MAX_LEN
  * (including the null terminator) rather than overflowing. */
+void network_config_set_device_id(const char *device_id);
 void network_config_set_host(const char *host);
 void network_config_set_port(uint16_t port);
 void network_config_set_client_id(const char *client_id);

@@ -37,6 +37,13 @@ add_executable(${CMAKE_PROJECT_NAME})
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
+# Add libs (TinyUSB) library first — bootloader/CMakeLists.txt links against
+# the "libs" target, so it must already exist when bootloader's CMakeLists runs
+add_subdirectory(libs)
+
+# Add bootloader library (statically links libs/TinyUSB internally)
+add_subdirectory(bootloader)
+
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
@@ -65,4 +72,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
 
     # Add user defined libraries
+    bootloader
+    libs
 )

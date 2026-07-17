@@ -69,7 +69,7 @@
 #define MQTT_PASS                       NULL
 #define MQTT_KEEPALIVE                  60          /* seconds */
 #define MQTT_STATION_DATA_TOPIC         "hanoi/air_quality/data/"
-#define MQTT_STATION_HEARTBEAT_TOPIC    "vindynamic/tracking/gps/"
+#define MQTT_STATION_HEARTBEAT_TOPIC    "hanoi/air_quality/heartbeat/" + 
 #define MQTT_SUB_TOPIC                  "stm32/cmd/#"
 #endif
 

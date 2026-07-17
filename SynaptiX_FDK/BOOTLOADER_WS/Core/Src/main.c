@@ -110,7 +110,7 @@ Bootloader_t *dfu_boot = NULL;
  
 void dfu_app_init(void)
 {
-  // printf("dfu_app_init");
+  log_info("dfu_app_init");
   _write_addr = APP_START_ADDR;
 }
  
@@ -119,7 +119,7 @@ void dfu_app_init(void)
 uint32_t tud_dfu_get_timeout_cb(uint8_t alt, uint8_t state)
 {
     (void) alt;
-    // printf("tud_dfu_get_timeout_cb\r\n");
+    log_info("tud_dfu_get_timeout_cb\r\n");
     if (state == DFU_DNBUSY) return 50; // erase/program time budget per block
     return 0;
 }
@@ -130,7 +130,7 @@ uint32_t tud_dfu_get_timeout_cb(uint8_t alt, uint8_t state)
 void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, uint16_t length)
 {
     (void) alt;
-    // printf("tud_dfu_download_cb\r\n");
+    log_info("tud_dfu_download_cb\r\n");
     if (block_num == 0)
     {
         dfu_app_init();
@@ -163,7 +163,7 @@ void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, u
 void tud_dfu_manifest_cb(uint8_t alt)
 {
     (void) alt;
-    // printf("tud_dfu_manifest_cb");
+    log_info("tud_dfu_manifest_cb");
     // HAL_FLASH_Unlock();
     // flush_quadword(); // write any trailing partial quad-word
     // HAL_FLASH_Lock();
@@ -186,7 +186,7 @@ void tud_dfu_manifest_cb(uint8_t alt)
 uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t *data, uint16_t length)
 {
     (void) alt;
-    // printf("tud_dfu_upload_cb\r\n");
+    log_info("tud_dfu_upload_cb\r\n");
     uint32_t addr = APP_START_ADDR + (uint32_t) block_num * length;
  
     if (addr >= APP_START_ADDR + APP_MAX_SIZE) return 0;
@@ -201,21 +201,19 @@ uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t *data, uint1
 void tud_dfu_abort_cb(uint8_t alt)
 {
     (void) alt;
-    // printf("tud_dfu_abort_cb\r\n");
+    log_info("tud_dfu_abort_cb\r\n");
     dfu_app_init();
 }
  
 // Only used if CFG_TUD_DFU_RUNTIME is enabled instead of/alongside DFU mode.
 void tud_dfu_detach_cb(void)
 {
-  // printf("tud_dfu_detach_cb\r\n");
-    // e.g. set a flag in a backup register / noinit RAM and reset so the
-    // bootloader re-enumerates with the DFU-mode descriptor set.
+  log_info("tud_dfu_detach_cb\r\n");
   NVIC_SystemReset();
 }
 
 int read_boot_button(){
-  return (int) !BSP_PB_GetState(BUTTON_USER);
+  return (int) !0;
 }
 
 void USB_DRD_FS_IRQHandler(void)
@@ -264,25 +262,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   logger_init(LOGGER_DEBUG, bsp_log_send);
-
-  /* Initialize leds */
-  BSP_LED_Init(LED_GREEN);
-  BSP_LED_Init(LED_YELLOW);
-  BSP_LED_Init(LED_RED);
-
-  /* Initialize USER push-button, will be used to trigger an interrupt each time it's pressed.*/
-  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI);
-
-  /* Initialize COM1 port (115200, 8 bits (7-bit data + 1 stop bit), no parity */
-  BspCOMInit.BaudRate   = 115200;
-  BspCOMInit.WordLength = COM_WORDLENGTH_8B;
-  BspCOMInit.StopBits   = COM_STOPBITS_1;
-  BspCOMInit.Parity     = COM_PARITY_NONE;
-  BspCOMInit.HwFlowCtl  = COM_HWCONTROL_NONE;
-  if (BSP_COM_Init(COM1, &BspCOMInit) != BSP_ERROR_NONE)
-  {
-    Error_Handler();
-  }
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -421,7 +400,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    //  ex: log_info("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

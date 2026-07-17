@@ -96,6 +96,13 @@ typedef struct {
     uint32_t pump_on_ms;   /* how long the pump stays on before sensing starts */
     uint32_t sensing_ms;   /* how long SENSING runs (SPS30 cycle + other sensors settle) */
     uint32_t sleep_ms;     /* STOP-mode sleep duration itself (not the total lap time) */
+    /* Pump PWM strength, 0-100 (see sx_pwm_sw.h/sx_pump.h) — separate from
+     * pump_on_ms above, same "duration vs strength" split as WS_v0's
+     * app_setting.timeOnPumpSeconds vs app_setting.dutyCyclePercent
+     * (WS_v0's cli_shell_command.c's "-pump"/"-duty" flags). Applied via
+     * pump_set_power() at the start of APP_CYCLE_ON_PUMP (app.c), not
+     * pump_on()'s hardcoded 100% — see app.c's ON_PUMP case. */
+    uint8_t  pump_duty_percent;
 
     /* Bumped whenever this struct's layout changes, so a future firmware
      * update can detect a stale/incompatible record in flash and fall
@@ -150,6 +157,7 @@ void network_config_set_apn_password(const char *apn_password);
 void network_config_set_pump_on_ms(uint32_t pump_on_ms);
 void network_config_set_sensing_ms(uint32_t sensing_ms);
 void network_config_set_sleep_ms(uint32_t sleep_ms);
+void network_config_set_pump_duty_percent(uint8_t pump_duty_percent);
 
 /* Persists the current in-RAM config to flash (NETWORK_CONFIG_FLASH_PATH).
  * Returns true on success. Callers should batch several set_*() calls

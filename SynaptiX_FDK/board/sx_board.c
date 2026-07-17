@@ -296,8 +296,10 @@ void sx_board_init(void)
 
     // Board bring-up: run the pump at 40% duty from boot for timer/PWM
     // hardware verification. Not app-cycle-driven yet — app.c's
-    // APP_CYCLE_ON_PUMP state below still owns steady-state pump on/off
-    // via pump_on()/pump_off() once the sensing cycle starts.
+    // APP_CYCLE_ON_PUMP state below owns steady-state pump control via
+    // pump_set_power() (at network_config_t's pump_duty_percent) once the
+    // sensing cycle starts, and pump_off() to stop it (sx_sleep_manager.c
+    // also calls pump_off() on its own sleep step).
     pump_set_power(&board.sx_pwm_sw, 40U);
 
     // Tier-1 generic sleep driver — this board's pre_stop/post_wake hooks
@@ -423,11 +425,12 @@ sx_gpio_t *sx_board_get_pump_gpio(void)
     return &s_en_pw_pump;
 }
 
-/* app.c drives the pump through sx_pump.h's pump_on()/pump_off()/
- * pump_set_power(), which now take a sx_pwm_software_t* (software-PWM
- * driven, see sx_pump.c) rather than the raw sx_gpio_t* returned by
- * sx_board_get_pump_gpio() above — that getter is kept for callers that
- * still only need the bare GPIO (e.g. board-level diagnostics), but app.c
+/* app.c drives the pump through sx_pump.h's pump_set_power()/pump_off()
+ * (pump_on() is defined but no longer called anywhere in the app layer —
+ * see app.c's doc-comment point 2), which take a sx_pwm_software_t*
+ * (software-PWM driven, see sx_pump.c) rather than the raw sx_gpio_t*
+ * returned by sx_board_get_pump_gpio() above — that getter is kept for
+ * callers that still only need the bare GPIO (e.g. board-level diagnostics), but app.c
  * needs this one instead. board.sx_pwm_sw is already pump_init()'d in
  * sx_board_init() above (which also owns *_en_pw_pump's sx_gpio_init()),
  * so this just exposes its address, same pattern as the getter above. */

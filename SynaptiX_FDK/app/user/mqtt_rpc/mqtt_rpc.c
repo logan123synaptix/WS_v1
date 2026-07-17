@@ -44,6 +44,15 @@ static int apply_param(cJSON *params, const char *flag)
         log_info(TAG, "Set pump_on_ms to %d s", item->valueint);
         return 1;
     }
+    if (strcmp(flag, "-duty") == 0) {
+        if (!cJSON_IsNumber(item) || item->valueint < 0 || item->valueint > 100) {
+            log_warn(TAG, "-duty must be 0-100");
+            return 1;
+        }
+        network_config_set_pump_duty_percent((uint8_t)item->valueint);
+        log_info(TAG, "Set pump_duty_percent to %d%%", item->valueint);
+        return 1;
+    }
     if (strcmp(flag, "-sensing") == 0) {
         if (!cJSON_IsNumber(item) || item->valueint <= 0) {
             log_warn(TAG, "-sensing must be a positive number");
@@ -187,7 +196,7 @@ void mqtt_rpc_on_message(const char *topic, const char *message)
      * and logged, not fatal to the whole request — see apply_param()'s
      * doc-comment). */
     static const char *const flags[] = {
-        "-pump", "-sensing", "-sleep",
+        "-pump", "-duty", "-sensing", "-sleep",
         "-host", "-port", "-clientid", "-user", "-pass", "-keepalive",
         "-apn", "-apnuser", "-apnpass",
     };

@@ -1,6 +1,7 @@
 #include "network_config.h"
 #include "app_config.h"
 #include "sx_ex_storage.h"
+#include "sx_pump.h"
 #include "logger.h"
 #include <string.h>
 #include <stdio.h>
@@ -76,6 +77,10 @@ static void build_defaults(network_config_t *cfg)
     cfg->pump_on_ms = APP_PUMP_ON_MS;
     cfg->sensing_ms = APP_SENSING_MS;
     cfg->sleep_ms   = APP_CYCLE_PERIOD_MS;
+    /* PUMP_FULL_DRIVE_PERCENT (sx_pump.h) = 100 — matches pump_on()'s
+     * previous hardcoded full-drive behavior before pump_duty_percent
+     * existed, so a fresh/empty flash doesn't change pump strength. */
+    cfg->pump_duty_percent = PUMP_FULL_DRIVE_PERCENT;
 
     cfg->version = NETWORK_CONFIG_VERSION;
 }
@@ -206,6 +211,14 @@ void network_config_set_sensing_ms(uint32_t sensing_ms)
 void network_config_set_sleep_ms(uint32_t sleep_ms)
 {
     s_cfg.sleep_ms = sleep_ms;
+}
+
+void network_config_set_pump_duty_percent(uint8_t pump_duty_percent)
+{
+    if (pump_duty_percent > 100U) {
+        pump_duty_percent = 100U;
+    }
+    s_cfg.pump_duty_percent = pump_duty_percent;
 }
 
 bool network_config_save(void)

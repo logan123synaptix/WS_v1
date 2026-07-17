@@ -58,11 +58,15 @@ static time_sync_t         s_time_sync;
  *  2. WS_v0's pump used PWM with a configurable duty cycle
  *     (bsp_pwm_set_duty/app_setting.dutyCyclePercent). WS_v1's pump driver
  *     (sx_pump.h) now also drives the pump via software PWM (sx_pwm_sw.h,
- *     see sx_board.c's TIM1/sx_pwm_sw wiring) — pump_on()/pump_off() below
- *     still just run it at 100%/0% duty (full drive), same steady-state
- *     behavior as before this PWM layer existed. sx_pump.h's
- *     pump_set_power() is available for an arbitrary duty_percent if a
- *     future cycle state wants one; this state doesn't use it yet.
+ *     see sx_board.c's TIM1/sx_pwm_sw wiring). As of 2026-07-17,
+ *     APP_CYCLE_ON_PUMP below drives it via pump_set_power() at
+ *     network_config_t's pump_duty_percent (runtime-editable via the CLI's
+ *     "-duty"/RPC's "-duty", same split as WS_v0's separate "-pump"/
+ *     "-duty" flags) rather than pump_on()'s hardcoded 100% — pump_on()
+ *     itself is no longer called anywhere in this file (or elsewhere in
+ *     the app layer; sx_sleep_manager.c only calls pump_off()), though it
+ *     remains defined in sx_pump.c/.h in case a future caller wants an
+ *     explicit "full drive regardless of configured duty" primitive.
  *
  *  3. Timing (pump-on duration, sensing duration, sleep duration) used to
  *     be APP_PUMP_ON_MS/APP_SENSING_MS/APP_CYCLE_PERIOD_MS fixed #defines
@@ -351,9 +355,12 @@ static void app_cycle_process(uint32_t delta_ms)
         if (s_cycle_tick_ms == delta_ms) {
             /* First tick after entering this state (including the very
              * first lap after boot, and every lap after WAKING) —
-             * kick the pump on exactly once. */
-            pump_on(sx_board_get_pump_pwm());
-            log_info(TAG, "Pump on");
+             * kick the pump on exactly once, at the configured duty
+             * (not a hardcoded full-on) — see network_config_t's
+             * pump_duty_percent doc-comment and shell_commands.c's/
+             * mqtt_rpc.c's "-duty" flag for how it's set. */
+            pump_set_power(sx_board_get_pump_pwm(), network_config_get()->pump_duty_percent);
+            log_info(TAG, "Pump on at %u%% duty", network_config_get()->pump_duty_percent);
         }
         if (s_cycle_tick_ms >= network_config_get()->pump_on_ms) {
             s_cycle_tick_ms = 0;

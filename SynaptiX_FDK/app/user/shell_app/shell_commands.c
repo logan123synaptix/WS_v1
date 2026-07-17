@@ -1,9 +1,10 @@
 /* CLI command table for V1's USB CDC shell. Follows WS_v0's
  * apps/cli_shell_command.c pattern (const Cli_Shell_Cmd[] + a single
  * "settings -i/-c" command), extended to cover network_config_t's
- * broker/APN fields in addition to the pump/sensing/sleep timing WS_v0
- * had. TLS certs are deliberately NOT exposed here — PEM text is too
- * long for a CLI line; use a future USB MSC file-edit path for those. */
+ * broker/APN fields in addition to the pump/sensing/sleep timing and pump
+ * PWM duty (-duty, WS_v0's separate "-duty" flag) WS_v0 had. TLS certs are
+ * deliberately NOT exposed here — PEM text is too long for a CLI line;
+ * use a future USB MSC file-edit path for those. */
 
 #include "cli_shell.h"
 #include "network_config.h"
@@ -24,6 +25,7 @@ static const Cli_Shell_Cmd s_shell_commands[] = {
         "settings -i : show current settings\r\n"
         "settings -c : configure settings (any subset of flags below)\r\n"
         "\t\t-pump [seconds]      pump-on duration\r\n"
+        "\t\t-duty [0-100]        pump PWM strength (%)\r\n"
         "\t\t-sensing [seconds]   sensing duration\r\n"
         "\t\t-sleep [seconds]     STOP-mode sleep duration\r\n"
         "\t\t-host [str]          MQTT broker host\r\n"
@@ -35,7 +37,7 @@ static const Cli_Shell_Cmd s_shell_commands[] = {
         "\t\t-apn [str]           GSM APN\r\n"
         "\t\t-apnuser [str]       GSM APN username\r\n"
         "\t\t-apnpass [str]       GSM APN password\r\n"
-        "example : settings -c -pump 30 -sensing 60 -sleep 300 -host mqtt.example.com\r\n"},
+        "example : settings -c -pump 30 -duty 100 -sensing 60 -sleep 300 -host mqtt.example.com\r\n"},
 };
 
 const Cli_Shell_Cmd *const g_shell_commands = s_shell_commands;
@@ -56,6 +58,7 @@ static void print_settings(ShellContext_t *shell)
     cli_shell_printf(shell,
         "---- Application Settings ----\r\n"
         "Pump on (s): %lu\r\n"
+        "Pump duty (%%): %u\r\n"
         "Sensing (s): %lu\r\n"
         "Sleep (s): %lu\r\n"
         "Host: %s\r\n"
@@ -69,6 +72,7 @@ static void print_settings(ShellContext_t *shell)
         "APN password: %s\r\n"
         "------------------------------\r\n",
         (unsigned long)(cfg->pump_on_ms / 1000U),
+        cfg->pump_duty_percent,
         (unsigned long)(cfg->sensing_ms / 1000U),
         (unsigned long)(cfg->sleep_ms / 1000U),
         cfg->host,
@@ -111,6 +115,13 @@ static int cli_cmd_settings(ShellContext_t *shell, int argc, char *argv[])
                 return -1;
             }
             network_config_set_pump_on_ms((uint32_t)seconds * 1000U);
+        } else if (strcmp(flag, "-duty") == 0) {
+            long duty = strtol(val, NULL, 10);
+            if (duty < 0 || duty > 100) {
+                cli_shell_printf(shell, "-duty must be 0-100\r\n");
+                return -1;
+            }
+            network_config_set_pump_duty_percent((uint8_t)duty);
         } else if (strcmp(flag, "-sensing") == 0) {
             long seconds = strtol(val, NULL, 10);
             if (seconds <= 0) {

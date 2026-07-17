@@ -212,6 +212,11 @@ void check_charge(void);
 
 sx_gpio_t *sx_board_get_sps30_power_gpio(void);
 sx_gpio_t *sx_board_get_pump_gpio(void);
+/* Use this (not sx_board_get_pump_gpio() above) when driving the pump
+ * through sx_pump.h's pump_on()/pump_off()/pump_set_power() — those now
+ * take the software-PWM struct, not the raw GPIO. See sx_board.c's
+ * doc-comment on this getter. */
+sx_pwm_software_t *sx_board_get_pump_pwm(void);
 
 extern Board_t board;
 

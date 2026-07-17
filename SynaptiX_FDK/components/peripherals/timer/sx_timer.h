@@ -115,6 +115,42 @@ int sx_timer_init_freq(sx_timer_t *_timer, sx_timer_ops_t *ops, void *_pDriver,
                         uint32_t _input_clock_hz, uint32_t _freq_hz,
                         sx_timer_callback_t _callback, void *_arg);
 
+/* Direct register init: caller supplies Prescaler and Period (ARR) exactly
+ * as they would in CubeMX's MX_TIMx_Init() (Init.Prescaler/Init.Period),
+ * no searching/derivation happens here at all — unlike sx_timer_init_freq()
+ * above, which picks Prescaler for you (always biased toward the SMALLEST
+ * Prescaler / highest tick_hz that fits freq_hz's ARR in 16 bits). That
+ * bias is exactly wrong for callers that need a specific, predictable
+ * tick_hz — e.g. sx_pwm_sw, which derives its OWN period_ticks from
+ * timer->tick_hz for a PWM period in ms and needs that arithmetic to stay
+ * within a 16-bit ARR too; sx_timer_init_freq()'s auto-maximized tick_hz
+ * (often the full undivided input clock, e.g. 32MHz on this project's
+ * TIM1) leaves far too little headroom for anything but a sub-millisecond
+ * PWM period. Use this function instead whenever the caller already knows
+ * (or wants full manual control over) both values, same as hand-tuning
+ * tim.c's CubeMX-generated Prescaler/Period would give you, just applied
+ * at runtime instead of codegen time.
+ *
+ * tick_hz = input_clock_hz / (prescaler + 1), same formula/derivation as
+ * sx_timer_init()'s doc-comment above — this function just computes that
+ * for you AND applies prescaler/period to the hardware in one call, since
+ * the caller is choosing both explicitly anyway (no reason to split into
+ * "apply PSC/ARR yourself, then call sx_timer_init()" across two places).
+ *
+ * period (ARR value, NOT a tick count starting from 1) and prescaler must
+ * each fit in 16 bits (0..65535) — checked here, returns -1 if either is
+ * out of range, or if input_clock_hz/timer/ops/pDriver are invalid.
+ * Actual interrupt/overflow frequency ends up being
+ * input_clock_hz / (prescaler+1) / (period+1) — the caller works this out
+ * themselves from their own PSC/Period choice, same as reading a CubeMX
+ * .ioc's computed frequency, this function does not report it back.
+ *
+ * Same "only touches PSC/ARR once at setup, never while running" contract
+ * as sx_timer_init_freq() — see that function's doc-comment for why. */
+int sx_timer_init_regs(sx_timer_t *_timer, sx_timer_ops_t *ops, void *_pDriver,
+                        uint32_t _input_clock_hz, uint32_t _prescaler, uint32_t _period,
+                        sx_timer_callback_t _callback, void *_arg);
+
 static inline int sx_timer_start(sx_timer_t *_timer){
     if(_timer->ops && _timer->ops->start){
         return _timer->ops->start(_timer);

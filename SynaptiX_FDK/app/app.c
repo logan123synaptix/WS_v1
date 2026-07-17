@@ -55,11 +55,14 @@ static time_sync_t         s_time_sync;
  *     reading_sensor_task did, just from the same function instead of a
  *     second task.
  *
- *  2. WS_v0's bump used PWM with a configurable duty cycle
+ *  2. WS_v0's pump used PWM with a configurable duty cycle
  *     (bsp_pwm_set_duty/app_setting.dutyCyclePercent). WS_v1's pump driver
- *     (sx_pump.h) is on/off only (pump_on()/pump_off() via EN_PW_PUMP) — no
- *     PWM duty cycle exists on this board's pump circuit, so ON_PUMP here
- *     just does pump_on() at full drive.
+ *     (sx_pump.h) now also drives the pump via software PWM (sx_pwm_sw.h,
+ *     see sx_board.c's TIM1/sx_pwm_sw wiring) — pump_on()/pump_off() below
+ *     still just run it at 100%/0% duty (full drive), same steady-state
+ *     behavior as before this PWM layer existed. sx_pump.h's
+ *     pump_set_power() is available for an arbitrary duty_percent if a
+ *     future cycle state wants one; this state doesn't use it yet.
  *
  *  3. Timing (pump-on duration, sensing duration, sleep duration) used to
  *     be APP_PUMP_ON_MS/APP_SENSING_MS/APP_CYCLE_PERIOD_MS fixed #defines
@@ -349,7 +352,7 @@ static void app_cycle_process(uint32_t delta_ms)
             /* First tick after entering this state (including the very
              * first lap after boot, and every lap after WAKING) —
              * kick the pump on exactly once. */
-            pump_on(sx_board_get_pump_gpio());
+            pump_on(sx_board_get_pump_pwm());
             log_info(TAG, "Pump on");
         }
         if (s_cycle_tick_ms >= network_config_get()->pump_on_ms) {
@@ -366,7 +369,7 @@ static void app_cycle_process(uint32_t delta_ms)
         if (s_cycle_tick_ms >= network_config_get()->sensing_ms) {
             s_cycle_tick_ms = 0;
             s_cycle_state = APP_CYCLE_SENDING;
-            pump_off(sx_board_get_pump_gpio());
+            pump_off(sx_board_get_pump_pwm());
             log_info(TAG, "Pump off, sending data");
         }
         break;

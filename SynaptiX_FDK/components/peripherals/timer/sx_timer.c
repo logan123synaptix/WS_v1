@@ -180,4 +180,34 @@ int sx_timer_init_freq(sx_timer_t *_timer, sx_timer_ops_t *ops, void *_pDriver,
     return 0;
 }
 
+/* See sx_timer.h's doc-comment for the full contract — caller supplies
+ * Prescaler/Period directly (like hand-tuning tim.c's CubeMX values),
+ * no search/derivation of tick_hz happens here beyond the one division
+ * needed to store it in the struct. */
+int sx_timer_init_regs(sx_timer_t *_timer, sx_timer_ops_t *ops, void *_pDriver,
+                        uint32_t _input_clock_hz, uint32_t _prescaler, uint32_t _period,
+                        sx_timer_callback_t _callback, void *_arg)
+{
+    if (_timer == NULL || ops == NULL || _pDriver == NULL || _input_clock_hz == 0 ||
+        _prescaler > 0xFFFFU || _period > 0xFFFFU) {
+        return -1;
+    }
+
+    TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)_pDriver;
+
+    __HAL_TIM_SET_PRESCALER(htim, _prescaler);
+    __HAL_TIM_SET_COUNTER(htim, 0);
+    __HAL_TIM_SET_AUTORELOAD(htim, _period);
+
+    uint32_t tick_hz = _input_clock_hz / (_prescaler + 1);
+    sx_timer_init(_timer, ops, _pDriver, tick_hz, /* timeout_ms: not meaningful
+                   * here, caller chose period directly rather than a ms
+                   * value — left 0, same "bookkeeping only" caveat as
+                   * sx_timer_init_freq()'s timeout_ms above applies even
+                   * more so here since there's no freq_hz to round from */
+                   0, _callback, _arg);
+
+    return 0;
+}
+
 #endif

@@ -264,19 +264,26 @@ void sx_board_init(void)
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
 
-    // TIMER (TIM1) — sx_timer_init_freq() derives PSC/ARR itself from
-    // _input_clock_hz/_freq_hz rather than requiring tick_hz to be known
-    // up front from tim.c's CubeMX-configured Prescaler; 32MHz/10kHz here
-    // matches tim.c's own Prescaler=31/Period=99 (32MHz/(31+1)=1MHz tick,
-    // 1MHz/(99+1)=10kHz interrupt) — see sx_timer.c's doc-comment on
-    // sx_timer_init_freq(). callback/arg are set to the PWM tick callback
-    // and &board.sx_pwm_sw below, AFTER pump_init() has initialized that
-    // struct — sx_timer_t has no "set callback later" API, so init order
-    // matters: PWM struct must exist as a valid target before the timer
-    // is told to call into it (an ISR firing into an uninitialized struct
-    // would read garbage).
-    sx_timer_init_freq(&board.sx_timer, &sx_timer_ops, sx_tim1,
-                        32000000U, 10000U, NULL, NULL);
+    // TIMER (TIM1) — sx_timer_init_regs() applies Prescaler/Period directly,
+    // no auto-derivation. PSC=31, Period=99 chosen to match tim.c's own
+    // CubeMX-configured Prescaler/Period exactly (32MHz/(31+1)=1MHz tick_hz,
+    // 1MHz/(99+1)=10kHz interrupt) — same numbers as before, just applied
+    // explicitly instead of via sx_timer_init_freq()'s auto-search.
+    //
+    // sx_timer_init_freq() was tried here first but is the WRONG tool for
+    // this board: it always picks the smallest Prescaler (highest tick_hz)
+    // that fits freq_hz's ARR in 16 bits — for freq_hz=10000 at 32MHz input
+    // that's PSC=0, i.e. tick_hz=32MHz (the full undivided input clock).
+    // sx_pwm_sw derives ITS OWN period_ticks from this tick_hz for a PWM
+    // period in ms (see sx_pwm_sw.c's _period_ms_to_ticks()) and applies
+    // that as a 16-bit ARR via sx_timer_start_ticks() — at 32MHz tick_hz,
+    // period_ms=10 -> period_ticks=320000, which silently truncates when
+    // written to TIM1's 16-bit ARR register (real bug, would have made the
+    // pump run at completely the wrong PWM frequency). At 1MHz tick_hz,
+    // period_ms=10 -> period_ticks=10000, comfortably within 16 bits (max
+    // representable period_ms at 1MHz is 65.535ms — plenty of headroom).
+    sx_timer_init_regs(&board.sx_timer, &sx_timer_ops, sx_tim1,
+                        32000000U, 31U, 99U, NULL, NULL);
 
     // Pump init — owns s_en_pw_pump's GPIO init and board.sx_pwm_sw's PWM
     // struct init (period_ms=10 -> 100Hz PWM / 1% duty resolution at this
@@ -414,6 +421,19 @@ sx_gpio_t *sx_board_get_sps30_power_gpio(void)
 sx_gpio_t *sx_board_get_pump_gpio(void)
 {
     return &s_en_pw_pump;
+}
+
+/* app.c drives the pump through sx_pump.h's pump_on()/pump_off()/
+ * pump_set_power(), which now take a sx_pwm_software_t* (software-PWM
+ * driven, see sx_pump.c) rather than the raw sx_gpio_t* returned by
+ * sx_board_get_pump_gpio() above — that getter is kept for callers that
+ * still only need the bare GPIO (e.g. board-level diagnostics), but app.c
+ * needs this one instead. board.sx_pwm_sw is already pump_init()'d in
+ * sx_board_init() above (which also owns *_en_pw_pump's sx_gpio_init()),
+ * so this just exposes its address, same pattern as the getter above. */
+sx_pwm_software_t *sx_board_get_pump_pwm(void)
+{
+    return &board.sx_pwm_sw;
 }
 void sx_board_uart_resume_it(void) {
     // sx_sim76_uart_abort();

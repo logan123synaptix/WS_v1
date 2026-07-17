@@ -2,6 +2,7 @@
 #include "boot_flash.h"
 #include "flash_define.h"
 #include "boot_debug.h"
+#include "new_bootloader.h"
 #include <assert.h>
 
 static void boot_partition_printf(BootFlashPartition_t *partition) {
@@ -31,7 +32,7 @@ static void boot_partition_printf(BootFlashPartition_t *partition) {
 
 #if SECONDARY_FLASH && SCRATCH_FLASH
 
-static int boot_swap_firmware(Bootloader_t *bootloader)
+int boot_swap_firmware(Bootloader_t *bootloader)
 {
     BOOT_DEBUG("Starting firmware swap process.");
     BootFlashPartition_t *partition = &bootloader->boot_flash.partition;
@@ -142,6 +143,7 @@ int bootloader_init(Bootloader_t *bootloader, void (*jump_to_application)(uint32
         boot_partition_printf(&bootloader->boot_flash.partition);
         return BOOT_PARTITION_MGIC_NUMBER_MISMATCH;
     }
+    new_bootloader_check_commands(bootloader);
     if(bootloader->read_boot_pin() == ENTER_BOOT_UPDATE_MODE){
         bootloader->boot_flash.partition.isUpgradeInProgress = true;
     }
@@ -187,4 +189,3 @@ int bootloader_process(Bootloader_t *boot){
     }
     return 0;
 }
-

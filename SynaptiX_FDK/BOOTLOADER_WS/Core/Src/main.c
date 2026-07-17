@@ -68,6 +68,8 @@ static void MPU_Config(void);
 
 UART_HandleTypeDef *log_uart = &huart3;
 
+static const char *TAG = "MAIN";
+
 void bsp_log_send(const char *str){
   HAL_UART_Transmit(log_uart, str, strlen(str), 10);
 }

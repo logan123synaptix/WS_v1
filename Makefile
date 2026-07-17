@@ -212,7 +212,7 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/components/modules/ze12a \
 			  -I$(SYNAPTIX_DIR)/components/modules/ads1115 \
 			  -I$(SYNAPTIX_DIR)/components/modules/pump \
-			  -I$(SYNAPTIX_DIR)/components/peripherals/sw_pwm \
+			  -I$(SYNAPTIX_DIR)/components/peripherals/pwm_sw \
 #USB tiny
 C_INCLUDES += -I$(USB_TINY_DIR)/src \
 			  -I$(USB_TINY_DIR)/src/common \

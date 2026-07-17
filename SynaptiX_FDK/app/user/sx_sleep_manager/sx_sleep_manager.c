@@ -183,13 +183,13 @@ static uint8_t _modem_power_off_is_done(void *ctx)
  * matches sx_sleep_step_t's signature exactly, wired in directly below
  * with mgr->sps30_app as ctx. No wrapper needed for this one. */
 
-/* Step 4: pump off. pump_off()'s signature (sx_gpio_t*) doesn't match
- * sx_sleep_step_t (void (*)(void*)), so this thin wrapper adapts it —
- * same reasoning as the ZE12A wrapper above/below. */
+/* Step 4: pump off (0% duty). pump_off()'s signature (sx_pwm_software_t*)
+ * doesn't match sx_sleep_step_t (void (*)(void*)), so this thin wrapper
+ * adapts it — same reasoning as the ZE12A wrapper above/below. */
 static void _pump_off_start(void *ctx)
 {
     sx_sleep_manager_t *mgr = (sx_sleep_manager_t *)ctx;
-    pump_off(mgr->pump_gpio);
+    pump_off(mgr->pump_pwm);
 }
 
 static uint8_t _pump_off_is_done(void *ctx)
@@ -237,13 +237,13 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             modem_handle_t     *modem,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
-                            sx_gpio_t          *pump_gpio,
+                            sx_pwm_software_t  *pump_pwm,
                             accel_app_t        *accel_app)
 {
     mgr->modem     = modem;
     mgr->gps       = gps;
     mgr->sps30_app = sps30_app;
-    mgr->pump_gpio = pump_gpio;
+    mgr->pump_pwm  = pump_pwm;
     mgr->accel_app = accel_app;
     mgr->gps_wait_elapsed_ms = 0;
     mgr->sim_wait_elapsed_ms = 0;

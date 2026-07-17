@@ -439,7 +439,7 @@ void app_init(void){
     power_monitor_app_init(&s_power_monitor, &board.ads1115);
 
     sx_sleep_manager_init(&s_sleep_mgr, &board.sleep, &board.modem, &board.gps,
-                           &s_sps30_app, sx_board_get_pump_gpio(), &s_accel_app);
+                           &s_sps30_app, sx_board_get_pump_pwm(), &s_accel_app);
 
     /* Per the user (2026-07-15): Thingsboard is NOT used for now — no real
      * Thingsboard broker exists yet, and app_config.h's USE_THINGSBOARD==1

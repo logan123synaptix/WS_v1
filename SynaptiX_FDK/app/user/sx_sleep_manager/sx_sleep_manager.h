@@ -11,6 +11,7 @@ extern "C" {
 #include "gps.h"
 #include "sht3x.h"
 #include "sx_gpio.h"
+#include "sx_pwm_sw.h"
 #include "sps30_app.h"
 #include "accel_app.h"
 
@@ -36,11 +37,14 @@ typedef struct {
      * pointer is only kept so sx_sleep_manager_init() can pass it as
      * that step's ctx. */
     sps30_app_t    *sps30_app;
-    /* Pump power-enable GPIO (EN_PW_PUMP), already sx_gpio_init()'d by
-     * the caller (mirrors power_gpio in sps30_app_t) — this module only
-     * drives it low via pump_off() in its own sleep-step wrapper, since
-     * pump_off()'s signature doesn't match sx_sleep_step_t directly. */
-    sx_gpio_t      *pump_gpio;
+    /* Pump PWM struct (board.sx_pwm_sw), already pump_init()'d by the
+     * caller (mirrors power_gpio in sps30_app_t) — this module only
+     * drives it to 0% via pump_off() in its own sleep-step wrapper, since
+     * pump_off()'s signature doesn't match sx_sleep_step_t directly. Was
+     * a bare sx_gpio_t* before sx_pump.h switched to software-PWM
+     * (pump_on()/pump_off() now take sx_pwm_software_t*, not the raw
+     * GPIO — see sx_board.c's sx_board_get_pump_pwm()). */
+    sx_pwm_software_t *pump_pwm;
     /* BNO055 app-layer accel/movement reader — sleep_steps/wake_steps call
      * its own accel_app_sleep_step_*()/accel_app_wake_step_*() pairs
      * directly (already match sx_sleep_step_t's signature, see
@@ -84,7 +88,7 @@ typedef struct {
  *      sleep() then EN_PW_DUST low). Caller must only trigger sleep once
  *      any in-progress SPS30 measurement cycle is DONE/IDLE (see
  *      sps30_app.h) — not enforced here, this module just runs the step.
- *   4. Pump off (EN_PW_PUMP low, via pump_off())
+ *   4. Pump off (0% duty via pump_off(), see sx_pwm_sw.h)
  *   5. ZE12A to Question & Answer mode (gas_sensor_switch_to_qa_mode())
  *      — reduces UART/processing load; does NOT reduce the electrochemical
  *      cell's own power draw (no such command exists per the datasheet).
@@ -103,7 +107,7 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             modem_handle_t     *modem,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
-                            sx_gpio_t          *pump_gpio,
+                            sx_pwm_software_t  *pump_pwm,
                             accel_app_t        *accel_app);
 
 /* Runs the sleep_steps then enters STOP mode via tier 2/1. Blocking, same

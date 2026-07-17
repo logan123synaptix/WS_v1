@@ -1,0 +1,3 @@
+[submodule "SynaptiX_FDK/BOOTLOADER_WS/libs/tinyusb/tinyusb"]
+	path = SynaptiX_FDK/BOOTLOADER_WS/libs/tinyusb/tinyusb
+	url = https://github.com/hathach/tinyusb.git

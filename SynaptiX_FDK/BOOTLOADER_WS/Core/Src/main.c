@@ -82,6 +82,13 @@ void bsp_log_send(const char *str){
   HAL_UART_Transmit(sx_uart[2], (uint8_t *)str, strlen(str), 10);
 }
 
+int __io_putchar(int ch)
+{
+  uint8_t c = (uint8_t)ch;
+  HAL_UART_Transmit(sx_uart[2], &c, 1, 10);
+  return ch;
+}
+
 __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t address)
 {
   BOOT_DEBUG("Gonna Jump to Application 0x%08X",(unsigned int)address);
@@ -298,7 +305,7 @@ int main(void)
   MX_GPIO_Init();
   MX_ICACHE_Init();
   MX_USART1_UART_Init();
-  // MX_USB_PCD_Init();
+  MX_USB_PCD_Init();
   MX_USART3_UART_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
@@ -308,11 +315,8 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-
   
-  hpcd_USB_DRD_FS.Instance = USB_DRD_FS;
-  HAL_PCD_MspInit(&hpcd_USB_DRD_FS);   // chỉ enable clock/NVIC, không init core registers
-  HAL_Delay(100);
+
   tusb_init(BOARD_TUD_RHPORT);
   dfu_app_init();
   tusb_init();

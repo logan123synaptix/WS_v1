@@ -71,12 +71,15 @@ static void MPU_Config(void);
 
 #define NUM_UART  6
 
+/*IN real board uart log is uart 6 but recently we don't have real board therefore we must use a board which has 
+stm32h563riv6 like real board and in this board uart log is uart3 to test bootloader --- thanks for reading*/
+
 static UART_HandleTypeDef *sx_uart[NUM_UART] = {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6};
 
 static const char *TAG = "MAIN";
 
 void bsp_log_send(const char *str){
-  HAL_UART_Transmit(sx_uart[5], str, strlen(str), 10);
+  HAL_UART_Transmit(sx_uart[2], str, strlen(str), 10);
 }
 
 __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t address)
@@ -307,6 +310,16 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   logger_init(LOGGER_DEBUG, bsp_log_send);
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  // tusb_init(BOARD_TUD_RHPORT);
+  dfu_app_init();
+  tusb_init();
+  Bootloader_t bootloader;
+  bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
+  dfu_boot = &bootloader;
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */

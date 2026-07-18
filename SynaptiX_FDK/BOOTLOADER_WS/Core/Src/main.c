@@ -18,7 +18,10 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "icache.h"
+#include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb.h"
 #include "gpio.h"
@@ -66,12 +69,14 @@ static void MPU_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-UART_HandleTypeDef *log_uart = &huart3;
+#define NUM_UART  6
+
+static UART_HandleTypeDef *sx_uart[NUM_UART] = {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6};
 
 static const char *TAG = "MAIN";
 
 void bsp_log_send(const char *str){
-  HAL_UART_Transmit(log_uart, str, strlen(str), 10);
+  HAL_UART_Transmit(sx_uart[5], str, strlen(str), 10);
 }
 
 __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t address)
@@ -82,6 +87,16 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
   /* Reset the Clock */
 
   /*Clear UART, ......, peripherals*/
+  for(uint8_t i=0; i<NUM_UART; i++){
+    HAL_UART_DeInit(sx_uart[i]);
+  }
+
+  /*Clear I2C*/   // In application, project use I2C1
+
+  /*Clear Timer*/ // In application, project use TIM1
+
+  /*Clear SPI*/   // In application, project use SPI1
+
 
   HAL_ICACHE_Disable();
   HAL_RCC_DeInit();
@@ -261,9 +276,26 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USB_PCD_Init();
   MX_USART3_UART_Init();
+  MX_I2C1_Init();
+  MX_SPI1_Init();
+  MX_TIM1_Init();
+  MX_UART4_Init();
+  MX_UART5_Init();
+  MX_USART2_UART_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 
   logger_init(LOGGER_DEBUG, bsp_log_send);
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  // tusb_init(BOARD_TUD_RHPORT);
+  dfu_app_init();
+  tusb_init();
+  Bootloader_t bootloader;
+  bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
+  dfu_boot = &bootloader;
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -306,12 +338,24 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSI
+                              |RCC_OSCILLATORTYPE_CSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV2;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.CSIState = RCC_CSI_ON;
+  RCC_OscInitStruct.CSICalibrationValue = RCC_CSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLL1_SOURCE_CSI;
+  RCC_OscInitStruct.PLL.PLLM = 1;
+  RCC_OscInitStruct.PLL.PLLN = 32;
+  RCC_OscInitStruct.PLL.PLLP = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1_VCIRANGE_2;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1_VCORANGE_WIDE;
+  RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();

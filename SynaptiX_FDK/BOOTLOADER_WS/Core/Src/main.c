@@ -83,7 +83,16 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
 {
   BOOT_DEBUG("Gonna Jump to Application 0x%08X",(unsigned int)address);
   volatile void (*app_reset_handler)(void) = (void *)(*((volatile uint32_t *)(address + 4U)));
-  // __disable_irq();
+
+  /* Disable global interrupts BEFORE touching any peripheral. Without this,
+   * an interrupt (USB, UART RX, ...) firing mid-deinit would be serviced
+   * using VTOR that still points at the bootloader's vector table, while
+   * the peripheral registers it expects may already be half-reset — a
+   * classic bootloader jump race. Deliberately NOT re-enabled at the end:
+   * the app's own startup/reset handler decides when it's ready for
+   * interrupts, so we leave PRIMASK set and let it take over that decision. */
+  __disable_irq();
+
   /* Reset the Clock */
 
   /*Clear UART, ......, peripherals*/
@@ -91,26 +100,37 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
     HAL_UART_DeInit(sx_uart[i]);
   }
 
+  /*Clear I2C*/   // In application, project use I2C1
+  HAL_I2C_DeInit(&hi2c1);
+
+  /*Clear Timer*/ // In application, project use TIM1
+  HAL_TIM_Base_DeInit(&htim1);
+
+  /*Clear SPI*/   // In application, project use SPI1
+  HAL_SPI_DeInit(&hspi1);
+
+  /*Clear USB*/   // In application, project use USB FS
+  HAL_PCD_DeInit(&hpcd_USB_DRD_FS);
+
   HAL_ICACHE_Disable();
   HAL_RCC_DeInit();
   HAL_DeInit();
-  
+
+  /* Clear NVIC enable + pending state so the app starts with a clean
+   * interrupt controller, instead of inheriting whichever IRQs the
+   * bootloader (e.g. USB for tud_task()) had enabled/pending. */
+  for (uint8_t i = 0; i < 8U; i++) {
+    NVIC->ICER[i] = 0xFFFFFFFFUL;
+    NVIC->ICPR[i] = 0xFFFFFFFFUL;
+  }
+
   SysTick->CTRL = 0;
   SysTick->LOAD = 0;
   SysTick->VAL = 0;
 
-  /*Clear I2C*/   // In application, project use I2C1
-
-  /*Clear Timer*/ // In application, project use TIM1
-
-  /*Clear SPI*/   // In application, project use SPI1
-
-  /*Clear USB*/   // In application, project use USB FS
-  
   __set_MSP(*(volatile uint32_t *)address);
   /* Jump to application */
   SCB->VTOR = address;
-  // __enable_irq();
   app_reset_handler(); // call the app reset handler
 }
 

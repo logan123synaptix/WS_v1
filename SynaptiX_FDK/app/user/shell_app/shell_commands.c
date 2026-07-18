@@ -56,6 +56,18 @@ static int cli_cmd_restart(ShellContext_t *shell, int argc, char *argv[])
     return 0; /* unreachable */
 }
 
+static int cli_cmd_ota(ShellContext_t *shell, int argc, char *argv[])
+{
+    (void)argc;
+    (void)argv;
+    cli_shell_put_line(shell, "Entering DFU update mode...");
+    int rc = ota_trigger_enter_dfu();
+    /* Only reached if the flash write failed — on success,
+     * ota_trigger_enter_dfu() resets the MCU and never returns here. */
+    cli_shell_printf(shell, "Failed to enter DFU mode (err %d)\r\n", rc);
+    return -1;
+}
+
 static void print_settings(ShellContext_t *shell)
 {
     const network_config_t *cfg = network_config_get();

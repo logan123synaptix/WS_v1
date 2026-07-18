@@ -16,11 +16,12 @@ extern "C" {
  * bootloader.c's bootloader_process()/bootloader_init().
  *
  * This board has no physical DFU button (per the user, 2026-07-17), so
- * this function is the ONLY way to enter DFU mode — it must be called
- * from both the CLI ("ota" command, shell_commands.c) and MQTT RPC
- * ("enterOtaMode" method, mqtt_rpc.c), which is why the logic lives here
- * as a single shared entry point rather than being duplicated in each
- * caller.
+ * this function is the ONLY way to enter DFU mode. It is called from the
+ * CLI ("ota" command, shell_commands.c) over USB — the intended entry
+ * point for OTA updates. There is deliberately NO MQTT RPC path for this
+ * (per the user, 2026-07-18): OTA is a USB-only operation, so
+ * mqtt_rpc.c's on-message handler does not and should not dispatch to
+ * this function.
  *
  * Returns 0 on success (does not actually return in practice — the
  * function resets the MCU before returning). Returns a negative value if

@@ -91,13 +91,6 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
     HAL_UART_DeInit(sx_uart[i]);
   }
 
-  /*Clear I2C*/   // In application, project use I2C1
-
-  /*Clear Timer*/ // In application, project use TIM1
-
-  /*Clear SPI*/   // In application, project use SPI1
-
-
   HAL_ICACHE_Disable();
   HAL_RCC_DeInit();
   HAL_DeInit();
@@ -105,6 +98,14 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
   SysTick->CTRL = 0;
   SysTick->LOAD = 0;
   SysTick->VAL = 0;
+
+  /*Clear I2C*/   // In application, project use I2C1
+
+  /*Clear Timer*/ // In application, project use TIM1
+
+  /*Clear SPI*/   // In application, project use SPI1
+
+  /*Clear USB*/   // In application, project use USB FS
   
   __set_MSP(*(volatile uint32_t *)address);
   /* Jump to application */

@@ -79,7 +79,7 @@ static UART_HandleTypeDef *sx_uart[NUM_UART] = {&huart1, &huart2, &huart3, &huar
 static const char *TAG = "MAIN";
 
 void bsp_log_send(const char *str){
-  HAL_UART_Transmit(sx_uart[2], str, strlen(str), 10);
+  HAL_UART_Transmit(sx_uart[2], (uint8_t *)str, strlen(str), 10);
 }
 
 __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t address)
@@ -321,17 +321,6 @@ int main(void)
   dfu_boot = &bootloader;
   /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  // tusb_init(BOARD_TUD_RHPORT);
-  dfu_app_init();
-  tusb_init();
-  Bootloader_t bootloader;
-  bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
-  dfu_boot = &bootloader;
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {

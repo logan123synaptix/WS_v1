@@ -92,11 +92,6 @@ int __io_putchar(int ch)
 __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t address)
 {
   BOOT_DEBUG("Gonna Jump to Application 0x%08X",(unsigned int)address);
-  /* DEBUG (phase 6 investigation): log CONTROL register as early as possible,
-   * before any peripheral deinit runs, to determine whether CONTROL.SPSEL is
-   * already 1 (PSP in use) at this point or whether it only becomes 1 later
-   * (e.g. inside the app's own startup code). */
-  BOOT_DEBUG("CONTROL at goto_application entry = 0x%08X", (unsigned int)__get_CONTROL());
   volatile void (*app_reset_handler)(void) = (void *)(*((volatile uint32_t *)(address + 4U)));
 
   /* Disable global interrupts BEFORE touching any peripheral. Without this,
@@ -107,13 +102,6 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
    * the app's own startup/reset handler decides when it's ready for
    * interrupts, so we leave PRIMASK set and let it take over that decision. */
   __disable_irq();
-
-  /* DEBUG (phase 6 investigation): log CONTROL again here, right after
-   * __disable_irq() but BEFORE HAL_UART_DeInit() below — UART must still be
-   * alive for this log to actually reach the host. This tells us whether
-   * CONTROL changed between function entry and this point (e.g. due to
-   * __disable_irq() itself, which it shouldn't, but we check anyway). */
-  BOOT_DEBUG("CONTROL after disable_irq, before UART deinit = 0x%08X", (unsigned int)__get_CONTROL());
 
   /* Reset the Clock */
 

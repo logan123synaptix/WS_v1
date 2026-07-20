@@ -6,7 +6,7 @@
             "type": "cortex-debug",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/release/BOOTLOADER_WS.elf",
+            "executable": "${workspaceFolder}/build/debug/BOOTLOADER_WS.elf",
             "servertype": "stlink",
             "serverpath": "D:\\stm32cubeclt\\STM32CubeCLT_1.21.0\\STLink-gdb-server\\bin\\ST-LINK_gdbserver.exe",
             "device": "STM32H563RIVx",

@@ -29,6 +29,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bootloader.h"
+#include "new_bootloader.h"
 #include "tusb.h"
 #include "stm32h5xx_hal.h"
 #include "flash_define.h"
@@ -144,8 +145,22 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
   app_reset_handler(); // call the app reset handler
 }
 
-#define APP_START_ADDR      SECONDARY_APP_FLASH_START_ADDRESS  // DFU now writes the new image to Secondary, not Primary directly (see tud_dfu_manifest_cb: after manifest, bootloader_process() swaps Secondary -> Primary on the next loop iteration)
-#define APP_MAX_SIZE        SECONDARY_APP_FLASH_SIZE          // must match Primary's size; boot_swap_firmware() asserts app_size % scratch_size == 0 using primary_app_size
+// DFU write target is chosen at runtime via g_dfu_target_factory (set by
+// new_bootloader_check_commands() when BKP2R == BOOT_MAGIC_UPDATE_FACTORY):
+//   false (default) -> Secondary. After manifest, bootloader_process() swaps
+//     Secondary -> Primary on the next loop iteration (existing OTA path).
+//   true             -> Factory. Written directly, no swap/activation
+//     afterwards - Factory is just a read-only source for rollback-factory.
+// Replaces the old hardcoded-to-Secondary APP_START_ADDR/APP_MAX_SIZE
+// macros; call sites below now call these functions instead.
+static inline uint32_t APP_START_ADDR(void)
+{
+  return g_dfu_target_factory ? FACTORY_APP_FLASH_START_ADDRESS : SECONDARY_APP_FLASH_START_ADDRESS;
+}
+static inline uint32_t APP_MAX_SIZE(void)
+{
+  return g_dfu_target_factory ? FACTORY_APP_FLASH_SIZE : SECONDARY_APP_FLASH_SIZE;
+}
 // #define FLASH_SECTOR_SIZE   0x2000UL                       // 8KB sectors on H5
 #define QUADWORD_SIZE       16U                               // 128-bit program width
  
@@ -159,7 +174,7 @@ Bootloader_t *dfu_boot = NULL;
 void dfu_app_init(void)
 {
   LOGI(TAG, "dfu_app_init");
-  _write_addr = APP_START_ADDR;
+  _write_addr = APP_START_ADDR();
 }
  
 // Called before DFU_DNLOAD is acked. Return time (ms) host should wait
@@ -191,11 +206,10 @@ void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, u
         // out-of-range sector number (only the low bits landed in the
         // hardware's SNB field), erasing/targeting the wrong sector and
         // causing DFU_DNLOAD to fail immediately at block 0.
-        boot_flash_erase(&dfu_boot->boot_flash, SECONDARY_APP_FLASH_START_ADDRESS,
-                          SECONDARY_APP_FLASH_SIZE);
+        boot_flash_erase(&dfu_boot->boot_flash, APP_START_ADDR(), APP_MAX_SIZE());
     }
  
-    if (_write_addr + length - APP_START_ADDR > APP_MAX_SIZE)
+    if (_write_addr + length - APP_START_ADDR() > APP_MAX_SIZE())
     {
         tud_dfu_finish_flashing(DFU_STATUS_ERR_ADDRESS);
         return;
@@ -215,14 +229,28 @@ void tud_dfu_manifest_cb(uint8_t alt)
     // HAL_FLASH_Unlock();
     // flush_quadword(); // write any trailing partial quad-word
     // HAL_FLASH_Lock();
-    // New image now sits in Secondary. Clear the "waiting for DFU" flag and
-    // instead flag that a swap (Secondary -> Primary, old Primary preserved
-    // into Secondary) is needed. bootloader_process(), called every
-    // iteration of the while(1) loop in main(), will see this flag, call
-    // boot_swap_firmware(), then jump to the now-updated Primary. We
-    // deliberately do NOT jump to application here ourselves.
     dfu_boot->boot_flash.partition.isUpgradeInProgress = false;
-    dfu_boot->boot_flash.partition.isNewFirmwareAvailable = true;
+    if (g_dfu_target_factory)
+    {
+      // New image now sits in Factory only - a read-only source for a
+      // future rollback-factory, not something to activate. Do NOT set
+      // isNewFirmwareAvailable (that would trigger a Secondary->Primary
+      // swap next loop, which has nothing to do with this DFU session).
+      // With both flags false, bootloader_process()'s next iteration
+      // falls through to its else branch and jumps straight to the
+      // (unchanged) Primary application.
+      g_dfu_target_factory = false; // one-shot, back to Secondary-target default
+    }
+    else
+    {
+      // New image now sits in Secondary. Flag that a swap (Secondary ->
+      // Primary, old Primary preserved into Secondary) is needed.
+      // bootloader_process(), called every iteration of the while(1) loop
+      // in main(), will see this flag, call boot_swap_firmware(), then
+      // jump to the now-updated Primary. We deliberately do NOT jump to
+      // application here ourselves.
+      dfu_boot->boot_flash.partition.isNewFirmwareAvailable = true;
+    }
     bootloader_save_partition(dfu_boot);
     // Tell TinyUSB we're done manifesting (no separate reboot needed since
     // DFU_ATTR_MANIFESTATION_TOLERANT is set — host can still GET_STATUS).
@@ -241,11 +269,11 @@ uint16_t tud_dfu_upload_cb(uint8_t alt, uint16_t block_num, uint8_t *data, uint1
 {
     (void) alt;
     LOGI(TAG, "tud_dfu_upload_cb\r\n");
-    uint32_t addr = APP_START_ADDR + (uint32_t) block_num * length;
+    uint32_t addr = APP_START_ADDR() + (uint32_t) block_num * length;
  
-    if (addr >= APP_START_ADDR + APP_MAX_SIZE) return 0;
+    if (addr >= APP_START_ADDR() + APP_MAX_SIZE()) return 0;
  
-    uint32_t remain = (APP_START_ADDR + APP_MAX_SIZE) - addr;
+    uint32_t remain = (APP_START_ADDR() + APP_MAX_SIZE()) - addr;
     uint16_t n = (remain < length) ? (uint16_t) remain : length;
  
     memcpy(data, (void const *) addr, n);

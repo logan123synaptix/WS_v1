@@ -12,6 +12,9 @@
 // depending on that header edit having been applied yet.
 extern int boot_swap_firmware(Bootloader_t *bootloader);
 
+// Defined here (declared extern in new_bootloader.h); see header comment.
+bool g_dfu_target_factory = false;
+
 #if SECONDARY_FLASH && SCRATCH_FLASH && FACTORY_APP_FLASH
 
 /*
@@ -87,6 +90,28 @@ void new_bootloader_check_commands(Bootloader_t *bootloader)
     uint32_t rollback_factory_flag = boot_backup_reg_read(BOOT_BACKUP_REG_ROLLBACK_FACTORY);
     uint32_t rollback_prev_flag    = boot_backup_reg_read(BOOT_BACKUP_REG_ROLLBACK_PREV);
     uint32_t update_flag           = boot_backup_reg_read(BOOT_BACKUP_REG_UPDATE);
+
+    // Same backup register (BKP2R) as rollback-factory, but a different
+    // magic value: this one means "enter DFU-wait mode and write the
+    // incoming image to Factory", not "copy existing Factory to Primary
+    // now". Checked before the rollback_factory_flag comparison below so
+    // the two magic values on the same register can never be confused.
+    if (rollback_factory_flag == BOOT_MAGIC_UPDATE_FACTORY)
+    {
+        boot_backup_reg_clear(BOOT_BACKUP_REG_ROLLBACK_FACTORY);
+#if FACTORY_APP_FLASH
+        BOOT_DEBUG("flash-factory command detected. Entering firmware update mode (target: Factory).");
+        g_dfu_target_factory = true;
+        bootloader->boot_flash.partition.isUpgradeInProgress = true;
+        bootloader_save_partition(bootloader);
+        // Deliberately do NOT jump to application here - same as the
+        // BOOT_MAGIC_UPDATE case below, the caller's DFU-wait loop in
+        // main.c takes over.
+#else
+        BOOT_ERROR("flash-factory requested but Factory flash not configured.");
+#endif
+        return;
+    }
 
     if (rollback_factory_flag == BOOT_MAGIC_ROLLBACK_FACTORY)
     {

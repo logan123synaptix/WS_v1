@@ -325,7 +325,7 @@ int main(void)
 
   tusb_init(BOARD_TUD_RHPORT);
   dfu_app_init();
-  tusb_init();
+  // tusb_init();
   logger_init(LOGGER_DEBUG, bsp_log_send);
   Bootloader_t bootloader;
   bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);

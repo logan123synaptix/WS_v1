@@ -37,6 +37,8 @@ extern "C" {
 // 1024 gives a good balance of USB throughput vs RAM buffer usage.
 #define CFG_TUD_DFU_XFER_BUFSIZE   1024*8
 
+#define CFG_TUD_TASK_QUEUE_SZ      64
+
 #define CFG_TUSB_DEBUG 0   // 1=basic, 2=verbose (bus reset, setup packets, mount/unmount)
 
 #ifdef __cplusplus

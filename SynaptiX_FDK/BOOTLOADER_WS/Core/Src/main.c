@@ -182,17 +182,17 @@ void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, u
     if (block_num == 0)
     {
         dfu_app_init();
-        HAL_FLASH_Unlock();
-        FLASH_EraseInitTypeDef erase = {0};
-        uint32_t sector_error = 0;
- 
-        erase.TypeErase   = FLASH_TYPEERASE_SECTORS;
-        erase.Banks        = FLASH_BANK_1;               // adjust if APP_START_ADDR crosses into bank 2
-        erase.Sector       = SECONDARY_APP_FLASH_START_ADDRESS / FLASH_SECTOR_SIZE;
-        erase.NbSectors    = SECONDARY_APP_FLASH_NUMBER_OF_SECTORS;
- 
-        HAL_FLASHEx_Erase(&erase, &sector_error);
-        HAL_FLASH_Lock();
+        // Use the existing boot_flash_erase() helper (see boot_flash.c) rather
+        // than calling HAL_FLASHEx_Erase() directly here — it already handles
+        // the sector-index-relative-to-bank-base math and Bank 1/2 selection
+        // correctly. An earlier version of this callback computed
+        // erase.Sector as an absolute address / FLASH_SECTOR_SIZE without
+        // subtracting FLASH_BASE first, which silently produced an
+        // out-of-range sector number (only the low bits landed in the
+        // hardware's SNB field), erasing/targeting the wrong sector and
+        // causing DFU_DNLOAD to fail immediately at block 0.
+        boot_flash_erase(&dfu_boot->boot_flash, SECONDARY_APP_FLASH_START_ADDRESS,
+                          SECONDARY_APP_FLASH_SIZE);
     }
  
     if (_write_addr + length - APP_START_ADDR > APP_MAX_SIZE)

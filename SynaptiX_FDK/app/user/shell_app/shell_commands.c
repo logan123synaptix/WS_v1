@@ -23,6 +23,7 @@ static int cli_cmd_settings(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_ota(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_rollback_prev(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_rollback_factory(ShellContext_t *shell, int argc, char *argv[]);
+static int cli_cmd_flash_factory(ShellContext_t *shell, int argc, char *argv[]);
 
 static const Cli_Shell_Cmd s_shell_commands[] = {
     {"help",     cli_shell_help_handler, "Lists all commands\r\n"},
@@ -32,6 +33,9 @@ static const Cli_Shell_Cmd s_shell_commands[] = {
         "Reboot and swap back to the previous (Secondary) app image — undoes the last OTA update\r\n"},
     {"rollback-factory", cli_cmd_rollback_factory,
         "Reboot and restore the factory-programmed app image into Primary (one-way, cannot be undone by rollback-prev)\r\n"},
+    {"flash-factory", cli_cmd_flash_factory,
+        "Reboot into bootloader DFU update mode, redirected to write the Factory partition instead of Secondary "
+        "(mirrors TF's ADMIN+AT+FACTORY, tested OK there) — does NOT activate the image, only rollback-factory does\r\n"},
     {"settings", cli_cmd_settings,
         "settings -i : show current settings\r\n"
         "settings -c : configure settings (any subset of flags below)\r\n"
@@ -100,6 +104,27 @@ static int cli_cmd_rollback_factory(ShellContext_t *shell, int argc, char *argv[
     cli_shell_put_line(shell, "Rolling back to factory app and rebooting...");
     boot_backup_reg_init();
     boot_backup_reg_write(BOOT_BACKUP_REG_ROLLBACK_FACTORY, BOOT_MAGIC_ROLLBACK_FACTORY);
+    NVIC_SystemReset();
+    return 0; /* unreachable */
+}
+
+/* Same backup register (BKP2R) as rollback-factory above, but a different
+ * magic value: this one tells the bootloader to enter DFU-wait mode with
+ * the write target redirected to Factory, instead of copying the existing
+ * Factory image to Primary right away. See new_bootloader_check_commands()
+ * (WS_v1/BOOTLOADER_WS) for the bootloader-side handling, and
+ * tud_dfu_download_cb()/tud_dfu_manifest_cb() (BOOTLOADER_WS/Core/Src/main.c)
+ * for how the DFU session itself redirects to Factory and, on completion,
+ * jumps straight back to the unchanged Primary app (no swap/activation).
+ * Mirrors TF's ADMIN+AT+FACTORY (SynaptiX_FDK/app/user/at_usb/test_at.c,
+ * _at_flash_factory_execute) - tested OK there on 2026-07-21. */
+static int cli_cmd_flash_factory(ShellContext_t *shell, int argc, char *argv[])
+{
+    (void)argc;
+    (void)argv;
+    cli_shell_put_line(shell, "Entering DFU update mode (target: Factory)...");
+    boot_backup_reg_init();
+    boot_backup_reg_write(BOOT_BACKUP_REG_ROLLBACK_FACTORY, BOOT_MAGIC_UPDATE_FACTORY);
     NVIC_SystemReset();
     return 0; /* unreachable */
 }

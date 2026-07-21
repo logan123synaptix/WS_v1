@@ -15,7 +15,7 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			$(SYNAPTIX_DIR)/app/user/network_config/network_config.c \
 			$(SYNAPTIX_DIR)/app/user/power_monitor_app/power_monitor_app.c \
 			$(SYNAPTIX_DIR)/app/user/shell_app/shell_app.c \
-			$(SYNAPTIX_DIR)/app/user/shell_commands.c \
+			$(SYNAPTIX_DIR)/app/user/shell_app/shell_commands.c \
 			$(SYNAPTIX_DIR)/app/user/time_synch/time_sync.c \
 			$(SYNAPTIX_DIR)/app/user/mqtt_rpc/mqtt_rpc.c \
 			$(SYNAPTIX_DIR)/app/user/ota_trigger/ota_trigger.c \

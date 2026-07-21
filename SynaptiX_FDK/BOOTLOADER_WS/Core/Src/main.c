@@ -353,6 +353,7 @@ int main(void)
   tusb_init();
   dfu_app_init();
   logger_init(LOGGER_DEBUG, bsp_log_send);
+  log_info(TAG, "BOOTLOADER TEST DONE!!!!");
   Bootloader_t bootloader;
   bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
   dfu_boot = &bootloader;

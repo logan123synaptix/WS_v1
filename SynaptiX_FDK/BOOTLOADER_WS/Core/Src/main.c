@@ -321,11 +321,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-  
-
-  tusb_init(BOARD_TUD_RHPORT);
+  // tusb_init(BOARD_TUD_RHPORT);
+  tusb_init();
   dfu_app_init();
-  // tusb_init();
   logger_init(LOGGER_DEBUG, bsp_log_send);
   Bootloader_t bootloader;
   bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);

@@ -144,8 +144,8 @@ __attribute__((optimize("O0"))) static void goto_application(volatile uint32_t a
   app_reset_handler(); // call the app reset handler
 }
 
-#define APP_START_ADDR      PRIMARY_APP_FLASH_START_ADDRESS   // bootloader occupies 0x08000000-0x0800FFFF (64KB)
-#define APP_MAX_SIZE        PRIMARY_APP_FLASH_SIZE            // rest of bank 1, adjust to your map
+#define APP_START_ADDR      SECONDARY_APP_FLASH_START_ADDRESS  // DFU now writes the new image to Secondary, not Primary directly (see tud_dfu_manifest_cb: after manifest, bootloader_process() swaps Secondary -> Primary on the next loop iteration)
+#define APP_MAX_SIZE        SECONDARY_APP_FLASH_SIZE          // must match Primary's size; boot_swap_firmware() asserts app_size % scratch_size == 0 using primary_app_size
 // #define FLASH_SECTOR_SIZE   0x2000UL                       // 8KB sectors on H5
 #define QUADWORD_SIZE       16U                               // 128-bit program width
  
@@ -188,8 +188,8 @@ void tud_dfu_download_cb(uint8_t alt, uint16_t block_num, uint8_t const *data, u
  
         erase.TypeErase   = FLASH_TYPEERASE_SECTORS;
         erase.Banks        = FLASH_BANK_1;               // adjust if APP_START_ADDR crosses into bank 2
-        erase.Sector       = PRIMARY_APP_FLASH_START_ADDRESS / FLASH_SECTOR_SIZE;
-        erase.NbSectors    = PRIMARY_APP_FLASH_NUMBER_OF_SECTORS;
+        erase.Sector       = SECONDARY_APP_FLASH_START_ADDRESS / FLASH_SECTOR_SIZE;
+        erase.NbSectors    = SECONDARY_APP_FLASH_NUMBER_OF_SECTORS;
  
         HAL_FLASHEx_Erase(&erase, &sector_error);
         HAL_FLASH_Lock();
@@ -215,17 +215,23 @@ void tud_dfu_manifest_cb(uint8_t alt)
     // HAL_FLASH_Unlock();
     // flush_quadword(); // write any trailing partial quad-word
     // HAL_FLASH_Lock();
+    // New image now sits in Secondary. Clear the "waiting for DFU" flag and
+    // instead flag that a swap (Secondary -> Primary, old Primary preserved
+    // into Secondary) is needed. bootloader_process(), called every
+    // iteration of the while(1) loop in main(), will see this flag, call
+    // boot_swap_firmware(), then jump to the now-updated Primary. We
+    // deliberately do NOT jump to application here ourselves.
     dfu_boot->boot_flash.partition.isUpgradeInProgress = false;
+    dfu_boot->boot_flash.partition.isNewFirmwareAvailable = true;
     bootloader_save_partition(dfu_boot);
     // Tell TinyUSB we're done manifesting (no separate reboot needed since
     // DFU_ATTR_MANIFESTATION_TOLERANT is set — host can still GET_STATUS).
     tud_dfu_finish_flashing(DFU_STATUS_OK);
- 
-    // Give the host a moment to read the final GET_STATUS, then jump.
+
+    // Give the host a moment to read the final GET_STATUS. The next
+    // while(1) loop iteration's bootloader_process() call performs the
+    // actual swap and jump — see main().
     HAL_Delay(200);
-    bootloader_jump_to_application(dfu_boot);
-    // NVIC_SystemReset();   // simplest: reset and let bootloader decide to
-                           // jump to APP_START_ADDR based on valid vector table
 }
  
 // Invoked when receiving DFU_UPLOAD request, application should fill

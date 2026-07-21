@@ -10,6 +10,8 @@
 #include "network_config.h"
 #include "sx_board.h"
 #include "ota_trigger.h"
+#include "new_boot_backup_reg.h"
+#include "new_magic_flash.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,11 +21,17 @@
 static int cli_cmd_restart(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_settings(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_ota(ShellContext_t *shell, int argc, char *argv[]);
+static int cli_cmd_rollback_prev(ShellContext_t *shell, int argc, char *argv[]);
+static int cli_cmd_rollback_factory(ShellContext_t *shell, int argc, char *argv[]);
 
 static const Cli_Shell_Cmd s_shell_commands[] = {
     {"help",     cli_shell_help_handler, "Lists all commands\r\n"},
     {"restart",  cli_cmd_restart,        "Restart device\r\n"},
     {"ota",      cli_cmd_ota,            "Reboot into bootloader DFU update mode (no physical DFU button on this board)\r\n"},
+    {"rollback-prev",    cli_cmd_rollback_prev,
+        "Reboot and swap back to the previous (Secondary) app image — undoes the last OTA update\r\n"},
+    {"rollback-factory", cli_cmd_rollback_factory,
+        "Reboot and restore the factory-programmed app image into Primary (one-way, cannot be undone by rollback-prev)\r\n"},
     {"settings", cli_cmd_settings,
         "settings -i : show current settings\r\n"
         "settings -c : configure settings (any subset of flags below)\r\n"
@@ -66,6 +74,34 @@ static int cli_cmd_ota(ShellContext_t *shell, int argc, char *argv[])
      * ota_trigger_enter_dfu() resets the MCU and never returns here. */
     cli_shell_printf(shell, "Failed to enter DFU mode (err %d)\r\n", rc);
     return -1;
+}
+
+/* Both rollback commands work the same way: write a one-shot command flag
+ * into a TAMP backup register (survives NVIC_SystemReset(), see
+ * new_boot_backup_reg.h), then reset. new_bootloader_check_commands(),
+ * called early in the bootloader's bootloader_init(), reads the flag,
+ * clears it, performs the swap/copy, and jumps straight to the
+ * application — no DFU wait, no host tool needed. */
+static int cli_cmd_rollback_prev(ShellContext_t *shell, int argc, char *argv[])
+{
+    (void)argc;
+    (void)argv;
+    cli_shell_put_line(shell, "Rolling back to previous (Secondary) app and rebooting...");
+    boot_backup_reg_init();
+    boot_backup_reg_write(BOOT_BACKUP_REG_ROLLBACK_PREV, BOOT_MAGIC_ROLLBACK_PREV);
+    NVIC_SystemReset();
+    return 0; /* unreachable */
+}
+
+static int cli_cmd_rollback_factory(ShellContext_t *shell, int argc, char *argv[])
+{
+    (void)argc;
+    (void)argv;
+    cli_shell_put_line(shell, "Rolling back to factory app and rebooting...");
+    boot_backup_reg_init();
+    boot_backup_reg_write(BOOT_BACKUP_REG_ROLLBACK_FACTORY, BOOT_MAGIC_ROLLBACK_FACTORY);
+    NVIC_SystemReset();
+    return 0; /* unreachable */
 }
 
 static void print_settings(ShellContext_t *shell)

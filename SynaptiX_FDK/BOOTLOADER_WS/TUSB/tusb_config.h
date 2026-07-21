@@ -35,7 +35,7 @@ extern "C" {
 
 // Must be a multiple of the flash quad-word (16 bytes) for STM32H5.
 // 1024 gives a good balance of USB throughput vs RAM buffer usage.
-#define CFG_TUD_DFU_XFER_BUFSIZE   1024*8
+#define CFG_TUD_DFU_XFER_BUFSIZE   1024*4 // 8KB fail;; Let's try 4KB
 
 #define CFG_TUD_TASK_QUEUE_SZ      64
 

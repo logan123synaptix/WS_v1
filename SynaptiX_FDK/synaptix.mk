@@ -19,6 +19,7 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			$(SYNAPTIX_DIR)/app/user/time_synch/time_sync.c \
 			$(SYNAPTIX_DIR)/app/user/mqtt_rpc/mqtt_rpc.c \
 			$(SYNAPTIX_DIR)/app/user/ota_trigger/ota_trigger.c \
+			$(SYNAPTIX_DIR)/app/user/ota_trigger/new_boot_backup_reg.c
 
 
 BOARD_FILES = ${SYNAPTIX_DIR}/board/sx_board.c

@@ -67,42 +67,119 @@ void PeriphCommonClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/*You need to log byte receive*/
 
 static const char *TAG = "MAIN";
 
-uint8_t uart_byte_sim; 
-uint8_t uart_byte_gps;
+/* --- SIM (UART1) --- */
+static volatile uint8_t uart_byte_sim;
+static volatile uint8_t sim_rx_flag = 0;
+
+/* --- GPS (UART2) --- */
+static volatile uint8_t uart_byte_gps;
+static volatile uint8_t gps_rx_flag = 0;
+
+/* --- Terminal input, UART6/log, dung de go lenh AT forward sang SIM --- */
+static volatile uint8_t uart_byte_log;
+static volatile uint8_t log_rx_flag = 0;
+static char     log_line_buf[128];
+static uint16_t log_line_len = 0;
 
 void power_on_sim(void);
-
 void send_byte_sim(const char *cmd);
-
 void send_byte_gps(const char *cmd);
+void uart_test_init(void);
+void uart_test_poll(void);
+static void log_print(const char *s);
 
-void power_on_sim(void){
-  //Pwrkey: PD12
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
+/* Ham "print" ma logger_init() se goi moi khi co 1 dong log da format
+ * xong (xem logger.h's p_log_func) - o day chi don gian ghi thang ra
+ * UART6, blocking, dung cho muc dich test cong cu nay. Day CUNG LA UART
+ * dung lam CLI transport (uart_byte_log/log_rx_flag ben tren) - log
+ * output va terminal input dung chung 1 day, giong thiet ke that cua
+ * sx_board.c (khong phai bug, la co y). */
+static void log_print(const char *s)
+{
+  HAL_UART_Transmit(&huart6, (uint8_t *)s, (uint16_t)strlen(s), 1000);
+}
+
+void power_on_sim(void)
+{
+  /* Pwrkey: PD12. Giu nguyen dung timing ban goc da viet (50ms/50ms/7s) -
+   * CHUA xac nhan lai voi datasheet A7677S xem dung sequence PWRKEY hay
+   * chua (bao nhieu ms low/high, active-high hay active-low) - ghi chu
+   * lai vi day la timing tu viet, chua doi chieu voi Documents/a7677s.md */
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
   HAL_Delay(50);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 0);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
   HAL_Delay(50);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
   HAL_Delay(7000);
 }
 
-void send_byte_sim(const char *cmd){
-  /* You can level up this function*/
-  HAL_UART_Transmit(&huart1, cmd, strlen(cmd), 100);
+void send_byte_sim(const char *cmd)
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)cmd, (uint16_t)strlen(cmd), 100);
 }
 
-HAL_UART_Receive_IT(&huart1, &uart_byte_sim, 1){
-  /*Code here*/
-
+void send_byte_gps(const char *cmd)
+{
+  HAL_UART_Transmit(&huart2, (uint8_t *)cmd, (uint16_t)strlen(cmd), 100);
 }
 
-HAL_UART_Receive_IT(&huart2, &uart_byte_gps, 1){
-  /*Code here*/
+/* Goi 1 lan trong main(), SAU khi MX_USARTx_UART_Init() da chay het. */
+void uart_test_init(void)
+{
+  logger_init(LOGGER_INFO, log_print);
+  log_info(TAG, "=== UART TEST -- SIM(UART1) + GPS(UART2), CLI via UART6 ===");
+}
 
+/* Goi lien tuc trong vong while(1) chinh, KHONG block. */
+void uart_test_poll(void)
+{
+  /* SIM -> log raw byte nhan duoc. Dung %02X (hex) thay vi %c/%s vi day
+   * la 1 BYTE THO tu UART, co the la ky tu khong in duoc (vd 0x00) hoac
+   * khong ket thuc bang '\0' - dua thang vao printf-style %s se khong an
+   * toan. */
+  if (sim_rx_flag) {
+    sim_rx_flag = 0;
+    log_info(TAG, "[SIM RX] 0x%02X ('%c')", uart_byte_sim,
+             (uart_byte_sim >= 0x20 && uart_byte_sim < 0x7F) ? uart_byte_sim : '.');
+  }
+
+  /* GPS -> log raw byte nhan duoc (NMEA sentence tho, in tung byte) */
+  if (gps_rx_flag) {
+    gps_rx_flag = 0;
+    log_info(TAG, "[GPS RX] 0x%02X ('%c')", uart_byte_gps,
+             (uart_byte_gps >= 0x20 && uart_byte_gps < 0x7F) ? uart_byte_gps : '.');
+  }
+
+  /* Terminal (UART6) -> gom thanh 1 dong, forward sang SIM khi gap Enter */
+  if (log_rx_flag) {
+    log_rx_flag = 0;
+    uint8_t c = uart_byte_log;
+
+    /* Echo lai ky tu vua go, van dung HAL_UART_Transmit truc tiep (khong
+     * qua log_info) vi day la echo ky tu don, khong phai 1 dong log co
+     * cau truc - dung log_info o day se tu them newline/format khong
+     * dung y do "go ky tu nao hien ra ky tu do". */
+    HAL_UART_Transmit(&huart6, &c, 1, 100);
+
+    if (c == '\r' || c == '\n') {
+      if (log_line_len > 0) {
+        log_line_buf[log_line_len] = '\0';
+        send_byte_sim(log_line_buf);
+        send_byte_sim("\r\n");
+
+        log_info(TAG, "[-> SIM] %s", log_line_buf);
+
+        log_line_len = 0;
+      }
+    } else if (log_line_len < sizeof(log_line_buf) - 1) {
+      log_line_buf[log_line_len++] = (char)c;
+    } else {
+      log_line_len = 0; /* dong qua dai, reset thay vi tran buffer */
+    }
+  }
 }
 
 /* USER CODE END 0 */
@@ -152,16 +229,24 @@ int main(void)
   MX_UART5_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UART_Receive_IT(&huart1, (uint8_t *)&uart_byte_sim, 1);
+  HAL_UART_Receive_IT(&huart2, (uint8_t *)&uart_byte_gps, 1);
+  HAL_UART_Receive_IT(&huart6, (uint8_t *)&uart_byte_log, 1);
   uint32_t last_tick = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   // sx_board_init();
   // app_init();
+  uart_test_init();
+  power_on_sim();      /* THEM MOI - bat nguon SIM truoc khi test AT command,
+                           neu quen buoc nay SIM se khong tra loi gi ca du
+                           UART da noi dung */     
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    uart_test_poll();   
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -256,7 +341,19 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART1) {
+    sim_rx_flag = 1;
+    HAL_UART_Receive_IT(&huart1, (uint8_t *)&uart_byte_sim, 1);
+  } else if (huart->Instance == USART2) {
+    gps_rx_flag = 1;
+    HAL_UART_Receive_IT(&huart2, (uint8_t *)&uart_byte_gps, 1);
+  } else if (huart->Instance == USART6) {
+    log_rx_flag = 1;
+    HAL_UART_Receive_IT(&huart6, (uint8_t *)&uart_byte_log, 1);
+  }
+}
 /* USER CODE END 4 */
 
 /**

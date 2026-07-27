@@ -104,16 +104,14 @@ static void log_print(const char *s)
 
 void power_on_sim(void)
 {
-  /* Pwrkey: PD12. Giu nguyen dung timing ban goc da viet (50ms/50ms/7s) -
-   * CHUA xac nhan lai voi datasheet A7677S xem dung sequence PWRKEY hay
-   * chua (bao nhieu ms low/high, active-high hay active-low) - ghi chu
-   * lai vi day la timing tu viet, chua doi chieu voi Documents/a7677s.md */
+  log_info(TAG, "POWER ON SIM");
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
   HAL_Delay(50);
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
   HAL_Delay(50);
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
   HAL_Delay(7000);
+  log_info(TAG, "CODE POWER SIM ON OK");
 }
 
 void send_byte_sim(const char *cmd)

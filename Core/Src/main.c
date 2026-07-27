@@ -30,8 +30,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "app.h"
-#include "sx_board.h"
+// #include "app.h"
+// #include "sx_board.h"
+#include "stdio.h"
+#include "string.h"
+#include "logger.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,7 +67,43 @@ void PeriphCommonClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/*You need to log byte receive*/
+
 static const char *TAG = "MAIN";
+
+uint8_t uart_byte_sim; 
+uint8_t uart_byte_gps;
+
+void power_on_sim(void);
+
+void send_byte_sim(const char *cmd);
+
+void send_byte_gps(const char *cmd);
+
+void power_on_sim(void){
+  //Pwrkey: PD12
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
+  HAL_Delay(50);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 0);
+  HAL_Delay(50);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
+  HAL_Delay(7000);
+}
+
+void send_byte_sim(const char *cmd){
+  /* You can level up this function*/
+  HAL_UART_Transmit(&huart1, cmd, strlen(cmd), 100);
+}
+
+HAL_UART_Receive_IT(&huart1, &uart_byte_sim, 1){
+  /*Code here*/
+
+}
+
+HAL_UART_Receive_IT(&huart2, &uart_byte_gps, 1){
+  /*Code here*/
+
+}
 
 /* USER CODE END 0 */
 
@@ -115,8 +154,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   uint32_t last_tick = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-  sx_board_init();
-  app_init();
+  // sx_board_init();
+  // app_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -126,14 +165,14 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    uint32_t now = HAL_GetTick();
-    uint32_t delta = now - last_tick;
+    // uint32_t now = HAL_GetTick();
+    // uint32_t delta = now - last_tick;
     
-    if (delta > 0)  
-    {
-        last_tick = now;
-        app_process(delta);
-    }
+    // if (delta > 0)  
+    // {
+    //     last_tick = now;
+    //     app_process(delta);
+    // }
     
   }
   /* USER CODE END 3 */

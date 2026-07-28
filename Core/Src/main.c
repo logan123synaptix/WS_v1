@@ -31,8 +31,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 // #include "app.h"
-#include "test_lte_mqtt.h"
 #include "sx_board.h"
+#include "test_lte_mqtt.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "string.h"
@@ -69,8 +69,6 @@ void PeriphCommonClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-static const char *TAG = "MAIN";
 
 /* USER CODE END 0 */
 
@@ -124,9 +122,6 @@ int main(void)
   sx_board_init();
   // app_init();
 
-  /*TEST*/
-  test_lte_mqtt_init();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -142,8 +137,7 @@ int main(void)
     if (delta > 0)  
     {
         last_tick = now;
-        // app_process(delta);
-        test_lte_mqtt_poll(delta);
+        app_process(delta);
     }
     
   }

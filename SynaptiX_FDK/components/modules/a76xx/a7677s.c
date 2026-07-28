@@ -269,10 +269,18 @@ static void a7677s_power_on_start(void *ctx)
     dce->power_state      = A7677S_PWR_PULSE_HIGH;
     dce->power_elapsed    = 0;
     dce->at_probe_pending = 0;
-    /* PWRKEY pulse pattern is identical to sim76xx (same physical circuit),
-     * but here it is driven by state machine timing inside poll() instead
-     * of sx_delay_ms(), so the main loop is never blocked. */
-    sx_gpio_write(&dce->base.pwrPin, SX_GPIO_HIGH);
+    /* PWRKEY drive polarity — CONFIRMED INVERTED from a7677s.h/datasheet's
+     * naive "active-LOW, MCU pin follows module pin" assumption, per user
+     * (2026-07-28), based on board measurement matching the standalone
+     * HAL test in Core/Src/main.c's power_on_sim(): driving this MCU pin
+     * (PD12) HIGH pulls the module's own PWRKEY line LOW (pressed/active);
+     * driving it LOW releases the module's PWRKEY back HIGH. There is an
+     * inverting stage on this board between PD12 and the module's PWRKEY
+     * pin (not a straight pull-up as a7677s.h's comment assumed) — do not
+     * "fix" this back to match the datasheet's literal pin-follows-pin
+     * wording without re-confirming on hardware first; this was
+     * deliberately verified against a real board, not assumed. */
+    sx_gpio_write(&dce->base.pwrPin, SX_GPIO_HIGH); /* -> module PWRKEY goes LOW (pressed) */
 }
 
 static void a7677s_power_off_start(void *ctx)
@@ -437,7 +445,14 @@ static void a7677s_poll(void *ctx, uint32_t ts)
     case A7677S_PWR_PULSE_LOW:
         dce->power_elapsed += ts;
         if (dce->power_elapsed >= A7677S_PULSE_LOW_MS) {
-            sx_gpio_write(&dce->base.pwrPin, SX_GPIO_HIGH);
+            /* Do NOT drive pwrPin back HIGH here — see the polarity note
+             * in a7677s_power_on_start() above. This MCU pin is left LOW
+             * (module's own PWRKEY line released back to its idle HIGH);
+             * driving it HIGH again here would pull the module's PWRKEY
+             * LOW a second time right as it starts booting, which the
+             * module would read as another power-button press (risking
+             * an unwanted power-off mid-boot). Confirmed against the
+             * standalone HAL test in Core/Src/main.c, 2026-07-28. */
             dce->power_state      = A7677S_PWR_WAIT_BOOT;
             dce->power_elapsed    = 0;
             dce->at_probe_pending = 0;

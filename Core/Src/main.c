@@ -33,6 +33,7 @@
 // #include "app.h"
 // #include "sx_board.h"
 #include "stdio.h"
+#include "stdbool.h"
 #include "string.h"
 #include "logger.h"
 /* USER CODE END Includes */
@@ -70,19 +71,67 @@ void PeriphCommonClock_Config(void);
 
 static const char *TAG = "MAIN";
 
-/* --- SIM (UART1) --- */
-static volatile uint8_t uart_byte_sim;
-static volatile uint8_t sim_rx_flag = 0;
+/* --- Ring buffer nhan cho SIM (UART1) va GPS (UART2) ---
+ * LY DO CAN RING BUFFER (khong dung 1 bien + 1 co nhu ban truoc): o
+ * baudrate 115200, moi byte chi mat ~87us. ISR HAL_UART_RxCpltCallback()
+ * tu re-arm HAL_UART_Receive_IT() ngay sau khi nhan 1 byte de san sang
+ * nhan byte tiep theo - neu module gui nhieu byte lien tiep khong nghi
+ * (vd "OK\r\n"), va main loop (uart_test_poll(), goi tu while(1)) chua
+ * kip doc/log byte cu TRUOC KHI ISR ghi de bang byte moi, thi byte cu se
+ * MAT VINH VIEN. Day chinh la nguyen nhan quan sat duoc: oscilloscope
+ * thay du xung (phan cung nhan dung), nhung code chi log lai duoc 1 phan
+ * (vd "A" va "\n" trong "AT\r\n", mat "T" va "\r" o giua) vi buffer 1-byte
+ * bi ghi de lien tuc truoc khi kip doc.
+ *
+ * Ring buffer giai quyet dung van de nay: ISR chi lam 1 viec toi thieu
+ * (ghi byte vao buffer, tang chi so ghi) roi tra ve NGAY, khong cho main
+ * loop kip lam gi ca - main loop se doc dan tu buffer o toc do cua rieng
+ * no, khong bao gio bi ISR ghi de len du liieu chua doc. */
+#define RING_BUF_SIZE 256   /* phai la luy thua cua 2 de phep '&' lam mod nhanh, khong dung '%' */
 
-/* --- GPS (UART2) --- */
-static volatile uint8_t uart_byte_gps;
-static volatile uint8_t gps_rx_flag = 0;
+#define CMD_AT_TEST   "AT+CGMM=?"
 
-/* --- Terminal input, UART6/log, dung de go lenh AT forward sang SIM --- */
-static volatile uint8_t uart_byte_log;
-static volatile uint8_t log_rx_flag = 0;
-static char     log_line_buf[128];
-static uint16_t log_line_len = 0;
+typedef struct {
+    volatile uint8_t buf[RING_BUF_SIZE];
+    volatile uint16_t head; /* ISR ghi vao day */
+    volatile uint16_t tail; /* main loop doc tu day */
+} ring_buf_t;
+
+static ring_buf_t sim_ring = {0};
+static ring_buf_t gps_ring = {0};
+
+static uint8_t sim_isr_byte; /* byte tam ISR nhan vao truoc khi day vao ring buffer */
+static uint8_t gps_isr_byte;
+
+static inline void ring_push(ring_buf_t *r, uint8_t byte)
+{
+    uint16_t next_head = (uint16_t)((r->head + 1) & (RING_BUF_SIZE - 1));
+    if (next_head == r->tail) {
+        /* Buffer day - byte nay bi mat (overflow). Khong nen xay ra voi
+         * RING_BUF_SIZE=256 tru khi main loop bi block qua lau o dau do
+         * khac - neu gap truong hop nay, tang RING_BUF_SIZE hoac tim cho
+         * nao dang block main loop. */
+        return;
+    }
+    r->buf[r->head] = byte;
+    r->head = next_head;
+}
+
+/* Tra ve true neu doc duoc 1 byte (ghi vao *out), false neu buffer rong. */
+static inline bool ring_pop(ring_buf_t *r, uint8_t *out)
+{
+    if (r->tail == r->head) {
+        return false; /* rong */
+    }
+    *out = r->buf[r->tail];
+    r->tail = (uint16_t)((r->tail + 1) & (RING_BUF_SIZE - 1));
+    return true;
+}
+
+/* Gui "AT\r\n" xuong SIM lap lai moi AT_SPAM_INTERVAL_MS, vo thoi han
+ * (khong dung lai du co nhan duoc phan hoi hay khong). */
+#define AT_SPAM_INTERVAL_MS   2000
+static uint32_t at_spam_last_tick = 0;
 
 void power_on_sim(void);
 void send_byte_sim(const char *cmd);
@@ -93,10 +142,7 @@ static void log_print(const char *s);
 
 /* Ham "print" ma logger_init() se goi moi khi co 1 dong log da format
  * xong (xem logger.h's p_log_func) - o day chi don gian ghi thang ra
- * UART6, blocking, dung cho muc dich test cong cu nay. Day CUNG LA UART
- * dung lam CLI transport (uart_byte_log/log_rx_flag ben tren) - log
- * output va terminal input dung chung 1 day, giong thiet ke that cua
- * sx_board.c (khong phai bug, la co y). */
+ * UART6, blocking, dung cho muc dich test cong cu nay. */
 static void log_print(const char *s)
 {
   HAL_UART_Transmit(&huart6, (uint8_t *)s, (uint16_t)strlen(s), 1000);
@@ -104,14 +150,16 @@ static void log_print(const char *s)
 
 void power_on_sim(void)
 {
-  log_info(TAG, "POWER ON SIM");
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
+  /* Pwrkey: PD12, active-LOW theo datasheet (Documents/a7677s.md, muc
+   * 3.2.1 "Customer can power on the module by pulling down the PWRKEY
+   * pin", pin duoc pull-up noi bo len VBAT san). Ton (do rong xung LOW)
+   * toi thieu 50ms theo Table 14. */
+  log_info(TAG, "POWER ON");
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET); /* keo LOW */
   HAL_Delay(50);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);
-  HAL_Delay(50);
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
-  HAL_Delay(7000);
-  log_info(TAG, "CODE POWER SIM ON OK");
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);   /* tha ve HIGH */
+  HAL_Delay(8050);
+  log_info(TAG, "POWER ON OKi");
 }
 
 void send_byte_sim(const char *cmd)
@@ -128,55 +176,34 @@ void send_byte_gps(const char *cmd)
 void uart_test_init(void)
 {
   logger_init(LOGGER_INFO, log_print);
-  log_info(TAG, "=== UART TEST -- SIM(UART1) + GPS(UART2), CLI via UART6 ===");
+  log_info(TAG, "=== UART TEST -- SIM(UART1) + GPS(UART2), spam AT moi %dms ===", AT_SPAM_INTERVAL_MS);
+
+  at_spam_last_tick = HAL_GetTick() - AT_SPAM_INTERVAL_MS; /* gui ngay lan dau */
 }
 
 /* Goi lien tuc trong vong while(1) chinh, KHONG block. */
 void uart_test_poll(void)
 {
-  /* SIM -> log raw byte nhan duoc. Dung %02X (hex) thay vi %c/%s vi day
-   * la 1 BYTE THO tu UART, co the la ky tu khong in duoc (vd 0x00) hoac
-   * khong ket thuc bang '\0' - dua thang vao printf-style %s se khong an
-   * toan. */
-  if (sim_rx_flag) {
-    sim_rx_flag = 0;
-    log_info(TAG, "[SIM RX] 0x%02X ('%c')", uart_byte_sim,
-             (uart_byte_sim >= 0x20 && uart_byte_sim < 0x7F) ? uart_byte_sim : '.');
+  uint8_t byte;
+
+  /* Rut can toan bo byte SIM dang cho trong ring buffer moi lan poll,
+   * KHONG chi lay 1 byte - vi co the co nhieu byte da don lai trong luc
+   * main loop ban viec khac. */
+  while (ring_pop(&sim_ring, &byte)) {
+    log_info(TAG, "[SIM RX] 0x%02X ('%c')", byte,
+             (byte >= 0x20 && byte < 0x7F) ? byte : '.');
   }
 
-  /* GPS -> log raw byte nhan duoc (NMEA sentence tho, in tung byte) */
-  if (gps_rx_flag) {
-    gps_rx_flag = 0;
-    log_info(TAG, "[GPS RX] 0x%02X ('%c')", uart_byte_gps,
-             (uart_byte_gps >= 0x20 && uart_byte_gps < 0x7F) ? uart_byte_gps : '.');
+  while (ring_pop(&gps_ring, &byte)) {
+    log_info(TAG, "[GPS RX] 0x%02X ('%c')", byte,
+             (byte >= 0x20 && byte < 0x7F) ? byte : '.');
   }
 
-  /* Terminal (UART6) -> gom thanh 1 dong, forward sang SIM khi gap Enter */
-  if (log_rx_flag) {
-    log_rx_flag = 0;
-    uint8_t c = uart_byte_log;
-
-    /* Echo lai ky tu vua go, van dung HAL_UART_Transmit truc tiep (khong
-     * qua log_info) vi day la echo ky tu don, khong phai 1 dong log co
-     * cau truc - dung log_info o day se tu them newline/format khong
-     * dung y do "go ky tu nao hien ra ky tu do". */
-    HAL_UART_Transmit(&huart6, &c, 1, 100);
-
-    if (c == '\r' || c == '\n') {
-      if (log_line_len > 0) {
-        log_line_buf[log_line_len] = '\0';
-        send_byte_sim(log_line_buf);
-        send_byte_sim("\r\n");
-
-        log_info(TAG, "[-> SIM] %s", log_line_buf);
-
-        log_line_len = 0;
-      }
-    } else if (log_line_len < sizeof(log_line_buf) - 1) {
-      log_line_buf[log_line_len++] = (char)c;
-    } else {
-      log_line_len = 0; /* dong qua dai, reset thay vi tran buffer */
-    }
+  /* Spam "AT" xuong SIM moi AT_SPAM_INTERVAL_MS, vo thoi han. */
+  if (HAL_GetTick() - at_spam_last_tick >= AT_SPAM_INTERVAL_MS) {
+    at_spam_last_tick = HAL_GetTick();
+    log_info(TAG, "[SIM TX] AT");
+    send_byte_sim(CMD_AT_TEST);
   }
 }
 
@@ -227,24 +254,22 @@ int main(void)
   MX_UART5_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart1, (uint8_t *)&uart_byte_sim, 1);
-  HAL_UART_Receive_IT(&huart2, (uint8_t *)&uart_byte_gps, 1);
-  HAL_UART_Receive_IT(&huart6, (uint8_t *)&uart_byte_log, 1);
+  HAL_UART_Receive_IT(&huart1, &sim_isr_byte, 1);
+  HAL_UART_Receive_IT(&huart2, &gps_isr_byte, 1);
   uint32_t last_tick = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   // sx_board_init();
   // app_init();
-  uart_test_init();
-  power_on_sim();      /* THEM MOI - bat nguon SIM truoc khi test AT command,
-                           neu quen buoc nay SIM se khong tra loi gi ca du
-                           UART da noi dung */     
+  uart_test_init();     /* THEM MOI - se tu dong spam "AT" moi 2s trong vong lap */
+  power_on_sim();      /* THEM MOI - bat nguon SIM truoc khi test AT command */
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    uart_test_poll();   
+    uart_test_poll();   /* THEM MOI */
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -341,15 +366,18 @@ void PeriphCommonClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+  /* Chi lam viec toi thieu trong ISR: day byte vao ring buffer roi
+   * re-arm ngay lap tuc de san sang nhan byte tiep theo cang som cang
+   * tot - khong lam gi ton thoi gian hon trong ISR (vd khong goi
+   * log_info() o day, vi log_info() dung HAL_UART_Transmit blocking,
+   * goi trong ISR se rat cham va co the lam mat byte UART khac dang
+   * toi cung luc). */
   if (huart->Instance == USART1) {
-    sim_rx_flag = 1;
-    HAL_UART_Receive_IT(&huart1, (uint8_t *)&uart_byte_sim, 1);
+    ring_push(&sim_ring, sim_isr_byte);
+    HAL_UART_Receive_IT(&huart1, &sim_isr_byte, 1);
   } else if (huart->Instance == USART2) {
-    gps_rx_flag = 1;
-    HAL_UART_Receive_IT(&huart2, (uint8_t *)&uart_byte_gps, 1);
-  } else if (huart->Instance == USART6) {
-    log_rx_flag = 1;
-    HAL_UART_Receive_IT(&huart6, (uint8_t *)&uart_byte_log, 1);
+    ring_push(&gps_ring, gps_isr_byte);
+    HAL_UART_Receive_IT(&huart2, &gps_isr_byte, 1);
   }
 }
 /* USER CODE END 4 */

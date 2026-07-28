@@ -121,7 +121,7 @@ int main(void)
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   sx_board_init();
   // app_init();
-
+  test_lte_mqtt_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -137,7 +137,8 @@ int main(void)
     if (delta > 0)  
     {
         last_tick = now;
-        app_process(delta);
+        // app_process(delta);
+        test_lte_mqtt_poll(delta);
     }
     
   }

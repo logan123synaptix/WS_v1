@@ -77,6 +77,14 @@ extern "C" {
                                           * of emergency... reset time
                                           * recommended to be 2.5s") */
 #define A7677S_BOOT_PROBE_MS   500U     /* interval between "AT" probes while waiting for boot */
+#define A7677S_OFF_PULSE_MS    2600U    /* PWRKEY power-off low pulse width, per a7677s.md
+                                          * Table 15 (Toff min 2.5s, no typ/max given) — 2.6s
+                                          * used instead of the bare 2.5s minimum to leave a
+                                          * small margin against timing jitter, same spirit as
+                                          * A7677S_RST_PULSE_MS's 2.5s typ vs 2s min. */
+#define A7677S_OFF_SETTLE_MS   2500U    /* wait after releasing PWRKEY before considering the
+                                          * module fully off, per a7677s.md Table 15's
+                                          * Toff(status)/Toff(uart)/Toff(usb) (~2.5s typ each) */
 #define A7677S_TIMEOUT_AT      2500U
 #define A7677S_TIMEOUT_CPOF    5000U
 #define A7677S_TIMEOUT_NETWORK 9000U    /* CGDCONT/CGAUTH/CGACT/COPS, per a76xx_at_cmd.md MaxResponseTime */
@@ -141,7 +149,23 @@ typedef enum {
                                * via its internal pull-up to VBAT, i.e. normal operation. */
     A7677S_PWR_WAIT_BOOT,     /* PWRKEY released high, probing "AT" until OK */
     A7677S_PWR_READY,         /* module confirmed responsive to AT */
-    A7677S_PWR_OFF_WAIT,      /* AT+CPOF sent, waiting for OK/timeout */
+    A7677S_PWR_OFF_WAIT,      /* DEPRECATED — was: AT+CPOF sent, waiting for OK/timeout.
+                               * AT+CPOF proved unreliable in practice (2026-07-28: the
+                               * module can be unresponsive to AT while still needing to be
+                               * powered down, so a command-based shutdown cannot be
+                               * guaranteed to work); power-off now goes through the two
+                               * states below instead, which pull PWRKEY low directly and
+                               * do not depend on the AT channel at all. Left in the enum
+                               * (unused) rather than renumbering, to avoid churn on any
+                               * saved/logged numeric state elsewhere. */
+    A7677S_PWR_OFF_PULSE,     /* PWRKEY driven low (module's own PWRKEY pin, respecting the
+                               * board's inverted polarity — see a7677s_power_on_start()'s
+                               * polarity note) for A7677S_OFF_PULSE_MS, per a7677s.md
+                               * Table 15 (Toff min 2.5s). */
+    A7677S_PWR_OFF_SETTLE,    /* PWRKEY released, waiting A7677S_OFF_SETTLE_MS for the
+                               * module to actually finish shutting down (Toff(status)/
+                               * Toff(uart)/Toff(usb) in a7677s.md Table 15) before
+                               * power_state is considered A7677S_PWR_IDLE again. */
 } a7677s_power_state_t;
 
 /* Non-blocking AT init / network attach sequence, run after power_state

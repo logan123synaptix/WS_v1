@@ -124,6 +124,9 @@ int main(void)
   sx_board_init();
   // app_init();
 
+  /*TEST*/
+  test_lte_mqtt_init();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -133,14 +136,15 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // uint32_t now = HAL_GetTick();
-    // uint32_t delta = now - last_tick;
+    uint32_t now = HAL_GetTick();
+    uint32_t delta = now - last_tick;
     
-    // if (delta > 0)  
-    // {
-    //     last_tick = now;
-    //     app_process(delta);
-    // }
+    if (delta > 0)  
+    {
+        last_tick = now;
+        // app_process(delta);
+        test_lte_mqtt_poll(delta);
+    }
     
   }
   /* USER CODE END 3 */

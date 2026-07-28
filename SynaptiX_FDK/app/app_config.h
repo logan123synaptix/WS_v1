@@ -92,10 +92,10 @@
 #define MQTT_SUB_TOPIC                  "stm32/cmd/#"
 #endif
 
-#define APN                             "v-internet"
+#define APN                             "m3-world"
 
-#define USERNAME_APN                    NULL
-#define PASSWORD_APN                    NULL
+#define USERNAME_APN                    "mms"
+#define PASSWORD_APN                    "mms"
 
 #define SX_TIME_IN_SLEEP                60000U     
 #define SX_TIME_IN_WAKE                 160000U   

@@ -289,10 +289,22 @@ void uart_test_poll(void)
  * dong keo CS trong HAL_SPI_TransmitReceive() - phai tu lam bang tay o
  * day (driver that lam qua sx_spi_write_read(), tu dong keo/tha CS ben
  * trong - code test nay lam lai y het bang thuan HAL). */
-#define W25Q128_CMD_JEDEC_ID_TEST   0x9F
+#define W25Q128_CMD_JEDEC_ID_TEST      0x9F
+#define W25Q128_CMD_RELEASE_POWER_DOWN 0xAB
 
 void test_flash_w25q128(void)
 {
+  /* Wake from deep power-down FIRST - real driver (sx_W25Q128_init(),
+   * sx_W25Q128.c line 97-105) always sends this before JEDEC ID. Chip
+   * may power up in deep power-down state where it ignores/mishandles
+   * other commands. 1 byte write, 1 CS cycle, then 1ms delay. */
+  uint8_t wake = W25Q128_CMD_RELEASE_POWER_DOWN;
+
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET); /* CS active-LOW */
+  HAL_SPI_Transmit(&hspi1, &wake, 1, 100);
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
+  HAL_Delay(1);
+
   uint8_t tx[4] = { W25Q128_CMD_JEDEC_ID_TEST, 0x00, 0x00, 0x00 };
   uint8_t rx[4] = { 0 };
 

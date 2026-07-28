@@ -172,7 +172,36 @@ static void escalate_recovery(sx_mqtt_t *mqtt)
             mqtt->modem->ops->power_on_start(mqtt->modem->ctx);
             mqtt->modem->ops->start(mqtt->modem->ctx);
         }
+        return;
     }
+
+    /* Bug fix (2026-07-28): below SX_MQTT_MAX_RETRY_BEFORE_RESTART, this
+     * function used to do NOTHING but increment the counter — no action
+     * was taken until the count reached the threshold above. That is fine
+     * when the driver's own init-attach sequence is still silently retrying
+     * on its own (a7677s.c's restart_init() does its own A7677S_MAX_RETRY
+     * internal retries before giving up), but once restart_init() itself
+     * gives up (init_state reset to A7677S_INIT_IDLE, error_cb fired —
+     * see restart_init()'s "giving up (caller should power-cycle)" log
+     * line) NOTHING at the driver layer ever calls a7677s_start() again on
+     * its own. The result: a7677s_start() never gets called a second time
+     * until reconnect_count reaches SX_MQTT_MAX_RETRY_BEFORE_RESTART, but
+     * since nothing is running, nothing ever fails again to increment that
+     * counter either — a permanent deadlock confirmed on real hardware,
+     * 2026-07-28: log showed "Init sequence failed after max retries,
+     * giving up (caller should power-cycle)" followed by
+     * "Failure reported — feeding into recovery ladder" and then nothing
+     * else, forever (reconnect_count stuck at 1/3).
+     * Fix: try the cheap recovery step (just a7677s_start(), no power
+     * cycle) on every failure below the threshold too — modem_ops_t.start()
+     * already no-ops safely if the driver's init_state isn't IDLE/READY
+     * (see a7677s_start()'s own guard), so calling it here even when the
+     * driver might already be mid-retry on its own is harmless. This gives
+     * the attach sequence a real chance to run again well before we'd ever
+     * resort to a full power cycle. */
+    log_info(TAG, "Retrying modem start() (recovery ladder %u/%u before power-cycle)",
+             mqtt->reconnect_count, SX_MQTT_MAX_RETRY_BEFORE_RESTART);
+    mqtt->modem->ops->start(mqtt->modem->ctx);
 }
 
 static void do_error(sx_mqtt_t *mqtt)

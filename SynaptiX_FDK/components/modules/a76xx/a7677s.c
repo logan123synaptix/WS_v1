@@ -1487,14 +1487,45 @@ static void urc_process_header_line(a7677s_t *dce, char *line)
 
     if (strstr(line, "+CGEV: ME PDN DEACT") || strstr(line, "+CGEV: NW PDN DEACT")) {
         log_warn(TAG, "PDN deactivated (URC) — restarting network attach sequence");
-        /* A7677S_INIT_AT doubles as the "restart the whole sequence" entry
-         * point (see a7677s_init_state_t comment) — reuse it rather than
-         * inventing a second restart path. */
-        dce->init_state       = A7677S_INIT_AT;
+        /* Bug fix (2026-07-28), take 2: the first fix here (send_init_cmd()
+         * guarded on power_state==READY) still hung in exactly the same
+         * way when this URC arrives BEFORE boot is confirmed — which is
+         * the common case, since this URC can arrive the instant the
+         * module powers up (network state left over across an MCU-only
+         * reset, see the CGACT-requery fix earlier in this file for the
+         * same underlying cause). In that situation power_state isn't
+         * READY yet, so the send_init_cmd() call was skipped (correctly —
+         * sending AT before boot is confirmed makes no sense), but
+         * init_state was still left at A7677S_INIT_AT. When cb_at_probe()
+         * later confirms boot and calls a7677s_start() itself (see that
+         * function's doc-comment), a7677s_start() sees init_state !=
+         * IDLE ("already in progress") and refuses to start anything —
+         * so nothing ever sent an AT command, forever. The real bug was
+         * never "forgot to send a command", it was leaving init_state in
+         * a state that LOOKS like "sequence in progress" to a7677s_start()
+         * even when power isn't ready and nothing is actually running.
+         * Correct fix: only set init_state to A7677S_INIT_AT (and send the
+         * AT probe immediately) when power is already READY — a genuine
+         * restart of a running sequence. If power isn't READY yet, reset
+         * init_state to A7677S_INIT_IDLE instead, so a7677s_start() is
+         * unblocked and free to run normally once cb_at_probe() confirms
+         * boot moments later. */
         dce->init_elapsed     = 0;
         dce->init_cmd_pending = 0;
         dce->mqtt_state       = A7677S_MQTT_IDLE;
         urc_reset_rx_state(dce);
+        if (dce->power_state == A7677S_PWR_READY) {
+            /* Safe to send a command here without checking modem_is_busy():
+             * this whole function only ever runs from urc_poll(), which
+             * itself only runs while !modem_is_busy() (see a7677s_poll())
+             * — so there is never an AT command already in flight at this
+             * call site. */
+            dce->init_state       = A7677S_INIT_AT;
+            dce->init_retry_count = 0;
+            send_init_cmd(dce, CMD_AT, cb_init_at, A7677S_TIMEOUT_AT);
+        } else {
+            dce->init_state = A7677S_INIT_IDLE;
+        }
         /* MQTT cannot survive the PDN going down even if CMQTTCONNLOST never
          * arrives separately — tell the service layer now so its reconnect
          * logic starts retrying (harmlessly failing via is_ready()==false
@@ -1662,11 +1693,35 @@ static uint8_t mqtt_response_indicates_network_loss(const char *response)
 static void mqtt_handle_network_loss(a7677s_t *dce)
 {
     log_warn(TAG, "Network loss detected in command response — restarting network attach sequence");
-    dce->init_state       = A7677S_INIT_AT;
     dce->init_elapsed     = 0;
     dce->init_cmd_pending = 0;
     dce->mqtt_state       = A7677S_MQTT_IDLE;
     urc_reset_rx_state(dce);
+    /* Bug fix (2026-07-28), take 2: same fix as
+     * urc_process_header_line()'s +CGEV PDN DEACT branch (see that
+     * function's doc-comment for the full writeup of why "set init_state
+     * to A7677S_INIT_AT unconditionally" is itself the bug, not just a
+     * missing send_init_cmd() call) — only set init_state to
+     * A7677S_INIT_AT (and actually send the AT probe) when power_state is
+     * READY; otherwise reset to A7677S_INIT_IDLE so a7677s_start() isn't
+     * left permanently blocked by a stale "in progress"-looking state.
+     * In practice this function is only ever reached from a
+     * publish-sequence callback, which by definition only runs once the
+     * modem was already attached and READY, so the else branch here is
+     * expected to be unreachable in practice — kept for defensive
+     * symmetry with the URC path rather than because it's expected to
+     * fire.
+     * Safe to send without checking modem_is_busy(): modem_poll() always
+     * clears isBusy before invoking any command's callback (see modem.c),
+     * so the command that just finished (the one whose callback got us
+     * here) is no longer in flight by this point. */
+    if (dce->power_state == A7677S_PWR_READY) {
+        dce->init_state       = A7677S_INIT_AT;
+        dce->init_retry_count = 0;
+        send_init_cmd(dce, CMD_AT, cb_init_at, A7677S_TIMEOUT_AT);
+    } else {
+        dce->init_state = A7677S_INIT_IDLE;
+    }
     if (dce->mqtt_connlost_cb) dce->mqtt_connlost_cb(dce->mqtt_user_ctx);
 }
 

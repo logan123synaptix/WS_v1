@@ -33,6 +33,7 @@
 // #include "app.h"
 #include "sx_board.h"
 #include "test_lte_mqtt.h"
+#include "test_sht3x.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "string.h"
@@ -123,7 +124,8 @@ int main(void)
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   sx_board_init();
   // app_init();
-  test_lte_mqtt_init();
+  // test_lte_mqtt_init();
+  test_sht3x_init();
 
   /* USER CODE END 2 */
 
@@ -140,7 +142,7 @@ int main(void)
     if (delta > 0)  
     {
         last_tick = now;
-        test_lte_mqtt_poll(delta);
+        test_sht3x_poll(delta);
     }
     
   }

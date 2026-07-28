@@ -31,7 +31,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 // #include "app.h"
-// #include "sx_board.h"
+#include "test_lte_mqtt.h"
+#include "sx_board.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "string.h"
@@ -120,7 +121,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   uint32_t last_tick = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-  // sx_board_init();
+  sx_board_init();
   // app_init();
 
   /* USER CODE END 2 */

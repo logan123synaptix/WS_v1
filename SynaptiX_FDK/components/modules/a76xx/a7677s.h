@@ -172,6 +172,8 @@ typedef enum {
  * reaches A7677S_PWR_READY. Order confirmed against two independent sources:
  *   - WS_v0/SynaptiX/board/A7677S/A76xx.c (a76xx_setup(), lines ~82-94):
  *     CGDCONT -> CGAUTH -> CGACT -> CREG -> COPS(auto) -> COPS? -> CGDCONT?
+ *   (this driver now inserts CGACT_QUERY, and conditionally CGACT_DEACT,
+ *   between CGAUTH and CGACT — see that state's doc-comment below for why)
  *   - Documents/a76xx_at_cmd.md, syntax cross-checked per command (sections
  *     4.2.1 AT+CREG, 5.2.4 AT+CGACT, 5.2.5 AT+CGDCONT, 5.2.16 AT+CGAUTH).
  * Deviates from both references on one point: AT+CREG=1 only enables the
@@ -184,6 +186,20 @@ typedef enum {
     A7677S_INIT_AT,             /* probe "AT", also used to restart the whole sequence on failure */
     A7677S_INIT_CGDCONT,        /* AT+CGDCONT=1,"IP","<apn>" */
     A7677S_INIT_CGAUTH,         /* AT+CGAUTH=1,<type>,"<passwd>","<user>" - skipped if no username/password */
+    /* Bug fix (2026-07-28): flashing new firmware only resets the MCU, not
+     * the A7677S module — if a previous run had already activated PDP
+     * context 1 (e.g. it was mid-publish when reflashed), the module keeps
+     * that context active across the MCU reset. Sending AT+CGACT=1,1
+     * straight away in that situation gets "+CME ERROR: unknown error"
+     * back (activating an already-active context is invalid), and the
+     * whole init sequence fails after 3 retries — reproduced 100% of the
+     * time by reflashing without power-cycling the modem; a real
+     * power-cycle clears the modem's own state too, so it worked fine
+     * there. Fix: query the context's current state first with
+     * AT+CGACT? and only deactivate-then-reactivate if it's already on;
+     * skip straight to activation (old behavior) if it's already off. */
+    A7677S_INIT_CGACT_QUERY,   /* AT+CGACT? - check <cid>,<state> for cid=1 before (re)activating */
+    A7677S_INIT_CGACT_DEACT,   /* AT+CGACT=0,1 - only sent if CGACT_QUERY found cid=1 already active */
     A7677S_INIT_CGACT,          /* AT+CGACT=1,1 */
     A7677S_INIT_CREG_SET,       /* AT+CREG=1 - enables the unsolicited report only */
     A7677S_INIT_CREG_POLL,      /* AT+CREG? - polled until <stat> == 1 or 5 */

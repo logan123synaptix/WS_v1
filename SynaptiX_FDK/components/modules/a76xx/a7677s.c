@@ -28,7 +28,9 @@ static const char *TAG = "A7677S";
 #define CMD_CSQ             11   /* AT+CSQ - read signal quality, polled periodically once ready */
 #define CMD_CTZU            12   /* AT+CTZU=1 - enable automatic network time (NITZ), once during start() */
 #define CMD_CCLK            13   /* AT+CCLK? - read back network time, once during start() */
-#define CMD_DYNAMIC         14   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
+#define CMD_CGACT_QUERY     14   /* AT+CGACT? - read cid=1's current activation state before (re)activating it */
+#define CMD_CGACT_DEACT     15   /* AT+CGACT=0,1 - only sent if CGACT_QUERY found cid 1 already active */
+#define CMD_DYNAMIC         16   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
 
 static modem_command_t command[] = {
     [CMD_AT]            = {.cmd = "AT\r\n",              .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
@@ -45,6 +47,8 @@ static modem_command_t command[] = {
     [CMD_CSQ]           = {.cmd = "AT+CSQ\r\n",          .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CTZU]          = {.cmd = "AT+CTZU=1\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CCLK]          = {.cmd = "AT+CCLK?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CGACT_QUERY]   = {.cmd = "AT+CGACT?\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CGACT_DEACT]   = {.cmd = "AT+CGACT=0,1\r\n",    .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_DYNAMIC]       = {0},
 };
 
@@ -152,6 +156,8 @@ static void mqtt_handle_network_loss(a7677s_t *dce);
 static void cb_init_at        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgdcont        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgauth         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cgact_query    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cgact_deact    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgact          (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_creg_set       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_creg_poll      (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
@@ -687,10 +693,11 @@ static void cb_cgdcont(modem_t *modem, const char *response, modem_response_st_t
         send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgauth, A7677S_TIMEOUT_NETWORK);
         return;
     }
-    /* No auth configured — skip CGAUTH entirely, go straight to CGACT. */
-    dce->init_state = A7677S_INIT_CGACT;
-    snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGACT=1,1\r\n");
-    send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgact, A7677S_TIMEOUT_NETWORK);
+    /* No auth configured — skip CGAUTH entirely, go check CGACT's current
+     * state before (re)activating it (see A7677S_INIT_CGACT_QUERY's
+     * doc-comment in a7677s.h for why this check exists). */
+    dce->init_state = A7677S_INIT_CGACT_QUERY;
+    send_init_cmd(dce, CMD_CGACT_QUERY, cb_cgact_query, A7677S_TIMEOUT_AT);
 }
 
 static void cb_cgauth(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
@@ -700,6 +707,90 @@ static void cb_cgauth(modem_t *modem, const char *response, modem_response_st_t 
     if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
 
     log_info(TAG, "CGAUTH OK");
+    dce->init_state = A7677S_INIT_CGACT_QUERY;
+    send_init_cmd(dce, CMD_CGACT_QUERY, cb_cgact_query, A7677S_TIMEOUT_AT);
+}
+
+static void cb_cgact_query(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* Non-fatal on failure/timeout here — if we can't read the state back,
+     * fall back to the old behavior (activate straight away) rather than
+     * failing the whole attach sequence over a purely informational read.
+     * Response format (a76xx_at_cmd.md 5.2.4, AT+CGACT? read command):
+     * +CGACT: <cid>,<state>[\r\n+CGACT: <cid>,<state>[...]]
+     * <state> 0 = deactivated, 1 = activated. We only care about cid=1,
+     * the single context this driver ever defines (see AT+CGDCONT=1,...
+     * in cb_init_at()). Search with strstr for "+CGACT:" without a space
+     * after the colon (matches with or without a following space, same
+     * defensive style already used for +CREG: in cb_creg_poll() — the
+     * datasheet's exact spacing has been wrong before, see CMQTT bug
+     * history), then parse "<cid>,<state>" starting right after it. */
+    int cid1_active = 0; /* default: assume inactive, matches old behavior on parse failure */
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        const char *scan = response;
+        int found = 0;
+        while (!found) {
+            const char *p = strstr(scan, "+CGACT:");
+            if (!p) break;
+            const char *num_start = p + 7; /* skip "+CGACT:" */
+            const char *q = num_start;
+            while (*q == ' ') q++; /* tolerate optional space after ':' */
+            char *after_cid = NULL;
+            int cid = (int)strtol(q, &after_cid, 10);
+            if (after_cid != q && *after_cid == ',') {
+                int state = (int)strtol(after_cid + 1, NULL, 10);
+                if (cid == 1) {
+                    cid1_active = (state == 1);
+                    found = 1;
+                }
+            }
+            /* Advance scan past this "+CGACT:" occurrence regardless of
+             * whether it parsed as cid=1, guaranteeing forward progress
+             * even if strtol couldn't parse a number here (after_cid==q) —
+             * without this, a malformed line would make strstr keep
+             * re-finding the same match forever. */
+            scan = num_start;
+        }
+        log_info(TAG, "CGACT query: cid=1 currently %s", cid1_active ? "ACTIVE" : "inactive");
+    } else {
+        log_warn(TAG, "CGACT query failed/timeout (res=%d) — assuming inactive, activating directly", res);
+    }
+
+    if (cid1_active) {
+        /* Context already active (likely left over from a previous run —
+         * the modem wasn't power-cycled across this MCU reset). Deactivate
+         * first so the upcoming AT+CGACT=1,1 lands on a clean context
+         * instead of erroring with "+CME ERROR: unknown error". */
+        dce->init_state = A7677S_INIT_CGACT_DEACT;
+        send_init_cmd(dce, CMD_CGACT_DEACT, cb_cgact_deact, A7677S_TIMEOUT_NETWORK);
+        return;
+    }
+
+    /* Already inactive — skip the deactivate round-trip, activate directly
+     * (this is the common case on a real power-cycle, where the modem's
+     * own state is clean already). */
+    dce->init_state = A7677S_INIT_CGACT;
+    snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGACT=1,1\r\n");
+    send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgact, A7677S_TIMEOUT_NETWORK);
+}
+
+static void cb_cgact_deact(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* Non-fatal on failure here too — if deactivation itself errors for
+     * some other reason, still attempt the activation next rather than
+     * giving up the whole attach sequence; if the context is genuinely
+     * stuck, AT+CGACT=1,1 will fail on its own and restart_init() there
+     * handles it same as before this fix existed. */
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_warn(TAG, "CGACT deactivate failed/timeout (res=%d) — trying activate anyway", res);
+    } else {
+        log_info(TAG, "CGACT deactivated, now reactivating");
+    }
+
     dce->init_state = A7677S_INIT_CGACT;
     snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGACT=1,1\r\n");
     send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgact, A7677S_TIMEOUT_NETWORK);

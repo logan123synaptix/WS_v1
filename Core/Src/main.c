@@ -141,13 +141,22 @@ static uint32_t at_spam_last_tick = 0;
 static char     sim_line_buf[SIM_LINE_BUF_SIZE];
 static uint16_t sim_line_len = 0;
 
+/* Tuong tu sim_line_buf nhung cho GPS - NMEA sentence (vd "$GPGGA,...")
+ * cung ket thuc boi '\r\n', gom lai in nguyen 1 cau de doc de hon nhieu
+ * so voi tung byte hex rieng le. */
+#define GPS_LINE_BUF_SIZE 128
+static char     gps_line_buf[GPS_LINE_BUF_SIZE];
+static uint16_t gps_line_len = 0;
+
 void power_on_sim(void);
+void power_on_gps(void);
 void send_byte_sim(const char *cmd);
 void send_byte_gps(const char *cmd);
 void uart_test_init(void);
 void uart_test_poll(void);
 static void log_print(const char *s);
 static void sim_line_flush(void);
+static void gps_line_flush(void);
 
 /* Ham "print" ma logger_init() se goi moi khi co 1 dong log da format
  * xong (xem logger.h's p_log_func) - o day chi don gian ghi thang ra
@@ -171,6 +180,27 @@ void power_on_sim(void)
   log_info(TAG, "POWER ON OK");
 }
 
+void power_on_gps(void)
+{
+  /* GPS_CPW_Pin (PC2) = N/F (Shutdown Control) theo datasheet Ai-Thinker
+   * GP-02: phai giu HIGH de hoat dong binh thuong (co pull-up noi bo,
+   * LOW = shutdown). GPS_RST_Pin (PC3) = external reset input, cung phai
+   * HIGH - QUAN TRONG: theo comment trong
+   * SynaptiX_FDK/components/modules/gps/gps.c's gps_init(), chan RST nay
+   * BI CUBEMX-GENERATED STARTUP CODE KEO LOW MAC DINH TRUOC KHI CODE APP
+   * NAO CHAY - neu khong tu keo HIGH lai o day, module GPS se bi giu o
+   * trang thai reset vinh vien, khong bao gio gui NMEA du UART hoan toan
+   * dung. Firmware that (gps_init()) tu lam viec nay, nhung code test
+   * standalone nay KHONG goi gps_init() (chi dung thuan HAL), nen phai
+   * tu lam lai y het o day. */
+  log_info(TAG, "POWER ON GPS");
+  HAL_GPIO_WritePin(GPS_CPW_GPIO_Port, GPS_CPW_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPS_RST_GPIO_Port, GPS_RST_Pin, GPIO_PIN_SET);
+  HAL_Delay(1000); /* cho module on dinh sau khi thoat reset, giong
+                       sx_delay_ms(1000) cuoi gps_init() that */
+  log_info(TAG, "POWER ON GPS OK");
+}
+
 void send_byte_sim(const char *cmd)
 {
   HAL_UART_Transmit(&huart1, (uint8_t *)cmd, (uint16_t)strlen(cmd), 100);
@@ -189,6 +219,16 @@ static void sim_line_flush(void)
     sim_line_buf[sim_line_len] = '\0';
     log_info(TAG, "[SIM RX] %s", sim_line_buf);
     sim_line_len = 0;
+  }
+}
+
+/* Tuong tu sim_line_flush(), cho GPS. */
+static void gps_line_flush(void)
+{
+  if (gps_line_len > 0) {
+    gps_line_buf[gps_line_len] = '\0';
+    log_info(TAG, "[GPS RX] %s", gps_line_buf);
+    gps_line_len = 0;
   }
 }
 
@@ -221,8 +261,13 @@ void uart_test_poll(void)
   }
 
   while (ring_pop(&gps_ring, &byte)) {
-    log_info(TAG, "[GPS RX] 0x%02X ('%c')", byte,
-             (byte >= 0x20 && byte < 0x7F) ? byte : '.');
+    if (byte == '\n') {
+      gps_line_flush();
+    } else if (gps_line_len < GPS_LINE_BUF_SIZE - 1) {
+      gps_line_buf[gps_line_len++] = (char)byte;
+    } else {
+      gps_line_flush(); /* dong qua dai, flush truoc khi mat du lieu */
+    }
   }
 
   /* Spam CMD_AT_TEST (AT+CGSN, lay IMEI) xuong SIM moi
@@ -289,6 +334,9 @@ int main(void)
   // app_init();
   uart_test_init();     /* THEM MOI - se tu dong spam "AT" moi 2s trong vong lap */
   power_on_sim();      /* THEM MOI - bat nguon SIM truoc khi test AT command */
+  power_on_gps();      /* THEM MOI - bat nguon + tha reset GPS, neu khong GPS se
+                           bi giu o trang thai reset vinh vien (xem comment
+                           trong power_on_gps()) */
   
   /* USER CODE END 2 */
 

@@ -35,6 +35,10 @@
  * app_init() back to thingsboard_client_init() at that point, not this
  * flag alone (this flag only controls which app_config.h macros/topics
  * exist, not which client app.c actually calls). */
+
+#define MQTT_HOST_TEST                 "broker.hivemq.com"
+#define MQTT_CLIENTID_TEST             "LOG01"
+
 #define USE_THINGSBOARD 1
 
 #define MQTT_ID                         "1234"

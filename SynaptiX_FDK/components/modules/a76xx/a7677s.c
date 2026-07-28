@@ -290,16 +290,33 @@ static void a7677s_power_off_start(void *ctx)
 {
     a7677s_t *dce = (a7677s_t *)ctx;
 
-    log_info(TAG, "Power Off start (AT+CPOF)");
-    /* No powerPin/VBAT cutoff on this board revision (hasPowerPin stays 0,
-     * see modem_init()) — graceful shutdown relies solely on AT+CPOF.
-     * modem_send_command() itself is non-blocking; the OK/timeout arrives
-     * later via modem_poll(), handled by cb_cpof() below. */
-    dce->power_state   = A7677S_PWR_OFF_WAIT;
-    dce->power_elapsed = 0;
-    command[CMD_CPOF].callback = cb_cpof;
-    command[CMD_CPOF].arg      = dce;
-    modem_send_command(pModem(dce), &command[CMD_CPOF], A7677S_TIMEOUT_CPOF);
+    /* Bug fix (2026-07-28): switched off AT+CPOF-based shutdown — per user,
+     * it proved unreliable in practice (the module can be in a state where
+     * it won't cleanly answer an AT command at the exact moment a shutdown
+     * is needed, e.g. mid-recovery from a network drop, leaving power-off
+     * stuck waiting on a response that never comes). Power-off now pulls
+     * PWRKEY low directly instead, per a7677s.md Table 15 (Toff min 2.5s) —
+     * does not depend on the AT/UART channel being responsive at all, same
+     * reasoning as a7677s_hard_reset()'s RST-pin path being the AT-free
+     * escape hatch for power-on failures.
+     * Same inverted polarity as a7677s_power_on_start() (see that
+     * function's doc-comment): driving this MCU pin HIGH pulls the
+     * module's own PWRKEY line LOW (pressed). The only difference between
+     * a power-on pulse and a power-off pulse on real A7677S hardware is
+     * pulse width (Ton ~50ms to turn on vs Toff >=2.5s to turn off) plus
+     * the module's own state when the pulse starts — the GPIO sequence
+     * itself is identical, so this reuses the same pwrPin, just with the
+     * longer A7677S_OFF_PULSE_MS held in A7677S_PWR_OFF_PULSE. */
+    log_info(TAG, "Power Off start (PWRKEY pulse, no AT command involved)");
+    dce->power_state      = A7677S_PWR_OFF_PULSE;
+    dce->power_elapsed    = 0;
+    dce->at_probe_pending = 0;
+    /* Abandon any AT command sequence in flight — power is going away
+     * regardless of whether it finishes cleanly, same as hard_reset(). */
+    dce->init_state       = A7677S_INIT_IDLE;
+    dce->init_retry_count = 0;
+    dce->mqtt_state        = A7677S_MQTT_IDLE;
+    sx_gpio_write(&dce->base.pwrPin, SX_GPIO_HIGH); /* -> module PWRKEY goes LOW (pressed) */
 }
 
 /* Last-resort hard reset via the physical RST line (LTE_RESET_Pin, through
@@ -381,6 +398,15 @@ static void cb_at_probe(modem_t *modem, const char *response, modem_response_st_
      * normal path while the module is still booting. */
 }
 
+/* UNUSED as of 2026-07-28 — a7677s_power_off_start() no longer sends
+ * AT+CPOF (see that function's doc-comment for why: unreliable when the
+ * module needs shutting down but isn't cleanly answering AT at that
+ * moment). Kept, not deleted, in case a future revision wants to attempt
+ * a graceful AT+CPOF first and only fall back to the PWRKEY pulse if it
+ * doesn't get a clean OK within a short timeout — CMD_CPOF's command-table
+ * entry above is left in place for that reason too. Marked (void)-cast
+ * where declared to suppress an unused-function warning without deleting
+ * the callback or its still-valid logic. */
 static void cb_cpof(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
 {
     a7677s_t *dce = pDCE(modem);
@@ -511,12 +537,36 @@ static void a7677s_poll(void *ctx, uint32_t ts)
         }
         break;
 
+    case A7677S_PWR_OFF_PULSE:
+        dce->power_elapsed += ts;
+        if (dce->power_elapsed >= A7677S_OFF_PULSE_MS) {
+            /* Release PWRKEY back to idle (module's own PWRKEY line floats
+             * back HIGH via its internal pull-up, same release logic as
+             * A7677S_PWR_PULSE_LOW above for power-on — see that state's
+             * comment on why the MCU pin is simply left LOW here, not
+             * driven HIGH). */
+            sx_gpio_write(&dce->base.pwrPin, SX_GPIO_LOW);
+            dce->power_state   = A7677S_PWR_OFF_SETTLE;
+            dce->power_elapsed = 0;
+        }
+        break;
+
+    case A7677S_PWR_OFF_SETTLE:
+        dce->power_elapsed += ts;
+        if (dce->power_elapsed >= A7677S_OFF_SETTLE_MS) {
+            log_info(TAG, "Power Off complete (PWRKEY)");
+            dce->power_state   = A7677S_PWR_IDLE;
+            dce->power_elapsed = 0;
+        }
+        break;
+
     case A7677S_PWR_IDLE:
     case A7677S_PWR_READY:
     case A7677S_PWR_OFF_WAIT:
     default:
-        /* Nothing to advance here; A7677S_PWR_OFF_WAIT is resolved entirely
-         * by cb_cpof() above, driven by modem_poll(). */
+        /* Nothing to advance here; A7677S_PWR_OFF_WAIT is unused/deprecated
+         * (see its doc-comment in a7677s.h — kept only so no code elsewhere
+         * that might still reference the enum value breaks). */
         break;
     }
 

@@ -26,6 +26,19 @@ int modem_send_command(modem_t *modem, modem_command_t *cmd, uint32_t timeout){
     modem->isBusy = 1;
     modem->timeOut = timeout;
     modem->buff_id = 0;
+    /* Bug fix (2026-07-28): buff_id=0 only resets the write cursor, it does
+     * NOT clear old bytes still sitting in modem->buff from the PREVIOUS
+     * command. Since buff is a fixed 512-byte array with no guaranteed
+     * null-terminator management, strstr(modem->buff, ...) below in
+     * modem_poll() can read straight through into leftover stale data from
+     * an earlier command whenever the new response is shorter than the old
+     * one. Confirmed on real board: a7677s.c's CREG-poll debug log showed
+     * responses like "[AT+C1\n+CME1,\"IP\",\"m3-world\"\nOK\nAT+CGA]" —
+     * a mix of a CGDCONT response and CREG echo bytes from different polls,
+     * never a clean "+CREG:" line. Clearing the whole buffer here (not just
+     * the cursor) fixes this for every AT command that goes through this
+     * function, not just CREG. */
+    memset(modem->buff, 0, MODEM_RX_BUFFER_SIZE);
     sx_uart_flush(&modem->uart);
     sx_uart_write(&modem->uart, (const uint8_t *)cmd->cmd, strlen(cmd->cmd));
     return 0;

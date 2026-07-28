@@ -682,6 +682,14 @@ static void cb_creg_poll(modem_t *modem, const char *response, modem_response_st
     a7677s_t *dce = pDCE(arg);
     dce->init_cmd_pending = 0;
 
+    /* TEMP DEBUG (2026-07-28): print the raw response every single poll so
+     * we can see exactly what the modem returned during the real app run —
+     * console AT test showed +CREG:0,1 succeeding fine on the same antenna,
+     * so this is to check whether the app path is even receiving the
+     * "+CREG:" line at all, or getting something else (echo-only, empty,
+     * truncated, res==FAIL/TIMEOUT). Remove once root cause is confirmed. */
+    log_info(TAG, "[DEBUG CREG] res=%d response=[%s]", res, response ? response : "(null)");
+
     if (res == MODEM_RESPONSE_SUCCESS && response) {
         /* Response format: +CREG: <n>,<stat>[,<lac>,<ci>] */
         const char *p = strstr(response, "+CREG:");

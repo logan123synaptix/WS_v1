@@ -53,7 +53,32 @@ int sx_uart_read(sx_uart_t *_uart, uint8_t *_data, int _len, uint32_t _timeoutMS
     int len = 0;
     uint32_t time = 0;
     while(len < _len && time < _timeoutMS){
-        if(cqueue_receive(&_uart->rxQueue, _data + len) == false){
+        /* Bug fix (2026-07-28): cqueue_receive() does a non-atomic
+         * read-modify-write on queue->count (and head/tail), and the
+         * SAME queue is also written from sx_uart_rx_callback() running
+         * in the UART RX interrupt (bare-metal build, SX_USE_OS == 0,
+         * so there is no mutex above to serialize this). If the ISR
+         * fires in the middle of cqueue_receive()'s count update, the
+         * two updates race and one gets lost, corrupting count/head/tail.
+         * Symptom observed on real hardware: AT command responses
+         * missing their first byte (e.g. "+CMQTTPUB: 0,0" arriving as
+         * "CMQTTPUB: 0,0", or "AT+CSQ" response truncated to "]K"),
+         * happening frequently under UART traffic, not randomly.
+         * Fix: briefly disable IRQs around the single-consumer call so
+         * the ISR (single producer) can't interleave with it. Kept here
+         * at the call site (not inside cqueue.c) so cqueue stays a
+         * generic, ISR-agnostic utility usable elsewhere without this
+         * overhead.
+         * Uses save/restore of PRIMASK (not a bare __disable_irq() /
+         * __enable_irq() pair) so this is safe to call even if it ever
+         * ends up nested inside another critical section elsewhere --
+         * restoring the saved mask can't accidentally re-enable
+         * interrupts that the outer caller intended to keep off. */
+        uint32_t primask = __get_PRIMASK();
+        __disable_irq();
+        bool got = cqueue_receive(&_uart->rxQueue, _data + len);
+        __set_PRIMASK(primask);
+        if(got == false){
             // sx_delay_ms(1);
             // time += 1;
             break;
@@ -71,9 +96,20 @@ int sx_uart_available(sx_uart_t *_uart){
 }
 
 int sx_uart_rx_callback(sx_uart_t *_uart, const uint8_t *_data, int _len){
+    /* Paired with the PRIMASK save/restore guard in sx_uart_read():
+     * this callback runs in the UART RX ISR and is the single producer
+     * into rxQueue, while sx_uart_read() in the main loop is the single
+     * consumer. Wrapping the ISR side too makes the critical section
+     * symmetric and safe even if UART interrupts are ever nested with
+     * a higher-priority IRQ that also touches this queue. See
+     * sx_uart_read() for the full bug writeup. */
     int len = 0;
     while(len < _len){
-        if(cqueue_send(&_uart->rxQueue, _data + len) == true){
+        uint32_t primask = __get_PRIMASK();
+        __disable_irq();
+        bool sent = cqueue_send(&_uart->rxQueue, _data + len);
+        __set_PRIMASK(primask);
+        if(sent == true){
             len++;
         } else {
             break;

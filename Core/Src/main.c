@@ -89,7 +89,8 @@ static const char *TAG = "MAIN";
  * no, khong bao gio bi ISR ghi de len du liieu chua doc. */
 #define RING_BUF_SIZE 256   /* phai la luy thua cua 2 de phep '&' lam mod nhanh, khong dung '%' */
 
-#define CMD_AT_TEST   "AT+CGMM=?"
+#define CMD_AT_TEST       "AT\r\n"   /* AT: lay IMEI, xem Documents/a76xx_at_cmd.md muc 2.2.19 */
+#define CMD_AT_TEST_LABEL "AT"       /* ban khong co \r\n, chi dung de log cho gon, khong bi xuong dong giua chung */
 
 typedef struct {
     volatile uint8_t buf[RING_BUF_SIZE];
@@ -133,12 +134,20 @@ static inline bool ring_pop(ring_buf_t *r, uint8_t *out)
 #define AT_SPAM_INTERVAL_MS   2000
 static uint32_t at_spam_last_tick = 0;
 
+/* Buffer gom byte SIM RX thanh tung DONG hoan chinh de log 1 lan, thay vi
+ * log tung byte hex rieng le (kho doc IMEI/phan hoi dai bang mat). Gom
+ * cho toi khi gap '\n' thi in ca dong ra 1 lan, roi reset buffer. */
+#define SIM_LINE_BUF_SIZE 128
+static char     sim_line_buf[SIM_LINE_BUF_SIZE];
+static uint16_t sim_line_len = 0;
+
 void power_on_sim(void);
 void send_byte_sim(const char *cmd);
 void send_byte_gps(const char *cmd);
 void uart_test_init(void);
 void uart_test_poll(void);
 static void log_print(const char *s);
+static void sim_line_flush(void);
 
 /* Ham "print" ma logger_init() se goi moi khi co 1 dong log da format
  * xong (xem logger.h's p_log_func) - o day chi don gian ghi thang ra
@@ -158,8 +167,8 @@ void power_on_sim(void)
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET); /* keo LOW */
   HAL_Delay(50);
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);   /* tha ve HIGH */
-  HAL_Delay(8050);
-  log_info(TAG, "POWER ON OKi");
+  // HAL_Delay(8050);
+  log_info(TAG, "POWER ON OK");
 }
 
 void send_byte_sim(const char *cmd)
@@ -170,6 +179,17 @@ void send_byte_sim(const char *cmd)
 void send_byte_gps(const char *cmd)
 {
   HAL_UART_Transmit(&huart2, (uint8_t *)cmd, (uint16_t)strlen(cmd), 100);
+}
+
+/* In ra sim_line_buf hien tai (neu co gi de in) roi reset buffer, dung
+ * chung cho ca truong hop gap '\n' lan buffer day (tranh tran). */
+static void sim_line_flush(void)
+{
+  if (sim_line_len > 0) {
+    sim_line_buf[sim_line_len] = '\0';
+    log_info(TAG, "[SIM RX] %s", sim_line_buf);
+    sim_line_len = 0;
+  }
 }
 
 /* Goi 1 lan trong main(), SAU khi MX_USARTx_UART_Init() da chay het. */
@@ -187,11 +207,17 @@ void uart_test_poll(void)
   uint8_t byte;
 
   /* Rut can toan bo byte SIM dang cho trong ring buffer moi lan poll,
-   * KHONG chi lay 1 byte - vi co the co nhieu byte da don lai trong luc
-   * main loop ban viec khac. */
+   * gom thanh tung dong (ket thuc boi '\n') roi in ca dong 1 lan - de doc
+   * hon nhieu so voi log tung byte hex rieng le, dac biet voi phan hoi
+   * dai nhu IMEI. */
   while (ring_pop(&sim_ring, &byte)) {
-    log_info(TAG, "[SIM RX] 0x%02X ('%c')", byte,
-             (byte >= 0x20 && byte < 0x7F) ? byte : '.');
+    if (byte == '\n') {
+      sim_line_flush();
+    } else if (sim_line_len < SIM_LINE_BUF_SIZE - 1) {
+      sim_line_buf[sim_line_len++] = (char)byte;
+    } else {
+      sim_line_flush(); /* dong qua dai, flush truoc khi mat du lieu */
+    }
   }
 
   while (ring_pop(&gps_ring, &byte)) {
@@ -199,10 +225,11 @@ void uart_test_poll(void)
              (byte >= 0x20 && byte < 0x7F) ? byte : '.');
   }
 
-  /* Spam "AT" xuong SIM moi AT_SPAM_INTERVAL_MS, vo thoi han. */
+  /* Spam CMD_AT_TEST (AT+CGSN, lay IMEI) xuong SIM moi
+   * AT_SPAM_INTERVAL_MS, vo thoi han. */
   if (HAL_GetTick() - at_spam_last_tick >= AT_SPAM_INTERVAL_MS) {
     at_spam_last_tick = HAL_GetTick();
-    log_info(TAG, "[SIM TX] AT");
+    log_info(TAG, "[SIM TX] %s", CMD_AT_TEST_LABEL);
     send_byte_sim(CMD_AT_TEST);
   }
 }

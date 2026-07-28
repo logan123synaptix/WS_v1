@@ -92,6 +92,19 @@ struct sx_mqtt{
      * cycle. */
     uint8_t  restart_cycle_count;
 
+    /* 1 while waiting for modem_ops_t.power_is_busy() to clear after
+     * escalate_recovery() called power_off_start() — power_on_start() and
+     * start() are deliberately NOT called back-to-back with power_off_start()
+     * anymore (see sx_mqtt.c's escalate_recovery()/sx_mqtt_poll()). Without
+     * this, the driver's power state machine never gets a chance to run
+     * through OFF_PULSE -> OFF_SETTLE -> IDLE: power_on_start() would
+     * overwrite power_state back to PULSE_HIGH on the very next line,
+     * skipping the settle/Toff-on time entirely (see a7677s.h's
+     * A7677S_OFF_SETTLE_MS). sx_mqtt_poll() checks this flag every tick and
+     * fires power_on_start()+start() itself the moment power_is_busy()
+     * clears. */
+    uint8_t  awaiting_power_cycle;
+
     /*  Callback    */
     sx_mqtt_on_connected_cb_t on_connected;
     sx_mqtt_on_disconnected_cb_t on_disconnected;

@@ -82,9 +82,23 @@ extern "C" {
                                           * used instead of the bare 2.5s minimum to leave a
                                           * small margin against timing jitter, same spirit as
                                           * A7677S_RST_PULSE_MS's 2.5s typ vs 2s min. */
-#define A7677S_OFF_SETTLE_MS   2500U    /* wait after releasing PWRKEY before considering the
-                                          * module fully off, per a7677s.md Table 15's
-                                          * Toff(status)/Toff(uart)/Toff(usb) (~2.5s typ each) */
+#define A7677S_OFF_SETTLE_MS   4500U    /* wait after releasing PWRKEY before considering the
+                                          * module fully off AND safe to power back on, per
+                                          * a7677s.md Table 15: 2500ms covers
+                                          * Toff(status)/Toff(uart)/Toff(usb) (~2.5s typ each),
+                                          * plus 2000ms extra to also satisfy Toff-on (min 2s
+                                          * buffer required between power-off and the next
+                                          * power-on). Gated here (instead of a separate state)
+                                          * so any caller of a7677s_power_on_start() — cold-boot,
+                                          * recovery ladder, or sleep manager — automatically
+                                          * respects Toff-on simply by waiting for A7677S_PWR_IDLE. */
+#define A7677S_UART_READY_MS   8000U    /* Ton(uart), per a7677s.md Table 15 — UART is not
+                                          * guaranteed usable until ~8s after PWRKEY is released
+                                          * on power-on. The first "AT" probe in
+                                          * A7677S_PWR_WAIT_BOOT is gated on this (via
+                                          * boot_wait_total_ms) so we don't probe into a UART
+                                          * that isn't up yet; subsequent probes still repeat
+                                          * every A7677S_BOOT_PROBE_MS as before. */
 #define A7677S_TIMEOUT_AT      2500U
 #define A7677S_TIMEOUT_CPOF    5000U
 #define A7677S_TIMEOUT_NETWORK 9000U    /* CGDCONT/CGAUTH/CGACT/COPS, per a76xx_at_cmd.md MaxResponseTime */
@@ -362,6 +376,14 @@ struct a7677s
      * Lives in the instance (like modem_t.waitElapsed) — never a static
      * local — so more than one a7677s_t could coexist safely in the future. */
     uint32_t power_elapsed;
+
+    /* Total elapsed ms since entering A7677S_PWR_WAIT_BOOT (does NOT reset
+     * between individual probe attempts, unlike power_elapsed above — this
+     * is what lets us gate the very first "AT" probe on A7677S_UART_READY_MS
+     * / Ton(uart), while power_elapsed keeps handling the A7677S_BOOT_PROBE_MS
+     * spacing between probes as before). Reset to 0 whenever WAIT_BOOT is
+     * (re-)entered, from either PULSE_LOW (power-on) or RST_PULSE (hard reset). */
+    uint32_t boot_wait_total_ms;
 
     /* 1 while an "AT" probe command is currently in flight during
      * A7677S_PWR_WAIT_BOOT (i.e. modem_send_command() was called and we are

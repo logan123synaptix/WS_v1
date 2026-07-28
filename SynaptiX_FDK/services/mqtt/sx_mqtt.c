@@ -167,10 +167,23 @@ static void escalate_recovery(sx_mqtt_t *mqtt)
                      mqtt->restart_cycle_count, SX_MQTT_MAX_RESTARTS_BEFORE_HARD_RESET);
             /* Same recovery action as before (full power cycle + re-init), now
              * reached only through modem_ops_t so this file stays
-             * driver-agnostic. */
+             * driver-agnostic.
+             *
+             * Bug fix (2026-07-28): used to call power_off_start() then
+             * power_on_start() then start() back-to-back on the next two
+             * lines. That never gave the driver's power state machine a
+             * chance to actually run through OFF_PULSE -> OFF_SETTLE -> IDLE
+             * (per a7677s.md Table 15's Toff/Toff-on timing) —
+             * power_on_start() overwrote power_state back to PULSE_HIGH
+             * immediately, on the very next line, before a single poll()
+             * tick could advance the OFF sequence at all. Fix: only kick off
+             * power_off_start() here, then set awaiting_power_cycle so
+             * sx_mqtt_poll() calls power_on_start()+start() itself, once per
+             * tick, the moment modem_ops_t.power_is_busy() actually clears
+             * (i.e. the driver reports A7677S_PWR_IDLE, settle time
+             * included). */
             mqtt->modem->ops->power_off_start(mqtt->modem->ctx);
-            mqtt->modem->ops->power_on_start(mqtt->modem->ctx);
-            mqtt->modem->ops->start(mqtt->modem->ctx);
+            mqtt->awaiting_power_cycle = 1;
         }
         return;
     }
@@ -333,6 +346,20 @@ int sx_mqtt_subscribe(sx_mqtt_t *mqtt, const char *topic, uint8_t qos)
 void sx_mqtt_poll(sx_mqtt_t *mqtt, uint32_t ts)
 {
     modem_handle_poll(mqtt->modem, ts);
+
+    /* Finish the power-cycle recovery started in escalate_recovery():
+     * power_off_start() was already called there; wait here for the
+     * driver's power state machine to actually finish the OFF sequence
+     * (power_is_busy() clears once it reaches A7677S_PWR_IDLE, after the
+     * full Toff/Toff-on settle time) before calling power_on_start()+
+     * start(). This must run before the reconnect/CONNECTED blocks below so
+     * a stale awaiting_power_cycle flag can't linger past this tick. */
+    if (mqtt->awaiting_power_cycle && !mqtt->modem->ops->power_is_busy(mqtt->modem->ctx)) {
+        mqtt->awaiting_power_cycle = 0;
+        log_info(TAG, "Power-cycle settle complete — powering back on");
+        mqtt->modem->ops->power_on_start(mqtt->modem->ctx);
+        mqtt->modem->ops->start(mqtt->modem->ctx);
+    }
 
     if ((mqtt->state == SX_MQTT_STATE_ERROR || mqtt->state == SX_MQTT_STATE_DISCONNECTED) &&
         modem_handle_is_ready(mqtt->modem) && mqtt->reconnect_count > 0)

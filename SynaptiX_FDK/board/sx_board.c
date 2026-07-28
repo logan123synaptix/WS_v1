@@ -31,21 +31,6 @@ static void set_enter_full_mode(void);
 static void board_sleep_pre_stop_hook(void *hook_ctx);
 static void board_sleep_post_wake_hook(void *hook_ctx);
 
-void dcd_fs_msp_init(uint8_t rhport)
-{
-    (void)rhport;
-    log_info(TAG, "dcd_fs_msp_init called");
-    hpcd_USB_DRD_FS.Instance = USB_DRD_FS;
-    HAL_PCD_MspInit(&hpcd_USB_DRD_FS);
-    HAL_Delay(100);
-    log_info(TAG, "MSP init done!");
-}
-
-void USB_DRD_FS_IRQHandler(void)
-{
-    tud_int_handler(0);
-}
-
 /* ------------------------------------------------------------------ */
 /*  GPIO Define                                                       */
 /* ------------------------------------------------------------------ */
@@ -141,18 +126,6 @@ void sx_board_init(void)
     sx_uart_init(&board.log_uart, &uart_config[UART_LOG], 512, 512);
     logger_init(LOGGER_INFO, log_print);
     log_info(TAG, "Board init start");
-    
-    /*  USB  */ 
-    #if BOARD_USE_MSC
-    sx_user_msc_init();
-    sx_user_msc_create_disk(USER_DISK_LABEL_CREATE);
-    log_info(TAG, "MSC disk created");
-    #endif
-    board.usb_cfg.rx_buf_size = 256;
-    board.usb_cfg.tx_buf_size = 256;
-    dcd_fs_msp_init(0);
-    sx_usb_tiny_init(&board.usb, &board.usb_cfg);
-    log_info(TAG, "USB init done");
 
     uart_config[UART_LTE].pDriver = hal_uart[UART_LTE];
     uart_config[UART_LTE].baudrate = 115200;

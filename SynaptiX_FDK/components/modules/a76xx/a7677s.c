@@ -67,6 +67,7 @@ static char s_mqtt_dyn_cmd_buf[A7677S_MQTT_DYN_CMD_MAX];
 
 static void cb_at_probe(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cpof(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static int  a7677s_start(void *ctx);
 
 static void restart_init(a7677s_t *dce);
 static void send_init_cmd(a7677s_t *dce, int idx, modem_command_response_callback_t cb, uint32_t timeout_ms);
@@ -351,6 +352,27 @@ static void cb_at_probe(modem_t *modem, const char *response, modem_response_st_
         log_info(TAG, "Module responsive, boot confirmed");
         dce->power_state   = A7677S_PWR_READY;
         dce->power_elapsed = 0;
+
+        /* Kick off the network attach sequence right here, now that
+         * power_state has just become READY. Without this, nothing else
+         * ever calls a7677s_start() again after the app's very first call
+         * (sx_user_mqtt.c's _common_init(), fired the instant
+         * sx_user_mqtt_nontls_init() runs) — which happens immediately on
+         * boot, long before power_state reaches READY, so that first call
+         * always fails with "power not ready yet" and is never retried.
+         * init_state would then stay A7677S_INIT_IDLE forever, is_ready()
+         * would never become true, and _on_modem_ready() (the callback
+         * that actually calls sx_mqtt_connect()) would never fire — MQTT
+         * would silently never connect. Confirmed via real board log,
+         * 2026-07-28: "start(): power not ready yet" followed later by
+         * "Module responsive, boot confirmed" with no attach sequence
+         * ever starting.
+         * a7677s_start() itself already guards against being called at
+         * the wrong time (modem busy / init already in progress), so
+         * calling it unconditionally here is safe — it simply becomes a
+         * no-op (logs a warning, returns -1) if some other path already
+         * kicked off the same sequence. */
+        a7677s_start(dce);
     }
     /* On FAIL/TIMEOUT: stay in A7677S_PWR_WAIT_BOOT, poll() will send the
      * next probe after another A7677S_BOOT_PROBE_MS — this is the expected,

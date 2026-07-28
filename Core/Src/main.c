@@ -279,6 +279,81 @@ void uart_test_poll(void)
   }
 }
 
+/* ============================================================
+ * TEST W25Q128 (SPI flash ngoai) - chi doc JEDEC ID, KHONG ghi/xoa gi ca,
+ * an toan tuyet doi. Gia tri dung theo datasheet + da xac nhan qua code
+ * driver that (SynaptiX_FDK/components/modules/external_flash/
+ * sx_W25Q128.c's sx_W25Q128_init()): Winbond manufacturer ID 0xEF, memory
+ * type 0x40, capacity 0x18 (= 16MB, dung W25Q128).
+ * CS pin: PC12 (SPI1_CS_GPIO_Port/SPI1_CS_Pin trong main.h). SPI khong tu
+ * dong keo CS trong HAL_SPI_TransmitReceive() - phai tu lam bang tay o
+ * day (driver that lam qua sx_spi_write_read(), tu dong keo/tha CS ben
+ * trong - code test nay lam lai y het bang thuan HAL). */
+#define W25Q128_CMD_JEDEC_ID_TEST   0x9F
+
+void test_flash_w25q128(void)
+{
+  uint8_t tx[4] = { W25Q128_CMD_JEDEC_ID_TEST, 0x00, 0x00, 0x00 };
+  uint8_t rx[4] = { 0 };
+
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET); /* CS active-LOW */
+  HAL_SPI_TransmitReceive(&hspi1, tx, rx, 4, 100);
+  HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
+
+  log_info(TAG, "[W25Q128] JEDEC ID: %02X %02X %02X (expect EF 40 18)",
+           rx[1], rx[2], rx[3]);
+
+  if (rx[1] == 0xEF && rx[2] == 0x40 && rx[3] == 0x18) {
+    log_info(TAG, "[W25Q128] OK - chip nhan dung, 16MB Winbond");
+  } else {
+    log_info(TAG, "[W25Q128] FAIL - JEDEC ID khong khop, kiem tra day SPI/CS/nguon");
+  }
+}
+
+/* ============================================================
+ * TEST BNO055 (IMU qua I2C1, dung chung bus voi RTC/SHT3x/ADS1115) - chi
+ * doc thanh ghi CHIP_ID (0x00), KHONG ghi gi vao chip ca, an toan tuyet
+ * doi. Gia tri dung theo code driver that
+ * (SynaptiX_FDK/components/modules/imu/bno055.c/.h):
+ * - I2C address: 0x29 << 1 (BNO055_I2C_ADDR_DEFAULT, da shift san cho HAL
+ *   8-bit address convention)
+ * - CHIP_ID register: 0x00, gia tri dung phai la 0xA0
+ * - Reset pin: PB8 (I2C1_RESET_Pin), active-LOW theo bno055_init() that
+ *   (keo LOW 10ms roi tha HIGH, cho 650ms on dinh truoc khi doc). LUU Y:
+ *   chan nay dung CHUNG voi RTC theo comment trong sx_board.c, nhung RTC
+ *   tu reset qua I2C command rieng nen khong dung chan nay - chi IMU dung
+ *   chan reset vat ly nay. */
+#define BNO055_I2C_ADDR_TEST   (0x29U << 1)
+#define BNO055_REG_CHIP_ID     0x00U
+#define BNO055_CHIP_ID_EXPECT  0xA0U
+
+void test_imu_bno055(void)
+{
+  log_info(TAG, "[BNO055] Reset...");
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
+  HAL_Delay(10);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
+  HAL_Delay(650); /* dung DELAY_RESET_MS y het bno055.c that */
+
+  uint8_t chip_id = 0;
+  HAL_StatusTypeDef st = HAL_I2C_Mem_Read(&hi2c1, BNO055_I2C_ADDR_TEST,
+                                           BNO055_REG_CHIP_ID, I2C_MEMADD_SIZE_8BIT,
+                                           &chip_id, 1, 100);
+
+  if (st != HAL_OK) {
+    log_info(TAG, "[BNO055] FAIL - HAL_I2C_Mem_Read loi (status=%d), kiem tra day I2C/dia chi/nguon", (int)st);
+    return;
+  }
+
+  log_info(TAG, "[BNO055] CHIP_ID: 0x%02X (expect 0xA0)", chip_id);
+
+  if (chip_id == BNO055_CHIP_ID_EXPECT) {
+    log_info(TAG, "[BNO055] OK - chip nhan dung");
+  } else {
+    log_info(TAG, "[BNO055] FAIL - CHIP_ID khong khop, kiem tra dia chi I2C (0x28 thay vi 0x29?) hoac day/nguon");
+  }
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -337,7 +412,9 @@ int main(void)
   power_on_gps();      /* THEM MOI - bat nguon + tha reset GPS, neu khong GPS se
                            bi giu o trang thai reset vinh vien (xem comment
                            trong power_on_gps()) */
-  
+  test_flash_w25q128(); /* THEM MOI - doc JEDEC ID, chi 1 lan, khong lap */
+  test_imu_bno055();    /* THEM MOI - reset + doc CHIP_ID, chi 1 lan, khong lap */
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

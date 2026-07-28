@@ -326,9 +326,6 @@ static void board_sleep_pre_stop_hook(void *hook_ctx)
     HAL_NVIC_ClearPendingIRQ(USART2_IRQn);
     HAL_NVIC_ClearPendingIRQ(UART4_IRQn);
     HAL_NVIC_ClearPendingIRQ(UART5_IRQn);
-
-    HAL_NVIC_DisableIRQ(USB_DRD_FS_IRQn);
-    HAL_NVIC_ClearPendingIRQ(USB_DRD_FS_IRQn);
 }
 
 /* Mirror of board_sleep_pre_stop_hook(), called right after waking +
@@ -339,8 +336,6 @@ static void board_sleep_pre_stop_hook(void *hook_ctx)
 static void board_sleep_post_wake_hook(void *hook_ctx)
 {
     (void)hook_ctx;
-
-    HAL_NVIC_EnableIRQ(USB_DRD_FS_IRQn);
 }
 
 void gps_it_handle(){
@@ -420,46 +415,25 @@ void sx_board_uart_resume_it(void) {
     board_sim_uart_resume_it();
 }
 
-/* USB IT CB    */
-void tud_mount_cb(void) {
-    log_info(TAG, "USB tiny connected");
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if(huart == hal_uart[UART_LTE]){
+        sx_uart_rx_callback(bsp_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+        HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+    } else if(huart == hal_uart[UART_GPS]){
+        sx_uart_rx_callback(bsp_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+        HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+    } else if(huart == hal_uart[UART_LOG]){
+        sx_uart_rx_callback(bsp_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+        HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+    } else if(huart == hal_uart[UART_DUST]){
+        sx_uart_rx_callback(bsp_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+        HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+    } else if(huart == hal_uart[UART_EXTEND]){
+        sx_uart_rx_callback(bsp_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+        HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+    }
 }
-
-void tud_umount_cb(void) {
-    log_info(TAG, "USB tiny disconnected");
-}
-
-void tud_suspend_cb(bool remote_wakeup_en) {
-    log_info(TAG, "USB tiny suspend");
-}
-
-void tud_resume_cb(void) {
-    log_info(TAG, "USB tiny resumed");
-}
-
-void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts) {
-    log_info("USB", "CDC line state: dtr=%d rts=%d", dtr, rts);
-}
-
-// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-// {
-//     if(huart == hal_uart[UART_LTE]){
-//         sx_uart_rx_callback(bsp_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
-//         HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
-//     } else if(huart == hal_uart[UART_GPS]){
-//         sx_uart_rx_callback(bsp_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
-//         HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
-//     } else if(huart == hal_uart[UART_LOG]){
-//         sx_uart_rx_callback(bsp_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
-//         HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
-//     } else if(huart == hal_uart[UART_DUST]){
-//         sx_uart_rx_callback(bsp_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
-//         HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
-//     } else if(huart == hal_uart[UART_EXTEND]){
-//         sx_uart_rx_callback(bsp_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
-//         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
-//     }
-// }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
     if(htim->Instance == sx_tim1->Instance){

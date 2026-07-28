@@ -30,7 +30,10 @@ static const char *TAG = "A7677S";
 #define CMD_CCLK            13   /* AT+CCLK? - read back network time, once during start() */
 #define CMD_CGACT_QUERY     14   /* AT+CGACT? - read cid=1's current activation state before (re)activating it */
 #define CMD_CGACT_DEACT     15   /* AT+CGACT=0,1 - only sent if CGACT_QUERY found cid 1 already active */
-#define CMD_DYNAMIC         16   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
+#define CMD_CPIN_QUERY      16   /* AT+CPIN? - confirm SIM present & unlocked right after "AT" succeeds */
+#define CMD_HOTSWAP_ON      17   /* AT+UIMHOTSWAPON=1 - enable SIM hot-swap detection */
+#define CMD_HOTSWAP_LEVEL   18   /* AT+UIMHOTSWAPLEVEL=0 - SIM_DET active-low */
+#define CMD_DYNAMIC         19   /* CGDCONT/CGAUTH/CGACT - built at runtime, need apn/user/pass */
 
 static modem_command_t command[] = {
     [CMD_AT]            = {.cmd = "AT\r\n",              .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
@@ -49,6 +52,9 @@ static modem_command_t command[] = {
     [CMD_CCLK]          = {.cmd = "AT+CCLK?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CGACT_QUERY]   = {.cmd = "AT+CGACT?\r\n",       .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_CGACT_DEACT]   = {.cmd = "AT+CGACT=0,1\r\n",    .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_CPIN_QUERY]    = {.cmd = "AT+CPIN?\r\n",        .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_HOTSWAP_ON]    = {.cmd = "AT+UIMHOTSWAPON=1\r\n",    .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
+    [CMD_HOTSWAP_LEVEL] = {.cmd = "AT+UIMHOTSWAPLEVEL=0\r\n", .res_success = "\r\nOK\r\n", .res_fail = "\r\nERROR\r\n"},
     [CMD_DYNAMIC]       = {0},
 };
 
@@ -158,6 +164,9 @@ static void cb_cgdcont        (modem_t *modem, const char *response, modem_respo
 static void cb_cgauth         (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgact_query    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgact_deact    (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_cpin_query     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_hotswap_on     (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_hotswap_level  (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgact          (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_creg_set       (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_creg_poll      (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
@@ -662,8 +671,108 @@ static void cb_init_at(modem_t *modem, const char *response, modem_response_st_t
     dce->init_cmd_pending = 0;
     if (res != MODEM_RESPONSE_SUCCESS) { restart_init(dce); return; }
 
-    dce->init_retry_count = 0;
-    dce->init_state       = A7677S_INIT_CGDCONT;
+    /* Bug fix (2026-07-28): used to reset init_retry_count to 0 here and
+     * proceed straight to CGDCONT. Both "AT" and CGDCONT succeed whether or
+     * not a SIM is present, so a pulled SIM only ever showed up several
+     * steps later as AT+CGACT timing out — and because this reset the
+     * counter every time "AT" succeeded, the retry loop never reached
+     * A7677S_MAX_RETRY across restarts (see restart_init()'s doc-comment).
+     * init_retry_count is no longer reset mid-sequence; it only resets on a
+     * genuine new attempt (a7677s_start(), or a restart triggered by a URC
+     * — see those call sites) or once the sequence actually finishes
+     * (A7677S_INIT_READY). Enable SIM hot-swap first (see
+     * A7677S_INIT_HOTSWAP_ON's doc-comment in a7677s.h for why), then
+     * query the SIM directly instead of inferring its state from a later
+     * timeout. */
+    dce->init_state = A7677S_INIT_HOTSWAP_ON;
+    send_init_cmd(dce, CMD_HOTSWAP_ON, cb_hotswap_on, A7677S_TIMEOUT_AT);
+}
+
+static void cb_hotswap_on(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* Non-fatal on failure — if the module doesn't support/accept this
+     * command for some reason, fall through to CPIN_QUERY anyway rather
+     * than failing the whole attach sequence over a hot-swap convenience
+     * feature; worst case, hot-swap just stays off like it always was. */
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_warn(TAG, "AT+UIMHOTSWAPON=1 failed/timeout (res=%d) — continuing without hot-swap", res);
+    }
+    dce->init_state = A7677S_INIT_HOTSWAP_LEVEL;
+    send_init_cmd(dce, CMD_HOTSWAP_LEVEL, cb_hotswap_level, A7677S_TIMEOUT_AT);
+}
+
+static void cb_hotswap_level(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* Same non-fatal handling as cb_hotswap_on() — see that function's
+     * comment. Level 0 (active-low) is a first guess based on the SIM
+     * tray's mechanical behavior described in Documents/a7677s.md 3.5.1
+     * (insert = falling edge); untested on this specific board's SIM_DET
+     * wiring, may need to flip to AT+UIMHOTSWAPLEVEL=1 if hot-swap still
+     * doesn't pick up a reinserted SIM after this fix ships. */
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_warn(TAG, "AT+UIMHOTSWAPLEVEL=0 failed/timeout (res=%d) — continuing anyway", res);
+    }
+    dce->init_state = A7677S_INIT_CPIN_QUERY;
+    send_init_cmd(dce, CMD_CPIN_QUERY, cb_cpin_query, A7677S_TIMEOUT_AT);
+}
+
+static void cb_cpin_query(modem_t *modem, const char *response, modem_response_st_t res, void *arg)
+{
+    a7677s_t *dce = pDCE(arg);
+    dce->init_cmd_pending = 0;
+    /* Response format (a76xx_at_cmd.md 6.2.2, AT+CPIN? read command):
+     * +CPIN: <code>\r\n\r\nOK\r\n, where <code> is READY, SIM PIN, SIM PUK,
+     * PH-SIM PIN, SIM PIN2, SIM PUK2, or PH-NET PIN. A missing/unreadable
+     * SIM does not return one of these codes at all — the module answers
+     * with +CME ERROR instead, which this driver's res_success/res_fail
+     * matching does not recognize (same framework gap already noted around
+     * CGACT's +CME ERROR — see that state's history), so it surfaces here
+     * as res != MODEM_RESPONSE_SUCCESS (timeout/fail) rather than a parsed
+     * "not ready" code. Both cases (bad code, or fail/timeout) are treated
+     * as "SIM not usable" and stop the sequence immediately here instead
+     * of ever reaching CGACT, so the real cause is visible in the log
+     * right away instead of a generic CGACT timeout several steps later. */
+    int sim_ready = 0;
+    if (res == MODEM_RESPONSE_SUCCESS && response) {
+        const char *p = strstr(response, "+CPIN:");
+        if (p) {
+            const char *q = p + 6; /* skip "+CPIN:" */
+            while (*q == ' ') q++; /* tolerate optional space after ':' */
+            sim_ready = (strncmp(q, "READY", 5) == 0);
+            if (!sim_ready) {
+                /* Log whatever code the module actually reported, trimmed
+                 * to the line — helps distinguish "no SIM" from "SIM
+                 * present but PIN-locked" without guessing. */
+                char code_buf[24];
+                size_t i = 0;
+                while (q[i] && q[i] != '\r' && q[i] != '\n' && i < sizeof(code_buf) - 1) {
+                    code_buf[i] = q[i];
+                    i++;
+                }
+                code_buf[i] = '\0';
+                log_error(TAG, "SIM not ready: +CPIN: %s", code_buf);
+            }
+        } else {
+            log_error(TAG, "AT+CPIN? OK but no +CPIN: line found — treating as SIM not ready");
+        }
+    } else {
+        log_error(TAG, "AT+CPIN? failed/timeout (res=%d) — SIM likely missing or module busy with SIM detection", res);
+    }
+
+    if (!sim_ready) {
+        /* Stop here rather than continuing to CGDCONT/CGACT only to fail
+         * there with a much less specific error later. restart_init()
+         * still owns the retry-count/give-up decision, same as any other
+         * failed step. */
+        restart_init(dce);
+        return;
+    }
+
+    dce->init_state = A7677S_INIT_CGDCONT;
     snprintf(s_dyn_cmd_buf, sizeof(s_dyn_cmd_buf), "AT+CGDCONT=1,\"IP\",\"%s\"\r\n", dce->apn);
     send_init_dynamic(dce, s_dyn_cmd_buf, cb_cgdcont, A7677S_TIMEOUT_NETWORK);
 }

@@ -184,6 +184,29 @@ typedef enum {
 typedef enum {
     A7677S_INIT_IDLE = 0,
     A7677S_INIT_AT,             /* probe "AT", also used to restart the whole sequence on failure */
+    /* Bug fix (2026-07-28): AT+CPIN? alone only tells us the SIM's state at
+     * the moment this init sequence happened to run — it does not make the
+     * module notice a SIM that gets inserted LATER, mid-run, without a
+     * true VBAT power cycle. Confirmed on real hardware: pulling the SIM
+     * and reinserting it, then recovering via PWRKEY pulse or the RST pin
+     * (both already covered by escalate_recovery()'s ladder), still kept
+     * reporting "+CME ERROR: SIM not inserted" indefinitely — only a real
+     * VBAT off/on picked the SIM back up. Root cause per
+     * Documents/a7677s.md section 3.5.1 (USIM Hot swap function): the
+     * module only re-reads the SIM on its own SIM_DET pin edge if hot-swap
+     * is explicitly enabled via AT+UIMHOTSWAPON — off by default. WS_v1's
+     * schematic does wire A7677S's SIM_DET to the nano-SIM socket's detect
+     * pin (confirmed by hardware owner, unlike the "leave floating if
+     * unused" case the datasheet describes), so enabling it in software is
+     * the actual fix here rather than a hardware change. Two commands, run
+     * once per full init sequence right after "AT" succeeds (both are
+     * AUTO_SAVE per the AT command manual, so this is a one-time write,
+     * not something that needs repeating on every restart_init() retry —
+     * but sending it again every sequence start is harmless and keeps this
+     * independent of whatever the module's NVM already has). */
+    A7677S_INIT_HOTSWAP_ON,     /* AT+UIMHOTSWAPON=1 - enable SIM hot-swap detection */
+    A7677S_INIT_HOTSWAP_LEVEL,  /* AT+UIMHOTSWAPLEVEL=0 - SIM_DET active-low (inserted = pin driven low); untested on this board, may need flipping to 1 if hot-swap still doesn't pick up a reinserted SIM */
+    A7677S_INIT_CPIN_QUERY,     /* AT+CPIN? - confirm SIM is present & unlocked before going further */
     A7677S_INIT_CGDCONT,        /* AT+CGDCONT=1,"IP","<apn>" */
     A7677S_INIT_CGAUTH,         /* AT+CGAUTH=1,<type>,"<passwd>","<user>" - skipped if no username/password */
     /* Bug fix (2026-07-28): flashing new firmware only resets the MCU, not

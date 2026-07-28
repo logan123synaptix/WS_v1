@@ -1502,14 +1502,26 @@ static void send_mqtt_dynamic(a7677s_t *dce, const char *cmd_str,
 /* START -> ACCQ -> CONNECT -> CONNECTED
  *
  * Key design: several MQTT commands return "OK" first, then a separate URC
- * line carries the real errcode (e.g. "+CMQTTSTART:0").  We set res_success
+ * line carries the real errcode (e.g. "+CMQTTSTART: 0").  We set res_success
  * to the full URC with errcode=0 so the callback only fires on genuine
- * success.  modem_command checks res_success before res_fail, so ":0\r\n"
+ * success.  modem_command checks res_success before res_fail, so ": 0\r\n"
  * is caught as success and any other "+CMQTTSTART:N" is caught by res_fail
  * (which is a substring match on "ERROR\r\n" — the modem always sends
  * "ERROR\r\n" on hard failures; for URC errcode failures we rely on timeout
  * since the modem sends OK + bad URC without an ERROR line, so the AT layer
- * will eventually time out and fire the callback with TIMEOUT). */
+ * will eventually time out and fire the callback with TIMEOUT).
+ *
+ * NOTE (2026-07-28): Documents/a76xx_at_cmd.md shows these URCs with NO
+ * space after the colon (e.g. "+CMQTTSTART:0"), but the real module on this
+ * board sends a space ("+CMQTTSTART: 0") — confirmed via
+ * [DEBUG CREG]-style raw response logging on real hardware. All six
+ * CMQTTxxx res_success patterns below (START/CONNECT/STOP/PUB/SUB/DISC)
+ * were fixed to include the space; before this fix every one of them
+ * always timed out despite the modem actually succeeding, because
+ * strstr() never found a match. Same class of bug as the PWRKEY-polarity
+ * and CSQ-spacing mismatches noted elsewhere in this codebase — datasheet
+ * text and real module firmware behavior do not always agree, and real
+ * hardware log always wins. */
 
 static void cb_mqtt_start(modem_t *modem, const char *response,
                            modem_response_st_t res, void *arg)
@@ -1908,7 +1920,7 @@ static void cb_mqtt_cfg_version(modem_t *modem, const char *response,
                  (unsigned)dce->mqtt_keepalive, (unsigned)dce->mqtt_clean_session);
     }
     send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf,
-                      "\r\n+CMQTTCONNECT:0,0\r\n", "\r\nERROR\r\n",
+                      "\r\n+CMQTTCONNECT: 0,0\r\n", "\r\nERROR\r\n",
                       cb_mqtt_connect, A7677S_TIMEOUT_MQTT_CONNECT);
 }
 
@@ -1971,7 +1983,7 @@ static void cb_mqtt_rel(modem_t *modem, const char *response,
 
     dce->mqtt_state = A7677S_MQTT_STOP;
     send_mqtt_dynamic(dce, "AT+CMQTTSTOP\r\n",
-                      "\r\n+CMQTTSTOP:0\r\n", "\r\nERROR\r\n",
+                      "\r\n+CMQTTSTOP: 0\r\n", "\r\nERROR\r\n",
                       cb_mqtt_stop, A7677S_TIMEOUT_MQTT_START);
 }
 
@@ -2092,7 +2104,7 @@ static void cb_mqtt_pub_payload_data(modem_t *modem, const char *response,
              A7677S_MQTT_CLIENT_INDEX, (unsigned)dce->mqtt_pub_qos,
              A7677S_MQTT_PUB_TIMEOUT_S, (unsigned)dce->mqtt_pub_retain);
     send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf,
-                      "\r\n+CMQTTPUB:0,0\r\n", "\r\nERROR\r\n",
+                      "\r\n+CMQTTPUB: 0,0\r\n", "\r\nERROR\r\n",
                       cb_mqtt_pub_send, A7677S_TIMEOUT_MQTT_PUB);
 }
 
@@ -2176,7 +2188,7 @@ static void cb_mqtt_sub_topic_data(modem_t *modem, const char *response,
     snprintf(s_mqtt_dyn_cmd_buf, sizeof(s_mqtt_dyn_cmd_buf),
              "AT+CMQTTSUB=%u\r\n", A7677S_MQTT_CLIENT_INDEX);
     send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf,
-                      "\r\n+CMQTTSUB:0,0\r\n", "\r\nERROR\r\n",
+                      "\r\n+CMQTTSUB: 0,0\r\n", "\r\nERROR\r\n",
                       cb_mqtt_sub_send, A7677S_TIMEOUT_MQTT_CONNECT);
 }
 
@@ -2321,7 +2333,7 @@ static int a7677s_mqtt_connect(void *ctx, const char *client_id,
     dce->mqtt_state = A7677S_MQTT_START;
 
     send_mqtt_dynamic(dce, "AT+CMQTTSTART\r\n",
-                      "\r\n+CMQTTSTART:0\r\n", "\r\nERROR\r\n",
+                      "\r\n+CMQTTSTART: 0\r\n", "\r\nERROR\r\n",
                       cb_mqtt_start, A7677S_TIMEOUT_MQTT_START);
     return 0;
 }
@@ -2347,7 +2359,7 @@ static int a7677s_mqtt_disconnect(void *ctx, mqtt_cb_t cb)
              "AT+CMQTTDISC=%u,%u\r\n",
              A7677S_MQTT_CLIENT_INDEX, A7677S_MQTT_DISC_TIMEOUT_S);
     send_mqtt_dynamic(dce, s_mqtt_dyn_cmd_buf,
-                      "\r\n+CMQTTDISC:0,0\r\n", "\r\nERROR\r\n",
+                      "\r\n+CMQTTDISC: 0,0\r\n", "\r\nERROR\r\n",
                       cb_mqtt_disc, A7677S_TIMEOUT_MQTT_DISC);
     return 0;
 }

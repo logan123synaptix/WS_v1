@@ -146,6 +146,8 @@ static void a7677s_mqtt_set_callbacks(void *ctx, mqtt_incoming_cb_t incoming_cb,
 
 /* Helper: fire the in-flight MQTT op callback and clear it. */
 static void mqtt_op_done(a7677s_t *dce, modem_ops_result_t result);
+static uint8_t mqtt_response_indicates_network_loss(const char *response);
+static void mqtt_handle_network_loss(a7677s_t *dce);
 
 static void cb_init_at        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_cgdcont        (modem_t *modem, const char *response, modem_response_st_t res, void *arg);
@@ -1472,6 +1474,61 @@ static void a7677s_mqtt_set_callbacks(void *ctx, mqtt_incoming_cb_t incoming_cb,
     a7677s_mqtt_register_callbacks((a7677s_t *)ctx, incoming_cb, connlost_cb, user_ctx);
 }
 
+/* Bug fix (2026-07-28): a7677s_poll() only calls urc_poll() (the scanner
+ * that recognizes +CGEV: ME/NW PDN DEACT, +CMQTTNONET, +CMQTTCONNLOST as
+ * URCs and drives re-attach) while modem_is_busy() is false — i.e. while no
+ * AT command is currently waiting on a response. If the network drops (SIM
+ * pulled) at the exact moment a publish-sequence AT command (AT+CMQTTTOPIC,
+ * AT+CMQTTPAYLOAD, AT+CMQTTPUB, ...) is in flight, the modem's URC lines
+ * arrive on the SAME channel modem_poll() is reading for that command's
+ * own response, not through urc_poll(). They end up as stray bytes inside
+ * modem->buff, get missed by that command's res_success/res_fail string
+ * match, and are silently discarded (buffer memset on the next
+ * modem_send_command()) — urc_process_header_line() never sees them, so
+ * mqtt_state/init_state are never reset to reflect the real network loss.
+ * Confirmed on real board, 2026-07-28: pulling the SIM mid-publish produced
+ * exactly "+CGEV: NW PDN DEACT 1 / +CMQTTNONET / +CGEV: ME DETACH" inside a
+ * TIMEOUT response dump, followed by an infinite loop of
+ * "AT+CMQTTTOPIC prompt failed" — every retry kept assuming the modem was
+ * still attached and got an instant ERROR back from the modem (no PDN),
+ * forever, because nothing ever told the state machine to re-attach.
+ * Fix: every publish-sequence callback that receives a non-SUCCESS result
+ * now scans the raw response text (if any) for these same network-loss
+ * markers before assuming "still connected, just this one step failed".
+ * If found, route into mqtt_handle_network_loss() instead of leaving
+ * mqtt_state optimistically at A7677S_MQTT_CONNECTED — this reuses the
+ * exact same recovery action urc_process_header_line() already takes for
+ * +CGEV PDN DEACT (restart the attach sequence from A7677S_INIT_AT and
+ * notify the service layer via mqtt_connlost_cb), just reached from the
+ * command-response channel instead of the URC channel for this one missed
+ * case. response can be NULL here (plain timeout with zero bytes ever
+ * received) — that case has nothing to scan and is left to whatever the
+ * caller already does. */
+static uint8_t mqtt_response_indicates_network_loss(const char *response)
+{
+    if (!response) return 0;
+    return (strstr(response, "+CGEV: ME PDN DEACT") != NULL) ||
+           (strstr(response, "+CGEV: NW PDN DEACT") != NULL) ||
+           (strstr(response, "+CGEV: ME DETACH")    != NULL) ||
+           (strstr(response, "+CMQTTNONET")          != NULL) ||
+           (strstr(response, "+CMQTTCONNLOST:")      != NULL);
+}
+
+/* Same recovery action as urc_process_header_line()'s +CGEV PDN DEACT
+ * branch (see that function's doc-comment) — kept as a separate helper so
+ * both call sites (the URC scanner and the publish-sequence callbacks
+ * below) stay in sync instead of duplicating the reset logic. */
+static void mqtt_handle_network_loss(a7677s_t *dce)
+{
+    log_warn(TAG, "Network loss detected in command response — restarting network attach sequence");
+    dce->init_state       = A7677S_INIT_AT;
+    dce->init_elapsed     = 0;
+    dce->init_cmd_pending = 0;
+    dce->mqtt_state       = A7677S_MQTT_IDLE;
+    urc_reset_rx_state(dce);
+    if (dce->mqtt_connlost_cb) dce->mqtt_connlost_cb(dce->mqtt_user_ctx);
+}
+
 /* Fire the in-flight op callback and clear it so it cannot fire twice. */
 static void mqtt_op_done(a7677s_t *dce, modem_ops_result_t result)
 {
@@ -2016,7 +2073,11 @@ static void cb_mqtt_pub_topic(modem_t *modem, const char *response,
 
     if (res != MODEM_RESPONSE_SUCCESS) {
         log_error(TAG, "AT+CMQTTTOPIC prompt failed (res=%d)", res);
-        dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        if (mqtt_response_indicates_network_loss(response)) {
+            mqtt_handle_network_loss(dce);
+        } else {
+            dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        }
         mqtt_op_done(dce, MODEM_OPS_ERROR);
         return;
     }
@@ -2046,7 +2107,11 @@ static void cb_mqtt_pub_topic_data(modem_t *modem, const char *response,
 
     if (res != MODEM_RESPONSE_SUCCESS) {
         log_error(TAG, "MQTT topic data failed (res=%d)", res);
-        dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        if (mqtt_response_indicates_network_loss(response)) {
+            mqtt_handle_network_loss(dce);
+        } else {
+            dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        }
         mqtt_op_done(dce, MODEM_OPS_ERROR);
         return;
     }
@@ -2067,7 +2132,11 @@ static void cb_mqtt_pub_payload(modem_t *modem, const char *response,
 
     if (res != MODEM_RESPONSE_SUCCESS) {
         log_error(TAG, "AT+CMQTTPAYLOAD prompt failed (res=%d)", res);
-        dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        if (mqtt_response_indicates_network_loss(response)) {
+            mqtt_handle_network_loss(dce);
+        } else {
+            dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        }
         mqtt_op_done(dce, MODEM_OPS_ERROR);
         return;
     }
@@ -2091,7 +2160,11 @@ static void cb_mqtt_pub_payload_data(modem_t *modem, const char *response,
 
     if (res != MODEM_RESPONSE_SUCCESS) {
         log_error(TAG, "MQTT payload data failed (res=%d)", res);
-        dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        if (mqtt_response_indicates_network_loss(response)) {
+            mqtt_handle_network_loss(dce);
+        } else {
+            dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        }
         mqtt_op_done(dce, MODEM_OPS_ERROR);
         return;
     }
@@ -2123,7 +2196,11 @@ static void cb_mqtt_pub_send(modem_t *modem, const char *response,
                     log_error(TAG, "AT+CMQTTPUB errcode=%d", err);
             }
         }
-        dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        if (mqtt_response_indicates_network_loss(response)) {
+            mqtt_handle_network_loss(dce);
+        } else {
+            dce->mqtt_state = A7677S_MQTT_CONNECTED;
+        }
         mqtt_op_done(dce, (res == MODEM_RESPONSE_TIMEOUT) ? MODEM_OPS_TIMEOUT : MODEM_OPS_ERROR);
         return;
     }

@@ -31,8 +31,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 // #include "app.h"
-#include "sx_board.h"
-#include "test_lte_mqtt.h"
+// #include "sx_board.h"
+// #include "test_lte_mqtt.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "string.h"
@@ -69,6 +69,140 @@ void PeriphCommonClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/* ============================================================
+ * AT TERMINAL — go lenh AT tay qua UART6 (console/log, huart6), forward
+ * sang UART1 (LTE modem, huart1), in nguyen van response tu modem nguoc
+ * lai qua UART6. Muc dich: test tay AT+CSQ/AT+CREG?/... ngay sau khi
+ * gap timeout hang loat trong chuoi network-attach, de xac dinh module
+ * con song/tra loi AT co ban hay da treo han UART — xem trao doi voi
+ * nguoi dung ve nghi van "module khong phan hoi UART giua chung dang
+ * network attach".
+ *
+ * Thuan HAL, khong dung sx_board.c/sx_uart abstraction layer (nguoi dung
+ * tu comment ISR ben sx_board.c de tranh 2 noi cung tranh IRQ tren cung
+ * USART1/USART6). Cung pattern ring-buffer + line-gom da dung thanh cong
+ * cho SIM/GPS test truoc day trong handoff cu.
+ * ============================================================ */
+
+#define AT_TERM_RING_SIZE   256U
+
+typedef struct {
+    volatile uint8_t  buf[AT_TERM_RING_SIZE];
+    volatile uint16_t head;
+    volatile uint16_t tail;
+} at_term_ring_t;
+
+static at_term_ring_t s_cmd_ring;   /* UART6 RX (user typing a command)   */
+static at_term_ring_t s_resp_ring;  /* UART1 RX (modem response)          */
+
+static uint8_t s_cmd_rx_byte  = 0;
+static uint8_t s_resp_rx_byte = 0;
+
+static char     s_cmd_line_buf[128];
+static uint16_t s_cmd_line_len = 0;
+
+static char     s_resp_line_buf[256];
+static uint16_t s_resp_line_len = 0;
+
+const char *TAG = "MAIN";
+
+void power_sim_on(void){
+  log_info(TAG, "Start Power On");
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 1);
+  HAL_Delay(50);
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, 0);
+  HAL_Delay(7500);
+  log_info(TAG, "Power On");
+}
+
+static void ring_push(at_term_ring_t *r, uint8_t b)
+{
+    uint16_t next = (uint16_t)((r->head + 1) % AT_TERM_RING_SIZE);
+    if (next == r->tail) return; /* full, drop byte rather than overwrite */
+    r->buf[r->head] = b;
+    r->head = next;
+}
+
+static int ring_pop(at_term_ring_t *r, uint8_t *out)
+{
+    if (r->tail == r->head) return 0; /* empty */
+    *out = r->buf[r->tail];
+    r->tail = (uint16_t)((r->tail + 1) % AT_TERM_RING_SIZE);
+    return 1;
+}
+
+/* Echo the modem's raw response, line by line, straight to the log UART.
+ * No parsing — this is a passthrough terminal, not the real AT-command
+ * layer (a7677s.c). */
+static void resp_line_flush(void)
+{
+    if (s_resp_line_len == 0) return;
+    s_resp_line_buf[s_resp_line_len] = '\0';
+    log_info("AT_TERM", "[MODEM RX] %s", s_resp_line_buf);
+    s_resp_line_len = 0;
+}
+
+/* Sends whatever the user typed (terminated by \r or \n on UART6) out to
+ * the modem on UART1, appending \r\n since AT commands need it and the
+ * user typing in a terminal usually only sends \r or \n alone depending
+ * on their terminal's line-ending setting. */
+static void cmd_line_send(void)
+{
+    if (s_cmd_line_len == 0) return;
+    s_cmd_line_buf[s_cmd_line_len] = '\0';
+
+    log_info("AT_TERM", "[TX] %s", s_cmd_line_buf);
+
+    HAL_UART_Transmit(&huart1, (uint8_t *)s_cmd_line_buf, s_cmd_line_len, 100);
+    HAL_UART_Transmit(&huart1, (uint8_t *)"\r\n", 2, 100);
+
+    s_cmd_line_len = 0;
+}
+
+/* logger_init() requires a real print callback (void(*)(const char*)) —
+ * cannot pass NULL. sx_board.c has its own log_print() using the
+ * sx_uart_t abstraction layer, but this file runs pure HAL (no
+ * sx_board_init() here, per user — avoiding double IRQ ownership on
+ * USART1/USART6), so a plain HAL_UART_Transmit-based version is used
+ * instead. */
+static void at_term_log_print(const char *str)
+{
+    HAL_UART_Transmit(&huart6, (uint8_t *)str, (uint16_t)strlen(str), 100);
+}
+
+static void at_term_init(void)
+{
+    logger_init(LOGGER_INFO, at_term_log_print);
+    log_info("AT_TERM", "=== AT TERMINAL (type AT commands, Enter to send) ===");
+}
+
+static void at_term_poll(void)
+{
+    uint8_t b;
+
+    /* Drain modem RX (UART1) -> gom thanh dong, log ra UART6 */
+    while (ring_pop(&s_resp_ring, &b)) {
+        if (b == '\n') {
+            resp_line_flush();
+        } else if (b != '\r') {
+            if (s_resp_line_len < sizeof(s_resp_line_buf) - 1) {
+                s_resp_line_buf[s_resp_line_len++] = (char)b;
+            }
+        }
+    }
+
+    /* Drain user typing (UART6) -> gom thanh dong, gui sang UART1 */
+    while (ring_pop(&s_cmd_ring, &b)) {
+        /* Local echo so the user sees what they typed in the terminal. */
+        HAL_UART_Transmit(&huart6, &b, 1, 10);
+        if (b == '\r' || b == '\n') {
+            cmd_line_send();
+        } else if (s_cmd_line_len < sizeof(s_cmd_line_buf) - 1) {
+            s_cmd_line_buf[s_cmd_line_len++] = (char)b;
+        }
+    }
+}
 
 /* USER CODE END 0 */
 
@@ -117,11 +251,15 @@ int main(void)
   MX_UART5_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UART_Receive_IT(&huart6, &s_cmd_rx_byte, 1);
+  HAL_UART_Receive_IT(&huart1, &s_resp_rx_byte, 1);
   uint32_t last_tick = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
-  sx_board_init();
+  // sx_board_init();
   // app_init();
-  test_lte_mqtt_init();
+  // test_lte_mqtt_init();
+  power_sim_on();
+  at_term_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -138,7 +276,8 @@ int main(void)
     {
         last_tick = now;
         // app_process(delta);
-        test_lte_mqtt_poll(delta);
+        // test_lte_mqtt_poll(delta);
+        at_term_poll();
     }
     
   }
@@ -223,6 +362,21 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+/* ISR-safe: only pushes to ring buffer + re-arms, no logging/processing
+ * here (same discipline as the earlier SIM/GPS ring-buffer test — see
+ * Bug 2 in the project handoff: a single-byte flag without a ring buffer
+ * drops bytes at 115200 baud, ~87us/byte). */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART1) {
+        ring_push(&s_resp_ring, s_resp_rx_byte);
+        HAL_UART_Receive_IT(&huart1, &s_resp_rx_byte, 1);
+    } else if (huart->Instance == USART6) {
+        ring_push(&s_cmd_ring, s_cmd_rx_byte);
+        HAL_UART_Receive_IT(&huart6, &s_cmd_rx_byte, 1);
+    }
+}
 
 /* USER CODE END 4 */
 

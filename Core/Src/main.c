@@ -172,9 +172,9 @@ int main(void)
         #endif
     }
 
-    if(delta>500){
+    if(theta>2000){
         last_ticks = noww;
-        test_imu_poll(delta);
+        test_imu_poll(theta);
     }
     
   }

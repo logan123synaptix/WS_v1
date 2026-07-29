@@ -131,11 +131,11 @@ int main(void)
   sx_board_init();
   #if TEST
   // test_lte_mqtt_init();
-  // test_sht3x_init();
-  // test_rtc_init();
-  // test_imu_init();
-  // test_gps_init();
-  // test_exflash_init();
+  test_sht3x_init();
+  test_rtc_init();
+  test_imu_init();
+  test_gps_init();
+  test_exflash_init();
   test_shell_init();
   #else
   app_init();
@@ -155,15 +155,15 @@ int main(void)
     if (delta > 0)  
     {
         last_tick = now;
-        test_shell_poll(delta);
+        
         #if TEST
         // test_lte_mqtt_poll(delta);
-        // test_sht3x_poll(delta);
-        // test_rtc_poll(delta);
-        // test_imu_poll(delta);
-        // test_gps_poll(delta);
-        // test_exflash_poll(delta);
-        
+        test_sht3x_poll(delta);
+        test_rtc_poll(delta);
+        test_imu_poll(delta);
+        test_gps_poll(delta);
+        test_exflash_poll(delta);
+        test_shell_poll(delta);
         #else
         app_process(delta);
         #endif

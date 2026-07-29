@@ -222,8 +222,18 @@ void test_sleep_poll(uint32_t delta_ms)
      * same call test_lte_mqtt_poll()/app.c's app_process() make every
      * tick. Also drives the sensors this test publishes from. */
     sx_user_mqtt_poll(delta_ms);
-    sx_temp_humi_poll(&s_th, delta_ms);
-    accel_app_poll(&s_accel, delta_ms);
+    /* Only poll temp/humi + accel when NOT in the middle of a wake
+     * sequence. accel_resume is wake_steps[5] (the last of 6 steps), so
+     * BNO055 is still in SUSPEND mode until wake is fully done, and SHT3x
+     * sits on the same I2C1 bus. Polling either mid-wake races the
+     * wake_steps and produces spurious "read failed" spam -- not a real
+     * bus fault. gps_process() is left unconditional here: unlike the I2C
+     * reads above it does not emit failure warnings when the GPS hasn't
+     * produced data yet, so this ordering concern doesn't apply to it. */
+    if (s_state != TEST_SLEEP_STATE_WAKING) {
+        sx_temp_humi_poll(&s_th, delta_ms);
+        accel_app_poll(&s_accel, delta_ms);
+    }
     gps_process(&board.gps, delta_ms);
 
     uint8_t connected = sx_user_mqtt_is_connected();

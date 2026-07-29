@@ -124,6 +124,7 @@ void sx_board_init(void)
     bsp_uart[UART_LOG] = &board.log_uart;
 
     sx_uart_init(&board.log_uart, &uart_config[UART_LOG], 512, 512);
+    HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
     logger_init(LOGGER_INFO, log_print);
     log_info(TAG, "Board init start");
 
@@ -236,7 +237,7 @@ void sx_board_init(void)
     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
-    HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
+    
 
     // TIMER (TIM1) — sx_timer_init_regs() applies Prescaler/Period directly,
     // no auto-derivation. PSC=31, Period=99 chosen to match tim.c's own

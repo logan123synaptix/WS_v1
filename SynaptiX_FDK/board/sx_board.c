@@ -264,8 +264,9 @@ void sx_board_init(void)
     // struct init (period_ms=10 -> 100Hz PWM / 1% duty resolution at this
     // timer's 1MHz tick_hz, see sx_pump.c). Wire the timer's callback to
     // drive this PWM struct now that it's a valid init'd target.
-    pump_init(&board.sx_pwm_sw, &s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin,
-              &board.sx_timer);
+
+    // pump_init(&board.sx_pwm_sw, &s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin,
+    //           &board.sx_timer);
     board.sx_timer.callback = sx_pwm_software_tick_cb;
     board.sx_timer.arg = &board.sx_pwm_sw;
 
@@ -275,7 +276,8 @@ void sx_board_init(void)
     // pump_set_power() (at network_config_t's pump_duty_percent) once the
     // sensing cycle starts, and pump_off() to stop it (sx_sleep_manager.c
     // also calls pump_off() on its own sleep step).
-    pump_set_power(&board.sx_pwm_sw, 40U);
+
+    // pump_set_power(&board.sx_pwm_sw, 40U);
 
     // Tier-1 generic sleep driver — this board's pre_stop/post_wake hooks
     // (defined below) are what actually know about LTE (USART1) + GPS

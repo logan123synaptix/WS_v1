@@ -52,7 +52,29 @@ int sx_uart_read(sx_uart_t *_uart, uint8_t *_data, int _len, uint32_t _timeoutMS
     #endif
     int len = 0;
     uint32_t time = 0;
-    while(len < _len && time < _timeoutMS){
+    /* BUG FIX (2026-07-29): was `time < _timeoutMS`, which for the
+     * common non-blocking poll case (_timeoutMS == 0, e.g.
+     * shell_app_poll()/test_shell_poll()'s "drain whatever's already in
+     * the ring buffer, don't wait" pattern) evaluates to `0 < 0` = false
+     * on the very FIRST check — so the loop body (the only place
+     * cqueue_receive() is called) never runs even once, even though
+     * sx_uart_available() already reported bytes waiting in rxQueue.
+     * Confirmed on real hardware via debug logging: sx_uart_available()
+     * correctly reported avail=6 (a full "help\r\n"), but every
+     * sx_uart_read(..., 0) call returned 0 bytes read, over and over,
+     * every tick — since shell_app_poll()'s own `while
+     * (sx_uart_available() > 0)` loop never saw the count drop, it
+     * looped forever within a single call, permanently starving
+     * main.c's while(1) of any further ticks (this is what looked like
+     * "the shell echoes then hangs" — the MCU was not hung on UART, it
+     * was spinning in this one function).
+     * Fix: `<=` instead of `<` — for _timeoutMS==0 this allows exactly
+     * one iteration (time=0 <= 0), i.e. "grab whatever is already
+     * buffered, don't wait for more" — the behavior every non-blocking
+     * caller actually wants. For _timeoutMS>0 this is a one-iteration
+     * difference out of many and does not meaningfully change blocking
+     * behavior for any existing caller (AT command parsing, etc.). */
+    while(len < _len && time <= _timeoutMS){
         /* Bug fix (2026-07-28): cqueue_receive() does a non-atomic
          * read-modify-write on queue->count (and head/tail), and the
          * SAME queue is also written from sx_uart_rx_callback() running

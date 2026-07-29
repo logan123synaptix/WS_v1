@@ -145,7 +145,11 @@ void cli_shell_boot(ShellContext_t *s_shell) {
 }
 
 void cli_shell_receive_char(ShellContext_t *s_shell,char c) {
+  log_info(DBG_TAG, "receive_char: c=0x%02X ('%c') booted=%d full=%d",
+            (unsigned char)c, (c >= 32 && c < 127) ? c : '?',
+            prv_booted(s_shell), prv_is_rx_buffer_full(s_shell));
   if (c == '\r' || prv_is_rx_buffer_full(s_shell) || !prv_booted(s_shell)) {
+    log_info(DBG_TAG, "receive_char: early return");
     return;
   }
   prv_echo(s_shell,c);

@@ -155,7 +155,7 @@ int main(void)
     if (delta > 0)  
     {
         last_tick = now;
-      
+        test_shell_poll(delta);
         #if TEST
         // test_lte_mqtt_poll(delta);
         // test_sht3x_poll(delta);
@@ -163,7 +163,7 @@ int main(void)
         // test_imu_poll(delta);
         // test_gps_poll(delta);
         // test_exflash_poll(delta);
-        test_shell_poll(delta);
+        
         #else
         app_process(delta);
         #endif

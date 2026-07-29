@@ -126,7 +126,7 @@ int main(void)
   MX_UART5_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint32_t last_tick = 0;
+  uint32_t last_tick = 0, last_ticks = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   sx_board_init();
   #if TEST
@@ -137,7 +137,7 @@ int main(void)
   test_gps_init();
   test_exflash_init();
   test_shell_init();
-  test_ads1115_init();
+  // test_ads1115_init();
   #else
   app_init();
   #endif
@@ -151,8 +151,10 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     uint32_t now = HAL_GetTick();
+    uint32_t noww = HAL_GetTick();
     uint32_t delta = now - last_tick;
-    
+    uint32_t theta = noww - last_ticks;
+
     if (delta > 0)  
     {
         last_tick = now;
@@ -161,14 +163,18 @@ int main(void)
         // test_lte_mqtt_poll(delta);
         test_sht3x_poll(delta);
         test_rtc_poll(delta);
-        test_imu_poll(delta);
         test_gps_poll(delta);
         test_exflash_poll(delta);
         test_shell_poll(delta);
-        test_ads1115_poll(delta);
+        // test_ads1115_poll(delta);
         #else
         app_process(delta);
         #endif
+    }
+
+    if(delta>500){
+        last_ticks = noww;
+        test_imu_poll(delta);
     }
     
   }

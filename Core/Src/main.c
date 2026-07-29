@@ -42,6 +42,7 @@
 #include "test_exflash.h"
 #include "test_ads1115.h"
 #include "test_shell.h"
+#include "test_sleep.h"
 #endif
 
 /* USER CODE END Includes */
@@ -131,13 +132,14 @@ int main(void)
   sx_board_init();
   #if TEST
   // test_lte_mqtt_init();
-  test_sht3x_init();
-  test_rtc_init();
-  test_imu_init();
-  test_gps_init();
-  test_exflash_init();
-  test_shell_init();
+  // test_sht3x_init();
+  // test_rtc_init();
+  // test_imu_init();
+  // test_gps_init();
+  // test_exflash_init();
+  // test_shell_init();
   // test_ads1115_init();
+  test_sleep_init();
   #else
   app_init();
   #endif
@@ -161,21 +163,22 @@ int main(void)
         
         #if TEST
         // test_lte_mqtt_poll(delta);
-        test_sht3x_poll(delta);
-        test_rtc_poll(delta);
-        test_gps_poll(delta);
-        test_exflash_poll(delta);
-        test_shell_poll(delta);
+        // test_sht3x_poll(delta);
+        // test_rtc_poll(delta);
+        // test_gps_poll(delta);
+        // test_exflash_poll(delta);
+        // test_shell_poll(delta);
         // test_ads1115_poll(delta);
+        test_sleep_poll(delta);
         #else
         app_process(delta);
         #endif
     }
 
-    if(theta>2000){
-        last_ticks = noww;
-        test_imu_poll(theta);
-    }
+    // if(theta>2000){
+    //     last_ticks = noww;
+    //     test_imu_poll(theta);
+    // }
     
   }
   /* USER CODE END 3 */

@@ -58,7 +58,7 @@ extern "C" {
  * uses SLEEP_TIME_MS (app_config.h, 5 minutes) for the production cycle.
  * This is deliberately a SEPARATE, independent define so tuning this
  * test never risks accidentally changing the real app's sleep duration. */
-#define SLEEP_TEST_TIME_MS   30000U
+#define SLEEP_TEST_TIME_MS   60000U
 
 void test_sleep_init(void);
 void test_sleep_poll(uint32_t delta_ms);

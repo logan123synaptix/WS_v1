@@ -265,8 +265,8 @@ void sx_board_init(void)
     // timer's 1MHz tick_hz, see sx_pump.c). Wire the timer's callback to
     // drive this PWM struct now that it's a valid init'd target.
 
-    // pump_init(&board.sx_pwm_sw, &s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin,
-    //           &board.sx_timer);
+    pump_init(&board.sx_pwm_sw, &s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin,
+              &board.sx_timer);
     board.sx_timer.callback = sx_pwm_software_tick_cb;
     board.sx_timer.arg = &board.sx_pwm_sw;
 

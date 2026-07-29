@@ -12,7 +12,7 @@ static const char *TAG = "TEST_IMU";
 static accel_app_t s_accel;
 
 static uint32_t s_euler_log_accum_ms = 0;
-#define EULER_LOG_PERIOD_MS  1000U
+#define EULER_LOG_PERIOD_MS  7000
 
 /* Watchdog for the "no reading at all" case — per the user (2026-07-29):
  * if no successful read completes within NO_READING_TIMEOUT_MS, re-run

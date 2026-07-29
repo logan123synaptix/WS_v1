@@ -84,16 +84,10 @@ static const Cli_Shell_Cmd *prv_find_command(const char *name) { // @suppress("T
 static const char *DBG_TAG = "CLI_DBG";
 
 static void prv_process(ShellContext_t *s_shell) {
-  log_info(DBG_TAG, "prv_process enter, rx_size=%u last_char=0x%02X",
-            (unsigned)s_shell->rx_size,
-            s_shell->rx_size > 0 ? (unsigned char)prv_last_char(s_shell) : 0);
 
   if (prv_last_char(s_shell) != '\n' && !prv_is_rx_buffer_full(s_shell)) {
-    log_info(DBG_TAG, "prv_process: early return (not a complete line yet)");
     return;
   }
-
-  log_info(DBG_TAG, "prv_process: tokenizing rx_buffer=\"%s\"", s_shell->rx_buffer);
 
   char *argv[SHELL_MAX_ARGS] = {0};
   int argc = 0;
@@ -112,31 +106,23 @@ static void prv_process(ShellContext_t *s_shell) {
     }
   }
 
-  log_info(DBG_TAG, "prv_process: argc=%d argv[0]=%s", argc, argc > 0 ? argv[0] : "(none)");
-
   if (s_shell->rx_size == SHELL_RX_BUFFER_SIZE) {
     prv_echo(s_shell,'\n');
   }
 
   if (argc >= 1) {
     const Cli_Shell_Cmd *command = prv_find_command(argv[0]);
-    log_info(DBG_TAG, "prv_process: command lookup for \"%s\" -> %s",
-              argv[0], command ? "FOUND" : "NOT FOUND");
     if (!command) {
       prv_echo_str(s_shell,"Unknown command: ");
       prv_echo_str(s_shell,argv[0]);
       prv_echo(s_shell,'\n');
       prv_echo_str(s_shell,"Type 'help' to list all commands\n");
     } else {
-      log_info(DBG_TAG, "prv_process: calling handler...");
       command->handler(s_shell,argc, argv);
-      log_info(DBG_TAG, "prv_process: handler returned");
     }
   }
-  log_info(DBG_TAG, "prv_process: resetting buffer + sending prompt");
   prv_reset_rx_buffer(s_shell);
   prv_send_prompt(s_shell);
-  log_info(DBG_TAG, "prv_process: done");
 }
 
 void cli_shell_boot(ShellContext_t *s_shell) {
@@ -145,11 +131,8 @@ void cli_shell_boot(ShellContext_t *s_shell) {
 }
 
 void cli_shell_receive_char(ShellContext_t *s_shell,char c) {
-  log_info(DBG_TAG, "receive_char: c=0x%02X ('%c') booted=%d full=%d",
-            (unsigned char)c, (c >= 32 && c < 127) ? c : '?',
-            prv_booted(s_shell), prv_is_rx_buffer_full(s_shell));
+
   if (c == '\r' || prv_is_rx_buffer_full(s_shell) || !prv_booted(s_shell)) {
-    log_info(DBG_TAG, "receive_char: early return");
     return;
   }
   prv_echo(s_shell,c);

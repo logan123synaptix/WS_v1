@@ -65,14 +65,11 @@ void shell_app_poll(void)
     uint8_t byte;
     int avail = sx_uart_available(s_uart);
     if (avail > 0) {
-        // log_info("SHELL_APP_DBG", "poll: avail=%d", avail);
     }
     while (sx_uart_available(s_uart) > 0) {
         if (sx_uart_read(s_uart, &byte, 1, 0) != 1) {
-            // log_info("SHELL_APP_DBG", "poll: sx_uart_read failed to get expected byte");
             break;
         }
-        // log_info("SHELL_APP_DBG", "poll: got byte 0x%02X, calling cli_shell_receive_char", byte);
         cli_shell_receive_char(&s_shell, (char)byte);
     }
 }

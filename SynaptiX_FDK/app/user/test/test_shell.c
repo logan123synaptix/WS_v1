@@ -24,10 +24,36 @@ static int uart_shell_send_char(void *arg, char c)
     return 0;
 }
 
+/* PATCH (2026-07-29) — root cause: sx_uart_write() -> HAL_UART_Transmit()
+ * is blocking/polling and briefly locks the UART peripheral (STM32 HAL's
+ * __HAL_LOCK on huart->State) for the whole call. If a byte arrives on
+ * UART6 RX while that lock is held, HAL_UART_RxCpltCallback()'s own
+ * re-arm call (HAL_UART_Receive_IT(), sx_board.c) silently fails with
+ * HAL_BUSY and is NOT retried anywhere — UART6 RX interrupts stop firing
+ * permanently after that single collision, which is exactly the observed
+ * symptom (shell echoes a few characters then goes completely silent,
+ * no more RX at all). The original one-shot send_str(whole string) held
+ * the lock for the string's entire TX duration (up to ~1000ms per
+ * sx_uart_write()'s HAL_UART_Transmit(...,1000) timeout for a long
+ * help-menu line), making a collision far more likely than
+ * send_char()'s single-byte call above.
+ *
+ * This is a mitigation, NOT a full fix — splitting into one HAL call per
+ * byte shrinks the lock window down close to send_char()'s (which was
+ * observed to survive in the known-good standalone main.c test), but a
+ * byte could still in principle arrive in the handful of microseconds a
+ * single HAL_UART_Transmit(...,1,...) call holds the lock for one byte
+ * at 115200 baud (~87us/byte). The real fix — making HAL_UART_Receive_IT()
+ * retry from the main loop instead of failing silently once inside the
+ * ISR, or moving sx_uart_write() to HAL_UART_Transmit_IT() so it never
+ * locks against RX at all — is tracked separately, not done here. */
 static int uart_shell_send_str(void *arg, char *str)
 {
     sx_uart_t *uart = (sx_uart_t *)arg;
-    sx_uart_write(uart, (const uint8_t *)str, (int)strlen(str));
+    for (const char *p = str; *p != '\0'; ++p) {
+        uint8_t byte = (uint8_t)*p;
+        sx_uart_write(uart, &byte, 1);
+    }
     return 0;
 }
 

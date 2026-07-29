@@ -210,6 +210,16 @@ sx_gpio_t *sx_board_get_pump_gpio(void);
  * doc-comment on this getter. */
 sx_pwm_software_t *sx_board_get_pump_pwm(void);
 
+/* Shared I2C1 reset line used by both board.imu (BNO055) and board.rtc
+ * (RX8130CE) — see s_i2c1_reset's own comment in sx_board.c. Exposed so
+ * callers (e.g. test_imu.c) can re-run bno055_init()'s own reset-pulse +
+ * re-config sequence on a comms timeout, without needing a separate
+ * static in sx_board.c. Toggling this WILL also pulse-reset the RTC's
+ * reset line since it is the same physical pin — acceptable for a
+ * bring-up/recovery path, but callers should be aware this is not an
+ * IMU-only reset. */
+sx_gpio_t *sx_board_get_imu_reset_gpio(void);
+
 extern Board_t board;
 
 #ifdef __cplusplus

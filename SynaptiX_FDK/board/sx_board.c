@@ -410,6 +410,17 @@ sx_pwm_software_t *sx_board_get_pump_pwm(void)
 {
     return &board.sx_pwm_sw;
 }
+
+/* s_i2c1_reset (defined near the top of this file) is the same shared
+ * reset line bno055_init() already took as its reset_gpio argument, and
+ * that rx8130ce_init() sits next to on this bus — see sx_board_init()
+ * above. Exposed for recovery paths (e.g. test_imu.c's 5s no-reading
+ * timeout) that need to re-run bno055_init()'s reset-pulse + re-config
+ * sequence without duplicating that static here. */
+sx_gpio_t *sx_board_get_imu_reset_gpio(void)
+{
+    return &s_i2c1_reset;
+}
 void sx_board_uart_resume_it(void) {
     // sx_sim76_uart_abort();
     // sx_gps_uart_abort();

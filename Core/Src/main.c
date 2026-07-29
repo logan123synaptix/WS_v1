@@ -34,6 +34,10 @@
 #include "sx_board.h"
 #include "test_lte_mqtt.h"
 #include "test_sht3x.h"
+#include "test_rtc.h"
+#include "test_imu.h"
+#include "test_gps.h"
+#include "test_exflash.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "string.h"
@@ -126,7 +130,10 @@ int main(void)
   // app_init();
   // test_lte_mqtt_init();
   test_sht3x_init();
-
+  test_rtc_init();
+  test_imu_init();
+  test_gps_init();
+  test_exflash_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -142,7 +149,12 @@ int main(void)
     if (delta > 0)  
     {
         last_tick = now;
+        // test_lte_mqtt_poll(delta);
         test_sht3x_poll(delta);
+        test_rtc_poll(delta);
+        test_imu_poll(delta);
+        test_gps_poll(delta);
+        test_exflash_poll(delta);
     }
     
   }

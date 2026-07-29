@@ -25,7 +25,11 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_gps.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_imu.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_sleep.c \
-			$(SYNAPTIX_DIR)/app/user/test/test_sht3x.c
+			$(SYNAPTIX_DIR)/app/user/test/test_sht3x.c \
+			$(SYNAPTIX_DIR)/app/user/test/test_sps30.c \
+			$(SYNAPTIX_DIR)/app/user/test/test_ze12a.c \
+			$(SYNAPTIX_DIR)/app/user/test/test_rtc.c \
+			$(SYNAPTIX_DIR)/app/user/test/test_shell.c 
 
 
 BOARD_FILES = ${SYNAPTIX_DIR}/board/sx_board.c

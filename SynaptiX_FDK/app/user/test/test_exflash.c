@@ -1,101 +1,160 @@
 #include "test_exflash.h"
-#include "sx_board.h"
-#include "sx_W25Q128.h"
+#include "sx_ex_storage.h"
 #include "logger.h"
 #include <string.h>
 
 static const char *TAG = "TEST_EXFLASH";
 
-/* Test region chosen deliberately far from any real data used elsewhere
- * (offline queue via LittleFS, filesystem metadata, etc.) — this test
- * writes/erases raw bytes at this address directly through the
- * sx_W25Q128_* driver API, bypassing any filesystem layer entirely, so
- * it must not land inside a sector that LittleFS/sx_ex_storage may
- * already be using. W25Q128 is 16MB total (W25Q128_TOTAL_BYTES); this
- * sector sits near the very end of the chip, away from low-address
- * space a filesystem would claim first. */
-#define TEST_ADDR   (W25Q128_TOTAL_BYTES - W25Q128_SECTOR_SIZE)
-#define TEST_LEN    64U
+/* Deliberately not under "/queue/..." — that prefix is app.c's real
+ * offline MQTT queue directory (see app.c's telemetry resend logic);
+ * using a different top-level filename here avoids any chance of this
+ * test colliding with or leaving stale junk in that queue. */
+#define TEST_EXFLASH_PATH "/test_exflash.bin"
 
-static uint8_t s_write_buf[TEST_LEN];
-static uint8_t s_read_buf[TEST_LEN];
-static uint32_t s_log_accum_ms = 0;
-static bool s_test_passed = false;
+static const char s_write_payload[] = "SynaptiX WS_v1 W25Q128 test payload 0123456789";
 
-/* board.q128 is already sx_W25Q128_init()'d inside sx_board_init()
- * (sx_board.c) — same reasoning as test_sht3x.c: do NOT re-init here,
- * that would just mask whether board init itself already succeeded. */
+/* One-shot state machine, run from poll() so it doesn't block the main
+ * loop with SPI/filesystem transfers, but only actually needs a
+ * handful of ticks (no waiting on external hardware timing, unlike
+ * GPS/SHT3x/RTC) — step order chosen to be non-destructive to any real
+ * data first, and to end by cleaning up after itself so re-flashing/
+ * re-running this test repeatedly does not leave a stale file behind. */
+typedef enum {
+    TEST_EXFLASH_STEP_INFO = 0,
+    TEST_EXFLASH_STEP_WRITE,
+    TEST_EXFLASH_STEP_EXISTS,
+    TEST_EXFLASH_STEP_SIZE,
+    TEST_EXFLASH_STEP_READ_VERIFY,
+    TEST_EXFLASH_STEP_DELETE,
+    TEST_EXFLASH_STEP_DELETE_VERIFY,
+    TEST_EXFLASH_STEP_DONE,
+} test_exflash_step_t;
+
+static test_exflash_step_t s_step = TEST_EXFLASH_STEP_INFO;
+
 void test_exflash_init(void)
 {
-    log_info(TAG, "=== TEST W25Q128 (SPI ext-flash, addr=0x%06lX len=%u) ===",
-              (unsigned long)TEST_ADDR, TEST_LEN);
+    log_info(TAG, "=== TEST W25Q128 (via sx_storage_* API, SPI ext-flash) ===");
 
-    if (!board.q128.initialized) {
-        log_error(TAG, "board.q128 not initialized — check SPI wiring/board init order");
-        return;
-    }
+    /* sx_storage_init() was already called inside sx_board_init()
+     * (sx_board.c, board.storage_cfg) — do NOT call it again here. If
+     * it had failed, every sx_storage_*() call below will consistently
+     * return SX_STORAGE_ERR_NOT_INIT, which is itself the diagnostic
+     * (check the SX_STORAGE log tag output at boot, before this test's
+     * own logs, for the real root cause — sx_ex_storage.c logs
+     * "Storage init OK" or "W25Q128 init failed"/"Filesystem init
+     * failed" there). */
 
-    /* Fill a recognizable pattern rather than all-0x00/0xFF, so a
-     * bit-stuck-at fault or address-line fault is visible instead of
-     * silently matching. */
-    for (uint32_t i = 0; i < TEST_LEN; i++) {
-        s_write_buf[i] = (uint8_t)(0xA5 ^ i);
-    }
-
-    /* Erase first — W25Q128 (like all NOR flash) can only clear bits
-     * 1->0 on program; a sector erase is required to guarantee the
-     * target region is all-0xFF before writing, otherwise a stale
-     * previous test's data could mask a program failure. */
-    int erase_ret = sx_W25Q128_erase_sector(TEST_ADDR);
-    if (erase_ret != 0) {
-        log_error(TAG, "erase_sector FAILED (ret=%d)", erase_ret);
-        return;
-    }
-
-    /* Busy-wait for the erase to complete before writing — this is a
-     * one-shot bring-up test, not the main app loop, so blocking here
-     * (rather than a non-blocking poll state machine) is acceptable and
-     * keeps the test simple. sx_W25Q128_write()/erase_sector() already
-     * poll the status register internally per the driver's own
-     * implementation, so this is a belt-and-suspenders safety check,
-     * not strictly required — kept for clarity of intent. */
-    while (sx_W25Q128_is_busy()) {
-        /* spin */
-    }
-
-    int write_ret = sx_W25Q128_write(TEST_ADDR, s_write_buf, TEST_LEN);
-    if (write_ret != 0) {
-        log_error(TAG, "write FAILED (ret=%d)", write_ret);
-        return;
-    }
-
-    while (sx_W25Q128_is_busy()) {
-        /* spin */
-    }
-
-    int read_ret = sx_W25Q128_read(TEST_ADDR, s_read_buf, TEST_LEN);
-    if (read_ret != 0) {
-        log_error(TAG, "read FAILED (ret=%d)", read_ret);
-        return;
-    }
-
-    if (memcmp(s_write_buf, s_read_buf, TEST_LEN) == 0) {
-        log_info(TAG, "Write/erase/read cycle OK — %u bytes verified", TEST_LEN);
-        s_test_passed = true;
-    } else {
-        log_error(TAG, "Data mismatch — SPI link or flash chip is suspect");
-    }
+    s_step = TEST_EXFLASH_STEP_INFO;
 }
 
-/* No periodic activity needed for a flash bring-up check (unlike a
- * sensor with an ongoing sampling cadence) — this just re-confirms the
- * one-shot init result on a slow cadence so the pass/fail status is
- * visible in the log stream without re-touching the flash. */
 void test_exflash_poll(uint32_t delta_ms)
 {
-    s_log_accum_ms += delta_ms;
-    if (s_log_accum_ms >= 5000U) {
-        s_log_accum_ms = 0;
-        log_info(TAG, "status: %s", s_test_passed ? "PASS" : "NOT PASSED");
+    (void)delta_ms; /* no timing dependency — each step is a single blocking SPI/FS call */
+
+    switch (s_step) {
+
+    case TEST_EXFLASH_STEP_INFO: {
+        int32_t total = sx_storage_total_space();
+        int32_t free  = sx_storage_free_space();
+        if (total < 0 || free < 0) {
+            log_error(TAG, "free/total_space() FAILED — storage not initialized, "
+                            "check SX_STORAGE tag log at boot for the real cause");
+            s_step = TEST_EXFLASH_STEP_DONE;
+            break;
+        }
+        log_info(TAG, "Filesystem: total=%ld bytes, free=%ld bytes", (long)total, (long)free);
+        s_step = TEST_EXFLASH_STEP_WRITE;
+        break;
+    }
+
+    case TEST_EXFLASH_STEP_WRITE: {
+        sx_storage_err_t ret = sx_storage_write(TEST_EXFLASH_PATH,
+                                                 s_write_payload,
+                                                 sizeof(s_write_payload));
+        if (ret != SX_STORAGE_OK) {
+            log_error(TAG, "sx_storage_write() FAILED (err=%d)", ret);
+            s_step = TEST_EXFLASH_STEP_DONE;
+            break;
+        }
+        log_info(TAG, "Write OK: %s (%u bytes)", TEST_EXFLASH_PATH, (unsigned)sizeof(s_write_payload));
+        s_step = TEST_EXFLASH_STEP_EXISTS;
+        break;
+    }
+
+    case TEST_EXFLASH_STEP_EXISTS: {
+        bool exists = sx_storage_exists(TEST_EXFLASH_PATH);
+        if (!exists) {
+            log_error(TAG, "sx_storage_exists() returned false right after a successful write");
+            s_step = TEST_EXFLASH_STEP_DONE;
+            break;
+        }
+        log_info(TAG, "Exists check OK");
+        s_step = TEST_EXFLASH_STEP_SIZE;
+        break;
+    }
+
+    case TEST_EXFLASH_STEP_SIZE: {
+        int32_t sz = sx_storage_size(TEST_EXFLASH_PATH);
+        if (sz != (int32_t)sizeof(s_write_payload)) {
+            log_error(TAG, "sx_storage_size() = %ld, expected %u",
+                       (long)sz, (unsigned)sizeof(s_write_payload));
+            s_step = TEST_EXFLASH_STEP_DONE;
+            break;
+        }
+        log_info(TAG, "Size check OK: %ld bytes", (long)sz);
+        s_step = TEST_EXFLASH_STEP_READ_VERIFY;
+        break;
+    }
+
+    case TEST_EXFLASH_STEP_READ_VERIFY: {
+        char readback[sizeof(s_write_payload)] = {0};
+        sx_storage_err_t ret = sx_storage_read(TEST_EXFLASH_PATH, readback, sizeof(readback));
+        if (ret != SX_STORAGE_OK) {
+            log_error(TAG, "sx_storage_read() FAILED (err=%d)", ret);
+            s_step = TEST_EXFLASH_STEP_DONE;
+            break;
+        }
+        if (memcmp(readback, s_write_payload, sizeof(s_write_payload)) != 0) {
+            log_error(TAG, "Read-back MISMATCH — got: \"%s\"", readback);
+            s_step = TEST_EXFLASH_STEP_DONE;
+            break;
+        }
+        log_info(TAG, "Read-back OK, content matches: \"%s\"", readback);
+        s_step = TEST_EXFLASH_STEP_DELETE;
+        break;
+    }
+
+    case TEST_EXFLASH_STEP_DELETE: {
+        sx_storage_err_t ret = sx_storage_delete(TEST_EXFLASH_PATH);
+        if (ret != SX_STORAGE_OK) {
+            log_error(TAG, "sx_storage_delete() FAILED (err=%d) — test file left behind at %s",
+                       ret, TEST_EXFLASH_PATH);
+            s_step = TEST_EXFLASH_STEP_DONE;
+            break;
+        }
+        log_info(TAG, "Delete OK");
+        s_step = TEST_EXFLASH_STEP_DELETE_VERIFY;
+        break;
+    }
+
+    case TEST_EXFLASH_STEP_DELETE_VERIFY: {
+        bool exists = sx_storage_exists(TEST_EXFLASH_PATH);
+        if (exists) {
+            log_error(TAG, "File still exists after delete()");
+        } else {
+            log_info(TAG, "Delete-verify OK — file gone");
+        }
+        log_info(TAG, "=== W25Q128 TEST PASS ===");
+        s_step = TEST_EXFLASH_STEP_DONE;
+        break;
+    }
+
+    case TEST_EXFLASH_STEP_DONE:
+    default:
+        /* Nothing more to do — this test is one-shot, not periodic
+         * like GPS/SHT3x/RTC (there is no "keep watching a sensor"
+         * angle for a flash read/write/delete round-trip). */
+        break;
     }
 }

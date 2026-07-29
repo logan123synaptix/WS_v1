@@ -92,20 +92,12 @@ typedef struct Board{
      *   series on the +12V rail, before the rest of the board); OUT
      *   feeds AIN1 through R9 (0R per schematic — a series link/isolation
      *   resistor, not the shunt itself).
-     *   *** OPEN QUESTION, UNRESOLVED as of this commit — do not assume
-     *   an answer: R16's actual resistance value has not been confirmed.
-     *   User initially said "0 ohm" for this discussion, but Vout = Gain
-     *   x I x R_shunt means R_shunt=0 would force AIN1's reading to 0V
-     *   for any current — i.e. the current-sense channel would never
-     *   read anything. This is very likely a mix-up with R9 (which
-     *   legitimately is 0R on the schematic, but sits on the output
-     *   side, not the shunt). User said they'd confirm this in a future
-     *   conversation. Until R16's real value is confirmed:
-     *     - PGA left at ADS1115_PGA_TWO as a placeholder only, matching
-     *       AIN2 for now — NOT derived from any confirmed R16 value.
-     *     - Treat every AIN1/adc_current reading as unverified — do not
-     *       trust it for any real current measurement or safety logic
-     *       (e.g. overcurrent cutoff) until this is resolved.
+     *   R16 CONFIRMED by the user as 0.02 ohm (see
+     *   POWER_MONITOR_APP_SHUNT_OHM in power_monitor_app.h, where the
+     *   actual mV -> amps conversion is implemented — this earlier
+     *   open question, including a prior mix-up with R9=0R, is now
+     *   resolved; do not reintroduce the "unconfirmed" caveat unless
+     *   the value changes again on a future board revision).
      *
      * AIN2 = adc_vol (voltage-sense input, 12V rail through a resistor
      *   divider: R14=100K top / R15=20K bottom per schematic, confirmed

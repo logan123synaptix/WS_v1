@@ -730,11 +730,14 @@ void app_init(void){
      * already initialized by sx_board_init() before app_init() runs. */
     time_sync_init(&s_time_sync, &board.modem, &board.gps, &board.rtc);
 
-    /* USB CDC CLI ("settings -i/-c", "restart", "help") — see
+    /* UART6 console CLI ("settings -i/-c", "restart", "help") — see
      * app/user/shell_app/. Placed after network_config_init() so the
      * shell always has a live, already-loaded config to read/write from
-     * the moment it becomes usable. */
-    shell_app_init(&board.usb);
+     * the moment it becomes usable. Uses board.log_uart (UART6) as the
+     * transport, not USB, because this board revision has no USB
+     * connector — shell I/O shares the wire with log output, see
+     * shell_app.h's caveat comment. */
+    shell_app_init(&board.log_uart);
 
     s_cycle_state   = APP_CYCLE_ON_PUMP;
     s_cycle_tick_ms = 0;
@@ -763,9 +766,10 @@ void app_process(uint32_t delta_ms){
      * comment on why Thingsboard isn't used yet. */
     sx_user_mqtt_poll(delta_ms);
 
-    /* USB CDC CLI — same "every tick regardless of app_mode" reasoning
-     * as the other *_poll() calls above. No-op while the board is
-     * actually parked in STOP mode (execution is paused then anyway). */
+    /* UART6 console CLI — same "every tick regardless of app_mode"
+     * reasoning as the other *_poll() calls above. No-op while the
+     * board is actually parked in STOP mode (execution is paused then
+     * anyway). */
     shell_app_poll();
 
     /* Main cycle only runs in APP_MODE_FULL_POWER. The other app_mode_t

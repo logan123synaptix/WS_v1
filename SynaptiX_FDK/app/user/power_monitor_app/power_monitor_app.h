@@ -19,9 +19,10 @@ extern "C" {
  * before applying either formula below.
  *
  *   AIN1 = adc_current — voltage across shunt resistor R16 (confirmed by
- *     the user as 0.1 ohm), amplified by INA180A1 (gain 20V/V):
- *       Vout_AIN1 [V] = 20 * I * R16 = 20 * 0.1 * I = 2 * I
- *       => I = Vout_AIN1 / 2.0f                      (amps)
+ *     the user as 0.02 ohm — replaces an earlier 0.1 ohm board revision),
+ *     amplified by INA180A1 (gain 20V/V):
+ *       Vout_AIN1 [V] = 20 * I * R16 = 20 * 0.02 * I = 0.4 * I
+ *       => I = Vout_AIN1 / 0.4f                      (amps)
  *
  *   AIN2 = adc_vol — 12V rail through a resistor divider (R14=100k top /
  *     R15=20k bottom, confirmed against schematic):
@@ -29,7 +30,7 @@ extern "C" {
  *       => Vin = Vout_AIN2 * 6.0f                    (volts, rail voltage)
  *
  * Both conversion factors are only valid for THIS board's confirmed
- * component values (R16=0.1R, R14/R15=100k/20k, INA180A1 gain=20V/V) —
+ * component values (R16=0.02R, R14/R15=100k/20k, INA180A1 gain=20V/V) —
  * do not reuse get_rail_current_a()/get_rail_voltage_v() as-is on a
  * different board revision without re-deriving these constants.
  *
@@ -48,11 +49,12 @@ extern "C" {
 
 #define POWER_MONITOR_APP_SAMPLE_PERIOD_MS   1000U   /* time between successive channel reads (not full AIN1+AIN2 cycles) */
 
-/* R16 shunt resistor (ohms) — confirmed by the user. INA180A1 gain
- * (V/V) — per TI's Device Comparison table (SOT23-5, pinout A), see
+/* R16 shunt resistor (ohms) — confirmed by the user as 0.02R (board
+ * revision update from an earlier 0.1R value). INA180A1 gain (V/V) —
+ * per TI's Device Comparison table (SOT23-5, pinout A), see
  * sx_board.h's doc-comment. */
 #define POWER_MONITOR_APP_INA180_GAIN         20.0f
-#define POWER_MONITOR_APP_SHUNT_OHM           0.1f
+#define POWER_MONITOR_APP_SHUNT_OHM           0.02f
 
 /* R14/R15 rail-voltage divider (ohms) — confirmed against schematic, see
  * sx_board.h's doc-comment. */
@@ -95,9 +97,9 @@ bool power_monitor_app_has_current_reading(power_monitor_app_t *app);
 bool power_monitor_app_has_voltage_reading(power_monitor_app_t *app);
 
 /* Rail current in amps (AIN1, via INA180A1/R16 — see conversion above).
- * Value is UNVERIFIED against a real load until the R16=0.1R value used
- * here has been checked on real hardware — treat with appropriate
- * caution for anything safety-critical (e.g. overcurrent cutoff logic). */
+ * R16=0.02R is the confirmed value as of this revision; if the board
+ * changes again, update POWER_MONITOR_APP_SHUNT_OHM and the derivation
+ * comment above together. */
 float power_monitor_app_get_current_a(power_monitor_app_t *app);
 
 /* Rail voltage in volts (AIN2, via R14/R15 divider — see conversion

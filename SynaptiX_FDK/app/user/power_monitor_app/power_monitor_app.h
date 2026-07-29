@@ -47,7 +47,7 @@ extern "C" {
  * stay valid using the most recent reading of that channel even while
  * the other channel is the one currently being sampled. */
 
-#define POWER_MONITOR_APP_SAMPLE_PERIOD_MS   1000U   /* time between successive channel reads (not full AIN1+AIN2 cycles) */
+#define POWER_MONITOR_APP_SAMPLE_PERIOD_MS   6000U   /* time between successive channel reads (not full AIN1+AIN2 cycles) */
 
 /* R16 shunt resistor (ohms) — confirmed by the user as 0.02R (board
  * revision update from an earlier 0.1R value). INA180A1 gain (V/V) —

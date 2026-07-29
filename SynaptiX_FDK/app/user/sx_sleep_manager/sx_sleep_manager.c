@@ -310,6 +310,11 @@ uint8_t sx_sleep_manager_is_wake_done(sx_sleep_manager_t *mgr)
     return sx_sleep_service_is_wake_done(&mgr->svc);
 }
 
+uint8_t sx_sleep_manager_is_waking(sx_sleep_manager_t *mgr)
+{
+    return !sx_sleep_service_is_wake_done(&mgr->svc);
+}
+
 void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr)
 {
     mgr->gps_wait_elapsed_ms = 0;

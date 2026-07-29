@@ -43,6 +43,21 @@ typedef void (*sx_mqtt_on_message_cb_t) (sx_mqtt_t *mqtt, const char *topic, con
 
 typedef void (*sx_mqtt_on_publish_cb_t) (sx_mqtt_t *mqtt, int success);
 
+/* Optional check the caller can register (see
+ * sx_mqtt_set_modem_owned_elsewhere_check()) so this service can tell
+ * whether some OTHER module currently owns the modem and is already
+ * driving modem->ops->start()/power_on_start() on its own — added
+ * 2026-07-29 to fix a real hardware bug where this file's reconnect/
+ * recovery-ladder logic collided with sx_sleep_manager.c's wake-step
+ * sequence, both calling start() within the same wake and confusing the
+ * modem's internal SIM detection (see sx_mqtt.c's do_error()/sx_mqtt_poll()
+ * for the exact call sites this guards). Returns non-zero if the modem is
+ * currently owned elsewhere and this file should skip its own start()/
+ * power_on_start() calls this tick. NULL (default) means "not registered,
+ * never skip" — preserves old behavior for callers that don't share the
+ * modem with a sleep manager (e.g. test_lte_mqtt.c). */
+typedef uint8_t (*sx_mqtt_modem_owned_elsewhere_cb_t)(void);
+
 typedef struct{
     const char *broker;
     uint16_t port;
@@ -110,6 +125,7 @@ struct sx_mqtt{
     sx_mqtt_on_disconnected_cb_t on_disconnected;
     sx_mqtt_on_message_cb_t on_message;
     sx_mqtt_on_publish_cb_t on_publish;
+    sx_mqtt_modem_owned_elsewhere_cb_t modem_owned_elsewhere; /* see typedef above; NULL by default */
 };
 
 /*  Status helper   */
@@ -136,6 +152,10 @@ static inline void sx_mqtt_set_on_publish(sx_mqtt_t *mqtt, sx_mqtt_on_publish_cb
 
 static inline void sx_mqtt_set_on_message(sx_mqtt_t *mqtt, sx_mqtt_on_message_cb_t cb){
     mqtt->on_message = cb;
+}
+
+static inline void sx_mqtt_set_modem_owned_elsewhere_check(sx_mqtt_t *mqtt, sx_mqtt_modem_owned_elsewhere_cb_t cb){
+    mqtt->modem_owned_elsewhere = cb;
 }
 
 static inline void sx_mqtt_force_disconnect(sx_mqtt_t *mqtt) {

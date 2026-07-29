@@ -1,244 +1,236 @@
-HANDOFF — HARDWARE BRING-UP TEST, WS_v1 (STM32H563RIV6) — PHIÊN 2
+HANDOFF — HARDWARE BRING-UP TEST, WS_v1 (STM32H563RIV6) — PHIÊN 3
 
-Viết khi sắp hết token. Đọc kỹ handoff phiên trước (đã dán trong lịch sử
-chat) trước khi làm gì — phiên này KẾ TIẾP từ đó, không lặp lại.
+Viết khi sắp hết token. Đọc kỹ 2 handoff phiên trước (trong lịch sử chat)
+trước khi làm gì — phiên này KẾ TIẾP trực tiếp từ phiên 2, đang dở 1 fix
+CHƯA ĐƯỢC THỰC HIỆN (xem mục "VIỆC CẦN LÀM NGAY ĐẦU PHIÊN" bên dưới).
 
 ============================================================
-QUY TẮC BẮT BUỘC (không đổi)
+QUY TẮC BẮT BUỘC (không đổi qua các phiên)
 RE-CLONE đầu phiên: git clone https://github.com/logan123synaptix/WS_v1.git
 KHÔNG tin log/mô tả cũ mà không tự đọc lại code thật. Container reset
-giữa phiên.
+giữa phiên — MỌI THAY ĐỔI CHƯA COMMIT/PUSH TRONG PHIÊN NÀY ĐÃ MẤT.
 Không sửa code âm thầm — trình bày nghi vấn → hỏi → chỉ sửa sau khi
-có xác nhận. Đã áp dụng đúng suốt phiên này, tiếp tục giữ nguyên.
+có xác nhận rõ ràng.
 Comment code tiếng Anh, trao đổi tiếng Việt.
 KHÔNG có compiler thật trong container — không build được. Người dùng
 tự build + flash + gửi log qua chat.
-Board test vật lý duy nhất: STM32H563RIV6, đã về thực tế.
+Board test vật lý duy nhất: STM32H563RIV6.
 Datasheet đầy đủ trong Documents/ — LUÔN tra cứu trước khi đoán
-thông số (định dạng AT response thực tế THƯỜNG LỆCH so với datasheet,
-xem lịch sử bug bên dưới — luôn ưu tiên log thật hơn tài liệu).
+thông số. Log thật LUÔN thắng datasheet khi có xung đột (đã xảy ra
+nhiều lần: PWRKEY polarity, CSQ/CMQTT response spacing — xem phiên 1-2).
 ============================================================
-BỐI CẢNH: ĐÃ CHUYỂN TỪ CODE TEST STANDALONE SANG APP THẬT
+VIỆC CẦN LÀM NGAY ĐẦU PHIÊN — FIX CHƯA THỰC HIỆN, ĐÃ ĐƯỢC XÁC NHẬN
 
-Phiên trước: Core/Src/main.c chạy code test thuần HAL (không qua
-sx_uart/sx_board abstraction) để test từng module độc lập — xem
-handoff phiên 1 (trong lịch sử chat) để biết chi tiết đầy đủ.
+Người dùng đã xác nhận đồng ý (câu trả lời cuối cùng trước khi hết
+token), nhưng CHƯA CÓ THỜI GIAN THỰC HIỆN. Đây là việc ĐẦU TIÊN cần làm:
 
-THAY ĐỔI QUAN TRỌNG CUỐI PHIÊN 1 → ĐẦU PHIÊN NÀY: người dùng đã tự
-chuyển main.c sang chạy APP THẬT (SynaptiX_FDK/app/), cụ thể chạy
-test_lte_mqtt.c (file test tích hợp LTE+MQTT dùng kiến trúc phân tầng
-driver/service/app đầy đủ, KHÔNG PHẢI code test HAL thuần nữa). Commit
-liên quan: aaa4e10 "test lte done". Xác nhận lại bằng git log/đọc
-main.c thật đầu phiên, ĐỪNG giả định trạng thái này còn giữ nguyên.
+Bug xác nhận: trong SynaptiX_FDK/app/user/test/test_sleep.c, hàm
+test_sleep_poll() gọi VÔ ĐIỀU KIỆN mỗi tick:
 
-============================================================
-TIẾN TRÌNH PHIÊN NÀY — CÁC BUG ĐÃ TÌM RA VÀ FIX (CÓ BẰNG CHỨNG LOG THẬT)
-Bug A — Thứ tự gọi at_term_init()/power_sim_on() sai (đã fix, thuộc
+c
+void test_sleep_poll(uint32_t delta_ms)
+{
+    sx_user_mqtt_poll(delta_ms);
+    sx_temp_humi_poll(&s_th, delta_ms);      // <-- BUG: gọi cả lúc đang WAKING
+    accel_app_poll(&s_accel, delta_ms);      // <-- BUG: gọi cả lúc đang WAKING
+    gps_process(&board.gps, delta_ms);
+    ...
+}
 
-code test cũ, có thể không còn liên quan nếu đã chuyển hẳn sang app thật)
-power_sim_on() gọi log_info() trước khi logger_init() chạy (nằm
-trong at_term_init()) → log "Power On" bị mất. Fix: đảo thứ tự gọi.
-Đây là bug ở Core/Src/main.c bản test cũ (console AT terminal qua
-UART6) — CÓ THỂ ĐÃ BỊ GHI ĐÈ/KHÔNG CÒN LIÊN QUAN sau khi người dùng
-chuyển sang chạy app thật, cần kiểm tra lại main.c hiện tại đầu phiên
-sau.
+Bằng chứng từ log thật (đã xác nhận, xem log đầy đủ trong lịch sử
+chat): sau khi <<< Woke from STOP mode, trong lúc
+s_state == TEST_SLEEP_STATE_WAKING (đang chạy 6 wake_steps của
+sx_sleep_manager.c, CHƯA XONG), log cho thấy:
 
-Bug B — SPI1 W25Q128 JEDEC ID toàn 0x00 (đã fix bởi người dùng tự làm,
+[INFO]SX_SLEEP_SVC : wake step 'gps_wait_fix' starting   <- mới ở bước 2/6
+[WARNING]TEMP_HUMI : read failed (2)
+[WARNING]ACCEL_APP : linear accel read failed
 
-xác nhận qua log): thêm bước RELEASE_POWER_DOWN (0xAB) trước khi đọc
-JEDEC ID. Xác nhận OK: [W25Q128] JEDEC ID: EF 40 18 (expect EF 40 18).
+accel_resume là wake_steps[5] (bước CUỐI CÙNG trong 6 bước) —
+nghĩa là khi TEMP_HUMI/ACCEL_APP cố đọc I2C1 ở early wake (bước 2/6),
+BNO055 vẫn còn ở SUSPEND mode (do sleep_step trước đó set), nên đọc
+thất bại là ĐÚNG KỲ VỌNG — đây là race condition do timing/thứ tự gọi
+hàm sai, KHÔNG PHẢI bug I2C bus vật lý thật (không cần bus-recovery gì
+thêm — bus-recovery I2C đã được xử lý ở phiên 2, xem mục "Bug đã fix"
+bên dưới, đó là fix khác, KHÔNG liên quan tới vấn đề mới này).
 
-Bug C — Ăng-ten LTE lỏng/hỏng (đã fix bởi người dùng, PHẦN CỨNG không
+Fix cần làm (ĐÃ ĐƯỢC NGƯỜI DÙNG XÁC NHẬN "đúng, sửa theo hướng này"):
+tạm dừng gọi sx_temp_humi_poll()/accel_app_poll() trong lúc
+s_state == TEST_SLEEP_STATE_WAKING, chỉ gọi lại sau khi
+sx_sleep_manager_is_wake_done(&s_sleep_mgr) trả về true (hoặc đơn giản
+hơn: chỉ gọi 2 hàm này khi s_state == TEST_SLEEP_STATE_PUBLISH, vì đó
+là state duy nhất mà cảm biến thực sự "sống" và cần đọc để build
+payload).
 
-phải code): trước khi đổi ăng-ten, AT+CSQ = 99,99 (không thấy sóng),
-AT+CREG? = 0,0 (không đăng ký, không tìm mạng). Sau khi đổi ăng-ten
-mới: AT+CSQ = 19,99 (tín hiệu khá), AT+CREG? = 0,1 (đăng ký home
-network thành công), toàn bộ chuỗi CGATT/CGDCONT cũng OK. Board hiện
-tại ĐANG DÙNG ăng-ten mới này, đã xác nhận vẫn gắn nguyên (người dùng
-xác nhận rõ ràng khi được hỏi lại).
+Cách sửa cụ thể đề xuất (chưa làm, cần đọc lại code thật trước khi
+áp dụng chính xác theo state hiện tại của file):
 
-Bug D — BUG GỐC QUAN TRỌNG NHẤT, ĐÃ FIX, CÓ TÁC ĐỘNG LỚN:
+c
+void test_sleep_poll(uint32_t delta_ms)
+{
+    sx_user_mqtt_poll(delta_ms);
+    gps_process(&board.gps, delta_ms);   // GPS có power/state riêng, có
+                                          // thể vẫn cần chạy mọi lúc — CẦN
+                                          // KIỂM TRA LẠI, không giả định
+    /* Only poll temp/humi + accel when NOT in the middle of a wake
+     * sequence — accel_resume is wake_steps[5] (last step), so BNO055
+     * is still in SUSPEND until wake is fully done; SHT3x is on the same
+     * I2C1 bus. Reading either mid-wake races the wake_steps and produces
+     * spurious "read failed" spam, not a real bus fault. */
+    if (s_state != TEST_SLEEP_STATE_WAKING) {
+        sx_temp_humi_poll(&s_th, delta_ms);
+        accel_app_poll(&s_accel, delta_ms);
+    }
+    ...
+}
 
-modem_send_command() trong SynaptiX_FDK/components/modules/modem/modem.c
-chỉ reset modem->buff_id = 0 (con trỏ ghi) nhưng KHÔNG XÓA nội dung cũ
-trong modem->buff (mảng char[512] cố định, không bao giờ được
-memset). Vì strstr(modem->buff, ...) tìm trên toàn bộ buffer (đọc tới
-byte \0 đầu tiên), khi lệnh mới ghi dữ liệu NGẮN HƠN lệnh cũ, phần đuôi
-buffer vẫn là rác của lệnh trước, khiến response bị "ghép lẫn" giữa
-nhiều lệnh khác nhau. Xác nhận bằng bằng chứng log thật: lúc đang debug
-CREG poll bị treo vô hạn, log debug tạm thời in ra
-response=[AT+C1\n+CME1,"IP","m3-world"\nOK\nAT+CGA] — rõ ràng lẫn lộn
-giữa response của CGDCONT cũ và echo/rác của CREG mới, KHÔNG BAO GIỜ có
-+CREG: sạch.
+LƯU Ý QUAN TRỌNG: PHẢI đọc lại toàn bộ test_sleep_poll() thật trong
+repo trước khi áp dụng — có thể người dùng đã tự sửa gì đó giữa phiên,
+hoặc thứ tự các dòng code đã khác so với đoạn trích trên (lấy từ log
+cuối phiên 2, xem lại phiên 2 trong lịch sử để đối chiếu bản gốc). Đây
+chỉ là ĐỀ XUẤT, không phải code đã xác nhận cuối cùng — logic tổng thể
+(chỉ đọc cảm biến ngoài lúc WAKING) đã được người dùng đồng ý, nhưng
+CÁCH VIẾT CHI TIẾT cần tự soi lại cho khớp code thật.
 
-FIX ĐÃ ÁP DỤNG (file SynaptiX_FDK/components/modules/modem/modem.c,
-hàm modem_send_command()): thêm dòng
-memset(modem->buff, 0, MODEM_RX_BUFFER_SIZE); ngay sau
-modem->buff_id = 0;. Đây là fix ở TẦNG LÕI, ảnh hưởng MỌI lệnh AT đi
-qua hàm này, không riêng CREG.
-
-KẾT QUẢ SAU FIX (xác nhận bằng log thật): toàn bộ chuỗi network
-attach (AT → CGDCONT → CGACT → CREG poll → COPS → lấy IP → sync time)
-chạy hết, kết thúc bằng "Network attach complete, ready for MQTT".
-Đây là tiến bộ rất lớn so với trước (trước đó CREG poll luôn timeout vô
-hạn, lặp retry 1/3 mãi mãi).
-
-Bug E — 6 pattern res_success cho lệnh MQTT bị lệch định dạng so với
-
-response thực tế của modem (ĐÃ FIX, xác nhận MQTT connect + publish OK
-sau fix):
-Datasheet (Documents/a76xx_at_cmd.md) ghi URC dạng
-+CMQTTSTART:0 (KHÔNG có dấu cách sau :), nhưng modem THẬT trên board
-này luôn trả về CÓ dấu cách: +CMQTTSTART: 0. Code cũ hard-code pattern
-theo datasheet (không dấu cách) → strstr() không bao giờ match →
-timeout dù modem đã trả lời đúng thành công. Đây là CÙNG LOẠI bug với
-"PWRKEY polarity" và "CSQ spacing" đã gặp ở phiên trước — luôn ưu tiên
-log thật hơn datasheet khi có xung đột.
-
-Đã sửa 6 chỗ trong SynaptiX_FDK/components/modules/a76xx/a7677s.c (tất
-cả đều thêm 1 dấu cách sau :):
-
-Dòng ~2324: CMQTTSTART: 0 (trước: CMQTTSTART:0)
-Dòng ~1911: CMQTTCONNECT: 0,0
-Dòng ~1974: CMQTTSTOP: 0
-Dòng ~2095: CMQTTPUB: 0,0
-Dòng ~2179: CMQTTSUB: 0,0
-Dòng ~2350: CMQTTDISC: 0,0
-
-Cũng cập nhật lại comment giải thích ở gần dòng 1505 (phía trên
-cb_mqtt_start) để ghi chú rõ nguyên nhân + ngày phát hiện, cho phiên
-sau không nghi ngờ lại từ đầu.
-
-KẾT QUẢ SAU FIX: MQTT connected to tcp://broker.hivemq.com:1883,
-publish OK liên tục nhiều lần (seq:1 đến seq:18 đều
-MQTT publish OK / Publish result: OK).
+Sau khi sửa, cần hỏi lại người dùng: có cần áp dụng cùng logic guard này
+cho gps_process() không (GPS có 2 wake_steps riêng — gps_on và
+gps_wait_fix — có thể cũng bị đọc sớm tương tự, CHƯA ĐIỀU TRA, cần xem
+kỹ code GPS driver có bug tương tự không trước khi kết luận).
 
 ============================================================
-VẤN ĐỀ CHƯA GIẢI QUYẾT — ƯU TIÊN CAO NHẤT PHIÊN SAU
-Bug F — CHƯA XÁC ĐỊNH ROOT CAUSE: publish thất bại 3 lần liên tiếp
-
-(seq:19, 20, 21) rồi tự phục hồi ở seq:22, KHÔNG RÕ TẦN SUẤT XẢY RA
-(câu hỏi cuối phiên gửi cho người dùng về tần suất CHƯA ĐƯỢC TRẢ LỜI —
-người dùng yêu cầu viết handoff thay vì trả lời, PHẢI HỎI LẠI CÂU NÀY
-đầu phiên sau trước khi làm gì tiếp).
-
-Log lỗi thật (nguyên văn, người dùng đã xác nhận KHÔNG bị cắt/sửa khi
-copy-paste — đáng tin cậy 100%):
-
-[ERROR]MODEM : TIMEOUT response: [AT+CMQTTPUB=0,1,60,0
-OK
-
-]CMQTTPUB: 0,0
-[ERROR]SX_MQTT : Publish failed (result=2)
-[WARNING]USER_MQTT : Publish fail 1/3
-...
-[TX] seq:20
-[ERROR]MODEM : TIMEOUT response: [AT+CMQTTTOPIC=0,22
-]
-[ERROR]A7677S : AT+CMQTTTOPIC prompt failed (res=2)
-...
-[TX] seq:21
-[ERROR]MODEM : TIMEOUT response: [NULL]
-[ERROR]A7677S : AT+CMQTTTOPIC prompt failed (res=2)
-...
-[ERROR]MODEM : TIMEOUT response: [
-OK
-]
-[ERROR]A7677S : AT+CMQTTTOPIC prompt failed (res=2)
-[WARNING]USER_MQTT : Publish fail 3/3
-[ERROR]USER_MQTT : Max retry — reporting to sx_mqtt.c's recovery ladder
-[TX] seq:22
-[INFO]A7677S : MQTT publish OK  ← tự phục hồi
-
-PHÁT HIỆN QUAN TRỌNG NHẤT: đã tra cứu Documents/a76xx_at_cmd.md
-mục 18.2.12 AT+CMQTTPUB, xác nhận +CMQTTPUB:<client_index>,<err> với
-err=0 LÀ THÀNH CÔNG theo đúng chuẩn. Log lỗi cho thấy response THẬT SỰ
-LÀ CMQTTPUB: 0,0 (client_index=0, err=0 — TỨC LÀ PUBLISH ĐÃ THÀNH CÔNG
-THẬT SỰ) — nhưng bị code coi là TIMEOUT/FAIL, vì response bị THIẾU
-DẤU + Ở ĐẦU (]CMQTTPUB: 0,0 thay vì ]+CMQTTPUB: 0,0 — dấu ] là
-ký tự đóng log message [...], KHÔNG PHẢI dữ liệu modem, chỉ để đánh
-dấu hết chuỗi response trong log). Pattern res_success code đang tìm
-là "\r\n+CMQTTPUB: 0,0\r\n" — THIẾU ĐÚNG 1 KÝ TỰ + ở đầu response
-thật thì sẽ KHÔNG BAO GIỜ match, dẫn đến timeout dù dữ liệu gần như đầy
-đủ và đúng.
-
-GIẢ THUYẾT CHƯA XÁC NHẬN (cần điều tra thêm, KHÔNG được sửa mù):
-mất 1 byte + ở đầu response — có thể do:
-a) Lỗi UART thật (nhiễu điện/mất byte ngẫu nhiên tại đúng lúc đó) — HIẾM,
-khó tái hiện bằng đọc code, cần xem tần suất xảy ra thực tế trước.
-b) Race condition giữa ISR ghi sx_uart_rx_callback() và main-loop đọc
-sx_uart_read()/modem_poll() — ĐÃ ĐỌC sx_uart.c, thấy dùng
-cqueue (ring buffer) qua rxQueue, có mutex CHỈ KHI
-SX_USE_OS == 1 — bare-metal (không RTOS) thì KHÔNG CÓ mutex bảo vệ.
-CHƯA XÁC NHẬN SX_USE_OS đang bật hay tắt trong board này — ĐÂY LÀ
-VIỆC ĐẦU TIÊN CẦN KIỂM TRA Ở PHIÊN SAU (grep -rn "SX_USE_OS" xem
-define ở đâu, giá trị bao nhiêu).
-c) Do lỗi log print bị cắt lúc paste — ĐÃ HỎI VÀ NGƯỜI DÙNG XÁC NHẬN RÕ
-RÀNG "Đúng nguyên văn, không sửa gì" — LOẠI TRỪ khả năng này, KHÔNG
-hỏi lại trừ khi có bằng chứng mới mạnh hơn.
-d) Lỗi ở tầng cqueue (ring buffer implementation) tự nó có bug mất byte
-trong điều kiện tải cao — CHƯA ĐỌC cqueue.c/cqueue.h trong phiên
-này, cần đọc ở phiên sau nếu (b) không phải nguyên nhân.
-
-CÂU HỎI CHƯA ĐƯỢC TRẢ LỜI, PHẢI HỎI LẠI ĐẦU TIÊN Ở PHIÊN SAU:
-"Hiện tượng publish fail 3 lần rồi tự phục hồi (seq 19-21 fail, seq 22
-OK) có hay xảy ra không, hay chỉ thấy 1 lần trong log này?" — câu trả
-lời sẽ quyết định hướng đi:
-
-Nếu HIẾM/1 lần: có thể chấp nhận được nhờ retry logic đã hoạt động
-đúng (sx_user_mqtt.c's MQTT_PUBLISH_MAX_RETRY + dispatch_next()
-tự phục hồi ở seq:22) — ưu tiên thấp, có thể để lại xử lý sau khi test
-xong các module khác.
-Nếu THƯỜNG XUYÊN/LẶP LẠI: cần điều tra sâu vào (b)/(d) ở trên trước
-khi tiếp tục — đây sẽ là bug ảnh hưởng độ tin cậy truyền dữ liệu thật
-sự nghiêm trọng, có thể mất dữ liệu telemetry thật khi deploy.
-Lưu ý phụ (không phải bug, chỉ để tránh hiểu nhầm lại)
-
-Hiện tượng "log [TX] seq:5 đến seq:19 in liên tục dồn cục, rồi 15
-dòng Publish OK xuất hiện dồn sau đó" ĐÃ ĐƯỢC XÁC NHẬN KHÔNG PHẢI BUG —
-đã đọc code sx_user_mqtt.c, xác nhận có hàng đợi (cqueue) + cờ
-s_publishing chặn gửi chồng lệnh đúng cách (dispatch_next() chỉ lấy
-item tiếp theo khi !s_publishing). Chỉ là hiện tượng hiển thị log dồn
-cục do [TX] log ngay lúc enqueue, còn kết quả thật đến sau tuần tự
-đúng thứ tự hàng đợi. KHÔNG CẦN điều tra lại vụ này.
-
+TIẾN TRÌNH TOÀN BỘ DỰ ÁN TÍNH ĐẾN HẾT PHIÊN NÀY
+Đã xác nhận sống hoàn toàn (qua log thật, nhiều lần lặp lại ổn định)
+UART1 + Modem A7677S: network attach đầy đủ (CGDCONT/CGACT/CREG/COPS/
+IP/time sync), MQTT connect + publish qua broker.hivemq.com:1883.
+UART2 + GPS (CASIC AT6558R): banner + NMEA sentences đều đặn (test HAL
+thuần, phiên 1). Qua app thật (driver gps.c) — CHƯA re-confirm kỹ ở
+phiên 3, chỉ thấy log "Power on GPS first" chạy được, GPS timeout do
+không có GPS thật gắn vào bench (theo thiết kế, không phải bug).
+I2C1 + BNO055 (IMU): CHIP_ID 0xA0 đúng, nhưng xem mục race condition
+trên — code app thật (accel_app.c) có vấn đề timing khi wake.
+SPI1 + W25Q128: JEDEC ID EF 40 18 đúng, driver thật hoạt động qua
+sx_board_init().
+LittleFS/sx_storage: mount OK.
+I2C1 + SHT3x: init OK qua sx_board_init(), nhưng có vấn đề timing khi
+wake (xem mục race condition).
+Bug đã fix, có bằng chứng log xác nhận (phiên 1-2, KHÔNG cần làm lại)
+Thứ tự at_term_init()/power_sim_on() (phiên test console cũ, có
+thể không còn áp dụng nếu code đã chuyển hẳn app thật).
+SPI1 JEDEC ID toàn 0x00 → thêm RELEASE_POWER_DOWN trước JEDEC ID.
+Ăng-ten LTE lỏng/hỏng → người dùng tự thay ăng-ten mới, đã xác nhận.
+BUG GỐC QUAN TRỌNG: modem_send_command() trong modem.c không
+memset buffer cũ → response bị ghép lẫn giữa nhiều lệnh AT khác
+nhau → CREG poll luôn timeout dù modem trả lời đúng. Fix:
+memset(modem->buff, 0, MODEM_RX_BUFFER_SIZE) thêm vào
+modem_send_command().
+6 pattern res_success cho lệnh MQTT (CMQTTSTART/CONNECT/STOP/PUB/ SUB/DISC) thiếu dấu cách sau : so với response thực tế modem (có
+dấu cách) → luôn timeout dù thành công. Fix: thêm dấu cách vào cả 6
+pattern trong a7677s.c.
+I2C bus lockup (1 slave kẹt giữa chừng khiến toàn bus timeout vĩnh
+viễn) → người dùng TỰ VIẾT bus-recovery riêng trong sx_i2c.c (commit
+9e85cc6 "fix crash"), ĐỘC LẬP với 1 bản mình từng viết thử trong
+container (đã bị discard, không dùng, không commit). XÁC NHẬN LẠI
+bằng đọc code thật đầu phiên sau, đừng lẫn 2 bản.
+Modem start() bị gọi CHỒNG LỆNH giữa sx_sleep_manager.c's wake
+sequence (_modem_wait_ready_is_done()) và sx_mqtt.c's reconnect/
+recovery-ladder logic (do_error() + sx_mqtt_poll()'s power-cycle-
+settle) — cả 2 độc lập gọi modem->ops->start() trong cùng 1 lần
+wake, làm modem "bối rối" giữa lúc tự SIM-detect nội bộ, gây
++CME ERROR: SIM failure + phải retry/power-cycle mất nhiều phút.
+ĐÃ FIX VÀ XÁC NHẬN THÀNH CÔNG bằng log thật (log phiên 3, đầu
+phiên): thấy "Retrying modem start() skipped (modem owned elsewhere...)" xuất hiện đúng 3 lần thay vì "start(): modem busy".
+Cách fix: thêm cơ chế callback modem_owned_elsewhere — xem chi tiết
+dưới đây vì đây là fix phức tạp, cần hiểu rõ nếu phải sửa tiếp:
+sx_sleep_manager.h/.c: thêm sx_sleep_manager_is_waking().
+sx_mqtt.h: thêm typedef sx_mqtt_modem_owned_elsewhere_cb_t,
+field modem_owned_elsewhere trong struct sx_mqtt_t, setter
+sx_mqtt_set_modem_owned_elsewhere_check().
+sx_mqtt.c: 2 vị trí gọi start() (trong do_error()'s recovery
+ladder, và sx_mqtt_poll()'s power-cycle-settle) đều check callback
+trước khi gọi start().
+sx_user_mqtt.h/.c: thêm hàm forward
+sx_user_mqtt_set_modem_owned_elsewhere_check() (dùng plain
+uint8_t (*)(void) type, không include sx_mqtt.h trong header để
+giữ tách biệt tầng, đúng style file cũ).
+test_sleep.c: thêm wrapper tĩnh is_modem_owned_by_sleep_manager()
+gọi sx_sleep_manager_is_waking(&s_sleep_mgr), đăng ký vào MQTT
+layer trong test_sleep_init() (SAU cả sx_user_mqtt_nontls_init()
+VÀ sx_sleep_manager_init(), vì cần cả s_mqtt và s_sleep_mgr đã
+tồn tại).
+ACCEL_APP_SAMPLE_PERIOD_MS đổi từ 100ms → 3000ms theo yêu cầu người
+dùng (đọc IMU quá thường xuyên, không cần thiết cho test này). Fix ở
+accel_app.h. CẢNH BÁO CHƯA GIẢI QUYẾT: ACCEL_APP_FILTER_ALPHA
+(0.1f, low-pass filter constant) được tune dựa trên chu kỳ 100ms cũ —
+đổi period lên 3000ms (chậm 30 lần) làm bộ lọc phản ứng khác đi đáng
+kể so với thiết kế gốc. ĐÃ HỎI người dùng có muốn điều chỉnh
+ACCEL_APP_FILTER_ALPHA theo cho phù hợp không — CÂU HỎI NÀY CHƯA
+ĐƯỢC TRẢ LỜI (người dùng yêu cầu viết handoff thay vì trả lời). HỎI
+LẠI CÂU NÀY nếu liên quan tới việc đang làm, nhưng đây là ưu tiên THẤP
+hơn nhiều so với bug WAKING/race condition ở trên.
+Vấn đề ĐÃ PHÁT HIỆN, CHƯA FIX (ngoài mục "việc cần làm ngay" ở trên)
+External flash W25Q128 hoàn toàn KHÔNG có sleep_step nào trong
+sx_sleep_manager.c (chỉ có 6 bước: GPS/modem/SPS30/pump/ZE12A/BNO055
+— không có W25Q128). Người dùng đã xác nhận đây là vấn đề thật (mục
+"3 vấn đề" ở đầu phiên 3, người dùng chọn xử lý "phần 1" — modem wake —
+trước, NHƯNG 2 vấn đề còn lại (external flash chưa sleep, LTE 1.8V
+không tắt hẳn) VẪN CHƯA XỬ LÝ, chỉ tạm hoãn, không phải đã giải quyết.
+LTE không thực sự cắt nguồn 1.8V — log cho thấy modem_power_off
+chỉ làm "PWRKEY pulse (no AT command involved)", KHÔNG dùng AT+CPOF.
+Nghi vấn: PWRKEY pulse có thể không đủ để cắt hẳn rail 1.8V nếu board
+không có GPIO cắt nguồn riêng (tương tự comment cũ trong
+sx_W25Q128.c: "No power-cutoff GPIO on this board revision"). CHƯA
+ĐỌC KỸ _modem_power_off_start()/a7677s_power_off_start() để xác
+nhận cơ chế thật — cần đọc kỹ ở phiên sau nếu người dùng quay lại vấn
+đề này.
 ============================================================
-CÁC MODULE CHƯA TEST TRONG APP THẬT (kế thừa từ phiên 1, có thể đã test
-riêng lẻ ở phiên 1 nhưng CHƯA test qua app thật/kiến trúc phân tầng)
-UART2 GPS — code test HAL thuần đã OK ở phiên 1 (banner CASIC AT6558R,
-NMEA sentences đều đặn), nhưng CHƯA test qua app thật/driver phân tầng
-thật (SynaptiX_FDK/components/modules/gps/gps.c).
-UART3 (RS485), UART4 (SPS30), UART5 (ZE12A) — hoàn toàn chưa test.
-I2C1 + SHT3x, RTC RX8130CE, ADS1115 — chưa test riêng (I2C1 bus vật lý
-đã xác nhận sống qua BNO055 ở phiên 1, nhưng logic/địa chỉ riêng của
-từng chip này chưa test).
-SPI1 + W25Q128 — OK ở tầng test HAL thuần (phiên 1). Log app thật phiên
-này cũng thấy [INFO]W25Q128 : W25Q128 OK (16MB) — XÁC NHẬN driver
-thật (sx_W25Q128.c) cũng hoạt động đúng qua sx_board_init(), không
-chỉ code test HAL thuần. Có thể coi module này ĐÃ XONG HOÀN TOÀN.
-I2C1 + BNO055 — tương tự, log app thật phiên này có [INFO]IMU : IMU init done — XÁC NHẬN driver thật cũng hoạt động qua sx_board_init().
-Có thể coi ĐÃ XONG HOÀN TOÀN (dù chưa test đọc dữ liệu cảm biến thật,
-chỉ mới init + CHIP_ID).
-LittleFS/sx_storage — MỚI, chưa từng nhắc ở phiên 1, log phiên này
-cho thấy đã có FS : mounted!/LittleFS formatted and mounted successfully/Storage init OK — CẦN XÁC NHẬN THÊM module này hoạt
-động đúng đến mức nào (đọc/ghi file thật chưa test, mới chỉ mount).
+GHI CHÚ QUAN TRỌNG VỀ KIẾN TRÚC (để hiểu code nhanh hơn phiên sau)
+main.c hiện tại chạy APP THẬT qua test_sleep.c (không phải code
+test HAL thuần của phiên 1 nữa, cũng không phải test_lte_mqtt.c của
+đầu phiên 2 — đã chuyển tiếp qua test_sleep.c từ giữa phiên 2). XÁC
+NHẬN LẠI bằng đọc main.c/git log đầu phiên sau, đừng giả định.
+Kiến trúc sleep 3 tầng: tier 1 (sx_sleep.c, generic STOP-mode +
+RTC wakeup, không biết peripheral cụ thể nào) → tier 2
+(sx_sleep_service.c, chạy mảng sx_sleep_step_t generic) → tier 3
+(sx_sleep_manager.c, biết cụ thể GPS/modem/SPS30/pump/ZE12A/BNO055
+là gì, đăng ký 6+6 step cụ thể).
+board_sleep_pre_stop_hook()/board_sleep_post_wake_hook()
+(sx_board.c) là plug-in riêng của board vào tier 1, xử lý UART LTE/
+GPS/DUST/EXTEND (abort trước sleep). QUAN TRỌNG:
+board_sleep_post_wake_hook() HIỆN TẠI HOÀN TOÀN RỖNG (không làm gì,
+kể cả USB dù comment nói "chỉ USB cần khôi phục ở đây") — KHÔNG XỬ LÝ
+I2C1 Ở BẤT KỲ ĐÂU trong toàn bộ chuỗi sleep/wake (không abort trước
+sleep, không resume sau wake) — điều này ĐÃ ĐƯỢC KIỂM TRA và có vẻ
+KHÔNG PHẢI vấn đề (I2C1 dùng PCLK1, có thể tự động sống lại đúng sau
+SystemClock_Config() mà không cần code thêm — NHƯNG CHƯA CHỨNG MINH
+ĐƯỢC 100%, chỉ là giả thuyết hợp lý hơn so với race-condition timing đã
+tìm ra). Nếu sau khi fix race-condition ở "việc cần làm ngay" mà I2C
+vẫn còn lỗi (không phải do race condition), QUAY LẠI điều tra hướng
+I2C1 clock/GPIO AF có thực sự sống lại đúng sau STOP mode hay không.
+modem_ops_t (modem_ops.h) là lớp trừu tượng driver-agnostic — mọi
+gọi tới modem đều qua board.modem.ops->xxx(board.modem.ctx, ...),
+không gọi thẳng a7677s_xxx(). Điều này giải thích vì sao bug "gọi
+start() chồng lệnh" (mục 7 ở trên) xảy ra: có NHIỀU caller độc lập
+(sx_sleep_manager.c, sx_mqtt.c) đều có quyền gọi qua modem_ops_t
+mà không biết về nhau — bài học: MỌI lần thêm code mới gọi
+board.modem.ops->start()/power_on_start()/power_off_start() ở
+bất kỳ đâu, PHẢI kiểm tra xem có caller nào khác cũng đang gọi cùng
+lúc không, tương tự cách đã tìm ra bug này (dùng grep -rn "ops->start("
+toàn bộ SynaptiX_FDK/).
 ============================================================
 GỢI Ý THỨ TỰ LÀM VIỆC PHIÊN SAU
-Re-clone, đọc lại git log, xem có commit mới nào từ người dùng
-không (rất có thể có, xu hướng người dùng tự sửa/test liên tục giữa
-các phiên).
-HỎI LẠI câu hỏi tần suất Bug F ngay lập tức — quyết định độ ưu tiên.
-Nếu cần điều tra Bug F: grep -rn "SX_USE_OS" xem có bật RTOS mutex
-bảo vệ UART rxQueue hay không trước, rồi đọc cqueue.c/cqueue.h để
-tìm hiểu ring buffer implementation có an toàn ISR/main-loop hay
-không.
-Nếu Bug F được xác nhận hiếm/chấp nhận được: chuyển sang test các
-module còn lại theo đúng phương pháp đã dùng (đọc driver thật →
-console AT tay nếu cần → đối chiếu datasheet → xác nhận bằng log thật
-→ không tin mù).
-Đặc biệt lưu ý: MỌI lần gặp lệch định dạng response giữa datasheet và
-log thật (đã xảy ra 3 lần: PWRKEY polarity, CSQ spacing, CMQTT
-spacing) — LUÔN ưu tiên log thật, tra cứu kỹ trước khi sửa, và kiểm
-tra xem có pattern tương tự nào khác trong cùng file chưa bị phát
-hiện không (dùng grep tìm mọi chỗ dùng cùng 1 kiểu lệnh, như đã làm
-với 6 chỗ CMQTT).
+Re-clone, đọc git log, xem người dùng đã tự sửa gì thêm chưa.
+Đọc lại test_sleep.c thật, áp dụng fix "tạm dừng poll cảm biến lúc
+WAKING" đã được xác nhận đồng ý (xem mục đầu tiên).
+Hỏi lại về gps_process() có cần guard tương tự không (chưa điều
+tra).
+Build, test, lấy log mới — kỳ vọng không còn thấy
+TEMP_HUMI read failed/ACCEL_APP linear accel read failed ngay
+trong lúc đang WAKING (bước gps_wait_fix/modem_wait_ready), chỉ có
+thể fail ở state PUBLISH nếu bus I2C thật sự có vấn đề khác.
+Nếu I2C vẫn lỗi sau fix #2-4: điều tra sâu hơn về I2C1 clock/GPIO-AF
+sau STOP mode (xem ghi chú kiến trúc ở trên).
+Sau khi race-condition ổn: quay lại 2 vấn đề còn treo — external
+flash chưa có sleep_step, và LTE không cắt nguồn 1.8V thật sự (đọc
+kỹ _modem_power_off_start()/a7677s_power_off_start()).
+Hỏi lại về ACCEL_APP_FILTER_ALPHA có cần điều chỉnh theo period mới
+(3000ms) hay không — ưu tiên thấp.

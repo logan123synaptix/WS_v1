@@ -119,6 +119,25 @@ void sx_sleep_manager_wake_process(sx_sleep_manager_t *mgr, uint32_t delta_ms);
 
 uint8_t sx_sleep_manager_is_wake_done(sx_sleep_manager_t *mgr);
 
+/* True while a wake sequence is actively running (from
+ * sx_sleep_manager_wake_process()'s first tick after waking, until
+ * sx_sleep_manager_reset_wake() is called once is_wake_done() is true).
+ *
+ * Added (2026-07-29) to fix a real hardware bug: sx_mqtt.c's reconnect/
+ * recovery-ladder logic independently calls modem->ops->start() whenever
+ * it sees the MQTT link down — which is exactly the case right after
+ * waking, since the modem was just powered off/on. That collided with
+ * this module's own _modem_wait_ready_is_done() also calling start()
+ * once power_is_busy() clears, causing two start() calls in quick
+ * succession during the same wake. Confirmed on real board: log showed
+ * "Starting network attach sequence" immediately followed by
+ * "start(): modem busy", then "+CME ERROR: SIM failure" — the modem's
+ * own internal SIM detection got interrupted by the second AT command
+ * landing mid-sequence, forcing multiple minutes of retry/power-cycle
+ * before recovering. sx_mqtt.c now checks this function and skips its
+ * own start() calls while a wake sequence owns the modem. */
+uint8_t sx_sleep_manager_is_waking(sx_sleep_manager_t *mgr);
+
 void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr);
 
 static inline wake_reason_t sx_sleep_manager_get_wake_reason(sx_sleep_manager_t *mgr)

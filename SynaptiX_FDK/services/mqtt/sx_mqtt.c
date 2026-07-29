@@ -212,6 +212,17 @@ static void escalate_recovery(sx_mqtt_t *mqtt)
      * driver might already be mid-retry on its own is harmless. This gives
      * the attach sequence a real chance to run again well before we'd ever
      * resort to a full power cycle. */
+    /* Skip this cheap-recovery start() call while some other module (the
+     * sleep manager's wake sequence) currently owns the modem — see the
+     * modem_owned_elsewhere typedef's doc-comment in sx_mqtt.h for the
+     * real-hardware bug this guards against. Still logs so the retry
+     * counting/timing above is unaffected; just the actual start() call
+     * is deferred to whoever owns the modem right now. */
+    if (mqtt->modem_owned_elsewhere && mqtt->modem_owned_elsewhere()) {
+        log_info(TAG, "Retrying modem start() skipped (modem owned elsewhere, e.g. wake sequence in progress)");
+        return;
+    }
+
     log_info(TAG, "Retrying modem start() (recovery ladder %u/%u before power-cycle)",
              mqtt->reconnect_count, SX_MQTT_MAX_RETRY_BEFORE_RESTART);
     mqtt->modem->ops->start(mqtt->modem->ctx);
@@ -358,7 +369,17 @@ void sx_mqtt_poll(sx_mqtt_t *mqtt, uint32_t ts)
         mqtt->awaiting_power_cycle = 0;
         log_info(TAG, "Power-cycle settle complete — powering back on");
         mqtt->modem->ops->power_on_start(mqtt->modem->ctx);
-        mqtt->modem->ops->start(mqtt->modem->ctx);
+        /* Same guard as do_error()'s recovery ladder above — see the
+         * modem_owned_elsewhere typedef's doc-comment in sx_mqtt.h. Still
+         * power_on_start() unconditionally (this file already committed to
+         * powering the modem back on by calling power_off_start() earlier
+         * in escalate_recovery()), just skip the redundant start() call if
+         * a wake sequence is also currently running and will call it. */
+        if (!(mqtt->modem_owned_elsewhere && mqtt->modem_owned_elsewhere())) {
+            mqtt->modem->ops->start(mqtt->modem->ctx);
+        } else {
+            log_info(TAG, "start() after power-cycle skipped (modem owned elsewhere)");
+        }
     }
 
     if ((mqtt->state == SX_MQTT_STATE_ERROR || mqtt->state == SX_MQTT_STATE_DISCONNECTED) &&

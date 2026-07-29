@@ -68,6 +68,19 @@ static void on_publish(int success)
     log_info(TAG, "Publish result: %s", success ? "OK" : "FAIL");
 }
 
+/* Wrapper matching sx_user_mqtt_set_modem_owned_elsewhere_check()'s plain
+ * uint8_t(*)(void) callback signature -- sx_sleep_manager_is_waking()
+ * itself needs &s_sleep_mgr, which a bare function pointer can't carry.
+ * See sx_mqtt.h's modem_owned_elsewhere typedef doc-comment for why this
+ * wiring exists: without it, sx_mqtt.c's reconnect/recovery-ladder logic
+ * calls modem->ops->start() at the same time as this file's wake sequence
+ * (via sx_sleep_manager_wake_process()), confusing the modem mid-attach.
+ * Confirmed on real hardware, 2026-07-29. */
+static uint8_t is_modem_owned_by_sleep_manager(void)
+{
+    return sx_sleep_manager_is_waking(&s_sleep_mgr);
+}
+
 /* Same "null if not ready/valid" convention as app.c's
  * build_telemetry_payload()/format_timestamp() -- see those functions'
  * doc-comments for the reasoning (don't fake a zero/stale reading). */
@@ -187,6 +200,15 @@ void test_sleep_init(void)
      * app.c's real cycle uses them. */
     sx_sleep_manager_init(&s_sleep_mgr, &board.sleep, &board.modem, &board.gps,
                            &s_sps30_app, sx_board_get_pump_pwm(), &s_accel);
+
+    /* Wire the modem-ownership check so sx_mqtt.c's reconnect/recovery-
+     * ladder logic defers to this file's wake sequence instead of also
+     * calling modem->ops->start() during the same wake -- see
+     * is_modem_owned_by_sleep_manager()'s doc-comment above and
+     * sx_mqtt.h's modem_owned_elsewhere typedef. Must run after both
+     * sx_user_mqtt_nontls_init() (creates s_mqtt) and
+     * sx_sleep_manager_init() (creates s_sleep_mgr) above. */
+    sx_user_mqtt_set_modem_owned_elsewhere_check(is_modem_owned_by_sleep_manager);
 
     s_state = TEST_SLEEP_STATE_PUBLISH;
     s_cycle_count = 0;

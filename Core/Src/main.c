@@ -30,7 +30,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-// #include "app.h"
+#include "app.h"
 #define TEST        1
 #include "sx_board.h"
 #if TEST

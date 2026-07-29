@@ -341,3 +341,7 @@ void sx_user_mqtt_queue_flush(void) {
     s_publish_retry = 0;
     log_info(TAG, "Queue flushed");
 }
+
+void sx_user_mqtt_set_modem_owned_elsewhere_check(uint8_t (*cb)(void)) {
+    sx_mqtt_set_modem_owned_elsewhere_check(&s_mqtt, cb);
+}

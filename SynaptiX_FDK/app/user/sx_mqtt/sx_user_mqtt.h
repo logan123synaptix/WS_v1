@@ -66,6 +66,15 @@ uint8_t sx_user_mqtt_is_publishing(void);
 uint8_t sx_user_mqtt_queue_empty(void);
 void sx_user_mqtt_queue_flush(void);
 
+/* Forwards to sx_mqtt_set_modem_owned_elsewhere_check() (sx_mqtt.h) --
+ * see that typedef's doc-comment for why this exists (sx_sleep_manager.c
+ * and sx_mqtt.c independently calling modem->ops->start() during the same
+ * wake, confirmed on real hardware 2026-07-29). Plain function-pointer
+ * type here (not sx_mqtt_modem_owned_elsewhere_cb_t) so this header does
+ * not need to include sx_mqtt.h, matching this file's existing
+ * "no sx_mqtt.h in this header" choice. */
+void sx_user_mqtt_set_modem_owned_elsewhere_check(uint8_t (*cb)(void));
+
 #ifdef __cplusplus
 }
 #endif

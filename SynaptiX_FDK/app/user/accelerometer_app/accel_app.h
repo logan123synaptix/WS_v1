@@ -41,7 +41,7 @@ extern "C" {
  *     board revision and MUST be recalibrated against real hardware
  *     before being trusted. Flagged again below at the #define site. */
 
-#define ACCEL_APP_SAMPLE_PERIOD_MS      100U    /* matches WS_v0's accelerometer_poll() cadence */
+#define ACCEL_APP_SAMPLE_PERIOD_MS      3000    /* matches WS_v0's accelerometer_poll() cadence */
 
 /* NOT validated for WS_v1 hardware — carried over from WS_v0 with unknown
  * calibration basis. Recalibrate against real board + real-world motion

@@ -134,8 +134,36 @@ static void _enter_stop(sx_sleep_t *mgr)
     HAL_UART_DeInit(&huart4);
     HAL_UART_DeInit(&huart5);
     HAL_UART_DeInit(&huart6);
-    __HAL_RCC_TIM1_CLK_DISABLE();
-    __HAL_RCC_LPTIM1_CLK_DISABLE();
+    /* Same root cause as the LPTIM1 fix below: HAL_TIM_Base_Init()
+     * (stm32h5xx_hal_tim.c ~line 296) only calls Base_MspInit() -- which
+     * enables the peripheral clock -- when htim->State == HAL_TIM_STATE_RESET.
+     * A raw __HAL_RCC_TIM1_CLK_DISABLE() doesn't touch htim1.State, so the
+     * post-wake MX_TIM1_Init() would skip MspInit and hit the exact same
+     * class of hang as LPTIM1 did (confirmed via gdb backtrace) once wake
+     * reaches this far. Use HAL_TIM_Base_DeInit() instead, for the same
+     * reason HAL_LPTIM_DeInit() is used below instead of a raw disable. */
+    HAL_TIM_Base_DeInit(&htim1);
+    /* Must use HAL_LPTIM_DeInit(), NOT a raw __HAL_RCC_LPTIM1_CLK_DISABLE().
+     * Confirmed via ST-Link + gdb backtrace at the actual hang (2026-07-30):
+     *   #0 Error_Handler () at Core/Src/main.c:277
+     *   #1 MX_LPTIM1_Init () at Core/Src/lptim.c:52
+     *   #2 _enter_stop (...) at sx_sleep.c:187
+     * Root cause: HAL_LPTIM_Init() (stm32h5xx_hal_lptim.c ~line 268) only
+     * calls HAL_LPTIM_MspInit() -- which does __HAL_RCC_LPTIM1_CLK_ENABLE()
+     * -- when hlptim1.State == HAL_LPTIM_STATE_RESET. A raw CLK_DISABLE()
+     * before STOP does NOT touch hlptim1.State (it stays READY/BUSY from
+     * the boot-time init), so on the post-wake MX_LPTIM1_Init() call the
+     * State check is false, MspInit is skipped, the peripheral clock is
+     * never turned back on, and HAL_LPTIM_Init() falls into
+     * LPTIM_WaitForFlag(LPTIM_FLAG_REPOK) polling a register with no clock
+     * -- the flag never sets, it times out, HAL_LPTIM_Init() returns
+     * HAL_TIMEOUT, and MX_LPTIM1_Init() calls Error_Handler() (infinite
+     * while(1) with IRQs disabled). HAL_LPTIM_DeInit() (used here) calls
+     * HAL_LPTIM_MspDeInit() and resets State to HAL_LPTIM_STATE_RESET,
+     * so the next MX_LPTIM1_Init() takes the MspInit branch again and
+     * clock is correctly re-enabled -- same pattern already used for
+     * I2C1/SPI1/UART above. */
+    HAL_LPTIM_DeInit(&hlptim1);
     HAL_ICACHE_Disable();
 
     SX_SUSPEND_TICS();

@@ -20,10 +20,6 @@ void app_init(void);
 
 void app_process(uint32_t delta_ms);
 
-void app_request_sleep(void);
-
-void app_sync_gps_log_to_disk(void);
-
 #ifdef __cplusplus
 }
 #endif

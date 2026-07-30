@@ -808,19 +808,3 @@ void app_process(uint32_t delta_ms){
     }
 }
 
-void app_request_sleep(void)
-{
-    /* Not yet acted upon — see the doc-comment above (point 6) and
-     * network_config.h's note on app_request_sleep() currently being
-     * unused (its former tud_umount_cb() caller was removed per the
-     * user). Logged so the request is at least visible/traceable while
-     * this is being built out. */
-    log_info(TAG, "app_request_sleep() called - sleep-on-request not implemented yet");
-}
-
-void app_sync_gps_log_to_disk(void)
-{
-    /* Not yet implemented — no GPS-log-to-flash storage wired up in this
-     * app.c yet (see app_config.h's GPS_LOG_FILE_PATH, unused so far). */
-    log_info(TAG, "app_sync_gps_log_to_disk() called - not implemented yet");
-}

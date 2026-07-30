@@ -126,6 +126,16 @@ static void _enter_stop(sx_sleep_t *mgr)
      *     whether sleep_step order guarantees CS is deselected before this
      *     point (should be, since W25Q128 sleep_step runs earlier in the
      *     sequence, but not independently re-verified this session). */
+    /* IMPORTANT: huart6 is the LOG console (confirmed via sx_board.c's
+     * hal_uart[6] = {&huart1..&huart6} comment: "lte, gps, rs485,
+     * dust-sensor, extend-uart, log" -- huart6 is the last one, log).
+     * DO NOT DeInit it here. Doing so previously made the log go silent
+     * right after "Entering STOP mode NOW" with no way to tell whether the
+     * board was actually hung or just running normally with its own log
+     * channel cut -- this was actively hiding the real state of the board
+     * during debugging. Keep it alive through this whole sequence until
+     * the sleep/wake path is fully confirmed stable; the leakage from one
+     * UART is negligible next to the ~25mA target already reached. */
     HAL_I2C_DeInit(&hi2c1);
     HAL_SPI_DeInit(&hspi1);
     HAL_UART_DeInit(&huart1);
@@ -133,7 +143,6 @@ static void _enter_stop(sx_sleep_t *mgr)
     HAL_UART_DeInit(&huart3);
     HAL_UART_DeInit(&huart4);
     HAL_UART_DeInit(&huart5);
-    HAL_UART_DeInit(&huart6);
     __HAL_RCC_TIM1_CLK_DISABLE();
     __HAL_RCC_LPTIM1_CLK_DISABLE();
     HAL_ICACHE_Disable();
@@ -177,7 +186,6 @@ static void _enter_stop(sx_sleep_t *mgr)
     MX_USART3_UART_Init();
     MX_UART4_Init();
     MX_UART5_Init();
-    MX_USART6_UART_Init();
     MX_TIM1_Init();
     MX_LPTIM1_Init();
     MX_ICACHE_Init();

@@ -170,28 +170,41 @@ static void _modem_power_off_start(void *ctx)
 {
     sx_sleep_manager_t *mgr = (sx_sleep_manager_t *)ctx;
     mgr->modem->ops->power_off_start(mgr->modem->ctx);
+    mgr->power_off_last_tick_ms = sx_gettick();
 }
 
 static uint8_t _modem_power_off_is_done(void *ctx)
 {
     sx_sleep_manager_t *mgr = (sx_sleep_manager_t *)ctx;
 
-    /* Bug fix (2026-07-30): this used to return 1 unconditionally, right
-     * after only a 500ms sx_delay_ms() -- but power_off_start() only
-     * *starts* an async PWRKEY-pulse-then-settle sequence
-     * (A7677S_OFF_PULSE_MS + A7677S_OFF_SETTLE_MS, ~7.1s total in
-     * a7677s.h) that runs across later poll() calls, not inside
-     * power_off_start() itself. Reporting "done" after 500ms let
-     * sx_sleep_manager_enter_sleep() carry on to the remaining
-     * sleep_steps, set the RTC, and put the MCU into STOP mode while the
-     * modem was still mid power-off -- confirmed on real board
-     * (2026-07-30): "Power Off complete (PWRKEY)" was logged several
-     * seconds later, mid wake sequence, and VDD_EXT was measured still
-     * outputting 1.8V at STOP-mode entry instead of having dropped to 0V.
-     * Fix: gate on power_is_busy() going false, same pattern already used
-     * by _modem_wait_ready_is_done() above for power-on. power_is_busy()
-     * covers A7677S_PWR_OFF_PULSE/A7677S_PWR_OFF_SETTLE and only clears
-     * once the driver's own state machine reaches A7677S_PWR_IDLE. */
+    /* Bug fix (2026-07-30), second half: the power_is_busy() gate added
+     * above only works if the driver's power state machine actually gets
+     * ticked forward. power_off_start() only *starts* the async
+     * PWRKEY-pulse-then-settle sequence -- advancing through its states
+     * (A7677S_PWR_OFF_PULSE -> OFF_SETTLE -> IDLE) happens inside
+     * a7677s_poll(ctx, ts), which normally only gets called via
+     * modem_handle_poll() from sx_mqtt_poll() -> sx_user_mqtt_poll() ->
+     * test_sleep_poll() each main-loop tick.
+     *
+     * sleep_steps (this one included) run inside
+     * sx_sleep_service.c's _run_steps_blocking(), a tight blocking
+     * while(!is_done()) { sx_delay_ms(10); } loop -- test_sleep_poll()
+     * (and therefore modem_handle_poll()) never runs again until this
+     * whole loop returns. Confirmed on real board (2026-07-30): with only
+     * the power_is_busy() gate and no poll() call here, power_elapsed
+     * inside the driver never advanced past 0 and this step hung forever
+     * ("Power Off start" logged, then nothing -- VDD_EXT stayed at 1.8V
+     * indefinitely instead of settling to 0V).
+     *
+     * Fix: tick the modem's state machine ourselves from here, using
+     * sx_gettick() deltas, same units/mechanism _gps_wait_is_done()/
+     * _modem_wait_ready_is_done() use via wake_process()'s delta_ms --
+     * just sourced locally since this step has no delta_ms of its own. */
+    uint32_t now = sx_gettick();
+    uint32_t ts  = now - mgr->power_off_last_tick_ms;
+    mgr->power_off_last_tick_ms = now;
+    modem_handle_poll(mgr->modem, ts);
+
     return !mgr->modem->ops->power_is_busy(mgr->modem->ctx);
 }
 

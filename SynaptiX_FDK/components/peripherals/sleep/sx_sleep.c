@@ -126,16 +126,6 @@ static void _enter_stop(sx_sleep_t *mgr)
      *     whether sleep_step order guarantees CS is deselected before this
      *     point (should be, since W25Q128 sleep_step runs earlier in the
      *     sequence, but not independently re-verified this session). */
-    /* IMPORTANT: huart6 is the LOG console (confirmed via sx_board.c's
-     * hal_uart[6] = {&huart1..&huart6} comment: "lte, gps, rs485,
-     * dust-sensor, extend-uart, log" -- huart6 is the last one, log).
-     * DO NOT DeInit it here. Doing so previously made the log go silent
-     * right after "Entering STOP mode NOW" with no way to tell whether the
-     * board was actually hung or just running normally with its own log
-     * channel cut -- this was actively hiding the real state of the board
-     * during debugging. Keep it alive through this whole sequence until
-     * the sleep/wake path is fully confirmed stable; the leakage from one
-     * UART is negligible next to the ~25mA target already reached. */
     HAL_I2C_DeInit(&hi2c1);
     HAL_SPI_DeInit(&hspi1);
     HAL_UART_DeInit(&huart1);
@@ -143,6 +133,7 @@ static void _enter_stop(sx_sleep_t *mgr)
     HAL_UART_DeInit(&huart3);
     HAL_UART_DeInit(&huart4);
     HAL_UART_DeInit(&huart5);
+    HAL_UART_DeInit(&huart6);
     __HAL_RCC_TIM1_CLK_DISABLE();
     __HAL_RCC_LPTIM1_CLK_DISABLE();
     HAL_ICACHE_Disable();
@@ -150,25 +141,30 @@ static void _enter_stop(sx_sleep_t *mgr)
     SX_SUSPEND_TICS();
     s_enter_stop(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
-    /* ── After wake ── */
+    /* ── After wake ──
+     * MUST resume SysTick BEFORE calling SystemClock_Config(), not just
+     * before MX_*_Init(). SystemClock_Config() -> HAL_RCC_OscConfig() waits
+     * for HSERDY using `tickstart = HAL_GetTick()` + `HAL_GetTick() -
+     * tickstart > RCC_HSE_TIMEOUT_VALUE` (stm32h5xx_hal_rcc.c ~line 571-573).
+     * With SysTick still suspended (from SX_SUSPEND_TICS() before STOP),
+     * HAL_GetTick() is frozen, so tickstart == HAL_GetTick() forever and the
+     * timeout math never trips. If HSERDY isn't already set the instant
+     * HAL_RCC_OscConfig() checks it after leaving STOP (real HSE needs some
+     * settling time), this spins forever with no way out -- true infinite
+     * hang, no log possible since UART isn't re-initialized yet. This
+     * matches the observed symptom exactly: log stops right after
+     * "[RTC CB] Set wake_reason = WAKE_REASON_RTC" (proves WFI/RTC wake
+     * itself works fine) with nothing else ever printed, no matter which
+     * peripherals are or aren't DeInit'd beforehand -- because the hang is
+     * here, before SystemClock_Config() returns, before any MX_*_Init() or
+     * UART is touched. The previous session's fix (moving SX_RESUME_TICS()
+     * before MX_*_Init() but still after SystemClock_Config()) was the same
+     * idea applied one call too late -- SystemClock_Config() has the exact
+     * same HAL_GetTick()-based wait pattern as HAL_UART_Init() did. */
+    SX_RESUME_TICS();
+
     extern void SystemClock_Config(void);
     SystemClock_Config();
-
-    /* MUST resume SysTick before calling any MX_*_Init() below.
-     * HAL_UART_Init() (called by MX_USARTx_UART_Init()/MX_UARTx_Init())
-     * ends with UART_CheckIdleState() -> UART_WaitOnFlagUntilTimeout(),
-     * which does `tickstart = HAL_GetTick()` then polls TEACK/REACK with a
-     * timeout computed from HAL_GetTick() - tickstart. If SysTick is still
-     * suspended (from SX_SUSPEND_TICS() before STOP), HAL_GetTick() never
-     * advances, so the timeout math never trips AND the real hardware flag
-     * still needs real elapsed time to set -- the wait loops forever with
-     * the CPU spinning in RUN mode. This was confirmed as the actual hang:
-     * user observed current jump back up to ~55mA (CPU busy-looping, not
-     * asleep, not reset) with zero further log output right after wake --
-     * exactly consistent with getting stuck inside this wait, since nothing
-     * after it ever executes to produce a log line. Moving SX_RESUME_TICS()
-     * here, before the MX_*_Init() block, fixes it. */
-    SX_RESUME_TICS();
 
     /* Re-run each peripheral's own MX_*_Init() (Core/Src/*.c) instead of
      * hand-rolling CLK_ENABLE + re-configuring registers ourselves -- this
@@ -186,6 +182,7 @@ static void _enter_stop(sx_sleep_t *mgr)
     MX_USART3_UART_Init();
     MX_UART4_Init();
     MX_UART5_Init();
+    MX_USART6_UART_Init();
     MX_TIM1_Init();
     MX_LPTIM1_Init();
     MX_ICACHE_Init();

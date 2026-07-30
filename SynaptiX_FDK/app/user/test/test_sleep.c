@@ -217,8 +217,7 @@ void test_sleep_init(void)
      * sx_sleep_manager.c's fixed 7+7 step tables are used exactly as
      * app.c's real cycle uses them. */
     sx_sleep_manager_init(&s_sleep_mgr, &board.sleep, &board.modem, &board.gps,
-                           &s_sps30_app, sx_board_get_pump_pwm(), &s_accel,
-                           &board.q128);
+                           &s_sps30_app, sx_board_get_pump_pwm(), &s_accel);
 
     /* Wire the modem-ownership check so sx_mqtt.c's reconnect/recovery-
      * ladder logic defers to this file's wake sequence instead of also

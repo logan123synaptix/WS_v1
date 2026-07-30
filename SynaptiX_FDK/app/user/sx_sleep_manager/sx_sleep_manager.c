@@ -4,22 +4,22 @@
 #include "sx_board.h"
 #include "sx_delay.h"
 #include "sx_pump.h"
-#include "sx_W25Q128.h"
+#include "sx_ex_storage.h"
 #include "logger.h"
 
 static const char *TAG = "SX_SLEEP_MGR";
 
 /* ===================== wake steps ===================== */
 
-/* Step 0: W25Q128 wake — release SPI Deep Power-Down. Thin wrapper since
- * sx_W25Q128_sleep_off()'s signature (sx_W25Q128_t*) doesn't match
- * sx_sleep_step_t's (void*) ctx — same reasoning as the pump/ZE12A
- * wrappers elsewhere in this file. Fire-and-forget: the SPI command
- * itself is synchronous (sx_spi_write() + a short fixed delay inside
- * sx_W25Q128_sleep_off()), so this step is always done after one tick. */
+/* Step 0: W25Q128 wake — release SPI Deep Power-Down via sx_storage_wake()
+ * (sx_ex_storage.h), which reaches the real, correctly-initialized flash
+ * instance. Fire-and-forget: the SPI command itself is synchronous, so
+ * this step is always done after one tick. No ctx needed — both
+ * sx_storage_sleep()/wake() are void(void). */
 static void _ext_flash_wake_start(void *ctx)
 {
-    sx_W25Q128_sleep_off((sx_W25Q128_t *)ctx);
+    (void)ctx;
+    sx_storage_wake();
 }
 
 static uint8_t _ext_flash_wake_is_done(void *ctx)
@@ -166,12 +166,22 @@ static uint8_t _gas_sensor_active_mode_is_done(void *ctx)
 
 /* ===================== sleep steps ===================== */
 
-/* Step 0: W25Q128 sleep — enter SPI Deep Power-Down. Same wrapper
- * reasoning as the wake-side step above; placed first among sleep_steps
- * so this rail is cut as early as possible on the way into STOP mode. */
+/* Step 0: W25Q128 sleep — enter SPI Deep Power-Down via sx_storage_sleep()
+ * (sx_ex_storage.h). Bug fix (2026-07-30): originally called
+ * sx_W25Q128_sleep_on() directly against a separate, never-initialized
+ * board.q128 (spi pointer garbage/NULL from zero-init) — that caused a
+ * HardFault (board froze right after this step's log line, no ST-Link
+ * available to confirm, but every softer explanation -- BUSY-wait
+ * timeout, HAL SPI timeout -- was already ruled out since both have
+ * their own timeouts and neither would explain a silent freeze with no
+ * further log at all). Going through sx_storage_sleep()/wake() instead
+ * reaches the correctly-initialized static instance owned by
+ * sx_ex_storage.c, with the real SPI/CS wiring set up in
+ * sx_storage_init(). */
 static void _ext_flash_sleep_start(void *ctx)
 {
-    sx_W25Q128_sleep_on((sx_W25Q128_t *)ctx);
+    (void)ctx;
+    sx_storage_sleep();
 }
 
 static uint8_t _ext_flash_sleep_is_done(void *ctx)
@@ -299,20 +309,18 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
                             sx_pwm_software_t  *pump_pwm,
-                            accel_app_t        *accel_app,
-                            sx_W25Q128_t       *ext_flash)
+                            accel_app_t        *accel_app)
 {
     mgr->modem     = modem;
     mgr->gps       = gps;
     mgr->sps30_app = sps30_app;
     mgr->pump_pwm  = pump_pwm;
     mgr->accel_app = accel_app;
-    mgr->ext_flash = ext_flash;
     mgr->gps_wait_elapsed_ms = 0;
     mgr->sim_wait_elapsed_ms = 0;
     mgr->sim_start_sent      = 0;
 
-    s_wake_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_wake_start, .is_done = _ext_flash_wake_is_done, .ctx = mgr->ext_flash, .name = "ext_flash_wake" };
+    s_wake_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_wake_start, .is_done = _ext_flash_wake_is_done, .ctx = NULL, .name = "ext_flash_wake" };
     s_wake_steps[1] = (sx_sleep_step_t){ .start = _gps_on_start,          .is_done = _gps_on_is_done,          .ctx = mgr, .name = "gps_on" };
     s_wake_steps[2] = (sx_sleep_step_t){ .start = _gps_wait_start,        .is_done = _gps_wait_is_done,        .ctx = mgr, .name = "gps_wait_fix" };
     s_wake_steps[3] = (sx_sleep_step_t){ .start = _modem_power_on_start,  .is_done = _modem_power_on_is_done,  .ctx = mgr, .name = "modem_power_on" };
@@ -320,7 +328,7 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
     s_wake_steps[5] = (sx_sleep_step_t){ .start = _gas_sensor_active_mode_start, .is_done = _gas_sensor_active_mode_is_done, .ctx = mgr, .name = "gas_sensor_active_mode" };
     s_wake_steps[6] = (sx_sleep_step_t){ .start = accel_app_wake_step_start, .is_done = accel_app_wake_step_is_done, .ctx = mgr->accel_app, .name = "accel_resume" };
 
-    s_sleep_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_sleep_start, .is_done = _ext_flash_sleep_is_done, .ctx = mgr->ext_flash, .name = "ext_flash_sleep" };
+    s_sleep_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_sleep_start, .is_done = _ext_flash_sleep_is_done, .ctx = NULL, .name = "ext_flash_sleep" };
     s_sleep_steps[1] = (sx_sleep_step_t){ .start = _gps_power_off_start,   .is_done = _gps_power_off_is_done,   .ctx = mgr, .name = "gps_power_off" };
     s_sleep_steps[2] = (sx_sleep_step_t){ .start = _modem_power_off_start, .is_done = _modem_power_off_is_done, .ctx = mgr, .name = "modem_power_off" };
     s_sleep_steps[3] = (sx_sleep_step_t){ .start = sps30_app_sleep_step_start, .is_done = sps30_app_sleep_step_is_done, .ctx = mgr->sps30_app, .name = "sps30_power_off" };

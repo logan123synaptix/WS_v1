@@ -14,7 +14,7 @@ extern "C" {
 #include "sx_pwm_sw.h"
 #include "sps30_app.h"
 #include "accel_app.h"
-#include "sx_W25Q128.h"
+#include "sx_ex_storage.h"
 
 /* Tier 3 of the 3-tier sleep architecture (see sx_sleep_service.h for the
  * full tier breakdown). This is the ONLY place in the sleep stack that
@@ -52,15 +52,12 @@ typedef struct {
      * accel_app.h), this pointer is only kept so sx_sleep_manager_init()
      * can pass it as those steps' ctx. */
     accel_app_t    *accel_app;
-    /* External SPI flash (W25Q128) — sleep_steps/wake_steps call this
-     * module's own sx_W25Q128_sleep_on()/sleep_off() directly (thin
-     * wrappers below adapt the (sx_W25Q128_t*) signature to
-     * sx_sleep_step_t's (void*) ctx), same pattern as pump_pwm above.
-     * Added (2026-07-30) to close the one power rail with no sleep_step
-     * yet: sx_W25Q128_sleep_on/_off already existed in the driver (SPI
-     * Deep Power-Down, no GPIO needed per the driver's own doc-comment)
-     * but were never called anywhere in the codebase before this. */
-    sx_W25Q128_t   *ext_flash;
+    /* No ext_flash pointer needed here (2026-07-30 revision): W25Q128
+     * power-down/up is driven through sx_storage_sleep()/sx_storage_wake()
+     * (sx_ex_storage.h), which internally reach the correctly-initialized
+     * static W25Q128 instance owned by that module. Passing a separate
+     * board.q128 pointer here was the original bug -- see sx_ex_storage.c's
+     * doc-comment on sx_storage_sleep()/wake() for the full story. */
     sx_sleep_service_t svc;
 
     /* Elapsed time for the currently-running GPS-fix-wait step; owned by
@@ -88,9 +85,10 @@ typedef struct {
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:
- *   1. W25Q128 wake — release SPI Deep Power-Down (sx_W25Q128_sleep_off()).
- *      Placed first: independent SPI bus, no dependency on I2C1/UART being
- *      resumed yet, so it's safe to bring back as early as possible.
+ *   1. W25Q128 wake — sx_storage_wake() releases SPI Deep Power-Down on
+ *      the real, correctly-initialized flash instance owned by
+ *      sx_ex_storage.c. Placed first: independent SPI bus, no dependency
+ *      on I2C1/UART being resumed yet, so it's safe to bring back first.
  *   2. GPS on           — power on GPS, resume its UART
  *   3. Wait for GPS fix — poll until lat/long non-zero or GPS_TIMEOUT_MS
  *   4. Resume LTE UART + power on modem
@@ -104,10 +102,12 @@ typedef struct {
  *      does not resume on its own (see accel_app.h).
  *
  * sleep_steps run, in order, before every sx_sleep_manager_enter_sleep():
- *   1. W25Q128 sleep — enter SPI Deep Power-Down (sx_W25Q128_sleep_on()).
- *      Placed first: closes off the one power rail that had no sleep_step
- *      at all before (2026-07-30) — the driver's Deep Power-Down command
- *      already existed but was never called anywhere in the codebase.
+ *   1. W25Q128 sleep — sx_storage_sleep() enters SPI Deep Power-Down on
+ *      the real flash instance (via sx_ex_storage.c, which internally
+ *      guards against sending Power-Down while the chip is still BUSY
+ *      from a prior write, e.g. network_config.c's config-save — see
+ *      sx_W25Q128_sleep_on()'s doc-comment). Placed first: closes off the
+ *      one power rail that had no sleep_step at all before (2026-07-30).
  *   2. Power down GPS (zero out last fix so a stale fix isn't reused)
  *   3. Power down modem
  *   4. SPS30 power-down (sps30_app_sleep_step_start/is_done — SHDLC
@@ -134,8 +134,7 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
                             sx_pwm_software_t  *pump_pwm,
-                            accel_app_t        *accel_app,
-                            sx_W25Q128_t       *ext_flash);
+                            accel_app_t        *accel_app);
 
 /* Runs the sleep_steps then enters STOP mode via tier 2/1. Blocking, same
  * as the old sx_sleep_manager_enter() — returns only after waking. */

@@ -4,11 +4,29 @@
 #include "sx_board.h"
 #include "sx_delay.h"
 #include "sx_pump.h"
+#include "sx_W25Q128.h"
 #include "logger.h"
 
 static const char *TAG = "SX_SLEEP_MGR";
 
 /* ===================== wake steps ===================== */
+
+/* Step 0: W25Q128 wake — release SPI Deep Power-Down. Thin wrapper since
+ * sx_W25Q128_sleep_off()'s signature (sx_W25Q128_t*) doesn't match
+ * sx_sleep_step_t's (void*) ctx — same reasoning as the pump/ZE12A
+ * wrappers elsewhere in this file. Fire-and-forget: the SPI command
+ * itself is synchronous (sx_spi_write() + a short fixed delay inside
+ * sx_W25Q128_sleep_off()), so this step is always done after one tick. */
+static void _ext_flash_wake_start(void *ctx)
+{
+    sx_W25Q128_sleep_off((sx_W25Q128_t *)ctx);
+}
+
+static uint8_t _ext_flash_wake_is_done(void *ctx)
+{
+    (void)ctx;
+    return 1;
+}
 
 /* Step 1: GPS on. */
 static void _gps_on_start(void *ctx)
@@ -148,6 +166,20 @@ static uint8_t _gas_sensor_active_mode_is_done(void *ctx)
 
 /* ===================== sleep steps ===================== */
 
+/* Step 0: W25Q128 sleep — enter SPI Deep Power-Down. Same wrapper
+ * reasoning as the wake-side step above; placed first among sleep_steps
+ * so this rail is cut as early as possible on the way into STOP mode. */
+static void _ext_flash_sleep_start(void *ctx)
+{
+    sx_W25Q128_sleep_on((sx_W25Q128_t *)ctx);
+}
+
+static uint8_t _ext_flash_sleep_is_done(void *ctx)
+{
+    (void)ctx;
+    return 1;
+}
+
 /* Step 1: power down GPS, clear last fix so a stale position isn't reused
  * next wake. */
 static void _gps_power_off_start(void *ctx)
@@ -258,8 +290,8 @@ static uint8_t _gas_sensor_qa_mode_is_done(void *ctx)
  * Instead, this module ticks mgr->gps_wait_elapsed_ms/sim_wait_elapsed_ms
  * itself, in sx_sleep_manager_wake_process() below, before delegating to
  * sx_sleep_service_wake_process(). */
-static sx_sleep_step_t s_wake_steps[6];
-static sx_sleep_step_t s_sleep_steps[6];
+static sx_sleep_step_t s_wake_steps[7];
+static sx_sleep_step_t s_sleep_steps[7];
 
 void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_sleep_t         *sleep,
@@ -267,30 +299,34 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
                             sx_pwm_software_t  *pump_pwm,
-                            accel_app_t        *accel_app)
+                            accel_app_t        *accel_app,
+                            sx_W25Q128_t       *ext_flash)
 {
     mgr->modem     = modem;
     mgr->gps       = gps;
     mgr->sps30_app = sps30_app;
     mgr->pump_pwm  = pump_pwm;
     mgr->accel_app = accel_app;
+    mgr->ext_flash = ext_flash;
     mgr->gps_wait_elapsed_ms = 0;
     mgr->sim_wait_elapsed_ms = 0;
     mgr->sim_start_sent      = 0;
 
-    s_wake_steps[0] = (sx_sleep_step_t){ .start = _gps_on_start,          .is_done = _gps_on_is_done,          .ctx = mgr, .name = "gps_on" };
-    s_wake_steps[1] = (sx_sleep_step_t){ .start = _gps_wait_start,        .is_done = _gps_wait_is_done,        .ctx = mgr, .name = "gps_wait_fix" };
-    s_wake_steps[2] = (sx_sleep_step_t){ .start = _modem_power_on_start,  .is_done = _modem_power_on_is_done,  .ctx = mgr, .name = "modem_power_on" };
-    s_wake_steps[3] = (sx_sleep_step_t){ .start = _modem_wait_ready_start,.is_done = _modem_wait_ready_is_done,.ctx = mgr, .name = "modem_wait_ready" };
-    s_wake_steps[4] = (sx_sleep_step_t){ .start = _gas_sensor_active_mode_start, .is_done = _gas_sensor_active_mode_is_done, .ctx = mgr, .name = "gas_sensor_active_mode" };
-    s_wake_steps[5] = (sx_sleep_step_t){ .start = accel_app_wake_step_start, .is_done = accel_app_wake_step_is_done, .ctx = mgr->accel_app, .name = "accel_resume" };
+    s_wake_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_wake_start, .is_done = _ext_flash_wake_is_done, .ctx = mgr->ext_flash, .name = "ext_flash_wake" };
+    s_wake_steps[1] = (sx_sleep_step_t){ .start = _gps_on_start,          .is_done = _gps_on_is_done,          .ctx = mgr, .name = "gps_on" };
+    s_wake_steps[2] = (sx_sleep_step_t){ .start = _gps_wait_start,        .is_done = _gps_wait_is_done,        .ctx = mgr, .name = "gps_wait_fix" };
+    s_wake_steps[3] = (sx_sleep_step_t){ .start = _modem_power_on_start,  .is_done = _modem_power_on_is_done,  .ctx = mgr, .name = "modem_power_on" };
+    s_wake_steps[4] = (sx_sleep_step_t){ .start = _modem_wait_ready_start,.is_done = _modem_wait_ready_is_done,.ctx = mgr, .name = "modem_wait_ready" };
+    s_wake_steps[5] = (sx_sleep_step_t){ .start = _gas_sensor_active_mode_start, .is_done = _gas_sensor_active_mode_is_done, .ctx = mgr, .name = "gas_sensor_active_mode" };
+    s_wake_steps[6] = (sx_sleep_step_t){ .start = accel_app_wake_step_start, .is_done = accel_app_wake_step_is_done, .ctx = mgr->accel_app, .name = "accel_resume" };
 
-    s_sleep_steps[0] = (sx_sleep_step_t){ .start = _gps_power_off_start,   .is_done = _gps_power_off_is_done,   .ctx = mgr, .name = "gps_power_off" };
-    s_sleep_steps[1] = (sx_sleep_step_t){ .start = _modem_power_off_start, .is_done = _modem_power_off_is_done, .ctx = mgr, .name = "modem_power_off" };
-    s_sleep_steps[2] = (sx_sleep_step_t){ .start = sps30_app_sleep_step_start, .is_done = sps30_app_sleep_step_is_done, .ctx = mgr->sps30_app, .name = "sps30_power_off" };
-    s_sleep_steps[3] = (sx_sleep_step_t){ .start = _pump_off_start,        .is_done = _pump_off_is_done,        .ctx = mgr, .name = "pump_off" };
-    s_sleep_steps[4] = (sx_sleep_step_t){ .start = _gas_sensor_qa_mode_start, .is_done = _gas_sensor_qa_mode_is_done, .ctx = mgr, .name = "gas_sensor_qa_mode" };
-    s_sleep_steps[5] = (sx_sleep_step_t){ .start = accel_app_sleep_step_start, .is_done = accel_app_sleep_step_is_done, .ctx = mgr->accel_app, .name = "accel_suspend" };
+    s_sleep_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_sleep_start, .is_done = _ext_flash_sleep_is_done, .ctx = mgr->ext_flash, .name = "ext_flash_sleep" };
+    s_sleep_steps[1] = (sx_sleep_step_t){ .start = _gps_power_off_start,   .is_done = _gps_power_off_is_done,   .ctx = mgr, .name = "gps_power_off" };
+    s_sleep_steps[2] = (sx_sleep_step_t){ .start = _modem_power_off_start, .is_done = _modem_power_off_is_done, .ctx = mgr, .name = "modem_power_off" };
+    s_sleep_steps[3] = (sx_sleep_step_t){ .start = sps30_app_sleep_step_start, .is_done = sps30_app_sleep_step_is_done, .ctx = mgr->sps30_app, .name = "sps30_power_off" };
+    s_sleep_steps[4] = (sx_sleep_step_t){ .start = _pump_off_start,        .is_done = _pump_off_is_done,        .ctx = mgr, .name = "pump_off" };
+    s_sleep_steps[5] = (sx_sleep_step_t){ .start = _gas_sensor_qa_mode_start, .is_done = _gas_sensor_qa_mode_is_done, .ctx = mgr, .name = "gas_sensor_qa_mode" };
+    s_sleep_steps[6] = (sx_sleep_step_t){ .start = accel_app_sleep_step_start, .is_done = accel_app_sleep_step_is_done, .ctx = mgr->accel_app, .name = "accel_suspend" };
 
     /* step_timeout_ms = 0 (no shared timeout) passed to sx_sleep_service:
      * every step here manages its own completion criteria (gps_on/
@@ -301,8 +337,8 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
      * the modem step run needlessly long; keeping it per-step avoids
      * that mismatch entirely. */
     sx_sleep_service_init(&mgr->svc, sleep,
-                           s_wake_steps, 6,
-                           s_sleep_steps, 6,
+                           s_wake_steps, 7,
+                           s_sleep_steps, 7,
                            0);
 
     log_info(TAG, "init OK");

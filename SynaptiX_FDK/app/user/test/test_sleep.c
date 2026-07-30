@@ -212,12 +212,13 @@ void test_sleep_init(void)
     sps30_app_init(&s_sps30_app, sx_board_get_sps30_power_gpio());
 
     /* Wires ALL 6 wake_steps + ALL 6 sleep_steps (GPS, modem, SPS30,
-     * pump, ZE12A, BNO055) -- per the user: "phai sleep tat ca cac
+     * pump, ZE12A, BNO055, W25Q128) -- per the user: "phai sleep tat ca cac
      * module de toi do dong". No module is skipped/stubbed out here;
-     * sx_sleep_manager.c's fixed 6+6 step tables are used exactly as
+     * sx_sleep_manager.c's fixed 7+7 step tables are used exactly as
      * app.c's real cycle uses them. */
     sx_sleep_manager_init(&s_sleep_mgr, &board.sleep, &board.modem, &board.gps,
-                           &s_sps30_app, sx_board_get_pump_pwm(), &s_accel);
+                           &s_sps30_app, sx_board_get_pump_pwm(), &s_accel,
+                           &board.q128);
 
     /* Wire the modem-ownership check so sx_mqtt.c's reconnect/recovery-
      * ladder logic defers to this file's wake sequence instead of also

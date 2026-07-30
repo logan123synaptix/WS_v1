@@ -14,6 +14,7 @@ extern "C" {
 #include "sx_pwm_sw.h"
 #include "sps30_app.h"
 #include "accel_app.h"
+#include "sx_W25Q128.h"
 
 /* Tier 3 of the 3-tier sleep architecture (see sx_sleep_service.h for the
  * full tier breakdown). This is the ONLY place in the sleep stack that
@@ -51,6 +52,15 @@ typedef struct {
      * accel_app.h), this pointer is only kept so sx_sleep_manager_init()
      * can pass it as those steps' ctx. */
     accel_app_t    *accel_app;
+    /* External SPI flash (W25Q128) — sleep_steps/wake_steps call this
+     * module's own sx_W25Q128_sleep_on()/sleep_off() directly (thin
+     * wrappers below adapt the (sx_W25Q128_t*) signature to
+     * sx_sleep_step_t's (void*) ctx), same pattern as pump_pwm above.
+     * Added (2026-07-30) to close the one power rail with no sleep_step
+     * yet: sx_W25Q128_sleep_on/_off already existed in the driver (SPI
+     * Deep Power-Down, no GPIO needed per the driver's own doc-comment)
+     * but were never called anywhere in the codebase before this. */
+    sx_W25Q128_t   *ext_flash;
     sx_sleep_service_t svc;
 
     /* Elapsed time for the currently-running GPS-fix-wait step; owned by
@@ -78,30 +88,37 @@ typedef struct {
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:
- *   1. GPS on           — power on GPS, resume its UART
- *   2. Wait for GPS fix — poll until lat/long non-zero or GPS_TIMEOUT_MS
- *   3. Resume LTE UART + power on modem
- *   4. Wait for modem ready — send start() once power_on_start() settles,
+ *   1. W25Q128 wake — release SPI Deep Power-Down (sx_W25Q128_sleep_off()).
+ *      Placed first: independent SPI bus, no dependency on I2C1/UART being
+ *      resumed yet, so it's safe to bring back as early as possible.
+ *   2. GPS on           — power on GPS, resume its UART
+ *   3. Wait for GPS fix — poll until lat/long non-zero or GPS_TIMEOUT_MS
+ *   4. Resume LTE UART + power on modem
+ *   5. Wait for modem ready — send start() once power_on_start() settles,
  *      poll is_ready(), hard-reset and retry once after 90s with no reply
- *   5. ZE12A back to Active Upload mode (gas_sensor_switch_to_active_mode())
+ *   6. ZE12A back to Active Upload mode (gas_sensor_switch_to_active_mode())
  *      — cheap fire-and-forget UART command, always reports done.
- *   6. BNO055 resume — PWR_MODE=NORMAL then re-select NDOF operation mode
+ *   7. BNO055 resume — PWR_MODE=NORMAL then re-select NDOF operation mode
  *      (accel_app_wake_step_start/is_done). Needed because leaving suspend
  *      only restores power per the datasheet; the fusion operation mode
  *      does not resume on its own (see accel_app.h).
  *
  * sleep_steps run, in order, before every sx_sleep_manager_enter_sleep():
- *   1. Power down GPS (zero out last fix so a stale fix isn't reused)
- *   2. Power down modem
- *   3. SPS30 power-down (sps30_app_sleep_step_start/is_done — SHDLC
+ *   1. W25Q128 sleep — enter SPI Deep Power-Down (sx_W25Q128_sleep_on()).
+ *      Placed first: closes off the one power rail that had no sleep_step
+ *      at all before (2026-07-30) — the driver's Deep Power-Down command
+ *      already existed but was never called anywhere in the codebase.
+ *   2. Power down GPS (zero out last fix so a stale fix isn't reused)
+ *   3. Power down modem
+ *   4. SPS30 power-down (sps30_app_sleep_step_start/is_done — SHDLC
  *      sleep() then EN_PW_DUST low). Caller must only trigger sleep once
  *      any in-progress SPS30 measurement cycle is DONE/IDLE (see
  *      sps30_app.h) — not enforced here, this module just runs the step.
- *   4. Pump off (0% duty via pump_off(), see sx_pwm_sw.h)
- *   5. ZE12A to Question & Answer mode (gas_sensor_switch_to_qa_mode())
+ *   5. Pump off (0% duty via pump_off(), see sx_pwm_sw.h)
+ *   6. ZE12A to Question & Answer mode (gas_sensor_switch_to_qa_mode())
  *      — reduces UART/processing load; does NOT reduce the electrochemical
  *      cell's own power draw (no such command exists per the datasheet).
- *   6. BNO055 to Suspend mode (accel_app_sleep_step_start/is_done) — a
+ *   7. BNO055 to Suspend mode (accel_app_sleep_step_start/is_done) — a
  *      real power-down per the datasheet's Suspend Mode section (all
  *      sensors + the chip's internal MCU sleep), unlike ZE12A's QA mode.
  *
@@ -117,7 +134,8 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
                             sx_pwm_software_t  *pump_pwm,
-                            accel_app_t        *accel_app);
+                            accel_app_t        *accel_app,
+                            sx_W25Q128_t       *ext_flash);
 
 /* Runs the sleep_steps then enters STOP mode via tier 2/1. Blocking, same
  * as the old sx_sleep_manager_enter() — returns only after waking. */

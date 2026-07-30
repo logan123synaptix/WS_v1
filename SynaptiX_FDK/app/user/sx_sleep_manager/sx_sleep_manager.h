@@ -66,6 +66,15 @@ typedef struct {
      * after power_on_start()'s async sequence reaches READY). */
     uint32_t sim_wait_elapsed_ms;
     uint8_t  sim_start_sent;
+
+    /* sx_gettick() snapshot from _modem_power_off_start(), used by
+     * _modem_power_off_is_done() to compute its own tick delta and drive
+     * modem_handle_poll() manually. Needed because the modem_power_off
+     * sleep_step runs inside sx_sleep_service.c's blocking
+     * _run_steps_blocking() loop, which does not call test_sleep_poll()
+     * (and therefore never calls modem_handle_poll()) between is_done()
+     * checks -- see that function's doc-comment for the full story. */
+    uint32_t power_off_last_tick_ms;
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:

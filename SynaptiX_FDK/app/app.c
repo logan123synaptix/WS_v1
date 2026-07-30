@@ -131,7 +131,6 @@ typedef enum {
     APP_CYCLE_SENSING,
     APP_CYCLE_SENDING,
     APP_CYCLE_SLEEPING,
-    APP_CYCLE_WAKING,
 } app_cycle_state_t;
 
 /* Starts in GPS_WAIT (not ON_PUMP) so every cycle — cold-boot or
@@ -599,10 +598,15 @@ static void send_heartbeat_if_due(void)
  * This means:
  *   - The APP_CYCLE_SLEEPING case below never actually reaches whatever
  *     would come after its sx_sleep_manager_enter_sleep() call.
- *   - APP_CYCLE_WAKING, APP_MODE_ENTER_SLEEP/WAKEUP, and
- *     sx_sleep_manager_wake_process() are all dead code paths now — kept
- *     for now to avoid a wider refactor (see app.h's doc-comment on
- *     app_mode_t), but never actually exercised.
+ *   - APP_CYCLE_WAKING and sx_sleep_manager_wake_process() (along with
+ *     the wake_steps they drove in sx_sleep_manager.c — GPS/modem
+ *     power-on, gas sensor active-mode, accel resume) have been removed
+ *     entirely: cold-boot/wake-from-STANDBY both go through the normal
+ *     sx_board_init()/app_init() path, which already re-powers GPS
+ *     (gps_init() drives N/F high unconditionally) and the modem
+ *     (sx_board_init() calls power_on_start() directly) on every boot —
+ *     nothing wake_steps did was still needed. APP_MODE_WAKEUP remains
+ *     in app.h's app_mode_t enum but is unused.
  *   - "Back to ON_PUMP" after waking no longer happens via this switch
  *     resuming — it happens via the chip resetting all the way back to
  *     main(), which calls app_init(), which resets s_cycle_state to
@@ -748,16 +752,6 @@ static void app_cycle_process(uint32_t delta_ms)
          * re-entered until it returns (see app_process()). */
         break;
 
-    case APP_CYCLE_WAKING:
-        if (sx_sleep_manager_is_wake_done(&s_sleep_mgr)) {
-            sx_sleep_manager_reset_wake(&s_sleep_mgr);
-            s_cycle_tick_ms = 0;
-            s_cycle_state   = APP_CYCLE_ON_PUMP;
-            s_app_mode      = APP_MODE_FULL_POWER;
-            log_info(TAG, "Wake sequence complete - resuming cycle");
-        }
-        break;
-
     default:
         s_cycle_state = APP_CYCLE_ON_PUMP;
         break;
@@ -857,7 +851,14 @@ void app_init(uint8_t is_wake_from_standby){
      * shell_app.h's caveat comment. */
     shell_app_init(&board.log_uart);
 
-    s_cycle_state   = APP_CYCLE_ON_PUMP;
+    /* Do NOT reset to APP_CYCLE_ON_PUMP here -- s_cycle_state's static
+     * initializer above (APP_CYCLE_GPS_WAIT) must be allowed to stand.
+     * Under STANDBY, every wake is a fresh app_init() call (see
+     * sx_sleep.c's _enter_stop() doc-comment), so overwriting it here
+     * silently skipped GPS_WAIT on every single boot -- the state was
+     * fully implemented (app_cycle_process()'s case, gps_fix_cache,
+     * build_telemetry_payload()'s gps_fix field) but never reachable. */
+    s_gps_wait_elapsed_ms = 0;
     s_cycle_tick_ms = 0;
     s_app_mode      = APP_MODE_FULL_POWER;
 }
@@ -892,42 +893,20 @@ void app_process(uint32_t delta_ms){
 
     /* Main cycle only runs in APP_MODE_FULL_POWER.
      *
-     * UPDATED (2026-07-30, STANDBY mode — see sx_sleep.c's _enter_stop()
-     * doc-comment): app_mode effectively never leaves APP_MODE_FULL_POWER
-     * from this function's own point of view any more. APP_CYCLE_SENDING
-     * (in app_cycle_process()) still sets s_app_mode = APP_MODE_ENTER_SLEEP
-     * before falling into the branch below, but
-     * sx_sleep_manager_enter_sleep() -> sx_sleep_enter_stop() ->
-     * HAL_PWR_EnterSTANDBYMode() now never returns — the whole chip resets
-     * instead of resuming past that call. So:
-     *   - The `s_app_mode = APP_MODE_WAKEUP; s_cycle_state =
-     *     APP_CYCLE_WAKING;` lines that used to follow the sleep call
-     *     never execute any more; they are unreachable dead code, kept
-     *     only because removing them isn't needed for correctness (they
-     *     just never run).
-     *   - The APP_MODE_WAKEUP branch (sx_sleep_manager_wake_process()) is
-     *     therefore also dead — s_app_mode can never actually become
-     *     APP_MODE_WAKEUP on this path any more.
-     *   - What used to be "post-wake" now happens via a fresh boot
-     *     instead: main() -> app_init() -> s_cycle_state reset to
-     *     APP_CYCLE_GPS_WAIT (see its doc-comment above app_cycle_state_t).
-     * Left as an if/else-if chain rather than deleting the dead branches
-     * outright, to keep this change minimal and reviewable; a follow-up
-     * cleanup can remove APP_MODE_ENTER_SLEEP/WAKEUP and APP_CYCLE_WAKING
-     * entirely once STANDBY is confirmed stable on real hardware. */
+     * Under STANDBY (see sx_sleep.c's _enter_stop() doc-comment),
+     * APP_MODE_ENTER_SLEEP's sx_sleep_manager_enter_sleep() call below
+     * never returns — the whole chip resets instead of resuming past it.
+     * Anything that used to be "post-wake" now happens via a fresh boot
+     * instead: main() -> app_init() -> s_cycle_state reset to
+     * APP_CYCLE_GPS_WAIT (see its doc-comment above app_cycle_state_t).
+     * APP_MODE_WAKEUP is therefore unreachable and has been removed. */
     if (s_app_mode == APP_MODE_FULL_POWER) {
         app_cycle_process(delta_ms);
     } else if (s_app_mode == APP_MODE_ENTER_SLEEP) {
         uint32_t sleep_ms = network_config_get()->sleep_ms;
         log_info(TAG, "Entering sleep for %lu ms", (unsigned long)sleep_ms);
         sx_sleep_manager_enter_sleep(&s_sleep_mgr, sleep_ms / 1000);
-        /* Unreachable with STANDBY -- see doc-comment above. Kept as-is
-         * (dead but harmless) rather than removed, per the note above. */
-        s_app_mode    = APP_MODE_WAKEUP;
-        s_cycle_state = APP_CYCLE_WAKING;
-        log_info(TAG, "Woke up - running wake sequence");
-    } else if (s_app_mode == APP_MODE_WAKEUP) {
-        sx_sleep_manager_wake_process(&s_sleep_mgr, delta_ms);
-        app_cycle_process(delta_ms);
+        /* Unreachable -- sx_sleep_manager_enter_sleep() never returns
+         * under STANDBY. Nothing belongs after this call any more. */
     }
 }

@@ -16,7 +16,7 @@ typedef enum {
 
 //extern volatile app_mode_t app_mode;
 
-void app_init(void);
+void app_init(uint8_t is_wake_from_standby);
 
 void app_process(uint32_t delta_ms);
 

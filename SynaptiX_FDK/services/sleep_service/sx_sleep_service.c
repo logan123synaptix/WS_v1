@@ -73,13 +73,17 @@ void sx_sleep_service_enter_sleep(sx_sleep_service_t *svc, uint32_t sleep_sec)
     log_info(TAG, "Setting RTC wakeup = %lu sec", sleep_sec);
     sx_sleep_set_rtc_wake(svc->sleep, sleep_sec);
 
-    log_info(TAG, ">>> Entering STOP mode NOW");
+    log_info(TAG, ">>> Entering STANDBY mode NOW");
     sx_delay_ms(10);
 
+    /* Does not return -- HAL_PWR_EnterSTANDBYMode() (called inside
+     * sx_sleep_enter_stop(), see sx_sleep.c) resets the whole chip on
+     * wake instead of resuming execution here. The next code to run is
+     * main(), from the reset vector. No log line or cleanup can happen
+     * on this side of the call any more -- see main.c's PWR_FLAG_SBF
+     * check for how the boot path tells a STANDBY wake apart from a
+     * cold boot. */
     sx_sleep_enter_stop(svc->sleep);
-
-    log_info(TAG, "<<< Woke from STOP mode");
-    sx_sleep_cancel_rtc(svc->sleep);
 }
 
 void sx_sleep_service_wake_process(sx_sleep_service_t *svc, uint32_t delta_ms)

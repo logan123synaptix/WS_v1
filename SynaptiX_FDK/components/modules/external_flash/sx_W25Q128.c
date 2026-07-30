@@ -233,6 +233,19 @@ void sx_W25Q128_chip_erase(sx_W25Q128_t *dev)
 }
 
 void sx_W25Q128_sleep_on(sx_W25Q128_t *dev){
+    /* Bug fix (2026-07-30): must not send Power-Down (0xB9) while the chip
+     * is still BUSY from a prior write/erase (e.g. network_config.c's
+     * config-save just before entering sleep) — the datasheet only allows
+     * Power-Down from idle. Confirmed on real board: without this guard,
+     * sending Power-Down right after a write left the SPI bus/chip hung
+     * (board froze at the "ext_flash_sleep" sleep step, no further log,
+     * required manual reset). s_dev must be set here since w25q_wait_busy()
+     * reads it, and callers of sleep_on()/sleep_off() don't necessarily
+     * call through sx_W25Q128_init() (which is the only other place that
+     * sets s_dev) right before calling this. */
+    s_dev = dev;
+    w25q_wait_busy();
+
     uint8_t cmd = W25Q128_CMD_POWER_DOWN;
     sx_spi_write(dev->spi, &cmd, 1);
     dev->initialized = false;

@@ -170,13 +170,29 @@ static void _modem_power_off_start(void *ctx)
 {
     sx_sleep_manager_t *mgr = (sx_sleep_manager_t *)ctx;
     mgr->modem->ops->power_off_start(mgr->modem->ctx);
-    sx_delay_ms(500);
 }
 
 static uint8_t _modem_power_off_is_done(void *ctx)
 {
-    (void)ctx;
-    return 1;
+    sx_sleep_manager_t *mgr = (sx_sleep_manager_t *)ctx;
+
+    /* Bug fix (2026-07-30): this used to return 1 unconditionally, right
+     * after only a 500ms sx_delay_ms() -- but power_off_start() only
+     * *starts* an async PWRKEY-pulse-then-settle sequence
+     * (A7677S_OFF_PULSE_MS + A7677S_OFF_SETTLE_MS, ~7.1s total in
+     * a7677s.h) that runs across later poll() calls, not inside
+     * power_off_start() itself. Reporting "done" after 500ms let
+     * sx_sleep_manager_enter_sleep() carry on to the remaining
+     * sleep_steps, set the RTC, and put the MCU into STOP mode while the
+     * modem was still mid power-off -- confirmed on real board
+     * (2026-07-30): "Power Off complete (PWRKEY)" was logged several
+     * seconds later, mid wake sequence, and VDD_EXT was measured still
+     * outputting 1.8V at STOP-mode entry instead of having dropped to 0V.
+     * Fix: gate on power_is_busy() going false, same pattern already used
+     * by _modem_wait_ready_is_done() above for power-on. power_is_busy()
+     * covers A7677S_PWR_OFF_PULSE/A7677S_PWR_OFF_SETTLE and only clears
+     * once the driver's own state machine reaches A7677S_PWR_IDLE. */
+    return !mgr->modem->ops->power_is_busy(mgr->modem->ctx);
 }
 
 /* Step 3: SPS30 power-down — sps30_app.h's start()/is_done() pair already

@@ -57,6 +57,22 @@ static test_sleep_state_t s_state = TEST_SLEEP_STATE_PUBLISH;
 static uint8_t  s_mqtt_was_connected = 0;
 static uint32_t s_cycle_count = 0;
 
+/* Publish-completion tracking for TEST_SLEEP_STATE_PUBLISH (see
+ * test_sleep_poll() below). sx_user_mqtt_publish() is fire-and-forget --
+ * it queues the AT+CMQTT* sequence and returns immediately, with the real
+ * result only arriving later via this on_publish callback. Without this,
+ * the state machine used to advance straight to ENTER_SLEEP right after
+ * calling sx_user_mqtt_publish(), which could power the modem off
+ * (modem_power_off sleep_step) while the publish's AT+CMQTTTOPIC/
+ * CMQTTPAYLOAD/CMQTTPUB sequence was still in flight on the UART --
+ * confirmed on real board, 2026-07-29 (log showed "AT+CMQTTTOPIC prompt
+ * failed"/"TIMEOUT response: [NULL]" starting right as "Power Off
+ * complete (PWRKEY)" printed). Fix (confirmed with user): don't enter
+ * sleep until the publish actually finishes, success or failure. */
+static uint8_t s_publish_sent = 0;
+static uint8_t s_publish_done = 0;
+static uint8_t s_publish_success = 0;
+
 static void on_connected(void)    { log_info(TAG, "MQTT connected callback fired"); }
 static void on_disconnected(void) { log_warn(TAG, "MQTT disconnected callback fired"); }
 static void on_message(const char *topic, const char *message)
@@ -66,6 +82,8 @@ static void on_message(const char *topic, const char *message)
 static void on_publish(int success)
 {
     log_info(TAG, "Publish result: %s", success ? "OK" : "FAIL");
+    s_publish_done    = 1;
+    s_publish_success = (uint8_t)success;
 }
 
 /* Wrapper matching sx_user_mqtt_set_modem_owned_elsewhere_check()'s plain
@@ -258,10 +276,36 @@ void test_sleep_poll(uint32_t delta_ms)
             return;
         }
 
-        s_cycle_count++;
-        const char *payload = build_test_payload();
-        log_info(TAG, "[TX] topic=%s payload=%s", TEST_SLEEP_TOPIC, payload);
-        sx_user_mqtt_publish(TEST_SLEEP_TOPIC, payload);
+        if (!s_publish_sent) {
+            s_cycle_count++;
+            const char *payload = build_test_payload();
+            log_info(TAG, "[TX] topic=%s payload=%s", TEST_SLEEP_TOPIC, payload);
+            s_publish_done    = 0;
+            s_publish_success = 0;
+            sx_user_mqtt_publish(TEST_SLEEP_TOPIC, payload);
+            s_publish_sent = 1;
+            return;
+        }
+
+        /* sx_user_mqtt_publish() above is fire-and-forget -- the real
+         * result only arrives later via the on_publish callback (which
+         * itself may fire only after sx_user_mqtt.c's internal retry
+         * ladder, MQTT_PUBLISH_MAX_RETRY attempts). Do not proceed to
+         * ENTER_SLEEP (which powers the modem off) until that callback
+         * has actually fired, or the modem gets cut mid AT+CMQTT*
+         * sequence -- confirmed bug, see s_publish_done's doc-comment. */
+        if (!s_publish_done) {
+            return;
+        }
+        s_publish_sent = 0;
+
+        if (!s_publish_success) {
+            /* Per user: only proceed to sleep on a confirmed-OK publish.
+             * On failure, stay in PUBLISH and retry next tick rather than
+             * sleeping with unconfirmed/failed telemetry. */
+            log_warn(TAG, "Publish did not succeed -- retrying before sleep");
+            return;
+        }
 
         log_info(TAG, "Entering sleep for %lu ms (ALL modules) ...",
                  (unsigned long)SLEEP_TEST_TIME_MS);

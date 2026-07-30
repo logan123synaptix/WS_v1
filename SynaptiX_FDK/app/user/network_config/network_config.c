@@ -59,9 +59,9 @@ static void build_defaults(network_config_t *cfg)
      * either. Placeholder, same spirit as app.c's TODO — MUST be
      * replaced (via network_config_set_host() + _save(), or by editing
      * this function) once a real broker is decided. */
-    safe_strcpy(cfg->host, sizeof(cfg->host), "REPLACE_ME_BROKER_HOST");
+    safe_strcpy(cfg->host, sizeof(cfg->host), HOST_THINGSBOART);
     cfg->port = 1883;
-    safe_strcpy(cfg->client_id, sizeof(cfg->client_id), "REPLACE_ME_CLIENT_ID");
+    safe_strcpy(cfg->client_id, sizeof(cfg->client_id), CLIENT_ID_TB);
     cfg->username[0] = '\0';
     cfg->password[0] = '\0';
     cfg->keepalive_s = 60;

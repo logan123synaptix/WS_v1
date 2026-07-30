@@ -55,6 +55,10 @@
 #define APP_FW_VERSION                  "0.1.0"
 
 #if USE_THINGSBOARD
+
+#define HOST_THINGSBOART                "broker.hivemq.com"
+#define CLIENT_ID_TB                    "vu001"
+
 #define ATTRIBUTE_UPDATE_API "synaptix/demo/attributes/"MQTT_ID
 #define ATTRIBUTE_REQUEST_API "synaptix/demo/attributes/response/"MQTT_ID
 #define ATTRIBUTE_FW_REQUEST_API "v2/fw/request/chunk" // v2/fw/request/${requestId}/chunk/${chunkIndex}

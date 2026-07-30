@@ -31,6 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
+#include "logger.h"
 #define TEST        0
 #include "sx_board.h"
 #if TEST
@@ -91,6 +92,22 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
+  /* Determine boot cause before anything else touches PWR/RCC state.
+   * PWR_FLAG_SBF ("Standby flag") is set by hardware whenever the chip
+   * wakes from STANDBY mode, and is NOT cleared by a normal reset (NRST
+   * pin, power-on, watchdog, software reset) -- only by
+   * __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SBF) or a fresh power-up (VDD cycled).
+   * Confirmed HAL_Init() below does not touch any PWR flag itself, so
+   * reading here, before it runs, is safe and unambiguous -- nothing has
+   * had a chance to clear or set this flag yet on this boot.
+   *
+   * Must clear the flag right after reading it: if left set, the NEXT
+   * boot (even a genuine cold reset) would misread it as "woke from
+   * STANDBY" too, since the flag only gets cleared by an explicit write,
+   * not automatically on every reset type. */
+  uint8_t is_wake_from_standby = (__HAL_PWR_GET_FLAG(PWR_FLAG_SBF) != RESET) ? 1 : 0;
+  __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SBF);
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -130,6 +147,8 @@ int main(void)
   uint32_t last_tick = 0, last_ticks = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   sx_board_init();
+  log_info(TAG, is_wake_from_standby ? "Boot cause: wake from STANDBY (RTC)"
+                                      : "Boot cause: cold boot / reset");
   #if TEST
   // test_lte_mqtt_init();
   // test_sht3x_init();
@@ -141,7 +160,7 @@ int main(void)
   // test_ads1115_init();
   test_sleep_init();
   #else
-  app_init();
+  app_init(is_wake_from_standby);
   #endif
   /* USER CODE END 2 */
 

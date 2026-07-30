@@ -18,6 +18,7 @@
 #include "time_sync.h"
 #include "mqtt_rpc.h"
 #include "ze12a.h"
+#include "gps_fix_cache.h"
 #include "gps.h"
 #include "cJSON.h"
 #include <string.h>
@@ -111,25 +112,54 @@ static time_sync_t         s_time_sync;
  *     the same follow-up. */
 
 typedef enum {
-    APP_CYCLE_ON_PUMP = 0,
+    /* GPS_WAIT (2026-07-30, added for STANDBY mode — see sx_sleep.c's
+     * _enter_stop() doc-comment): with STANDBY, every wake is a full
+     * reboot through main()/board_init()/app_init(), so there is no
+     * longer a separate non-blocking wake_steps pass (sx_sleep_manager.c,
+     * STOP-mode era) to wait for a GPS fix before the rest of the cycle
+     * runs — that has to happen here instead, as the first state of every
+     * cycle. Per the user: wait up to GPS_WAIT_TIMEOUT_MS for a fresh fix;
+     * if one arrives, stop waiting immediately and cache it
+     * (gps_fix_cache_save()) for future fallback; if the window times out
+     * with no fix, fall back to the last cached fix (gps_fix_cache_load())
+     * if one exists, and mark the reading stale via the telemetry
+     * payload's "gps_fix" field rather than blocking any further — modem/
+     * SPS30 do NOT wait on this (per the user, they start in board_init()
+     * regardless, same as before). */
+    APP_CYCLE_GPS_WAIT = 0,
+    APP_CYCLE_ON_PUMP,
     APP_CYCLE_SENSING,
     APP_CYCLE_SENDING,
     APP_CYCLE_SLEEPING,
     APP_CYCLE_WAKING,
 } app_cycle_state_t;
 
-/* Starts in ON_PUMP rather than IDLE — per the user, the whole board
- * (STM32 + peripherals) actually sleeps between cycles now, so there is
- * no separate "wait for the next cycle" IDLE state anymore: SLEEPING
- * itself (via sx_sleep_manager_enter_sleep()'s RTC wakeup timer, using
- * APP_CYCLE_PERIOD_MS as the sleep duration) is what used to be IDLE's
- * job. On boot (first lap, before any sleep has happened yet) this just
- * starts the pump immediately rather than waiting out a "time until next
- * lap" window — acceptable since there is no prior telemetry to protect
- * a cadence around on the very first lap. */
-static app_cycle_state_t s_cycle_state   = APP_CYCLE_ON_PUMP;
+/* Starts in GPS_WAIT (not ON_PUMP) so every cycle — cold-boot or
+ * wake-from-STANDBY, now indistinguishable at the code level, see
+ * sx_sleep.c — gets a chance at a fresh GPS fix before the pump/sensing/
+ * sending sequence runs. See APP_CYCLE_GPS_WAIT's doc-comment above and
+ * its handling in app_cycle_process() below.
+ *
+ * Below GPS_WAIT: starts in ON_PUMP rather than IDLE — per the user, the
+ * whole board (STM32 + peripherals) actually sleeps between cycles now,
+ * so there is no separate "wait for the next cycle" IDLE state anymore:
+ * SLEEPING itself (via sx_sleep_manager_enter_sleep()'s RTC wakeup timer,
+ * using APP_CYCLE_PERIOD_MS as the sleep duration) is what used to be
+ * IDLE's job. */
+static app_cycle_state_t s_cycle_state   = APP_CYCLE_GPS_WAIT;
 static uint32_t          s_cycle_tick_ms = 0;
 static volatile app_mode_t s_app_mode    = APP_MODE_FULL_POWER;
+
+/* GPS_WAIT state's own bookkeeping — separate counter from
+ * s_cycle_tick_ms since GPS_WAIT needs a longer, independent timeout
+ * (130s) that must not collide with ON_PUMP's/SENSING's much shorter
+ * ms windows if GPS_WAIT ever needs to coexist with them in future
+ * refactors. Whether this cycle got a fresh fix or fell back to the
+ * cache (or found nothing at all) is recorded in s_gps_fix_this_cycle,
+ * read by build_telemetry_payload() below. */
+#define GPS_WAIT_TIMEOUT_MS  130000U
+static uint32_t s_gps_wait_elapsed_ms  = 0;
+static bool     s_gps_fix_this_cycle   = false;
 
 #define TELEMETRY_JSON_BUFF_SIZE 512
 static char s_telemetry_json[TELEMETRY_JSON_BUFF_SIZE];
@@ -388,7 +418,21 @@ static const char *build_telemetry_payload(void)
      * dataPayload() gated this on weatherstation.gps.isReady; sx_gps_t
      * here has no such flag (see board.gps in sx_board.h), so this uses
      * the same "non-zero lat/long" liveness check sx_sleep_manager.c's
-     * _gps_wait_is_done() already uses for the same purpose. */
+     * _gps_wait_is_done() already uses for the same purpose.
+     *
+     * gps_fix (added 2026-07-30, STANDBY mode — see APP_CYCLE_GPS_WAIT's
+     * doc-comment in app_cycle_state_t above): tells the consumer whether
+     * latitude/longitude below are a fresh fix from THIS cycle
+     * (s_gps_fix_this_cycle == true) or a fallback from the last known
+     * position, loaded from the exflash cache after this cycle's GPS_WAIT
+     * window timed out with no new fix (s_gps_fix_this_cycle == false) —
+     * board.gps.latitude/longtitude are overwritten with the cached value
+     * in that fallback case (see APP_CYCLE_GPS_WAIT), so the non-zero
+     * check below still finds something to publish either way; gps_fix is
+     * what actually distinguishes "live" from "stale" for whoever reads
+     * the payload. Still null when there is truly nothing (never fixed
+     * even once, no cache to fall back to). */
+    cJSON_AddBoolToObject(root, "gps_fix", s_gps_fix_this_cycle);
     if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
         cJSON_AddNumberToObject(root, "latitude", board.gps.latitude);
         cJSON_AddNumberToObject(root, "longitude", board.gps.longtitude);
@@ -540,23 +584,96 @@ static void send_heartbeat_if_due(void)
     log_info(TAG, "Heartbeat published: %s", payload);
 }
 
-/* ===================== FULL_POWER cycle: ON_PUMP -> SENSING -> SENDING
- * ===================== SLEEPING -> WAKING -> back to ON_PUMP
+/* ===================== FULL_POWER cycle: GPS_WAIT -> ON_PUMP -> SENSING
+ * ===================== -> SENDING -> SLEEPING -> (reset, back to GPS_WAIT)
  *
- * Per the user (2026-07-15): the whole board sleeps between cycles, not
- * just individual peripherals independently — SLEEPING here calls
- * sx_sleep_manager_enter_sleep() (tier 3), which runs every registered
- * sleep_step (GPS/modem power-down, SPS30 SHDLC-sleep+EN_PW_DUST-low,
- * pump off, ZE12A to QA mode, BNO055 to suspend — see
- * sx_sleep_manager.c) and then actually parks the STM32 itself in STOP
- * mode via tier 1 (sx_sleep_enter_stop()). sx_sleep_manager_enter_sleep()
- * is blocking: it does not return until the RTC wakeup timer fires and
- * the MCU resumes — so app_process() below only calls it once per
- * SLEEPING-state entry and then waits out the following WAKING state
- * once execution resumes on the other side of that call. */
+ * IMPORTANT UPDATE (2026-07-30, STANDBY mode — see sx_sleep.c's
+ * _enter_stop() doc-comment): the paragraph below describing SLEEPING ->
+ * WAKING as a blocking-call-that-returns is from the STOP-mode era and is
+ * NO LONGER ACCURATE. sx_sleep_manager_enter_sleep() still runs every
+ * registered sleep_step first (GPS/modem power-down, SPS30 SHDLC-sleep+
+ * EN_PW_DUST-low, pump off, ZE12A to QA mode, BNO055 to suspend — see
+ * sx_sleep_manager.c), but the STM32 park step at the end
+ * (sx_sleep_enter_stop() -> HAL_PWR_EnterSTANDBYMode()) now NEVER
+ * RETURNS — the chip resets on wake instead of resuming execution here.
+ * This means:
+ *   - The APP_CYCLE_SLEEPING case below never actually reaches whatever
+ *     would come after its sx_sleep_manager_enter_sleep() call.
+ *   - APP_CYCLE_WAKING, APP_MODE_ENTER_SLEEP/WAKEUP, and
+ *     sx_sleep_manager_wake_process() are all dead code paths now — kept
+ *     for now to avoid a wider refactor (see app.h's doc-comment on
+ *     app_mode_t), but never actually exercised.
+ *   - "Back to ON_PUMP" after waking no longer happens via this switch
+ *     resuming — it happens via the chip resetting all the way back to
+ *     main(), which calls app_init(), which resets s_cycle_state to
+ *     APP_CYCLE_GPS_WAIT (not directly ON_PUMP any more — see
+ *     APP_CYCLE_GPS_WAIT's own doc-comment above).
+ *
+ * Original paragraph, describing the STOP-mode-era behavior, kept for
+ * historical context: "Per the user (2026-07-15): the whole board sleeps
+ * between cycles, not just individual peripherals independently —
+ * SLEEPING here calls sx_sleep_manager_enter_sleep() (tier 3) ... it does
+ * not return until the RTC wakeup timer fires and the MCU resumes — so
+ * app_process() below only calls it once per SLEEPING-state entry and
+ * then waits out the following WAKING state once execution resumes on
+ * the other side of that call." */
 static void app_cycle_process(uint32_t delta_ms)
 {
     switch (s_cycle_state) {
+    case APP_CYCLE_GPS_WAIT:
+        /* First tick after entering this state (boot, or reset-from-
+         * STANDBY which lands here again via app_init() — see
+         * APP_CYCLE_GPS_WAIT's doc-comment above). GPS itself was already
+         * powered on back in gps_init() (see gps.c: pwr GPIO driven HIGH
+         * unconditionally at init) and modem/SPS30 already kicked off in
+         * board_init() regardless of this state, per the user — this
+         * state's only job is to give GPS a window to get a fix before
+         * committing to a reading for this cycle. */
+        if (s_gps_wait_elapsed_ms == 0) {
+            log_info(TAG, "Waiting up to %lu ms for GPS fix",
+                     (unsigned long)GPS_WAIT_TIMEOUT_MS);
+        }
+
+        if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
+            /* Fresh fix arrived — stop waiting immediately, don't burn
+             * the rest of the window. Cache it (delete+recreate, per the
+             * user) for the next cycle's fallback if it fails to fix. */
+            log_info(TAG, "GPS fix acquired after %lu ms (lat=%f lon=%f)",
+                     (unsigned long)s_gps_wait_elapsed_ms,
+                     board.gps.latitude, board.gps.longtitude);
+            gps_fix_cache_save(board.gps.latitude, board.gps.longtitude);
+            s_gps_fix_this_cycle = true;
+            s_gps_wait_elapsed_ms = 0;
+            s_cycle_state = APP_CYCLE_ON_PUMP;
+            break;
+        }
+
+        s_gps_wait_elapsed_ms += delta_ms;
+        if (s_gps_wait_elapsed_ms >= GPS_WAIT_TIMEOUT_MS) {
+            /* Timed out with no fresh fix — fall back to the last cached
+             * fix if one exists (delete-and-recreate cache, per the
+             * user), otherwise publish nulls this cycle (board.gps.lat/
+             * lon are already 0.0f in that case, build_telemetry_payload()
+             * already nulls on that condition — no extra change needed
+             * there beyond the new gps_fix field). Per the user: do NOT
+             * wait any longer than this window — publish and move on
+             * ("bắn data ... vào sleep") to save power. */
+            float cached_lat, cached_lon;
+            if (gps_fix_cache_load(&cached_lat, &cached_lon)) {
+                log_warn(TAG, "GPS fix timeout after %lu ms — using cached fix (lat=%f lon=%f)",
+                         (unsigned long)s_gps_wait_elapsed_ms, cached_lat, cached_lon);
+                board.gps.latitude   = cached_lat;
+                board.gps.longtitude = cached_lon;
+            } else {
+                log_warn(TAG, "GPS fix timeout after %lu ms — no cached fix available, publishing null",
+                         (unsigned long)s_gps_wait_elapsed_ms);
+            }
+            s_gps_fix_this_cycle = false;
+            s_gps_wait_elapsed_ms = 0;
+            s_cycle_state = APP_CYCLE_ON_PUMP;
+        }
+        break;
+
     case APP_CYCLE_ON_PUMP:
         s_cycle_tick_ms += delta_ms;
         if (s_cycle_tick_ms == delta_ms) {
@@ -647,8 +764,9 @@ static void app_cycle_process(uint32_t delta_ms)
     }
 }
 
-void app_init(void){
-    log_info(TAG, "APP initializing ....");
+void app_init(uint8_t is_wake_from_standby){
+    log_info(TAG, "APP initializing .... (is_wake_from_standby=%u)",
+             (unsigned)is_wake_from_standby);
 
     sps30_app_init(&s_sps30_app, sx_board_get_sps30_power_gpio());
     sx_temp_humi_init(&s_temp_humi, &board.sht3x);
@@ -772,33 +890,39 @@ void app_process(uint32_t delta_ms){
      * anyway). */
     shell_app_poll();
 
-    /* Main cycle only runs in APP_MODE_FULL_POWER. The other app_mode_t
-     * states drive the sleep/wake transition below:
+    /* Main cycle only runs in APP_MODE_FULL_POWER.
      *
-     *  - APP_MODE_ENTER_SLEEP: set once by app_cycle_process()'s SENDING
-     *    case right after publish. sx_sleep_manager_enter_sleep() is a
-     *    BLOCKING call — it runs every registered sleep_step (GPS/modem
-     *    power-down, SPS30 SHDLC-sleep+EN_PW_DUST-low, pump off, ZE12A to
-     *    QA mode, accel suspend) and then parks the STM32 itself in STOP
-     *    mode via tier 1. It does not return until the RTC wakeup timer
-     *    fires (sleep_sec derived from APP_CYCLE_PERIOD_MS) and the MCU
-     *    resumes — so this call itself is where "the whole board sleeps"
-     *    actually happens; everything after it below is post-wake.
-     *  - APP_MODE_WAKEUP: drives sx_sleep_manager_wake_process() every
-     *    tick until sx_sleep_manager_is_wake_done() reports the wake
-     *    step sequence (GPS on, modem on + wait ready, gas sensor back to
-     *    active mode, accel resume) has finished; app_cycle_process()'s
-     *    APP_CYCLE_WAKING case then resets state and flips s_app_mode back
-     *    to FULL_POWER, resuming the ON_PUMP->SENSING->SENDING lap. */
+     * UPDATED (2026-07-30, STANDBY mode — see sx_sleep.c's _enter_stop()
+     * doc-comment): app_mode effectively never leaves APP_MODE_FULL_POWER
+     * from this function's own point of view any more. APP_CYCLE_SENDING
+     * (in app_cycle_process()) still sets s_app_mode = APP_MODE_ENTER_SLEEP
+     * before falling into the branch below, but
+     * sx_sleep_manager_enter_sleep() -> sx_sleep_enter_stop() ->
+     * HAL_PWR_EnterSTANDBYMode() now never returns — the whole chip resets
+     * instead of resuming past that call. So:
+     *   - The `s_app_mode = APP_MODE_WAKEUP; s_cycle_state =
+     *     APP_CYCLE_WAKING;` lines that used to follow the sleep call
+     *     never execute any more; they are unreachable dead code, kept
+     *     only because removing them isn't needed for correctness (they
+     *     just never run).
+     *   - The APP_MODE_WAKEUP branch (sx_sleep_manager_wake_process()) is
+     *     therefore also dead — s_app_mode can never actually become
+     *     APP_MODE_WAKEUP on this path any more.
+     *   - What used to be "post-wake" now happens via a fresh boot
+     *     instead: main() -> app_init() -> s_cycle_state reset to
+     *     APP_CYCLE_GPS_WAIT (see its doc-comment above app_cycle_state_t).
+     * Left as an if/else-if chain rather than deleting the dead branches
+     * outright, to keep this change minimal and reviewable; a follow-up
+     * cleanup can remove APP_MODE_ENTER_SLEEP/WAKEUP and APP_CYCLE_WAKING
+     * entirely once STANDBY is confirmed stable on real hardware. */
     if (s_app_mode == APP_MODE_FULL_POWER) {
         app_cycle_process(delta_ms);
     } else if (s_app_mode == APP_MODE_ENTER_SLEEP) {
-        {
-            uint32_t sleep_ms = network_config_get()->sleep_ms;
-            log_info(TAG, "Entering sleep for %lu ms", (unsigned long)sleep_ms);
-            sx_sleep_manager_enter_sleep(&s_sleep_mgr, sleep_ms / 1000);
-        }
-        /* Execution resumes here after the RTC wakeup timer fires. */
+        uint32_t sleep_ms = network_config_get()->sleep_ms;
+        log_info(TAG, "Entering sleep for %lu ms", (unsigned long)sleep_ms);
+        sx_sleep_manager_enter_sleep(&s_sleep_mgr, sleep_ms / 1000);
+        /* Unreachable with STANDBY -- see doc-comment above. Kept as-is
+         * (dead but harmless) rather than removed, per the note above. */
         s_app_mode    = APP_MODE_WAKEUP;
         s_cycle_state = APP_CYCLE_WAKING;
         log_info(TAG, "Woke up - running wake sequence");
@@ -807,4 +931,3 @@ void app_process(uint32_t delta_ms){
         app_cycle_process(delta_ms);
     }
 }
-

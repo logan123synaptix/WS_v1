@@ -237,6 +237,15 @@ void sx_board_init(void)
     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+
+    /* Switch to Active Upload mode so the sensor starts pushing CO/SO2/
+     * NO2/O3/H2S readings on its own over UART_EXTEND without the MCU
+     * having to poll for them (see ze12a.c's gas_sensor_switch_to_active_
+     * mode() doc-comment for the Q&A-vs-Active protocol distinction).
+     * Must run every boot now (STANDBY resets everything -- see sx_sleep.c)
+     * since there is no longer a separate "wake" pass that used to do
+     * this (sx_sleep_manager.c's wake_steps, STOP-mode era). */
+    gas_sensor_switch_to_active_mode();
     
 
     // TIMER (TIM1) — sx_timer_init_regs() applies Prescaler/Period directly,

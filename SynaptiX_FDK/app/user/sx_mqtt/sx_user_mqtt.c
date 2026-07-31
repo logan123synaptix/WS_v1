@@ -26,7 +26,17 @@ volatile sx_mqtt_t s_mqtt;
 
 typedef struct {
     char topic[128];
-    char message[256];
+    /* Bug fix (2026-07-31): was 256, silently truncating any published
+     * message longer than 255 bytes via the strncpy() in
+     * sx_user_mqtt_publish() below -- confirmed on real hardware: the
+     * app.c telemetry JSON payload (~300 bytes with all fields, built
+     * into a 512-byte buffer, see TELEMETRY_JSON_BUFF_SIZE in app.c)
+     * arrived at the broker cut off mid-field ("...latitude":null,"l
+     * <nothing>), exactly at the 255-byte mark. Matched to
+     * TELEMETRY_JSON_BUFF_SIZE here rather than picking an arbitrary
+     * larger number, so the two buffers stay in sync if more fields are
+     * added to the telemetry payload later. */
+    char message[512];
 } mqtt_queue_item_t;
 
 static mqtt_queue_item_t s_queue_buf[MQTT_QUEUE_SIZE];

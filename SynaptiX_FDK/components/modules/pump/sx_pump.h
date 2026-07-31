@@ -15,12 +15,17 @@ extern "C" {
 /* Initializes the pump's GPIO (via sx_gpio_init()) and wires it to the
  * caller-owned sx_pwm_software_t/sx_timer_t so the pump is driven through
  * software PWM instead of a plain on/off GPIO write. `timer` must already
- * be initialized (e.g. via sx_timer_init_freq() in sx_board.c) before this
- * call — this function only owns the GPIO + PWM struct, not the timer
- * hardware itself. Starts at duty=0%, not running (see pump_on()/
- * pump_set_power() to actually start it). */
+ * be initialized AND already have its ARR fixed at a fast, constant ISR
+ * rate (e.g. via sx_timer_init_regs() in sx_board.c) before this call —
+ * this function only owns the GPIO + PWM struct, not the timer hardware
+ * itself, and never reprograms the timer's ARR (see sx_pwm_sw.h's file
+ * doc-comment for why that distinction matters). `isr_rate_hz` must match
+ * whatever ISR fire rate that ARR actually produces (timer->tick_hz /
+ * (ARR+1)) — sx_board.c documents the exact value it uses. Starts at
+ * duty=0%, not running (see pump_on()/pump_set_power() to actually start
+ * it). */
 void pump_init(sx_pwm_software_t *pwm, sx_gpio_t *gpio, sx_gpio_ops_t *ops,
-                void *gpio_pDriver, sx_timer_t *timer);
+                void *gpio_pDriver, sx_timer_t *timer, uint32_t isr_rate_hz);
 
 /* Full drive: duty=100%. If the PWM is already running (e.g. via
  * pump_set_power()), just updates duty in place without restarting —

@@ -261,12 +261,20 @@ void sx_board_init(void)
                         32000000U, 31U, 99U, NULL, NULL);
 
     // Pump init — owns s_en_pw_pump's GPIO init and board.sx_pwm_sw's PWM
-    // struct init (period_ms=10 -> 100Hz PWM / 1% duty resolution at this
-    // timer's 1MHz tick_hz, see sx_pump.c). Wire the timer's callback to
-    // drive this PWM struct now that it's a valid init'd target.
+    // struct init (period_ms=10 -> 100Hz PWM). isr_rate_hz=10000 passed
+    // explicitly because it's the ACTUAL ISR fire rate the PSC=31/
+    // Period=99 ARR above produces (1MHz counter / (99+1) = 10kHz) — NOT
+    // the timer's raw 1MHz counter tick_hz. sx_pwm_software_start()/
+    // pump_on()/pump_set_power() no longer touch this ARR at all (see
+    // sx_pwm_sw.h's file doc-comment for why the old code reprogramming
+    // ARR here was the actual bug: it made the ISR fire only once per PWM
+    // period instead of period_ticks times per period, so every duty
+    // except 0% behaved identically to 100% on the bench). Wire the
+    // timer's callback to drive this PWM struct now that it's a valid
+    // init'd target.
 
     pump_init(&board.sx_pwm_sw, &s_en_pw_pump, &sx_gpio_ops, &s_en_pw_pump_pin,
-              &board.sx_timer);
+              &board.sx_timer, 10000U);
     board.sx_timer.callback = sx_pwm_software_tick_cb;
     board.sx_timer.arg = &board.sx_pwm_sw;
 

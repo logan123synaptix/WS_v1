@@ -64,19 +64,24 @@ void test_sps30_poll(uint32_t delta_ms)
             log_error(TAG, "Cycle DONE but no measurement captured — check UART4 wiring/SHDLC comms");
         }
 
-        /* Cycle finished but sensor power (EN_PW_DUST) is still ON —
-         * sps30_app deliberately does not power off automatically (see
-         * sps30_app.h doc-comment), the caller must call
-         * sps30_app_sleep_step_start()/_is_done() explicitly. This test
-         * powers down between cycles the same way app.c's real
-         * SENDING->SLEEPING transition would, rather than leaving the
-         * fan/laser running continuously between test iterations. */
-        sps30_app_sleep_step_start(&s_sps30);
-        while (!sps30_app_sleep_step_is_done(&s_sps30)) {
-            /* fire-and-forget per sps30_app.h — expected to report done
-             * on first poll, spin here only as a safety net */
-        }
-
+        /* TEMP DEBUG CHANGE (per user request): keep EN_PW_DUST HIGH
+         * continuously instead of power-cycling between cycles — no
+         * sps30_app_sleep_step_start() call here anymore, so the
+         * opto+MOSTFET power path never gets a falling edge between
+         * cycles. Goal: isolate whether the earlier "wake_up_sequence
+         * failed, err=-2" was caused by the sensor not having settled
+         * yet right after each fresh power-on (1000ms window), or by
+         * an unrelated hardware/wiring fault -- if leaving power on
+         * continuously lets it read successfully, that points at
+         * settle timing / the power path's rise time, not UART4 wiring
+         * or the SHDLC command sequence itself.
+         * sps30_app_reset() still resets the state machine to IDLE (so
+         * the next sps30_app_start_cycle() below can run), but
+         * start_cycle() unconditionally re-drives EN_PW_DUST high again
+         * -- harmless here since it is already high, no falling edge is
+         * produced. Revert to calling sps30_app_sleep_step_start()
+         * before reset once done debugging, to restore the normal
+         * "power off between test cycles" behavior. */
         sps30_app_reset(&s_sps30);
         s_waiting_for_next_cycle = true;
         s_gap_elapsed_ms = 0;

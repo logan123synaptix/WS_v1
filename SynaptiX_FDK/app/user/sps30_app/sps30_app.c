@@ -80,20 +80,26 @@ void sps30_app_poll(sps30_app_t *app, uint32_t delta_ms)
 
     case SPS30_APP_STATE_POWER_ON:
         if (app->state_elapsed_ms >= SPS30_APP_POWER_ON_SETTLE_MS) {
-            sps30_app_enter(app, SPS30_APP_STATE_WAKE_UP);
-        }
-        break;
-
-    case SPS30_APP_STATE_WAKE_UP:
-        ret = sps30_wake_up_sequence();
-        if (ret == NO_ERROR) {
-            log_info(TAG, "wake_up_sequence OK");
+            /* Bug fix (confirmed against real hardware + datasheet):
+             * sps30_wake_up_sequence() used to run here, but the SPS30
+             * always boots into Idle-Mode after power-on/reset (not
+             * Sleep-Mode -- see datasheet section 4.1), and this app
+             * never puts it into SHDLC Sleep-Mode in the first place
+             * (sps30_app_sleep_step_start() below now only cuts
+             * EN_PW_DUST, no more sps30_sleep() call). Sending the
+             * Wake-up sequence's 0xFF low-pulse byte while the sensor is
+             * already in Idle-Mode (UART already active, not disabled)
+             * injects a stray byte into the SHDLC channel and desyncs
+             * the frame that follows -- confirmed on real board: first
+             * cycle after power-on returned err=-2 (sensor not
+             * responding yet, still settling), every cycle after that
+             * returned err=-8 (SENSIRION_SHDLC_ERR_EXECUTION_FAILURE,
+             * device status byte 0x43 "Command not allowed in current
+             * state" -- see Documents/SPS30_dust_sensor (1).md Table 6).
+             * Per the user's decision: skip Wake-up entirely and go
+             * straight to START_MEASUREMENT, since power-on is the only
+             * "wake" path this app uses now. */
             sps30_app_enter(app, SPS30_APP_STATE_START_MEASUREMENT);
-        } else {
-            log_error(TAG, "wake_up_sequence failed, err=%d", ret);
-            /* Give up this cycle rather than retrying forever — next
-             * sps30_app_start_cycle() will try again from POWER_ON. */
-            sps30_app_enter(app, SPS30_APP_STATE_DONE);
         }
         break;
 
@@ -187,17 +193,17 @@ void sps30_app_sleep_step_start(void *ctx)
 
     if (app->state != SPS30_APP_STATE_IDLE && app->state != SPS30_APP_STATE_DONE) {
         log_warn(TAG, "sleep requested mid-cycle (state=%d) — powering down anyway; "
-                       "fan/laser will stop abruptly rather than via the normal "
-                       "stop_measurement()+sleep() sequence", app->state);
+                       "fan/laser will stop abruptly", app->state);
     }
 
-    /* Per datasheet-recommended shutdown: stop any measurement (safe to
-     * call even if already stopped/idle — worst case returns a benign
-     * error, which we don't treat as fatal here), then SHDLC sleep()
-     * before cutting physical power. */
-    sps30_stop_measurement();
-    sps30_sleep();
-
+    /* Per the user's decision: sleep now means "cut EN_PW_DUST power",
+     * full stop -- no more sps30_stop_measurement()/sps30_sleep() SHDLC
+     * calls first. Since sps30_app_start_cycle() (POWER_ON) no longer
+     * sends the Wake-up sequence either (see that state's comment
+     * above), this app never puts the sensor into SHDLC Sleep-Mode in
+     * the first place, so there is nothing to gracefully exit before
+     * cutting power -- the sensor always comes back up in Idle-Mode on
+     * its own per the datasheet, regardless of how power was removed. */
     sx_gpio_write(app->power_gpio, SX_GPIO_LOW);
     log_info(TAG, "EN_PW_DUST low, SPS30 powered down");
 

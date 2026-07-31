@@ -145,7 +145,29 @@ int sx_uart_tx_callback(sx_uart_t *_uart){
 
 int sx_uart_flush(sx_uart_t *_uart)
 {
-    cqueue_init_static(&_uart->rxQueue, _uart->rxBuffer, _uart->rxBufferSize, sizeof(uint8_t)); 
+    /* Bug fix (2026-07-31): cqueue_init_static() resets head/tail/count
+     * non-atomically, and this queue is also written from
+     * sx_uart_rx_callback() running in the UART RX interrupt (same
+     * single-producer/single-consumer queue as sx_uart_read() above --
+     * see that function's 2026-07-28 bug fix comment for the full
+     * writeup of the underlying race). Without disabling IRQs here, an
+     * RX byte arriving mid-reset can interleave with the head/tail/count
+     * write and leave the ring buffer's pointers inconsistent, corrupting
+     * whatever is read next. Confirmed on real hardware: calling
+     * sx_uart_flush() right before each SPS30 SHDLC command (added to
+     * clear stale bytes between commands) started producing a
+     * consistent SENSIRION_SHDLC_ERR_EXECUTION_FAILURE (-8) from the
+     * very first cycle, where before the fix it took several cycles for
+     * unrelated stale-byte errors to snowball -- pointing at flush()
+     * itself corrupting the queue right as SPS30's UART interrupt (just
+     * re-armed by board_dust_uart_resume_it()) was live. Same
+     * save/restore PRIMASK pattern as the other two functions in this
+     * file, so this stays safe even if ever called from within another
+     * critical section. */
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+    cqueue_init_static(&_uart->rxQueue, _uart->rxBuffer, _uart->rxBufferSize, sizeof(uint8_t));
+    __set_PRIMASK(primask);
     return 0;
 }
 

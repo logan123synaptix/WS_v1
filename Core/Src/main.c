@@ -31,7 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        0
+#define TEST        1
 #include "sx_board.h"
 #if TEST
 #include "test_lte_mqtt.h"
@@ -43,6 +43,7 @@
 #include "test_ads1115.h"
 #include "test_shell.h"
 #include "test_sleep.h"
+#include "test_sps30.h"
 #endif
 
 /* USER CODE END Includes */
@@ -137,9 +138,10 @@ int main(void)
   // test_imu_init();
   // test_gps_init();
   // test_exflash_init();
-  test_shell_init();
+  // test_shell_init();
   // test_ads1115_init();
   // test_sleep_init();
+  test_sps30_init();
   #else
   app_init();
   #endif
@@ -167,9 +169,10 @@ int main(void)
         // test_rtc_poll(delta);
         // test_gps_poll(delta);
         // test_exflash_poll(delta);
-        test_shell_poll(delta);
+        // test_shell_poll(delta);
         // test_ads1115_poll(delta);
         // test_sleep_poll(delta);
+        test_sps30_poll(delta);
         #else
         app_process(delta);
         #endif

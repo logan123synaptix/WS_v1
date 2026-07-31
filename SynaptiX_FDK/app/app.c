@@ -22,6 +22,7 @@
 #include "cJSON.h"
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 static const char *TAG = "APP";
 
@@ -298,6 +299,9 @@ static int offline_queue_resend_one(void)
  * project's own choice, not a port.
  * rx8130ce_time_t's year field is 2-digit (e.g. 25 = 2025, see
  * sx_ex_rtc.h), so 2000 is added here. */
+/* Vietnam local time offset, in hours (UTC+7, no DST). */
+#define VN_UTC_OFFSET_HOURS   7
+
 static bool format_timestamp(char *out, size_t out_size)
 {
     bool valid = false;
@@ -310,8 +314,35 @@ static bool format_timestamp(char *out, size_t out_size)
         return false;
     }
 
-    snprintf(out, out_size, "%04u-%02u-%02uT%02u:%02u:%02uZ",
-             2000U + t.year, t.month, t.day, t.hour, t.min, t.sec);
+    /* board.rtc is kept in UTC (time_sync.c writes it from modem NITZ /
+     * GPS, both already normalized to UTC). Convert to Vietnam local time
+     * (UTC+7) via mktime()/gmtime() rather than adding 7 to t.hour
+     * directly -- a plain add can push hour past 23 (e.g. 22:00 UTC ->
+     * "29:00") or, without day/month/year rollover, land on the wrong
+     * date entirely. mktime()/gmtime() normalize the whole struct tm
+     * (day/month/year rollover included), same pattern already used in
+     * time_sync.c and a7677s.c's cb_cclk() for the reverse conversion. */
+    struct tm tm_utc = {0};
+    tm_utc.tm_year = (2000 + t.year) - 1900;
+    tm_utc.tm_mon  = t.month - 1;
+    tm_utc.tm_mday = t.day;
+    tm_utc.tm_hour = t.hour + VN_UTC_OFFSET_HOURS;
+    tm_utc.tm_min  = t.min;
+    tm_utc.tm_sec  = t.sec;
+    tm_utc.tm_isdst = 0;
+
+    time_t as_time = mktime(&tm_utc);
+    if (as_time == (time_t)-1) {
+        return false;
+    }
+    struct tm *vn = gmtime(&as_time);
+    if (!vn) {
+        return false;
+    }
+
+    snprintf(out, out_size, "%04d-%02d-%02dT%02d:%02d:%02d+07:00",
+             vn->tm_year + 1900, vn->tm_mon + 1, vn->tm_mday,
+             vn->tm_hour, vn->tm_min, vn->tm_sec);
     return true;
 }
 
@@ -812,4 +843,3 @@ void app_process(uint32_t delta_ms){
         app_cycle_process(delta_ms);
     }
 }
-

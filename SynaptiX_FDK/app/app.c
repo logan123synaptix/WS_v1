@@ -115,6 +115,7 @@ typedef enum {
     APP_CYCLE_ON_PUMP = 0,
     APP_CYCLE_SENSING,
     APP_CYCLE_SENDING,
+    APP_CYCLE_WAIT_PUBLISH,
     APP_CYCLE_SLEEPING,
     APP_CYCLE_WAKING,
 } app_cycle_state_t;
@@ -133,6 +134,27 @@ static uint32_t          s_cycle_tick_ms = 0;
 static volatile app_mode_t s_app_mode    = APP_MODE_FULL_POWER;
 
 #define TELEMETRY_JSON_BUFF_SIZE 512
+
+/* Bug fix (2026-07-31): APP_CYCLE_SENDING used to fall straight through
+ * to APP_CYCLE_SLEEPING / APP_MODE_ENTER_SLEEP in the same tick as
+ * calling sx_user_mqtt_publish(). sx_user_mqtt_publish() only enqueues
+ * the AT command to the modem (sx_mqtt_publish() -> modem->ops->
+ * mqtt_publish(), async, completes later via cb_publish_done() ->
+ * sx_user_mqtt_is_publishing() going back to 0) -- it does not mean the
+ * publish has actually reached the broker. sx_sleep_manager_enter_sleep()
+ * then runs 'modem_power_off' (PWRKEY pulse) as one of its steps, which
+ * can cut the modem before the AT command finishes, silently dropping
+ * the telemetry -- confirmed on real hardware: "Telemetry published"
+ * logged, followed immediately by "modem_power_off" starting, with
+ * nothing arriving at the broker for that cycle.
+ * APP_CYCLE_WAIT_PUBLISH polls sx_user_mqtt_is_publishing() every tick
+ * (sx_user_mqtt_poll() already runs unconditionally every tick in
+ * app_process(), regardless of app_mode/cycle_state, so publish
+ * actually progresses while this state is active) and only proceeds to
+ * sleep once it clears. Bounded by a timeout so a stuck/never-completing
+ * publish (e.g. modem wedged) cannot block the device from ever
+ * sleeping again. */
+#define APP_WAIT_PUBLISH_TIMEOUT_MS   10000U
 static char s_telemetry_json[TELEMETRY_JSON_BUFF_SIZE];
 
 /* MQTT_STATION_DATA_TOPIC/MQTT_STATION_HEARTBEAT_TOPIC (app_config.h) are
@@ -637,21 +659,46 @@ static void app_cycle_process(uint32_t delta_ms)
             char topic[TOPIC_BUFF_SIZE];
             build_telemetry_topic(topic, sizeof(topic));
             sx_user_mqtt_publish(topic, payload);
-            log_info(TAG, "Telemetry published: %s", payload);
+            log_info(TAG, "Telemetry queued for publish: %s", payload);
         } else {
             offline_queue_save(payload);
             log_warn(TAG, "MQTT not connected, telemetry queued: %s", payload);
         }
         send_heartbeat_if_due();
         sps30_app_reset(&s_sps30_app);
-        s_cycle_state = APP_CYCLE_SLEEPING;
-        s_app_mode    = APP_MODE_ENTER_SLEEP;
-        /* app_process() below acts on APP_MODE_ENTER_SLEEP right after
-         * this switch returns — see the comment there for why the
-         * actual sx_sleep_manager_enter_sleep() call lives in
-         * app_process() rather than here. */
+        s_cycle_state = APP_CYCLE_WAIT_PUBLISH;
+        /* Do NOT set APP_MODE_ENTER_SLEEP yet — see
+         * APP_WAIT_PUBLISH_TIMEOUT_MS's comment above. app_mode stays
+         * APP_MODE_FULL_POWER so app_cycle_process() keeps being called
+         * every tick (needed to poll this new state), while
+         * sx_user_mqtt_poll() in app_process() (unconditional, runs
+         * regardless of cycle_state) drives the actual publish to
+         * completion in the background. */
+        s_cycle_tick_ms = 0;
         break;
     }
+
+    case APP_CYCLE_WAIT_PUBLISH:
+        s_cycle_tick_ms += delta_ms;
+        if (!sx_user_mqtt_is_publishing() ||
+            s_cycle_tick_ms >= APP_WAIT_PUBLISH_TIMEOUT_MS) {
+            if (s_cycle_tick_ms >= APP_WAIT_PUBLISH_TIMEOUT_MS &&
+                sx_user_mqtt_is_publishing()) {
+                log_warn(TAG, "Publish still pending after %lu ms, sleeping anyway",
+                         (unsigned long)APP_WAIT_PUBLISH_TIMEOUT_MS);
+            } else {
+                log_info(TAG, "Publish confirmed done after %lu ms",
+                         (unsigned long)s_cycle_tick_ms);
+            }
+            s_cycle_tick_ms = 0;
+            s_cycle_state   = APP_CYCLE_SLEEPING;
+            s_app_mode      = APP_MODE_ENTER_SLEEP;
+            /* app_process() below acts on APP_MODE_ENTER_SLEEP right
+             * after this switch returns — see the comment there for why
+             * the actual sx_sleep_manager_enter_sleep() call lives in
+             * app_process() rather than here. */
+        }
+        break;
 
     case APP_CYCLE_SLEEPING:
         /* Handled directly in app_process() (APP_MODE_ENTER_SLEEP branch)

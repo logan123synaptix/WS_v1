@@ -54,7 +54,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, GPS_CPW_Pin|GPS_RST_Pin|UART5_S1_Pin|SPI1_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, UART5_S0_Pin|EN_PW_DUST_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, UART5_S0_Pin|EN_PW_PUMP_Pin|EN_PW_DUST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, UART3_RDE_Pin|I2C1_RST_Pin, GPIO_PIN_RESET);
@@ -98,8 +98,9 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : EN_PW_PUMP_Pin */
   GPIO_InitStruct.Pin = EN_PW_PUMP_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(EN_PW_PUMP_GPIO_Port, &GPIO_InitStruct);
 
 }

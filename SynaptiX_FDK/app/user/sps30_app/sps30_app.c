@@ -2,6 +2,7 @@
 #include "sps30_uart.h"
 #include "sensirion_common.h"
 #include "sx_board.h"
+#include "sx_uart.h"
 #include "logger.h"
 
 static const char *TAG = "SPS30_APP";
@@ -104,6 +105,16 @@ void sps30_app_poll(sps30_app_t *app, uint32_t delta_ms)
         break;
 
     case SPS30_APP_STATE_START_MEASUREMENT:
+        /* Flush any stale bytes left in UART4's RX queue before sending
+         * a new command -- confirmed root cause of the error snowball
+         * seen on real hardware (CRC_MISMATCH -> EXECUTION_FAILURE ->
+         * FRAME_TOO_LONG -> MISSING_START across consecutive cycles):
+         * sensirion_uart_hal_rx()/sx_uart_read() never flush, so leftover
+         * bytes from any short/misaligned previous read stay queued and
+         * corrupt the next command's response framing. Same flush added
+         * before READ_MEASUREMENT/STOP_MEASUREMENT below for the same
+         * reason. */
+        sx_uart_flush(&board.sps30_uart);
         ret = sps30_start_measurement(SPS30_OUTPUT_FORMAT_OUTPUT_FORMAT_FLOAT);
         if (ret == NO_ERROR) {
             log_info(TAG, "measurement started");
@@ -121,33 +132,53 @@ void sps30_app_poll(sps30_app_t *app, uint32_t delta_ms)
         break;
 
     case SPS30_APP_STATE_READ_MEASUREMENT:
-        ret = sps30_read_measurement_values_float(
-            &app->last_measurement.mc_1p0, &app->last_measurement.mc_2p5,
-            &app->last_measurement.mc_4p0, &app->last_measurement.mc_10p0,
-            &app->last_measurement.nc_0p5, &app->last_measurement.nc_1p0,
-            &app->last_measurement.nc_2p5, &app->last_measurement.nc_4p0,
-            &app->last_measurement.nc_10p0, &app->last_measurement.typical_particle_size);
+        {
+            sps30_app_measurement_t tmp;
+            sx_uart_flush(&board.sps30_uart);
+            ret = sps30_read_measurement_values_float(
+                &tmp.mc_1p0, &tmp.mc_2p5,
+                &tmp.mc_4p0, &tmp.mc_10p0, &tmp.nc_0p5, &tmp.nc_1p0,
+                &tmp.nc_2p5, &tmp.nc_4p0,
+                &tmp.nc_10p0, &tmp.typical_particle_size);
 
-        if (ret == NO_ERROR) {
-            app->has_measurement = true;
-            log_info(TAG, "PM1.0=%.2f PM2.5=%.2f PM4.0=%.2f PM10.0=%.2f",
-                     app->last_measurement.mc_1p0, app->last_measurement.mc_2p5,
-                     app->last_measurement.mc_4p0, app->last_measurement.mc_10p0);
-        } else {
-            log_error(TAG, "read_measurement failed, err=%d", ret);
-            /* Deliberately NOT retrying/repeating the cycle here (unlike
-             * WS_v0's mc_pm10p0==mc_pm2p5 heuristic, which re-looped
-             * back to IDLE on what it treated as "invalid data" — see
-             * this file's header comment for why that heuristic was
-             * dropped). A real read failure (non-NO_ERROR) still just
-             * proceeds to STOP_MEASUREMENT below with has_measurement
-             * left false / stale, same as WS_v0 did in its own error
-             * branch. */
+            if (ret == NO_ERROR) {
+                /* Only commit into app->last_measurement on success --
+                 * sps30_read_measurement_values_float() (auto-generated
+                 * Sensirion driver) writes to all output pointers
+                 * unconditionally, even on a failed/short SHDLC read, so
+                 * writing straight into app->last_measurement on error
+                 * would silently mix stale fields from the previous
+                 * successful cycle with garbage from this one --
+                 * confirmed on real board: a failed read showed
+                 * PM1.0=0.00 PM2.5=0.00 (fresh garbage) next to
+                 * PM4.0/PM10 still holding the prior cycle's real
+                 * values. Reading into a local tmp first and only
+                 * copying out on NO_ERROR keeps last_measurement either
+                 * fully fresh or fully the last good reading, never a
+                 * mix of both. */
+                app->last_measurement = tmp;
+                app->has_measurement = true;
+                log_info(TAG, "PM1.0=%.2f PM2.5=%.2f PM4.0=%.2f PM10.0=%.2f",
+                         app->last_measurement.mc_1p0, app->last_measurement.mc_2p5,
+                         app->last_measurement.mc_4p0, app->last_measurement.mc_10p0);
+            } else {
+                log_error(TAG, "read_measurement failed, err=%d", ret);
+                /* Deliberately NOT retrying/repeating the cycle here (unlike
+                 * WS_v0's mc_pm10p0==mc_pm2p5 heuristic, which re-looped
+                 * back to IDLE on what it treated as "invalid data" — see
+                 * this file's header comment for why that heuristic was
+                 * dropped). A real read failure (non-NO_ERROR) still just
+                 * proceeds to STOP_MEASUREMENT below with has_measurement
+                 * left at whatever it was before (stale-but-clean last
+                 * good reading, not a mix), same intent as WS_v0's own
+                 * error branch. */
+            }
         }
         sps30_app_enter(app, SPS30_APP_STATE_STOP_MEASUREMENT);
         break;
 
     case SPS30_APP_STATE_STOP_MEASUREMENT:
+        sx_uart_flush(&board.sps30_uart);
         ret = sps30_stop_measurement();
         if (ret == NO_ERROR) {
             log_info(TAG, "measurement stopped");

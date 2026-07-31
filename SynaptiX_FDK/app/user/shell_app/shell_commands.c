@@ -24,6 +24,7 @@ static int cli_cmd_ota(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_rollback_prev(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_rollback_factory(ShellContext_t *shell, int argc, char *argv[]);
 static int cli_cmd_flash_factory(ShellContext_t *shell, int argc, char *argv[]);
+static int cli_cmd_pump(ShellContext_t *shell, int argc, char *argv[]);
 
 static const Cli_Shell_Cmd s_shell_commands[] = {
     {"help",     cli_shell_help_handler, "Lists all commands\r\n"},
@@ -54,6 +55,15 @@ static const Cli_Shell_Cmd s_shell_commands[] = {
         "\t\t-apnuser [str]       GSM APN username\r\n"
         "\t\t-apnpass [str]       GSM APN password\r\n"
         "example : settings -c -pump 30 -duty 100 -sensing 60 -sleep 300 -host mqtt.example.com\r\n"},
+    {"pump",     cli_cmd_pump,
+        "Drive the pump's software PWM directly, right now -- for bench "
+        "testing (independent of settings -c -pump/-duty, which only "
+        "configure the production cycle's next run, not the pump itself "
+        "immediately).\r\n"
+        "\t\tpump on           : full drive, duty=100%\r\n"
+        "\t\tpump off          : stop (forces GPIO LOW, see pump_off())\r\n"
+        "\t\tpump [0-100]      : run at this duty %% until changed/stopped\r\n"
+        "example : pump 40\r\n"},
 };
 
 const Cli_Shell_Cmd *const g_shell_commands = s_shell_commands;
@@ -250,5 +260,54 @@ static int cli_cmd_settings(ShellContext_t *shell, int argc, char *argv[])
                              "timing takes effect on the next cycle "
                              "tick, broker settings on next MQTT (re)connect.\r\n");
     print_settings(shell);
+    return 0;
+}
+
+/* "pump on|off|<0-100>" -- drives the pump's software PWM (see
+ * sx_pump.h/sx_pwm_sw.h) directly and immediately, for bench testing.
+ * Unlike settings -c -pump/-duty above (which only write network_config_t
+ * for the next production cycle), this calls pump_on()/pump_off()/
+ * pump_set_power() on sx_board_get_pump_pwm()'s real instance right now --
+ * useful for confirming PWM frequency/duty on a scope or listening to the
+ * motor change speed without waiting on a full sensing cycle. Does not
+ * touch network_config_t or persist anything to flash. */
+static int cli_cmd_pump(ShellContext_t *shell, int argc, char *argv[])
+{
+    if (argc != 2) {
+        cli_shell_printf(shell, "usage: pump on|off|<0-100>\r\n");
+        return -1;
+    }
+
+    sx_pwm_software_t *pwm = sx_board_get_pump_pwm();
+
+    if (strcmp(argv[1], "on") == 0) {
+        pump_on(pwm);
+        cli_shell_printf(shell, "Pump ON (duty=100%%)\r\n");
+        return 0;
+    }
+    if (strcmp(argv[1], "off") == 0) {
+        pump_off(pwm);
+        cli_shell_printf(shell, "Pump OFF\r\n");
+        return 0;
+    }
+
+    /* strtol() returns 0 both for a genuine "0" and for unparseable input
+     * (e.g. "abc") -- disambiguate by rejecting anything not purely
+     * digits, same defensive spirit as -duty's range check above but
+     * needed here since 0 is otherwise a legitimate, silently-accepted
+     * duty value. */
+    for (const char *p = argv[1]; *p != '\0'; p++) {
+        if (*p < '0' || *p > '9') {
+            cli_shell_printf(shell, "usage: pump on|off|<0-100>\r\n");
+            return -1;
+        }
+    }
+    long duty = strtol(argv[1], NULL, 10);
+    if (duty < 0 || duty > 100) {
+        cli_shell_printf(shell, "pump duty must be 0-100\r\n");
+        return -1;
+    }
+    pump_set_power(pwm, (uint8_t)duty);
+    cli_shell_printf(shell, "Pump running at %ld%% duty\r\n", duty);
     return 0;
 }

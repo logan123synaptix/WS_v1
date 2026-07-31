@@ -762,6 +762,11 @@ void app_process(uint32_t delta_ms){
      * reading_sensor_task calling gnss_poll(1) unconditionally). */
     gps_process(&board.gps, delta_ms);
 
+    /* RTC time sync from modem NITZ (falling back to GPS) -- must run every
+    * tick like the other *_poll() calls above, or the RTC never gets set
+    * and format_timestamp() keeps reading garbage reset-state time. */
+    time_sync_poll(&s_time_sync);
+
     /* Plain MQTT poll, not thingsboard_client_poll() — see app_init()'s
      * comment on why Thingsboard isn't used yet. */
     sx_user_mqtt_poll(delta_ms);

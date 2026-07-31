@@ -106,6 +106,14 @@ typedef struct {
     uint32_t pump_on_ms;   /* how long the pump stays on before sensing starts */
     uint32_t sensing_ms;   /* how long SENSING runs (SPS30 cycle + other sensors settle) */
     uint32_t sleep_ms;     /* STOP-mode sleep duration itself (not the total lap time) */
+    /* How long APP_CYCLE_GPS_WAIT (app.c) / sx_sleep_manager.c's GPS wait
+     * step waits for a fix before giving up and proceeding without one
+     * (lat/long stay 0.0f, build_telemetry_payload()'s "gps_fix" field
+     * reads false). Replaces app_config.h's GPS_TIMEOUT_MS #define at
+     * runtime, same "struct field overrides the #define, #define only
+     * seeds build_defaults() for a fresh flash" relationship as
+     * pump_on_ms/sensing_ms/sleep_ms above. */
+    uint32_t gps_timeout_ms;
     /* Pump PWM strength, 0-100 (see sx_pwm_sw.h/sx_pump.h) — separate from
      * pump_on_ms above, same "duration vs strength" split as WS_v0's
      * app_setting.timeOnPumpSeconds vs app_setting.dutyCyclePercent
@@ -121,7 +129,7 @@ typedef struct {
     uint32_t version;
 } network_config_t;
 
-#define NETWORK_CONFIG_VERSION  1U
+#define NETWORK_CONFIG_VERSION  2U
 
 /* Loads config from flash (NETWORK_CONFIG_FLASH_PATH). If the file does
  * not exist, or its stored version doesn't match NETWORK_CONFIG_VERSION,
@@ -168,6 +176,7 @@ void network_config_set_apn_password(const char *apn_password);
 void network_config_set_pump_on_ms(uint32_t pump_on_ms);
 void network_config_set_sensing_ms(uint32_t sensing_ms);
 void network_config_set_sleep_ms(uint32_t sleep_ms);
+void network_config_set_gps_timeout_ms(uint32_t gps_timeout_ms);
 void network_config_set_pump_duty_percent(uint8_t pump_duty_percent);
 
 /* Persists the current in-RAM config to flash (NETWORK_CONFIG_FLASH_PATH).

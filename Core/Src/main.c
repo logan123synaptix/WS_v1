@@ -31,7 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        1
+#define TEST        0
 #include "sx_board.h"
 #if TEST
 #include "test_lte_mqtt.h"

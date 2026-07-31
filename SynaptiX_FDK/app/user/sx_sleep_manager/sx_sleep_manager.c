@@ -1,6 +1,7 @@
 #include "sx_sleep_manager.h"
 #include "ze12a.h"
 #include "app_config.h"
+#include "network_config.h"
 #include "sx_board.h"
 #include "sx_delay.h"
 #include "sx_pump.h"
@@ -44,13 +45,16 @@ static uint8_t _gps_on_is_done(void *ctx)
     return 1; /* fire-and-forget kick-off, always "done" after one tick */
 }
 
-/* Step 2: wait for GPS fix, up to GPS_TIMEOUT_MS. This step owns its own
- * timeout tracking (mgr->gps_wait_elapsed_ms) rather than relying on
- * sx_sleep_service's shared step_timeout_ms — GPS is deliberately given a
- * much longer allowance (130s) than the modem wake step (90s), and the
- * two must stay independent: a timeout here still counts as "done" (this
- * step gives up and moves on with an unfixed GPS position, i.e. lat/long
- * still 0.0f), it does not abort the wake sequence. */
+/* Step 2: wait for GPS fix, up to network_config_get()->gps_timeout_ms
+ * (runtime-editable via the CLI's "settings -c -gpstimeout", defaults to
+ * app_config.h's GPS_TIMEOUT_MS -- see network_config.c's build_defaults()).
+ * This step owns its own timeout tracking (mgr->gps_wait_elapsed_ms)
+ * rather than relying on sx_sleep_service's shared step_timeout_ms — GPS
+ * is deliberately given a much longer allowance than the modem wake step
+ * (90s), and the two must stay independent: a timeout here still counts
+ * as "done" (this step gives up and moves on with an unfixed GPS
+ * position, i.e. lat/long still 0.0f), it does not abort the wake
+ * sequence. */
 static void _gps_wait_start(void *ctx)
 {
     (void)ctx;
@@ -67,7 +71,7 @@ static uint8_t _gps_wait_is_done(void *ctx)
                  mgr->gps_wait_elapsed_ms);
         return 1;
     }
-    if (mgr->gps_wait_elapsed_ms >= GPS_TIMEOUT_MS) {
+    if (mgr->gps_wait_elapsed_ms >= network_config_get()->gps_timeout_ms) {
         log_warn(TAG, "GPS timeout after %lu ms — proceeding without fix",
                  mgr->gps_wait_elapsed_ms);
         return 1;

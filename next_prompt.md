@@ -1,11 +1,14 @@
-HANDOFF — HARDWARE BRING-UP TEST, WS_v1 (STM32H563RIV6) — PHIÊN 7
+HANDOFF — HARDWARE BRING-UP TEST, WS_v1 (STM32H563RIV6) — PHIÊN 5
 
-Viết khi sắp hết token. Đọc kỹ handoff phiên 5 VÀ phiên 6 (trong lịch sử
-chat) trước khi làm gì — phiên này KẾ TIẾP trực tiếp từ phiên 6. Patch
-file đính kèm (handoff_phien7_v4_keep_log_uart_alive.patch) chứa thay
-đổi CHƯA TEST XONG HOÀN CHỈNH (đã flash, đã sửa lỗi tự-làm-mù-log,
-NHƯNG CHƯA CÓ KẾT QUẢ WAKE THÀNH CÔNG XÁC NHẬN) — xem mục "VIỆC ĐANG
-LÀM DỞ" bên dưới trước khi áp dụng.
+Viết khi sắp hết token. Đọc kỹ các handoff phiên trước (trong lịch sử
+chat, ít nhất phiên 3 và 4) trước khi làm gì — phiên này KẾ TIẾP trực
+tiếp từ phiên 4. LƯU Ý: handoff phiên 4 có phần lo ngại về việc
+container không push được lên GitHub — ĐIỀU ĐÓ ĐÃ ĐƯỢC GIẢI QUYẾT,
+người dùng tự lấy code ra và push thành công (xem git log hiện tại có
+nhiều commit mới: "new config", "add code fix crash sx_sleep_manager"
+x2, "add new code claude", "fix with claude 1" — các fix của phiên 3
+đã persist). KHÔNG cần lo về vấn đề push nữa trừ khi gặp lại lỗi tương
+tự.
 
 ============================================================
 QUY TẮC BẮT BUỘC (không đổi qua các phiên)
@@ -19,296 +22,235 @@ Comment code tiếng Anh, trao đổi tiếng Việt.
 KHÔNG có compiler thật trong container — không build được. Người dùng
 tự build + flash + gửi log qua chat.
 Board test vật lý duy nhất: STM32H563RIV6.
-Datasheet đầy đủ trong Documents/ — LUÔN tra cứu trước khi đoán thông
-số. Log thật/phép đo tay LUÔN thắng datasheet khi có xung đột.
+Datasheet đầy đủ trong Documents/ — LUÔN tra cứu trước khi đoán
+thông số. Log thật/phép đo tay LUÔN thắng datasheet khi có xung đột.
 Nếu gặp lại lỗi "could not read Username for 'https://github.com'"
-khi cố git push từ container — giới hạn môi trường đã biết, KHÔNG
-PHẢI lỗi mới. Xuất patch file qua present_files và nhờ người dùng tự
-đồng bộ.
-CLI shell có sẵn lệnh "settings -c -sleep [seconds]" để đổi STOP-mode
-sleep duration khi test mà KHÔNG cần build lại — dùng cái này để test
-nhanh chu kỳ wake, không cần sửa code (xem shell_commands.c).
+khi cố git push từ container — đây là giới hạn môi trường đã biết
+(container không có credential git), KHÔNG PHẢI lỗi mới. Xuất patch
+file qua present_files và nhờ người dùng tự đồng bộ, như đã làm ở
+phiên 3-4.
 
 ============================================================
-TÌNH TRẠNG TỔNG QUAN ĐẦU PHIÊN 7 — ĐÃ XONG, ĐỪNG ĐỘNG VÀO
+TÌNH TRẠNG TỔNG QUAN ĐẦU PHIÊN 5 — ĐỌC KỸ
 ============================================================
-1. Sleep/wake cycle test_sleep.c: ỔN ĐỊNH (từ phiên 3-5, không đổi).
-2. app.c: publish OK lên "hanoi/air_quality/data/001", broker host đã
-   đúng qua CLI settings -c -host broker.hivemq.com.
-3. Bug modem_power_off hang: đã fix (người dùng tự làm, phiên 6),
-   KHÔNG liên quan gì tới các việc dưới đây.
-4. W25Q128 (external flash) sleep_step: ĐÃ XONG HOÀN CHỈNH, ĐÃ TEST
-   TRÊN BOARD THẬT, ĐÃ PUSH LÊN GIT từ phiên 6. Đi qua
-   sx_storage_sleep()/sx_storage_wake() → sx_W25Q128_sleep_on()/
-   sleep_off()(&s_w25q128). Xem chi tiết đầy đủ lịch sử debug (2 vòng,
-   dead field board.q128 vs static s_w25q128 thật) ở handoff phiên 6
-   nếu cần — KHÔNG lặp lại ở đây vì đã ổn định, không đổi gì thêm
-   trong phiên 7.
+Dự án đã tiến triển RẤT NHIỀU so với các handoff trước. Tóm tắt người
+dùng xác nhận trực tiếp (cuối phiên 4/đầu phiên 5): "hiện tại những
+cảm biến đã mua được trên board đã đọc được khi sleep và pub lên
+mqtt, có thể dùng shell để config". Cụ thể:
 
-============================================================
-BỐI CẢNH: ĐIỀU TRA DÒNG RÒ ~28-31mA TRONG STOP MODE (bắt đầu phiên 6,
-tiếp tục xuyên suốt phiên 7)
-============================================================
-Baseline đo được (từ đầu, không đổi qua các phiên):
-- Full-power (chạy bình thường, không sleep): 120mA
-- STOP mode TRƯỚC MỌI FIX của phiên 6-7: 50-56mA
-- Baseline mong muốn (reset-button, erase chip, không code gì): 25mA
-=> Mục tiêu: đưa STOP mode về gần 25mA.
+1. **Sleep/wake cycle qua test_sleep.c: ỔN ĐỊNH, không còn treo.**
+   - VDD_EXT (1.8V) tắt đúng về 0V sau power-off (xác nhận bằng đo tay).
+   - Publish sau khi wake không còn bị treo/mất tín hiệu giữa chừng.
+   - Race condition I2C1 lúc WAKING (temp/humi/accel) đã fix từ phiên 3,
+     vẫn ổn định.
+   Chi tiết kỹ thuật của các fix này xem phiên 3-4's handoff, không
+   lặp lại ở đây — chỉ cần biết: ĐÃ XONG, ĐÃ TEST THẬT, ĐỪNG ĐỘNG VÀO
+   trừ khi có bug mới phát sinh liên quan.
 
-**ĐÃ LOẠI TRỪ (điều tra phiên 6, đối chiếu datasheet, KHÔNG cần xem
-lại trừ khi có bằng chứng mới mâu thuẫn):**
-1. PWR regulator mode (LOWPOWERREGULATOR_ON + STOPENTRY_WFI) — đúng.
-2. RX8130CE (RTC ngoại) — IDD nA-level, không đáng kể.
-3. GPS (GP-02) — dùng Shutdown mode qua chân N/F, đúng thiết kế.
-4. BNO055 (IMU) — Suspend mode qua bno055_set_pwr_mode(), đúng.
-5. ADS1115 — single-shot tự power-down, không cần sleep_step riêng.
-6. SHT3x — idle IDD 0.2-2.0µA, không cần sleep_step riêng.
-7. I2C1 peripheral clock trong STOP mode qua PCLK1 — STOP mode tự
-   dừng SYSCLK/HCLK/PCLK nên I2C1 tự mất clock, không cần can thiệp
-   (nhưng xem mục quan trọng bên dưới — kết luận NÀY VẪN ĐÚNG cho
-   HCLK/PCLK gating, KHÔNG mâu thuẫn với phát hiện phiên 6 cuối kỳ về
-   RCC clock-ENABLE BIT riêng của từng peripheral, là chuyện khác).
+2. **app.c (app thật, không phải test) — ĐÃ CHUYỂN SANG DÙNG ĐƯỢC,
+   với các fix mới trong phiên này (phiên 5, vừa làm xong — CHƯA CÓ
+   THỜI GIAN NGƯỜI DÙNG TEST TRÊN BOARD, cần test đầu phiên 6):**
 
-**GIẢ THUYẾT ĐÃ THỬ VÀ SAI (phiên 6, đầu phiên 7) — ĐỪNG LÀM LẠI:**
-- v0: tắt HSE/PLL1/HSI48 trước STOP (lý luận: STOP không tự tắt
-  oscillator gốc). SAI theo ablation test của người dùng — xem mục
-  dưới. Đã revert hoàn toàn, không còn trong code.
+   a. **BUG MQTT BROKER "REPLACE_ME_BROKER_HOST" — ĐÃ XÁC ĐỊNH NGUYÊN
+      NHÂN, NGƯỜI DÙNG ĐÃ TỰ SỬA CODE (không phải mình sửa):**
+      - app_config.h có USE_THINGSBOARD=1. network_config.c's
+        build_defaults() có nhánh #if/#else riêng dựa theo
+        USE_THINGSBOARD — khi =1, nó dùng placeholder cứng
+        "REPLACE_ME_BROKER_HOST" thay vì broker thật (vì code cũ giả
+        định nếu USE_THINGSBOARD=1 thì sẽ dùng Thingsboard client
+        thật, nhưng thực tế app.c luôn dùng plain MQTT bất kể cờ này
+        — xem comment ở app_config.h dòng ~27-37).
+      - Người dùng đã tự thêm macro HOST_THINGSBOART =
+        "broker.hivemq.com" vào app_config.h (nhánh #if
+        USE_THINGSBOARD) và network_config.c's build_defaults() đã
+        đổi sang dùng macro này thay vì "REPLACE_ME_BROKER_HOST".
+        Code hiện tại (đầu phiên 5) đã đúng.
+      - NHƯNG: network_config_init() chỉ dùng build_defaults() khi
+        file config trên flash KHÔNG TỒN TẠI hoặc RỖNG — nếu board đã
+        từng chạy qua với code default cũ, giá trị
+        "REPLACE_ME_BROKER_HOST" đã bị ghi xuống LittleFS
+        (NETWORK_CONFIG_FLASH_PATH) và SẼ TIẾP TỤC ĐƯỢC DÙNG dù code
+        default đã sửa đúng, vì flash cũ được ưu tiên đọc trước. Đây
+        là hành vi ĐÚNG THIẾT KẾ (flash-persisted, runtime-editable),
+        không phải bug — nhưng gây nhầm lẫn nếu không biết.
+      - GIẢI PHÁP ĐÃ CHỌN: dùng cơ chế runtime-editable có sẵn qua CLI
+        shell (xem mục 3 bên dưới) để set lại host trực tiếp, ghi đè
+        giá trị cũ trong flash — KHÔNG cần xoá file/reflash.
+      - VIỆC CẦN LÀM ĐẦU PHIÊN 6: hỏi người dùng đã chạy lệnh
+        `settings -c -host broker.hivemq.com` (hoặc host thật họ
+        muốn) qua CLI chưa, và kiểm tra log/`settings -i` xem host đã
+        đúng chưa.
 
-**ẢNH NGHIỆM QUYẾT ĐỊNH CỦA NGƯỜI DÙNG (giữa phiên 6, ĐỪNG NGHI NGỜ
-LẠI, đã đủ bằng chứng):**
-- Erase full chip: 25mA (baseline sạch).
-- Full MX_*_Init() (11 module: GPIO/I2C1/SPI1/USART1/2/3/ICACHE/
-  LPTIM1/RTC/TIM1/UART4/5/USART6) + app chạy full (kể cả qua sleep
-  path): 56.3-56.6mA.
-- Comment HẾT app_init/board_init/app_process NHƯNG GIỮ NGUYÊN toàn
-  bộ MX_*_Init() trong main(): VẪN 56.3mA — không đổi.
-- Comment THÊM cả MX_*_Init(): về 25.4mA.
-=> Kết luận chắc chắn: ~31mA rò đến từ chính việc 11 module trên được
-   init ở main() và KHÔNG BAO GIỜ được tắt/disable trước STOP mode —
-   không liên quan gì đến HSE/PLL/app logic/sleep logic. STOP mode
-   chỉ gate SYSCLK/HCLK/PCLK ở mức core, KHÔNG tự gate từng RCC
-   clock-enable bit riêng của từng peripheral (RCC_APBxENR/AHBxENR).
+   b. **CLI Shell qua UART6 — ĐÃ CÓ SẴN TỪ TRƯỚC (shell_app.c +
+      shell_commands.c), không phải code mới, chỉ mới được người
+      dùng biết tới/dùng tới trong phiên 5:**
+      - Lệnh `settings -i` xem config hiện tại.
+      - Lệnh `settings -c -host <str> -port <n> -clientid <str>
+        -user <str> -pass <str> -keepalive <n> -apn <str> -apnuser
+        <str> -apnpass <str> -deviceid <str> -pump <s> -duty <0-100>
+        -sensing <s> -sleep <s>` để config bất kỳ subset flags nào.
+      - Ký tự kết thúc dòng: CHỈ CẦN `\n` (LF) — cli_shell.c's
+        cli_shell_receive_char() bỏ qua hoàn toàn ký tự `\r` (return
+        ngay không xử lý gì), nên gửi `\r\n` (CRLF) cũng không sao,
+        `\r` chỉ bị lờ đi.
+      - Sau khi settings -c, KHÔNG CẦN REBOOT — broker mới áp dụng
+        vào lần MQTT (re)connect tiếp theo, timing (pump/sensing/
+        sleep) áp dụng vào cycle tick tiếp theo (thông báo in ra ngay
+        sau lệnh).
+      - Baud rate UART6 CHƯA XÁC NHẬN CHÍNH XÁC trong phiên 5 (không
+        kịp tra) — nếu người dùng hỏi lại, CẦN ĐỌC sx_board.c's UART6
+        init để xác nhận baud rate thật trước khi trả lời.
 
-============================================================
-CÁC VÒNG FIX ĐÃ THỬ TRONG _enter_stop() (sx_sleep.c) — LỊCH SỬ ĐẦY ĐỦ
-============================================================
-File: SynaptiX_FDK/components/peripherals/sleep/sx_sleep.c
+   c. **Topic MQTT app.c publish lên (khác hẳn test_sleep.c's
+      "synaptix/test/sleep_cycle"):**
+      - Telemetry (dữ liệu sensor): "hanoi/air_quality/data/" +
+        device_id → mặc định "hanoi/air_quality/data/001"
+        (build_telemetry_topic(), app.c dòng ~146-148). Publish mỗi
+        chu kỳ SENDING (app.c dòng ~591-613, case APP_CYCLE_SENDING).
+        Người dùng ĐÃ XÁC NHẬN thấy topic này pub được trên broker.
+      - Heartbeat: "hanoi/air_quality/heartbeat/" + device_id →
+        "hanoi/air_quality/heartbeat/001". CHỈ publish mỗi
+        HEARTBEAT_CYCLE_INTERVAL=4 chu kỳ SENDING một lần (không phải
+        mỗi cycle), ~27 phút giữa 2 lần heartbeat theo timing mặc
+        định hiện tại (app.c's send_heartbeat_if_due(), dòng
+        ~523-541). Người dùng CHƯA XÁC NHẬN đã thấy heartbeat pub hay
+        chưa (cần đợi đủ ~27 phút hoặc tạm giảm
+        HEARTBEAT_CYCLE_INTERVAL để test nhanh hơn — CHƯA LÀM, cần
+        hỏi người dùng có muốn giảm tạm để test không).
+      - device_id đổi được qua CLI: `settings -c -deviceid <str>`.
 
-**v1 (revert): __HAL_RCC_xxx_CLK_DISABLE() thô cho I2C1/SPI1/6 UART/
-TIM1/LPTIM1/ICACHE, không đụng GPIO (lý do không đụng GPIO xem dưới),
-không đụng RTC (wake source). Kết quả đo: 56mA → 50mA. Không đủ.
-Nguyên nhân thiếu sót: CLEAR_BIT chỉ cắt clock, KHÔNG đổi GPIO pin
-mode. I2C1's SDA/SCL (PB6/PB7) là GPIO_MODE_AF_OD + NOPULL, dựa vào
-pull-up NGOÀI THẬT trên board (NGƯỜI DÙNG ĐÃ XÁC NHẬN CÓ PULL-UP
-NGOÀI TRÊN I2C1). Cắt clock mà để pin ở AF_OD "chết nửa vời" → nếu
-SDA/SCL đang ở mức LOW lúc cắt (giữa giao dịch dở, hoặc slave clock-
-stretch) → pin đứng yên LOW suốt STOP trong khi pull-up ngoài cố kéo
-lên HIGH → dòng rò liên tục qua điện trở pull-up.
-
-**v2: thay CLEAR_BIT bằng HAL_I2C_DeInit(&hi2c1)/HAL_SPI_DeInit(&hspi1)/
-HAL_UART_DeInit(&huart1..6). Đã tra thật HAL_I2C_MspDeInit() trong
-Core/Src/i2c.c: xác nhận nó tự CLK_DISABLE VÀ tự HAL_GPIO_DeInit() đưa
-pin về analog input (mode rò dòng thấp nhất theo datasheet reset-
-state). Cùng pattern xác nhận cho SPI1 và cả 6 UART (CubeMX sinh sẵn
-MspDeInit đúng chuẩn). Kết quả đo LẦN ĐẦU (người dùng quên chưa flash,
-sau khi flash đúng bản): 24mA — GẦN ĐẠT MỤC TIÊU 25mA baseline!
-
-**VẤN ĐỀ MỚI PHÁT SINH SAU v2: KHÔNG WAKE LẠI ĐƯỢC (hoặc treo, chưa
-rõ — xem mục "VIỆC ĐANG LÀM DỞ" bên dưới, ĐÂY LÀ TRỌNG TÂM PHIÊN 7).**
-Log dừng đúng tại:
-  [INFO]SX_SLEEP_SVC : >>> Entering STOP mode NOW
-...và không có gì thêm, kể cả sau khi chờ đủ 300s (RTC period lúc đó).
-Dòng đo nhảy TỪ 24mA LÊN LẠI ~55mA sau đó (không rõ tại thời điểm
-nào chính xác — CHƯA ĐO ĐƯỢC MỐC THỜI GIAN CHÍNH XÁC KHI DÒNG NHẢY
-LÊN, chỉ biết là "vẫn treo y hệt, không log gì thêm" theo lời người
-dùng).
-
-**v3 (đã thử, KHÔNG rõ có giải quyết được gì không, vì bị che lấp bởi
-lỗi debug ở dưới): nghi ngờ ban đầu là SX_RESUME_TICS() (HAL_ResumeTick())
-đặt SAI VỊ TRÍ — nó nằm SAU toàn bộ khối MX_*_Init(), nhưng
-HAL_UART_Init() (gọi bởi MX_USARTx_Init) kết thúc bằng
-UART_CheckIdleState() → UART_WaitOnFlagUntilTimeout(), dùng
-HAL_GetTick() để tính timeout. ĐÃ TRA THẬT trong
-Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_uart.c dòng ~3433-3480,
-xác nhận cơ chế timeout dùng HAL_GetTick() thật, và nếu SysTick chưa
-resume, HAL_GetTick() đứng yên → về lý thuyết có thể treo vô hạn chờ
-flag TEACK/REACK. Đã sửa: chuyển SX_RESUME_TICS() lên NGAY SAU
-SystemClock_Config(), TRƯỚC khối MX_*_Init(). Người dùng báo "vẫn
-không được" sau khi flash bản này — NHƯNG (xem v4) có khả năng cao
-đây KHÔNG PHẢI vì v3 sai, mà vì cùng lúc đó UART6 (log console) VẪN
-đang bị DeInit ở đầu _enter_stop(), nên KHÔNG THỂ PHÂN BIỆT được
-"code treo thật" với "code chạy đúng nhưng tự tắt mất kênh log của
-chính mình". v3's fix (thứ tự resume tick) CÓ THỂ ĐÚNG HOẶC KHÔNG ĐÚNG
-— CHƯA CÓ CÁCH XÁC NHẬN VÌ BỊ v4's vấn đề che lấp. Đừng revert v3 vội,
-nhưng cũng đừng coi nó là đã xác nhận đúng.
-
-**v4 (VỪA SỬA XONG PHIÊN 7, CHƯA FLASH, CHƯA CÓ KẾT QUẢ — ƯU TIÊN SỐ 1
-ĐẦU PHIÊN 8): phát hiện quan trọng — tra sx_board.c dòng ~18:
-  static UART_HandleTypeDef *hal_uart[6] =
-      {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6};
-      // lte, gps, rs485, dust-sensor, extend-uart, log
-huart6 CHÍNH LÀ UART LOG CONSOLE (xác nhận thêm qua sx_board.c's
-sx_board_init(): logger_init(LOGGER_DEBUG, log_print) dùng
-board.log_uart, với uart_config[UART_LOG].pDriver = hal_uart[UART_LOG],
-và UART_LOG là phần tử cuối cùng = index 5 = huart6).
-v1/v2/v3 ĐỀU CÓ HAL_UART_DeInit(&huart6) trong danh sách tắt trước
-STOP — nghĩa là MỌI LẦN TEST TRƯỚC ĐÓ, code tự tắt luôn kênh log của
-chính nó ngay trước khi vào STOP. "Không thấy log sau khi vào STOP"
-KHÔNG THỂ dùng làm bằng chứng "code bị treo" nữa kể từ v2 trở đi —
-board có thể đã chạy hoàn toàn bình thường (vào STOP, wake, resume)
-nhưng đơn giản là không còn kênh nào để in log ra nữa.
-ĐÃ SỬA: loại bỏ HAL_UART_DeInit(&huart6) và MX_USART6_UART_Init()
-khỏi luồng sleep — giữ UART6 (log) sống xuyên suốt STOP mode. Patch
-đính kèm (handoff_phien7_v4_keep_log_uart_alive.patch) — ĐÃ XUẤT,
-CHƯA CÓ XÁC NHẬN NGƯỜI DÙNG ĐÃ FLASH HAY CHƯA, CHƯA CÓ KẾT QUẢ ĐO.
+3. **Warning "read failed" khi chạy app.c (KHÁC với test_sleep.c) —
+   ĐÃ PHÁT HIỆN NGHI VẤN, CHƯA XÁC NHẬN/CHƯA SỬA:**
+   Người dùng xác nhận: chạy app.c thấy warning log giống kiểu
+   "TEMP_HUMI measure cmd failed"/"ACCEL_APP linear accel read
+   failed" (y hệt bug WAKING đã fix ở test_sleep.c phiên 3). NGHI VẤN
+   MẠNH (chưa xác nhận bằng đọc code cụ thể trong phiên 5, HẾT THỜI
+   GIAN): app.c's app_process() gọi accel_app_poll()/
+   sx_temp_humi_poll() HOÀN TOÀN VÔ ĐIỀU KIỆN mỗi tick (app.c dòng
+   ~756-757), KHÔNG CÓ GUARD theo state nào cả — khác hẳn
+   test_sleep.c đã có guard `if (s_state != TEST_SLEEP_STATE_WAKING)`
+   từ phiên 3. Vì app.c dùng CHUNG sx_sleep_manager.c (cùng
+   s_sleep_mgr, cùng 6 wake_steps/6 sleep_steps) với test_sleep.c, RẤT
+   CÓ THỂ app.c đang dính lại ĐÚNG BUG RACE-CONDITION mà test_sleep.c
+   đã bị trước khi fix (BNO055 còn SUSPEND cho tới wake_steps[5],
+   SHT3x cùng bus I2C1, đọc sớm lúc app_mode==APP_MODE_WAKEUP gây race).
+   VIỆC CẦN LÀM ĐẦU PHIÊN 6: đọc lại app.c's app_process() đầy đủ (đặc
+   biệt phần xử lý APP_MODE_WAKEUP/APP_MODE_SLEEP nếu có state tương
+   đương s_state của test_sleep.c), XÁC NHẬN với người dùng đây đúng
+   là cùng loại race-condition, rồi áp dụng guard tương tự (bọc
+   accel_app_poll()/sx_temp_humi_poll() bằng điều kiện "không đang
+   trong wake sequence", logic y hệt fix ở test_sleep.c phiên 3) —
+   NHƯNG app.c's state machine phức tạp hơn test_sleep.c (có
+   APP_CYCLE_ON_PUMP/SENSING/SENDING/SLEEPING và app_mode riêng), cần
+   đọc kỹ để áp guard đúng chỗ, đừng copy máy móc từ test_sleep.c.
 
 ============================================================
-NỘI DUNG CODE HIỆN TẠI TRONG _enter_stop() SAU v4 (tóm tắt, xem patch
-đính kèm để có diff đầy đủ, chính xác từng dòng)
+VIỆC ĐANG LÀM DỞ — TỐI ƯU NĂNG LƯỢNG (bắt đầu cuối phiên 5, CHƯA SỬA
+GÌ, chỉ mới điều tra + trình bày nghi vấn cho người dùng)
 ============================================================
-Trước STOP (thứ tự):
-  1. pre_stop_hook (board/app tự quiesce thứ họ cần, không đổi)
-  2. SCB->ICSR pending-systick-clear (không đổi, có từ trước)
-  3. HAL_I2C_DeInit(&hi2c1)
-  4. HAL_SPI_DeInit(&hspi1)
-  5. HAL_UART_DeInit(&huart1) -- LTE
-  6. HAL_UART_DeInit(&huart2) -- GPS
-  7. HAL_UART_DeInit(&huart3) -- RS485
-  8. HAL_UART_DeInit(&huart4) -- dust sensor (SPS30)
-  9. HAL_UART_DeInit(&huart5) -- extend
-     [huart6 KHÔNG đụng — đây là log, giữ sống]
-  10. __HAL_RCC_TIM1_CLK_DISABLE()
-  11. __HAL_RCC_LPTIM1_CLK_DISABLE()
-  12. HAL_ICACHE_Disable()
-  13. SX_SUSPEND_TICS() (HAL_SuspendTick())
-  14. s_enter_stop(...) = HAL_PWR_EnterSTOPMode(..., WFI) — vào STOP
+Bối cảnh: người dùng đo dòng tiêu thụ thực tế bằng đồng hồ đo:
+  - Full power (đang chạy bình thường): 120mA
+  - STOP mode / sleep (kỳ vọng thấp nhất): 50mA — NGƯỜI DÙNG NÓI RÕ
+    "đây vẫn chưa được" — tức là kỳ vọng phải thấp hơn nhiều.
+  - Giữ nút RESET (mọi thứ đứng yên, không code chạy — baseline phần
+    cứng thuần): 22mA — người dùng xác nhận "22mA là đạt" (mốc mục
+    tiêu).
+  => Có khoảng ~28mA "rò" trong STOP mode cần tìm và cắt.
 
-Sau wake (thứ tự, ĐÃ SỬA Ở v3 — SX_RESUME_TICS lên trước MX_*_Init):
-  1. SystemClock_Config()
-  2. SX_RESUME_TICS() (HAL_ResumeTick()) -- ĐÃ CHUYỂN LÊN ĐÂY (v3 fix)
-  3. MX_I2C1_Init()
-  4. MX_SPI1_Init()
-  5. MX_USART1_UART_Init() -- LTE
-  6. MX_USART2_UART_Init() -- GPS
-  7. MX_USART3_UART_Init() -- RS485
-  8. MX_UART4_Init() -- dust
-  9. MX_UART5_Init() -- extend
-     [MX_USART6_UART_Init() KHÔNG gọi lại — không cần vì huart6 không
-     bị DeInit ở trên]
-  10. MX_TIM1_Init()
-  11. MX_LPTIM1_Init()
-  12. MX_ICACHE_Init()
-  13. post_wake_hook
+Đã điều tra (đọc code, KHÔNG có compiler nên KHÔNG build/test được
+trong phiên 5) toàn bộ 6 sleep_steps hiện có trong sx_sleep_manager.c
+(gps_power_off, modem_power_off, sps30_power_off, pump_off,
+gas_sensor_qa_mode, accel_suspend) + đối chiếu với toàn bộ peripheral
+thật trong struct Board (sx_board.h).
 
-**Deliberately KHÔNG đụng (giữ nguyên từ v1, lý do vẫn còn đúng):**
-- RTC: wake source xác nhận qua HAL_RTCEx_SetWakeUpTimer_IT
-  (Core/Src/rtc.c), KHÔNG được tắt.
-- GPIO (mọi port, GPIOx clock): MX_GPIO_Init() (Core/Src/gpio.c) chủ
-  động ghi GPIO_PIN_RESET cho GPS_CPW/GPS_RST/SPI1_CS/EN_PW_DUST/
-  I2C1_RST/LTE_RST/LTE_PWR_KEY. Gọi lại MX_GPIO_Init() sau wake sẽ
-  ÂM THẦM reset các thiết bị ngoài (modem, GPS...) về trạng thái boot
-  bất kể app đang giữ pin ở mức nào — RỦI RO THẬT, không lý thuyết.
-  Cắt GPIOx clock cũng rủi ro vì pin đang driven (SPI1_CS, LTE_PWR_KEY)
-  có thể float trong STOP thay vì giữ mức. Dòng rò từ GPIO clock-enable
-  bit tự thân không đáng kể so với ~31mA đã đo — không đáng risk này.
+KẾT LUẬN RÕ RÀNG NHẤT, ĐÃ CÓ BẰNG CHỨNG TỪ CODE (CHƯA SỬA, ĐANG CHỜ
+XÁC NHẬN NGƯỜI DÙNG — hỏi xong thì hết token, CHƯA NHẬN ĐƯỢC CÂU TRẢ
+LỜI):
 
-============================================================
-VIỆC ĐANG LÀM DỞ — ƯU TIÊN SỐ 1 TUYỆT ĐỐI ĐẦU PHIÊN 8
-============================================================
-1. **Flash bản v4** (patch đính kèm handoff_phien7_v4_keep_log_uart_alive.patch)
-   NẾU người dùng chưa kịp làm trong lúc chat với phiên 7 (kiểm tra kỹ
-   qua hỏi han, ĐỪNG GIẢ ĐỊNH).
-2. Nhờ người dùng dùng CLI "settings -c -sleep 20" (hoặc số giây ngắn)
-   để test nhanh chu kỳ wake thay vì chờ 300s mỗi lần — lệnh này ĐÃ
-   CÓ SẴN, không cần code gì thêm (xem shell_commands.c dòng ~213-219,
-   gọi network_config_set_sleep_ms()).
-3. Xem log ĐẦY ĐỦ sau khi flash bản v4: bây giờ log KHÔNG bị tắt giữa
-   chừng nữa (huart6 sống xuyên suốt), nên nếu vẫn không thấy
-   "<<< Woke from STOP mode" (log này có sẵn ở
-   SynaptiX_FDK/services/sleep_service/sx_sleep_service.c dòng ~81,
-   ngay sau sx_sleep_enter_stop() return) thì ĐÂY MỚI LÀ BẰNG CHỨNG
-   THẬT về treo, đáng tin cậy để điều tra tiếp — khác với log phiên 6
-   cuối kỳ (v1-v3) vốn không đáng tin vì tự tắt log.
-4. NẾU v4 flash xong và board wake được bình thường + log
-   "<<< Woke from STOP mode" xuất hiện + dòng tiêu thụ vẫn ~24-25mA
-   (có thể nhỉnh hơn 1 chút vì giữ 1 UART sống, chấp nhận được) → COI
-   NHƯ ĐÃ XONG, xác nhận lại 1-2 chu kỳ nữa cho chắc rồi COMMIT+PUSH.
-5. NẾU v4 flash xong mà VẪN treo y hệt (log vẫn dừng ở "Entering STOP
-   mode NOW", dù giờ log KHÔNG bị tắt nữa) → đây là bằng chứng THẬT,
-   nghĩa là code THẬT SỰ treo, không phải do tự tắt log. Nghi vấn tiếp
-   theo theo thứ tự ưu tiên:
-   a. Có thể treo NGAY TRONG WFI, chưa bao giờ wake — kiểm tra RTC
-      wakeup timer có thực sự set đúng không (log "SetWakeUpTimer
-      ret=0 counter=299" cho thấy set OK, ret=0 = HAL_OK, nhưng CHƯA
-      CHẮC nghĩa là interrupt sẽ thực sự bắn — có thể NVIC chưa enable
-      đúng cho RTC WKUP IRQ sau khi các DeInit() phía trên chạy, dù lý
-      thuyết RTC không bị đụng tới. Cần kiểm tra kỹ NVIC priority/
-      enable cho RTC_WKUP_IRQn có bị ảnh hưởng gián tiếp bởi bất kỳ
-      DeInit nào ở trên không — CHƯA TRA, cần làm đầu phiên 8).
-   b. Có thể treo trong 1 trong các HAL_UART_DeInit()/HAL_SPI_DeInit()/
-      HAL_I2C_DeInit() TRƯỚC KHI VÀO WFI (tức là chưa bao giờ thực sự
-      vào STOP mode) — nếu đúng, dòng đo sẽ KHÔNG giảm xuống 24mA nữa
-      mà đứng yên ở mức RUN cao hơn NGAY LẬP TỨC sau "Entering STOP
-      mode NOW", KHÔNG đợi tới 300s. NGƯỜI DÙNG CẦN XÁC NHẬN: dòng có
-      giảm xuống ~24mA trước rồi mới nhảy lên lại sau ~300s, hay là
-      đứng yên ở mức cao NGAY LẬP TỨC không hề giảm? ĐÂY LÀ CÂU HỎI
-      QUAN TRỌNG NHẤT CHƯA HỎI KỊP TRONG PHIÊN 6-7, PHẢI HỎI ĐẦU
-      PHIÊN 8 TRƯỚC KHI ĐOÁN TIẾP.
-   c. Nếu (b) xác nhận đúng (không hề giảm dòng, tức treo TRƯỚC WFI):
-      nghi ngờ cụ thể nhất là HAL_SPI_DeInit(&hspi1) — SPI1_CS_Pin
-      (PC... xem gpio.c) là GPIO thường, KHÔNG rõ trạng thái lúc
-      HAL_SPI_DeInit() chạy (xem mục 6 dưới, CHƯA XÁC NHẬN). Nếu CS
-      đang ở mức SELECT (thường active-low, nên mức LOW = đang chọn
-      W25Q128) và HAL_SPI_DeInit() cắt SPI1 clock/pin giữa chừng một
-      giao dịch SPI dở dang với W25Q128 đang chờ phản hồi — có thể
-      treo ở đâu đó trong SPI HAL nếu có busy-wait nào phụ thuộc phản
-      hồi phần cứng không bao giờ tới. CHƯA XÁC NHẬN, CHỈ LÀ SUY LUẬN
-      — cần đọc kỹ HAL_SPI_DeInit() thật (Drivers/.../stm32h5xx_hal_spi.c)
-      xem nó có busy-wait dựa vào flag phần cứng nào không, giống cách
-      đã tra HAL_UART_Init()'s UART_CheckIdleState() ở phiên 6.
-6. **CHƯA XÁC NHẬN (tồn đọng từ phiên 6, vẫn treo đó)**: SPI1_CS_Pin
-   có chắc chắn ở mức deselect (thường = HIGH cho active-low CS) TRƯỚC
-   khi HAL_SPI_DeInit(&hspi1) chạy trong _enter_stop() không? Không
-   tìm thấy nơi nào set SPI1_CS_Pin bằng code ngoài MX_GPIO_Init()
-   (grep cả repo, chỉ thấy trong gpio.c) — có thể CS được quản lý qua
-   hardware NSS tự động bởi SPI1 peripheral (hspi1.Init.NSS), CHƯA TRA
-   KỸ CẤU HÌNH NÀY. Cần xem Core/Src/spi.c's MX_SPI1_Init() phần
-   hspi1.Init.NSS = ??? để biết CS là software-managed hay
-   hardware-managed — đây là việc CHƯA LÀM, ưu tiên nếu nghi vấn 5c ở
-   trên được xác nhận.
+1. **W25Q128 (external flash SPI) — NGUỒN RÒ RÕ RÀNG NHẤT, gần như
+   chắc chắn cần fix đầu tiên:**
+   Driver components/modules/external_flash/sx_W25Q128.c ĐÃ CÓ SẴN
+   sx_W25Q128_sleep_on() / sx_W25Q128_sleep_off() (Deep Power-Down
+   mode qua lệnh SPI 0xB9/0xAB — chip's own low-power mode, không cần
+   GPIO cắt nguồn riêng, "works regardless of board wiring" theo
+   comment trong sx_W25Q128.h dòng ~48-49) NHƯNG CHƯA TỪNG ĐƯỢC GỌI Ở
+   ĐÂU trong toàn bộ codebase (đã grep xác nhận, 0 kết quả ngoài định
+   nghĩa). Flash đứng ở active/standby mode bình thường suốt cả STOP
+   mode — không vào Deep Power-Down. Đây khớp với ghi chú "External
+   flash chưa có sleep_step" đã có từ 2 handoff trước (phiên 2-3),
+   giờ đã xác định rõ driver có sẵn, chỉ cần thêm 1 sleep_step gọi nó.
+   VIỆC CẦN LÀM: hỏi người dùng xác nhận, rồi thêm sleep_step thứ 7
+   vào sx_sleep_manager.c (s_sleep_steps[6]) gọi
+   sx_W25Q128_sleep_on() lúc vào sleep, và thêm 1 wake_step (hoặc mở
+   rộng 1 wake_step có sẵn) gọi sx_W25Q128_sleep_off() lúc wake —
+   CẦN ĐỌC KỸ sx_sleep_manager.h's struct để biết cần thêm field ctx
+   nào (con trỏ tới board.q128) trước khi sửa, và LƯU Ý mảng
+   s_wake_steps[6]/s_sleep_steps[6] hiện đang HARDCODE SIZE=6 ở
+   sx_sleep_manager_init() — cần đổi cả kích thước mảng lẫn số lượng
+   truyền vào sx_sleep_service_init() (hiện đang gọi với 6, 6 — xem
+   dòng cuối sx_sleep_manager_init()).
 
-============================================================
-VIỆC CẦN LÀM SAU KHI GIẢI QUYẾT XONG TREO/WAKE (thứ tự ưu tiên, sau
-mục "VIỆC ĐANG LÀM DỞ" ở trên)
-============================================================
-1. Nếu dòng vẫn chưa về sát 22mA sau khi fix xong treo — kiểm tra GPIO
-   nào đang driven HIGH/LOW kéo dòng tĩnh qua external component
-   (SPS30, ZE12A, pump) — CHƯA đối chiếu kỹ các module này với
-   datasheet, chỉ mới đối chiếu GPS/IMU/ADS1115/SHT3x/RTC/W25Q128 ở
-   phiên 6. Việc tồn đọng, ưu tiên sau khi treo/wake ổn định.
-2. Việc tồn đọng từ phiên 5, CHƯA ĐỘNG TỚI Ở PHIÊN 6-7, VẪN CÒN ĐÓ:
-   - Bug "read failed" nghi race-condition WAKING trong app.c's
-     app_process() — accel_app_poll()/sx_temp_humi_poll() gọi vô điều
-     kiện không có guard theo state, khác test_sleep.c đã có guard từ
-     phiên 3.
-   - Muốn giảm tạm HEARTBEAT_CYCLE_INTERVAL để test nhanh heartbeat
-     publish — chưa hỏi lại người dùng.
-   - Timestamp payload sai "2087-00-00T...", ACCEL_APP_FILTER_ALPHA
-     chưa điều chỉnh theo period mới, log_debug -> log_info cho
-     temp/humi (ưu tiên thấp, xem chi tiết ở handoff phiên 3-4).
-3. Race-condition nhỏ (KHÔNG gây treo, chỉ log rối, ghi nhận từ phiên
-   6): modem_power_off sleep_step và sx_mqtt.c's recovery ladder có vẻ
-   cùng động vào modem gần như đồng thời — ưu tiên thấp.
-4. CLI "settings -c -sleep [n]" đã xác nhận tồn tại và hoạt động
-   (shell_commands.c), tận dụng để test nhanh thay vì chờ 300s mỗi
-   chu kỳ trong suốt các phiên tới.
+2. **Nghi vấn CHƯA ĐỦ BẰNG CHỨNG, cần điều tra thêm (đã hỏi người
+   dùng, CHƯA CÓ CÂU TRẢ LỜI khi hết token):**
+   - RTC (RX8130CE, I2C) có cơ chế low-power riêng cần kích hoạt
+     không? CHƯA ĐỌC rx8130ce.c/.h trong phiên 5.
+   - sx_sleep.c (tier 1, generic STOP-mode) — CHƯA ĐỌC LẠI trong
+     phiên 5 để xác nhận HAL_PWR_EnterSTOPMode() được gọi với option
+     nào (PWR_LOWPOWERREGULATOR_ON hay MAINREGULATOR_ON,
+     PWR_STOPENTRY_WFI hay WFE) — lựa chọn regulator mode ảnh hưởng
+     TRỰC TIẾP tới dòng tiêu thụ nền của MCU trong STOP mode (có thể
+     là nguồn rò lớn hơn cả W25Q128 nếu đang dùng MAINREGULATOR thay
+     vì LOWPOWERREGULATOR). ĐÂY CÓ THỂ LÀ NGHI VẤN QUAN TRỌNG NHẤT,
+     CHƯA KỊP ĐIỀU TRA — ưu tiên đọc sx_sleep.c đầu phiên 6 TRƯỚC KHI
+     kết luận thêm về W25Q128 có đủ để giải thích hết 28mA hay không.
+   - I2C1/SPI1 peripheral clock có tự bị cắt trong STOP mode hay
+     không (phụ thuộc RCC config, không chỉ phụ thuộc PWR mode) —
+     CHƯA ĐIỀU TRA.
+   - ads1115 (power_monitor_app) và sht3x: ĐÃ XÁC NHẬN dùng
+     single-shot mode qua đọc code (ads1115.c dòng ~39-43 dùng
+     ADS1115_MODE bit trong config register cho single-shot; sht3x.c
+     có hàm sht3x_measure_single_shot()) — chip tự về idle giữa các
+     lần đo, dòng tiêu thụ µA-level, KHÔNG PHẢI nguồn rò đáng kể, đã
+     loại trừ khỏi danh sách nghi vấn.
+   - Board CHỈ CÓ 2 chân GPIO enable nguồn thật sự (theo sx_board.h):
+     EN_PW_DUST (SPS30) và EN_PW_PUMP (bơm) — CẢ 2 ĐÃ CÓ TRONG
+     sleep_steps rồi (sps30_power_off, pump_off). Không có GPIO cắt
+     nguồn riêng cho I2C sensors/RTC/flash — các thiết bị này dùng
+     chung 1 rail nguồn board, chỉ "sleep" được qua lệnh nội bộ của
+     từng chip (như W25Q128's Deep Power-Down), không thể cắt nguồn
+     vật lý riêng lẻ bằng phần mềm thuần (cần thêm GPIO/transistor
+     phần cứng nếu muốn cắt nguồn thật cho nhóm này — KHÔNG PHẢI việc
+     phần mềm có thể tự làm được).
 
-============================================================
-FILE PATCH ĐÍNH KÈM PHIÊN NÀY
-============================================================
-handoff_phien7_v4_keep_log_uart_alive.patch — áp dụng bằng
-`git apply` từ thư mục gốc SAU KHI re-clone sạch. Đây là patch CỘNG
-DỒN từ đầu phiên 6 (bao gồm cả W25Q128 fix đã push rồi — NẾU git log
-cho thấy W25Q128 fix đã có sẵn trên main thì patch này CÓ THỂ conflict
-khi apply, cần kiểm tra kỹ bằng git apply --check trước, hoặc chỉ lấy
-phần đổi trong sx_sleep.c bằng tay nếu cần).
+VIỆC CẦN LÀM ĐẦU PHIÊN 6 (thứ tự ưu tiên):
+1. Re-clone, đọc git log — CHẠY LỆNH XÁC NHẬN 2 fix phiên 3 vẫn còn
+   (xem mục QUY TẮC ở handoff phiên 4 nếu cần, nhưng theo git log đầu
+   phiên 5 đã thấy các commit đó tồn tại nên khả năng cao vẫn OK,
+   XÁC NHẬN LẠI CHO CHẮC).
+2. Đọc sx_sleep.c (tier 1) để xác nhận/loại trừ nghi vấn PWR regulator
+   mode — đây là việc điều tra CHƯA KỊP LÀM ở phiên 5, ưu tiên cao vì
+   có thể là nguồn rò điện lớn nhất.
+3. Đọc rx8130ce.c/.h xem RTC có cần lệnh low-power riêng không.
+4. Tổng hợp lại toàn bộ nghi vấn (W25Q128 + PWR mode + RTC + I2C/SPI
+   clock) trình bày cho người dùng MỘT LẦN, hỏi rõ muốn sửa theo thứ
+   tự nào trước — ĐỪNG tự ý sửa W25Q128 trước khi có bức tranh đầy đủ,
+   vì có thể PWR regulator mode mới là nguyên nhân chính, sửa W25Q128
+   trước rồi test có thể gây hiểu lầm "đã hết rò" trong khi vẫn còn
+   nguồn rò lớn hơn chưa đụng tới.
+5. Sau khi người dùng xác nhận hướng, sửa từng phần một, đợi test
+   trên board thật giữa mỗi lần sửa (đúng quy tắc dự án — không sửa
+   dồn nhiều thứ rồi mới test, khó xác định thứ nào thực sự có tác
+   dụng).
+6. Song song/sau đó: điều tra bug "read failed" khi chạy app.c (mục
+   3 ở trên) — nghi vấn race-condition WAKING giống hệt bug đã fix ở
+   test_sleep.c phiên 3, nhưng app.c's state machine phức tạp hơn,
+   cần đọc kỹ app_process() trước khi áp fix.
+7. Xác nhận với người dùng bug broker "REPLACE_ME_BROKER_HOST" đã
+   được giải quyết bằng lệnh CLI `settings -c -host ...` chưa (mục 2a
+   ở trên).
+8. Hỏi người dùng có muốn tạm giảm HEARTBEAT_CYCLE_INTERVAL để test
+   nhanh heartbeat publish không (mục 2c ở trên).
+9. Các việc tồn đọng từ phiên 3-4 (ưu tiên thấp hơn, xem handoff phiên
+   4 nếu cần chi tiết): timestamp payload sai "2087-00-00T...",
+   ACCEL_APP_FILTER_ALPHA chưa điều chỉnh theo period mới, log_debug
+   -> log_info cho temp/humi.

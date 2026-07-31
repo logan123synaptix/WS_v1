@@ -79,6 +79,7 @@ static void build_defaults(network_config_t *cfg)
     cfg->pump_on_ms = APP_PUMP_ON_MS;
     cfg->sensing_ms = APP_SENSING_MS;
     cfg->sleep_ms   = APP_CYCLE_PERIOD_MS;
+    cfg->gps_timeout_ms = GPS_TIMEOUT_MS;
     /* PUMP_FULL_DRIVE_PERCENT (sx_pump.h) = 100 — matches pump_on()'s
      * previous hardcoded full-drive behavior before pump_duty_percent
      * existed, so a fresh/empty flash doesn't change pump strength. */
@@ -218,6 +219,11 @@ void network_config_set_sensing_ms(uint32_t sensing_ms)
 void network_config_set_sleep_ms(uint32_t sleep_ms)
 {
     s_cfg.sleep_ms = sleep_ms;
+}
+
+void network_config_set_gps_timeout_ms(uint32_t gps_timeout_ms)
+{
+    s_cfg.gps_timeout_ms = gps_timeout_ms;
 }
 
 void network_config_set_pump_duty_percent(uint8_t pump_duty_percent)

@@ -47,9 +47,10 @@ void time_sync_init(time_sync_t *ts, modem_handle_t *modem, sx_gps_t *gps, rx813
 }
 
 /* Tries the modem (primary source) first; falls back to GPS only if the
- * modem hasn't synced anything yet. Sets ts->done on the first successful
- * RTC write from either source and never checks again after that — per
- * the module doc-comment in time_sync.h. */
+ * modem hasn't synced anything yet this cycle. Sets ts->done on the first
+ * successful RTC write from either source and stops re-checking until
+ * time_sync_reset() clears ts->done again (normally once per wake, see
+ * time_sync.h's top comment and time_sync_reset()'s doc-comment). */
 void time_sync_poll(time_sync_t *ts)
 {
     if (ts->done) {
@@ -114,4 +115,9 @@ void time_sync_poll(time_sync_t *ts)
 uint8_t time_sync_is_done(const time_sync_t *ts)
 {
     return ts->done;
+}
+
+void time_sync_reset(time_sync_t *ts)
+{
+    ts->done = 0;
 }

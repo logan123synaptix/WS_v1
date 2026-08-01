@@ -742,6 +742,20 @@ static void app_cycle_process(uint32_t delta_ms)
     case APP_CYCLE_WAKING:
         if (sx_sleep_manager_is_wake_done(&s_sleep_mgr)) {
             sx_sleep_manager_reset_wake(&s_sleep_mgr);
+            /* Bug fix (2026-08-01): re-sync the RTC from this wake's fresh
+             * modem NITZ reading (a7677s.c's CCLK init step already reran
+             * during the wake steps just completed, logging "Network time
+             * synced (UTC): ..." — see time_sync.h's top comment) instead
+             * of leaving it frozen at whatever the very first sync wrote.
+             * Confirmed on real hardware: without this, ordinary RX8130CE
+             * quartz drift built up to ~38s of offset between the RTC-
+             * derived telemetry timestamp and the wall-clock time the
+             * payload actually reached the broker, after only tens of
+             * minutes of runtime. time_sync_reset() only clears the
+             * done flag; the actual re-sync happens via time_sync_poll(),
+             * already called unconditionally every tick a few lines below
+             * in app_process() — no separate poll call needed here. */
+            time_sync_reset(&s_time_sync);
             s_cycle_tick_ms = 0;
             s_cycle_state   = APP_CYCLE_ON_PUMP;
             s_app_mode      = APP_MODE_FULL_POWER;

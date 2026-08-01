@@ -153,8 +153,38 @@ static volatile app_mode_t s_app_mode    = APP_MODE_FULL_POWER;
  * actually progresses while this state is active) and only proceeds to
  * sleep once it clears. Bounded by a timeout so a stuck/never-completing
  * publish (e.g. modem wedged) cannot block the device from ever
- * sleeping again. */
-#define APP_WAIT_PUBLISH_TIMEOUT_MS   10000U
+ * sleeping again.
+ *
+ * Bug fix (2026-08-01): first cut of this timeout was 10000ms, picked
+ * arbitrarily without checking the modem layer's own timeout. Confirmed
+ * on real hardware this was far too short — every cycle logged "Publish
+ * still pending after 10000 ms, sleeping anyway" and the reading never
+ * reached the broker, i.e. the fix was cutting the modem off mid-publish
+ * exactly like the original bug, just 10s later instead of immediately.
+ * a7677s.c's AT+CMQTTPUB flow (cb_mqtt_pub_payload_data ->
+ * cb_mqtt_pub_send) is given A7677S_TIMEOUT_MQTT_PUB = 70000ms by the
+ * driver itself to wait for the modem's +CMQTTPUB response (which in
+ * turn tells the modem to allow up to A7677S_MQTT_PUB_TIMEOUT_S = 60s
+ * for the actual over-the-air publish, datasheet section 18.2.12) — a
+ * 10s app-level timeout could never win a race against that. Set to
+ * match A7677S_TIMEOUT_MQTT_PUB exactly (see a7677s.h) rather than
+ * picking another arbitrary number, plus a small margin so the app-level
+ * timeout fires strictly after, not at the same time as, the driver's
+ * own timeout (letting the driver's own error path run first and mark
+ * s_publishing back to 0 via cb_publish_done, instead of both timeouts
+ * racing each other).
+ *
+ * Deliberately NOT #include-ing a7677s.h here to pull in the real
+ * A7677S_TIMEOUT_MQTT_PUB constant — app.c is written against the
+ * modem_ops_t abstraction (via sx_mqtt.h/sx_user_mqtt.h) and reaching
+ * into one specific driver's private header would break that layering
+ * (see sx_mqtt.c's own doc-comment: swapping modems should only mean
+ * writing a new driver against the same contract, not touching this
+ * file). The value below is copied by hand instead — if a7677s.h's
+ * A7677S_TIMEOUT_MQTT_PUB (currently 70000U) ever changes, or a
+ * different modem driver with a different publish timeout is swapped
+ * in, this must be updated to match by hand. */
+#define APP_WAIT_PUBLISH_TIMEOUT_MS   (70000U + 2000U)
 static char s_telemetry_json[TELEMETRY_JSON_BUFF_SIZE];
 
 /* MQTT_STATION_DATA_TOPIC/MQTT_STATION_HEARTBEAT_TOPIC (app_config.h) are

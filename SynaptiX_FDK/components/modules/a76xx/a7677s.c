@@ -1059,16 +1059,54 @@ static void cb_get_imei(modem_t *modem, const char *response, modem_response_st_
         char imei_buf[A7677S_IMEI_LEN] = {0};
         int i = 0;
         const char *p = response;
-        /* Skip any leading \r\n left over from the raw response buffer;
-         * copy only ASCII digits, stop at the first non-digit or buffer
-         * limit. Mirrors the defensive-parsing style used elsewhere in this
-         * file (e.g. cb_creg_poll's strtol on a trusted-format substring),
-         * but here the whole line IS the value, not a "key: value" pair. */
-        while (*p && (*p == '\r' || *p == '\n')) p++;
-        while (*p && isdigit((unsigned char)*p) && i < (int)(A7677S_IMEI_LEN - 1)) {
-            imei_buf[i++] = *p++;
+        /* Bug fix (2026-08-01): the old parser only skipped leading \r\n
+         * then read digits starting at the very next character, on the
+         * assumption the whole response line IS the IMEI digits with no
+         * other text. Confirmed on real hardware this assumption is
+         * wrong -- the actual response includes the command echo before
+         * the digits, e.g. "AT+CGSN 861385071580230  OK" (echo enabled),
+         * not just "351602000330570" as the datasheet section this
+         * comment used to cite implied. Starting the digit-read at 'A'
+         * (of "AT+CGSN") immediately failed isdigit() and produced i==0
+         * every time, silently leaving dce->imei permanently "" -- which
+         * in turn made sx_user_mqtt.c's client_id collapse to the fixed
+         * string "stm32h5_" (IMEI suffix missing) on every connect, the
+         * same client_id on every device/every reconnect. On a shared
+         * public broker (broker.hivemq.com) a duplicate client_id makes
+         * the broker drop whichever connection was already open the
+         * moment a new one connects with the same ID (MQTT spec: only
+         * one active connection per client_id) -- this was confirmed to
+         * be the actual cause of the "+CMQTTCONNLOST: 0,3" seen
+         * immediately after a fresh connect+subscribe+publish sequence
+         * (nothing else in that sequence indicated any error).
+         * Fix: scan forward past the echo/whitespace for the first run
+         * of ASCII digits that is at least 8 characters long (IMEIs are
+         * 15 digits; 8 is a safe lower bound that won't misfire on a
+         * stray short number elsewhere in the line, e.g. from "OK" or a
+         * result code, none of which contain digits anyway, but kept as
+         * a defensive minimum in case of leading zeros or truncation)
+         * rather than assuming position 0 is the start of the value. */
+        while (*p) {
+            const char *run_start = p;
+            int run_len = 0;
+            while (*p && isdigit((unsigned char)*p) &&
+                   run_len < (int)(A7677S_IMEI_LEN - 1)) {
+                p++;
+                run_len++;
+            }
+            if (run_len >= 8) {
+                memcpy(imei_buf, run_start, (size_t)run_len);
+                imei_buf[run_len] = '\0';
+                i = run_len;
+                break;
+            }
+            if (run_len == 0) {
+                p++; /* not a digit, advance past it */
+            }
+            /* run_len in [1,7]: too short to be the IMEI (stray digits
+             * elsewhere in the line) -- loop continues scanning from p,
+             * which already sits just past this short run. */
         }
-        imei_buf[i] = '\0';
         if (i > 0) {
             memcpy(dce->imei, imei_buf, sizeof(imei_buf));
             log_info(TAG, "IMEI: %s", dce->imei);

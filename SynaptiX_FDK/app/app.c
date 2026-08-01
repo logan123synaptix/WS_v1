@@ -769,6 +769,22 @@ static void app_cycle_process(uint32_t delta_ms)
     }
 }
 
+/* Wrapper matching sx_user_mqtt_set_modem_owned_elsewhere_check()'s plain
+ * uint8_t(*)(void) callback signature -- sx_sleep_manager_is_waking()
+ * itself needs &s_sleep_mgr, which a bare function pointer can't carry.
+ * Ported from test_sleep.c's is_modem_owned_by_sleep_manager() (fix
+ * confirmed on real hardware, 2026-07-29) -- app.c had never wired this
+ * up, so sx_mqtt.c's recovery-ladder start() calls were racing directly
+ * against sx_sleep_manager_wake_process()'s own modem power-on/attach
+ * sequence. Confirmed on real hardware, 2026-08-01: "Power Off start"
+ * followed immediately by "start(): power not ready yet" from the
+ * recovery ladder firing mid power-off, then "mqtt_connect: modem busy"
+ * after wake -- MQTT never reconnects, telemetry stays queued offline. */
+static uint8_t is_modem_owned_by_sleep_manager(void)
+{
+    return sx_sleep_manager_is_waking(&s_sleep_mgr);
+}
+
 void app_init(void){
     log_info(TAG, "APP initializing ....");
 
@@ -846,6 +862,16 @@ void app_init(void){
     } else {
         sx_user_mqtt_nontls_init(&mqtt_cfg);
     }
+
+    /* Must run after both sx_sleep_manager_init() (above) and the MQTT
+     * init call just above -- see is_modem_owned_by_sleep_manager()'s
+     * doc-comment and sx_mqtt.h's modem_owned_elsewhere typedef doc-comment
+     * for the real-hardware race this guards against. Without this,
+     * sx_mqtt.c's escalate_recovery() calls modem->ops->start() at the
+     * same time as sx_sleep_manager_wake_process()'s own power-on/attach
+     * sequence, confusing the modem mid-attach and leaving MQTT stuck
+     * disconnected after wake. */
+    sx_user_mqtt_set_modem_owned_elsewhere_check(is_modem_owned_by_sleep_manager);
 
     /* Time sync (RTC set once from modem NITZ, falling back to GPS UTC) —
      * see app/user/time_sync/. board.modem/board.gps/board.rtc are all

@@ -32,7 +32,7 @@
 /* USER CODE BEGIN Includes */
 #include "app.h"
 #include "sx_ex_storage.h"
-#define TEST        0
+#define TEST        1
 #include "sx_board.h"
 #if TEST
 #include "test_lte_mqtt.h"
@@ -45,6 +45,7 @@
 #include "test_shell.h"
 #include "test_sleep.h"
 #include "test_sps30.h"
+#include "test_ze12a.h"
 #endif
 
 /* USER CODE END Includes */
@@ -142,7 +143,8 @@ int main(void)
   // test_shell_init();
   // test_ads1115_init();
   // test_sleep_init();
-  test_sps30_init();
+  // test_sps30_init();
+  test_ze12a_init();
   #else
   app_init();
   #endif
@@ -173,7 +175,8 @@ int main(void)
         // test_shell_poll(delta);
         // test_ads1115_poll(delta);
         // test_sleep_poll(delta);
-        test_sps30_poll(delta);
+        // test_sps30_poll(delta);
+        test_ze12a_poll(delta);
         #else
         app_process(delta);
         #endif

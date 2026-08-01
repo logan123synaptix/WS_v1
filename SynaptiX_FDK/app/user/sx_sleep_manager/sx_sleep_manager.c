@@ -6,6 +6,7 @@
 #include "sx_delay.h"
 #include "sx_pump.h"
 #include "sx_ex_storage.h"
+#include "sx_user_mqtt.h"
 #include "logger.h"
 
 static const char *TAG = "SX_SLEEP_MGR";
@@ -215,6 +216,30 @@ static uint8_t _gps_power_off_is_done(void *ctx)
 static void _modem_power_off_start(void *ctx)
 {
     sx_sleep_manager_t *mgr = (sx_sleep_manager_t *)ctx;
+    /* Bug fix (2026-08-01): mgr->modem->ops->power_off_start() below only
+     * cuts the modem's physical power (PWRKEY pulse) -- it has no idea
+     * sx_mqtt.c's mqtt->state even exists, let alone that it needs
+     * resetting. If a publish was in flight or the connection was simply
+     * still SX_MQTT_STATE_CONNECTED at the moment sleep began (the common
+     * case -- see app.c's APP_CYCLE_WAIT_PUBLISH, which normally only
+     * reaches sleep once idle), mqtt->state stays CONNECTED straight
+     * through the power-off, the whole STOP-mode sleep, and the
+     * subsequent wake/re-power-on -- nothing else ever moves it back to
+     * DISCONNECTED (sx_mqtt_report_failure()'s escalate_recovery() only
+     * manages a retry counter and possible hard-reset escalation, it does
+     * not touch mqtt->state either, see sx_mqtt.c). Confirmed on real
+     * hardware: after wake, _on_modem_ready() calls sx_mqtt_connect(),
+     * which is a no-op because mqtt->state != DISCONNECTED/ERROR ("connect:
+     * already connected or in progress"), so no new MQTT connection is
+     * ever actually established even though the modem was fully
+     * power-cycled and definitely has no live connection -- every publish
+     * that cycle then fails with "mqtt_publish: not connected".
+     * sx_user_mqtt_force_disconnect() (thin wrapper over
+     * sx_mqtt_force_disconnect(), see sx_mqtt.h) resets mqtt->state to
+     * DISCONNECTED without sending any AT command -- safe to call
+     * unconditionally here even though the modem is about to lose power
+     * anyway, since this only touches MCU-side state. */
+    sx_user_mqtt_force_disconnect();
     mgr->modem->ops->power_off_start(mgr->modem->ctx);
     mgr->power_off_last_tick_ms = sx_gettick();
 }

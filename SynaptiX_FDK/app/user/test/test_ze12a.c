@@ -22,6 +22,23 @@ void test_ze12a_init(void)
               "before expecting all channels connected",
               (unsigned)GAS_SENSOR_CHANNEL_DWELL_MS, (unsigned)GAS_SENSOR_TIMEOUT_MS,
               (unsigned long)(GAS_SENSOR_MUX_CHANNEL_COUNT * GAS_SENSOR_CHANNEL_DWELL_MS));
+    /* Read-only mode (2026-08-01, per user request): deliberately does
+     * NOT call gas_sensor_switch_to_active_mode() here anymore. That call
+     * writes a mode-select command out over UART5_TX -- which on this
+     * board was measured at only 1.8V instead of the expected 3.3V logic
+     * level at the mux's DB input (confirmed 3.3V right at the MCU's own
+     * PB13 pin, so the drop happens somewhere between PB13 and the mux;
+     * root cause not yet pinned down). UART5_RX (module -> MCU) was
+     * separately confirmed to carry a real, valid signal, so this test
+     * now only listens -- it does not depend on TX working at all. If
+     * the modules are already in Active Upload mode (their default,
+     * factory or otherwise) this needs nothing further. If a module is
+     * sitting in Question & Answer mode instead (e.g. left there by a
+     * prior app.c run — mode is stored non-volatile inside the module
+     * itself, see gas_sensor_switch_to_active_mode()'s own doc-comment in
+     * ze12a.h), it will simply show as "disconnected" here since nothing
+     * asks it to reply; that is a separate, known limitation of
+     * read-only mode, not a bug in this test. */
 }
 
 /* Static list so the log loop below can report a stable name per type

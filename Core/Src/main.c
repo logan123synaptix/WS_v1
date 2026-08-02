@@ -31,7 +31,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#include "sx_ex_storage.h"
 #define TEST        1
 #include "sx_board.h"
 #if TEST
@@ -180,6 +179,40 @@ int main(void)
         #else
         app_process(delta);
         #endif
+
+        /* Debug instrumentation (2026-08-01), TEMPORARY -- delete once
+         * the real question is answered. Minimal, standalone test:
+         * calls HAL_UART_Transmit() directly on huart5, bypassing
+         * sx_uart.c/ze12a.c/the TMUX4052 mux entirely, to answer one
+         * question with an oscilloscope: does UART5_TX (PB13) ever
+         * actually toggle at the HAL/hardware level at all? Real-hardware
+         * report so far: ze12a.c's broadcast command runs, logs success,
+         * HAL_UART_Transmit() inside sx_uart_write() returns HAL_OK (see
+         * sx_uart.c's added error log, which never fires) -- yet the
+         * oscilloscope shows nothing on PB13, both right after a fresh
+         * flash and after a hardware reset. This isolates the same call
+         * from all of that application-layer logic to see if the pin
+         * toggles at all under the simplest possible case. Sends one
+         * fixed byte roughly every 500ms (not on every tick, to keep the
+         * pulse easy to find on the scope -- 9600 baud means each byte
+         * is under 1.2ms wide, easy to miss if sent every tick at
+         * whatever rate this loop runs). */
+        // static uint32_t s_uart5_test_accum_ms = 0;
+        // s_uart5_test_accum_ms += delta;
+        // if (s_uart5_test_accum_ms >= 500) {
+        //     s_uart5_test_accum_ms = 0;
+        //     uint8_t test_byte = 0x55; /* 0x55 = 01010101, alternating bit
+        //                                 * pattern, easy to recognize on a
+        //                                 * scope trace and to distinguish
+        //                                 * from idle-high/idle-low. */
+        //     HAL_StatusTypeDef test_tx_status =
+        //         HAL_UART_Transmit(&huart5, &test_byte, 1, 1000);
+        //     (void)test_tx_status; /* set a breakpoint here to inspect if
+        //                             * needed; not logged to keep this
+        //                             * block self-contained without
+        //                             * depending on logger.h's TAG in this
+        //                             * file. */
+        // }
     }
 
     #if TEST

@@ -214,12 +214,40 @@ static const uint8_t CMD_SWITCH_TO_QA_MODE[9] =
 static const uint8_t CMD_SWITCH_TO_ACTIVE_MODE[9] =
     { 0xFF, 0x01, 0x78, 0x40, 0x00, 0x00, 0x00, 0x00, 0x47 };
 
+/* Both commands must reach every physically populated mux channel, not
+ * just whichever channel s_mux_channel happens to be parked on when the
+ * caller calls in -- the command frame travels out through the same mux
+ * (same A0/A1 address lines) as the RX data path, so it only reaches
+ * whichever single module is currently selected. Sweeping through all
+ * GAS_SENSOR_MUX_CHANNEL_COUNT channels (not just the populated ones --
+ * this module has no way to know in advance which channels are
+ * populated, and sending to an empty channel is harmless, nothing is
+ * listening) and restoring s_mux_channel's own round-robin position
+ * afterwards keeps this transparent to gas_sensor_poll(). The two delays
+ * are conservative, not measured against a datasheet timing spec: 20ms
+ * after switching channel for the mux/module's own RX line to settle
+ * before the command frame starts, and 50ms after sending for the module
+ * to actually process the mode-change command (9 bytes at 9600 baud is
+ * under 10ms on the wire, so 50ms is mostly margin for the module's
+ * internal handling, not transmission time). */
+static void ze12a_broadcast_command(const uint8_t *cmd, size_t len)
+{
+    uint8_t original_channel = s_mux_channel;
+    for (uint8_t ch = 0; ch < GAS_SENSOR_MUX_CHANNEL_COUNT; ch++) {
+        ze12a_select_mux_channel(ch);
+        sx_delay_ms(20);
+        sx_uart_write(&s_comm, cmd, len);
+        sx_delay_ms(50);
+    }
+    ze12a_select_mux_channel(original_channel);
+}
+
 void gas_sensor_switch_to_qa_mode(void)
 {
     if (!s_initialized) {
         return;
     }
-    sx_uart_write(&s_comm, CMD_SWITCH_TO_QA_MODE, sizeof(CMD_SWITCH_TO_QA_MODE));
+    ze12a_broadcast_command(CMD_SWITCH_TO_QA_MODE, sizeof(CMD_SWITCH_TO_QA_MODE));
     log_info(TAG, "switched to Q&A mode");
 }
 
@@ -228,7 +256,7 @@ void gas_sensor_switch_to_active_mode(void)
     if (!s_initialized) {
         return;
     }
-    sx_uart_write(&s_comm, CMD_SWITCH_TO_ACTIVE_MODE, sizeof(CMD_SWITCH_TO_ACTIVE_MODE));
+    ze12a_broadcast_command(CMD_SWITCH_TO_ACTIVE_MODE, sizeof(CMD_SWITCH_TO_ACTIVE_MODE));
     log_info(TAG, "switched to Active Upload mode");
 }
 

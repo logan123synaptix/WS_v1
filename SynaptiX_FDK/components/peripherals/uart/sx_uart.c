@@ -43,7 +43,22 @@ void sx_uart_init(sx_uart_t *_uart, sx_uart_config_t *_config, int _rxBufferSize
 void sx_uart_write(sx_uart_t *_uart, const uint8_t *_data, int _len){
     // log_debug(TAG, "UART write: %d bytes", _len);
 #if SX_PLATFORM == SX_PLATFORM_STM32H5 || SX_PLATFORM == SX_PLATFORM_STM32H7 || SX_PLATFORM == SX_PLATFORM_STM32F7 || SX_PLATFORM == SX_PLATFORM_STM32F4 || SX_PLATFORM == SX_PLATFORM_STM32F1
-    HAL_UART_Transmit((UART_HandleTypeDef *)_uart->config->pDriver, (uint8_t *)_data, _len, 1000);
+    /* Debug instrumentation (2026-08-01): HAL_UART_Transmit()'s return
+     * value was previously discarded entirely -- if it fails (busy
+     * state, timeout, HAL error...) the caller has no way to know, and
+     * callers like ze12a.c's gas_sensor_switch_to_active_mode() log
+     * success unconditionally right after calling this, regardless of
+     * whether any byte actually left the UART peripheral. Added while
+     * investigating a real-hardware report of the broadcast command
+     * appearing to run (log line printed) but the oscilloscope showing
+     * no activity at all on UART5_TX after a hardware reset -- this log
+     * line will confirm or rule out a HAL-level transmit failure as the
+     * cause. */
+    HAL_StatusTypeDef tx_status = HAL_UART_Transmit(
+        (UART_HandleTypeDef *)_uart->config->pDriver, (uint8_t *)_data, _len, 1000);
+    if (tx_status != HAL_OK) {
+        log_error(TAG, "HAL_UART_Transmit failed, status=%d, len=%d", (int)tx_status, _len);
+    }
 #endif
 }
 int sx_uart_read(sx_uart_t *_uart, uint8_t *_data, int _len, uint32_t _timeoutMS){

@@ -1,5 +1,5 @@
-#ifndef TEST_SPS30_H
-#define TEST_SPS30_H
+#ifndef TEST_ZE12A_H
+#define TEST_ZE12A_H
 
 #ifdef __cplusplus
 extern "C" {

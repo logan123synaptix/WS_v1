@@ -3,6 +3,11 @@
 #include "ze12a.h"
 #include "logger.h"
 
+/* Debug instrumentation (2026-08-02), TEMPORARY -- see
+ * sx_board.c's HAL_UART_RxCpltCallback() UART_EXTEND branch. */
+extern volatile uint32_t g_uart5_isr_byte_count;
+extern volatile uint8_t  g_uart5_isr_last_byte;
+
 static const char *TAG = "TEST_ZE12A";
 
 static uint32_t s_log_accum_ms = 0;
@@ -70,6 +75,15 @@ void test_ze12a_poll(uint32_t delta_ms)
         return;
     }
     s_log_accum_ms = 0;
+
+    /* Debug instrumentation (2026-08-02), TEMPORARY -- see this file's
+     * top comment. Read once, right before the per-type loop below, so
+     * the count/byte reported here line up with the same instant as the
+     * connected/disconnected report that follows. */
+    uint32_t isr_count = g_uart5_isr_byte_count;
+    uint8_t  isr_last   = g_uart5_isr_last_byte;
+    log_info(TAG, "UART5 ISR: %lu bytes total so far, last=0x%02X",
+              (unsigned long)isr_count, isr_last);
 
     for (int i = 0; i < GAS_SENSOR_COUNT; i++) {
         GasSensorType_t type = s_names[i].type;

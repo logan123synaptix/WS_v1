@@ -9,13 +9,14 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define GAS_SENSOR_COUNT 5
+#define GAS_SENSOR_COUNT 3
 
 /* The TMUX4052 mux physically has 4 selectable channels (2-bit address,
- * A1/A0), even though only 3 physical ZE12A modules (SR1/SR2/SR3) are
- * populated on this board revision per the schematic. Address 3 is simply
- * left unconnected; polling it will just time out with no frame received,
- * which is handled the same as any other disconnected/missing sensor. */
+ * A1/A0). Only 3 physical ZE12A modules (SR1/SR2/SR3 -- SO2/NO2/O3) are
+ * populated on this board revision per the schematic, matching
+ * GAS_SENSOR_COUNT below exactly. Address 3 is simply left unconnected;
+ * polling it will just time out with no frame received, which is handled
+ * the same as any other disconnected/missing sensor. */
 #define GAS_SENSOR_MUX_CHANNEL_COUNT 4
 
 /* How long (ms) to stay on one mux channel waiting for a frame before
@@ -30,11 +31,9 @@ extern "C" {
 #define GAS_SENSOR_TIMEOUT_MS 10000U
 
 typedef enum GasSensorType{
-    GAS_SENSOR_CO = 0x04,
     GAS_SENSOR_SO2 = 0x2B,
     GAS_SENSOR_NO2 = 0x2C,
-    GAS_SENSOR_O3 = 0x2A,
-    GAS_SENSOR_H2S =  0x03
+    GAS_SENSOR_O3 = 0x2A
 }GasSensorType_t;
 
 typedef struct GasSensor{

@@ -436,11 +436,9 @@ static const char *build_telemetry_payload(void)
      * when is_connected() is true, so null it out otherwise rather than
      * publishing a stale/zeroed reading. */
     static const struct { GasSensorType_t type; const char *key; } gas_channels[] = {
-        { GAS_SENSOR_CO,  "co"  },
         { GAS_SENSOR_SO2, "so2" },
         { GAS_SENSOR_NO2, "no2" },
         { GAS_SENSOR_O3,  "o3"  },
-        { GAS_SENSOR_H2S, "h2s" },
     };
     for (size_t i = 0; i < sizeof(gas_channels) / sizeof(gas_channels[0]); i++) {
         if (gas_sensor_app_is_connected(gas_channels[i].type)) {
@@ -574,11 +572,9 @@ static const char *build_heartbeat_payload(void)
     cJSON *sensors = cJSON_CreateObject();
     cJSON_AddBoolToObject(sensors, "tempHumi", sx_temp_humi_is_ready(&s_temp_humi));
     cJSON_AddBoolToObject(sensors, "sps30", sps30_app_has_measurement(&s_sps30_app));
-    cJSON_AddBoolToObject(sensors, "co", gas_sensor_app_is_connected(GAS_SENSOR_CO));
     cJSON_AddBoolToObject(sensors, "so2", gas_sensor_app_is_connected(GAS_SENSOR_SO2));
     cJSON_AddBoolToObject(sensors, "no2", gas_sensor_app_is_connected(GAS_SENSOR_NO2));
     cJSON_AddBoolToObject(sensors, "o3", gas_sensor_app_is_connected(GAS_SENSOR_O3));
-    cJSON_AddBoolToObject(sensors, "h2s", gas_sensor_app_is_connected(GAS_SENSOR_H2S));
     /* No "accel" status field: accel_app_t has a has_reading bool
      * internally (see accel_app.h) but exposes no public getter for it —
      * only accel_app_is_movement_detected(), which answers a different

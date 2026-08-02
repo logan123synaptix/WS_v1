@@ -17,12 +17,6 @@ Board_t board;
 
 static UART_HandleTypeDef *hal_uart[6] = {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6}; // lte, gps, rs485, dust-sensor, extend-uart, log
 
-/* Debug instrumentation (2026-08-02), TEMPORARY -- see
- * HAL_UART_RxCpltCallback()'s UART_EXTEND branch below for why. Not
- * static so main.c can extern + read these out to a log line. */
-volatile uint32_t g_uart5_isr_byte_count = 0;
-volatile uint8_t  g_uart5_isr_last_byte  = 0;
-
 static TIM_HandleTypeDef *sx_tim1 = &htim1;
 
 static sx_uart_t *bsp_uart[6];
@@ -242,24 +236,7 @@ void sx_board_init(void)
     // received bytes into it the same way it does for LTE/GPS/LOG/DUST.
     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
-    {
-        /* Debug instrumentation (2026-08-02), TEMPORARY -- delete once
-         * the real question is answered. Real-hardware report: UART5's
-         * physical RX signal confirmed clean 3.3V at PB12, yet
-         * HAL_UART_RxCpltCallback()'s UART_EXTEND byte counter never
-         * increments (stays 0 indefinitely) -- i.e. the ISR itself never
-         * fires. HAL_UART_Receive_IT()'s return value was never checked
-         * anywhere in this file (same class of bug as sx_uart_write()'s
-         * discarded HAL_UART_Transmit() status, fixed separately) -- if
-         * this call fails right here (e.g. huart5.gState not READY for
-         * some reason at this point in board init), the receive
-         * interrupt is simply never armed in the first place, and no
-         * later byte would ever trigger it regardless of the physical
-         * signal being present. */
-        HAL_StatusTypeDef rx_it_status =
-            HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
-        log_info(TAG, "UART_EXTEND HAL_UART_Receive_IT status=%d (0=OK)", (int)rx_it_status);
-    }
+    HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
     
 
     // TIMER (TIM1) — sx_timer_init_regs() applies Prescaler/Period directly,
@@ -476,51 +453,27 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         sx_uart_rx_callback(bsp_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
         HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
     } else if(huart == hal_uart[UART_EXTEND]){
-        /* Debug instrumentation (2026-08-02), TEMPORARY -- delete once
-         * the real question is answered. ze12a.c's parser has stayed
-         * completely silent (no checksum-mismatch, no unknown-gas-code
-         * log) even with the UART5 baud rate confirmed correct at 9600
-         * and the physical signal confirmed clean 3.3V end-to-end
-         * (module TX -> mux -> MCU RX), so this counts every byte this
-         * ISR actually receives and records the last byte value, to be
-         * read out from the main loop (not logged here directly -- ISR
-         * context, keep this handler as fast and side-effect-free as
-         * possible; logger.h's log_* calls are not verified safe to call
-         * from an ISR in this codebase). */
-        g_uart5_isr_byte_count++;
-        g_uart5_isr_last_byte = uart_rx_char[UART_EXTEND];
         sx_uart_rx_callback(bsp_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
     }
 }
 
-/* Debug instrumentation (2026-08-02), TEMPORARY -- see comment inside
- * HAL_UART_ErrorCallback() below. Not static so main.c/test_ze12a.c can
- * extern + read these out. */
-volatile uint32_t g_uart5_error_count = 0;
-volatile uint32_t g_uart5_last_error_code = 0;
-
+/* Bug fix (2026-08-02): before this, HAL_UART_ErrorCallback() had no
+ * override anywhere in the project, so it fell back to HAL's weak
+ * default (does nothing) -- in particular it does NOT re-arm
+ * HAL_UART_Receive_IT(). If UART5 hit a framing/noise/overrun error on
+ * its very first received byte (root cause traced to the TMUX4052 mux's
+ * own brief "off" blip every ~2s during its round-robin channel switch,
+ * observed on the oscilloscope, occasionally cutting a byte off
+ * mid-transmission), nothing ever re-armed the receive interrupt
+ * afterwards and UART5 stayed stuck indefinitely -- confirmed on real
+ * hardware: the physical RX signal was clean 3.3V and
+ * HAL_UART_Receive_IT() returned HAL_OK at init, yet zero bytes were ever
+ * received. This override re-arms the receive interrupt on error so
+ * UART5 recovers instead of staying wedged after the first glitch. */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
     if (huart == hal_uart[UART_EXTEND]) {
-        /* No override of this callback existed anywhere in the project
-         * before this fix -- HAL's weak default HAL_UART_ErrorCallback()
-         * does nothing, in particular it does NOT re-arm
-         * HAL_UART_Receive_IT(). If UART5 hits a framing/noise/overrun
-         * error on its very first received byte (possible cause: the
-         * mux's own brief "off" blip every 2s, observed on the
-         * oscilloscope, cutting a byte off mid-transmission if it lands
-         * at the wrong moment) and nothing re-arms the receive interrupt
-         * afterwards, UART5 would stay stuck indefinitely -- explaining a
-         * byte counter frozen at 0 despite the signal being physically
-         * present and HAL_UART_Receive_IT() having returned HAL_OK at
-         * init. Recording the error code (huart->ErrorCode, HAL_UART
-         * bitmask: bit0=PE parity, bit1=NE noise, bit2=FE framing,
-         * bit3=ORE overrun...) to be read out from the main loop, then
-         * re-arming the receive interrupt so UART5 can recover instead of
-         * staying wedged. */
-        g_uart5_error_count++;
-        g_uart5_last_error_code = huart->ErrorCode;
         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
     }
 }

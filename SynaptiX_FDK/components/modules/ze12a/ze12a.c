@@ -51,11 +51,9 @@ void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
                      void *_s0_arg, void *_s1_arg)
 {
     GasSensorType_t sensor_types[GAS_SENSOR_COUNT] = {
-        GAS_SENSOR_CO,
         GAS_SENSOR_SO2,
         GAS_SENSOR_NO2,
-        GAS_SENSOR_O3,
-        GAS_SENSOR_H2S
+        GAS_SENSOR_O3
     };
 
     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {

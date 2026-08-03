@@ -3,7 +3,29 @@
 
 #define USER_DISK_LABEL_CREATE         "VD GPS"   
 
-#define SLEEP_TIME_MS                   5*60*1000     // 5 minutes                 
+/* Per the user (2026-08-02): device now sleeps 20 minutes between wake
+ * cycles (was 5 minutes). This #define only seeds network_config's
+ * build_defaults() for a fresh/empty flash — the live value is
+ * network_config_t's sleep_ms field, runtime-editable via the CLI's
+ * "-sleep" and MQTT RPC's "-sleep" (see network_config.h). */
+#define SLEEP_TIME_MS                   20*60*1000    // 20 minutes
+
+/* How often the heartbeat topic is published (ms) — independent of
+ * SLEEP_TIME_MS/sleep_ms (see network_config_t's heartbeat_ms doc-comment
+ * for why they were decoupled). Per the user (2026-08-02), heartbeat
+ * should keep firing roughly every 5 minutes even though the main sleep
+ * cycle is now 20 minutes; send_heartbeat_if_due() (app.c) checks
+ * elapsed wall-clock time against this each time SENDING runs, so it
+ * still fires "on time" from the device's perspective even though
+ * SENDING itself now only happens once per 20-minute cycle (i.e. this
+ * value being shorter than sleep_ms does NOT mean heartbeat fires more
+ * than once per cycle — it can only actually publish when the device is
+ * awake at SENDING; see that function's doc-comment in app.c). Same
+ * "only seeds build_defaults() for a fresh flash" relationship as
+ * SLEEP_TIME_MS above — the live value is network_config_t's
+ * heartbeat_ms, runtime-editable via the CLI's "-heartbeat" and MQTT
+ * RPC's "-heartbeat". */
+#define HEARTBEAT_TIME_MS               5*60*1000     // 5 minutes
 
 /* ------------------------------------------------------------------ */
 /*  Main app state machine timing (app.c's APP_MODE_FULL_POWER cycle)  */

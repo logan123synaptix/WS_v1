@@ -80,6 +80,7 @@ static void build_defaults(network_config_t *cfg)
     cfg->sensing_ms = APP_SENSING_MS;
     cfg->sleep_ms   = APP_CYCLE_PERIOD_MS;
     cfg->gps_timeout_ms = GPS_TIMEOUT_MS;
+    cfg->heartbeat_ms = HEARTBEAT_TIME_MS;
     /* PUMP_FULL_DRIVE_PERCENT (sx_pump.h) = 100 — matches pump_on()'s
      * previous hardcoded full-drive behavior before pump_duty_percent
      * existed, so a fresh/empty flash doesn't change pump strength. */
@@ -232,6 +233,11 @@ void network_config_set_pump_duty_percent(uint8_t pump_duty_percent)
         pump_duty_percent = 100U;
     }
     s_cfg.pump_duty_percent = pump_duty_percent;
+}
+
+void network_config_set_heartbeat_ms(uint32_t heartbeat_ms)
+{
+    s_cfg.heartbeat_ms = heartbeat_ms;
 }
 
 bool network_config_save(void)

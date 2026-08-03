@@ -46,6 +46,7 @@ static const Cli_Shell_Cmd s_shell_commands[] = {
         "\t\t-sensing [seconds]   sensing duration\r\n"
         "\t\t-sleep [seconds]     STOP-mode sleep duration\r\n"
         "\t\t-gpstimeout [seconds] GPS fix wait timeout (before proceeding without a fix)\r\n"
+        "\t\t-heartbeat [seconds] heartbeat publish interval (independent of -sleep)\r\n"
         "\t\t-host [str]          MQTT broker host\r\n"
         "\t\t-port [n]            MQTT broker port\r\n"
         "\t\t-clientid [str]      MQTT client id\r\n"
@@ -55,7 +56,7 @@ static const Cli_Shell_Cmd s_shell_commands[] = {
         "\t\t-apn [str]           GSM APN\r\n"
         "\t\t-apnuser [str]       GSM APN username\r\n"
         "\t\t-apnpass [str]       GSM APN password\r\n"
-        "example : settings -c -pump 30 -duty 100 -sensing 60 -sleep 300 -host mqtt.example.com\r\n"},
+        "example : settings -c -pump 30 -duty 100 -sensing 60 -sleep 1200 -heartbeat 300 -host mqtt.example.com\r\n"},
     {"pump",     cli_cmd_pump,
         "Drive the pump's software PWM directly, right now -- for bench "
         "testing (independent of settings -c -pump/-duty, which only "
@@ -151,6 +152,7 @@ static void print_settings(ShellContext_t *shell)
         "Sensing (s): %lu\r\n"
         "Sleep (s): %lu\r\n"
         "GPS timeout (s): %lu\r\n"
+        "Heartbeat (s): %lu\r\n"
         "Host: %s\r\n"
         "Port: %u\r\n"
         "Client ID: %s\r\n"
@@ -167,6 +169,7 @@ static void print_settings(ShellContext_t *shell)
         (unsigned long)(cfg->sensing_ms / 1000U),
         (unsigned long)(cfg->sleep_ms / 1000U),
         (unsigned long)(cfg->gps_timeout_ms / 1000U),
+        (unsigned long)(cfg->heartbeat_ms / 1000U),
         cfg->host,
         cfg->port,
         cfg->client_id,
@@ -237,6 +240,13 @@ static int cli_cmd_settings(ShellContext_t *shell, int argc, char *argv[])
                 return -1;
             }
             network_config_set_gps_timeout_ms((uint32_t)seconds * 1000U);
+        } else if (strcmp(flag, "-heartbeat") == 0) {
+            long seconds = strtol(val, NULL, 10);
+            if (seconds <= 0) {
+                cli_shell_printf(shell, "-heartbeat must be > 0\r\n");
+                return -1;
+            }
+            network_config_set_heartbeat_ms((uint32_t)seconds * 1000U);
         } else if (strcmp(flag, "-host") == 0) {
             network_config_set_host(val);
         } else if (strcmp(flag, "-port") == 0) {

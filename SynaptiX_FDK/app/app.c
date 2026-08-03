@@ -298,16 +298,14 @@ static bool gps_log_read_last(float *out_lat, float *out_lon)
     return true;
 }
 
-/* Heartbeat is sent every HEARTBEAT_CYCLE_INTERVAL SENDING passes, not
- * every cycle — see build_heartbeat_payload()'s doc-comment for why.
- * Per the user, ~4 cycles at the current APP_CYCLE_PERIOD_MS/
- * APP_PUMP_ON_MS/APP_SENSING_MS defaults works out to roughly 27 minutes
- * between heartbeats. Counts cycles rather than wall-clock ms, so if
- * those timings become runtime-configurable later (see app_config.h's
- * NOTE on that) this interval scales automatically instead of needing a
- * separate ms-based recompute. */
-#define HEARTBEAT_CYCLE_INTERVAL 4U
-static uint32_t s_sending_cycle_count = 0;
+/* Heartbeat now fires by wall-clock elapsed time (network_config_get()'s
+ * heartbeat_ms), not by counting SENDING passes — see heartbeat_ms's
+ * doc-comment in network_config.h for why counting cycles was replaced.
+ * s_last_heartbeat_tick_ms is a HAL_GetTick() snapshot of the last time a
+ * heartbeat was actually sent (or attempted — see send_heartbeat_if_due()
+ * below); 0 at boot so the very first SENDING pass after power-up always
+ * sends one immediately rather than waiting a full heartbeat_ms first. */
+static uint32_t s_last_heartbeat_tick_ms = 0;
 
 /* Saves payload as a new file in OFFLINE_QUEUE_DIR. Silently gives up (logs
  * only) if the write itself fails — same as WS_v0's fopen()==NULL branch,
@@ -563,23 +561,26 @@ static const char *build_telemetry_payload(void)
 #define HEARTBEAT_JSON_BUFF_SIZE 512
 static char s_heartbeat_json[HEARTBEAT_JSON_BUFF_SIZE];
 
-/* Builds the periodic device-health payload (uptime, firmware version,
- * signal strength, power rail, per-sensor connected/ready status),
- * separate from build_telemetry_payload()'s measurement data — same split
- * WS_v0 had (its heartBeatPayload() vs dataPayload()). Sent every
- * HEARTBEAT_CYCLE_INTERVAL cycles (see APP_CYCLE_SENDING), not every
- * cycle, since a device that's reachable enough to publish telemetry is
- * already known-alive; heartbeat exists to catch outages, not to repeat
- * that signal every lap.
- *
- * uptimeMs uses HAL_GetTick() (ms since boot/reset) rather than the RTC —
- * this is "how long since last boot", not wall-clock time, and stays
- * valid even before time_sync has run. Sensor status fields reuse the
- * same *_is_ready()/*_is_connected()/*_has_*() getters
- * build_telemetry_payload() already calls, so a sensor reported "moving"
- * for motionState there and "ok" here always agree. */
+/* Builds the periodic device-health payload — deviceID, timestamp,
+ * signalStrength, operator, motionState (see the trimmed-fields note
+ * inside the function body below for what was dropped and why),
+ * separate from build_telemetry_payload()'s measurement data — same
+ * split WS_v0 had (its heartBeatPayload() vs dataPayload()). Sent every
+ * heartbeat_ms of wall-clock time (network_config_t, see
+ * send_heartbeat_if_due() below), decoupled from the main sleep/pump/
+ * sensing cycle length — a device reachable enough to publish telemetry
+ * is already known-alive; heartbeat exists as a lighter, independently-
+ * timed "still alive" ping to catch outages between telemetry sends. */
 static const char *build_heartbeat_payload(void)
 {
+    /* Trimmed to 5 fields per the user (2026-08-02): deviceID, timestamp,
+     * signalStrength, operator, motionState. Previously also carried
+     * uptimeMs, firmwareVersion, railVoltage/railCurrent, latitude/
+     * longitude/fix_gps, and a per-sensor OK/FAIL "sensors" object — all
+     * dropped here. Full detail (rail power, GPS, per-sensor status) is
+     * still published on the telemetry topic via build_telemetry_payload()
+     * every cycle; heartbeat is now just a lightweight "device is alive
+     * and on this network" ping. */
     cJSON *root = cJSON_CreateObject();
 
     cJSON_AddStringToObject(root, "deviceID", network_config_get()->device_id);
@@ -590,9 +591,6 @@ static const char *build_heartbeat_payload(void)
     } else {
         cJSON_AddNullToObject(root, "timestamp");
     }
-
-    cJSON_AddNumberToObject(root, "uptimeMs", (double)HAL_GetTick());
-    cJSON_AddStringToObject(root, "firmwareVersion", APP_FW_VERSION);
 
     /* sx_user_mqtt_get_rssi() reads board.modem.ops->get_rssi() under the
      * hood (see sx_user_mqtt.c) — only meaningful once the modem reports
@@ -614,63 +612,8 @@ static const char *build_heartbeat_payload(void)
         cJSON_AddNullToObject(root, "operator");
     }
 
-    if (power_monitor_app_has_voltage_reading(&s_power_monitor)) {
-        cJSON_AddNumberToObject(root, "railVoltage",
-                                 power_monitor_app_get_rail_voltage_v(&s_power_monitor));
-    } else {
-        cJSON_AddNullToObject(root, "railVoltage");
-    }
-    if (power_monitor_app_has_current_reading(&s_power_monitor)) {
-        cJSON_AddNumberToObject(root, "railCurrent",
-                                 power_monitor_app_get_current_a(&s_power_monitor));
-    } else {
-        cJSON_AddNullToObject(root, "railCurrent");
-    }
-
-    /* motionState/gps: same getters and same "non-zero lat/long means fix"
-     * liveness check build_telemetry_payload() uses above (see its
-     * doc-comment there) — kept identical so both payloads always agree,
-     * matching WS_v0's heartBeatPayload() which publishes both fields too
-     * (not just dataPayload()). */
     cJSON_AddStringToObject(root, "motionState",
                              accel_app_is_movement_detected(&s_accel_app) ? "moving" : "stationary");
-
-    /* Same fix_gps + last-known-fix fallback as build_telemetry_payload()
-     * — see its doc-comment above for the full reasoning. Kept identical
-     * so both payloads always agree. */
-    if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
-        cJSON_AddNumberToObject(root, "latitude", board.gps.latitude);
-        cJSON_AddNumberToObject(root, "longitude", board.gps.longtitude);
-        cJSON_AddNumberToObject(root, "fix_gps", 1);
-    } else {
-        float last_lat, last_lon;
-        if (gps_log_read_last(&last_lat, &last_lon)) {
-            cJSON_AddNumberToObject(root, "latitude", last_lat);
-            cJSON_AddNumberToObject(root, "longitude", last_lon);
-        } else {
-            cJSON_AddNullToObject(root, "latitude");
-            cJSON_AddNullToObject(root, "longitude");
-        }
-        cJSON_AddNumberToObject(root, "fix_gps", 0);
-    }
-
-    /* Per-sensor OK/FAIL status, same channel set as build_telemetry_payload()
-     * (see gas_channels[] there) plus temp/humidity, SPS30, and accel. */
-    cJSON *sensors = cJSON_CreateObject();
-    cJSON_AddBoolToObject(sensors, "tempHumi", sx_temp_humi_is_ready(&s_temp_humi));
-    cJSON_AddBoolToObject(sensors, "sps30", sps30_app_has_measurement(&s_sps30_app));
-    cJSON_AddBoolToObject(sensors, "so2", gas_sensor_app_is_connected(GAS_SENSOR_SO2));
-    cJSON_AddBoolToObject(sensors, "no2", gas_sensor_app_is_connected(GAS_SENSOR_NO2));
-    cJSON_AddBoolToObject(sensors, "o3", gas_sensor_app_is_connected(GAS_SENSOR_O3));
-    /* No "accel" status field: accel_app_t has a has_reading bool
-     * internally (see accel_app.h) but exposes no public getter for it —
-     * only accel_app_is_movement_detected(), which answers a different
-     * question ("is it currently moving", not "is the sensor working").
-     * Faking this field would break the "don't fake data" convention
-     * every other field here follows. Add accel_app_has_reading() to
-     * accel_app.h/.c if this is wanted — flagging for the user rather
-     * than guessing at the getter's semantics. */
-    cJSON_AddItemToObject(root, "sensors", sensors);
 
     memset(s_heartbeat_json, 0, sizeof(s_heartbeat_json));
     cJSON_PrintPreallocated(root, s_heartbeat_json, HEARTBEAT_JSON_BUFF_SIZE, 0);
@@ -688,16 +631,25 @@ static const char *build_heartbeat_payload(void)
  * *reading* (still historically valid whenever it arrives) has. */
 static void send_heartbeat_if_due(void)
 {
-    s_sending_cycle_count++;
-    if (s_sending_cycle_count < HEARTBEAT_CYCLE_INTERVAL) {
+    uint32_t now_ms = HAL_GetTick();
+    uint32_t heartbeat_ms = network_config_get()->heartbeat_ms;
+
+    /* (uint32_t) subtraction wraps correctly across HAL_GetTick()'s ~49.7
+     * day rollover, same pattern as the s_cycle_tick_ms accumulation
+     * elsewhere in this file. */
+    if ((now_ms - s_last_heartbeat_tick_ms) < heartbeat_ms) {
         return;
     }
-    s_sending_cycle_count = 0;
 
     if (!sx_user_mqtt_is_connected()) {
         log_warn(TAG, "MQTT not connected, heartbeat skipped this cycle");
+        /* Do NOT update s_last_heartbeat_tick_ms here — leave it due so
+         * the next SENDING pass (whenever that is) retries immediately
+         * instead of waiting another full heartbeat_ms with no MQTT. */
         return;
     }
+
+    s_last_heartbeat_tick_ms = now_ms;
 
     const char *payload = build_heartbeat_payload();
     char topic[TOPIC_BUFF_SIZE];

@@ -110,6 +110,15 @@ static int apply_param(cJSON *params, const char *flag)
         log_info(TAG, "Set gps_timeout_ms to %d s", item->valueint);
         return 1;
     }
+    if (strcmp(flag, "-heartbeat") == 0) {
+        if (!cJSON_IsNumber(item) || item->valueint <= 0) {
+            log_warn(TAG, "-heartbeat must be a positive number");
+            return 1;
+        }
+        network_config_set_heartbeat_ms((uint32_t)item->valueint * 1000U);
+        log_info(TAG, "Set heartbeat_ms to %d s", item->valueint);
+        return 1;
+    }
 
     /* Broker / APN string+number flags. */
     if (strcmp(flag, "-host") == 0) {
@@ -240,7 +249,7 @@ void mqtt_rpc_on_message(const char *topic, const char *message)
      * doc-comment). */
     static const char *const flags[] = {
         "-deviceid",
-        "-pump", "-duty", "-sensing", "-sleep", "-gpstimeout",
+        "-pump", "-duty", "-sensing", "-sleep", "-gpstimeout", "-heartbeat",
         "-host", "-port", "-clientid", "-user", "-pass", "-keepalive",
         "-apn", "-apnuser", "-apnpass",
     };

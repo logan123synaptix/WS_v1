@@ -106,7 +106,6 @@ typedef struct {
     uint32_t pump_on_ms;   /* how long the pump stays on before sensing starts */
     uint32_t sensing_ms;   /* how long SENSING runs (SPS30 cycle + other sensors settle) */
     uint32_t sleep_ms;     /* STOP-mode sleep duration itself (not the total lap time) */
-    /* How long APP_CYCLE_GPS_WAIT (app.c) / sx_sleep_manager.c's GPS wait
      * step waits for a fix before giving up and proceeding without one
      * (lat/long stay 0.0f, build_telemetry_payload()'s "gps_fix" field
      * reads false). Replaces app_config.h's GPS_TIMEOUT_MS #define at
@@ -122,6 +121,19 @@ typedef struct {
      * pump_on()'s hardcoded 100% — see app.c's ON_PUMP case. */
     uint8_t  pump_duty_percent;
 
+    /* How often the heartbeat topic is published (ms), independent of the
+     * main sleep/pump/sensing cycle length. Per the user (2026-08-02):
+     * previously heartbeat fired every HEARTBEAT_CYCLE_INTERVAL=4 SENDING
+     * passes (~27 min at the old 5-min sleep_ms default) — a *count* of
+     * cycles, not a duration, so it silently stretched whenever sleep_ms
+     * changed (e.g. would become ~80 min once sleep_ms moves to 20 min).
+     * This field decouples heartbeat timing from sleep_ms entirely: it is
+     * compared against wall-clock elapsed time (HAL_GetTick()) in
+     * send_heartbeat_if_due() (app.c), not against a SENDING-pass counter.
+     * Runtime-editable via the CLI's "-heartbeat" and MQTT RPC's
+     * "-heartbeat", same as pump_on_ms/sensing_ms/sleep_ms above. */
+    uint32_t heartbeat_ms;
+
     /* Bumped whenever this struct's layout changes, so a future firmware
      * update can detect a stale/incompatible record in flash and fall
      * back to defaults instead of misinterpreting old bytes. Not
@@ -129,7 +141,7 @@ typedef struct {
     uint32_t version;
 } network_config_t;
 
-#define NETWORK_CONFIG_VERSION  2U
+#define NETWORK_CONFIG_VERSION  3U
 
 /* Loads config from flash (NETWORK_CONFIG_FLASH_PATH). If the file does
  * not exist, or its stored version doesn't match NETWORK_CONFIG_VERSION,
@@ -178,6 +190,7 @@ void network_config_set_sensing_ms(uint32_t sensing_ms);
 void network_config_set_sleep_ms(uint32_t sleep_ms);
 void network_config_set_gps_timeout_ms(uint32_t gps_timeout_ms);
 void network_config_set_pump_duty_percent(uint8_t pump_duty_percent);
+void network_config_set_heartbeat_ms(uint32_t heartbeat_ms);
 
 /* Persists the current in-RAM config to flash (NETWORK_CONFIG_FLASH_PATH).
  * Returns true on success. Callers should batch several set_*() calls
@@ -193,6 +206,4 @@ void network_config_reset_to_defaults(void);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

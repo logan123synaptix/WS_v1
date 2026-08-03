@@ -31,8 +31,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        1
+#define TEST        0
 #include "sx_board.h"
+#include "sx_ex_storage.h"
 #if TEST
 #include "test_lte_mqtt.h"
 #include "test_sht3x.h"
@@ -132,6 +133,7 @@ int main(void)
   uint32_t last_tick = 0, last_ticks = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   sx_board_init();
+  // sx_storage_factory_reset();
   #if TEST
   // test_lte_mqtt_init();
   // test_sht3x_init();
@@ -143,7 +145,7 @@ int main(void)
   // test_ads1115_init();
   // test_sleep_init();
   // test_sps30_init();
-  test_ze12a_init();
+  // test_ze12a_init();
   #else
   app_init();
   #endif
@@ -175,7 +177,7 @@ int main(void)
         // test_ads1115_poll(delta);
         // test_sleep_poll(delta);
         // test_sps30_poll(delta);
-        test_ze12a_poll(delta);
+        // test_ze12a_poll(delta);
         #else
         app_process(delta);
         #endif

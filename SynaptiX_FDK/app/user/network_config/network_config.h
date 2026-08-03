@@ -106,6 +106,7 @@ typedef struct {
     uint32_t pump_on_ms;   /* how long the pump stays on before sensing starts */
     uint32_t sensing_ms;   /* how long SENSING runs (SPS30 cycle + other sensors settle) */
     uint32_t sleep_ms;     /* STOP-mode sleep duration itself (not the total lap time) */
+    /* How long APP_CYCLE_GPS_WAIT (app.c) / sx_sleep_manager.c's GPS wait
      * step waits for a fix before giving up and proceeding without one
      * (lat/long stay 0.0f, build_telemetry_payload()'s "gps_fix" field
      * reads false). Replaces app_config.h's GPS_TIMEOUT_MS #define at
@@ -206,4 +207,6 @@ void network_config_reset_to_defaults(void);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

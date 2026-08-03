@@ -31,7 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        1
+#define TEST        0
 #include "sx_board.h"
 #include "sx_ex_storage.h"
 #if TEST

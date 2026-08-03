@@ -8,18 +8,19 @@ static const char *TAG = "TEST_ZE12A";
 static uint32_t s_log_accum_ms = 0;
 #define ZE12A_LOG_PERIOD_MS  2500U
 
-/* gas_sensor_init() was already called inside sx_board_init() — it owns
- * its UART5 instance and both mux-select GPIOs internally (see ze12a.c
- * and sx_board.c comments). This test does not re-init anything, it
- * only drives the poll and reports gas_sensor_app's lookup API — same
- * "do not re-init what board init already did" pattern as
- * test_sht3x.c/test_imu.c.
- *
- * Read-only: deliberately does not call gas_sensor_switch_to_active_mode()
- * here. If a module is left in Question & Answer mode from a prior run
- * (mode is stored non-volatile inside the module itself, see
- * gas_sensor_switch_to_active_mode()'s doc-comment in ze12a.h), it will
- * simply show as "disconnected" here since nothing asks it to reply. */
+/* Per the user (2026-08-03): SO2/NO2 stopped showing any frames while O3
+ * kept working, right after some prior run had gone through the
+ * sleep sequence (sx_sleep_manager.c's _gas_sensor_qa_mode_start()
+ * broadcasts CMD_SWITCH_TO_QA_MODE to all mux channels). Q&A mode is
+ * stored non-volatile inside each module (see gas_sensor_switch_to_
+ * active_mode()'s doc-comment in ze12a.h) — a module left in Q&A mode
+ * stays silent forever against this test's read-only listening, which
+ * matches "O3 still works, SO2/NO2 don't" if the broadcast reached some
+ * channels but not others. Testing that theory: explicitly force all
+ * modules back to Active Upload mode once at init, rather than assuming
+ * they're already there. If this fixes SO2/NO2, the theory is confirmed
+ * and this call should stay; if not, revert this and look elsewhere
+ * (wiring/power to those two modules specifically). */
 void test_ze12a_init(void)
 {
     log_info(TAG, "=== TEST ZE12A (UART5 shared, mux round-robin, %u sensors) ===",
@@ -28,6 +29,9 @@ void test_ze12a_init(void)
               "before expecting all channels connected",
               (unsigned)GAS_SENSOR_CHANNEL_DWELL_MS, (unsigned)GAS_SENSOR_TIMEOUT_MS,
               (unsigned long)(GAS_SENSOR_MUX_CHANNEL_COUNT * GAS_SENSOR_CHANNEL_DWELL_MS));
+
+    gas_sensor_switch_to_active_mode();
+    log_info(TAG, "Forced all mux channels to Active Upload mode (testing Q&A-mode-stuck theory)");
 }
 
 /* Static list so the log loop below can report a stable name per type

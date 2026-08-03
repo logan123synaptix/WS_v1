@@ -81,8 +81,6 @@ void PeriphCommonClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-static const char *TAG = "MAIN";
-
 /* USER CODE END 0 */
 
 /**
@@ -135,16 +133,6 @@ int main(void)
   sx_board_init();
   // sx_storage_factory_reset();
   #if TEST
-  // test_lte_mqtt_init();
-  // test_sht3x_init();
-  // test_rtc_init();
-  // test_imu_init();
-  // test_gps_init();
-  // test_exflash_init();
-  // test_shell_init();
-  // test_ads1115_init();
-  // test_sleep_init();
-  // test_sps30_init();
   test_ze12a_init();
   #else
   app_init();
@@ -168,16 +156,8 @@ int main(void)
         last_tick = now;
         
         #if TEST
-        // test_lte_mqtt_poll(delta);
-        // test_sht3x_poll(delta);
-        // test_rtc_poll(delta);
-        // test_gps_poll(delta);
-        // test_exflash_poll(delta);
-        // test_shell_poll(delta);
-        // test_ads1115_poll(delta);
-        // test_sleep_poll(delta);
-        // test_sps30_poll(delta);
         test_ze12a_poll(delta);
+        // HAL_UART_Transmit(&huart5, (uint8_t*)"a", 2, 100);
         #else
         app_process(delta);
         #endif

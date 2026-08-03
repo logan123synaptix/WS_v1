@@ -3,6 +3,7 @@
 #include "sx_config.h"
 #include "sx_delay.h"
 #include "logger.h"
+#include <stdbool.h>
 
 static const char *TAG = "SX_UART";
 
@@ -53,11 +54,33 @@ void sx_uart_write(sx_uart_t *_uart, const uint8_t *_data, int _len){
      * appearing to run (log line printed) but the oscilloscope showing
      * no activity at all on UART5_TX after a hardware reset -- this log
      * line will confirm or rule out a HAL-level transmit failure as the
-     * cause. */
+     * cause.
+     *
+     * BUG FIX (2026-08-03): the log_error() call below goes through
+     * log_func() -> log_print() -> sx_board.c's log_print() -> THIS SAME
+     * sx_uart_write(), but on board.log_uart specifically. If
+     * board.log_uart itself is the one failing to transmit (confirmed on
+     * real hardware: HardFault during modem_power_off, backtrace showed
+     * thousands of stacked sx_uart_write()->log_func()->log_print()->
+     * sx_uart_write() frames), this recurses without ever returning --
+     * every re-entry hits the same HAL_UART_Transmit() failure and logs
+     * again, forever, until the stack overflows into a HardFault. A
+     * static re-entrancy guard breaks the cycle: the first failure still
+     * gets logged (useful signal, kept per the original instrumentation's
+     * intent), but a failure that happens *while already inside this
+     * error-logging path* is silently dropped instead of recursing. This
+     * cannot false-positive across unrelated calls because the flag is
+     * cleared immediately after the log_error() call returns, so a
+     * legitimate later failure (different call, not nested) still logs
+     * normally. */
+    static volatile bool s_logging_transmit_failure = false;
+
     HAL_StatusTypeDef tx_status = HAL_UART_Transmit(
         (UART_HandleTypeDef *)_uart->config->pDriver, (uint8_t *)_data, _len, 1000);
-    if (tx_status != HAL_OK) {
+    if (tx_status != HAL_OK && !s_logging_transmit_failure) {
+        s_logging_transmit_failure = true;
         log_error(TAG, "HAL_UART_Transmit failed, status=%d, len=%d", (int)tx_status, _len);
+        s_logging_transmit_failure = false;
     }
 #endif
 }

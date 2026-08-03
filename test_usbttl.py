@@ -41,7 +41,7 @@ except ImportError:
     print("Thiếu pyserial. Cài bằng: pip install pyserial")
     sys.exit(1)
 
-BAUDRATE = 9600
+BAUDRATE = 9600   
 FRAME_LEN = 9
 START_BYTE = 0xFF
 

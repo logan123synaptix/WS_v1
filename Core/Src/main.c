@@ -31,7 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        0
+#define TEST        1
 #include "sx_board.h"
 #include "sx_ex_storage.h"
 #if TEST
@@ -145,7 +145,7 @@ int main(void)
   // test_ads1115_init();
   // test_sleep_init();
   // test_sps30_init();
-  // test_ze12a_init();
+  test_ze12a_init();
   #else
   app_init();
   #endif
@@ -177,7 +177,7 @@ int main(void)
         // test_ads1115_poll(delta);
         // test_sleep_poll(delta);
         // test_sps30_poll(delta);
-        // test_ze12a_poll(delta);
+        test_ze12a_poll(delta);
         #else
         app_process(delta);
         #endif

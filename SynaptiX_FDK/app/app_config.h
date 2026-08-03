@@ -8,7 +8,7 @@
  * build_defaults() for a fresh/empty flash — the live value is
  * network_config_t's sleep_ms field, runtime-editable via the CLI's
  * "-sleep" and MQTT RPC's "-sleep" (see network_config.h). */
-#define SLEEP_TIME_MS                   20*60*1000    // 20 minutes
+#define SLEEP_TIME_MS                   2*60*1000    // 20 minutes
 
 /* How often the heartbeat topic is published (ms) — independent of
  * SLEEP_TIME_MS/sleep_ms (see network_config_t's heartbeat_ms doc-comment
@@ -25,7 +25,7 @@
  * SLEEP_TIME_MS above — the live value is network_config_t's
  * heartbeat_ms, runtime-editable via the CLI's "-heartbeat" and MQTT
  * RPC's "-heartbeat". */
-#define HEARTBEAT_TIME_MS               5*60*1000     // 5 minutes
+#define HEARTBEAT_TIME_MS               1*60*1000     // 5 minutes
 
 /* ------------------------------------------------------------------ */
 /*  Main app state machine timing (app.c's APP_MODE_FULL_POWER cycle)  */
@@ -43,7 +43,7 @@
  * covers this need for now. */
 #define APP_CYCLE_PERIOD_MS             SLEEP_TIME_MS  /* how long the board stays in STOP mode per lap (sleep duration itself, NOT the total ON_PUMP->SENSING->SENDING->sleep lap time — the full lap is longer by APP_PUMP_ON_MS+APP_SENSING_MS+publish time). Runtime-configurable is planned (see NOTE above) but not implemented yet — currently a fixed compile-time value. */
 #define APP_PUMP_ON_MS                  30000U         /* how long the pump stays on before sensing starts */
-#define APP_SENSING_MS                  60000U         /* how long SENSING runs (SPS30 measurement cycle + other sensors settle) */
+#define APP_SENSING_MS                  40000U         /* how long SENSING runs (SPS30 measurement cycle + other sensors settle) */
 
 /*USE MQTT*/
 /* NOTE (2026-07-15, per the user): Thingsboard is NOT actually in use yet

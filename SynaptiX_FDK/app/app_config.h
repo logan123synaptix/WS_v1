@@ -116,36 +116,22 @@
 #define DELTA_T                         100U
 
 /* ------------------------------------------------------------------ */
-/*  W25Q128 Partition Table (16MB total) */
+/*  External flash (W25Q128, 16MB total) — LittleFS mount region       */
 /* ------------------------------------------------------------------ */
+/* Per the user (2026-08-02): the whole chip is now given to LittleFS,
+ * rather than being split into unused partitions left over from an
+ * earlier design (bootloader/mqtt_config/misc/msc_disk offsets/sizes —
+ * none of those were ever referenced anywhere in the codebase, grep
+ * confirmed, so they were dropped entirely rather than renamed).
+ * EX_FLASH_OFFSET/EXFLASH_SIZE replace the old PART_GPS_LOG_OFFSET/
+ * PART_GPS_LOG_SIZE names — those were misleading: despite the name,
+ * that region was already being used by sx_fs.c as the mount point for
+ * the entire LittleFS filesystem (every sx_storage_*() file — /queue,
+ * /log_gps, everything), not GPS data specifically. */
+#define FLASH_TOTAL_SIZE            (16U * 1024U * 1024U)   /* 16MB, W25Q128 */
 
-#define FLASH_TOTAL_SIZE            (16U * 1024U * 1024U)   /* 16MB */
-
-#define PART_BOOTLOADER_OFFSET      (0x000000U)
-#define PART_BOOTLOADER_SIZE        (1U * 1024U * 1024U)    /* 1MB  */
-
-#define PART_MQTT_CONFIG_OFFSET     (PART_BOOTLOADER_OFFSET + PART_BOOTLOADER_SIZE)
-#define PART_MQTT_CONFIG_SIZE       (2U * 1024U * 1024U)    /* 2MB  */
-
-#define PART_MISC_OFFSET            (PART_MQTT_CONFIG_OFFSET + PART_MQTT_CONFIG_SIZE)
-#define PART_MISC_SIZE              (1U * 1024U * 1024U)    /* 1MB  */
-
-#define PART_MSC_DISK_WIN           (PART_MISC_OFFSET + PART_MISC_SIZE)
-#define PART_MSC_DISK_SIZE          (3U * 1024U * 1024U)    /*  3MB */
-
-#define PART_GPS_LOG_OFFSET         (PART_MSC_DISK_WIN + PART_MSC_DISK_SIZE)
-#define PART_GPS_LOG_SIZE           (FLASH_TOTAL_SIZE - PART_GPS_LOG_OFFSET) /* ~9MB */
-
-/* GPS Log file path */
-#define GPS_LOG_FILE_PATH           "/log_gps"
-#define IMU_CALIB_FILE_PATH         "/imu_calib"
-
-#define GPS_CSV_FILE_PATH           "log_gps.csv"   
-// #define GPS_CSV_HEADER           "fix,lat,lon,rssi,time,date\n"
-#define GPS_CSV_HEADER              "fix,lat,lon,alt,spd,sat,time,date\n"
-#define GPS_LOG_READ_CHUNK          256U 
-
-// #define GPS_LOG_MAX_ENTRIES 10
+#define EX_FLASH_OFFSET             (0x000000U)
+#define EXFLASH_SIZE                FLASH_TOTAL_SIZE
 
 /* ================================================================== */
 /*  ADC Voltage Reader                                                 */

@@ -1,5 +1,10 @@
 #include "sx_fs.h"
 #include "logger.h"
+/* EX_FLASH_OFFSET/EXFLASH_SIZE (used below) are defined in app_config.h.
+ * Included explicitly here rather than relying on some other header
+ * pulling it in transitively — this file had been compiling only via an
+ * indirect include somewhere in the project, which is fragile. */
+#include "app_config.h"
 
 static const char *TAG = "SX_FS";
 static sx_ext_flash_t *s_flash = NULL;
@@ -14,7 +19,7 @@ static int lfs_flash_read(const struct lfs_config *c,
     // int ret = sx_ext_flash_read(s_flash, addr, buf, size);
     // if (ret != 0) log_error("SX_FS", "read FAILED ret=%d", ret);
     // return ret;
-    uint32_t addr = PART_GPS_LOG_OFFSET + block * c->block_size + off;
+    uint32_t addr = EX_FLASH_OFFSET + block * c->block_size + off;
     return sx_ext_flash_read(s_flash, addr, buf, size);
 }
 
@@ -24,7 +29,7 @@ static int lfs_flash_write(const struct lfs_config *c,
 {
     // uint32_t addr = block *c->block_size + off;
     // int ret = sx_ext_flash_write(s_flash, addr, buf, size);
-    uint32_t addr = PART_GPS_LOG_OFFSET + block * c->block_size + off;
+    uint32_t addr = EX_FLASH_OFFSET + block * c->block_size + off;
     int ret = sx_ext_flash_write(s_flash, addr, buf, size);
     if (ret != 0) {
         log_error("SX_FS", "write FAILED ret=%d", ret);
@@ -45,7 +50,7 @@ static int lfs_flash_write(const struct lfs_config *c,
 
 static int lfs_flash_erase(const struct lfs_config *c, lfs_block_t block){
     // uint32_t addr = block * c->block_size;
-    uint32_t addr = PART_GPS_LOG_OFFSET + block * c->block_size;
+    uint32_t addr = EX_FLASH_OFFSET + block * c->block_size;
     return sx_ext_flash_erase_sector(s_flash, addr);
 }
 
@@ -54,7 +59,7 @@ int sx_fs_init(sx_ext_flash_t *flash){
     s_flash = flash;
     s_config.block_size  = flash->info.sector_size;
     
-    s_config.block_count = PART_GPS_LOG_SIZE / flash->info.sector_size;
+    s_config.block_count = EXFLASH_SIZE / flash->info.sector_size;
     
     s_config.file_function.read  = lfs_flash_read;
     s_config.file_function.write = lfs_flash_write;

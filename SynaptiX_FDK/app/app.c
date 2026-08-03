@@ -237,6 +237,67 @@ static void build_heartbeat_topic(char *out, size_t out_size)
 
 static uint32_t s_offline_queue_seq = 0;
 
+/* Last-known-good GPS fix, persisted to exflash so a fix acquired earlier
+ * survives being published on later SENDING passes where GPS has since
+ * lost fix (board.gps.latitude/longtitude in RAM stay at their last value
+ * across a fix loss too, but only within the current boot — this file
+ * survives a reset, and is what "fix_gps: 0" payloads read from). Per the
+ * user (2026-08-02): written only on a 0->1 fix transition (edge, not
+ * level — see s_gps_was_fixed below), erasing the previous file first
+ * (sx_storage_delete() then sx_storage_write(), not a plain overwrite)
+ * before writing the new one. One record only, no history. */
+#define GPS_LOG_PATH "/log_gps"
+
+typedef struct {
+    float latitude;
+    float longtitude;
+} gps_log_record_t;
+
+/* Tracks the previous tick's fix state so gps_process() being called every
+ * tick (see app_process()) only triggers a flash write on the instant fix
+ * appears (0->1), not on every tick fix stays true — a stable fix held for
+ * many seconds/minutes must not re-write flash every tick. Reset to false
+ * at boot (no fix yet), so the very first fix of a boot is always treated
+ * as a 0->1 transition and saved. */
+static bool s_gps_was_fixed = false;
+
+/* Called once per 0->1 fix transition (see s_gps_was_fixed's doc-comment
+ * above) with the just-acquired coordinates. Explicit delete-then-write
+ * per the user's request, rather than relying on sx_storage_write()'s own
+ * overwrite behavior. */
+static void gps_log_save_fix(float latitude, float longtitude)
+{
+    sx_storage_delete(GPS_LOG_PATH);
+
+    gps_log_record_t rec = { .latitude = latitude, .longtitude = longtitude };
+    if (sx_storage_write(GPS_LOG_PATH, &rec, sizeof(rec)) == SX_STORAGE_OK) {
+        log_info(TAG, "GPS fix acquired, saved to %s: lat=%f lon=%f",
+                 GPS_LOG_PATH, (double)latitude, (double)longtitude);
+    } else {
+        log_error(TAG, "Failed to save GPS fix to %s", GPS_LOG_PATH);
+    }
+}
+
+/* Reads the last-saved fix back for a fix_gps:0 payload. Returns true and
+ * fills *out_lat/*out_lon on success, false if no fix has ever been saved
+ * (fresh board / file never created) or the read fails. */
+static bool gps_log_read_last(float *out_lat, float *out_lon)
+{
+    if (!sx_storage_exists(GPS_LOG_PATH)) {
+        return false;
+    }
+
+    gps_log_record_t rec;
+    if (sx_storage_read(GPS_LOG_PATH, &rec, sizeof(rec)) != SX_STORAGE_OK) {
+        log_error(TAG, "Failed to read %s despite it existing", GPS_LOG_PATH);
+        return false;
+    }
+
+    *out_lat = rec.latitude;
+    *out_lon = rec.longtitude;
+    return true;
+}
+
 /* Heartbeat is sent every HEARTBEAT_CYCLE_INTERVAL SENDING passes, not
  * every cycle — see build_heartbeat_payload()'s doc-comment for why.
  * Per the user, ~4 cycles at the current APP_CYCLE_PERIOD_MS/
@@ -469,13 +530,28 @@ static const char *build_telemetry_payload(void)
      * dataPayload() gated this on weatherstation.gps.isReady; sx_gps_t
      * here has no such flag (see board.gps in sx_board.h), so this uses
      * the same "non-zero lat/long" liveness check sx_sleep_manager.c's
-     * _gps_wait_is_done() already uses for the same purpose. */
+     * _gps_wait_is_done() already uses for the same purpose.
+     *
+     * fix_gps: 1/0 added per the user (2026-08-02). When there is no fix
+     * right now, fall back to the last fix saved to GPS_LOG_PATH (see
+     * gps_log_read_last()'s doc-comment) instead of publishing null, so a
+     * consumer still gets the most recent known location — fix_gps: 0 is
+     * what tells them it's stale rather than a live reading. If no fix has
+     * ever been saved (fresh board), this still falls through to null. */
     if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
         cJSON_AddNumberToObject(root, "latitude", board.gps.latitude);
         cJSON_AddNumberToObject(root, "longitude", board.gps.longtitude);
+        cJSON_AddNumberToObject(root, "fix_gps", 1);
     } else {
-        cJSON_AddNullToObject(root, "latitude");
-        cJSON_AddNullToObject(root, "longitude");
+        float last_lat, last_lon;
+        if (gps_log_read_last(&last_lat, &last_lon)) {
+            cJSON_AddNumberToObject(root, "latitude", last_lat);
+            cJSON_AddNumberToObject(root, "longitude", last_lon);
+        } else {
+            cJSON_AddNullToObject(root, "latitude");
+            cJSON_AddNullToObject(root, "longitude");
+        }
+        cJSON_AddNumberToObject(root, "fix_gps", 0);
     }
 
     memset(s_telemetry_json, 0, sizeof(s_telemetry_json));
@@ -559,12 +635,23 @@ static const char *build_heartbeat_payload(void)
     cJSON_AddStringToObject(root, "motionState",
                              accel_app_is_movement_detected(&s_accel_app) ? "moving" : "stationary");
 
+    /* Same fix_gps + last-known-fix fallback as build_telemetry_payload()
+     * — see its doc-comment above for the full reasoning. Kept identical
+     * so both payloads always agree. */
     if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
         cJSON_AddNumberToObject(root, "latitude", board.gps.latitude);
         cJSON_AddNumberToObject(root, "longitude", board.gps.longtitude);
+        cJSON_AddNumberToObject(root, "fix_gps", 1);
     } else {
-        cJSON_AddNullToObject(root, "latitude");
-        cJSON_AddNullToObject(root, "longitude");
+        float last_lat, last_lon;
+        if (gps_log_read_last(&last_lat, &last_lon)) {
+            cJSON_AddNumberToObject(root, "latitude", last_lat);
+            cJSON_AddNumberToObject(root, "longitude", last_lon);
+        } else {
+            cJSON_AddNullToObject(root, "latitude");
+            cJSON_AddNullToObject(root, "longitude");
+        }
+        cJSON_AddNumberToObject(root, "fix_gps", 0);
     }
 
     /* Per-sensor OK/FAIL status, same channel set as build_telemetry_payload()
@@ -905,6 +992,18 @@ void app_process(uint32_t delta_ms){
      * every other "*_poll() every tick" call here (mirrors WS_v0's
      * reading_sensor_task calling gnss_poll(1) unconditionally). */
     gps_process(&board.gps, delta_ms);
+
+    /* 0->1 fix edge detect (see s_gps_was_fixed/gps_log_save_fix()'s
+     * doc-comments above) — must run every tick right after gps_process()
+     * so a fix acquired mid-cycle (not just at SENDING) is caught and
+     * saved immediately, per the user's request. */
+    {
+        bool is_fixed_now = (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f);
+        if (is_fixed_now && !s_gps_was_fixed) {
+            gps_log_save_fix(board.gps.latitude, board.gps.longtitude);
+        }
+        s_gps_was_fixed = is_fixed_now;
+    }
 
     /* RTC time sync from modem NITZ (falling back to GPS) -- must run every
     * tick like the other *_poll() calls above, or the RTC never gets set

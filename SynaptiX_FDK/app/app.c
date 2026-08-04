@@ -1,4 +1,5 @@
 #include "app.h"
+#include <math.h>
 #include "app_config.h"
 #include "logger.h"
 #include "sx_delay.h"
@@ -457,6 +458,23 @@ static bool format_timestamp(char *out, size_t out_size)
     return true;
 }
 
+/* Rounds a GPS coordinate to 6 decimal places (~11cm precision at the
+ * equator) before it goes into a JSON payload. Per the user (2026-08-04):
+ * Google Maps itself only supports 6 decimal places, so publishing more
+ * than that is pointless precision that also happens to expose float's
+ * binary-representation noise as long trailing digits (e.g.
+ * "105.73182678222656") now that cJSON.c's print_number() was fixed to
+ * print full round-trippable precision instead of silently truncating to
+ * 4 decimals. This keeps board.gps.latitude/longtitude themselves as
+ * float (no change to gps.h/minmea.h) and only rounds at the point of
+ * building outgoing JSON, so nothing about GPS storage/comparison logic
+ * elsewhere (sx_sleep_manager.c's fix-liveness check, gps_log_save_fix(),
+ * etc.) is affected. */
+static double gps_round_coord(double value)
+{
+    return round(value * 1e6) / 1e6;
+}
+
 /* Builds the telemetry JSON payload from whatever each sensor app's
  * *_is_ready()/*_is_connected()/*_has_*() getters currently report —
  * missing/not-yet-ready readings are emitted as JSON null, same
@@ -537,14 +555,14 @@ static const char *build_telemetry_payload(void)
      * what tells them it's stale rather than a live reading. If no fix has
      * ever been saved (fresh board), this still falls through to null. */
     if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
-        cJSON_AddNumberToObject(root, "latitude", board.gps.latitude);
-        cJSON_AddNumberToObject(root, "longitude", board.gps.longtitude);
+        cJSON_AddNumberToObject(root, "latitude", gps_round_coord(board.gps.latitude));
+        cJSON_AddNumberToObject(root, "longitude", gps_round_coord(board.gps.longtitude));
         cJSON_AddNumberToObject(root, "fix_gps", 1);
     } else {
         float last_lat, last_lon;
         if (gps_log_read_last(&last_lat, &last_lon)) {
-            cJSON_AddNumberToObject(root, "latitude", last_lat);
-            cJSON_AddNumberToObject(root, "longitude", last_lon);
+            cJSON_AddNumberToObject(root, "latitude", gps_round_coord(last_lat));
+            cJSON_AddNumberToObject(root, "longitude", gps_round_coord(last_lon));
         } else {
             cJSON_AddNullToObject(root, "latitude");
             cJSON_AddNullToObject(root, "longitude");

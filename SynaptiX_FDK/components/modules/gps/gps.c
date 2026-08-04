@@ -114,7 +114,7 @@ void gps_process(sx_gps_t *_gps, uint32_t _timestamp)
             _gps->callback(_gps, _gps->buff, _gps->arg);
         }
         _gps->state = GPS_IDLE;
-        log_info(TAG, "%s", _gps->buff);
+        // log_info(TAG, "%s", _gps->buff);
         memset(_gps->buff, 0, _gps->buff_id);
         _gps->buff_id = 0;
         break;
@@ -140,7 +140,7 @@ static void gps_callback_task(sx_gps_t *gps, char *message, void *arg)
      * file's un-commented-out log_info() this replaced, which had the
      * same "one raw line per sentence" intent but got disabled at some
      * point). */
-    log_info(TAG, "RAW: %s", message);
+    log_debug(TAG, "RAW: %s", message);
 
     gps->_sentence_id = minmea_sentence_id((const char *)message, false);
     switch (gps->_sentence_id)

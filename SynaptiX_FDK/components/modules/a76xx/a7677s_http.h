@@ -76,6 +76,53 @@ extern "C" {
  * with A7677S_MQTT_BROKER_MAX's precedent in a7677s.h). */
 #define A7677S_HTTP_URL_MAX           257U
 
+/* --- HTTPS support ---
+ * Per a76xx_at_cmd.md 16.2.3 (AT+HTTPPARA "URL"): the <url> parameter
+ * itself may start with "https://" instead of "http://" - AT+HTTPACTION
+ * then transparently does the TLS handshake, no separate "start HTTPS
+ * mode" command exists (confirmed by reading the manual directly, this is
+ * simpler than a7677s.c's MQTT SSL path, which needs a whole separate
+ * CMQTTSSLCFG/CSSLCFG bind sequence before CONNECT).
+ *
+ * SSL context (id 0-9, a76xx_at_cmd.md chapter 19, AT+CSSLCFG) still needs
+ * configuring once before the first HTTPS a7677s_http_get_range() call,
+ * because two of its defaults are wrong for a server whose cert chains up
+ * to a public root CA the module doesn't have preloaded, and whose
+ * hostname is shared across multiple certs behind a CDN (GitHub raw
+ * content, ngrok, etc):
+ *   - authmode default (0) = "no authentication" - this is actually FINE
+ *     for a plain download from a public HTTPS host (no client cert
+ *     needed, and "no authentication" here means the module does not
+ *     verify the server's cert chain, not that TLS itself is skipped) -
+ *     no AT+CCERTDOWN of any root CA is required for this project's use
+ *     case. Kept at 0, not changed by a7677s_http_ssl_configure() below.
+ *   - enableSNI default (0) = SNI OFF. This one DOES need to be flipped to
+ *     1: a CDN-backed HTTPS host serves different certs for different
+ *     hostnames off the same IP, and without SNI the module's TLS
+ *     ClientHello carries no hostname, so the server has no way to know
+ *     which cert to present - this is expected to cause a handshake
+ *     failure (a76xx_at_cmd.md's errcode 715, "Handshake failed") against
+ *     GitHub raw / ngrok specifically, NOT a generic "some servers need
+ *     it" caveat - confirmed necessary from how CDN-fronted TLS works, not
+ *     yet confirmed against this specific module's real behavior (see
+ *     a7677s_http_ssl_configure()'s doc-comment - NOT tested against real
+ *     hardware yet, same caveat as the rest of this file). */
+#define A7677S_HTTP_SSL_CTX_INDEX     1U  /* deliberately NOT 0 - MQTT's
+                                            * A7677S_SSL_CTX_INDEX (a7677s.h)
+                                            * already uses context 0; a
+                                            * separate context for HTTP
+                                            * avoids the two features ever
+                                            * fighting over the same
+                                            * context's authmode/SNI config
+                                            * if both are active in the same
+                                            * build (this project's fota.c
+                                            * and MQTT client run at
+                                            * different times, not
+                                            * concurrently, but there is no
+                                            * reason to force them to share
+                                            * a context when 0-9 are
+                                            * available and unused). */
+
 /* Result of one a7677s_http_get_range() call, delivered via
  * a7677s_http_range_cb_t. Distinct from modem_ops_result_t's generic
  * OK/ERROR/TIMEOUT/BUSY because the caller (fota.c) needs to distinguish
@@ -142,6 +189,23 @@ int a7677s_http_get_range(a7677s_t *dce,
  * from a7677s_http_get_range() above - either is sufficient) before issuing
  * the next range request; this module does not queue overlapping requests. */
 bool a7677s_http_is_busy(a7677s_t *dce);
+
+/* One-time (not per-call) SSL context setup for A7677S_HTTP_SSL_CTX_INDEX -
+ * must be called once, successfully, before the first
+ * a7677s_http_get_range() call with an "https://" url. Not needed at all
+ * for "http://" urls. Configures authmode=0 (no server cert verification -
+ * fine for this project's use case, see A7677S_HTTP_SSL_CTX_INDEX's
+ * doc-comment) and enableSNI=1 (needed for CDN-fronted HTTPS hosts like
+ * GitHub raw content or ngrok - same doc-comment).
+ *
+ * Non-blocking, same "fire cb once" contract as a7677s_http_get_range().
+ * Returns 0 if accepted, -1 if rejected immediately (modem command channel
+ * busy - see a7677s_http_get_range()'s BUSY doc-comment, same reasoning
+ * applies here). cb receives MODEM_OPS_OK/MODEM_OPS_ERROR (this call has no
+ * HTTP-specific result to report, unlike get_range's richer result enum -
+ * it is pure AT-layer configuration). */
+typedef void (*a7677s_http_ssl_cfg_cb_t)(modem_ops_result_t result, void *ctx);
+int a7677s_http_ssl_configure(a7677s_t *dce, a7677s_http_ssl_cfg_cb_t cb, void *ctx);
 
 #ifdef __cplusplus
 }

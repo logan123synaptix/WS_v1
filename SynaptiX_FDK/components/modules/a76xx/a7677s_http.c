@@ -32,13 +32,22 @@ static const char *TAG = "A7677S_HTTP";
  * / CMD_DYNAMIC (see file header comment - deliberate, not an oversight). */
 #define HTTP_CMD_INIT      0   /* AT+HTTPINIT */
 #define HTTP_CMD_PARA_URL  1   /* AT+HTTPPARA="URL",<url> */
-#define HTTP_CMD_PARA_HDR  2   /* AT+HTTPPARA="USERDATA",<range header> */
-#define HTTP_CMD_ACTION    3   /* AT+HTTPACTION=0 (GET) */
-#define HTTP_CMD_READ      4   /* AT+HTTPREAD=<offset>,<size> */
-#define HTTP_CMD_TERM      5   /* AT+HTTPTERM */
-#define HTTP_CMD_COUNT     6
+#define HTTP_CMD_PARA_SSL  2   /* AT+HTTPPARA="SSLCFG",<ctx> - only sent when url is https:// */
+#define HTTP_CMD_PARA_HDR  3   /* AT+HTTPPARA="USERDATA",<range header> */
+#define HTTP_CMD_ACTION    4   /* AT+HTTPACTION=0 (GET) */
+#define HTTP_CMD_READ      5   /* AT+HTTPREAD=<offset>,<size> */
+#define HTTP_CMD_TERM      6   /* AT+HTTPTERM */
+#define HTTP_CMD_COUNT     7
+
+/* --- SSL context one-time setup, entirely separate command slots/state
+ * from the per-range HTTP_CMD_* above (a7677s_http_ssl_configure() is
+ * called once at boot, not per range - see a7677s_http.h doc-comment). */
+#define SSL_CMD_AUTHMODE   0   /* AT+CSSLCFG="authmode",<ctx>,0 */
+#define SSL_CMD_SNI        1   /* AT+CSSLCFG="enableSNI",<ctx>,1 */
+#define SSL_CMD_COUNT      2
 
 static modem_command_t s_http_command[HTTP_CMD_COUNT];
+static modem_command_t s_ssl_command[SSL_CMD_COUNT];
 
 /* Scratch buffer for dynamically-built AT command strings (URL/Range/READ
  * params vary per call). Sized to comfortably hold
@@ -56,6 +65,7 @@ typedef enum {
     HTTP_STATE_IDLE = 0,
     HTTP_STATE_INIT,
     HTTP_STATE_PARA_URL,
+    HTTP_STATE_PARA_SSL,     /* only entered when s_http.is_https - see cb_http_para_url() */
     HTTP_STATE_PARA_HDR,
     HTTP_STATE_ACTION,
     HTTP_STATE_READ,
@@ -67,6 +77,8 @@ static struct {
     a7677s_t *dce;
 
     char     url[A7677S_HTTP_URL_MAX];
+    bool     is_https;       /* true if url starts with "https://" - decides whether the
+                               * PARA_SSL step below is sent at all (see cb_http_para_url()) */
     uint32_t start_offset;   /* absolute offset into the remote file, first byte of this range */
     uint32_t range_len;      /* requested length of this range */
 
@@ -173,6 +185,15 @@ int a7677s_http_get_range(a7677s_t *dce,
     s_http.cb           = cb;
     s_http.ctx          = ctx;
     strncpy(s_http.url, url, sizeof(s_http.url) - 1);
+    /* strncasecmp is not always available (not standard C, POSIX-only) -
+     * this codebase's style elsewhere (a7677s.c) sticks to plain strstr/
+     * strchr from <string.h>, so match that instead of assuming a
+     * case-insensitive compare function exists in this toolchain. URLs are
+     * expected lowercase scheme per RFC 3986 convention (and every example
+     * in a76xx_at_cmd.md uses lowercase "http"/"https"), so a plain
+     * strncmp is sufficient here without pulling in a portability risk for
+     * a case that should not occur in practice. */
+    s_http.is_https = (strncmp(url, "https://", 8) == 0);
 
     s_http.state = HTTP_STATE_INIT;
     http_send_dynamic(HTTP_CMD_INIT, "AT+HTTPINIT\r\n",

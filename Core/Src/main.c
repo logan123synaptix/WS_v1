@@ -81,6 +81,8 @@ void PeriphCommonClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/*The beginning*/
+
 /* USER CODE END 0 */
 
 /**

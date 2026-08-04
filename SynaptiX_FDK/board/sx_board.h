@@ -141,11 +141,11 @@ typedef enum{
 
 /*  GPS GPIO    */
 #define GPS_PPS_Port            GPIOC
-#define GPS_PPS_Pin             GPIO_PIN_11
+#define GPS_PPS_Pin             GPIO_PIN_1
 #define GPS_CPW_Port            GPIOC
-#define GPS_CPW_Pin             GPIO_PIN_12
+#define GPS_CPW_Pin             GPIO_PIN_2
 #define GPS_RST_Port            GPIOC
-#define GPS_RST_Pin             GPIO_PIN_13
+#define GPS_RST_Pin             GPIO_PIN_3
 
 /*  I2C PIN    */
 #define I2C1_RESET_Port         GPIOB

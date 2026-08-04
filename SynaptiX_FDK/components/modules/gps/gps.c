@@ -170,7 +170,7 @@ static void gps_callback_task(sx_gps_t *gps, char *message, void *arg)
                     gps->tim.tm_hour -= 24;
                     gps->tim.tm_mday += 1;
                 }
-                log_info(TAG, "RMC: lat=%.6f lon=%.6f spd=%.2f time=%02d:%02d:%02d date=%02d/%02d/%04d",
+                log_debug(TAG, "RMC: lat=%.6f lon=%.6f spd=%.2f time=%02d:%02d:%02d date=%02d/%02d/%04d",
                          gps->latitude, gps->longtitude, gps->speed,
                          gps->tim.tm_hour, gps->tim.tm_min, gps->tim.tm_sec,
                          gps->tim.tm_mday, gps->tim.tm_mon + 1, gps->tim.tm_year + 1900);
@@ -189,7 +189,7 @@ static void gps_callback_task(sx_gps_t *gps, char *message, void *arg)
         {
             gps->altitude   = minmea_tofloat(&gga.altitude);
             gps->satellites = gga.satellites_tracked;
-            log_info(TAG, "GGA: alt=%.2f sat=%d", gps->altitude, gps->satellites);
+            log_debug(TAG, "GGA: alt=%.2f sat=%d", gps->altitude, gps->satellites);
         }
         else
         {

@@ -473,8 +473,32 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  * UART5 recovers instead of staying wedged after the first glitch. */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
+    /* BUG FIX (2026-08-04): this only re-armed UART_EXTEND (UART5/ZE12A,
+     * the original bug found in an earlier session — see that fix's
+     * doc-comment history). UART_GPS/UART_LTE/UART_DUST/UART_LOG were
+     * left out entirely. HAL's weak default HAL_UART_ErrorCallback()
+     * does nothing — critically, it does NOT re-arm
+     * HAL_UART_Receive_IT() — so any of these four UARTs hitting a
+     * framing/noise/overrun error on its very first received byte would
+     * get stuck forever, never receiving another byte again, even
+     * though the physical signal keeps arriving normally. This exactly
+     * matches a real report: GP-02 GPS module confirmed (oscilloscope)
+     * to be transmitting clean NMEA sentences on UART2, yet gps.c never
+     * saw a single byte (added raw-sentence logging to confirm zero
+     * bytes ever reached the parser, not just zero valid RMC/GGA
+     * sentences) — a UART2 error interrupt with no re-arm explains this
+     * completely, without needing to suspect the GPS module or wiring
+     * at all. Same fix pattern as UART_EXTEND, applied to all UARTs. */
     if (huart == hal_uart[UART_EXTEND]) {
         HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
+    } else if (huart == hal_uart[UART_GPS]) {
+        HAL_UART_Receive_IT(hal_uart[UART_GPS], &uart_rx_char[UART_GPS], 1);
+    } else if (huart == hal_uart[UART_LTE]) {
+        HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
+    } else if (huart == hal_uart[UART_DUST]) {
+        HAL_UART_Receive_IT(hal_uart[UART_DUST], &uart_rx_char[UART_DUST], 1);
+    } else if (huart == hal_uart[UART_LOG]) {
+        HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
     }
 }
 

@@ -114,7 +114,7 @@ void gps_process(sx_gps_t *_gps, uint32_t _timestamp)
             _gps->callback(_gps, _gps->buff, _gps->arg);
         }
         _gps->state = GPS_IDLE;
-        // log_info(TAG, "%s", _gps->buff);
+        log_info(TAG, "%s", _gps->buff);
         memset(_gps->buff, 0, _gps->buff_id);
         _gps->buff_id = 0;
         break;

@@ -133,7 +133,8 @@ int main(void)
   sx_board_init();
   // sx_storage_factory_reset();
   #if TEST
-  test_ze12a_init();
+  // test_ze12a_init();
+  test_gps_init();
   #else
   app_init();
   #endif
@@ -156,19 +157,12 @@ int main(void)
         last_tick = now;
         
         #if TEST
-        test_ze12a_poll(delta);
+        test_gps_poll(delta);
         // HAL_UART_Transmit(&huart5, (uint8_t*)"a", 2, 100);
         #else
         app_process(delta);
         #endif
     }
-
-    #if TEST
-    if(theta>2000){
-        last_ticks = noww;
-        // test_imu_poll(theta);
-    }
-    #endif
   }
   /* USER CODE END 3 */
 }

@@ -20,6 +20,7 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			$(SYNAPTIX_DIR)/app/user/mqtt_rpc/mqtt_rpc.c \
 			$(SYNAPTIX_DIR)/app/user/ota_trigger/ota_trigger.c \
 			$(SYNAPTIX_DIR)/app/user/ota_trigger/new_boot_backup_reg.c \
+			$(SYNAPTIX_DIR)/app/user/fota/fota.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_lte_mqtt.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_exflash.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_gps.c \
@@ -47,6 +48,7 @@ COMPONENT_FILES = \
 				  ${SYNAPTIX_DIR}/components/modules/gps/minmea.c \
 				  ${SYNAPTIX_DIR}/components/modules/modem/modem.c \
 				  ${SYNAPTIX_DIR}/components/modules/a76xx/a7677s.c \
+				  ${SYNAPTIX_DIR}/components/modules/a76xx/a7677s_http.c \
 				  ${SYNAPTIX_DIR}/components/peripherals/usb_cdc_tiny/sx_usb_tiny_cdc.c \
 				  ${SYNAPTIX_DIR}/components/peripherals/usb_cdc_tiny/usb_descriptor.c \
 				  ${SYNAPTIX_DIR}/components/peripherals/usb_msc_tiny/sx_usb_tiny_msc.c \
@@ -63,7 +65,7 @@ COMPONENT_FILES = \
 				  $(SYNAPTIX_DIR)/components/modules/sps30_uart.c \
 				  $(SYNAPTIX_DIR)/components/modules/ze12a/ze12a.c \
 				  $(SYNAPTIX_DIR)/components/modules/ads1115/ads1115.c \
-				  $(SYNAPTIX_DIR)/components/modules/pump/sx_pump.c 
+				  $(SYNAPTIX_DIR)/components/modules/pump/sx_pump.c
 
 SERVICES_FILES = ${SYNAPTIX_DIR}/services/logger/logger.c \
 				 ${SYNAPTIX_DIR}/services/littlefs/lfs.c \

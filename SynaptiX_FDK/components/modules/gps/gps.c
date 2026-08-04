@@ -125,6 +125,23 @@ void gps_process(sx_gps_t *_gps, uint32_t _timestamp)
 
 static void gps_callback_task(sx_gps_t *gps, char *message, void *arg)
 {
+    /* TEMP DIAGNOSTIC (2026-08-04): logging every raw sentence received,
+     * regardless of type, to answer a real "GPS never gets a fix, even
+     * under open sky" report. The RMC/GGA-only logging below stays
+     * silent for any other NMEA sentence type (GSA/GSV/GLL/VTG/ZDA...),
+     * so "no GPS-tag log lines" was ambiguous: it could mean UART2 is
+     * getting zero bytes at all (wiring/GPIO/power issue), or it could
+     * mean sentences ARE arriving but are just not RMC/GGA (a very
+     * common cold-start pattern: GSV "searching for satellites" chatter
+     * shows up well before the receiver has enough satellites locked to
+     * compute a fix and start sending valid RMC/GGA). This line
+     * distinguishes the two immediately. Remove once the real cause is
+     * confirmed - this is not meant to stay long-term (matches this
+     * file's un-commented-out log_info() this replaced, which had the
+     * same "one raw line per sentence" intent but got disabled at some
+     * point). */
+    log_info(TAG, "RAW: %s", message);
+
     gps->_sentence_id = minmea_sentence_id((const char *)message, false);
     switch (gps->_sentence_id)
     {

@@ -587,14 +587,32 @@ static cJSON_bool print_number(const cJSON * const item, printbuffer * const out
     }
     else
     {
-        /* Try 15 decimal places of precision to avoid nonsignificant nonzero digits */
-        length = sprintf((char*)number_buffer, "%.4f", d);
+        /* BUG FIX (2026-08-04): this printed with "%.4f" (only 4 decimal
+         * places) on both the first try and the fallback, despite the
+         * comments right above still saying "15 decimal places" / "17
+         * decimal places" — the format strings had been hand-edited to
+         * %.4f at some point without updating those comments, silently
+         * truncating precision on every double printed through cJSON.
+         * This broke GPS latitude/longitude specifically (reported: MQTT
+         * payload coordinates were visibly rounded) — 4 decimal degrees
+         * is only ~11m of precision at the equator, nowhere near enough
+         * for a real GPS fix, and %.4f being a *fixed* format (not %g)
+         * also wastes digits on small numbers and can lose precision on
+         * larger ones. Restored to upstream cJSON's actual behavior:
+         * %1.15g first (shortest round-trippable representation for most
+         * doubles), falling back to %1.17g (worst-case round-trip
+         * guarantee for IEEE 754 double) only if 15 significant digits
+         * couldn't reproduce the original value exactly. This is a
+         * general-purpose JSON number formatter used for every float/
+         * double in every payload this firmware builds — not something
+         * to special-case per field, so fixed here at the source. */
+        length = sprintf((char*)number_buffer, "%1.15g", d);
 
         /* Check whether the original double can be recovered */
         if ((sscanf((char*)number_buffer, "%lg", &test) != 1) || !compare_double((double)test, d))
         {
             /* If not, print with 17 decimal places of precision */
-            length = sprintf((char*)number_buffer, "%.4f", d);
+            length = sprintf((char*)number_buffer, "%1.17g", d);
         }
     }
 

@@ -138,6 +138,7 @@ int main(void)
   #if TEST
   // test_ze12a_init();
   // test_gps_init();
+  test_lte_mqtt_init();
   test_http_init();
   #else
   app_init();

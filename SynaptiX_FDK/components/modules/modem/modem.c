@@ -115,8 +115,34 @@ void modem_poll(modem_t *modem, uint32_t timeStamp){
                 if(pattern_self_terminated || !pattern_is_urc_prefix){
                     line_complete = 1;
                 } else {
-                    char next_char = match_pos[success_len];
-                    line_complete = (next_char == '\r' || next_char == '\n');
+                    /* Bug fix (2026-08-05, follow-up #3): a partial-URC
+                     * prefix like "+HTTPACTION: 0," is followed by
+                     * VARIABLE data (<statuscode>,<datalen>, e.g. "206,2048")
+                     * BEFORE the line's real "\r\n" - checking only the
+                     * single byte right after the matched prefix (as the
+                     * previous version of this fix did) checks the first
+                     * digit of that variable data, which is never '\r'/'\n'
+                     * itself, so line_complete was always false and every
+                     * HTTPACTION call timed out even once the full line
+                     * (with trailing \r\n) had genuinely arrived - confirmed
+                     * on real hardware: TIMEOUT log showed the complete
+                     * "+HTTPACTION: 0,206,2048\r\n" sitting in the buffer.
+                     * Fix: scan forward from the end of the matched prefix,
+                     * byte by byte, until a '\r' or '\n' is found - bounded
+                     * by modem->buff_id (how many bytes have actually been
+                     * received so far), never reading past valid data into
+                     * the unwritten remainder of the fixed-size buff[]
+                     * array. */
+                    size_t scan_pos = (size_t)(match_pos - modem->buff) + success_len;
+                    line_complete = 0;
+                    while(scan_pos < modem->buff_id){
+                        char c = modem->buff[scan_pos];
+                        if(c == '\r' || c == '\n'){
+                            line_complete = 1;
+                            break;
+                        }
+                        scan_pos++;
+                    }
                 }
                 if(line_complete){
                     modem->isBusy = 0;

@@ -1,188 +1,193 @@
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2048
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2048
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2048
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2048
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2048
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2048
-[ERROR]A7677S_HTTP : AT+HTTPREAD (raw): raw read timed out at offset 0
-[ERROR]MODEM : TIMEOUT response: [NULL]
-[WARNING]A7677S_HTTP : AT+HTTPTERM failed/timed out (res=2) - session may still be open
+[INFO]A7677S_HTTP : SSL context 1 configured (authmode=0, SNI=1)
+[INFO]TEST_HTTP : SSL context configured OK (authmode=0, SNI=1)
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPINIT
+
+[DEBUG]MODEM : Send command AT+HTTPINIT
+
+[DEBUG]MODEM : Read : 4 bytes
+[DEBUG]MODEM : Data : AT+H
+[DEBUG]MODEM : 41 54 2B 48 
+[DEBUG]MODEM : Read : 8 bytes
+[DEBUG]MODEM : Data : TTPINIT
+[DEBUG]MODEM : 54 54 50 49 4E 49 54 0D 
+[DEBUG]MODEM : Read : 6 bytes
+[DEBUG]MODEM : Data : 
+OK
+
+[DEBUG]MODEM : 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPINIT
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/WS_v1/ft/fota_ws/TrackingFirmWare.bin"
+
+[DEBUG]MODEM : Send command AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/WS_v1/ft/fota_ws/TrackingFirmWare.bin"
+
+[DEBUG]MODEM : Read : 73 bytes
+[DEBUG]MODEM : Data : AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/WS_
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 50 41 52 41 3D 22 55 52 4C 22 2C 22 68 74 74 70 73 3A 2F 2F 72 61 77 2E 67 69 74 68 75 62 75 73 65 72 63 6F 6E 74 65 6E 74 2E 63 6F 6D 2F 6C 6F 67 61 6E 31 32 33 73 79 6E 61 70 74 69 78 2F 57 53 5F 
+[DEBUG]MODEM : Read : 42 bytes
+[DEBUG]MODEM : Data : v1/ft/fota_ws/TrackingFirmWare.bin"
+OK
+
+[DEBUG]MODEM : 76 31 2F 66 74 2F 66 6F 74 61 5F 77 73 2F 54 72 61 63 6B 69 6E 67 46 69 72 6D 57 61 72 65 2E 62 69 6E 22 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/WS_v1/ft/fota_ws/TrackingFirmWare.bin"
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPPARA="SSLCFG",1
+
+[DEBUG]MODEM : Send command AT+HTTPPARA="SSLCFG",1
+
+[DEBUG]MODEM : Read : 9 bytes
+[DEBUG]MODEM : Data : AT+HTTPPA
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 50 41 
+[DEBUG]MODEM : Read : 20 bytes
+[DEBUG]MODEM : Data : RA="SSLCFG",1
+OK
+
+[DEBUG]MODEM : 52 41 3D 22 53 53 4C 43 46 47 22 2C 31 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPPARA="SSLCFG",1
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPPARA="USERDATA","Range: bytes=0-2047"
+
+[DEBUG]MODEM : Send command AT+HTTPPARA="USERDATA","Range: bytes=0-2047"
+
+[DEBUG]MODEM : Read : 10 bytes
+[DEBUG]MODEM : Data : AT+HTTPPAR
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 50 41 52 
+[DEBUG]MODEM : Read : 41 bytes
+[DEBUG]MODEM : Data : A="USERDATA","Range: bytes=0-2047"
+OK
+
+[DEBUG]MODEM : 41 3D 22 55 53 45 52 44 41 54 41 22 2C 22 52 61 6E 67 65 3A 20 62 79 74 65 73 3D 30 2D 32 30 34 37 22 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPPARA="USERDATA","Range: bytes=0-2047"
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPACTION=0
+
+[DEBUG]MODEM : Send command AT+HTTPACTION=0
+
+[DEBUG]MODEM : Read : 8 bytes
+[DEBUG]MODEM : Data : AT+HTTPA
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 41 
+[DEBUG]MODEM : Read : 14 bytes
+[DEBUG]MODEM : Data : CTION=0
+OK
+
+[DEBUG]MODEM : 43 54 49 4F 4E 3D 30 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Read : 1 bytes
+[DEBUG]MODEM : Data : 
+[DEBUG]MODEM : 0D 
+[DEBUG]MODEM : Read : 26 bytes
+[DEBUG]MODEM : Data : 
+                      +HTTPACTION: 0,206,2048
+
+[DEBUG]MODEM : 0A 2B 48 54 54 50 41 43 54 49 4F 4E 3A 20 30 2C 32 30 36 2C 32 30 34 38 0D 0A 
+[ERROR]MODEM : TIMEOUT response: [AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,206,2048
+]
+[ERROR]A7677S_HTTP : AT+HTTPACTION failed/timed out (res=2)
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPTERM
+
+[DEBUG]MODEM : Send command AT+HTTPTERM
+
+[DEBUG]MODEM : Read : 9 bytes
+[DEBUG]MODEM : Data : AT+HTTPTE
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 54 45 
+[DEBUG]MODEM : Read : 9 bytes
+[DEBUG]MODEM : Data : RM
+OK
+
+[DEBUG]MODEM : 52 4D 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPTERM
+OK
+]
 [ERROR]TEST_HTTP : [range 0] AT_ERROR (AT command sequence failed - check earlier log lines for which step, and the exact raw response text)
-[ERROR]A7677S_HTTP : AT+HTTPACTION: failed to parse response [AT+HTTPACTION=0
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPINIT
+
+[DEBUG]MODEM : Send command AT+HTTPINIT
+
+[DEBUG]MODEM : Read : 9 bytes
+[DEBUG]MODEM : Data : AT+HTTPIN
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 49 4E 
+[DEBUG]MODEM : Read : 3 bytes
+[DEBUG]MODEM : Data : IT
+[DEBUG]MODEM : 49 54 0D 
+[DEBUG]MODEM : Read : 2 bytes
+[DEBUG]MODEM : Data : 
+
+[DEBUG]MODEM : 0D 0A 
+[DEBUG]MODEM : Read : 4 bytes
+[DEBUG]MODEM : Data : OK
+
+[DEBUG]MODEM : 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPINIT
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/WS_v1/ft/fota_ws/TrackingFirmWare.bin"
+
+[DEBUG]MODEM : Send command AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/WS_v1/ft/fota_ws/TrackingFirmWare.bin"
+
+[DEBUG]MODEM : Read : 70 bytes
+[DEBUG]MODEM : Data : AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 50 41 52 41 3D 22 55 52 4C 22 2C 22 68 74 74 70 73 3A 2F 2F 72 61 77 2E 67 69 74 68 75 62 75 73 65 72 63 6F 6E 74 65 6E 74 2E 63 6F 6D 2F 6C 6F 67 61 6E 31 32 33 73 79 6E 61 70 74 69 78 2F 
+[DEBUG]MODEM : Read : 45 bytes
+[DEBUG]MODEM : Data : WS_v1/ft/fota_ws/TrackingFirmWare.bin"
 OK
 
-+HTTPACTION: 0,2]
-[ERROR]TEST_HTTP : [range 1] AT_ERROR (AT command sequence failed - check earlier log lines for which step, and the exact raw response text)
-[ERROR]A7677S_HTTP : AT+HTTPACTION: failed to parse response [AT+HTTPACTION=0
+[DEBUG]MODEM : 57 53 5F 76 31 2F 66 74 2F 66 6F 74 61 5F 77 73 2F 54 72 61 63 6B 69 6E 67 46 69 72 6D 57 61 72 65 2E 62 69 6E 22 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPPARA="URL","https://raw.githubusercontent.com/logan123synaptix/WS_v1/ft/fota_ws/TrackingFirmWare.bin"
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPPARA="SSLCFG",1
+
+[DEBUG]MODEM : Send command AT+HTTPPARA="SSLCFG",1
+
+[DEBUG]MODEM : Read : 9 bytes
+[DEBUG]MODEM : Data : AT+HTTPPA
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 50 41 
+[DEBUG]MODEM : Read : 20 bytes
+[DEBUG]MODEM : Data : RA="SSLCFG",1
 OK
 
-+HTTPACTION: 0,206]
-[ERROR]TEST_HTTP : [range 2] AT_ERROR (AT command sequence failed - check earlier log lines for which step, and the exact raw response text)
-[ERROR]A7677S_HTTP : AT+HTTPACTION: failed to parse response [AT+HTTPACTION=0
+[DEBUG]MODEM : 52 41 3D 22 53 53 4C 43 46 47 22 2C 31 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPPARA="SSLCFG",1
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPPARA="USERDATA","Range: bytes=2048-4095"
+
+[DEBUG]MODEM : Send command AT+HTTPPARA="USERDATA","Range: bytes=2048-4095"
+
+[DEBUG]MODEM : Read : 10 bytes
+[DEBUG]MODEM : Data : AT+HTTPPAR
+[DEBUG]MODEM : 41 54 2B 48 54 54 50 50 41 52 
+[DEBUG]MODEM : Read : 44 bytes
+[DEBUG]MODEM : Data : A="USERDATA","Range: bytes=2048-4095"
 OK
 
-+HTTPACTION: 0,206]
-[ERROR]TEST_HTTP : [range 3] AT_ERROR (AT command sequence failed - check earlier log lines for which step, and the exact raw response text)
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[INFO]A7677S_HTTP : AT+HTTPACTION: status=206 datalen=2
-[ERROR]A7677S_HTTP : AT+HTTPREAD (raw): raw read timed out at offset 0
-[ERROR]MODEM : TIMEOUT response: [NULL]
-[WARNING]A7677S_HTTP : AT+HTTPTERM failed/timed out (res=2) - session may still be open
-[ERROR]TEST_HTTP : [range 4] AT_ERROR (AT command sequence failed - check earlier log lines for which step, and the exact raw response text)
-[INFO]TEST_HTTP : === TEST DONE: 0/5 ranges OK, 0 bytes total, 5 failures ===
+[DEBUG]MODEM : 41 3D 22 55 53 45 52 44 41 54 41 22 2C 22 52 61 6E 67 65 3A 20 62 79 74 65 73 3D 32 30 34 38 2D 34 30 39 35 22 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Command success: [AT+HTTPPARA="USERDATA","Range: bytes=2048-4095"
+OK
+]
+[DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPACTION=0
+
+[DEBUG]MODEM : Send command AT+HTTPACTION=0
+
+[DEBUG]MODEM : Read : 6 bytes
+[DEBUG]MODEM : Data : AT+HTT
+[DEBUG]MODEM : 41 54 2B 48 54 54 
+[DEBUG]MODEM : Read : 16 bytes
+[DEBUG]MODEM : Data : PACTION=0
+OK
+
+[DEBUG]MODEM : 50 41 43 54 49 4F 4E 3D 30 0D 0D 0A 4F 4B 0D 0A 
+[DEBUG]MODEM : Read : 5 bytes
+[DEBUG]MODEM : Data : 
++HT
+[DEBUG]MODEM : 0D 0A 2B 48 54 
+[DEBUG]MODEM : Read : 22 bytes
+[DEBUG]MODEM : Data : TPACTION: 0,206,2048
+
+[DEBUG]MODEM : 54 50 41 43 54 49 4F 4E 3A 20 30 2C 32 30 36 2C 32 30 34 38 0D 0A 

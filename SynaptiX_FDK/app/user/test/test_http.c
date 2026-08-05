@@ -151,24 +151,19 @@ void test_http_init(void)
                        "with a real reachable HTTP file URL before running this test");
     }
 
-    /* Drives modem power-on directly via board.modem.ops->start()
-     * (modem_ops.h) - the same call sx_user_mqtt.c's _common_init() makes
-     * (see that file's line "board.modem.ops->start(board.modem.ctx);").
-     * This test does NOT go through sx_user_mqtt.c/sx_mqtt.c at all - no
-     * MQTT config, no broker, nothing - so it has no dependency on
-     * test_lte_mqtt_init()/test_lte_mqtt_poll() being called anywhere.
-     * Non-blocking per modem_ops.h's doc-comment ("Does not block. Progress
-     * is advanced inside poll()") - actual progress happens in
-     * test_http_poll()'s modem_handle_poll() call below, tracked via
-     * is_ready(). */
-    log_info(TAG, "Starting modem power-on sequence...");
-    int ret = board.modem.ops->start(board.modem.ctx);
-    if (ret < 0) {
-        log_error(TAG, "board.modem.ops->start() failed immediately (ret=%d)", ret);
-        s_state = TEST_HTTP_DONE;
-        return;
-    }
-
+    /* NOT calling board.modem.ops->start() here on purpose. sx_board_init()
+     * (main.c, runs before this) already calls
+     * board.modem.ops->power_on_start() once, and a7677s.c's cb_at_probe()
+     * automatically kicks off the network attach sequence itself the
+     * moment power_state reaches READY (see that function's comment - this
+     * exact "call start() too early" mistake is a known, already-handled
+     * case: a7677s_start() correctly rejects the too-early call with
+     * "power not ready yet", and a7677s.c's own internal retry after boot
+     * is what actually gets the attach sequence going, not this test).
+     * Calling start() here ourselves only produced a harmless one-time
+     * "power not ready yet" warning with no other effect - confirmed via
+     * real hardware log during this test's own bring-up. This test now
+     * only waits on is_ready() below, same as it always did. */
     s_state       = TEST_HTTP_STARTING;
     s_offset      = 0;
     s_range_count = 0;

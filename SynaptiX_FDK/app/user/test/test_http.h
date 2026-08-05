@@ -32,24 +32,38 @@ extern "C" {
  * only, matching the "only one real a7677s_t on this board" assumption
  * already made throughout a7677s.c.
  *
- * SELF-CONTAINED: drives modem power-on and network registration itself,
- * via board.modem.ops->start()/is_ready()/poll() directly (modem_ops.h) -
- * the same calls sx_user_mqtt.c makes internally, but without going through
- * sx_user_mqtt.c/sx_mqtt.c or any MQTT config at all. This test has NO
- * dependency on test_lte_mqtt.c/test_lte_mqtt_init()/test_lte_mqtt_poll()
- * being called anywhere - test_http_init() + test_http_poll() alone are
- * sufficient to bring the modem up from cold and run the HTTP range
- * download. Confirmed by reading sx_user_mqtt.c's _common_init() (the
- * board.modem.ops->start() call) and sx_mqtt_poll()'s modem_handle_poll()
- * call - both reused here directly.
+ * SELF-CONTAINED w.r.t. test_lte_mqtt: does NOT depend on
+ * test_lte_mqtt.c/test_lte_mqtt_init()/test_lte_mqtt_poll() being called
+ * anywhere. Modem power-on itself is already kicked off unconditionally by
+ * sx_board_init() (main.c, runs before either test's init()) via
+ * board.modem.ops->power_on_start() - this test only waits on
+ * board.modem.ops->is_ready() and drives board.modem.ops->poll() every
+ * tick via modem_handle_poll(), it does not call power_on_start() or
+ * start() itself (a7677s.c's own cb_at_probe() kicks off the network
+ * attach sequence automatically once power_state reaches READY - see that
+ * function's comment for why calling start() from test code is unnecessary
+ * and, if attempted too early, produces a harmless "power not ready yet"
+ * warning that this test used to trigger before this comment was
+ * updated).
+ *
+ * IMPORTANT if test_lte_mqtt is ALSO still wired into main.c: do not run
+ * both at once. Both this file and test_lte_mqtt.c now independently call
+ * board.modem.ops->start() and drive board.modem.ops->poll() every tick -
+ * calling start() a second time while already starting/started is not
+ * something this test or a7677s_http.c has been checked against, and both
+ * would be driving the one shared a7677s_t/modem command channel
+ * simultaneously (see a7677s_http.h's A7677S_HTTP_RANGE_BUSY doc-comment
+ * for why that matters for a7677s_http_get_range() specifically). To run
+ * this test alone, remove or comment out the test_lte_mqtt_init()/
+ * test_lte_mqtt_poll() calls in main.c - this test needs only
+ * test_http_init() once and test_http_poll(delta) every tick.
  *
  * BEFORE BUILDING: set TEST_HTTP_URL below (test_http.c) to a real,
- * reachable, plain-HTTP (not HTTPS - AT+HTTPSSL is not exercised by this
- * test) file a few hundred KB in size. A small JPEG or firmware .bin
- * hosted anywhere reachable from the SIM's APN works; must support HTTP
- * Range requests (most static file hosts do) for TEST_HTTP_RANGE_LEN's
- * chunking to be meaningfully tested rather than accidentally reading the
- * whole file in one range. */
+ * reachable file a few hundred KB in size that supports HTTP Range
+ * requests. Currently set to a real https:// URL (GitHub raw content, see
+ * test_http.c) - a7677s_http_ssl_configure() is called automatically by
+ * this test before the first range download when the URL is https, no
+ * extra wiring needed. */
 
 void test_http_init(void);
 void test_http_poll(uint32_t delta_ms);

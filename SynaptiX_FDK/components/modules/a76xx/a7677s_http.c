@@ -441,17 +441,18 @@ static void cb_http_para_hdr(modem_t *modem, const char *response,
      * line "+HTTPACTION:<method>,<statuscode>,<datalen>" - same two-stage
      * shape as +CMQTTSTART/+CMQTTCONNECT etc in a7677s.c (see that file's
      * NOTE on res_success needing the full URC, not bare OK). We therefore
-     * set res_success to the "+HTTPACTION:0," prefix (method=0 is GET),
+     * set res_success to the "+HTTPACTION: 0," prefix (method=0 is GET),
      * not "\r\nOK\r\n" - matching that established pattern exactly, so this
      * callback only fires once the real result line has arrived, not on
-     * the earlier bare OK. NOT verified against a real module yet (see
-     * a7677s_http.h note that a real download must be tested against
-     * hardware) - if the module's actual response text differs (e.g. a
-     * space after the colon, mirroring the CMQTTSTART fix noted in
-     * a7677s.c), this must be corrected against real hardware log, not
-     * assumed. */
+     * the earlier bare OK. CONFIRMED against real hardware log (2026-08-05):
+     * the module sends "+HTTPACTION: 0,206,2048" - WITH a space after the
+     * colon, exactly the CMQTTSTART-style mismatch this comment used to
+     * warn about before it was verified. Datasheet text
+     * (a76xx_at_cmd.md) shows no space; real module output does - this
+     * project's "real log beats datasheet" rule applies, matching the
+     * space here rather than the documented format. */
     http_send_dynamic(HTTP_CMD_ACTION, "AT+HTTPACTION=0\r\n",
-                       "+HTTPACTION:0,", "\r\nERROR\r\n",
+                       "+HTTPACTION: 0,", "\r\nERROR\r\n",
                        cb_http_action, HTTP_TIMEOUT_ACTION_MS);
 }
 
@@ -474,15 +475,18 @@ static void cb_http_action(modem_t *modem, const char *response,
         return;
     }
 
-    /* Parse "+HTTPACTION:0,<statuscode>,<datalen>" out of modem->buff
-     * (response points into it). Not using response directly with sscanf's
-     * %d on the whole buffer in case of leading noise - locate the marker
-     * first, same defensive style as urc_process_header_line()'s
-     * strchr(line, ':') + sscanf(p+1, ...) in a7677s.c. */
-    p = strstr(response, "+HTTPACTION:0,");
+    /* Parse "+HTTPACTION: 0,<statuscode>,<datalen>" out of modem->buff
+     * (response points into it) - CONFIRMED real format includes a space
+     * after the colon (real hardware log, 2026-08-05: "+HTTPACTION:
+     * 0,206,2048"), matching res_success above. Not using response
+     * directly with sscanf's %d on the whole buffer in case of leading
+     * noise - locate the marker first, same defensive style as
+     * urc_process_header_line()'s strchr(line, ':') + sscanf(p+1, ...) in
+     * a7677s.c. */
+    p = strstr(response, "+HTTPACTION: 0,");
     status = 0;
     datalen = 0;
-    if (!p || sscanf(p, "+HTTPACTION:0,%d,%lu", &status, &datalen) != 2) {
+    if (!p || sscanf(p, "+HTTPACTION: 0,%d,%lu", &status, &datalen) != 2) {
         log_error(TAG, "AT+HTTPACTION: failed to parse response [%s]", modem->buff);
         s_http.state = HTTP_STATE_TERM;
         http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",

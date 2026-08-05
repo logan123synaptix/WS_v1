@@ -65,13 +65,73 @@ void modem_poll(modem_t *modem, uint32_t timeStamp){
             modem->buff_id += read;
             modem->waitElapsed = 0;
 
-            if(modem->cmd->res_success && strstr(modem->buff, modem->cmd->res_success)){
-                modem->isBusy = 0;
-                modem->waitElapsed = 0;
-                log_debug(TAG, "Command success: [%s]", modem->buff);
-                if(modem->cmd->callback)
-                    modem->cmd->callback(modem, modem->buff, MODEM_RESPONSE_SUCCESS, modem->cmd->arg);
-                return;
+            /* Bug fix (2026-08-05): a bare strstr() match is not enough for
+             * res_success patterns that end mid-line without a trailing
+             * "\r\n" of their own (e.g. a7677s_http.c's cb_http_action uses
+             * "+HTTPACTION: 0," as a prefix, since the following
+             * <statuscode>,<datalen> values vary and cannot be a fixed
+             * literal). Without this check, UART bytes arriving in small
+             * batches let strstr() match the moment just the prefix has
+             * landed (confirmed on real hardware: buffer content
+             * "+HTTPACTION: 0,2" matched and fired the callback before the
+             * rest of "06,2048\r\n" arrived), causing the callback to parse
+             * a truncated line.
+             *
+             * Follow-up fix #1 (same day): checking the byte immediately
+             * AFTER every matched res_success broke every existing "\r\nOK
+             * \r\n"-style command (that trailing byte isn't part of the
+             * match, it's whatever's next in the buffer, usually '\0').
+             * Fixed by trusting patterns that already end in '\r'/'\n'
+             * immediately, only waiting for more bytes when the pattern
+             * itself doesn't self-terminate.
+             *
+             * Follow-up fix #2 (same day): that "doesn't self-terminate"
+             * bucket also caught ">" - the data-entry prompt used by
+             * AT+CMQTTTOPIC, AT+CMQTTPUB, AT+CCERTDOWN, etc. (see a7677s.c,
+             * many call sites). ">" is a complete signal on its own; the
+             * modem sends it and then waits for the MCU to write raw data,
+             * it never follows ">" with "\r\n" the way a URC line would.
+             * Waiting for that never-coming "\r\n" broke MQTT publish on
+             * real hardware (confirmed: AT+CMQTTTOPIC timed out every time
+             * after fix #1's logic, even restricted to non-self-terminating
+             * patterns). The actual distinguishing feature of the ORIGINAL
+             * bug (HTTPACTION) is that it's a *prefix of a URC line* -
+             * URC lines in this codebase always start with "+" and are
+             * followed by variable data then "\r\n". ">" is not a URC line
+             * prefix, it has nothing after it to wait for. So: only apply
+             * the wait-for-more-bytes check to patterns that (a) don't
+             * already end in '\r'/'\n', AND (b) start with '+' (i.e. are
+             * genuinely a partial URC-line prefix like "+HTTPACTION: 0,").
+             * Everything else (">", and any future single-char/non-URC
+             * prompt) is trusted on bare strstr() match, exactly like
+             * pre-2026-08-05 behavior. */
+            char *match_pos = modem->cmd->res_success ? strstr(modem->buff, modem->cmd->res_success) : NULL;
+            if(match_pos){
+                size_t success_len = strlen(modem->cmd->res_success);
+                char last_char_of_pattern = success_len > 0 ? modem->cmd->res_success[success_len - 1] : '\0';
+                int pattern_self_terminated = (last_char_of_pattern == '\r' || last_char_of_pattern == '\n');
+                int pattern_is_urc_prefix = (success_len > 0 && modem->cmd->res_success[0] == '+');
+                int line_complete;
+                if(pattern_self_terminated || !pattern_is_urc_prefix){
+                    line_complete = 1;
+                } else {
+                    char next_char = match_pos[success_len];
+                    line_complete = (next_char == '\r' || next_char == '\n');
+                }
+                if(line_complete){
+                    modem->isBusy = 0;
+                    modem->waitElapsed = 0;
+                    log_debug(TAG, "Command success: [%s]", modem->buff);
+                    if(modem->cmd->callback)
+                        modem->cmd->callback(modem, modem->buff, MODEM_RESPONSE_SUCCESS, modem->cmd->arg);
+                    return;
+                }
+                /* Prefix matched but the line hasn't finished arriving yet -
+                 * fall through without resetting isBusy/waitElapsed, so the
+                 * next modem_poll() tick reads more bytes and re-checks.
+                 * waitElapsed was already reset to 0 above (line 66) since
+                 * we did receive new bytes this tick, so the overall command
+                 * timeout is not affected by this wait. */
             }
             else if(modem->cmd->res_fail && strstr(modem->buff, modem->cmd->res_fail)){
                 modem->isBusy = 0;

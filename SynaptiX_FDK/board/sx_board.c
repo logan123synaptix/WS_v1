@@ -125,7 +125,7 @@ void sx_board_init(void)
 
     sx_uart_init(&board.log_uart, &uart_config[UART_LOG], 512, 512);
     HAL_UART_Receive_IT(hal_uart[UART_LOG], &uart_rx_char[UART_LOG], 1);
-    logger_init(LOGGER_INFO, log_print);
+    logger_init(LOGGER_DEBUG, log_print);
     log_info(TAG, "Board init start");
 
     uart_config[UART_LTE].pDriver = hal_uart[UART_LTE];

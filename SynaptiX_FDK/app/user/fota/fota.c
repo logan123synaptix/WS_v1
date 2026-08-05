@@ -608,7 +608,13 @@ static bool fota_download_attempt(void)
         uint32_t remaining = FOTA_SECONDARY_APP_SIZE - offset;
         uint32_t this_len  = (remaining < FOTA_HTTP_CHUNK_SIZE) ? remaining : FOTA_HTTP_CHUNK_SIZE;
 
-        fota_async_wait_t w = {0};
+        /* Bug fix (2026-08-05): same stack-overflow fix as ssl_wait above
+         * (see that comment for the full explanation) - static removes
+         * this ~4.1KB struct from the stack. Explicitly memset every loop
+         * iteration since a static variable does NOT reset itself between
+         * iterations the way a stack local with "= {0}" would have. */
+        static fota_async_wait_t w;
+        memset(&w, 0, sizeof(w));
         int ret = a7677s_http_get_range(&board.a7677s, s_fota.url, offset, this_len,
                                           on_fota_range_done, &w);
         if (ret != 0) {
@@ -724,7 +730,11 @@ static bool fota_download_attempt(void)
     while (verify_offset < total_size) {
         uint32_t remaining = total_size - verify_offset;
         uint32_t this_len  = (remaining < FOTA_HTTP_CHUNK_SIZE) ? remaining : FOTA_HTTP_CHUNK_SIZE;
-        uint8_t  buf[FOTA_HTTP_CHUNK_SIZE];
+        /* Bug fix (2026-08-05): same stack-overflow fix as ssl_wait/w above
+         * - static instead of a 4KB stack-local array. No memset needed:
+         * sx_flash_read() below fully overwrites buf[0..this_len) before
+         * the CRC loop reads any byte of it. */
+        static uint8_t buf[FOTA_HTTP_CHUNK_SIZE];
 
         sx_flash_read(FOTA_SECONDARY_APP_ADDR + verify_offset, buf, this_len);
         for (uint32_t i = 0; i < this_len; i++) {
@@ -765,7 +775,27 @@ void fota_download(void)
      * (GitHub raw content, matching test_http.c's precedent), but the
      * check is still made explicit rather than assumed. */
     if (strncmp(s_fota.url, "https://", 8) == 0) {
-        fota_async_wait_t ssl_wait = {0};
+        /* Bug fix (2026-08-05): HardFault confirmed on real hardware right
+         * at fota_download_attempt()'s entry (before its own first log
+         * line even ran) - a stack-frame-creation fault, not a logic bug.
+         * Root cause: fota_async_wait_t embeds a 4096-byte data_copy[]
+         * (see that struct's doc-comment), so each stack-local instance
+         * costs ~4.1KB. This ssl_wait instance stays alive for the WHOLE
+         * duration of fota_download() (C does not free a local's stack
+         * slot just because the code is logically done with it), which
+         * includes the nested, blocking fota_download_attempt() call
+         * below - which itself stack-allocates a SECOND fota_async_wait_t
+         * (w) plus a THIRD 4KB buffer (buf, in the verify loop) - on top
+         * of everything main()/test_fota_poll()/the MQTT+modem+HTTP
+         * layers already used getting here. Static removes this instance
+         * from the stack entirely. Safe here specifically because this is
+         * a bare-metal, single main-loop build (no RTOS, no recursion,
+         * confirmed by reading Core/Src/main.c and test_fota.c) and
+         * fota_download() is a deliberate one-off blocking call - never
+         * re-entered while already running, never called from more than
+         * one calling context. */
+        static fota_async_wait_t ssl_wait;
+        memset(&ssl_wait, 0, sizeof(ssl_wait));
         int ret = a7677s_http_ssl_configure(&board.a7677s, on_fota_ssl_configured, &ssl_wait);
         if (ret != 0) {
             log_error(TAG, "a7677s_http_ssl_configure() rejected immediately - modem busy, aborting this attempt");

@@ -132,6 +132,7 @@ int main(void)
   MX_UART5_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_Delay(5000);
   uint32_t last_tick = 0, last_ticks = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   sx_board_init();

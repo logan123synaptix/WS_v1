@@ -88,6 +88,25 @@ void test_fota_init(void)
                    "partition and WILL reset the board to swap into whatever image was "
                    "downloaded - confirmed acceptable by the user for this test run.");
 
+    /* BUG FIX (2026-08-05, confirmed on real hardware log): this test (and
+     * fota.c itself, via network_config_get()->device_id in
+     * build_fota_check_topic()) reads network_config_get()->device_id, but
+     * nothing had called network_config_init() first anywhere in this
+     * test's own call chain - the real app.c flow calls it (see app.c's
+     * app_init()), but that path is not exercised by this standalone test.
+     * s_cfg (network_config.c) is a plain static struct, zero-initialized
+     * by the C runtime, NOT pre-filled with DEVICE_ID's "001" default until
+     * network_config_init() actually runs (build_defaults() inside it) -
+     * without this call, device_id was an empty string, so this test
+     * subscribed to "synaptix/demo/fota_check/" (prefix only, no id) instead
+     * of ".../001", confirmed by the real subscribe-ack log line. Safe/cheap
+     * to call here: reads from flash storage if a config was previously
+     * saved there, otherwise falls back to app_config.h's DEVICE_ID default
+     * and writes it once - same call app.c's app_init() makes, just made
+     * explicitly here since this test does not go through app_init() at
+     * all. */
+    network_config_init();
+
     sx_user_mqtt_cfg_t cfg = {0};
     cfg.broker          = MQTT_HOST_TEST;
     cfg.port            = 1883;

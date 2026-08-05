@@ -293,7 +293,7 @@ bool fota_is_pending(void)
  * deployment note about the on-flash partition table needing a reset
  * (erase FOTA_PARTITION_TABLE_ADDR, NOT Factory's sectors) before this
  * new address takes effect on an already-provisioned board. */
-#define FOTA_SECONDARY_APP_ADDR    0x08178000UL
+#define FOTA_SECONDARY_APP_ADDR    0x08100000UL
 #define FOTA_SECONDARY_APP_SIZE    (60UL * 8192UL)  /* 480KB, 60 sectors - must match
                                                        * FOTA_MAX_FIRMWARE_SIZE (fota.h) */
 #define FOTA_PARTITION_TABLE_ADDR  0x0800E000UL

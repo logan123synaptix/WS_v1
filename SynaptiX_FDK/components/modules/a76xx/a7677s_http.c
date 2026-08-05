@@ -45,9 +45,8 @@ static const char *TAG = "A7677S_HTTP";
 #define HTTP_CMD_PARA_SSL  2   /* AT+HTTPPARA="SSLCFG",<ctx> - only sent when url is https:// */
 #define HTTP_CMD_PARA_HDR  3   /* AT+HTTPPARA="USERDATA",<range header> */
 #define HTTP_CMD_ACTION    4   /* AT+HTTPACTION=0 (GET) */
-#define HTTP_CMD_READ      5   /* AT+HTTPREAD=<offset>,<size> */
-#define HTTP_CMD_TERM      6   /* AT+HTTPTERM */
-#define HTTP_CMD_COUNT     7
+#define HTTP_CMD_TERM      5   /* AT+HTTPTERM */
+#define HTTP_CMD_COUNT     6
 
 /* --- SSL context one-time setup, entirely separate command slots/state
  * from the per-range HTTP_CMD_* above (a7677s_http_ssl_configure() is
@@ -78,9 +77,31 @@ typedef enum {
     HTTP_STATE_PARA_SSL,     /* only entered when s_http.is_https - see cb_http_para_url() */
     HTTP_STATE_PARA_HDR,
     HTTP_STATE_ACTION,
-    HTTP_STATE_READ,
+    HTTP_STATE_READ_RAW,     /* raw UART read for AT+HTTPREAD's binary response - see
+                               * a7677s_http_poll()'s doc-comment and this file's header
+                               * comment (2026-08-05 update) for why this replaced the
+                               * old modem_send_command()/modem_poll()-based HTTP_STATE_READ */
     HTTP_STATE_TERM,
 } http_state_t;
+
+/* Sub-states within HTTP_STATE_READ_RAW - see a7677s_http_poll(). Every
+ * AT+HTTPREAD response has the same 3-part shape:
+ *   "AT+HTTPREAD=<off>,<len>\r\n\r\nOK\r\n\r\n+HTTPREAD:<chunk_len>\r\n"
+ *   <chunk_len raw bytes, MAY CONTAIN ANY BYTE VALUE INCLUDING 0x00/0x45/etc>
+ *   "\r\n\r\nOK\r\n"    (or "\r\n\r\n+HTTPREAD:0\r\n" instead when this was
+ *                        the last chunk of the range - both start with
+ *                        "\r\n\r\n", which is all this parser looks for)
+ * Only the text portions (RAW_WAIT_EOK/RAW_WAIT_HEADER/RAW_WAIT_FOOTER) are
+ * scanned byte-by-byte for a marker string - RAW_COPY_DATA counts exactly
+ * chunk_len bytes and copies them verbatim regardless of content, never
+ * calling strstr() on them. This is the entire point of this rewrite (see
+ * file header comment). */
+typedef enum {
+    RAW_WAIT_ECHO_OK = 0,  /* skip the command echo + first "OK" (command accepted) */
+    RAW_WAIT_HEADER,       /* find "+HTTPREAD:" then parse the decimal chunk_len after it */
+    RAW_COPY_DATA,         /* copy exactly chunk_len raw bytes, no string scanning */
+    RAW_WAIT_FOOTER,       /* skip trailing "\r\n\r\nOK\r\n" (or "...+HTTPREAD:0\r\n") */
+} http_read_raw_substate_t;
 
 static struct {
     http_state_t state;
@@ -100,6 +121,26 @@ static struct {
 
     uint8_t  data[A7677S_HTTP_RANGE_SIZE];  /* accumulates HTTPREAD output across this range */
     uint32_t data_len;       /* bytes actually written into data[] so far */
+
+    /* --- Raw-read state (HTTP_STATE_READ_RAW / a7677s_http_poll()) ---
+     * See http_read_raw_substate_t's doc-comment above for the shape being
+     * parsed. Reset at the start of every HTTP_STATE_READ_RAW entry (see
+     * start_read_raw() below), not persisted across ranges. */
+    http_read_raw_substate_t raw_substate;
+    uint32_t raw_chunk_len;      /* parsed from "+HTTPREAD:<len>" in RAW_WAIT_HEADER,
+                                   * how many raw data bytes RAW_COPY_DATA must still copy */
+    uint32_t raw_chunk_copied;   /* how many of raw_chunk_len bytes RAW_COPY_DATA has
+                                   * copied so far this chunk */
+    /* Small line-scan buffer for the text portions (echo/OK/header/footer)
+     * only - RAW_COPY_DATA never touches this, it copies straight from the
+     * UART read buffer into s_http.data[]. Sized generously for the
+     * longest text line this parser scans byte-by-byte in one sitting
+     * (the command echo "AT+HTTPREAD=4294967295,4294967295\r\n" is the
+     * longest, well under 64 bytes). */
+    char     raw_line_buf[64];
+    uint32_t raw_line_len;       /* bytes currently held in raw_line_buf */
+    uint32_t raw_state_elapsed_ms; /* time spent in the current raw sub-state, for
+                                     * per-substate timeout - see a7677s_http_poll() */
 
     a7677s_http_range_cb_t cb;
     void *ctx;
@@ -141,7 +182,7 @@ static void cb_http_para_url(modem_t *modem, const char *response, modem_respons
 static void cb_http_para_ssl(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_http_para_hdr(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_http_action(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
-static void cb_http_read(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void start_read_raw(void);
 static void cb_http_term(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 
 /* AT+HTTPINIT MaxResponseTime is not separately documented beyond the
@@ -355,8 +396,9 @@ static void cb_http_para_url(modem_t *modem, const char *response,
         log_error(TAG, "AT+HTTPPARA=URL failed (res=%d)", res);
         /* AT+HTTPINIT already succeeded - must HTTPTERM before giving up,
          * otherwise the next get_range() call's HTTPINIT will fail because
-         * an HTTP session is still open. See cb_http_read()'s error path
-         * for the same reasoning applied after ACTION/READ failures. */
+         * an HTTP session is still open. See abort_read_raw()'s call site
+         * (a7677s_http_poll()) for the same reasoning applied after
+         * ACTION/READ failures in the raw-read path. */
         s_http.state = HTTP_STATE_TERM;
         http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
                            "\r\nOK\r\n", "\r\nERROR\r\n",
@@ -462,8 +504,6 @@ static void cb_http_action(modem_t *modem, const char *response,
     const char *p;
     int status;
     unsigned long datalen;
-    uint32_t remaining;
-    uint32_t this_read;
 
     (void)arg;
     if (res != MODEM_RESPONSE_SUCCESS) {
@@ -534,102 +574,82 @@ static void cb_http_action(modem_t *modem, const char *response,
 
     /* Begin the read loop - see file header comment on the two-level
      * Range/Read chunking. read_offset/data_len both start at 0 (already
-     * zeroed by the memset in a7677s_http_get_range()). */
-    s_http.state = HTTP_STATE_READ;
-    remaining = s_http.http_datalen - s_http.read_offset;
-    this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
+     * zeroed by the memset in a7677s_http_get_range()).
+     *
+     * BUG FIX (2026-08-05): previously sent AT+HTTPREAD through
+     * http_send_dynamic()/modem_send_command(), relying on modem_poll()'s
+     * strstr(modem->buff, "\r\nOK\r\n") to detect completion. CONFIRMED on
+     * real hardware this fails: the actual firmware file being downloaded
+     * (TrackingFirmWare.bin) contains a long run of a single repeated byte
+     * value (0x45 'E') that, when it lands inside one 400-byte HTTPREAD
+     * chunk, contains no "OK"/"+HTTPREAD:" text anywhere in that chunk -
+     * strstr() never matches, the command times out (modem->buff dumped in
+     * the TIMEOUT log line as a wall of 'E' characters - not corrupted
+     * memory, the actual binary file content), and the download fails.
+     * This is not a rare edge case for real firmware binaries (padding,
+     * zero-initialized data sections, repeated instruction patterns) -
+     * text-based framing detection is fundamentally unsafe for binary
+     * payloads. Switched to start_read_raw() (below), a hand-rolled UART
+     * reader that counts exactly datalen raw bytes instead of scanning for
+     * a marker string inside them - see http_read_raw_substate_t's
+     * doc-comment. */
+    s_http.state = HTTP_STATE_READ_RAW;
+    start_read_raw();
+}
+
+/* Timeout for the ENTIRE HTTP_STATE_READ_RAW sequence for one AT+HTTPREAD
+ * chunk (echo+OK, header, data, footer combined) - generous since this
+ * covers UART transfer of up to A7677S_HTTP_READ_CHUNK_SIZE raw bytes plus
+ * framing, at whatever baud rate this UART runs, not just a short AT
+ * command's usual turnaround. Same order of magnitude as
+ * HTTP_TIMEOUT_SHORT_MS but kept separate/named for clarity, since this
+ * timeout now guards a hand-rolled loop instead of modem_send_command()'s
+ * built-in one. */
+#define HTTP_READ_RAW_TIMEOUT_MS   5000U
+
+/* Begins (or restarts, for the next chunk within the same range)
+ * HTTP_STATE_READ_RAW: sends "AT+HTTPREAD=<offset>,<size>" directly via
+ * sx_uart_write() - deliberately bypassing modem_send_command()/
+ * modem_poll() for this command only (every other AT+HTTP* command in this
+ * file still goes through the normal http_send_dynamic() path, which is
+ * fine since none of their responses carry arbitrary binary payload).
+ * Manually claims modem->isBusy so modem_poll() (called elsewhere in the
+ * same tick via a7677s_poll(), see a7677s.c) does not also try to read
+ * this UART concurrently - released again in finish_read_raw() below. */
+static void start_read_raw(void)
+{
+    uint32_t remaining = s_http.http_datalen - s_http.read_offset;
+    uint32_t this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
+
     snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
              "AT+HTTPREAD=%lu,%lu\r\n",
              (unsigned long)s_http.read_offset, (unsigned long)this_read);
-    http_send_dynamic(HTTP_CMD_READ, s_http_dyn_cmd_buf,
-                       "\r\nOK\r\n", "\r\nERROR\r\n",
-                       cb_http_read, HTTP_TIMEOUT_SHORT_MS);
+
+    s_http.raw_substate         = RAW_WAIT_ECHO_OK;
+    s_http.raw_chunk_len        = 0;
+    s_http.raw_chunk_copied     = 0;
+    s_http.raw_line_len         = 0;
+    s_http.raw_state_elapsed_ms = 0;
+
+    log_debug(TAG, "HTTP RAW CMD: %s", s_http_dyn_cmd_buf);
+    pModem(s_http.dce)->isBusy = 1;   /* claim the channel - see file header comment above */
+    sx_uart_flush(&pModem(s_http.dce)->uart);
+    sx_uart_write(&pModem(s_http.dce)->uart,
+                   (const uint8_t *)s_http_dyn_cmd_buf, strlen(s_http_dyn_cmd_buf));
 }
 
-static void cb_http_read(modem_t *modem, const char *response,
-                          modem_response_st_t res, void *arg)
+/* Releases the manually-claimed modem->isBusy and either issues the next
+ * chunk's AT+HTTPREAD (more of this range still unread) or moves on to
+ * HTTP_STATE_TERM (range fully read) - the same two-way branch
+ * cb_http_read() used to make at the end of its success path, just
+ * relocated here since a7677s_http_poll() drives this now instead of a
+ * modem command callback. */
+static void finish_read_raw_chunk(void)
 {
-    const char *marker;
-    long chunk_len;
-    const char *line_end;
-    const char *data_start;
-    uint32_t remaining;
-    uint32_t this_read;
-
-    (void)arg;
-    if (res != MODEM_RESPONSE_SUCCESS) {
-        log_error(TAG, "AT+HTTPREAD failed/timed out at offset %lu (res=%d)",
-                  (unsigned long)s_http.read_offset, res);
-        s_http.state = HTTP_STATE_TERM;
-        http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
-                           "\r\nOK\r\n", "\r\nERROR\r\n",
-                           cb_http_term, HTTP_TIMEOUT_SHORT_MS);
-        return;
-    }
-
-    /* Expected shape: "+HTTPREAD:<len>\r\n<raw data, len bytes>\r\n\r\nOK\r\n"
-     * (per a76xx_at_cmd.md's AT+HTTPREAD section - see a7677s_http.h file
-     * header comment on why this whole line must fit under
-     * MODEM_RX_BUFFER_SIZE). NOT verified against real hardware yet - the
-     * exact framing (e.g. whether raw data can itself contain byte
-     * sequences that look like "OK\r\n", which would matter if firmware
-     * binary data ever coincidentally matches it) needs a real test with
-     * an actual multi-hundred-KB file before this parsing is trusted, per
-     * a7677s_http.h's note and this project's "real log beats datasheet"
-     * rule. Parsing here locates "+HTTPREAD:" then the following "\r\n",
-     * reads <len> raw bytes immediately after that, and does not attempt
-     * to also validate the trailing "\r\n\r\nOK\r\n" content beyond what
-     * modem_command's res_success match already confirmed (the presence of
-     * "\r\nOK\r\n" somewhere in the buffer). */
-    marker = strstr(response, "+HTTPREAD:");
-    if (!marker) {
-        log_error(TAG, "AT+HTTPREAD: no +HTTPREAD: marker in response [%s]", modem->buff);
-        s_http.state = HTTP_STATE_TERM;
-        http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
-                           "\r\nOK\r\n", "\r\nERROR\r\n",
-                           cb_http_term, HTTP_TIMEOUT_SHORT_MS);
-        return;
-    }
-    chunk_len = strtol(marker + strlen("+HTTPREAD:"), NULL, 10);
-    line_end = strstr(marker, "\r\n");
-    if (chunk_len <= 0 || !line_end) {
-        log_error(TAG, "AT+HTTPREAD: bad chunk length or missing line terminator [%s]", modem->buff);
-        s_http.state = HTTP_STATE_TERM;
-        http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
-                           "\r\nOK\r\n", "\r\nERROR\r\n",
-                           cb_http_term, HTTP_TIMEOUT_SHORT_MS);
-        return;
-    }
-    data_start = line_end + 2; /* skip the "\r\n" after "+HTTPREAD:<len>" */
-
-    if (s_http.data_len + (uint32_t)chunk_len > sizeof(s_http.data)) {
-        log_error(TAG, "AT+HTTPREAD: chunk would overflow internal buffer (data_len=%lu chunk=%ld)",
-                  (unsigned long)s_http.data_len, chunk_len);
-        s_http.state = HTTP_STATE_TERM;
-        http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
-                           "\r\nOK\r\n", "\r\nERROR\r\n",
-                           cb_http_term, HTTP_TIMEOUT_SHORT_MS);
-        return;
-    }
-
-    memcpy(s_http.data + s_http.data_len, data_start, (size_t)chunk_len);
-    s_http.data_len   += (uint32_t)chunk_len;
-    s_http.read_offset += (uint32_t)chunk_len;
+    pModem(s_http.dce)->isBusy = 0;
 
     if (s_http.read_offset < s_http.http_datalen) {
-        /* More chunks remain in this range - issue the next AT+HTTPREAD at
-         * the advanced offset (READMODE=1 allows re-reading the same
-         * already-downloaded range at arbitrary offsets - see
-         * a7677s_http.h file header comment; NOT verified against real
-         * hardware yet). */
-        remaining = s_http.http_datalen - s_http.read_offset;
-        this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
-        snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
-                 "AT+HTTPREAD=%lu,%lu\r\n",
-                 (unsigned long)s_http.read_offset, (unsigned long)this_read);
-        http_send_dynamic(HTTP_CMD_READ, s_http_dyn_cmd_buf,
-                           "\r\nOK\r\n", "\r\nERROR\r\n",
-                           cb_http_read, HTTP_TIMEOUT_SHORT_MS);
+        start_read_raw();
         return;
     }
 
@@ -640,6 +660,171 @@ static void cb_http_read(modem_t *modem, const char *response,
     http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
                        "\r\nOK\r\n", "\r\nERROR\r\n",
                        cb_http_term, HTTP_TIMEOUT_SHORT_MS);
+}
+
+/* Aborts the in-flight raw read on error/timeout, same cleanup path every
+ * other error branch in this file uses (HTTPTERM then surface the error to
+ * the caller via cb_http_term()'s http_status==0 case). */
+static void abort_read_raw(const char *why)
+{
+    log_error(TAG, "AT+HTTPREAD (raw): %s at offset %lu", why, (unsigned long)s_http.read_offset);
+    pModem(s_http.dce)->isBusy = 0;
+    s_http.state = HTTP_STATE_TERM;
+    http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
+                       "\r\nOK\r\n", "\r\nERROR\r\n",
+                       cb_http_term, HTTP_TIMEOUT_SHORT_MS);
+}
+
+/* Drives HTTP_STATE_READ_RAW - must be called every tick alongside
+ * modem_handle_poll()/a7677s_poll() (see a7677s_http.h's a7677s_http_poll()
+ * doc-comment), NOT instead of it: this only takes over the UART channel
+ * for the specific duration of one AT+HTTPREAD raw read (isBusy claimed in
+ * start_read_raw(), released in finish_read_raw_chunk()/abort_read_raw()),
+ * every other HTTP_STATE_* still relies on modem_poll() via
+ * modem_handle_poll() as before.
+ *
+ * Parses the 3-part response shape documented on http_read_raw_substate_t
+ * above. RAW_COPY_DATA is the only sub-state that does NOT scan for a
+ * marker string - it counts exactly raw_chunk_len bytes and copies them
+ * verbatim into s_http.data[], regardless of content (this is the entire
+ * fix for the 2026-08-05 bug - see cb_http_action()'s doc-comment on why
+ * strstr()-based framing was unsafe for binary firmware payloads). */
+void a7677s_http_poll(a7677s_t *dce, uint32_t delta_ms)
+{
+    sx_uart_t *uart;
+    uint8_t byte;
+    int n;
+
+    if (!dce || s_http.state != HTTP_STATE_READ_RAW) {
+        return;
+    }
+
+    uart = &pModem(s_http.dce)->uart;
+
+    s_http.raw_state_elapsed_ms += delta_ms;
+    if (s_http.raw_state_elapsed_ms >= HTTP_READ_RAW_TIMEOUT_MS) {
+        abort_read_raw("raw read timed out");
+        return;
+    }
+
+    /* Read one byte at a time - simplest correct implementation for a
+     * byte-oriented state machine that must switch behavior (text-scan vs
+     * verbatim-copy) mid-stream at an exact byte boundary. UART throughput
+     * at typical AT-command baud rates (many kbps) means this is not a
+     * meaningful bottleneck against HTTP_READ_RAW_TIMEOUT_MS above; a
+     * batched sx_uart_read() into a temporary buffer would save calls but
+     * adds complexity (re-slicing a batch across a sub-state transition)
+     * for no measured benefit yet. Revisit if real hardware testing shows
+     * this is too slow for the full chunk size. */
+    n = sx_uart_read(uart, &byte, 1, 0);
+    if (n <= 0) {
+        return; /* nothing new yet, try again next tick */
+    }
+    s_http.raw_state_elapsed_ms = 0; /* got a byte, reset this sub-state's timeout */
+
+    switch (s_http.raw_substate) {
+
+    case RAW_WAIT_ECHO_OK:
+        /* Skip everything up through the command's own "OK" (echo of
+         * "AT+HTTPREAD=...\r\n" followed by "\r\nOK\r\n" per every other
+         * AT command's shape in this codebase) - accumulate into
+         * raw_line_buf and look for "OK\r\n" as a plain substring, safe
+         * here since nothing binary has appeared yet (we are still in the
+         * command-echo/acknowledgement portion, always plain ASCII). */
+        if (s_http.raw_line_len < sizeof(s_http.raw_line_buf) - 1) {
+            s_http.raw_line_buf[s_http.raw_line_len++] = (char)byte;
+            s_http.raw_line_buf[s_http.raw_line_len] = '\0';
+        } else {
+            /* Shift buffer left by 1 to keep scanning a sliding window,
+             * rather than growing unboundedly or giving up - the marker
+             * we need ("OK\r\n") is short, a small sliding window suffices. */
+            memmove(s_http.raw_line_buf, s_http.raw_line_buf + 1, sizeof(s_http.raw_line_buf) - 2);
+            s_http.raw_line_buf[sizeof(s_http.raw_line_buf) - 2] = (char)byte;
+            s_http.raw_line_buf[sizeof(s_http.raw_line_buf) - 1] = '\0';
+        }
+        if (strstr(s_http.raw_line_buf, "OK\r\n")) {
+            s_http.raw_substate = RAW_WAIT_HEADER;
+            s_http.raw_line_len = 0;
+        }
+        return;
+
+    case RAW_WAIT_HEADER:
+        /* Find "+HTTPREAD:" then parse the decimal chunk_len that follows,
+         * up to the "\r\n" ending that line - still plain ASCII, safe to
+         * scan as a string. Same sliding-window accumulation as above. */
+        if (s_http.raw_line_len < sizeof(s_http.raw_line_buf) - 1) {
+            s_http.raw_line_buf[s_http.raw_line_len++] = (char)byte;
+            s_http.raw_line_buf[s_http.raw_line_len] = '\0';
+        } else {
+            memmove(s_http.raw_line_buf, s_http.raw_line_buf + 1, sizeof(s_http.raw_line_buf) - 2);
+            s_http.raw_line_buf[sizeof(s_http.raw_line_buf) - 2] = (char)byte;
+            s_http.raw_line_buf[sizeof(s_http.raw_line_buf) - 1] = '\0';
+        }
+        {
+            const char *marker = strstr(s_http.raw_line_buf, "+HTTPREAD:");
+            if (marker && strstr(marker, "\r\n")) {
+                long chunk_len = strtol(marker + strlen("+HTTPREAD:"), NULL, 10);
+                if (chunk_len < 0 || (uint32_t)chunk_len > A7677S_HTTP_READ_CHUNK_SIZE) {
+                    abort_read_raw("bad or oversized chunk_len in +HTTPREAD: header");
+                    return;
+                }
+                if (s_http.data_len + (uint32_t)chunk_len > sizeof(s_http.data)) {
+                    abort_read_raw("chunk would overflow internal data[] buffer");
+                    return;
+                }
+                s_http.raw_chunk_len    = (uint32_t)chunk_len;
+                s_http.raw_chunk_copied = 0;
+                s_http.raw_substate     = (chunk_len == 0) ? RAW_WAIT_FOOTER : RAW_COPY_DATA;
+                /* chunk_len==0 happens on the final "+HTTPREAD:0" marker
+                 * some ranges send after the last real chunk - nothing to
+                 * copy, go straight to skipping the footer. */
+            }
+        }
+        return;
+
+    case RAW_COPY_DATA:
+        /* The core fix: copy this byte verbatim into s_http.data[] no
+         * matter what value it is (0x00, 0x45 'E', anything) - no string
+         * scanning happens here at all. */
+        s_http.data[s_http.data_len++] = byte;
+        s_http.raw_chunk_copied++;
+        if (s_http.raw_chunk_copied >= s_http.raw_chunk_len) {
+            s_http.raw_substate = RAW_WAIT_FOOTER;
+            s_http.raw_line_len = 0;
+        }
+        return;
+
+    case RAW_WAIT_FOOTER:
+        /* Skip the trailing "\r\n\r\nOK\r\n" (or "\r\n\r\n+HTTPREAD:0\r\n"
+         * for the last chunk - either way this parser only needs to see
+         * "OK\r\n" appear to know the response is fully consumed; a
+         * trailing "+HTTPREAD:0" line, if present, is itself followed by
+         * its own "\r\n" only, not "OK\r\n" - PER A76XX_AT_CMD.MD's
+         * example the module still emits nothing further after that, so
+         * this case is handled by the timeout naturally completing the
+         * chunk via read_offset bookkeeping in the caller, NOT by this
+         * substate waiting for text that will never come. To keep this
+         * robust either way, this substate advances on EITHER seeing
+         * "OK\r\n" OR accumulating a line that starts with "+HTTPREAD:0"
+         * followed by "\r\n". Not verified byte-for-byte against every
+         * possible module firmware revision - see this file's
+         * "real log beats datasheet" note if a real capture ever shows a
+         * third shape here. */
+        if (s_http.raw_line_len < sizeof(s_http.raw_line_buf) - 1) {
+            s_http.raw_line_buf[s_http.raw_line_len++] = (char)byte;
+            s_http.raw_line_buf[s_http.raw_line_len] = '\0';
+        } else {
+            memmove(s_http.raw_line_buf, s_http.raw_line_buf + 1, sizeof(s_http.raw_line_buf) - 2);
+            s_http.raw_line_buf[sizeof(s_http.raw_line_buf) - 2] = (char)byte;
+            s_http.raw_line_buf[sizeof(s_http.raw_line_buf) - 1] = '\0';
+        }
+        if (strstr(s_http.raw_line_buf, "OK\r\n") ||
+            strstr(s_http.raw_line_buf, "+HTTPREAD:0\r\n")) {
+            s_http.read_offset += s_http.raw_chunk_len;
+            finish_read_raw_chunk();
+        }
+        return;
+    }
 }
 
 static void cb_http_term(modem_t *modem, const char *response,

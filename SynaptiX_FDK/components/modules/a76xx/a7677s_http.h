@@ -189,6 +189,29 @@ int a7677s_http_get_range(a7677s_t *dce,
                            a7677s_http_range_cb_t cb,
                            void *ctx);
 
+/* Must be called every tick, ALONGSIDE (not instead of) the normal
+ * board.modem.ops->poll()/modem_handle_poll() chain that already drives
+ * a7677s.c's own state machine - see test_http.c's test_http_poll() for
+ * the calling convention this expects (modem_handle_poll() first, then
+ * this, every tick, unconditionally; this function itself is a no-op
+ * unless a get_range() call has reached its AT+HTTPREAD phase).
+ *
+ * BUG FIX (2026-08-05): AT+HTTPREAD's response can contain arbitrary
+ * binary firmware data with no guaranteed text framing inside it
+ * (confirmed on real hardware - see cb_http_action()'s doc-comment for
+ * the exact failure this replaced: modem_poll()'s strstr()-based
+ * completion detection silently failed and timed out whenever a chunk's
+ * raw bytes happened not to contain "OK"/"+HTTPREAD:" text, which a real
+ * firmware .bin's repeated-byte-value regions hit in practice, not just in
+ * theory). This function reads the modem UART directly, byte by byte,
+ * switching between text-scanning and verbatim-copy sub-states at exact
+ * byte-counted boundaries instead of searching for a marker string inside
+ * binary data - see a7677s_http.c's http_read_raw_substate_t for the full
+ * state shape. delta_ms is the same tick delta passed to
+ * modem_handle_poll(), used for this function's own read-timeout
+ * tracking. */
+void a7677s_http_poll(a7677s_t *dce, uint32_t delta_ms);
+
 /* True while an a7677s_http_get_range() call is in flight (its cb has not
  * fired yet). fota.c should check this (or rely solely on the -1 return
  * from a7677s_http_get_range() above - either is sufficient) before issuing

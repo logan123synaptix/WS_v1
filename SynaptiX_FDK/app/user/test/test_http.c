@@ -185,6 +185,12 @@ void test_http_poll(uint32_t delta_ms)
      * loop"). */
     modem_handle_poll(&board.modem, delta_ms);
 
+    /* Drives HTTP_STATE_READ_RAW (a7677s_http.c) - required every tick
+     * whenever a get_range() call is mid-flight, see a7677s_http_poll()'s
+     * doc-comment in a7677s_http.h for why this is a second, separate poll
+     * call rather than being folded into modem_handle_poll() above. */
+    a7677s_http_poll(&board.a7677s, delta_ms);
+
     switch (s_state) {
     case TEST_HTTP_IDLE:
         return;

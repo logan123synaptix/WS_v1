@@ -68,7 +68,7 @@ extern "C" {
  * BOOTLOADER_WS/bootloader/flash_define.h) is NOT required here - fota.c is
  * responsible for its own sector-boundary bookkeeping against whatever
  * range size this module is configured with. */
-#define A7677S_HTTP_RANGE_SIZE        4096U
+#define A7677S_HTTP_RANGE_SIZE        8192U
 
 /* Max length of a URL passed to a7677s_http_get_range(), including any
  * query string, matching AT+HTTPPARA="URL",<url> per a76xx_at_cmd.md

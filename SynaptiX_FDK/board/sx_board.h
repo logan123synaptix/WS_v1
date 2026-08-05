@@ -182,9 +182,9 @@ typedef enum{
 #define UART5_S1_Port           GPIOC
 #define UART5_S1_Pin            GPIO_PIN_4
 
-/* USB */
-void dcd_fs_msp_init(uint8_t rhport);
-void USB_DRD_FS_IRQHandler(void);
+// /* USB */
+// void dcd_fs_msp_init(uint8_t rhport);
+// void USB_DRD_FS_IRQHandler(void);
 
 /* Board */
 void sx_board_init(void);

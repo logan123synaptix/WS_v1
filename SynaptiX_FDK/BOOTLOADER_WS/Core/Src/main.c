@@ -77,10 +77,19 @@ stm32h563riv6 like real board and in this board uart log is uart3 to test bootlo
 
 static UART_HandleTypeDef *sx_uart[NUM_UART] = {&huart1, &huart2, &huart3, &huart4, &huart5, &huart6};
 
+typedef enum{
+  UART_LTE = 0,
+  UART_GPS,
+  UART_RS485,
+  UART_DUST_SENSOR,
+  UART_EXTEND_UART,
+  UART_LOG
+}UART_INDEX;
+
 static const char *TAG = "MAIN";
 
 void bsp_log_send(const char *str){
-  HAL_UART_Transmit(sx_uart[2], (uint8_t *)str, strlen(str), 10);
+  HAL_UART_Transmit(sx_uart[UART_LOG], (uint8_t *)str, strlen(str), 10);
 }
 
 int __io_putchar(int ch)
@@ -353,7 +362,7 @@ int main(void)
   tusb_init();
   dfu_app_init();
   logger_init(LOGGER_DEBUG, bsp_log_send);
-  log_info(TAG, "BOOTLOADER TEST DONE!!!!");
+  LOGI(TAG, "BOOTLOADER TEST DONE!!!!");
   Bootloader_t bootloader;
   bootloader_init(&bootloader, goto_application,read_boot_button, &boot_flash_functions);
   dfu_boot = &bootloader;

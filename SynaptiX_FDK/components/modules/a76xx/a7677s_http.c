@@ -28,6 +28,16 @@
 
 static const char *TAG = "A7677S_HTTP";
 
+/* a7677s.c's pModem(dce) macro (== (modem_t*)&dce->base) is private to that
+ * file, not exposed via a7677s.h - confirmed by grep, only defined in
+ * a7677s.c itself. struct a7677s's base field IS public (a7677s.h, first
+ * field, modem_t base) so this module can reach it directly; redefining
+ * an equivalent macro here (rather than exposing a7677s.c's) keeps this
+ * file's stated goal of not touching/depending on a7677s.c's internals -
+ * same spirit as this file having its own command[]/state instead of
+ * a7677s.c's CMD_DYNAMIC. */
+#define pModem(dce) (&(dce)->base)
+
 /* --- Private AT command table, entirely separate from a7677s.c's command[]
  * / CMD_DYNAMIC (see file header comment - deliberate, not an oversight). */
 #define HTTP_CMD_INIT      0   /* AT+HTTPINIT */

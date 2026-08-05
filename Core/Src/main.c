@@ -31,7 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        0
+#define TEST        1
 #include "sx_board.h"
 #include "sx_ex_storage.h"
 #if TEST
@@ -46,6 +46,7 @@
 #include "test_sleep.h"
 #include "test_sps30.h"
 #include "test_ze12a.h"
+#include "test_http.h"
 #endif
 
 /* USER CODE END Includes */
@@ -136,7 +137,8 @@ int main(void)
   // sx_storage_factory_reset();
   #if TEST
   // test_ze12a_init();
-  test_gps_init();
+  // test_gps_init();
+  test_http_init();
   #else
   app_init();
   #endif
@@ -159,8 +161,9 @@ int main(void)
         last_tick = now;
         
         #if TEST
-        test_gps_poll(delta);
-        // HAL_UART_Transmit(&huart5, (uint8_t*)"a", 2, 100);
+        // test_gps_poll(delta);
+        // test_ze12a_poll(delta);
+        test_http_poll(delta);
         #else
         app_process(delta);
         #endif

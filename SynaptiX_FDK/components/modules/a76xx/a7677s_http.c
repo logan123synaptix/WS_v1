@@ -128,6 +128,7 @@ static void http_send_dynamic(int cmd_idx, const char *cmd_str,
  * PARA_HDR -> ACTION -> READ (repeats) -> TERM). */
 static void cb_http_init(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_http_para_url(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+static void cb_http_para_ssl(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_http_para_hdr(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_http_action(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
 static void cb_http_read(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
@@ -208,6 +209,115 @@ bool a7677s_http_is_busy(a7677s_t *dce)
     return s_http.state != HTTP_STATE_IDLE;
 }
 
+/* --- a7677s_http_ssl_configure() -----------------------------------------
+ * Separate static state from s_http above, since this is a one-time
+ * boot-time call (not per-range) and its own in-flight/idle tracking must
+ * not be confused with a7677s_http_is_busy()'s per-range meaning. Both
+ * still ultimately serialize through the same underlying modem_t command
+ * channel (isBusy) - modem_send_command() itself is what actually prevents
+ * this from overlapping with a range download or an MQTT operation, same
+ * as everywhere else in this file. */
+static struct {
+    bool     busy;
+    a7677s_http_ssl_cfg_cb_t cb;
+    void    *ctx;
+} s_ssl_cfg;
+
+static void ssl_cfg_done(modem_ops_result_t result)
+{
+    a7677s_http_ssl_cfg_cb_t cb = s_ssl_cfg.cb;
+    void *ctx = s_ssl_cfg.ctx;
+    s_ssl_cfg.cb   = NULL;
+    s_ssl_cfg.busy = false;
+    if (cb) cb(result, ctx);
+}
+
+static void cb_ssl_sni(modem_t *modem, const char *response,
+                        modem_response_st_t res, void *arg)
+{
+    (void)modem; (void)response; (void)arg;
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CSSLCFG=enableSNI failed (res=%d)", res);
+        ssl_cfg_done(MODEM_OPS_ERROR);
+        return;
+    }
+    log_info(TAG, "SSL context %u configured (authmode=0, SNI=1)", A7677S_HTTP_SSL_CTX_INDEX);
+    ssl_cfg_done(MODEM_OPS_OK);
+}
+
+static void cb_ssl_authmode(modem_t *modem, const char *response,
+                             modem_response_st_t res, void *arg)
+{
+    static char cmd_buf[64];
+    (void)modem; (void)response; (void)arg;
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+CSSLCFG=authmode failed (res=%d)", res);
+        ssl_cfg_done(MODEM_OPS_ERROR);
+        return;
+    }
+
+    /* AT+CSSLCFG="enableSNI",<ctx>,1 - see A7677S_HTTP_SSL_CTX_INDEX's
+     * doc-comment in a7677s_http.h for why this is required against
+     * CDN-fronted hosts (GitHub raw, ngrok). NOT tested against real
+     * hardware yet - if the module's real response text differs from the
+     * bare "\r\nOK\r\n" assumed here (unlikely for a simple config command,
+     * but every other assumption in this file carries the same caveat, see
+     * a7677s_http.h's file header comment), this needs correcting against
+     * a real log. */
+    snprintf(cmd_buf, sizeof(cmd_buf), "AT+CSSLCFG=\"enableSNI\",%u,1\r\n",
+             A7677S_HTTP_SSL_CTX_INDEX);
+    s_ssl_command[SSL_CMD_SNI].cmd         = cmd_buf;
+    s_ssl_command[SSL_CMD_SNI].res_success = "\r\nOK\r\n";
+    s_ssl_command[SSL_CMD_SNI].res_fail    = "\r\nERROR\r\n";
+    s_ssl_command[SSL_CMD_SNI].callback    = cb_ssl_sni;
+    s_ssl_command[SSL_CMD_SNI].arg         = NULL;
+    modem_send_command(pModem(s_http.dce), &s_ssl_command[SSL_CMD_SNI], HTTP_TIMEOUT_SHORT_MS);
+}
+
+int a7677s_http_ssl_configure(a7677s_t *dce, a7677s_http_ssl_cfg_cb_t cb, void *ctx)
+{
+    static char cmd_buf[64];
+
+    if (!dce || !cb) {
+        log_error(TAG, "ssl_configure(): invalid arguments");
+        return -1;
+    }
+    if (s_ssl_cfg.busy) {
+        log_warn(TAG, "ssl_configure(): already in progress");
+        return -1;
+    }
+    if (modem_is_busy(pModem(dce))) {
+        log_warn(TAG, "ssl_configure(): modem command channel busy with another operation");
+        return -1;
+    }
+
+    s_ssl_cfg.busy = true;
+    s_ssl_cfg.cb   = cb;
+    s_ssl_cfg.ctx  = ctx;
+    /* Reuses s_http.dce as the single-instance modem pointer for the
+     * cb_ssl_* chain below, same as everywhere else in this file - fine
+     * since a7677s_http_ssl_configure() and a7677s_http_get_range() are
+     * never expected to run concurrently (both funnel through the one
+     * shared modem command channel regardless). */
+    s_http.dce = dce;
+
+    /* AT+CSSLCFG="authmode",<ctx>,0 - explicit even though 0 is the
+     * documented default (a76xx_at_cmd.md 19.2.1), so this function's
+     * behavior does not depend on assuming the module's power-on defaults
+     * match the datasheet (this project's "real log beats datasheet" rule
+     * applies just as much to "what the default already is" as to
+     * response text formatting). */
+    snprintf(cmd_buf, sizeof(cmd_buf), "AT+CSSLCFG=\"authmode\",%u,0\r\n",
+             A7677S_HTTP_SSL_CTX_INDEX);
+    s_ssl_command[SSL_CMD_AUTHMODE].cmd         = cmd_buf;
+    s_ssl_command[SSL_CMD_AUTHMODE].res_success = "\r\nOK\r\n";
+    s_ssl_command[SSL_CMD_AUTHMODE].res_fail    = "\r\nERROR\r\n";
+    s_ssl_command[SSL_CMD_AUTHMODE].callback    = cb_ssl_authmode;
+    s_ssl_command[SSL_CMD_AUTHMODE].arg         = NULL;
+    modem_send_command(pModem(dce), &s_ssl_command[SSL_CMD_AUTHMODE], HTTP_TIMEOUT_SHORT_MS);
+    return 0;
+}
+
 static void cb_http_init(modem_t *modem, const char *response,
                           modem_response_st_t res, void *arg)
 {
@@ -244,10 +354,55 @@ static void cb_http_para_url(modem_t *modem, const char *response,
         return;
     }
 
+    if (s_http.is_https) {
+        /* Point this HTTP session at the SSL context that
+         * a7677s_http_ssl_configure() should already have set up (authmode
+         * + SNI) - see a7677s_http.h's A7677S_HTTP_SSL_CTX_INDEX
+         * doc-comment for why this is a separate context from MQTT's. If
+         * a7677s_http_ssl_configure() was never called, this AT+HTTPPARA
+         * itself is expected to still succeed (it just selects a context
+         * index, does not validate its contents) - the failure would only
+         * surface later at AT+HTTPACTION as a TLS handshake error, not
+         * here. fota.c's design doc/next_prompt.md should call out this
+         * ordering requirement explicitly once fota.c itself is written. */
+        s_http.state = HTTP_STATE_PARA_SSL;
+        snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
+                 "AT+HTTPPARA=\"SSLCFG\",%u\r\n", A7677S_HTTP_SSL_CTX_INDEX);
+        http_send_dynamic(HTTP_CMD_PARA_SSL, s_http_dyn_cmd_buf,
+                           "\r\nOK\r\n", "\r\nERROR\r\n",
+                           cb_http_para_ssl, HTTP_TIMEOUT_SHORT_MS);
+        return;
+    }
+
     s_http.state = HTTP_STATE_PARA_HDR;
     /* USERDATA carries our own Range header - AT+HTTPPARA has no dedicated
      * Range parameter (confirmed against a76xx_at_cmd.md - see
      * a7677s_http.h). end_offset is inclusive per RFC 7233 Range syntax. */
+    snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
+             "AT+HTTPPARA=\"USERDATA\",\"Range: bytes=%lu-%lu\"\r\n",
+             (unsigned long)s_http.start_offset,
+             (unsigned long)(s_http.start_offset + s_http.range_len - 1));
+    http_send_dynamic(HTTP_CMD_PARA_HDR, s_http_dyn_cmd_buf,
+                       "\r\nOK\r\n", "\r\nERROR\r\n",
+                       cb_http_para_hdr, HTTP_TIMEOUT_SHORT_MS);
+}
+
+static void cb_http_para_ssl(modem_t *modem, const char *response,
+                              modem_response_st_t res, void *arg)
+{
+    (void)modem; (void)arg;
+    if (res != MODEM_RESPONSE_SUCCESS) {
+        log_error(TAG, "AT+HTTPPARA=SSLCFG failed (res=%d)", res);
+        s_http.state = HTTP_STATE_TERM;
+        http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
+                           "\r\nOK\r\n", "\r\nERROR\r\n",
+                           cb_http_term, HTTP_TIMEOUT_SHORT_MS);
+        return;
+    }
+
+    /* Same next step as the non-https branch in cb_http_para_url() above -
+     * both paths converge on PARA_HDR from here. */
+    s_http.state = HTTP_STATE_PARA_HDR;
     snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
              "AT+HTTPPARA=\"USERDATA\",\"Range: bytes=%lu-%lu\"\r\n",
              (unsigned long)s_http.start_offset,
@@ -293,6 +448,12 @@ static void cb_http_para_hdr(modem_t *modem, const char *response,
 static void cb_http_action(modem_t *modem, const char *response,
                             modem_response_st_t res, void *arg)
 {
+    const char *p;
+    int status;
+    unsigned long datalen;
+    uint32_t remaining;
+    uint32_t this_read;
+
     (void)arg;
     if (res != MODEM_RESPONSE_SUCCESS) {
         log_error(TAG, "AT+HTTPACTION failed/timed out (res=%d)", res);
@@ -308,9 +469,9 @@ static void cb_http_action(modem_t *modem, const char *response,
      * %d on the whole buffer in case of leading noise - locate the marker
      * first, same defensive style as urc_process_header_line()'s
      * strchr(line, ':') + sscanf(p+1, ...) in a7677s.c. */
-    const char *p = strstr(response, "+HTTPACTION:0,");
-    int status = 0;
-    unsigned long datalen = 0;
+    p = strstr(response, "+HTTPACTION:0,");
+    status = 0;
+    datalen = 0;
     if (!p || sscanf(p, "+HTTPACTION:0,%d,%lu", &status, &datalen) != 2) {
         log_error(TAG, "AT+HTTPACTION: failed to parse response [%s]", modem->buff);
         s_http.state = HTTP_STATE_TERM;
@@ -361,8 +522,8 @@ static void cb_http_action(modem_t *modem, const char *response,
      * Range/Read chunking. read_offset/data_len both start at 0 (already
      * zeroed by the memset in a7677s_http_get_range()). */
     s_http.state = HTTP_STATE_READ;
-    uint32_t remaining = s_http.http_datalen - s_http.read_offset;
-    uint32_t this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
+    remaining = s_http.http_datalen - s_http.read_offset;
+    this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
     snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
              "AT+HTTPREAD=%lu,%lu\r\n",
              (unsigned long)s_http.read_offset, (unsigned long)this_read);
@@ -374,6 +535,13 @@ static void cb_http_action(modem_t *modem, const char *response,
 static void cb_http_read(modem_t *modem, const char *response,
                           modem_response_st_t res, void *arg)
 {
+    const char *marker;
+    long chunk_len;
+    const char *line_end;
+    const char *data_start;
+    uint32_t remaining;
+    uint32_t this_read;
+
     (void)arg;
     if (res != MODEM_RESPONSE_SUCCESS) {
         log_error(TAG, "AT+HTTPREAD failed/timed out at offset %lu (res=%d)",
@@ -399,7 +567,7 @@ static void cb_http_read(modem_t *modem, const char *response,
      * to also validate the trailing "\r\n\r\nOK\r\n" content beyond what
      * modem_command's res_success match already confirmed (the presence of
      * "\r\nOK\r\n" somewhere in the buffer). */
-    const char *marker = strstr(response, "+HTTPREAD:");
+    marker = strstr(response, "+HTTPREAD:");
     if (!marker) {
         log_error(TAG, "AT+HTTPREAD: no +HTTPREAD: marker in response [%s]", modem->buff);
         s_http.state = HTTP_STATE_TERM;
@@ -408,8 +576,8 @@ static void cb_http_read(modem_t *modem, const char *response,
                            cb_http_term, HTTP_TIMEOUT_SHORT_MS);
         return;
     }
-    long chunk_len = strtol(marker + strlen("+HTTPREAD:"), NULL, 10);
-    const char *line_end = strstr(marker, "\r\n");
+    chunk_len = strtol(marker + strlen("+HTTPREAD:"), NULL, 10);
+    line_end = strstr(marker, "\r\n");
     if (chunk_len <= 0 || !line_end) {
         log_error(TAG, "AT+HTTPREAD: bad chunk length or missing line terminator [%s]", modem->buff);
         s_http.state = HTTP_STATE_TERM;
@@ -418,7 +586,7 @@ static void cb_http_read(modem_t *modem, const char *response,
                            cb_http_term, HTTP_TIMEOUT_SHORT_MS);
         return;
     }
-    const char *data_start = line_end + 2; /* skip the "\r\n" after "+HTTPREAD:<len>" */
+    data_start = line_end + 2; /* skip the "\r\n" after "+HTTPREAD:<len>" */
 
     if (s_http.data_len + (uint32_t)chunk_len > sizeof(s_http.data)) {
         log_error(TAG, "AT+HTTPREAD: chunk would overflow internal buffer (data_len=%lu chunk=%ld)",
@@ -440,8 +608,8 @@ static void cb_http_read(modem_t *modem, const char *response,
          * already-downloaded range at arbitrary offsets - see
          * a7677s_http.h file header comment; NOT verified against real
          * hardware yet). */
-        uint32_t remaining = s_http.http_datalen - s_http.read_offset;
-        uint32_t this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
+        remaining = s_http.http_datalen - s_http.read_offset;
+        this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
         snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
                  "AT+HTTPREAD=%lu,%lu\r\n",
                  (unsigned long)s_http.read_offset, (unsigned long)this_read);

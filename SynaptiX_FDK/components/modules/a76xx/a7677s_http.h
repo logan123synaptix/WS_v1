@@ -135,10 +135,15 @@ typedef enum {
     A7677S_HTTP_RANGE_OK = 0,       /* HTTP 200 or 206, range downloaded and readable */
     A7677S_HTTP_RANGE_HTTP_ERROR,   /* modem completed the request but status code was not 200/206 */
     A7677S_HTTP_RANGE_AT_ERROR,     /* an AT command in the sequence failed/timed out */
-    A7677S_HTTP_RANGE_BUSY          /* a7677s_t's single command channel (CMD_DYNAMIC) was already
-                                      * in use by another async operation (MQTT, init, another HTTP
-                                      * call) when this was invoked - caller must wait and retry,
-                                      * never call a second HTTP op while one is already in flight */
+    A7677S_HTTP_RANGE_BUSY          /* This module's own internal command channel (private
+                                      * command[]/state in a7677s_http.c, separate from
+                                      * a7677s.c's CMD_DYNAMIC - see a7677s_http.c file header
+                                      * comment) was already in use by another in-flight
+                                      * a7677s_http_get_range()/a7677s_http_ssl_configure() call,
+                                      * OR the shared modem_t command channel itself was busy
+                                      * with an unrelated operation (MQTT, init sequence) -
+                                      * either way, caller must wait and retry, never call a
+                                      * second HTTP op while one is already in flight */
 } a7677s_http_range_result_t;
 
 /* Fired once per a7677s_http_get_range() call, after AT+HTTPTERM has been

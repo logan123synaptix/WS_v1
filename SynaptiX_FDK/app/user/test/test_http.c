@@ -36,7 +36,8 @@ static const char *TAG = "TEST_HTTP";
 
 typedef enum {
     TEST_HTTP_IDLE = 0,
-    TEST_HTTP_WAIT_READY,
+    TEST_HTTP_STARTING,         /* board.modem.ops->start() called, waiting for is_ready() -
+                                  * see test_http_poll()'s TEST_HTTP_STARTING case */
     TEST_HTTP_SSL_CONFIGURING,  /* a7677s_http_ssl_configure() in flight - see test_http_poll() */
     TEST_HTTP_RUNNING,
     TEST_HTTP_DONE,
@@ -142,13 +143,33 @@ static void on_ssl_configured(modem_ops_result_t result, void *ctx)
 
 void test_http_init(void)
 {
-    log_info(TAG, "=== TEST HTTP (a7677s_http.c bring-up) ===");
+    log_info(TAG, "=== TEST HTTP (a7677s_http.c bring-up, self-contained - "
+                   "does NOT depend on test_lte_mqtt) ===");
     log_info(TAG, "URL: %s", TEST_HTTP_URL);
     if (strstr(TEST_HTTP_URL, "REPLACE_ME")) {
         log_error(TAG, "TEST_HTTP_URL is still the placeholder - edit test_http.c "
                        "with a real reachable HTTP file URL before running this test");
     }
-    s_state       = TEST_HTTP_WAIT_READY;
+
+    /* Drives modem power-on directly via board.modem.ops->start()
+     * (modem_ops.h) - the same call sx_user_mqtt.c's _common_init() makes
+     * (see that file's line "board.modem.ops->start(board.modem.ctx);").
+     * This test does NOT go through sx_user_mqtt.c/sx_mqtt.c at all - no
+     * MQTT config, no broker, nothing - so it has no dependency on
+     * test_lte_mqtt_init()/test_lte_mqtt_poll() being called anywhere.
+     * Non-blocking per modem_ops.h's doc-comment ("Does not block. Progress
+     * is advanced inside poll()") - actual progress happens in
+     * test_http_poll()'s modem_handle_poll() call below, tracked via
+     * is_ready(). */
+    log_info(TAG, "Starting modem power-on sequence...");
+    int ret = board.modem.ops->start(board.modem.ctx);
+    if (ret < 0) {
+        log_error(TAG, "board.modem.ops->start() failed immediately (ret=%d)", ret);
+        s_state = TEST_HTTP_DONE;
+        return;
+    }
+
+    s_state       = TEST_HTTP_STARTING;
     s_offset      = 0;
     s_range_count = 0;
     s_total_bytes = 0;
@@ -158,25 +179,32 @@ void test_http_init(void)
 
 void test_http_poll(uint32_t delta_ms)
 {
-    (void)delta_ms;
+    /* Drives the modem's power-on/network-registration state machine -
+     * without this call, board.modem.ops->start() above never actually
+     * progresses (confirmed by reading sx_mqtt_poll() -> modem_handle_poll()
+     * -> board.modem.ops->poll(), the same chain sx_user_mqtt_poll() drives;
+     * this test calls the same underlying poll() directly instead of going
+     * through sx_mqtt_poll(), since there is no sx_mqtt_t here - no MQTT
+     * involved at all). Mandatory every tick per modem_ops.h's doc-comment
+     * on the poll field ("Mandatory poll, called continuously from the main
+     * loop"). */
+    modem_handle_poll(&board.modem, delta_ms);
 
     switch (s_state) {
     case TEST_HTTP_IDLE:
         return;
 
-    case TEST_HTTP_WAIT_READY:
-        /* Deliberately NOT driving power-on/network-attach here - see
-         * test_http.h's doc-comment. Only checks a7677s_ops.is_ready(),
-         * assumed already true because the modem was brought up some
-         * other way (e.g. test_lte_mqtt run first) before this test
-         * started. */
-        if (!a7677s_ops.is_ready(&board.a7677s)) {
+    case TEST_HTTP_STARTING:
+        if (!board.modem.ops->is_ready(board.modem.ctx)) {
             return; /* keep waiting, poll() will be called again next tick */
         }
         if (a7677s_http_is_busy(&board.a7677s)) {
             return; /* modem command channel occupied by something else - wait */
         }
-        log_info(TAG, "Modem ready, configuring SSL context (TEST_HTTP_URL is https)...");
+        log_info(TAG, "Modem ready (IP=%s RSSI=%d), configuring SSL context "
+                       "(TEST_HTTP_URL is https)...",
+                 board.modem.ops->get_ip(board.modem.ctx),
+                 board.modem.ops->get_rssi(board.modem.ctx));
         {
             int ret = a7677s_http_ssl_configure(&board.a7677s, on_ssl_configured, NULL);
             if (ret != 0) {

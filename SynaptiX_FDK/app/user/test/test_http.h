@@ -27,21 +27,21 @@ extern "C" {
  *
  * Follows the same init()-once / poll(delta_ms)-every-tick shape as
  * test_lte_mqtt.h, reusing the board's real modem instance (board.a7677s,
- * sx_board.h) rather than a second/fake instance - a7677s_http.c's private
- * state (see that file's s_http) is single-instance only, matching the
- * "only one real a7677s_t on this board" assumption already made
- * throughout a7677s.c.
+ * board.modem, sx_board.h) rather than a second/fake instance -
+ * a7677s_http.c's private state (see that file's s_http) is single-instance
+ * only, matching the "only one real a7677s_t on this board" assumption
+ * already made throughout a7677s.c.
  *
- * Depends on the modem already being powered on, network-attached, and
- * a7677s_ops.is_ready() true before starting the HTTP call - this test
- * does NOT drive the modem power-on/network-attach sequence itself (unlike
- * test_lte_mqtt.c, which does via sx_user_mqtt_poll()). Call
- * test_http_init() only after confirming the modem is ready some other way
- * (e.g. run test_lte_mqtt first and confirm "-> Now CONNECTED" in the log,
- * THEN swap main.c's test call over to this one - the two tests are not
- * meant to run at the same time, since a7677s_http_get_range() and MQTT
- * both need the single shared modem command channel free, see
- * a7677s_http.h's A7677S_HTTP_RANGE_BUSY doc-comment).
+ * SELF-CONTAINED: drives modem power-on and network registration itself,
+ * via board.modem.ops->start()/is_ready()/poll() directly (modem_ops.h) -
+ * the same calls sx_user_mqtt.c makes internally, but without going through
+ * sx_user_mqtt.c/sx_mqtt.c or any MQTT config at all. This test has NO
+ * dependency on test_lte_mqtt.c/test_lte_mqtt_init()/test_lte_mqtt_poll()
+ * being called anywhere - test_http_init() + test_http_poll() alone are
+ * sufficient to bring the modem up from cold and run the HTTP range
+ * download. Confirmed by reading sx_user_mqtt.c's _common_init() (the
+ * board.modem.ops->start() call) and sx_mqtt_poll()'s modem_handle_poll()
+ * call - both reused here directly.
  *
  * BEFORE BUILDING: set TEST_HTTP_URL below (test_http.c) to a real,
  * reachable, plain-HTTP (not HTTPS - AT+HTTPSSL is not exercised by this

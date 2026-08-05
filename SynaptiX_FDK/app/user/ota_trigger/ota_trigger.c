@@ -7,18 +7,37 @@
  * How this works, and WHY it is safe to write to this address from here:
  *
  * BOOTLOADER_WS/bootloader/flash_define.h lays out internal STM32H5 flash
- * (2MB total, 256 x 8KB sectors) as:
+ * (2MB total, 256 x 8KB sectors) as (UPDATED 2026-08-05, see
+ * flash_define.h's own comment for the full reasoning - this comment
+ * mirrors it so this file's readers don't have to cross-reference):
  *   0x08000000  bootloader            56 KB  (7 sectors)
  *   0x0800E000  partition table        8 KB  (1 sector)   <- this module writes here
  *   0x08010000  primary app           480 KB (60 sectors) <- THIS firmware runs here
- *   0x08088000  secondary app         480 KB (60 sectors)
- *   0x08100000  factory app           480 KB (60 sectors)
- *   0x08178000  scratch                 8 KB (1 sector)
+ *   0x08088000  (unused - was secondary app before 2026-08-05, moved out
+ *                 of Bank 1 because fota.c's fota_download_attempt() runs
+ *                 from primary app and was erasing/writing this address
+ *                 while executing from the SAME bank, HardFaulting on
+ *                 real hardware - see fota.c's matching comment)
+ *   0x08100000  factory app           480 KB (60 sectors) - Bank 2 starts here
+ *   0x08178000  secondary app         480 KB (60 sectors) - moved here, Bank 2
+ *   0x081F0000  scratch                 8 KB (1 sector)   - Bank 2
  *
- * This app's own flash-backed FatFS disk (services/sx_fatfs/sx_diskio.c)
- * starts at 0x081C0000 — well past 0x0817A000 where the bootloader's last
- * partition ends, so the two do not overlap. Verified by reading both
- * flash_define.h and sx_diskio.c directly (2026-07-17), not assumed.
+ * KNOWN CONFLICT (unresolved as of 2026-08-05, confirmed with the user -
+ * NOT yet fixed, do not assume it has been): this app's flash-backed
+ * FatFS disk (services/sx_fatfs/sx_diskio.c, FLASH_STORAGE_BASE =
+ * 0x081C0000, 256KB) OVERLAPS the new secondary app range above
+ * (0x08178000-0x081F0000) and the new scratch range (0x081F0000-
+ * 0x081F2000) by construction - the old layout had FatFS safely past
+ * everything else (0x081C0000 was chosen specifically because
+ * 0x0817A000, the old scratch's end, left room before it), but that
+ * safety margin no longer holds now that secondary+scratch were pushed
+ * into Bank 2 to fix the HardFault. The user has said FatFS is no longer
+ * needed (was only for USB MSC, which is no longer used) and will handle
+ * disabling/removing sx_fatfs/sx_diskio.c separately - if it is still
+ * enabled in a build that also runs fota_download_attempt() or
+ * boot_swap_firmware(), the two will corrupt each other's flash region.
+ * Do not assume this has been resolved without checking sx_diskio.c's
+ * current state first.
  *
  * BootFlashPartition_t is NOT included from BOOTLOADER_WS/ here (that
  * project is a separate CMake build the user maintains independently, see

@@ -61,8 +61,10 @@ extern "C" {
  *    corrupting that cycle's sensor telemetry publish.
  *
  *  - Firmware is written directly into BOOTLOADER_WS's Secondary
- *    partition (0x08088000, 480KB, see ota_trigger.c's PARTITION_LAYOUT
- *    comment for the full internal-flash layout) via sx_flash_*(), NOT
+ *    partition (0x08178000 as of 2026-08-05 - moved from the original
+ *    0x08088000, see this file's FOTA_SECONDARY_APP_ADDR comment in
+ *    fota.c and ota_trigger.c's PARTITION_LAYOUT comment for the full
+ *    internal-flash layout and why it moved) via sx_flash_*(), NOT
  *    via USB DFU - this module owns the entire download+write+verify
  *    sequence itself, since there is no DFU host on the other end to
  *    checksum things for us.

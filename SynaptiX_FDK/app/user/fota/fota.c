@@ -278,8 +278,22 @@ bool fota_is_pending(void)
 /* Internal flash layout, mirrored from BOOTLOADER_WS/bootloader/
  * flash_define.h - same "local copy, not shared header" precedent as
  * ota_trigger.c (see that file's header comment for why). Only the two
- * addresses this module needs are reproduced. */
-#define FOTA_SECONDARY_APP_ADDR    0x08088000UL
+ * addresses this module needs are reproduced.
+ *
+ * Bug fix (2026-08-05): FOTA_SECONDARY_APP_ADDR moved from 0x08088000 to
+ * 0x08178000 - the old address was inside FLASH BANK 1 on the STM32H563
+ * (Bank 1 = 0x08000000-0x080FFFFF), the SAME bank the Primary app (and
+ * this very function, fota_download_attempt(), which calls
+ * sx_flash_erase()/sx_flash_write() on this address) executes from.
+ * Confirmed on real hardware: this caused an immediate HardFault inside
+ * fota_download_attempt() the moment the erase/program touched Bank 1
+ * flash while the CPU was fetching code from that same bank. See
+ * flash_define.h's matching comment on FACTORY_APP_FLASH_START_ADDRESS/
+ * SECONDARY_APP_FLASH_START_ADDRESS for the full layout and the
+ * deployment note about the on-flash partition table needing a reset
+ * (erase FOTA_PARTITION_TABLE_ADDR, NOT Factory's sectors) before this
+ * new address takes effect on an already-provisioned board. */
+#define FOTA_SECONDARY_APP_ADDR    0x08178000UL
 #define FOTA_SECONDARY_APP_SIZE    (60UL * 8192UL)  /* 480KB, 60 sectors - must match
                                                        * FOTA_MAX_FIRMWARE_SIZE (fota.h) */
 #define FOTA_PARTITION_TABLE_ADDR  0x0800E000UL

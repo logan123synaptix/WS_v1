@@ -754,6 +754,31 @@ void a7677s_http_poll(a7677s_t *dce, uint32_t delta_ms)
     }
     s_http.raw_state_elapsed_ms = 0; /* got a byte, reset this sub-state's timeout */
 
+    /* Diagnostic instrumentation (2026-08-05): a7677s_http_poll()'s raw-read
+     * loop had zero logging anywhere, unlike modem_poll()'s "Read : N bytes"
+     * line. After adding rawIoActive to stop modem_poll() from contending
+     * for the UART during HTTP_STATE_READ_RAW, a real-hardware run showed
+     * the whole 5000ms HTTP_READ_RAW_TIMEOUT_MS elapsing with NO further log
+     * output at all between "HTTP RAW CMD" and the timeout error - which is
+     * ambiguous: it could mean genuinely zero bytes ever arrived at the
+     * UART peripheral (a real regression from the rawIoActive change), OR
+     * it could mean bytes ARE arriving and being consumed correctly but the
+     * raw_substate machine is stalling somewhere past RAW_WAIT_ECHO_OK
+     * without any visibility, since this loop was never instrumented to
+     * begin with - the prior "working" log only ever showed the OLD
+     * contended/broken behavior (modem_poll() and this loop fighting over
+     * bytes), never a genuinely working raw-read pass, so there is no known
+     * good log to compare against. This line resolves that ambiguity for
+     * the next hardware run: logs every byte received and which substate
+     * consumed it, so if it's silent for 5000ms after start, the UART
+     * itself is not delivering bytes (a peripheral/hardware-level
+     * question); if it logs but stalls, the substate machine has a real
+     * parsing bug to chase down using the printed sequence. Remove or
+     * downgrade to a lower verbosity once the root cause is confirmed - at
+     * 400 bytes per chunk this is a lot of log lines. */
+    log_debug(TAG, "RAW byte: 0x%02X ('%c') substate=%d", byte,
+              (byte >= 0x20 && byte < 0x7F) ? (char)byte : '.', (int)s_http.raw_substate);
+
     switch (s_http.raw_substate) {
 
     case RAW_WAIT_ECHO_OK:
@@ -827,21 +852,37 @@ void a7677s_http_poll(a7677s_t *dce, uint32_t delta_ms)
         return;
 
     case RAW_WAIT_FOOTER:
-        /* Skip the trailing "\r\n\r\nOK\r\n" (or "\r\n\r\n+HTTPREAD:0\r\n"
+        /* Skip the trailing "\r\n\r\nOK\r\n" (or "\r\n\r\n+HTTPREAD: 0\r\n"
          * for the last chunk - either way this parser only needs to see
          * "OK\r\n" appear to know the response is fully consumed; a
-         * trailing "+HTTPREAD:0" line, if present, is itself followed by
+         * trailing "+HTTPREAD: 0" line, if present, is itself followed by
          * its own "\r\n" only, not "OK\r\n" - PER A76XX_AT_CMD.MD's
          * example the module still emits nothing further after that, so
          * this case is handled by the timeout naturally completing the
          * chunk via read_offset bookkeeping in the caller, NOT by this
          * substate waiting for text that will never come. To keep this
          * robust either way, this substate advances on EITHER seeing
-         * "OK\r\n" OR accumulating a line that starts with "+HTTPREAD:0"
-         * followed by "\r\n". Not verified byte-for-byte against every
-         * possible module firmware revision - see this file's
-         * "real log beats datasheet" note if a real capture ever shows a
-         * third shape here. */
+         * "OK\r\n" OR accumulating a line that starts with "+HTTPREAD: 0"
+         * followed by "\r\n".
+         *
+         * BUG FIX (2026-08-05): CONFIRMED on real hardware via byte-level
+         * logging (RAW byte: ... substate=3) that the actual final-chunk
+         * marker is "+HTTPREAD: 0\r\n" - WITH a space after the colon,
+         * matching the same "+HTTPREAD: <len>" shape RAW_WAIT_HEADER above
+         * already parses (strtol() there skips the space naturally, so it
+         * was never noticed there). The previous version of this check
+         * searched for "+HTTPREAD:0\r\n" with NO space, which never matched
+         * the real byte stream - every single-range read stalled here for
+         * the full HTTP_READ_RAW_TIMEOUT_MS even though every byte of the
+         * chunk (header, all 400 data bytes, and this exact footer line)
+         * had already arrived and been correctly parsed by every earlier
+         * substate, confirmed by the log showing the full "\r\n+HTTPREAD:
+         * 0\r\n" footer landing byte-for-byte right before the timeout
+         * fired. This was the actual root cause of every "raw read timed
+         * out at offset 0" failure seen after the rawIoActive UART
+         * contention fix - that fix was correct and necessary (it made the
+         * byte stream clean enough for this bug to even become visible),
+         * but was not sufficient on its own. */
         if (s_http.raw_line_len < sizeof(s_http.raw_line_buf) - 1) {
             s_http.raw_line_buf[s_http.raw_line_len++] = (char)byte;
             s_http.raw_line_buf[s_http.raw_line_len] = '\0';
@@ -851,7 +892,7 @@ void a7677s_http_poll(a7677s_t *dce, uint32_t delta_ms)
             s_http.raw_line_buf[sizeof(s_http.raw_line_buf) - 1] = '\0';
         }
         if (strstr(s_http.raw_line_buf, "OK\r\n") ||
-            strstr(s_http.raw_line_buf, "+HTTPREAD:0\r\n")) {
+            strstr(s_http.raw_line_buf, "+HTTPREAD: 0\r\n")) {
             s_http.read_offset += s_http.raw_chunk_len;
             finish_read_raw_chunk();
         }

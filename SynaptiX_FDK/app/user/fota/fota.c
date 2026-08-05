@@ -1,4 +1,279 @@
-/* ===================== Part 2: fota_download() ===================== */
+/* ===================== Part 1: init / on_message / is_pending ===================== */
+/*
+ * NOT YET TESTED ON REAL HARDWARE (2026-08-05) - unlike Part 2 below
+ * (fota_download() and everything it calls), which was written and
+ * reviewed against real HTTP range-download logs already, this Part 1
+ * code has not been built or run yet. Flagged explicitly per this
+ * project's own rule (see the handoff notes elsewhere in this codebase's
+ * history: never claim something works without a real board confirming
+ * it) - test this against a real retained MQTT message before trusting
+ * it in the field.
+ *
+ * Payload design (2026-08-05, per the user - fota.h's doc-comment has
+ * been updated to match this, both files now agree): the user
+ * deliberately dropped BOTH "version" and "size" from an earlier draft.
+ *     {"url": "...", "crc32": "0x..."}
+ *
+ * Why "version" was dropped and crc32 used as the "is this new" signal
+ * instead (this was flagged as a real problem before writing this: a
+ * retained MQTT message does NOT disappear after being read - it is
+ * still there the NEXT time this device wakes, subscribes, and reads it
+ * again. Without some way to recognize "I have already successfully
+ * applied this exact firmware", the device would re-download and
+ * re-flash the SAME firmware every single wake cycle forever, forever
+ * burning battery/data on a no-op). crc32 already uniquely identifies
+ * "which build" (two different builds essentially never share a CRC32
+ * by chance) SO it doubles as both "is this a new image" AND "does what
+ * I downloaded match what the server meant" - no separate version string
+ * needed for either purpose.
+ *
+ * Where "last successfully applied crc32" is stored so it survives the
+ * NVIC_SystemReset() that fota_trigger_swap_and_reset() (Part 2) always
+ * calls on success (per the user, 2026-08-05: use a spare RTC/TAMP backup
+ * register - see new_boot_backup_reg.h/.c under app/user/ota_trigger/,
+ * already used by this same project for the unrelated "enter DFU"/
+ * "rollback" one-shot flags, indices 0-2 - this reuses that same
+ * 32-register file, NOT a second copy of the backup-register driver, at
+ * previously-unused indices).
+ *
+ *   - FOTA_BACKUP_REG_LAST_APPLIED_CRC32 (index 3, see #define below)
+ *     holds the raw crc32 value of the last image this module actually
+ *     wrote+verified+swapped in. boot_backup_reg_read()/write() operate
+ *     on plain TAMP->BKPxR registers (32-bit, no magic/validity marker of
+ *     their own) - see that module's doc-comment: these survive a
+ *     software reset (confirmed - that is their entire purpose in this
+ *     codebase already, for the DFU/rollback flags). CONFIRMED by the
+ *     user (2026-08-05): this board's STM32 VBAT pin is hardwired
+ *     directly to the 3.3V rail (not a coin cell/supercap) - so the
+ *     backup domain in fact survives ANY reset while the board has power
+ *     at all (software reset, watchdog, NRST pin, brown-out recovery),
+ *     not just NVIC_SystemReset() specifically. It is only lost on a true
+ *     full power-down of the board (3.3V rail itself gone) - handled
+ *     safely below regardless (see the validity-marker point next).
+ *
+ *   - Because a full power-down (not any kind of reset - see above) can
+ *     still clear the backup domain, a second backup register
+ *     (FOTA_BACKUP_REG_LAST_APPLIED_VALID, index 4) is used purely as
+ *     a validity marker (written with a fixed magic value, immediately
+ *     after a successful write of the crc32 register itself) - a
+ *     power-loss that clears backup domain SRAM will clear BOTH
+ *     registers back to 0, which reads as "not valid" via this marker,
+ *     rather than being misread as "the last applied crc32 was literally
+ *     0x00000000" (astronomically unlikely for a real CRC32 of a real
+ *     firmware image, but not impossible, and cheap to rule out
+ *     explicitly rather than rely on that being rare enough). Losing this
+ *     memory after a real power cycle is not unsafe by itself - the worst
+ *     case is one extra redundant download+flash+verify+reset of a
+ *     firmware image that was already running, not a bricked device (the
+ *     new image passes the exact same CRC32 check as any other
+ *     legitimate update before it is ever swapped in).
+ */
+
+#include "fota.h"
+#include "sx_flash.h"
+#include "logger.h"
+#include "sx_board.h"
+#include "sx_user_mqtt.h"
+#include "network_config.h"
+#include "new_boot_backup_reg.h"
+#include "a7677s_http.h"
+#include "cJSON.h"
+#include "stm32h5xx_hal.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static const char *TAG = "FOTA";
+
+/* See this file's Part 1 header comment above for the full reasoning.
+ * Indices 0-2 are already taken by app/user/ota_trigger/new_boot_backup_reg.h
+ * (BOOT_BACKUP_REG_UPDATE/ROLLBACK_PREV/ROLLBACK_FACTORY) - this module
+ * claims the next two, 3 and 4, and must never reuse 0-2 or collide with
+ * any future addition there (that header is the single source of truth
+ * for which indices are taken; if it ever claims 3 or 4 for something
+ * else, THIS file must move to different indices, not the other way
+ * around, since ota_trigger.c's flags are read by the bootloader itself
+ * and are more load-bearing than this module's own bookkeeping). */
+#define FOTA_BACKUP_REG_LAST_APPLIED_CRC32   3U
+#define FOTA_BACKUP_REG_LAST_APPLIED_VALID   4U
+#define FOTA_BACKUP_REG_VALID_MAGIC          0xFA710001UL
+
+/* Topic buffer sizing: FOTA_CHECK_TOPIC_PREFIX (fota.h) is longer than
+ * mqtt_rpc.c's RPC_REQUEST_API/RPC_RESPONSE_API, so RPC_TOPIC_BUFF_SIZE's
+ * value (64) is not blindly reused here - computed fresh against this
+ * module's own actual prefix length + NETWORK_CONFIG_DEVICE_ID_MAX_LEN
+ * (32, network_config.h), same margin style as mqtt_rpc.c. */
+#define FOTA_TOPIC_BUFF_SIZE   64
+
+/* URL max length mirrors a7677s_http.h's A7677S_HTTP_URL_MAX (257,
+ * including NUL) - this module never passes a longer string down to
+ * a7677s_http_get_range() anyway, so there is no point storing more than
+ * that module could ever actually use. crc32 hex string from the JSON
+ * payload (e.g. "0xDEADBEEF", up to 10 chars + NUL) is parsed into a raw
+ * uint32_t immediately (see fota_on_message() below) and not kept as a
+ * string past that point. */
+typedef struct {
+    bool     pending;                       /* true = a newer, not-yet-downloaded/verified image is latched */
+    char     url[A7677S_HTTP_URL_MAX];
+    uint32_t crc32;                         /* target checksum for the currently pending/in-progress attempt */
+    uint32_t retry_count;                   /* consecutive failed fota_download() attempts for THIS crc32 */
+} fota_state_t;
+
+static fota_state_t s_fota = {0};
+
+/* --- Backup-register helpers, local to this file --- */
+
+static bool fota_backup_get_last_applied_crc32(uint32_t *out_crc32)
+{
+    boot_backup_reg_init();
+    uint32_t valid_marker = boot_backup_reg_read(FOTA_BACKUP_REG_LAST_APPLIED_VALID);
+    if (valid_marker != FOTA_BACKUP_REG_VALID_MAGIC) {
+        return false; /* never written, or backup domain lost power - see file header comment */
+    }
+    *out_crc32 = boot_backup_reg_read(FOTA_BACKUP_REG_LAST_APPLIED_CRC32);
+    return true;
+}
+
+static void fota_backup_set_last_applied_crc32(uint32_t crc32)
+{
+    boot_backup_reg_init();
+    boot_backup_reg_write(FOTA_BACKUP_REG_LAST_APPLIED_CRC32, crc32);
+    /* Valid marker written SECOND, after the crc32 value itself - so if
+     * this device somehow lost power in between these two writes (should
+     * be near-impossible, both are simple register writes with no delay
+     * between them, but there is no hardware atomicity across two
+     * separate 32-bit registers), the marker would still read as
+     * "invalid" on the next boot rather than pairing a valid-looking
+     * marker with a half-written/stale crc32 value from an earlier,
+     * different image. */
+    boot_backup_reg_write(FOTA_BACKUP_REG_LAST_APPLIED_VALID, FOTA_BACKUP_REG_VALID_MAGIC);
+}
+
+/* --- Topic helper, same shape as mqtt_rpc.c's build_rpc_request_topic() --- */
+
+static void build_fota_check_topic(char *out, size_t out_size)
+{
+    snprintf(out, out_size, "%s%s", FOTA_CHECK_TOPIC_PREFIX, network_config_get()->device_id);
+}
+
+/* --- Parse "0x..." or plain-decimal crc32 string from JSON into a raw uint32_t ---
+ * strtoul() with base 0 auto-detects "0x"/"0X" prefix (hex) vs a plain
+ * decimal string, so either representation the server happens to publish
+ * works without this module needing to know which one in advance. Returns
+ * false if the string parsed to nothing usable (empty, or no digits
+ * consumed at all) - a malformed crc32 field must not silently become 0
+ * and be treated as a real target checksum. */
+static bool parse_crc32_string(const char *s, uint32_t *out)
+{
+    if (s == NULL || s[0] == '\0') {
+        return false;
+    }
+    char *endptr = NULL;
+    unsigned long val = strtoul(s, &endptr, 0);
+    if (endptr == s) {
+        return false; /* no digits consumed at all */
+    }
+    *out = (uint32_t)val;
+    return true;
+}
+
+void fota_init(void)
+{
+    char topic[FOTA_TOPIC_BUFF_SIZE];
+    build_fota_check_topic(topic, sizeof(topic));
+    sx_user_mqtt_subscribe(topic);
+    log_info(TAG, "Subscribed to %s", topic);
+}
+
+void fota_on_message(const char *topic, const char *message)
+{
+    char expected_topic[FOTA_TOPIC_BUFF_SIZE];
+    build_fota_check_topic(expected_topic, sizeof(expected_topic));
+    if (strcmp(topic, expected_topic) != 0) {
+        return;
+    }
+
+    log_info(TAG, "FOTA check message received: %s", message);
+
+    cJSON *root = cJSON_Parse(message);
+    if (root == NULL) {
+        log_error(TAG, "Failed to parse FOTA check JSON");
+        return;
+    }
+
+    cJSON *url_item = cJSON_GetObjectItemCaseSensitive(root, "url");
+    if (!cJSON_IsString(url_item) || url_item->valuestring == NULL || url_item->valuestring[0] == '\0') {
+        log_error(TAG, "FOTA check message missing/invalid \"url\"");
+        cJSON_Delete(root);
+        return;
+    }
+
+    cJSON *crc32_item = cJSON_GetObjectItemCaseSensitive(root, "crc32");
+    uint32_t new_crc32 = 0;
+    if (!cJSON_IsString(crc32_item) || !parse_crc32_string(crc32_item->valuestring, &new_crc32)) {
+        log_error(TAG, "FOTA check message missing/invalid \"crc32\"");
+        cJSON_Delete(root);
+        return;
+    }
+
+    if (strlen(url_item->valuestring) >= sizeof(s_fota.url)) {
+        log_error(TAG, "FOTA check message \"url\" too long (%u chars, max %u) - ignoring",
+                   (unsigned)strlen(url_item->valuestring), (unsigned)sizeof(s_fota.url) - 1U);
+        cJSON_Delete(root);
+        return;
+    }
+
+    /* Same-crc32-as-last-successfully-applied check: this is what stands
+     * in for "version" (see file header comment on why version was
+     * dropped). A retained message describing the firmware ALREADY
+     * running on this device must not trigger a re-download - it is not
+     * "new", it is the same image the server published the last time
+     * this device updated. */
+    uint32_t last_applied_crc32;
+    if (fota_backup_get_last_applied_crc32(&last_applied_crc32) && last_applied_crc32 == new_crc32) {
+        log_info(TAG, "FOTA check: crc32=0x%08lX matches last-applied image, nothing to do",
+                   (unsigned long)new_crc32);
+        cJSON_Delete(root);
+        return;
+    }
+
+    /* Same-crc32-as-currently-pending check: a retained message is
+     * re-delivered on every fresh MQTT (re)connect, which can happen more
+     * than once without an intervening fota_download() attempt (e.g. a
+     * connection blip mid-cycle). Without this check, re-arriving at the
+     * SAME still-pending crc32 would reset retry_count back to 0 every
+     * time, defeating FOTA_MAX_RETRY_COUNT's whole purpose (a genuinely
+     * failing download would then retry forever, one MQTT reconnect at a
+     * time, instead of ever reaching the give-up threshold). Per fota.h's
+     * doc-comment on FOTA_MAX_RETRY_COUNT, retry_count should only reset
+     * when a truly NEW version string is seen - crc32 is now that
+     * identity, so this is the direct translation of that original
+     * intent to the new payload shape. */
+    if (s_fota.pending && s_fota.crc32 == new_crc32) {
+        log_info(TAG, "FOTA check: crc32=0x%08lX already pending (retry %lu/%lu), not resetting",
+                   (unsigned long)new_crc32, (unsigned long)s_fota.retry_count,
+                   (unsigned long)FOTA_MAX_RETRY_COUNT);
+        cJSON_Delete(root);
+        return;
+    }
+
+    strncpy(s_fota.url, url_item->valuestring, sizeof(s_fota.url) - 1);
+    s_fota.url[sizeof(s_fota.url) - 1] = '\0';
+    s_fota.crc32       = new_crc32;
+    s_fota.retry_count = 0;
+    s_fota.pending     = true;
+
+    log_info(TAG, "FOTA update latched: crc32=0x%08lX url=%s", (unsigned long)new_crc32, s_fota.url);
+
+    cJSON_Delete(root);
+}
+
+bool fota_is_pending(void)
+{
+    return s_fota.pending;
+}
+
+
 
 /* Internal flash layout, mirrored from BOOTLOADER_WS/bootloader/
  * flash_define.h - same "local copy, not shared header" precedent as
@@ -59,7 +334,18 @@ typedef struct {
  * file's own footprint small - not thread-safe by construction, but this
  * codebase is single-threaded/non-RTOS throughout (see modem.c's similar
  * assumptions elsewhere), so that is not a concern here. */
-static uint32_t fota_crc32(const uint8_t *data, uint32_t len)
+/* Shared table + one-byte lookup step, factored out of what used to be a
+ * single self-contained fota_crc32(data,len) function, so that BOTH a
+ * one-shot whole-buffer call (fota_crc32() below, kept for any future
+ * caller that has the whole buffer in RAM at once) AND the incremental
+ * flash-verify loop (fota_download_attempt(), further down - reads flash
+ * back in FOTA_HTTP_CHUNK_SIZE pieces rather than one multi-hundred-KB
+ * buffer) can reuse the exact same table without duplicating the
+ * polynomial-generation loop in two places. table_ready/table are function-
+ * static, not file-static globals, deliberately - this keeps the "is the
+ * table built yet" state colocated with the one piece of code that
+ * initializes it, same reasoning as before the split. */
+static uint32_t fota_crc32_table_lookup(uint32_t crc, uint8_t byte)
 {
     static uint32_t table[256];
     static bool      table_ready = false;
@@ -75,9 +361,22 @@ static uint32_t fota_crc32(const uint8_t *data, uint32_t len)
         table_ready = true;
     }
 
+    return table[(crc ^ byte) & 0xFF] ^ (crc >> 8);
+}
+
+/* One-shot whole-buffer CRC32, built on fota_crc32_table_lookup() above.
+ * Not currently called anywhere in this file (the flash-verify loop in
+ * fota_download_attempt() calls fota_crc32_table_lookup() directly, byte by
+ * byte, since it never has the whole region in one buffer - see that
+ * loop's own comment) - kept as a small public-shaped helper in case a
+ * future caller (e.g. a unit test, or a caller that already holds the
+ * whole image in RAM) needs a one-call CRC32 without re-deriving the
+ * init/finalize XOR dance itself. */
+static uint32_t fota_crc32(const uint8_t *data, uint32_t len)
+{
     uint32_t crc = 0xFFFFFFFFUL;
     for (uint32_t i = 0; i < len; i++) {
-        crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >> 8);
+        crc = fota_crc32_table_lookup(crc, data[i]);
     }
     return crc ^ 0xFFFFFFFFUL;
 }
@@ -236,6 +535,19 @@ static bool fota_trigger_swap_and_reset(void)
         return false;
     }
 
+    /* Persist s_fota.crc32 (the image that just passed CRC32 verification
+     * and is about to be swapped in) as "last applied" BEFORE resetting -
+     * see this file's Part 1 header comment for why this is needed at
+     * all (a retained MQTT message does not disappear after being read,
+     * so without this the device would re-download the same firmware
+     * forever) and why a backup register rather than flash/RAM. Written
+     * here, not inside fota_download() after this function returns,
+     * because this function does not return on the success path
+     * (NVIC_SystemReset() below) - this is the only point in the whole
+     * success path guaranteed to run after verification passed but before
+     * the reset actually happens. */
+    fota_backup_set_last_applied_crc32(s_fota.crc32);
+
     log_info(TAG, "FOTA flags written (isNewFirmwareAvailable=1), resetting to apply update");
     HAL_Delay(100); /* let the log line actually go out before reset - same as ota_trigger.c */
     NVIC_SystemReset();
@@ -249,7 +561,27 @@ static bool fota_trigger_swap_and_reset(void)
  * AND the final CRC32 matched - fota_download() (below) is the only
  * caller, and treats any false return as "this attempt failed", handling
  * the retry-counter bookkeeping itself so this function stays a pure
- * download+verify primitive without needing to know about retry policy. */
+ * download+verify primitive without needing to know about retry policy.
+ *
+ * Design change (2026-08-05, per the user): the retained FOTA_CHECK
+ * payload no longer carries a "size" field - fota.h originally described
+ * {"version","url","size","crc32"}, but the user deliberately dropped
+ * BOTH "version" and "size" (see fota_on_message()'s doc-comment for why
+ * "version" was dropped and replaced by crc32-as-identity). Without a
+ * server-declared size, this function no longer knows in advance how many
+ * bytes to expect, so it:
+ *   - bounds the download loop by FOTA_SECONDARY_APP_SIZE (the hard
+ *     ceiling - a fixed 480KB partition, same constant fota.h's
+ *     FOTA_MAX_FIRMWARE_SIZE already documented as the ceiling even back
+ *     when "size" existed) instead of s_fota.size, and
+ *   - detects true end-of-file the same way a7677s_http.h's
+ *     a7677s_http_range_cb_t doc-comment already told callers to handle
+ *     regardless (data_len may be "shorter than the requested range size
+ *     - e.g. last range in the file" - this was already a documented
+ *     possibility, just previously treated as a sanity-check against a
+ *     size the server told us; now it is the ONLY EOF signal available:
+ *     w.data_len < this_len means the server has no more bytes to give,
+ *     stop the loop there, that offset is the real end of the file). */
 static bool fota_download_attempt(void)
 {
     if (!fota_erase_secondary()) {
@@ -257,8 +589,9 @@ static bool fota_download_attempt(void)
     }
 
     uint32_t offset = 0;
-    while (offset < s_fota.size) {
-        uint32_t remaining = s_fota.size - offset;
+    bool     eof_reached = false;
+    while (offset < FOTA_SECONDARY_APP_SIZE && !eof_reached) {
+        uint32_t remaining = FOTA_SECONDARY_APP_SIZE - offset;
         uint32_t this_len  = (remaining < FOTA_HTTP_CHUNK_SIZE) ? remaining : FOTA_HTTP_CHUNK_SIZE;
 
         fota_async_wait_t w = {0};
@@ -281,6 +614,17 @@ static bool fota_download_attempt(void)
         }
 
         if (w.data_len == 0) {
+            /* Zero bytes on the VERY FIRST range (offset==0) means the URL
+             * itself is bad/unreachable/empty - a genuinely-empty firmware
+             * file is not a real scenario worth accepting silently. Zero
+             * bytes on a LATER range, immediately after a previous range
+             * that itself came back short (already caught by the
+             * data_len < this_len check below, which sets eof_reached and
+             * exits the loop before a next call is ever made) should not
+             * normally happen - if it does, treat it the same as any other
+             * failed range rather than silently accepting a 0-byte
+             * "final" chunk, since eof_reached should have already stopped
+             * the loop one iteration earlier in the legitimate case. */
             log_error(TAG, "Range at offset %lu returned 0 bytes (expected up to %lu) - "
                             "aborting this attempt, server/URL may not support Range requests correctly",
                        (unsigned long)offset, (unsigned long)this_len);
@@ -306,68 +650,65 @@ static bool fota_download_attempt(void)
 
         offset += w.data_len;
 
-        log_info(TAG, "FOTA chunk OK: offset=%lu len=%lu (%lu/%lu bytes total)",
+        log_info(TAG, "FOTA chunk OK: offset=%lu len=%lu (%lu bytes total so far)",
                   (unsigned long)(offset - w.data_len), (unsigned long)w.data_len,
-                  (unsigned long)offset, (unsigned long)s_fota.size);
+                  (unsigned long)offset);
 
-        /* Defends against a server that ignores the Range header and
-         * always returns fewer bytes than asked (e.g. w.data_len <
-         * this_len on every call, not just the legitimate final chunk) -
-         * without this, the while loop above would need exactly
-         * ceil(size/this_len) iterations to finish normally, but a
-         * server shorting every response would make `remaining` shrink
-         * by less than FOTA_HTTP_CHUNK_SIZE each time forever without
-         * ever reaching s_fota.size if data_len is ever 0 (already
-         * caught above) or, more subtly, never actually converge if
-         * data_len is consistently smaller than requested - counted
-         * separately from the main loop bound so a slow-but-honest
-         * server (many small final chunks near EOF) is not penalized. */
+        /* True EOF signal, now that there is no server-declared size to
+         * compare against (see this function's doc-comment above): a
+         * range returning fewer bytes than requested means the server has
+         * no more data to give from this offset onward - this is the
+         * legitimate, expected way every successful download ends (unless
+         * the file is an exact multiple of FOTA_HTTP_CHUNK_SIZE, in which
+         * case the loop instead ends by reaching FOTA_SECONDARY_APP_SIZE,
+         * or - far more likely for a real firmware image well under 480KB
+         * - a future range would simply return 0 bytes, which is caught
+         * above as an error rather than silently accepted; a real HTTP
+         * server that supports Range requests correctly always returns
+         * data_len == this_len for every non-final range, so this
+         * comparison is not fooled by a slow/chunked transfer, only by
+         * genuine end-of-file). */
+        if (w.data_len < this_len) {
+            eof_reached = true;
+        }
     }
 
-    if (offset != s_fota.size) {
-        log_error(TAG, "Download loop ended with offset=%lu, expected %lu - size mismatch, aborting",
-                   (unsigned long)offset, (unsigned long)s_fota.size);
+    if (offset == 0) {
+        log_error(TAG, "Download loop ended with 0 bytes written - aborting");
         return false;
     }
+    if (!eof_reached && offset >= FOTA_SECONDARY_APP_SIZE) {
+        log_error(TAG, "Download reached the %lu-byte Secondary partition ceiling "
+                        "without the server signaling EOF - firmware image may be "
+                        "larger than the partition, or Range requests are not being "
+                        "honored - aborting rather than risk a truncated image",
+                   (unsigned long)FOTA_SECONDARY_APP_SIZE);
+        return false;
+    }
+
+    uint32_t total_size = offset; /* real, server-determined size of this image */
+    log_info(TAG, "Download complete: %lu bytes total", (unsigned long)total_size);
 
     /* Verify: re-read the whole written region back out of flash (not
      * the HTTP data as it arrived - reading back what actually landed in
      * flash catches a write that silently failed or a torn quadword, not
      * just a download-layer problem) and CRC32 it against the
      * server-provided checksum. Reads FOTA_HTTP_CHUNK_SIZE at a time
-     * rather than the whole s_fota.size in one sx_flash_read() call, to
+     * rather than the whole total_size in one sx_flash_read() call, to
      * avoid needing a second multi-hundred-KB RAM buffer alongside
      * fota_async_wait_t's own data_copy[] (this MCU's RAM budget is not
      * assumed to have room for two such buffers live at once - no
      * evidence either way was found in this codebase, so the more
-     * conservative assumption is used here). fota_crc32() is called
-     * incrementally is NOT how it is written above (it takes the whole
-     * buffer in one call) - this loop instead accumulates via repeated
-     * calls is also not what's implemented; see the note below for why a
-     * single design was chosen instead. */
-    uint32_t crc = 0xFFFFFFFFUL; /* placeholder, overwritten below */
-    (void)crc;
-
-    /* Re-derive CRC32 incrementally across chunks read back from flash.
-     * fota_crc32() as defined above always starts from 0xFFFFFFFF and
-     * XORs out at the end, which is only correct for a SINGLE call
-     * covering the whole buffer - calling it repeatedly on successive
-     * chunks would restart and re-finalize the CRC each time, giving the
-     * wrong answer. Verification below therefore reads the ENTIRE
-     * written region into a chunk-sized buffer across multiple
-     * sx_flash_read() calls, but only calls fota_crc32() ONCE the
-     * corresponding bytes are fully staged - this is only feasible
-     * within RAM budget by processing the CRC over the SAME data_copy[]
-     * buffer chunk-by-chunk using the standard incremental CRC32
-     * technique (carry the running `crc` value between calls, do NOT
-     * re-initialize/re-finalize until the very last chunk) - see the
-     * dedicated fota_crc32_update()/fota_crc32_final() split below,
-     * which fota_crc32() itself is now built on top of, rather than
-     * duplicating the table-driven inner loop a second time here. */
+     * conservative assumption is used here). Only reads/CRCs total_size
+     * bytes (the actual downloaded length, now that there is no
+     * server-declared size field to have pre-validated this against) -
+     * NOT the full FOTA_SECONDARY_APP_SIZE partition, which would checksum
+     * whatever stale/erased 0xFF filler bytes happen to sit past the real
+     * image and never match s_fota.crc32. */
     uint32_t running_crc = 0xFFFFFFFFUL;
     uint32_t verify_offset = 0;
-    while (verify_offset < s_fota.size) {
-        uint32_t remaining = s_fota.size - verify_offset;
+    while (verify_offset < total_size) {
+        uint32_t remaining = total_size - verify_offset;
         uint32_t this_len  = (remaining < FOTA_HTTP_CHUNK_SIZE) ? remaining : FOTA_HTTP_CHUNK_SIZE;
         uint8_t  buf[FOTA_HTTP_CHUNK_SIZE];
 
@@ -396,9 +737,9 @@ void fota_download(void)
         return;
     }
 
-    log_info(TAG, "Starting FOTA download attempt %lu/%lu: version=%s size=%lu url=%s",
+    log_info(TAG, "Starting FOTA download attempt %lu/%lu: crc32=0x%08lX url=%s",
               (unsigned long)s_fota.retry_count + 1, (unsigned long)FOTA_MAX_RETRY_COUNT,
-              s_fota.version, (unsigned long)s_fota.size, s_fota.url);
+              (unsigned long)s_fota.crc32, s_fota.url);
 
     /* SSL context must be configured once before any https:// range call -
      * see a7677s_http_ssl_configure()'s doc-comment. Cheap/fast AT-layer
@@ -443,11 +784,13 @@ void fota_download(void)
      * fota.h's doc-comment on FOTA_MAX_RETRY_COUNT. */
     s_fota.retry_count++;
     if (s_fota.retry_count >= FOTA_MAX_RETRY_COUNT) {
-        log_error(TAG, "FOTA download failed %lu times for version %s - giving up until a new "
-                        "retained message is published", (unsigned long)s_fota.retry_count, s_fota.version);
+        log_error(TAG, "FOTA download failed %lu times for crc32=0x%08lX - giving up until a new "
+                        "retained message is published", (unsigned long)s_fota.retry_count,
+                   (unsigned long)s_fota.crc32);
         s_fota.pending = false;
     } else {
-        log_warn(TAG, "FOTA download attempt %lu/%lu failed for version %s - will retry next cycle",
-                  (unsigned long)s_fota.retry_count, (unsigned long)FOTA_MAX_RETRY_COUNT, s_fota.version);
+        log_warn(TAG, "FOTA download attempt %lu/%lu failed for crc32=0x%08lX - will retry next cycle",
+                  (unsigned long)s_fota.retry_count, (unsigned long)FOTA_MAX_RETRY_COUNT,
+                  (unsigned long)s_fota.crc32);
     }
 }

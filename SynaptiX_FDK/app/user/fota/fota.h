@@ -25,6 +25,32 @@ extern "C" {
  *    retained message survives regardless of how long the subscriber was
  *    offline, no persistent session needed.
  *
+ *  - Payload (2026-08-05, FINAL - per the user, deliberately dropping both
+ *    "version" and "size" from an earlier draft of this design):
+ *        {"url": "https://...", "crc32": "0x..."}
+ *    crc32 (hex or decimal string, auto-detected - see fota.c's
+ *    parse_crc32_string()) does double duty as both "which build is this"
+ *    (no separate version string needed - two different builds essentially
+ *    never share a CRC32 by chance) AND the post-download integrity check
+ *    (see below). There is no "size" field: fota_download_attempt() (Part
+ *    2, fota.c) instead downloads up to the fixed FOTA_MAX_FIRMWARE_SIZE
+ *    ceiling and stops at the first HTTP range that returns fewer bytes
+ *    than requested (true end-of-file, per a7677s_http.h's
+ *    a7677s_http_range_cb_t doc-comment on data_len possibly being
+ *    shorter than the requested range).
+ *
+ *  - Since a retained message does NOT disappear after being read (it is
+ *    redelivered on every fresh MQTT connect, including one that just
+ *    successfully applied that exact update), fota_on_message() compares
+ *    the incoming crc32 against the crc32 of the last image this device
+ *    actually applied - persisted across the update's own
+ *    NVIC_SystemReset() in a spare RTC/TAMP backup register (see
+ *    app/user/ota_trigger/new_boot_backup_reg.h, indices 3-4 - fota.c's
+ *    Part 1 header comment has the full reasoning, including why a
+ *    validity-marker register is used alongside the crc32 register
+ *    itself). A matching crc32 is treated as "nothing to do", not
+ *    re-downloaded.
+ *
  *  - Detection and download are deliberately split across two wake
  *    cycles: the cycle that first sees a newer version only sets
  *    fota_is_pending() = true (RAM only, intentionally not persisted -
@@ -80,16 +106,19 @@ extern "C" {
 
 /* Hard ceiling = Secondary partition size (60 sectors * 8KB, see
  * ota_trigger.c's PARTITION_LAYOUT comment / BOOTLOADER_WS/bootloader/
- * flash_define.h SECONDARY_APP_FLASH_SIZE). A retained message
- * advertising a larger "size" is rejected outright before any download
- * starts - see fota.c's fota_check(). */
+ * flash_define.h SECONDARY_APP_FLASH_SIZE). There is no server-declared
+ * "size" field to check against anymore (see this file's design
+ * doc-comment above) - fota_download_attempt() (fota.c) instead bounds
+ * its own download loop by this constant directly and aborts if EOF is
+ * never signaled before reaching it (see that function's doc-comment). */
 #define FOTA_MAX_FIRMWARE_SIZE (60UL * 8192UL) /* 480KB */
 
 /* Number of consecutive CRC32-mismatch download attempts before this
- * module gives up on the currently-pending version and waits for the
+ * module gives up on the currently-pending crc32 and waits for the
  * server to publish a new retained message (i.e. does not retry forever
  * burning battery on a bad/corrupted URL). Resets to 0 whenever a NEW
- * version string is seen on the retained topic. */
+ * crc32 (this design's stand-in for a version string - see this file's
+ * design doc-comment above) is seen on the retained topic. */
 #define FOTA_MAX_RETRY_COUNT 3
 
 /* Subscribes to FOTA_CHECK_TOPIC_PREFIX + device_id. Matches
@@ -102,39 +131,45 @@ void fota_init(void);
  * dispatcher alongside mqtt_rpc_on_message() - filters for topic ==
  * FOTA_CHECK_TOPIC_PREFIX + device_id itself, ignores everything else,
  * same pattern as mqtt_rpc_on_message(). Parses the retained payload
- * {"version":"x.y.z","url":"...","size":N,"crc32":"0x..."}, compares
- * version against APP_FW_VERSION (app_config.h) with a semver-aware
- * comparison (NOT strcmp - "0.2.0" vs "0.10.0" would compare wrong as
- * plain strings), and if newer, latches the pending-update fields
- * in-memory (does not download here - see fota_download()). */
+ * {"url":"...","crc32":"0x..."} (see this file's design doc-comment
+ * above for why there is no "version"/"size" field), compares crc32
+ * against the last-successfully-applied crc32 persisted in a backup
+ * register (fota.c) and against the currently-pending crc32 if any, and
+ * if genuinely new, latches the pending-update fields in-memory (does
+ * not download here - see fota_download()). */
 void fota_on_message(const char *topic, const char *message);
 
-/* True if fota_on_message() has latched a newer version this boot that
- * has not yet been downloaded (or is mid-retry after a CRC mismatch).
- * Call from app.c's APP_CYCLE_WAIT_PUBLISH handler, AFTER telemetry has
- * been queued for publish, to decide whether to call fota_download()
- * this cycle. Deliberately RAM-only (see fota.c) - always false again
- * after a fresh boot until the retained message is re-read on the next
- * successful MQTT connect. */
+/* True if fota_on_message() has latched a not-yet-applied crc32 this boot
+ * that has not yet been downloaded (or is mid-retry after a CRC
+ * mismatch). Call from app.c's APP_CYCLE_WAIT_PUBLISH handler, AFTER
+ * telemetry has been queued for publish, to decide whether to call
+ * fota_download() this cycle. Deliberately RAM-only (see fota.c) -
+ * always false again after a fresh boot until the retained message is
+ * re-read on the next successful MQTT connect (the separate
+ * backup-register record of the *last applied* crc32, unlike this flag,
+ * DOES persist across boots - see fota.c's Part 1 header comment - so a
+ * reboot does not cause a false "is pending" for an update already
+ * applied). */
 bool fota_is_pending(void);
 
 /* Performs one full download+write+verify attempt for the currently
- * pending version (see fota_is_pending()): downloads the firmware from
+ * pending crc32 (see fota_is_pending()): downloads the firmware from
  * the latched URL in FOTA_HTTP_CHUNK_SIZE-byte HTTP Range requests (see
  * fota.c), writes each chunk directly into the Secondary partition,
  * then re-reads the whole partition and checks CRC32 against the
  * latched checksum.
  *
  * On success: flips isUpgradeInProgress=false + isNewFirmwareAvailable
- * =true together and calls NVIC_SystemReset() - does not return.
+ * =true together, records this crc32 as "last applied" in a backup
+ * register, and calls NVIC_SystemReset() - does not return.
  *
- * On failure (HTTP error, size mismatch, CRC mismatch): logs the
- * failure, increments the retry counter, and returns. After
- * FOTA_MAX_RETRY_COUNT consecutive failures for the same version,
- * clears the pending flag entirely (fota_is_pending() becomes false)
- * so the caller does not keep retrying forever - a future retained
- * message (even the same version re-published, which resets the retry
- * counter - see fota_on_message()) is needed to try again.
+ * On failure (HTTP error, CRC mismatch): logs the failure, increments
+ * the retry counter, and returns. After FOTA_MAX_RETRY_COUNT consecutive
+ * failures for the same crc32, clears the pending flag entirely
+ * (fota_is_pending() becomes false) so the caller does not keep retrying
+ * forever - a future retained message (even the same crc32 re-published,
+ * which resets the retry counter - see fota_on_message()) is needed to
+ * try again.
  *
  * Blocking - the modem's AT+HTTPACTION alone can take up to 120s per
  * range per A76XX AT command manual's MaxResponseTime; this is called

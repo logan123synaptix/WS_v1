@@ -47,6 +47,7 @@
 #include "test_sps30.h"
 #include "test_ze12a.h"
 #include "test_http.h"
+#include "test_fota.h"
 #endif
 
 /* USER CODE END Includes */
@@ -139,7 +140,8 @@ int main(void)
   // test_ze12a_init();
   // test_gps_init();
   // test_lte_mqtt_init();
-  test_http_init();
+  // test_http_init();
+  test_fota_init();
   #else
   app_init();
   #endif
@@ -165,7 +167,8 @@ int main(void)
         // test_gps_poll(delta);
         // test_ze12a_poll(delta);
         // test_lte_mqtt_poll(delta);
-        test_http_poll(delta);
+        // test_http_poll(delta);
+        test_fota_poll(delta);
         #else
         app_process(delta);
         #endif

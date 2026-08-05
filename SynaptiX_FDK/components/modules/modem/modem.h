@@ -45,6 +45,25 @@ struct modem
                               * assumed. Drivers must check this flag before
                               * touching powerPin. */
     uint8_t isBusy;
+    uint8_t rawIoActive;     /* 1 when a sub-module (e.g. a7677s_http.c's
+                              * HTTP_STATE_READ_RAW) has bypassed
+                              * modem_send_command() and is reading the UART
+                              * directly for a raw/binary transfer. isBusy is
+                              * still set to 1 by that sub-module too (so the
+                              * rest of the system still sees "modem busy" in
+                              * the general sense), but modem_poll() must NOT
+                              * read the UART itself while this flag is set,
+                              * since modem->cmd still points at the PREVIOUS
+                              * AT command and there is no new command for
+                              * modem_poll() to match against - it would just
+                              * steal bytes meant for the raw reader instead
+                              * (confirmed on real hardware: AT+HTTPREAD raw
+                              * reads got fragmented into 1-12 byte pieces,
+                              * interleaved with re-sent command echo text,
+                              * because modem_poll() ran first each tick via
+                              * a7677s_poll() and consumed part of every
+                              * batch of UART bytes before the raw-read loop
+                              * in a7677s_http_poll() got a turn). */
     uint8_t isReady;
     uint32_t timeOut;
     uint32_t waitElapsed;    /* elapsed time accumulator for the current

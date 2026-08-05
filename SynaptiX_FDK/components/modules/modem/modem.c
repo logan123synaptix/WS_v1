@@ -6,6 +6,7 @@ static const char *TAG = "MODEM";
 
 void modem_init(modem_t *modem){
     modem->isBusy = 0;
+    modem->rawIoActive = 0;
     modem->isReady = 0;
     modem->resID = 0;
     modem->cmd = NULL;
@@ -52,6 +53,18 @@ void modem_poll(modem_t *modem, uint32_t timeStamp){
      * here would silently share state across every modem_t, corrupting
      * timeout tracking as soon as a second instance exists. */
     if (!modem->isBusy) return;
+
+    /* Bug fix (2026-08-05): a sub-module may have bypassed
+     * modem_send_command() to do a raw/binary UART read directly (e.g.
+     * a7677s_http.c's HTTP_STATE_READ_RAW, see modem.h's rawIoActive
+     * doc-comment). While that's in progress, modem->cmd still points at
+     * the previous AT command, so continuing below would let modem_poll()
+     * read and consume UART bytes that belong to the raw reader instead -
+     * confirmed on real hardware this fragmented AT+HTTPREAD's binary
+     * payload into 1-12 byte pieces interleaved with re-sent command echo
+     * text, since this function runs before a7677s_http_poll() every tick.
+     * Must return here without touching the UART at all. */
+    if (modem->rawIoActive) return;
 
     int available = sx_uart_available(&modem->uart);
     

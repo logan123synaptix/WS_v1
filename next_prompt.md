@@ -1,7 +1,12 @@
-HANDOFF — FIX modem_poll() res_success + BUG TREO Ở AT+HTTPACTION (CHƯA XONG)
+HANDOFF v2 — FIX modem_poll() res_success (XONG) + BUG UART CONTENTION
+Ở HTTP_STATE_READ_RAW (ĐÃ CHẨN ĐOÁN XONG, CHƯA CODE, ĐÃ CHỐT HƯỚNG SỬA)
 
-Viết giữa chừng phiên, dừng lại vì cần xác nhận 1 điểm với người dùng
-trước khi đào tiếp (đợi đủ 121s hay chưa). Đọc kỹ trước khi tiếp tục.
+Đây là bản v2, THAY THẾ HANDOFF v1 (HANDOFF_2026-08-05_modem_poll_fix.md)
+— v1 còn 1 nghi vấn CHƯA XÁC NHẬN (bug "next_char sai vị trí"), v2 này
+đã XÁC NHẬN nghi vấn đó ĐÚNG, đã sửa xong (lần sửa thứ 4), và đã tìm
+ra + chẩn đoán xong 1 bug HOÀN TOÀN KHÁC nằm sau đó trong chuỗi HTTP
+(UART contention). Đọc kỹ toàn bộ tài liệu này trước khi code tiếp,
+KHÔNG cần đọc lại v1 (mọi thông tin còn giá trị đã được mang sang đây).
 
 ============================================================
 TRẠNG THÁI GIT — QUAN TRỌNG, LÀM NGAY ĐẦU PHIÊN SAU
@@ -10,128 +15,209 @@ CHỈ 1 FILE bị sửa, CHƯA COMMIT/PUSH (container không có git
 credential, không tự push được):
     SynaptiX_FDK/components/modules/modem/modem.c
 
-Nội dung đầy đủ file đã sửa được dán nguyên văn ở cuối tài liệu này
-(mục "NỘI DUNG ĐẦY ĐỦ modem.c ĐÃ SỬA"). NGƯỜI DÙNG ĐÃ CÓ FILE NÀY
-TRÊN MÁY THẬT (đã build + test được, xem log dưới) — nhưng nếu
-container phiên sau bị reset và không thấy thay đổi này qua git,
-PHẢI hỏi người dùng xác nhận máy họ đang giữ bản nào, KHÔNG tự ý
-ghi đè hoặc giả định.
+Nội dung đầy đủ file đã sửa (lần sửa thứ 4, ĐÃ XÁC NHẬN ĐÚNG trên
+board thật — xem log ở mục "TIẾN ĐỘ ĐÃ XÁC NHẬN" bên dưới) được dán
+nguyên văn ở cuối tài liệu này. Người dùng đã có bản này trên máy
+thật (build + test rồi). Nếu container phiên sau bị reset và git
+không thấy thay đổi này, PHẢI hỏi người dùng xác nhận máy họ đang
+giữ bản nào, KHÔNG tự ý ghi đè/giả định.
+
+CHƯA CÓ THAY ĐỔI NÀO trong a7677s_http.c hay modem.h cho bug UART
+contention (mục dưới) — đó là việc CẦN LÀM tiếp theo, đã chốt hướng
+với người dùng nhưng CHƯA CODE DÒNG NÀO.
 
 ============================================================
-BỐI CẢNH — TẠI SAO CÓ THAY ĐỔI NÀY
+TIẾN ĐỘ ĐÃ XÁC NHẬN (KHÔNG CẦN LÀM LẠI)
 ============================================================
-Đang test tính năng FOTA qua HTTP (a7677s_http.c, test_http.c) trên
-nhánh ft/fota_ws. Phát hiện qua log thật (không phải suy đoán) rằng
-modem_poll() (SynaptiX_FDK/components/modules/modem/modem.c) có bug
-gốc: dùng strstr(modem->buff, res_success) để quyết định 1 lệnh AT
-đã thành công — với các res_success dạng PREFIX của 1 dòng URC có số
-liệu thay đổi (cụ thể: "+HTTPACTION: 0," — datalen/statuscode thay
-đổi mỗi lần, không thể là literal cố định), strstr() match NGAY khi
-mới nhận được vài byte đầu của dòng, TRƯỚC KHI phần còn lại
-(datalen/statuscode) kịp về qua UART — dẫn tới cb_http_action() nhận
-buffer bị cắt cụt kiểu "+HTTPACTION: 0,2" (thay vì
-"+HTTPACTION: 0,206,2048") và parse lỗi (AT_ERROR).
+1. modem_poll() res_success bug — ĐÃ SỬA XONG, ĐÃ TEST OK TRÊN BOARD
+   THẬT cho cả 2 luồng:
+   - test_lte_mqtt (MQTT connect/publish/subscribe) — người dùng xác
+     nhận "test mqtt thì ok rồi".
+   - test_http's AT+HTTPACTION parse — log thật cho thấy
+     "AT+HTTPACTION: status=206 datalen=2048" in ra liên tục đúng,
+     không còn timeout ở bước này nữa.
+   Xem mục "LỊCH SỬ SỬA modem_poll() (4 LẦN)" bên dưới để hiểu rõ
+   TẠI SAO logic cuối cùng lại như vậy — quan trọng nếu cần sửa thêm
+   lần nữa, tránh lặp lại 3 lần sai trước đó.
 
-============================================================
-LỊCH SỬ SỬA TRONG PHIÊN NÀY (3 LẦN, 2 LẦN ĐẦU ĐỀU GÂY REGRESSION)
-============================================================
-LẦN 1 (SAI — gây treo AT+CPIN?, AT trần, AT+UIMHOTSWAPLEVEL...):
-  Kiểm tra ký tự NGAY SAU đoạn res_success đã match trong buffer,
-  áp dụng cho MỌI res_success không phân biệt. Bug: với pattern như
-  "\r\nOK\r\n" (đã TỰ đủ để xác nhận dòng hoàn chỉnh), ký tự "ngay
-  sau" đó không thuộc về response thật — là byte rác/'\0' còn sót
-  trong buffer nếu UART chưa gửi gì thêm. Toàn bộ lệnh AT cơ bản bị
-  treo tới timeout.
-
-LẦN 2 (SAI — gây treo AT+CMQTTTOPIC, MQTT publish fail):
-  Sửa: chỉ chờ thêm ký tự khi res_success KHÔNG tự kết thúc bằng
-  \r/\n. Bug: điều kiện này vô tình bắt luôn dấu ">" (data-entry
-  prompt dùng bởi AT+CMQTTTOPIC, AT+CMQTTPUB, AT+CCERTDOWN — xem
-  a7677s.c, nhiều chỗ gọi send_mqtt_dynamic(..., ">", ...)). Dấu ">"
-  là tín hiệu ĐẦY ĐỦ tự thân, modem KHÔNG BAO GIỜ gửi \r\n theo sau
-  nó (khác hẳn 1 dòng URC) — chờ mãi không bao giờ tới, treo tới
-  timeout.
-
-LẦN 3 (ĐÃ XÁC NHẬN ĐÚNG CHO MQTT — người dùng report "test mqtt ok
-rồi"):
-  Sửa lại: chỉ chờ thêm byte khi res_success VỪA không tự kết thúc
-  bằng \r/\n, VỪA bắt đầu bằng '+' (tức thực sự là 1 tiền tố dòng
-  URC như "+HTTPACTION: 0,", KHÔNG phải dấu ">"). Đã grep toàn bộ
-  res_success trong a7677s.c VÀ a7677s_http.c để xác nhận bao phủ đủ
-  3 loại pattern hiện có trong codebase:
-    (a) "\r\nOK\r\n", "\r\n+CMQTTSTART: 0\r\n" kiểu — tự kết thúc
-        bằng \r\n → tin ngay, không đổi hành vi so với trước khi có
-        bug này.
-    (b) ">" — không bắt đầu bằng '+' → tin ngay như (a), không chờ
-        thêm.
-    (c) "+HTTPACTION: 0," — DUY NHẤT case này bắt đầu bằng '+' VÀ
-        không tự kết thúc bằng \r/\n → chờ thêm byte tới khi thấy
-        \r hoặc \n ngay sau đoạn match.
-  Test MQTT (test_lte_mqtt: publish/subscribe/connect) đã XÁC NHẬN
-  OK trên board thật sau lần sửa này.
+2. Đã loại trừ giả thuyết "file .bin chứa chuỗi text trùng AT
+   command" — người dùng đã cung cấp hex dump 500 byte đầu file
+   TrackingFirmWare.bin thật (118504 bytes), xác nhận là ARM vector
+   table chuẩn (00 00 0A 20 = initial SP, loạt 45 4B 01 08 lặp lại =
+   default handler address), KHÔNG chứa bất kỳ chuỗi ASCII nào giống
+   "AT+HTTP...". Bug KHÔNG nằm ở nội dung file.
 
 ============================================================
-VẤN ĐỀ CÒN LẠI — CHƯA GIẢI QUYẾT, CẦN LÀM NGAY ĐẦU PHIÊN SAU
+BUG MỚI ĐÃ CHẨN ĐOÁN XONG — UART CONTENTION (CHƯA SỬA)
 ============================================================
-Test HTTP (test_http.c, gọi a7677s_http_get_range()) với log_debug
-bật lên cho thấy log DỪNG LẠI (không có gì thêm) NGAY SAU dòng:
+TRIỆU CHỨNG (xem log đầy đủ trong lịch sử chat nếu cần, tóm tắt ở
+đây): sau khi AT+HTTPACTION parse đúng (status=206, datalen=2048),
+bước AT+HTTPREAD=0,400 bị gửi LẶP LẠI HÀNG CHỤC LẦN với offset LUÔN
+LUÔN LÀ 0 (không bao giờ tăng), mỗi lần chỉ đọc được 1-12 byte lẻ
+tẻ qua UART, dữ liệu trong modem->buff (KHÔNG PHẢI s_http.data[])
+tích lũy thành một mớ hỗn độn xen kẽ giữa dữ liệu nhị phân thật của
+file (byte ngẫu nhiên như 'Т', 'h', 'w', 'K'...) VÀ chuỗi echo lệnh
+AT+HTTPREAD dạng text lặp đi lặp lại nhiều lần liền nhau
+("AT+HTTPAT+HTTPREAD=AT+HTTPREADAT+HT..."). Cuối cùng
+RAW_WAIT_ECHO_OK không bao giờ thấy "OK\r\n" liền mạch, timeout sau
+HTTP_READ_RAW_TIMEOUT_MS=5000ms, abort_read_raw() được gọi, toàn bộ
+range bị fail và test_http.c gọi lại a7677s_http_get_range() từ đầu
+(offset không đổi vì range đó chưa từng thành công) — khớp hoàn toàn
+với log: mỗi vòng lặp lớn lại thấy 1 chuỗi AT+HTTPACTION mới chạy
+lại từ đầu.
 
-    [DEBUG]MODEM : Read : 26 bytes
-    [DEBUG]MODEM : Data :
-                          +HTTPACTION: 0,206,2048
-    [DEBUG]MODEM : 0D 2B 48 54 54 50 41 43 54 49 4F 4E 3A 20 30 2C
-                    32 30 36 2C 32 30 34 38 0D 0A
+NGUYÊN NHÂN GỐC ĐÃ XÁC NHẬN BẰNG CÁCH ĐỌC CODE THẬT (không suy
+đoán):
 
-Đọc kỹ hex dump: dòng "+HTTPACTION: 0,206,2048" KẾT THÚC bằng
-"0D 0A" (\r\n) — tức theo lý thuyết đã đủ điều kiện line_complete
-với logic Lần 3 ở trên (match "+HTTPACTION: 0," rồi ký tự tiếp theo
-trong buffer phải là '\r' — CẦN XÁC NHẬN LẠI: chuỗi số "206,2048"
-nằm GIỮA "+HTTPACTION: 0," và "\r\n", nên next_char thực chất là
-ký tự đầu của "206..." KHÔNG PHẢI \r — ĐÂY CÓ THỂ LÀ BUG THỨ 4,
-CHƯA XÁC NHẬN, XEM PHÂN TÍCH BÊN DƯỚI).
+  a7677s_poll() (a7677s.c, dòng ~442-460) — hàm này được gọi MỖI
+  TICK qua modem_handle_poll() (test_http.c gọi modem_handle_poll()
+  mỗi tick trong test_http_poll()) — LUÔN LUÔN gọi modem_poll(pModem
+  (dce), ts) ĐẦU TIÊN, VÔ ĐIỀU KIỆN, không kiểm tra xem có module
+  con nào khác (như a7677s_http.c) đang tự ý chiếm UART hay không.
 
->>> NGHI VẤN BUG MỚI (chưa xác nhận, việc đầu tiên cần làm phiên sau):
-Logic Lần 3 chờ ký tự NGAY SAU đoạn "+HTTPACTION: 0," (14-15 ký tự)
-phải là \r hoặc \n. Nhưng response thật là
-"+HTTPACTION: 0,206,2048\r\n" — ký tự ngay sau "+HTTPACTION: 0," là
-'2' (đầu của "206"), KHÔNG PHẢI \r. Với logic hiện tại, điều kiện
-line_complete sẽ luôn FALSE cho response này (vì sau "0," luôn là
-số liệu, không bao giờ là \r/\n ngay lập tức) — nghĩa là bug Lần 3
-tuy đã fix đúng cho case "bị cắt cụt giữa dòng" nhưng có thể đã VÔ
-TÌNH làm nó KHÔNG BAO GIỜ match được nữa khi dòng đã về ĐỦ, vì code
-chỉ kiểm tra ĐÚNG 1 ký tự ngay sau prefix, không quét tiếp tới khi
-gặp \r/\n thật sự ở cuối dòng.
+  start_read_raw() (a7677s_http.c, dòng ~619-639) set
+  pModem(s_http.dce)->isBusy = 1 THỦ CÔNG để "báo hiệu bận" — nhưng
+  modem_poll() chỉ kiểm tra "if (!modem->isBusy) return;" rồi VẪN
+  TIẾP TỤC đọc UART bình thường nếu isBusy==1 (đây vốn là hành vi
+  ĐÚNG cho command bình thường qua modem_send_command() — modem_poll
+  () CẦN đọc UART để hoàn thành command đó). Nhưng với raw-read,
+  modem->cmd VẪN CÒN TRỎ TỚI LỆNH AT+HTTPACTION CŨ (chưa có lệnh mới
+  nào được gán qua modem_send_command() cho AT+HTTPREAD, vì
+  start_read_raw() CỐ TÌNH bypass modem_send_command()/modem_poll()
+  bằng cách tự sx_uart_write() thẳng — xem chính comment trong code
+  giải thích lý do bypass, vẫn đúng và cần thiết vì response HTTPREAD
+  chứa byte nhị phân bất kỳ, modem_poll()'s strstr()-based framing
+  không an toàn cho việc đó).
 
-ĐÂY LÀ VIỆC ĐẦU TIÊN CẦN LÀM Ở PHIÊN TIẾP THEO: đọc lại đoạn code
-trong modem_poll() (dán nguyên văn bên dưới, dòng ~108-135), xác
-nhận lại chính xác logic "next_char = match_pos[success_len]" đang
-kiểm tra ký tự gì, so với vị trí thật của \r\n trong response đầy đủ
-"+HTTPACTION: 0,206,2048\r\n". NHIỀU KHẢ NĂNG cần sửa thành: quét
-từ vị trí match_pos + success_len TỚI KHI gặp \r hoặc \n (không chỉ
-xem đúng 1 ký tự ngay sau), để chấp nhận số liệu biến đổi ở giữa.
+  KẾT QUẢ: modem_poll() (qua a7677s_poll()) VÀ a7677s_http_poll()
+  (raw-read loop, đọc 1 byte/tick qua sx_uart_read(uart, &byte, 1, 0)
+  ở dòng ~719) CÙNG ĐỌC CHUNG 1 UART TRONG CÙNG 1 TICK — tranh giành
+  từng byte một cách không xác định (phụ thuộc thứ tự gọi trong
+  test_http_poll(): modem_handle_poll() gọi TRƯỚC, a7677s_http_poll()
+  gọi SAU — nên modem_poll() luôn "ăn" byte trước, a7677s_http_poll()
+  chỉ còn lại phần thừa mỗi tick, xé lẻ dữ liệu nhị phân thành từng
+  mảnh 1-12 byte rải rác, khớp chính xác với log thật).
 
-KHÔNG ĐƯỢC GIẢ ĐỊNH TRƯỚC — cần đọc lại code thật + có thể cần thêm
-log/test để xác nhận chắc chắn trước khi sửa, đúng quy tắc dự án.
+============================================================
+HƯỚNG SỬA ĐÃ CHỐT VỚI NGƯỜI DÙNG (CHƯA CODE)
+============================================================
+Đã trình bày 2 hướng, người dùng đồng ý đi theo HƯỚNG 2:
 
-Người dùng CHƯA XÁC NHẬN đã đợi đủ HTTP_TIMEOUT_ACTION_MS (121000ms
-= 121 giây) sau dòng log cuối cùng hay chưa — nếu đợi đủ mà vẫn
-không thấy log TIMEOUT nào từ modem.c, thì bug trên gần như chắc
-chắn đúng (điều kiện line_complete không bao giờ true → isBusy
-không bao giờ về 0 → nhưng vẫn phải timeout sau 121s vì waitElapsed
-vẫn tăng bình thường ở nhánh không đọc được gì mới — NẾU VẪN KHÔNG
-TIMEOUT SAU 121S THÌ CÓ BUG KHÁC NỮA, xem thêm phần "khả năng khác"
-bên dưới). Hỏi lại người dùng ngay đầu phiên sau nếu chưa có câu trả
-lời.
+HƯỚNG 1 (KHÔNG CHỌN): sửa a7677s_poll() để tự kiểm tra
+a7677s_http_is_busy(dce) trước khi gọi modem_poll(). BỊ LOẠI vì tạo
+dependency ngược — a7677s.c (module modem tổng quát) phải biết về
+a7677s_http.c (module con chỉ lo HTTP), đi ngược nguyên tắc tách
+biệt đã ghi rõ trong chính file header của a7677s_http.c. Không mở
+rộng được nếu sau này có module khác cũng cần raw UART access.
 
->>> KHẢ NĂNG KHÁC (chưa loại trừ, chỉ mới nghĩ tới, CHƯA ĐỌC CODE
-XÁC NHẬN): nếu buffer 512 byte (MODEM_RX_BUFFER_SIZE) đầy hoặc gần
-đầy do các lần đọc tích lũy không được reset đúng lúc trong chuỗi
-HTTP nhiều bước (INIT->PARA_URL->PARA_SSL->PARA_HDR->ACTION, mỗi
-bước gọi http_send_dynamic() riêng — CẦN XÁC NHẬN mỗi lần gọi có
-thực sự reset buff_id/memset buff hay không, vì modem_send_command()
-làm việc này nhưng CẦN XEM LẠI s_http_command[] có bị tái sử dụng
-đúng cách giữa các bước không). CHƯA ĐỌC KỸ, chỉ là giả thuyết dự
-phòng nếu giả thuyết chính (next_char sai vị trí) bị loại trừ.
+HƯỚNG 2 (ĐÃ CHỌN): thêm 1 cờ MỚI trong struct modem (modem.h), ví dụ
+tên "rawIoActive" (uint8_t, cùng kiểu với isBusy/isReady/
+hasPowerPin - xem struct hiện tại ở cuối tài liệu). Cụ thể:
+
+  1. modem.h: thêm field uint8_t rawIoActive; vào struct modem,
+     cạnh isBusy. Khởi tạo = 0 trong modem_init() (giống isBusy/
+     isReady).
+
+  2. modem_poll(): thêm điều kiện SỚM NHẤT có thể trong hàm - ví dụ
+     ngay sau "if (!modem->isBusy) return;" thêm dòng
+     "if (modem->rawIoActive) return;" - để KHÔNG đọc UART, không
+     làm gì cả, khi cờ này bật. (CẦN XÁC NHẬN LẠI vị trí chính xác
+     khi code thật - đọc lại modem_poll() hiện tại, dán ở cuối tài
+     liệu này, để chọn đúng chỗ chèn, không đoán trước.)
+
+  3. a7677s_http.c's start_read_raw(): set CẢ HAI cờ - giữ nguyên
+     "pModem(s_http.dce)->isBusy = 1;" (để các nơi khác trong hệ
+     thống vẫn biết modem "bận" nói chung, không đổi ý nghĩa cũ) VÀ
+     THÊM "pModem(s_http.dce)->rawIoActive = 1;" (cờ mới, để chặn
+     modem_poll() khỏi tự đọc UART).
+
+  4. a7677s_http.c's finish_read_raw_chunk() VÀ abort_read_raw():
+     CẢ HAI hàm này đều clear isBusy = 0 hiện tại - cần thêm clear
+     rawIoActive = 0 CÙNG LÚC ở cả hai chỗ (không được sót 1 trong 2
+     - abort_read_raw() dễ bị quên vì nó là đường lỗi, ít được để ý
+     hơn happy path).
+
+TẠI SAO CHỌN HƯỚNG NÀY: khái niệm "ai đang chiếm quyền đọc UART" đúng
+ra thuộc về tầng modem_t - đây đúng là nơi lưu trạng thái đó, cùng
+logic với cách isBusy đã làm cho command bình thường. Cờ mới tách
+biệt rõ 2 khái niệm khác nhau: "bận vì 1 command AT thường"
+(modem_poll() TỰ xử lý, cần đọc UART) vs "bận vì module con đang TỰ
+đọc UART trực tiếp" (modem_poll() PHẢI tránh xa hoàn toàn). Bất kỳ
+module con nào khác trong tương lai (không chỉ HTTP) cần raw UART
+access đều dùng lại được cùng cơ chế mà không cần sửa a7677s.c/
+a7677s_poll() thêm lần nào nữa.
+
+VIỆC CẦN LÀM ĐẦU TIÊN Ở PHIÊN TIẾP THEO: implement đúng 4 bước trên,
+theo ĐÚNG THỨ TỰ (đọc lại code thật của modem.h/modem.c/a7677s_http.c
+TRƯỚC KHI sửa - đừng giả định vị trí dòng từ tài liệu này, code có
+thể đã đổi). Sau khi sửa xong, PHẢI kiểm tra lại (như đã làm 3 lần
+trước với res_success) rằng KHÔNG có module nào khác trong codebase
+đang tự set modem->isBusy = 1 thủ công theo kiểu tương tự
+start_read_raw() mà lại KHÔNG set rawIoActive - grep toàn bộ
+"->isBusy = 1" trong cả a7677s.c VÀ a7677s_http.c để xác nhận
+start_read_raw() là NƠI DUY NHẤT làm việc này theo kiểu bypass
+modem_send_command(), nếu không sẽ tạo ra 1 bug tương tự ở chỗ khác
+mà không hay biết.
+
+SAU KHI SỬA XONG: yêu cầu người dùng build + chạy lại test_http,
+xem log_debug, xác nhận:
+  - AT+HTTPREAD=0,400 KHÔNG còn bị gửi lặp lại với offset=0 mãi mãi
+    nữa - offset phải TĂNG dần qua các lần gọi trong CÙNG 1 range
+    (0 -> 400 -> 800 -> ... theo A7677S_HTTP_READ_CHUNK_SIZE, xem
+    a7677s_http.h để biết giá trị chính xác).
+  - modem->buff (log "Command success: [...]") KHÔNG còn xen lẫn dữ
+    liệu nhị phân của file .bin nữa - vì modem_poll() giờ hoàn toàn
+    không đọc UART trong lúc HTTP_STATE_READ_RAW đang chạy.
+  - Ít nhất 1 range (lý tưởng là cả 5 range trong TEST_HTTP_MAX_RANGES)
+    báo "[range N] OK status=206 data_len=...".
+  - Log hex đầu/cuối mỗi range OK (test_http.c's on_range_done() đã
+    tự dump 16 byte đầu) khớp với nội dung thật của file .bin (so
+    với hex dump người dùng đã cung cấp cho range 0: phải bắt đầu
+    bằng "00 00 0A 20 F5 4A 01 08...").
+
+NẾU VẪN CÒN BUG SAU KHI SỬA: KHÔNG giả định thêm, quay lại đọc log
+debug thật, so khớp offset/hex dump, và cân nhắc liệu còn nguồn tranh
+chấp UART nào khác chưa lường tới (ví dụ urc_poll() trong a7677s.c,
+dòng ~458-460 của a7677s_poll() - CHƯA KIỂM TRA hàm này có tự đọc
+UART độc lập hay không, CHỈ MỚI XÁC NHẬN nó bị chặn bởi
+!modem_is_busy() nên với isBusy=1 hiện tại nó ĐÃ không chạy - cần
+xác nhận điều này VẪN ĐÚNG sau khi thêm rawIoActive, vì logic if
+(!modem_is_busy(...)) không đổi, chỉ modem_poll() nội bộ đổi, nên
+urc_poll() không bị ảnh hưởng - NHƯNG NÊN XÁC NHẬN LẠI, không giả
+định).
+
+============================================================
+LỊCH SỬ SỬA modem_poll() res_success (4 LẦN, 3 LẦN ĐẦU SAI)
+============================================================
+Giữ nguyên từ v1, tóm tắt lại để không phải đọc file cũ:
+
+LẦN 1 (SAI): kiểm tra ký tự NGAY SAU res_success cho MỌI pattern.
+  Gãy: "\r\nOK\r\n" và tương tự - ký tự sau match không thuộc response
+  thật (rác/'\0'), treo mọi lệnh AT cơ bản (AT+CPIN?, AT trần...).
+
+LẦN 2 (SAI): chỉ chờ thêm khi res_success KHÔNG tự kết thúc \r/\n.
+  Gãy: bắt luôn dấu ">" (data-entry prompt của AT+CMQTTTOPIC/PUB/
+  CCERTDOWN) - "> " không bao giờ có \r\n theo sau, treo MQTT
+  publish.
+
+LẦN 3 (SAI, nhưng đúng cho MQTT): thêm điều kiện phải bắt đầu bằng
+  '+' (tức prefix URC thật) MỚI chờ thêm. MQTT test OK. NHƯNG: chỉ
+  kiểm tra ĐÚNG 1 KÝ TỰ ngay sau prefix - với "+HTTPACTION: 0," ký
+  tự đó luôn là chữ số đầu của <statuscode> (vd '2' của "206"),
+  KHÔNG BAO GIỜ là \r/\n trực tiếp vì còn <statuscode>,<datalen>
+  chen giữa trước \r\n thật. Treo HTTPACTION dù response đã về đủ -
+  XÁC NHẬN bằng log TIMEOUT chứa nguyên vẹn
+  "+HTTPACTION: 0,206,2048\r\n" trong buffer.
+
+LẦN 4 (ĐÚNG, ĐÃ TEST TRÊN BOARD THẬT): thay kiểm tra 1 ký tự bằng
+  vòng quét byte-by-byte từ ngay sau prefix TỚI KHI gặp \r hoặc \n,
+  giới hạn trong modem->buff_id (số byte thực sự đã nhận, không đọc
+  tràn vào phần buffer chưa ghi). Xem code đầy đủ ở cuối tài liệu.
+
+BÀI HỌC: mỗi lần sửa modem_poll() PHẢI được kiểm tra lại theo TẤT CẢ
+res_success pattern hiện có trong CẢ a7677s.c VÀ a7677s_http.c (grep
+toàn bộ, không chỉ đoán) TRƯỚC KHI báo là xong - test 1 luồng OK
+không có nghĩa luồng khác cũng OK.
 
 ============================================================
 QUY TẮC BẮT BUỘC (kế thừa, không đổi)
@@ -142,10 +228,7 @@ QUY TẮC BẮT BUỘC (kế thừa, không đổi)
   văn bên dưới) TRƯỚC KHI làm gì khác, vì thay đổi này CHƯA PUSH.
 - KHÔNG tin log/mô tả cũ mà không tự đọc lại code thật.
 - Không sửa code âm thầm — trình bày nghi vấn → hỏi → chỉ sửa sau
-  khi có xác nhận rõ ràng. (Bài học từ 2 lần sửa sai trong phiên
-  này: MỖI thay đổi ở modem_poll() phải được review kỹ theo TẤT CẢ
-  các res_success pattern hiện có trong cả a7677s.c VÀ a7677s_http.c
-  trước khi báo là xong — không chỉ test 1 luồng rồi kết luận.)
+  khi có xác nhận rõ ràng.
 - Comment code tiếng Anh, trao đổi tiếng Việt.
 - KHÔNG có compiler thật trong container — không build được. Người
   dùng tự build + flash + gửi log qua chat.
@@ -156,6 +239,7 @@ QUY TẮC BẮT BUỘC (kế thừa, không đổi)
 
 ============================================================
 NỘI DUNG ĐẦY ĐỦ modem.c ĐÃ SỬA (dán nguyên văn để copy lại nếu mất)
+LẦN SỬA THỨ 4 — ĐÃ XÁC NHẬN ĐÚNG TRÊN BOARD THẬT
 ============================================================
 File: SynaptiX_FDK/components/modules/modem/modem.c
 
@@ -193,7 +277,7 @@ int modem_send_command(modem_t *modem, modem_command_t *cmd, uint32_t timeout){
      * command. Since buff is a fixed 512-byte array with no guaranteed
      * null-terminator management, strstr(modem->buff, ...) below in
      * modem_poll() can read straight through into leftover stale data from
-     * an earlier command whenever the new response is shorter than the old
+     * an earlier command whenever the new response is shorter than the one
      * one. Confirmed on real board: a7677s.c's CREG-poll debug log showed
      * responses like "[AT+C1\n+CME1,\"IP\",\"m3-world\"\nOK\nAT+CGA]" —
      * a mix of a CGDCONT response and CREG echo bytes from different polls,
@@ -268,17 +352,25 @@ void modem_poll(modem_t *modem, uint32_t timeStamp){
              * prompt) is trusted on bare strstr() match, exactly like
              * pre-2026-08-05 behavior.
              *
-             * KNOWN OPEN ISSUE as of end of this session (see handoff doc,
-             * "VAN DE CON LAI" section): for pattern (c) below, this only
-             * checks the SINGLE byte immediately after the matched prefix.
-             * For "+HTTPACTION: 0," that next byte is the first digit of
-             * <statuscode> (e.g. '2' in "206"), NEVER '\r' or '\n' directly
-             * - the real \r\n comes several bytes further, after
-             * <statuscode>,<datalen>. This condition may need to become a
-             * scan-forward-until-\r-or-\n instead of a single-byte check.
-             * NOT YET CONFIRMED against a repro that proves the callback
-             * really never fires (vs. just being slow) - see handoff doc
-             * before changing this. */
+             * Follow-up fix #3 (same day, CONFIRMED CORRECT on real
+             * hardware): a partial-URC prefix like "+HTTPACTION: 0," is
+             * followed by VARIABLE data (<statuscode>,<datalen>, e.g.
+             * "206,2048") BEFORE the line's real "\r\n" - checking only the
+             * single byte right after the matched prefix (fix #2's version)
+             * checks the first digit of that variable data, which is never
+             * '\r'/'\n' itself, so line_complete was always false and every
+             * HTTPACTION call timed out even once the full line (with
+             * trailing \r\n) had genuinely arrived - confirmed on real
+             * hardware: TIMEOUT log showed the complete
+             * "+HTTPACTION: 0,206,2048\r\n" sitting in the buffer already.
+             * Fix: scan forward from the end of the matched prefix, byte by
+             * byte, until a '\r' or '\n' is found - bounded by
+             * modem->buff_id (how many bytes have actually been received so
+             * far), never reading past valid data into the unwritten
+             * remainder of the fixed-size buff[] array. CONFIRMED WORKING:
+             * subsequent test_http.c run showed
+             * "AT+HTTPACTION: status=206 datalen=2048" logged correctly and
+             * repeatedly, no more timeouts at this step. */
             char *match_pos = modem->cmd->res_success ? strstr(modem->buff, modem->cmd->res_success) : NULL;
             if(match_pos){
                 size_t success_len = strlen(modem->cmd->res_success);
@@ -289,8 +381,16 @@ void modem_poll(modem_t *modem, uint32_t timeStamp){
                 if(pattern_self_terminated || !pattern_is_urc_prefix){
                     line_complete = 1;
                 } else {
-                    char next_char = match_pos[success_len];
-                    line_complete = (next_char == '\r' || next_char == '\n');
+                    size_t scan_pos = (size_t)(match_pos - modem->buff) + success_len;
+                    line_complete = 0;
+                    while(scan_pos < modem->buff_id){
+                        char c = modem->buff[scan_pos];
+                        if(c == '\r' || c == '\n'){
+                            line_complete = 1;
+                            break;
+                        }
+                        scan_pos++;
+                    }
                 }
                 if(line_complete){
                     modem->isBusy = 0;
@@ -330,37 +430,176 @@ void modem_poll(modem_t *modem, uint32_t timeStamp){
 ```
 
 ============================================================
-LOG THAM KHẢO — TEST HTTP TREO (bật log_debug), DÙNG ĐỂ ĐỐI CHIẾU
-KHI SỬA LẠI
+THAM KHẢO — modem.h struct modem HIỆN TẠI (CHƯA CÓ rawIoActive)
+Dán nguyên văn để biết chính xác chỗ cần thêm field mới ở phiên sau
 ============================================================
-(Chỉ đoạn cuối cùng trước khi treo, xem log đầy đủ trong lịch sử
-chat nếu cần thêm ngữ cảnh — KHÔNG có trong file này để tránh phình
-tài liệu.)
+File: SynaptiX_FDK/components/modules/modem/modem.h
 
-    [DEBUG]A7677S_HTTP : HTTP CMD: AT+HTTPACTION=0
-    [DEBUG]MODEM : Send command AT+HTTPACTION=0
-    [DEBUG]MODEM : Read : 8 bytes
-    [DEBUG]MODEM : Data : AT+HTTPA
-    [DEBUG]MODEM : 41 54 2B 48 54 54 50 41
-    [DEBUG]MODEM : Read : 14 bytes
-    [DEBUG]MODEM : Data : CTION=0
-    OK
-    [DEBUG]MODEM : 43 54 49 4F 4E 3D 30 0D 0D 0A 4F 4B 0D 0A
-    [DEBUG]MODEM : Read : 1 bytes
-    [DEBUG]MODEM : Data :
-    [DEBUG]MODEM : 0D
-    [DEBUG]MODEM : Read : 26 bytes
-    [DEBUG]MODEM : Data :
-                          +HTTPACTION: 0,206,2048
-    [DEBUG]MODEM : 0A 2B 48 54 54 50 41 43 54 49 4F 4E 3A 20 30 2C
-                    32 30 36 2C 32 30 34 38 0D 0A
-    (log dừng lại đây, không có gì thêm - CHƯA XÁC NHẬN người dùng
-    đã đợi đủ 121 giây - HAI VIỆC CẦN LÀM NGAY ĐẦU PHIÊN SAU, THEO
-    THỨ TỰ:
-      1. Hỏi người dùng đã đợi đủ 121s (HTTP_TIMEOUT_ACTION_MS) hay
-         chưa - nếu chưa, yêu cầu đợi/test lại trước khi kết luận
-         gì thêm.
-      2. Đọc lại logic next_char trong modem_poll() (xem mục "NGHI
-         VẤN BUG MỚI" ở trên), xác nhận hoặc loại trừ giả thuyết
-         "chỉ kiểm tra đúng 1 ký tự ngay sau prefix, không quét tới
-         \r\n thật" bằng cách trace tay qua ví dụ log này.)
+```c
+#ifndef MODEM_H
+#define MODEM_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "sx_uart.h"
+#include "sx_gpio.h"
+#include "cqueue.h"
+#include <string.h>
+
+#define MODEM_RX_BUFFER_SIZE 512
+
+typedef struct modem modem_t;
+
+typedef enum modem_response_st{
+    MODEM_RESPONSE_SUCCESS = 0,
+    MODEM_RESPONSE_FAIL,
+    MODEM_RESPONSE_TIMEOUT
+}modem_response_st_t;
+
+typedef void (*modem_command_response_callback_t)(modem_t *modem, const char *response, modem_response_st_t res, void *arg);
+
+typedef struct modem_command{
+    const char *cmd;
+    const char *res_success;
+    const char *res_fail;
+    modem_command_response_callback_t callback;
+    void *arg; // callback
+}modem_command_t;
+
+struct modem
+{
+    /* data */
+    char buff[MODEM_RX_BUFFER_SIZE];
+    uint32_t buff_id;
+    sx_uart_t uart;
+    sx_gpio_t pwrPin;        /* PWRKEY line — every modem driver has this */
+    sx_gpio_t powerPin;      /* VBAT cutoff transistor GPIO — optional,
+                              * depends on board revision. Only valid to use
+                              * when hasPowerPin is 1. */
+    uint8_t hasPowerPin;     /* 1 if this board wires a VBAT cutoff for this
+                              * modem, 0 otherwise. Must be explicitly set by
+                              * the board init code (sx_board.c), never
+                              * assumed. Drivers must check this flag before
+                              * touching powerPin. */
+    uint8_t isBusy;
+    uint8_t isReady;
+    uint32_t timeOut;
+    uint32_t waitElapsed;    /* elapsed time accumulator for the current
+                              * command timeout, tracked per-instance.
+                              * Replaces the old "static uint32_t s_time"
+                              * local in modem_poll(), which was unsafe with
+                              * more than one modem instance. */
+    uint32_t resID;
+    modem_command_t *cmd;
+};
+
+void modem_init(modem_t *modem);
+void modem_poll(modem_t *modem,uint32_t timeStamp);
+
+//int modem_send_command(modem_t *modem, modem_command_t *cmd, char *response, int response_size,modem_command_response_callback_t callback,uint32_t timeout);
+int modem_send_command(modem_t *modem, modem_command_t *cmd, uint32_t timeout);
+
+static inline uint8_t modem_is_busy(modem_t *modem){
+    return modem->isBusy;
+}
+
+static inline uint8_t modem_is_ready(modem_t *modem){
+    return modem->isReady;
+}
+
+#ifdef __cplusplus
+}
+#endif
+#endif // MODEM_H
+```
+
+============================================================
+THAM KHẢO — a7677s_http.c CÁC HÀM LIÊN QUAN (start_read_raw,
+finish_read_raw_chunk, abort_read_raw) - CHƯA SỬA, dán để biết vị
+trí cần thêm rawIoActive ở phiên sau
+============================================================
+(Trích đoạn liên quan, không phải toàn file - xem toàn file thật khi
+code, code có thể lệch số dòng so với lúc trích.)
+
+```c
+static void start_read_raw(void)
+{
+    uint32_t remaining = s_http.http_datalen - s_http.read_offset;
+    uint32_t this_read = (remaining < A7677S_HTTP_READ_CHUNK_SIZE) ? remaining : A7677S_HTTP_READ_CHUNK_SIZE;
+
+    snprintf(s_http_dyn_cmd_buf, sizeof(s_http_dyn_cmd_buf),
+             "AT+HTTPREAD=%lu,%lu\r\n",
+             (unsigned long)s_http.read_offset, (unsigned long)this_read);
+
+    s_http.raw_substate         = RAW_WAIT_ECHO_OK;
+    s_http.raw_chunk_len        = 0;
+    s_http.raw_chunk_copied     = 0;
+    s_http.raw_line_len         = 0;
+    s_http.raw_state_elapsed_ms = 0;
+
+    log_debug(TAG, "HTTP RAW CMD: %s", s_http_dyn_cmd_buf);
+    pModem(s_http.dce)->isBusy = 1;   /* claim the channel - see file header comment above */
+    /* TODO (phien sau): them pModem(s_http.dce)->rawIoActive = 1; o day */
+    sx_uart_flush(&pModem(s_http.dce)->uart);
+    sx_uart_write(&pModem(s_http.dce)->uart,
+                   (const uint8_t *)s_http_dyn_cmd_buf, strlen(s_http_dyn_cmd_buf));
+}
+
+static void finish_read_raw_chunk(void)
+{
+    pModem(s_http.dce)->isBusy = 0;
+    /* TODO (phien sau): them pModem(s_http.dce)->rawIoActive = 0; o day */
+
+    if (s_http.read_offset < s_http.http_datalen) {
+        start_read_raw();
+        return;
+    }
+
+    s_http.state = HTTP_STATE_TERM;
+    http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
+                       "\r\nOK\r\n", "\r\nERROR\r\n",
+                       cb_http_term, HTTP_TIMEOUT_SHORT_MS);
+}
+
+static void abort_read_raw(const char *why)
+{
+    log_error(TAG, "AT+HTTPREAD (raw): %s at offset %lu", why, (unsigned long)s_http.read_offset);
+    pModem(s_http.dce)->isBusy = 0;
+    /* TODO (phien sau): them pModem(s_http.dce)->rawIoActive = 0; o day -
+     * DE Y hon finish_read_raw_chunk() vi day la duong loi, hay bi quen */
+    s_http.state = HTTP_STATE_TERM;
+    http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
+                       "\r\nOK\r\n", "\r\nERROR\r\n",
+                       cb_http_term, HTTP_TIMEOUT_SHORT_MS);
+}
+```
+
+============================================================
+THAM KHẢO — a7677s_poll() (a7677s.c) - nơi gọi modem_poll() vô điều
+kiện, nguồn gốc bug UART contention
+============================================================
+```c
+static void a7677s_poll(void *ctx, uint32_t ts)
+{
+    a7677s_t *dce = (a7677s_t *)ctx;
+
+    /* Always pump the underlying command/response state machine first, so
+     * any in-flight AT command (probe or CPOF) gets its callback fired
+     * before we act on power_state below. */
+    modem_poll(pModem(dce), ts);
+
+    /* URC scanner: only safe to read the UART for unsolicited lines while
+     * no AT command is currently awaiting its response (modem_poll() above
+     * owns the UART/modem->buff channel exclusively whenever isBusy is 1).
+     * ... */
+    if (!modem_is_busy(pModem(dce))) {
+        urc_poll(dce);
+    }
+
+    /* ... (edge detection, unchanged, not relevant to this bug) ... */
+}
+```
+Với cờ rawIoActive mới, KHÔNG cần sửa file này - modem_poll() tự
+kiểm tra cờ ở đầu hàm và return sớm, a7677s_poll() không cần biết gì
+về rawIoActive cả (đúng ý đồ tách biệt module).

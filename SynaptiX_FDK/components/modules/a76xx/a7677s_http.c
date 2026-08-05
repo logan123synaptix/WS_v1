@@ -633,6 +633,16 @@ static void start_read_raw(void)
 
     log_debug(TAG, "HTTP RAW CMD: %s", s_http_dyn_cmd_buf);
     pModem(s_http.dce)->isBusy = 1;   /* claim the channel - see file header comment above */
+    /* Bug fix (2026-08-05): isBusy alone does not stop modem_poll() from
+     * also reading the UART this tick (modem_poll() only skips work when
+     * !isBusy) - modem->cmd still points at the previous AT command, and
+     * a7677s_poll() calls modem_poll() unconditionally before
+     * a7677s_http_poll() gets a turn (see a7677s.c). rawIoActive is the
+     * dedicated flag that stops modem_poll() from touching the UART at all
+     * while this raw read is in flight - see modem.h's doc-comment on this
+     * field for the full explanation, and the file header comment above for
+     * why this command bypasses modem_send_command() in the first place. */
+    pModem(s_http.dce)->rawIoActive = 1;
     sx_uart_flush(&pModem(s_http.dce)->uart);
     sx_uart_write(&pModem(s_http.dce)->uart,
                    (const uint8_t *)s_http_dyn_cmd_buf, strlen(s_http_dyn_cmd_buf));
@@ -647,6 +657,18 @@ static void start_read_raw(void)
 static void finish_read_raw_chunk(void)
 {
     pModem(s_http.dce)->isBusy = 0;
+    /* Bug fix (2026-08-05): must release rawIoActive together with isBusy,
+     * or modem_poll() stays locked out of the UART forever after this raw
+     * read finishes, even for perfectly normal AT commands later (HTTPTERM
+     * below, or any subsequent command) - see modem.h's rawIoActive
+     * doc-comment and start_read_raw()'s comment above for why this flag
+     * exists. If read_offset < http_datalen just below, start_read_raw()
+     * immediately re-sets rawIoActive = 1 for the next chunk anyway, so
+     * this clear+re-set pair is intentional, not wasted work - it keeps the
+     * invariant "rawIoActive is 1 only while a raw UART transfer is
+     * actually in flight" true at every instant, not just at the start/end
+     * of the whole multi-chunk range. */
+    pModem(s_http.dce)->rawIoActive = 0;
 
     if (s_http.read_offset < s_http.http_datalen) {
         start_read_raw();
@@ -669,6 +691,16 @@ static void abort_read_raw(const char *why)
 {
     log_error(TAG, "AT+HTTPREAD (raw): %s at offset %lu", why, (unsigned long)s_http.read_offset);
     pModem(s_http.dce)->isBusy = 0;
+    /* Bug fix (2026-08-05): same rawIoActive release as finish_read_raw_
+     * chunk() above - easy to miss here specifically because this is the
+     * error path, not the happy path, and it's the one the handoff notes
+     * explicitly flagged as likely to be forgotten. Without this, any
+     * AT+HTTPREAD timeout/error would permanently wedge modem_poll() out of
+     * ever reading the UART again for the rest of the session (isBusy gets
+     * cleared and re-set by later commands normally, but rawIoActive would
+     * stay stuck at 1 forever since nothing else in the codebase clears
+     * it). */
+    pModem(s_http.dce)->rawIoActive = 0;
     s_http.state = HTTP_STATE_TERM;
     http_send_dynamic(HTTP_CMD_TERM, "AT+HTTPTERM\r\n",
                        "\r\nOK\r\n", "\r\nERROR\r\n",

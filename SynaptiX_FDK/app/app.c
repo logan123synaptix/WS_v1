@@ -18,6 +18,7 @@
 #include "shell_app.h"
 #include "time_sync.h"
 #include "mqtt_rpc.h"
+#include "fota.h"
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
@@ -773,6 +774,35 @@ static void app_cycle_process(uint32_t delta_ms)
                 log_info(TAG, "Publish confirmed done after %lu ms",
                          (unsigned long)s_cycle_tick_ms);
             }
+
+            /* FOTA check/download goes here — AFTER telemetry publish is
+             * confirmed done (or timed out), BEFORE APP_CYCLE_SLEEPING —
+             * exactly matching fota.h's documented wiring intent
+             * ("explicitly called from app.c's APP_CYCLE_WAIT_PUBLISH ->
+             * APP_CYCLE_SLEEPING transition"). Ordering matters: if a FOTA
+             * download fails or is slow, that must never delay/corrupt
+             * this cycle's telemetry publish, which already completed
+             * (or was given up on) by the time this line runs.
+             *
+             * fota_download() is BLOCKING — the entire HTTPS range-download
+             * + flash erase/write/verify sequence runs synchronously here,
+             * potentially for a long time (see fota.c's own timing notes;
+             * not yet measured with real timestamps end-to-end). This
+             * means app_cycle_process() itself will not return, and the
+             * rest of this tick's/main loop's other work (sensors, sleep
+             * manager, any watchdog) is blocked for that whole duration.
+             * NOT YET CONFIRMED acceptable by the user for the shipped
+             * app.c flow specifically (it was fine for test_fota.c, a
+             * throwaway test harness) — flagged here rather than silently
+             * assumed fine, per this project's rule of not deciding
+             * architecture-level tradeoffs without asking first. If a
+             * watchdog timer turns out to be enabled anywhere in this
+             * build, this call is the first place to check for a reset
+             * during a long FOTA download. */
+            if (fota_is_pending()) {
+                fota_download();
+            }
+
             s_cycle_tick_ms = 0;
             s_cycle_state   = APP_CYCLE_SLEEPING;
             s_app_mode      = APP_MODE_ENTER_SLEEP;
@@ -836,6 +866,32 @@ static void app_cycle_process(uint32_t delta_ms)
 static uint8_t is_modem_owned_by_sleep_manager(void)
 {
     return sx_sleep_manager_is_waking(&s_sleep_mgr);
+}
+
+/* mqtt_cfg (below, in app_init()) has exactly ONE on_connected slot and ONE
+ * on_message slot (sx_user_mqtt_cfg_t, sx_user_mqtt.h) — but this app now
+ * has TWO independent consumers of MQTT events: mqtt_rpc.c (config-set
+ * channel, existing) and fota.c (new, this wiring). Each filters its own
+ * topic internally and does nothing for topics it doesn't own (confirmed
+ * by reading fota_on_message()'s and mqtt_rpc_on_message()'s doc-comments)
+ * — so simply calling both, unconditionally, in each dispatcher below is
+ * safe: neither call can affect the other's handling of a given message.
+ * on_connected re-runs mqtt_rpc_init()+fota_init() on every reconnect too
+ * (not just the first connect), which matters for fota_init() specifically
+ * since it (re-)subscribes to the retained FOTA-check topic — needed after
+ * any drop/reconnect, same reasoning mqtt_rpc_init()'s existing comment
+ * (below, at its mqtt_cfg.on_connected assignment) already gives for why
+ * on_connected was chosen over a one-time call right after *_init(). */
+static void mqtt_on_connected_dispatch(void)
+{
+    mqtt_rpc_init();
+    fota_init();
+}
+
+static void mqtt_on_message_dispatch(const char *topic, const char *message)
+{
+    mqtt_rpc_on_message(topic, message);
+    fota_on_message(topic, message);
 }
 
 void app_init(void){
@@ -905,8 +961,8 @@ void app_init(void){
      * client reports connected. Hooking on_connected guarantees the
      * subscribe happens exactly when it can succeed, including on any
      * future reconnect after a drop. */
-    mqtt_cfg.on_message   = mqtt_rpc_on_message;
-    mqtt_cfg.on_connected = mqtt_rpc_init;
+    mqtt_cfg.on_message   = mqtt_on_message_dispatch;
+    mqtt_cfg.on_connected = mqtt_on_connected_dispatch;
     if (net_cfg->use_tls) {
         sx_user_mqtt_tls_init(&mqtt_cfg,
                                net_cfg->ca_cert_len ? (char *)net_cfg->ca_cert : NULL,

@@ -143,7 +143,8 @@ int main(void)
   // test_lte_mqtt_init();
   // test_http_init();
   test_sps30_init();
-  test_fota_init();
+  // test_fota_init();
+  // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
   #else
   app_init();
   #endif
@@ -171,7 +172,7 @@ int main(void)
         // test_lte_mqtt_poll(delta);
         // test_http_poll(delta);
         test_sps30_poll(delta);
-        test_fota_poll(delta);
+        // test_fota_poll(delta);
         #else
         app_process(delta);
         #endif

@@ -31,7 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        1
+#define TEST        0
 #include "sx_board.h"
 #include "sx_ex_storage.h"
 #if TEST
@@ -138,11 +138,11 @@ int main(void)
   sx_board_init();
   // sx_storage_factory_reset();
   #if TEST
-  // test_ze12a_init();
+  test_ze12a_init();
   // test_gps_init();
   // test_lte_mqtt_init();
   // test_http_init();
-  test_sps30_init();
+  // test_sps30_init();
   // test_fota_init();
   // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
   #else
@@ -168,10 +168,10 @@ int main(void)
         
         #if TEST
         // test_gps_poll(delta);
-        // test_ze12a_poll(delta);
+        test_ze12a_poll(delta);
         // test_lte_mqtt_poll(delta);
         // test_http_poll(delta);
-        test_sps30_poll(delta);
+        // test_sps30_poll(delta);
         // test_fota_poll(delta);
         #else
         app_process(delta);

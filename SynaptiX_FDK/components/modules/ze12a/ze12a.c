@@ -175,20 +175,14 @@ void gas_sensor_poll(uint32_t time_stamp_ms)
      * ceiling is reached regardless of success (ensures we never get
      * stuck on a silent/disconnected channel). */
     s_channel_dwell_ms += time_stamp_ms;
-    (void)advance_channel; /* unused while the diagnostic below is active — see comment */
-    /* DIAGNOSTIC (2026-08-05, temporary — revert after the channel-1
-     * mystery is resolved, see chat history): "advance_channel ||"
-     * disabled on purpose to test whether the fast-path early-advance
-     * (switching channel the instant a valid frame is read, potentially
-     * mid-tick, while more bytes for a DIFFERENT channel's module may
-     * already be in-flight toward the now-just-flushed rxQueue via the
-     * RX ISR) is what's splicing/mislabeling frames into a wrong-looking
-     * "channel 1 always fails" pattern. With this disabled, every
-     * channel dwells the full fixed 2000ms regardless of whether a good
-     * frame arrived early — if channel 1 STILL fails identically, this
-     * early-advance path is NOT the cause and can be ruled out entirely;
-     * if channel 1 starts working, this is confirmed as the root cause. */
-    if (/* advance_channel || */ s_channel_dwell_ms >= GAS_SENSOR_CHANNEL_DWELL_MS) {
+    /* DIAGNOSTIC REVERTED (2026-08-05): disabling advance_channel here
+     * was tested against the real "channel 1 never reads" symptom —
+     * confirmed on real hardware the failure is IDENTICAL with early-
+     * advance disabled, ruling out mid-tick channel-switch frame-splicing
+     * as the cause. Restored to the original behavior; see chat history
+     * for the full elimination reasoning. Root cause still unknown as of
+     * this revert — see next diagnostic step. */
+    if (advance_channel || s_channel_dwell_ms >= GAS_SENSOR_CHANNEL_DWELL_MS) {
         s_channel_dwell_ms = 0;
         s_mux_channel = (uint8_t)((s_mux_channel + 1U) % GAS_SENSOR_MUX_CHANNEL_COUNT);
         ze12a_select_mux_channel(s_mux_channel);

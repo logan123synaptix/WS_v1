@@ -48,7 +48,9 @@ static void ze12a_select_mux_channel(uint8_t channel)
 {
     /* channel is a 2-bit mux address: bit0 -> S0/A0, bit1 -> S1/A1. */
     sx_gpio_write(&s_mux_s0, (channel & 0x01U) ? SX_GPIO_HIGH : SX_GPIO_LOW);
+    sx_delay_ms(20);
     sx_gpio_write(&s_mux_s1, (channel & 0x02U) ? SX_GPIO_HIGH : SX_GPIO_LOW);
+    sx_delay_ms(20);
 }
 
 void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,

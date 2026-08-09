@@ -30,7 +30,8 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_ze12a.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_rtc.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_shell.c \
-			$(SYNAPTIX_DIR)/app/user/test/test_ads1115.c
+			$(SYNAPTIX_DIR)/app/user/test/test_ads1115.c \
+			$(SYNAPTIX_DIR)/app/user/test/test_mux_select.c \
 
 
 BOARD_FILES = ${SYNAPTIX_DIR}/board/sx_board.c

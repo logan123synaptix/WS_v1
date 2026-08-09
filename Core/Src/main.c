@@ -31,7 +31,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app.h"
-#define TEST        1
+#define TEST        0
 #include "sx_board.h"
 #include "sx_ex_storage.h"
 #if TEST
@@ -46,6 +46,7 @@
 #include "test_sleep.h"
 #include "test_sps30.h"
 #include "test_ze12a.h"
+#include "test_mux_select.h"
 #endif
 
 /* USER CODE END Includes */
@@ -133,8 +134,11 @@ int main(void)
   sx_board_init();
   // sx_storage_factory_reset();
   #if TEST
-  test_ze12a_init();
+  // test_ze12a_init();
   // test_gps_init();
+  // select_mux_test_init();
+  test_sps30_init();
+  // select_mux_test(3);
   #else
   app_init();
   #endif
@@ -158,8 +162,8 @@ int main(void)
         
         #if TEST
         // test_gps_poll(delta);
-        test_ze12a_poll(delta);
-        // HAL_UART_Transmit(&huart5, (uint8_t*)"a", 2, 100);
+        // test_ze12a_poll(delta);
+        test_sps30_poll(delta);
         #else
         app_process(delta);
         #endif

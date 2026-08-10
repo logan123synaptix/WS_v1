@@ -130,6 +130,7 @@ uint8_t g_iwdg_ob_flash_unlock_status    = 0xFF;
 uint8_t g_iwdg_ob_ob_unlock_status       = 0xFF;
 uint8_t g_iwdg_ob_program_status         = 0xFF;
 uint32_t g_iwdg_ob_program_flash_error   = 0xFFFFFFFFU;
+uint8_t g_iwdg_ob_launch_status          = 0xFF;
 
 static void ensure_iwdg_frozen_in_stop_option_byte(void)
 {
@@ -205,6 +206,32 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void)
     g_iwdg_ob_program_status       = (program_status == HAL_OK) ? 0 : 1;
     g_iwdg_ob_program_flash_error  = HAL_FLASH_GetError();
 
+    /* BUG FIX (2026-08-10, round 3): HAL_FLASH_OB_Launch() below must be
+     * called BEFORE HAL_FLASH_OB_Lock()/HAL_FLASH_Lock(), not after.
+     * HAL_FLASH_OB_Launch() (stm32h5xx_hal_flash.c) works by setting the
+     * OPTSTRT bit in FLASH->OPTCR and waiting for the operation to
+     * complete -- it does NOT reset the MCU on STM32H5 (unlike STM32L4,
+     * which the original comment below was based on -- confirmed by
+     * reading the actual H5 HAL source: no NVIC_SystemReset/similar
+     * anywhere in the function body). Calling HAL_FLASH_OB_Lock() first
+     * sets FLASH_OPTCR.OPTLOCK, which locks out further writes to OPTCR
+     * -- so by the time OB_Launch() tried to SET_BIT(...OPTSTART) on the
+     * old code path below, the register was already locked and the bit
+     * silently failed to take effect. That fully explains round-2 DIAG's
+     * symptom: HAL_FLASHEx_OBProgram() and (the then-too-late)
+     * HAL_FLASH_OB_Launch() both reported HAL_OK / error=0, yet
+     * IWDG_STOP read back ACTIVE on every subsequent boot -- the actual
+     * hardware option-byte reload never ran. Moving Launch() before the
+     * Lock() calls fixes the ordering; the still-open question is
+     * whether STM32H5 needs an explicit reset after a successful OB
+     * reload for FLASH_OPTR/OPTSR_CUR to reflect the new value on THIS
+     * same boot, or whether it takes effect immediately -- the next DIAG
+     * log run will show which. */
+    if (program_status == HAL_OK) {
+        HAL_StatusTypeDef launch_status = HAL_FLASH_OB_Launch();
+        g_iwdg_ob_launch_status = (launch_status == HAL_OK) ? 0 : 1;
+    }
+
     HAL_FLASH_OB_Lock();
     HAL_FLASH_Lock();
 
@@ -215,13 +242,17 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void)
         return;
     }
 
-    /* HAL_FLASH_OB_Launch() reloads the option bytes from flash into the
-     * live FLASH_OPTR register -- this is the step that actually makes
-     * the new IWDG_STOP value take effect, and it does so by resetting
-     * the MCU immediately (documented HAL behaviour, confirmed by the ST
-     * community thread this function's doc-comment references). This
-     * call does not return under normal operation. */
-    HAL_FLASH_OB_Launch();
+    if (g_iwdg_ob_launch_status == 0) {
+        /* Unlike STM32L4, HAL_FLASH_OB_Launch() on STM32H5 does NOT reset
+         * the MCU itself -- it only sets OPTSTRT and waits for the
+         * hardware option-byte reload to complete (see doc-comment above
+         * the Launch() call site). Force the reset ourselves so
+         * FLASH_OPTR/OPTSR_CUR is guaranteed to reflect the new value
+         * from the very next boot, matching the original intent (and
+         * this function's own early-return check above, which reads
+         * ob_current fresh from OPTSR_CUR on every boot). */
+        NVIC_SystemReset();
+    }
 }
 
 /* USER CODE END 0 */
@@ -291,10 +322,11 @@ int main(void)
    * ~30s-in-STOP reset is confirmed fixed. */
   log_info("DIAG", "IWDG_STOP option byte: raw=0x%08lX (0=FREEZE, nonzero=ACTIVE) already_frozen_flag=%u",
            (unsigned long)g_iwdg_stop_ob_raw, (unsigned)g_iwdg_stop_ob_was_already_frozen);
-  log_info("DIAG", "IWDG_STOP OB write path: flash_unlock=%u(0=ok,1=fail,0xFF=skipped) ob_unlock=%u program=%u(0=ok,1=fail,0xFF=skipped) flash_err=0x%08lX",
+  log_info("DIAG", "IWDG_STOP OB write path: flash_unlock=%u(0=ok,1=fail,0xFF=skipped) ob_unlock=%u program=%u(0=ok,1=fail,0xFF=skipped) launch=%u(0=ok,1=fail,0xFF=skipped) flash_err=0x%08lX",
            (unsigned)g_iwdg_ob_flash_unlock_status,
            (unsigned)g_iwdg_ob_ob_unlock_status,
            (unsigned)g_iwdg_ob_program_status,
+           (unsigned)g_iwdg_ob_launch_status,
            (unsigned long)g_iwdg_ob_program_flash_error);
   // sx_storage_factory_reset();
   #if TEST

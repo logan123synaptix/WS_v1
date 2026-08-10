@@ -3,6 +3,7 @@
 #include "app_config.h"
 #include "network_config.h"
 #include "sx_board.h"
+#include "iwdg.h"
 #include "sx_delay.h"
 #include "sx_pump.h"
 #include "sx_ex_storage.h"
@@ -332,6 +333,17 @@ static uint8_t _gas_sensor_qa_mode_is_done(void *ctx)
 static sx_sleep_step_t s_wake_steps[7];
 static sx_sleep_step_t s_sleep_steps[7];
 
+/* Matches sx_sleep_service_t's pre_stop_refresh function pointer shape
+ * exactly (void(void)) -- see that field's doc-comment in
+ * sx_sleep_service.h for the full reasoning. This is the one place in
+ * the 3-tier sleep stack that is allowed to know hiwdg/IWDG exists, since
+ * this file (tier 3) is already the project-specific layer wiring GPS/
+ * modem/etc into tier 2's generic step engine. */
+static void _iwdg_refresh(void)
+{
+    HAL_IWDG_Refresh(&hiwdg);
+}
+
 void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_sleep_t         *sleep,
                             modem_handle_t     *modem,
@@ -373,10 +385,23 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
      * generic timeout would either cut GPS's 130s allowance short or let
      * the modem step run needlessly long; keeping it per-step avoids
      * that mismatch entirely. */
+    /* pre_stop_refresh = _iwdg_refresh (2026-08-10): refreshes IWDG right
+     * before sx_sleep_service_enter_sleep() actually calls
+     * sx_sleep_enter_stop() -- i.e. after all 7 sleep_steps above have
+     * finished running, immediately before IWDG's counter gets frozen by
+     * the FLASH_OPTR.IWDG_STOP option byte (see main.c's
+     * ensure_iwdg_frozen_in_stop_option_byte()). Complements, not
+     * replaces, app.c's own HAL_IWDG_Refresh() calls during
+     * APP_MODE_FULL_POWER/APP_MODE_WAKEUP and its one refresh right
+     * before calling sx_sleep_manager_enter_sleep() — this one exists
+     * specifically to cover the (currently short, but not guaranteed to
+     * stay that way) time these 7 sleep_steps themselves take to run,
+     * which app.c's earlier refresh cannot see into. */
     sx_sleep_service_init(&mgr->svc, sleep,
                            s_wake_steps, 7,
                            s_sleep_steps, 7,
-                           0);
+                           0,
+                           _iwdg_refresh);
 
     log_info(TAG, "init OK");
 }

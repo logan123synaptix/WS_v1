@@ -77,11 +77,102 @@
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+static void ensure_iwdg_frozen_in_stop_option_byte(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/* Ensures the FLASH_OPTR.IWDG_STOP option byte is set to "freeze" before
+ * IWDG is ever started (MX_IWDG_Init(), called later in main()) --
+ * without this, IWDG (LSI-clocked, ~30s timeout, see iwdg.c) keeps
+ * counting straight through STOP mode, and since app.c's sleep cycle
+ * parks the MCU in STOP for sleep_ms (e.g. 1800s), the device would
+ * reset itself roughly every 30s while "asleep" -- entirely defeating
+ * the point of a long sleep cycle. This is a one-time FLASH OPTION BYTE
+ * (not a runtime register) -- it persists across power cycles and normal
+ * reflashing, so on any board that already has it set correctly this
+ * function reads the current value, sees it already matches, and returns
+ * immediately without touching flash again. Only the very first boot on
+ * a fresh/unprogrammed board (or one explicitly reset via mass erase)
+ * actually performs the option byte write, and HAL_FLASH_OB_Launch()
+ * below deliberately resets the MCU immediately to reload the new value
+ * -- so on that first boot only, the board will appear to reset once
+ * extra right after this call; every boot after that, this function is a
+ * no-op. See "STM32L4 IWDG freeze in STOP mode" (ST community) for the
+ * exact unlock/read-modify-write/launch sequence this mirrors, and the
+ * common pitfall of forgetting HAL_FLASH_Unlock() before
+ * HAL_FLASH_OB_Unlock() (the two locks are independent -- both are
+ * required). Deliberately called before SystemClock_Config() in main()
+ * (see the call site) so that if this does reset the MCU, it does so as
+ * early and cheaply as possible rather than after clock/peripheral init
+ * has already run. */
+static void ensure_iwdg_frozen_in_stop_option_byte(void)
+{
+    FLASH_OBProgramInitTypeDef ob_current = {0};
+    HAL_FLASHEx_OBGetConfig(&ob_current);
+
+    /* ob_current.USERConfig is a bitmask covering ALL user option bytes
+     * (IWDG_SW, WWDG_SW, nRST_STOP, nRST_STANDBY, IWDG_STOP,
+     * IWDG_STANDBY, ...), not just the one this function cares about --
+     * see FLASH_OBProgramInitTypeDef's doc-comment in
+     * stm32h5xx_hal_flash_ex.h. Checking OB_USER_IWDG_STOP's bit alone
+     * (not comparing the whole USERConfig word) is what lets this
+     * function safely leave every other option byte (nRST_STOP, IWDG_SW,
+     * etc) exactly as some other part of the provisioning process set
+     * them, rather than silently reverting them to whatever this
+     * function's own OBInit struct would otherwise imply. */
+    if ((ob_current.USERConfig & OB_USER_IWDG_STOP) == OB_IWDG_STOP_FREEZE) {
+        /* Already frozen-in-STOP -- normal case on every boot after the
+         * very first one on a given board. Nothing to do. */
+        return;
+    }
+
+    if (HAL_FLASH_Unlock() != HAL_OK) {
+        /* Cannot safely proceed with an option byte write without this
+         * unlock -- HAL_FLASHEx_OBProgram() below would fail anyway.
+         * Falling through to boot normally rather than looping/hanging
+         * here: IWDG will behave as if this feature doesn't exist (keeps
+         * counting through STOP, ~30s resets during sleep) until this
+         * function can succeed on some later boot -- safer than blocking
+         * boot entirely over a flash-unlock failure. */
+        return;
+    }
+    if (HAL_FLASH_OB_Unlock() != HAL_OK) {
+        HAL_FLASH_Lock();
+        return;
+    }
+
+    FLASH_OBProgramInitTypeDef ob_write = {0};
+    ob_write.OptionType = OPTIONBYTE_USER;
+    /* USERType restricts the write to ONLY the IWDG_STOP field -- see
+     * the doc-comment above ob_current's check for why this matters
+     * (every other user option byte field is left completely untouched
+     * by this call, regardless of what value we put in USERConfig for
+     * bits outside this field). */
+    ob_write.USERType   = OB_USER_IWDG_STOP;
+    ob_write.USERConfig = OB_IWDG_STOP_FREEZE;
+
+    HAL_StatusTypeDef program_status = HAL_FLASHEx_OBProgram(&ob_write);
+
+    HAL_FLASH_OB_Lock();
+    HAL_FLASH_Lock();
+
+    if (program_status != HAL_OK) {
+        /* Same reasoning as the unlock-failure branches above: leave
+         * IWDG_STOP as whatever it currently is and continue booting
+         * rather than blocking here. */
+        return;
+    }
+
+    /* HAL_FLASH_OB_Launch() reloads the option bytes from flash into the
+     * live FLASH_OPTR register -- this is the step that actually makes
+     * the new IWDG_STOP value take effect, and it does so by resetting
+     * the MCU immediately (documented HAL behaviour, confirmed by the ST
+     * community thread this function's doc-comment references). This
+     * call does not return under normal operation. */
+    HAL_FLASH_OB_Launch();
+}
 
 /* USER CODE END 0 */
 
@@ -102,7 +193,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  ensure_iwdg_frozen_in_stop_option_byte();
   /* USER CODE END Init */
 
   /* Configure the system clock */

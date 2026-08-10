@@ -54,6 +54,22 @@ typedef struct {
      * wake/sleep timeouts later if a project ever needs that. */
     uint32_t          step_timeout_ms;
 
+    /* Optional (NULL = no-op, existing callers unaffected). Called once,
+     * right before sx_sleep_enter_stop() actually parks the MCU in STOP
+     * mode — i.e. after sleep_steps have all finished, immediately before
+     * the point past which this tier has no more visibility into elapsed
+     * time. Exists so a project using a hardware watchdog (e.g. this
+     * project's IWDG, refreshed via HAL_IWDG_Refresh(&hiwdg) from
+     * sx_sleep_manager.c/app.c) can top it up right before sleep_steps'
+     * total running time counts against the watchdog's timeout, rather
+     * than relying solely on a refresh from further up the call stack
+     * (app.c) that happened before sleep_steps ran and could, in
+     * principle, be too far in the past if sleep_steps collectively took
+     * a while. Tier 2 deliberately has zero knowledge of what a
+     * "watchdog" is beyond calling this function pointer — keeps this
+     * file reusable across projects that don't use one at all (NULL). */
+    void            (*pre_stop_refresh)(void);
+
     /* Internal iteration state — do not touch directly. */
     uint8_t           current_step;
     uint8_t           step_started;
@@ -63,14 +79,17 @@ typedef struct {
 
 /* Registers the step arrays and tier-1 sleep handle. Does not run
  * anything yet — call sx_sleep_service_wake_process() or
- * sx_sleep_service_enter_sleep() to actually drive the steps. */
+ * sx_sleep_service_enter_sleep() to actually drive the steps.
+ * pre_stop_refresh may be NULL — see its doc-comment above
+ * sx_sleep_service_t's declaration for what it's for. */
 void sx_sleep_service_init(sx_sleep_service_t *svc,
                             sx_sleep_t         *sleep,
                             sx_sleep_step_t    *wake_steps,
                             uint8_t             wake_step_count,
                             sx_sleep_step_t    *sleep_steps,
                             uint8_t             sleep_step_count,
-                            uint32_t            step_timeout_ms);
+                            uint32_t            step_timeout_ms,
+                            void               (*pre_stop_refresh)(void));
 
 /* Runs sleep_steps to completion (blocking — each step's start()/is_done()
  * is polled in a tight loop here, same blocking style as the tier-3

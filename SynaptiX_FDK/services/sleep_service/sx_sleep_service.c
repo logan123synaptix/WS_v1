@@ -10,7 +10,8 @@ void sx_sleep_service_init(sx_sleep_service_t *svc,
                             uint8_t             wake_step_count,
                             sx_sleep_step_t    *sleep_steps,
                             uint8_t             sleep_step_count,
-                            uint32_t            step_timeout_ms)
+                            uint32_t            step_timeout_ms,
+                            void               (*pre_stop_refresh)(void))
 {
     svc->sleep             = sleep;
     svc->wake_steps         = wake_steps;
@@ -18,6 +19,7 @@ void sx_sleep_service_init(sx_sleep_service_t *svc,
     svc->sleep_steps        = sleep_steps;
     svc->sleep_step_count   = sleep_step_count;
     svc->step_timeout_ms    = step_timeout_ms;
+    svc->pre_stop_refresh   = pre_stop_refresh;
 
     svc->current_step        = 0;
     svc->step_started         = 0;
@@ -72,6 +74,15 @@ void sx_sleep_service_enter_sleep(sx_sleep_service_t *svc, uint32_t sleep_sec)
 
     log_info(TAG, "Setting RTC wakeup = %lu sec", sleep_sec);
     sx_sleep_set_rtc_wake(svc->sleep, sleep_sec);
+
+    /* Last chance to refresh a hardware watchdog before this tier loses
+     * visibility into elapsed time — see pre_stop_refresh's doc-comment
+     * in sx_sleep_service.h for why this exists and why it's a plain
+     * NULL-able function pointer rather than this file knowing anything
+     * about IWDG specifically. */
+    if (svc->pre_stop_refresh) {
+        svc->pre_stop_refresh();
+    }
 
     log_info(TAG, ">>> Entering STOP mode NOW");
     sx_delay_ms(10);

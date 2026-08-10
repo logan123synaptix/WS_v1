@@ -46,6 +46,7 @@
 #include "test_sleep.h"
 #include "test_sps30.h"
 #include "test_ze12a.h"
+#include "test_mux_select.h"
 #endif
 
 /* USER CODE END Includes */
@@ -135,11 +136,6 @@ int main(void)
   #if TEST
   // test_ze12a_init();
   // test_gps_init();
-  // test_lte_mqtt_init();
-  // test_ads1115_init();
-  // test_imu_init();
-  // test_sht3x_init();
-  test_shell_init();
   #else
   app_init();
   #endif
@@ -163,12 +159,6 @@ int main(void)
         
         #if TEST
         // test_gps_poll(delta);
-        // test_lte_mqtt_poll(delta);
-        // test_ads1115_poll(delta);
-        test_shell_poll(delta);
-        // test_imu_poll(delta);
-        // test_sht3x_poll(delta);
-        // HAL_UART_Transmit(&huart5, (uint8_t*)"a", 2, 100);
         #else
         app_process(delta);
         #endif

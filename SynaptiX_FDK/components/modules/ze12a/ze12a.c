@@ -7,6 +7,10 @@ static const char *TAG = "GAS_SENSOR";
 
 GasSensor_t gas_sensor[GAS_SENSOR_COUNT];
 
+/* DIAGNOSTIC (temporary): last mux channel that wrote each gas_sensor[]
+ * slot. 0xFF = never written yet. See comment in ze12a_handle_frame(). */
+static uint8_t s_last_write_channel[GAS_SENSOR_COUNT];
+
 /* Shared UART5 link (through the TMUX4052 mux) and the two GPIOs that
  * select which physical ZE12A module (SR1/SR2/SR3, plus one unused
  * channel) is currently connected to it. See the schematic: UART5_S0/S1
@@ -44,7 +48,9 @@ static void ze12a_select_mux_channel(uint8_t channel)
 {
     /* channel is a 2-bit mux address: bit0 -> S0/A0, bit1 -> S1/A1. */
     sx_gpio_write(&s_mux_s0, (channel & 0x01U) ? SX_GPIO_HIGH : SX_GPIO_LOW);
+    sx_delay_ms(20);
     sx_gpio_write(&s_mux_s1, (channel & 0x02U) ? SX_GPIO_HIGH : SX_GPIO_LOW);
+    sx_delay_ms(20);
 }
 
 void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
@@ -65,6 +71,7 @@ void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
         gas_sensor[i].unitPPB = 0;
         gas_sensor[i].timeout = 0;
         memset(&gas_sensor[i].Frame, 0, sizeof(gas_sensor[i].Frame));
+        s_last_write_channel[i] = 0xFFU; /* DIAGNOSTIC: not yet written */
     }
 
     sx_uart_init(&s_comm, _uart_cfg, sizeof(s_rx_buf) * 4, sizeof(s_rx_buf) * 4);
@@ -108,6 +115,28 @@ static bool ze12a_handle_frame(const uint8_t *frame)
 
     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
         if (gas_sensor[i].type == type) {
+            /* DIAGNOSTIC (temporary): gas_sensor[] slots are keyed by gas
+             * type code (frame[1]), not by which mux channel the frame
+             * arrived on -- see comment above ze12a_handle_frame(). This
+             * means two different mux channels reporting the same
+             * frame[1] type will silently overwrite the same slot, which
+             * would look externally identical to "these two channels
+             * always read the same type" even with fully correct
+             * hardware. s_last_write_channel[] records which channel
+             * last wrote each slot so we can confirm/rule this out from
+             * real logs before touching anything else. Not a fix; do not
+             * remove the type-keyed lookup above without confirming this
+             * first (see ZE12A handoff notes, mục "CHƯA ĐIỀU TRA"). */
+            if (s_last_write_channel[i] != 0xFFU &&
+                s_last_write_channel[i] != s_mux_channel) {
+                log_warn(TAG,
+                    "ZE12A DIAG: slot %u (type 0x%02X) previously written "
+                    "by mux ch %u, now written by mux ch %u -- same slot, "
+                    "different channels",
+                    i, type, s_last_write_channel[i], s_mux_channel);
+            }
+            s_last_write_channel[i] = s_mux_channel;
+
             gas_sensor[i].isConnected = true;
             gas_sensor[i].unitPPB = frame[2];
             gas_sensor[i].value = value;

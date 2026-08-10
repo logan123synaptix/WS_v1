@@ -18,6 +18,7 @@
 #include "shell_app.h"
 #include "time_sync.h"
 #include "mqtt_rpc.h"
+#include "fota.h"
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
@@ -475,10 +476,16 @@ static double gps_round_coord(double value)
     return round(value * 1e6) / 1e6;
 }
 
-/* Builds the telemetry JSON payload from whatever each sensor app's
- * *_is_ready()/*_is_connected()/*_has_*() getters currently report —
- * missing/not-yet-ready readings are emitted as JSON null, same
- * "don't fake a zero" convention as WS_v0's dataPayload(). */
+/* Builds the telemetry JSON payload, nested structure matching WS_v0's
+ * dataPayload() exactly (per the user, 2026-08-05): location/environment/
+ * sensors as nested objects rather than flat top-level fields. Missing/
+ * not-yet-ready readings are still emitted as JSON null within their
+ * nested object, same "don't fake a zero" convention as before — only the
+ * shape changed, not the readiness gating logic itself.
+ *
+ * fix_gps DROPPED per the user (2026-08-05) — no fallback to the last
+ * saved GPS_LOG_PATH fix either; latitude/longitude are null whenever
+ * board.gps does not have a live fix right now, full stop. */
 static const char *build_telemetry_payload(void)
 {
     cJSON *root = cJSON_CreateObject();
@@ -492,83 +499,58 @@ static const char *build_telemetry_payload(void)
         cJSON_AddNullToObject(root, "timestamp");
     }
 
-    if (sx_temp_humi_is_ready(&s_temp_humi)) {
-        cJSON_AddNumberToObject(root, "temperature", sx_temp_humi_get_temperature(&s_temp_humi));
-        cJSON_AddNumberToObject(root, "humidity", sx_temp_humi_get_humidity(&s_temp_humi));
-    } else {
-        cJSON_AddNullToObject(root, "temperature");
-        cJSON_AddNullToObject(root, "humidity");
-    }
+    cJSON_AddStringToObject(root, "motionState",
+                             accel_app_is_movement_detected(&s_accel_app) ? "moving" : "stationary");
 
+    cJSON *location = cJSON_CreateObject();
+    if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
+        cJSON_AddNumberToObject(location, "latitude", gps_round_coord(board.gps.latitude));
+        cJSON_AddNumberToObject(location, "longitude", gps_round_coord(board.gps.longtitude));
+    } else {
+        cJSON_AddNullToObject(location, "latitude");
+        cJSON_AddNullToObject(location, "longitude");
+    }
+    cJSON_AddItemToObject(root, "location", location);
+
+    cJSON *environment = cJSON_CreateObject();
+    if (sx_temp_humi_is_ready(&s_temp_humi)) {
+        cJSON_AddNumberToObject(environment, "temperature", sx_temp_humi_get_temperature(&s_temp_humi));
+        cJSON_AddNumberToObject(environment, "humidity", sx_temp_humi_get_humidity(&s_temp_humi));
+    } else {
+        cJSON_AddNullToObject(environment, "temperature");
+        cJSON_AddNullToObject(environment, "humidity");
+    }
+    cJSON_AddItemToObject(root, "environment", environment);
+
+    cJSON *sensor = cJSON_CreateObject();
     if (sps30_app_has_measurement(&s_sps30_app)) {
         const sps30_app_measurement_t *m = sps30_app_get_measurement(&s_sps30_app);
-        cJSON_AddNumberToObject(root, "pm2_5", m->mc_2p5);
-        cJSON_AddNumberToObject(root, "pm10", m->mc_10p0);
+        cJSON_AddNumberToObject(sensor, "pm10", m->mc_10p0);
+        cJSON_AddNumberToObject(sensor, "pm2_5", m->mc_2p5);
     } else {
-        cJSON_AddNullToObject(root, "pm2_5");
-        cJSON_AddNullToObject(root, "pm10");
+        cJSON_AddNullToObject(sensor, "pm10");
+        cJSON_AddNullToObject(sensor, "pm2_5");
     }
 
     /* Gas sensor channels — see gas_sensor_app.h: value is only meaningful
      * when is_connected() is true, so null it out otherwise rather than
      * publishing a stale/zeroed reading. */
     static const struct { GasSensorType_t type; const char *key; } gas_channels[] = {
+        { GAS_SENSOR_CO,  "co"  },
         { GAS_SENSOR_SO2, "so2" },
         { GAS_SENSOR_NO2, "no2" },
         { GAS_SENSOR_O3,  "o3"  },
+        { GAS_SENSOR_H2S, "h2s" },
     };
     for (size_t i = 0; i < sizeof(gas_channels) / sizeof(gas_channels[0]); i++) {
         if (gas_sensor_app_is_connected(gas_channels[i].type)) {
-            cJSON_AddNumberToObject(root, gas_channels[i].key,
+            cJSON_AddNumberToObject(sensor, gas_channels[i].key,
                                      gas_sensor_app_get_value(gas_channels[i].type));
         } else {
-            cJSON_AddNullToObject(root, gas_channels[i].key);
+            cJSON_AddNullToObject(sensor, gas_channels[i].key);
         }
     }
-
-    if (power_monitor_app_has_voltage_reading(&s_power_monitor)) {
-        cJSON_AddNumberToObject(root, "railVoltage",
-                                 power_monitor_app_get_rail_voltage_v(&s_power_monitor));
-    } else {
-        cJSON_AddNullToObject(root, "railVoltage");
-    }
-    if (power_monitor_app_has_current_reading(&s_power_monitor)) {
-        cJSON_AddNumberToObject(root, "railCurrent",
-                                 power_monitor_app_get_current_a(&s_power_monitor));
-    } else {
-        cJSON_AddNullToObject(root, "railCurrent");
-    }
-
-    cJSON_AddStringToObject(root, "motionState",
-                             accel_app_is_movement_detected(&s_accel_app) ? "moving" : "stationary");
-
-    /* GPS fix (see gps_process() call in app_process()) — WS_v0's
-     * dataPayload() gated this on weatherstation.gps.isReady; sx_gps_t
-     * here has no such flag (see board.gps in sx_board.h), so this uses
-     * the same "non-zero lat/long" liveness check sx_sleep_manager.c's
-     * _gps_wait_is_done() already uses for the same purpose.
-     *
-     * fix_gps: 1/0 added per the user (2026-08-02). When there is no fix
-     * right now, fall back to the last fix saved to GPS_LOG_PATH (see
-     * gps_log_read_last()'s doc-comment) instead of publishing null, so a
-     * consumer still gets the most recent known location — fix_gps: 0 is
-     * what tells them it's stale rather than a live reading. If no fix has
-     * ever been saved (fresh board), this still falls through to null. */
-    if (board.gps.latitude != 0.0f && board.gps.longtitude != 0.0f) {
-        cJSON_AddNumberToObject(root, "latitude", gps_round_coord(board.gps.latitude));
-        cJSON_AddNumberToObject(root, "longitude", gps_round_coord(board.gps.longtitude));
-        cJSON_AddNumberToObject(root, "fix_gps", 1);
-    } else {
-        float last_lat, last_lon;
-        if (gps_log_read_last(&last_lat, &last_lon)) {
-            cJSON_AddNumberToObject(root, "latitude", gps_round_coord(last_lat));
-            cJSON_AddNumberToObject(root, "longitude", gps_round_coord(last_lon));
-        } else {
-            cJSON_AddNullToObject(root, "latitude");
-            cJSON_AddNullToObject(root, "longitude");
-        }
-        cJSON_AddNumberToObject(root, "fix_gps", 0);
-    }
+    cJSON_AddItemToObject(root, "sensors", sensor);
 
     memset(s_telemetry_json, 0, sizeof(s_telemetry_json));
     cJSON_PrintPreallocated(root, s_telemetry_json, TELEMETRY_JSON_BUFF_SIZE, 0);
@@ -576,29 +558,29 @@ static const char *build_telemetry_payload(void)
     return s_telemetry_json;
 }
 
-#define HEARTBEAT_JSON_BUFF_SIZE 512
+#define HEARTBEAT_JSON_BUFF_SIZE 1024
 static char s_heartbeat_json[HEARTBEAT_JSON_BUFF_SIZE];
 
-/* Builds the periodic device-health payload — deviceID, timestamp,
- * signalStrength, operator, motionState (see the trimmed-fields note
- * inside the function body below for what was dropped and why),
- * separate from build_telemetry_payload()'s measurement data — same
- * split WS_v0 had (its heartBeatPayload() vs dataPayload()). Sent every
- * heartbeat_ms of wall-clock time (network_config_t, see
- * send_heartbeat_if_due() below), decoupled from the main sleep/pump/
- * sensing cycle length — a device reachable enough to publish telemetry
- * is already known-alive; heartbeat exists as a lighter, independently-
- * timed "still alive" ping to catch outages between telemetry sends. */
+/* Builds the periodic device-health payload — RESTORED to full WS_v0
+ * heartBeatPayload() shape per the user (2026-08-05), reversing the
+ * 2026-08-02 trim mentioned below. Adds back: firmwareVersion, uptime,
+ * nested network{signalStrength,operator}, nested power{source} (soc
+ * DROPPED — no state-of-charge percentage source exists in this
+ * codebase, only raw railVoltage/railCurrent via power_monitor_app.h, and
+ * the user confirmed (2026-08-05) to just drop soc rather than compute a
+ * rough estimate from voltage), nested memory{total,storageUsed}
+ * (HARDCODED same as WS_v0's dataPayload() — 2048/128 KB — per the user
+ * (2026-08-05) explicitly choosing not to wire up a real flash-usage
+ * calculation here, keep it simple), and a sensorStatus array with one
+ * {sensor, status} entry per physical sensor type reporting OK/FAIL from
+ * each app's readiness getter.
+ *
+ * Previously (2026-08-02) trimmed to 5 fields; that trim's reasoning
+ * ("heartbeat as a lightweight ping, full detail lives on telemetry") no
+ * longer applies now that the user wants WS_v0 parity — see git history/
+ * chat log around 2026-08-02 if that older reasoning needs revisiting. */
 static const char *build_heartbeat_payload(void)
 {
-    /* Trimmed to 5 fields per the user (2026-08-02): deviceID, timestamp,
-     * signalStrength, operator, motionState. Previously also carried
-     * uptimeMs, firmwareVersion, railVoltage/railCurrent, latitude/
-     * longitude/fix_gps, and a per-sensor OK/FAIL "sensors" object — all
-     * dropped here. Full detail (rail power, GPS, per-sensor status) is
-     * still published on the telemetry topic via build_telemetry_payload()
-     * every cycle; heartbeat is now just a lightweight "device is alive
-     * and on this network" ping. */
     cJSON *root = cJSON_CreateObject();
 
     cJSON_AddStringToObject(root, "deviceID", network_config_get()->device_id);
@@ -610,28 +592,75 @@ static const char *build_heartbeat_payload(void)
         cJSON_AddNullToObject(root, "timestamp");
     }
 
-    /* sx_user_mqtt_get_rssi() reads board.modem.ops->get_rssi() under the
-     * hood (see sx_user_mqtt.c) — only meaningful once the modem reports
-     * ready, same caveat a7677s.h documents for get_rssi() itself. No
-     * "is ready" gate exists at this layer, so this is published as-is;
-     * a not-yet-ready modem's cached value is whatever a7677s_get_rssi()
-     * defaults to (see its doc-comment in a7677s.c). */
-    cJSON_AddNumberToObject(root, "signalStrength", sx_user_mqtt_get_rssi());
+    cJSON_AddStringToObject(root, "firmwareVersion", APP_FW_VERSION);
 
-    /* sx_user_mqtt_get_operator() reads board.modem.ops->get_operator()
-     * under the hood — same "cached, no readiness gate here" caveat as
-     * signalStrength above. "" until A7677S_INIT_COPS_QUERY has run (or if
-     * it failed to parse), matching cb_cops_query()'s doc-comment in
-     * a7677s.c. */
+    /* uptime in ms since boot — HAL_GetTick() directly, same source
+     * s_last_heartbeat_tick_ms below already uses for its own timing, no
+     * separate uptime-tracking state needed. */
+    cJSON_AddNumberToObject(root, "uptime", (double)HAL_GetTick());
+
+    cJSON *network = cJSON_CreateObject();
+    /* sx_user_mqtt_get_rssi()/get_operator() read board.modem.ops-> under
+     * the hood — no readiness gate at this layer, published as-is same as
+     * before the WS_v0-parity restore (see a7677s.c's cb_cops_query() and
+     * a7677s_get_rssi() doc-comments for their own default-until-ready
+     * caveats). */
+    cJSON_AddNumberToObject(network, "signalStrength", sx_user_mqtt_get_rssi());
     const char *op = sx_user_mqtt_get_operator();
     if (op && op[0] != '\0') {
-        cJSON_AddStringToObject(root, "operator", op);
+        cJSON_AddStringToObject(network, "operator", op);
     } else {
-        cJSON_AddNullToObject(root, "operator");
+        cJSON_AddNullToObject(network, "operator");
     }
+    cJSON_AddItemToObject(root, "network", network);
+
+    cJSON *power = cJSON_CreateObject();
+    cJSON_AddStringToObject(power, "source", "battery");
+    cJSON_AddItemToObject(root, "power", power);
+
+    cJSON *memory = cJSON_CreateObject();
+    cJSON_AddNumberToObject(memory, "total", 2048);      // in KB, hardcoded per the user (2026-08-05)
+    cJSON_AddNumberToObject(memory, "storageUsed", 128); // in KB, hardcoded per the user (2026-08-05)
+    cJSON_AddItemToObject(root, "memory", memory);
 
     cJSON_AddStringToObject(root, "motionState",
                              accel_app_is_movement_detected(&s_accel_app) ? "moving" : "stationary");
+
+    cJSON *sensorStatus = cJSON_CreateArray();
+
+    cJSON *temphum = cJSON_CreateObject();
+    cJSON_AddStringToObject(temphum, "sensor", "Temperature_Humidity_Sensor");
+    cJSON_AddStringToObject(temphum, "status", sx_temp_humi_is_ready(&s_temp_humi) ? "OK" : "FAIL");
+    cJSON_AddItemToArray(sensorStatus, temphum);
+
+    cJSON *pm = cJSON_CreateObject();
+    cJSON_AddStringToObject(pm, "sensor", "PM_Sensor");
+    cJSON_AddStringToObject(pm, "status", sps30_app_has_measurement(&s_sps30_app) ? "OK" : "FAIL");
+    cJSON_AddItemToArray(sensorStatus, pm);
+
+    /* Same {type, sensor-name} table shape as build_telemetry_payload()'s
+     * gas_channels[] above, just mapped to OK/FAIL here instead of a
+     * numeric value — kept as a separate local array rather than sharing
+     * one, since the two need different label text ("SO2_Sensor" here vs
+     * "so2" JSON key there) and reusing gas_channels[] verbatim would
+     * mean overloading one field's meaning across two different payload
+     * shapes, more confusing than the small duplication. */
+    static const struct { GasSensorType_t type; const char *name; } gas_status_channels[] = {
+        { GAS_SENSOR_CO,  "CO_Sensor"  },
+        { GAS_SENSOR_SO2, "SO2_Sensor" },
+        { GAS_SENSOR_NO2, "NO2_Sensor" },
+        { GAS_SENSOR_O3,  "O3_Sensor"  },
+        { GAS_SENSOR_H2S, "H2S_Sensor" },
+    };
+    for (size_t i = 0; i < sizeof(gas_status_channels) / sizeof(gas_status_channels[0]); i++) {
+        cJSON *g = cJSON_CreateObject();
+        cJSON_AddStringToObject(g, "sensor", gas_status_channels[i].name);
+        cJSON_AddStringToObject(g, "status",
+                                 gas_sensor_app_is_connected(gas_status_channels[i].type) ? "OK" : "FAIL");
+        cJSON_AddItemToArray(sensorStatus, g);
+    }
+
+    cJSON_AddItemToObject(root, "sensorStatus", sensorStatus);
 
     memset(s_heartbeat_json, 0, sizeof(s_heartbeat_json));
     cJSON_PrintPreallocated(root, s_heartbeat_json, HEARTBEAT_JSON_BUFF_SIZE, 0);
@@ -773,6 +802,35 @@ static void app_cycle_process(uint32_t delta_ms)
                 log_info(TAG, "Publish confirmed done after %lu ms",
                          (unsigned long)s_cycle_tick_ms);
             }
+
+            /* FOTA check/download goes here — AFTER telemetry publish is
+             * confirmed done (or timed out), BEFORE APP_CYCLE_SLEEPING —
+             * exactly matching fota.h's documented wiring intent
+             * ("explicitly called from app.c's APP_CYCLE_WAIT_PUBLISH ->
+             * APP_CYCLE_SLEEPING transition"). Ordering matters: if a FOTA
+             * download fails or is slow, that must never delay/corrupt
+             * this cycle's telemetry publish, which already completed
+             * (or was given up on) by the time this line runs.
+             *
+             * fota_download() is BLOCKING — the entire HTTPS range-download
+             * + flash erase/write/verify sequence runs synchronously here,
+             * potentially for a long time (see fota.c's own timing notes;
+             * not yet measured with real timestamps end-to-end). This
+             * means app_cycle_process() itself will not return, and the
+             * rest of this tick's/main loop's other work (sensors, sleep
+             * manager, any watchdog) is blocked for that whole duration.
+             * NOT YET CONFIRMED acceptable by the user for the shipped
+             * app.c flow specifically (it was fine for test_fota.c, a
+             * throwaway test harness) — flagged here rather than silently
+             * assumed fine, per this project's rule of not deciding
+             * architecture-level tradeoffs without asking first. If a
+             * watchdog timer turns out to be enabled anywhere in this
+             * build, this call is the first place to check for a reset
+             * during a long FOTA download. */
+            if (fota_is_pending()) {
+                fota_download();
+            }
+
             s_cycle_tick_ms = 0;
             s_cycle_state   = APP_CYCLE_SLEEPING;
             s_app_mode      = APP_MODE_ENTER_SLEEP;
@@ -836,6 +894,32 @@ static void app_cycle_process(uint32_t delta_ms)
 static uint8_t is_modem_owned_by_sleep_manager(void)
 {
     return sx_sleep_manager_is_waking(&s_sleep_mgr);
+}
+
+/* mqtt_cfg (below, in app_init()) has exactly ONE on_connected slot and ONE
+ * on_message slot (sx_user_mqtt_cfg_t, sx_user_mqtt.h) — but this app now
+ * has TWO independent consumers of MQTT events: mqtt_rpc.c (config-set
+ * channel, existing) and fota.c (new, this wiring). Each filters its own
+ * topic internally and does nothing for topics it doesn't own (confirmed
+ * by reading fota_on_message()'s and mqtt_rpc_on_message()'s doc-comments)
+ * — so simply calling both, unconditionally, in each dispatcher below is
+ * safe: neither call can affect the other's handling of a given message.
+ * on_connected re-runs mqtt_rpc_init()+fota_init() on every reconnect too
+ * (not just the first connect), which matters for fota_init() specifically
+ * since it (re-)subscribes to the retained FOTA-check topic — needed after
+ * any drop/reconnect, same reasoning mqtt_rpc_init()'s existing comment
+ * (below, at its mqtt_cfg.on_connected assignment) already gives for why
+ * on_connected was chosen over a one-time call right after *_init(). */
+static void mqtt_on_connected_dispatch(void)
+{
+    mqtt_rpc_init();
+    fota_init();
+}
+
+static void mqtt_on_message_dispatch(const char *topic, const char *message)
+{
+    mqtt_rpc_on_message(topic, message);
+    fota_on_message(topic, message);
 }
 
 void app_init(void){
@@ -905,8 +989,8 @@ void app_init(void){
      * client reports connected. Hooking on_connected guarantees the
      * subscribe happens exactly when it can succeed, including on any
      * future reconnect after a drop. */
-    mqtt_cfg.on_message   = mqtt_rpc_on_message;
-    mqtt_cfg.on_connected = mqtt_rpc_init;
+    mqtt_cfg.on_message   = mqtt_on_message_dispatch;
+    mqtt_cfg.on_connected = mqtt_on_connected_dispatch;
     if (net_cfg->use_tls) {
         sx_user_mqtt_tls_init(&mqtt_cfg,
                                net_cfg->ca_cert_len ? (char *)net_cfg->ca_cert : NULL,

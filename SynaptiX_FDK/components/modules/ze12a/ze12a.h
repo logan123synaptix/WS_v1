@@ -9,14 +9,20 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define GAS_SENSOR_COUNT 3
+#define GAS_SENSOR_COUNT 5
 
 /* The TMUX4052 mux physically has 4 selectable channels (2-bit address,
  * A1/A0). Only 3 physical ZE12A modules (SR1/SR2/SR3 -- SO2/NO2/O3) are
- * populated on this board revision per the schematic, matching
- * GAS_SENSOR_COUNT below exactly. Address 3 is simply left unconnected;
- * polling it will just time out with no frame received, which is handled
- * the same as any other disconnected/missing sensor. */
+ * currently populated on this board revision per the schematic — but
+ * GAS_SENSOR_COUNT below is intentionally kept at 5 (matching the gas
+ * type enum's full set: CO/SO2/NO2/O3/H2S) so the code recognizes and
+ * correctly handles a CO or H2S module's frame if/when one is physically
+ * added later, without needing another firmware change just to add
+ * recognition — confirmed with the user (2026-08-05) this is deliberate
+ * readiness, not a claim that 5 physical modules are present now. Any
+ * gas type not physically connected simply never produces a frame and
+ * stays isConnected=false/timed-out, same as address 3 already does
+ * today with only 3 of 4 mux channels populated. */
 #define GAS_SENSOR_MUX_CHANNEL_COUNT 4
 
 /* How long (ms) to stay on one mux channel waiting for a frame before
@@ -31,9 +37,11 @@ extern "C" {
 #define GAS_SENSOR_TIMEOUT_MS 10000U
 
 typedef enum GasSensorType{
+    GAS_SENSOR_CO = 0x04,
     GAS_SENSOR_SO2 = 0x2B,
     GAS_SENSOR_NO2 = 0x2C,
-    GAS_SENSOR_O3 = 0x2A
+    GAS_SENSOR_O3 = 0x2A,
+    GAS_SENSOR_H2S = 0x03
 }GasSensorType_t;
 
 typedef struct GasSensor{

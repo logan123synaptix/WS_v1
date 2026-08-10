@@ -51,9 +51,11 @@ void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
                      void *_s0_arg, void *_s1_arg)
 {
     GasSensorType_t sensor_types[GAS_SENSOR_COUNT] = {
+        GAS_SENSOR_CO,
         GAS_SENSOR_SO2,
         GAS_SENSOR_NO2,
-        GAS_SENSOR_O3
+        GAS_SENSOR_O3,
+        GAS_SENSOR_H2S
     };
 
     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
@@ -175,6 +177,13 @@ void gas_sensor_poll(uint32_t time_stamp_ms)
      * ceiling is reached regardless of success (ensures we never get
      * stuck on a silent/disconnected channel). */
     s_channel_dwell_ms += time_stamp_ms;
+    /* DIAGNOSTIC REVERTED (2026-08-05): disabling advance_channel here
+     * was tested against the real "channel 1 never reads" symptom —
+     * confirmed on real hardware the failure is IDENTICAL with early-
+     * advance disabled, ruling out mid-tick channel-switch frame-splicing
+     * as the cause. Restored to the original behavior; see chat history
+     * for the full elimination reasoning. Root cause still unknown as of
+     * this revert — see next diagnostic step. */
     if (advance_channel || s_channel_dwell_ms >= GAS_SENSOR_CHANNEL_DWELL_MS) {
         s_channel_dwell_ms = 0;
         s_mux_channel = (uint8_t)((s_mux_channel + 1U) % GAS_SENSOR_MUX_CHANNEL_COUNT);

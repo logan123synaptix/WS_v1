@@ -284,7 +284,8 @@ void sx_board_init(void)
     // pump_set_power() (at network_config_t's pump_duty_percent) once the
     // sensing cycle starts, and pump_off() to stop it (sx_sleep_manager.c
     // also calls pump_off() on its own sleep step).
-
+    pump_on(&board.sx_pwm_sw);
+    // sx_delay_ms(2500U);  // let the pump spin up a bit before setting duty
     // pump_set_power(&board.sx_pwm_sw, 40U);
 
     // Tier-1 generic sleep driver — this board's pre_stop/post_wake hooks

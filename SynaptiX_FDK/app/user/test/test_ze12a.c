@@ -35,18 +35,25 @@ void test_ze12a_init(void)
 }
 
 /* Static list so the log loop below can report a stable name per type
- * without duplicating the enum's raw hex values inline (matches the
- * GasSensorType_t enum in ze12a.h — SO2/NO2/O3 only, the three types
- * this board actually has modules for). */
+ * without duplicating the enum's raw hex values inline. Covers all 5
+ * types in GasSensorType_t (ze12a.h) — CO and H2S are listed even though
+ * this board revision only has SO2/NO2/O3 physically populated (confirmed
+ * with the user, 2026-08-05: this is deliberate forward-readiness, not a
+ * claim that CO/H2S modules exist on this board today). If no CO/H2S
+ * module is connected, gas_sensor_read_value() for those types simply
+ * keeps returning "disconnected/no valid frame yet" below, same as any
+ * other unpopulated channel — no special-casing needed here. */
 typedef struct {
     GasSensorType_t type;
     const char     *name;
 } gas_sensor_name_t;
 
 static const gas_sensor_name_t s_names[GAS_SENSOR_COUNT] = {
+    { GAS_SENSOR_CO,  "CO"  },
     { GAS_SENSOR_SO2, "SO2" },
     { GAS_SENSOR_NO2, "NO2" },
     { GAS_SENSOR_O3,  "O3"  },
+    { GAS_SENSOR_H2S, "H2S" },
 };
 
 void test_ze12a_poll(uint32_t delta_ms)

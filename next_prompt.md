@@ -1,441 +1,268 @@
-HANDOFF — HARDWARE BRING-UP TEST, WS_v1 (STM32H563RIV6) — PHIÊN 8
-
-Viết khi sắp hết token. Đọc kỹ trước khi làm gì. Phiên này KẾ TIẾP trực
-tiếp từ phiên 7 (xem handoff phiên 7 trong lịch sử chat nếu cần chi
-tiết đầy đủ: fix debug ZE12A qua mux/UART5, xóa CO/H2S khỏi hệ thống).
-Phiên 8 KHÔNG động gì tới phần cứng ZE12A — tập trung vào: (A) xác
-nhận code xóa CO/H2S của phiên 7 đã push, (B) debug 1 lần "publish
-sau wake" hoá ra do người dùng quên cắm anten (không phải bug), (C)
-tìm hiểu cơ chế ZE12A sleep/Q&A mode theo yêu cầu người dùng (kết
-luận: không sửa gì, chỉ giải thích), (D) THÊM MỚI: cơ chế lưu GPS fix
-cuối cùng vào exflash + field fix_gps trong payload — ĐÃ CODE XONG,
-CHƯA PUSH, (E) dọn dẹp macro partition rác trong app_config.h + đổi
-tên EX_FLASH_OFFSET/EXFLASH_SIZE — ĐÃ CODE XONG, CHƯA PUSH, (F) xác
-nhận cơ chế bật/tắt TIM1 theo bơm đã đúng sẵn, không cần sửa, (G) YêU
-CẦU MỚI CHƯA LÀM: heartbeat interval runtime-config + rút payload
-heartbeat chỉ còn signalStrength, sleep 20 phút.
+HANDOFF — WS_v1 (nhánh main) — TIẾN ĐỘ PHIÊN NÀY
+============================================================
+Ngày: 2026-08-10
+Nhánh làm việc: main (KHÔNG phải ft/fota_ws — nhánh đó có FOTA,
+main thì không, xem mục "FOTA" bên dưới)
 
 ============================================================
-QUAN TRỌNG NHẤT — TRẠNG THÁI GIT ĐẦU PHIÊN 9
+TRẠNG THÁI GIT — QUAN TRỌNG, ĐỌC TRƯỚC
 ============================================================
-CÓ 3 FILE ĐANG THAY ĐỔI TRONG CONTAINER, CHƯA COMMIT/PUSH LÊN GITHUB:
-  M SynaptiX_FDK/app/app.c
-  M SynaptiX_FDK/app/app_config.h
-  M SynaptiX_FDK/services/filesystem/sx_fs.c
+5 file đang có thay đổi CHƯA COMMIT trên máy làm việc (chưa push):
 
-(git diff --stat: app.c +109/-8 dòng, app_config.h +44/-38 dòng dạng
-thay thế toàn khối, sx_fs.c +13/-6 dòng)
+    Core/Src/main.c
+    SynaptiX_FDK/app/app.c
+    SynaptiX_FDK/app/user/sx_sleep_manager/sx_sleep_manager.c
+    SynaptiX_FDK/services/sleep_service/sx_sleep_service.c
+    SynaptiX_FDK/services/sleep_service/sx_sleep_service.h
 
-Đây LÀ TOÀN BỘ thay đổi của mục D+E bên dưới (GPS log persistence +
-dọn macro flash partition). Người dùng ĐÃ YÊU CẦU không dùng
-present_files/patch file — trình chiếu code trực tiếp trong chat bằng
-view/tool xem file, để người dùng tự copy sang máy build+push. CHƯA
-XÁC NHẬN người dùng đã copy/build/push các đoạn code này hay chưa —
-người dùng vừa yêu cầu viết handoff ngay sau khi hoàn thành mục E.
-
-VIỆC ĐẦU TIÊN PHIÊN 9: git status/git diff để xem đúng 3 file trên,
-HỎI người dùng đã copy/build/push chưa. Nếu chưa, trình chiếu lại
-bằng `view` cho người dùng copy — đặc biệt chú ý sx_fs.c vì nếu
-người dùng chỉ copy app.c/app_config.h mà quên sx_fs.c thì build sẽ
-LỖI NGAY (macro EX_FLASH_OFFSET/EXFLASH_SIZE không được định nghĩa ở
-đâu khác ngoài app_config.h, và sx_fs.c là nơi duy nhất dùng chúng —
-3 file này PHẢI đi cùng nhau, không thể copy thiếu 1 trong 3).
+Đây là code IWDG watchdog (xem mục 2 bên dưới) — ĐÃ VIẾT XONG,
+ĐÃ KIỂM TRA CÚ PHÁP (ngoặc cân bằng, include, không sót tham
+chiếu), NHƯNG CHƯA BUILD THẬT (không có toolchain ARM trong môi
+trường làm việc) VÀ CHƯA TỪNG CHẠY TRÊN BOARD THẬT. Người dùng cần
+tự build + flash + test trước khi commit/push.
 
 ============================================================
-QUY TẮC BẮT BUỘC (không đổi qua các phiên)
+ĐÃ HOÀN THÀNH VÀ XÁC NHẬN QUA HARDWARE THẬT (ổn định)
 ============================================================
-RE-CLONE đầu phiên: git clone https://github.com/logan123synaptix/WS_v1.git
-  rồi kiểm tra lại xem có patch/thay đổi nào của phiên trước còn dang
-  dở chưa được copy (xem mục trên).
-KHÔNG tin log/mô tả cũ mà không tự đọc lại code thật. Container reset
-  giữa phiên — MỌI THAY ĐỔI CHƯA COMMIT/PUSH ĐÃ MẤT nếu không kịp đưa
-  cho người dùng trước khi hết token.
-Không sửa code âm thầm — trình bày nghi vấn → hỏi → chỉ sửa sau khi
-  có xác nhận rõ ràng. Phiên 8 người dùng xác nhận từng bước rất chi
-  tiết (đặc biệt vụ GPS log: xác nhận delete-rồi-write, xác nhận thời
-  điểm lưu là lúc edge 0->1 fix chứ không phải mỗi SENDING, xác nhận
-  ghi lại mỗi lần re-fix dù chập chờn nhiều lần trong 1 cycle).
-Comment code tiếng Anh, trao đổi tiếng Việt.
-KHÔNG có compiler thật trong container — không build được. Người dùng
-  tự build + flash + gửi log qua chat.
-Board test vật lý duy nhất: STM32H563RIV6.
-Datasheet đầy đủ trong Documents/ — LUÔN tra cứu trước khi đoán
-  thông số. Log thật/phép đo tay LUÔN thắng datasheet khi có xung đột.
-  Phiên 8 dùng datasheet ZE12A (Documents/ze12a-electrochemical-
-  module-manual-v1_0.md) để trả lời câu hỏi sleep/tiết kiệm điện — xem
-  mục C.
-KHÔNG dùng present_files/xuất patch file — trình chiếu code trực tiếp
-  trong chat bằng view/tool xem file, để người dùng tự copy. Container
-  vẫn không có git credential để tự push — không cần cố push, chỉ cần
-  đưa code đúng, đầy đủ, rõ ràng cho người dùng tự copy.
-KHI DEBUG PHẦN CỨNG: đừng đoán mò nhiều bước liên tiếp không hỏi. Mỗi
-  giả thuyết cần 1 phép đo/log cụ thể để xác nhận hoặc loại trừ TRƯỚC
-  khi chuyển sang giả thuyết kế tiếp.
-TRƯỚC KHI XOÁ/ĐỔI TÊN MACRO: luôn grep toàn bộ codebase (--include=
-  "*.c" --include="*.h") để xác nhận macro có đang thực sự được dùng ở
-  đâu không, trước khi kết luận "rác" — bài học rút ra ở mục E: tên
-  gọi macro (PART_GPS_LOG_*) có thể gây hiểu lầm hoàn toàn về vai trò
-  thật của nó trong code (thực chất là vùng mount LittleFS toàn hệ
-  thống, không phải riêng cho GPS).
 
-============================================================
-MỤC A — TÌNH TRẠNG CHUNG HỆ THỐNG (ổn định từ phiên 6-7, KHÔNG động
-vào ở phiên 8 trừ các thay đổi nêu ở mục D/E)
-============================================================
-Các bug đã fix ở phiên 6 (SPS30 flush, shell CLI sau wake, timestamp
-UTC+7, MQTT publish treo sau wake qua nhiều lớp, RTC re-sync mỗi
-wake) — ĐÃ PUSH, xem handoff phiên 6/7 nếu cần chi tiết đầy đủ.
+1. ZE12A — mux ghép cặp kênh (0,1)/(2,3) — ĐÃ TÌM RA NGUYÊN NHÂN
+--------------------------------------------------------------
+Đã xác nhận bằng đo trực tiếp: chân MCU UART5_S0_Pin (GPIOA Pin 7,
+điều khiển bit A0 của mux TMUX4052) kẹt cứng ở 0V, không lên HIGH
+được dù channel lẻ (1,3) yêu cầu HIGH. Đây là lỗi PHẦN CỨNG (chân
+MCU hỏng hoặc dây/mối hàn), KHÔNG PHẢI lỗi logic firmware — công
+thức chọn kênh trong ze12a_select_mux_channel() (channel & 0x01 ->
+S0, channel & 0x02 -> S1) đã verify đúng qua code.
 
-Debug ZE12A phiên 7 (mux/baudrate/HAL_UART_ErrorCallback thiếu) và
-xóa CO/H2S khỏi hệ thống (9 file: main.c, app.c, gas_sensor_app.*,
-test_sleep.c, test_ze12a.c, sx_board.c, ze12a.*) — phiên 8 ĐÃ XÁC
-NHẬN LẠI BẰNG GIT LOG/GREP: tất cả đã push đúng, commit gần nhất liên
-quan là b23cb50 "read sensor ok" (2026-08-02). Grep xác nhận sạch
-hoàn toàn CO/H2S trong .c/.h, HAL_UART_ErrorCallback() có mặt trong
-sx_board.c, GAS_SENSOR_COUNT=3.
+Việc còn lại thuộc về người dùng, không phải code: xác định S0
+kẹt LOW là do chân MCU hỏng hay do dây/mối hàn — cần đo thêm tại
+chân IC trực tiếp (không phải test point) để phân biệt.
 
-MỘT CHỖ SÓT nhỏ được phát hiện lúc đầu phiên 8 nhưng CHƯA ĐƯỢC NGƯỜI
-DÙNG XÁC NHẬN SỬA: SynaptiX_FDK/app/user/test/test_sleep.c dòng 159
-vẫn còn:
-    static const char *gas_keys[] = { "co", "so2", "no2", "o3", "h2s" };
-File này không dùng ze12a.h nên KHÔNG lỗi biên dịch nếu không sửa,
-chỉ là không nhất quán với schema payload thật (đã sạch co/h2s ở
-app.c). Người dùng CHƯA yêu cầu sửa cái này ở phiên 8 (bị chuyển
-hướng sang chủ đề GPS/heartbeat/TIM1 luôn) — NẾU CÓ THỜI GIAN, hỏi
-lại người dùng phiên 9 có muốn dọn nốt không.
+Công cụ đã cung cấp, đã dùng để chẩn đoán, có thể giữ lại hoặc gỡ
+tùy người dùng:
+  - SynaptiX_FDK/app/user/test/test_mux_select.c/.h — hàm
+    select_mux_test(channel) độc lập, tự ghi GPIO S0/S1 để đo bằng
+    đồng hồ vạn năng, không phụ thuộc gas_sensor_init().
+  - ze12a.c có thêm log chẩn đoán DIAG (s_last_write_channel[]) ghi
+    lại mux channel nào ghi đè vào slot nào — hữu ích nếu lỗi mux
+    khác tái xuất hiện sau này, có thể gỡ nếu người dùng thấy log
+    quá ồn.
+
+2. Heartbeat không bao giờ publish — ĐÃ FIX, ĐÃ QUA REVIEW LOGIC
+--------------------------------------------------------------
+Nguyên nhân gốc: send_heartbeat_if_due() (app.c) dùng HAL_GetTick()
+để đo thời gian trôi qua, nhưng HAL_GetTick() (SysTick) bị
+HAL_SuspendTick() đóng băng suốt STOP mode. Với sleep_ms=1800s và
+phần thức mỗi lap chỉ vài chục giây, hiệu số tick giữa 2 lần
+SENDING gần như luôn nhỏ hơn heartbeat_ms, khiến điều kiện "đã đủ
+giờ chưa" gần như vĩnh viễn sai — heartbeat không bao giờ publish.
+
+Đã sửa: chuyển sang dùng epoch giây đọc từ RTC ngoài (rx8130ce,
+không bị SysTick ảnh hưởng) — hàm mới get_rtc_epoch_utc() +
+sửa send_heartbeat_if_due() trong app.c. Đã present file, đã giải
+thích cho người dùng. TRẠNG THÁI: đã nằm trong code hiện tại trên
+main (không phải 1 trong 5 file "chưa commit" ở trên — đây đã
+được người dùng tự commit/push từ trước, đã pull về xác nhận).
 
 ============================================================
-MỤC B — SỰ CỐ "PUBLISH SAU WAKE KHÔNG ĐƯỢC" — HOÁ RA LÀ QUÊN CẮM
-ANTEN, KHÔNG PHẢI BUG (không cần làm gì thêm)
+★★★ VIỆC QUAN TRỌNG NHẤT CHƯA LÀM — TRỌNG TÂM CẦN LÀM TIẾP ★★★
 ============================================================
-Người dùng gửi log cho thấy:
-  - "MQTT not connected, telemetry queued" ngay ở SENDING đầu tiên
-    sau wake.
-  - Timestamp payload sai nghiêm trọng: "2082-11-30T10:19:33+07:00".
-Mình đã đọc code app.c's APP_CYCLE_SENDING/APP_CYCLE_WAIT_PUBLISH và
-is_modem_owned_by_sleep_manager() (fix từ phiên trước, đã confirm
-wire đúng ở app_init() dòng ~870, sx_user_mqtt_set_modem_owned_
-elsewhere_check()) — code KHÔNG có gì sai, nghi vấn đang đi đúng
-hướng "kiểm tra modem/network" thì người dùng tự phát hiện: QUÊN CẮM
-ANTEN GSM. Không có tín hiệu → modem không attach mạng → không NITZ
-sync (giải thích timestamp 2082 rác) → không MQTT connect được →
-telemetry queued offline, đúng behavior kỳ vọng, không phải bug.
 
-BÀI HỌC: khi thấy timestamp RTC bất thường + MQTT not connected cùng
-lúc ngay sau wake, ưu tiên hỏi người dùng kiểm tra anten GSM TRƯỚC
-khi đào sâu code — 2 triệu chứng này cùng lúc là dấu hiệu mất tín
-hiệu mạng, không phải lỗi phần mềm.
+YÊU CẦU CỦA NGƯỜI DÙNG (đã xác nhận rõ ràng, nguyên văn ý):
+  - Cứ 15 PHÚT thì publish 1 lần HEARTBEAT (topic heartbeat)
+  - Cứ 30 PHÚT thì publish 1 lần DATA/TELEMETRY (topic chính, đầy
+    đủ cảm biến — pump/GPS/SPS30/ZE12A)
+  - heartbeat_ms và sleep_ms đều đã runtime-configurable qua
+    shell/RPC từ trước (network_config_set_heartbeat_ms(), đã có
+    sẵn, không cần làm gì thêm ở tầng đó)
 
-Người dùng cũng có gửi 1 đoạn log khác (từ test_ze12a.c, không phải
-app.c thật) cho thấy SO2/NO2 "disconnected" xuyên suốt trong khi O3
-đọc được liên tục — ĐÂY LÀ CÂU HỎI CHƯA GIẢI QUYẾT, người dùng chưa
-trả lời các câu hỏi làm rõ mình đặt ra (board có thay đổi vật lý gì
-giữa 2 lần test không, log có bị cắt đầu không) rồi chuyển sang hỏi
-chủ đề khác. XEM MỤC "VIỆC TỒN ĐỌNG" bên dưới — cần theo dõi tiếp nếu
-người dùng quay lại.
+TRẠNG THÁI THỰC TẾ HIỆN TẠI TRÊN MAIN: CHƯA LÀM ĐƯỢC ĐIỀU NÀY.
 
-============================================================
-MỤC C — CÂU HỎI VỀ SLEEP/TIẾT KIỆM ĐIỆN ZE12A — CHỈ TRẢ LỜI, KHÔNG
-SỬA CODE
-============================================================
-Người dùng hỏi có cách nào sleep/tiết kiệm điện ZE12A không. Tra
-datasheet (Documents/ze12a-electrochemical-module-manual-v1_0.md):
-datasheet CẢNH BÁO RÕ không nên cắt nguồn ngắt quãng module này
-("frequent power-off will cause serious deviations in displayed
-values", khuyến nghị pin dự phòng nếu bắt buộc ngắt nguồn) và ghi rõ
-bản chất cảm biến điện hóa lão hóa theo thời gian bất kể có cấp điện
-hay không ("no relationship whether it is powered on").
+Bản fix ở mục 2 (RTC epoch) chỉ sửa được lỗi "heartbeat không bao
+giờ publish" — nhưng heartbeat vẫn CHỈ publish tại state
+APP_CYCLE_SENDING, tức là **CHỈ có cơ hội publish 1 lần MỖI LAP
+sleep_ms (30 phút), CÙNG LÚC với data**. Với cấu hình hiện tại
+(heartbeat_ms=900s=15p < sleep_ms=1800s=30p), thực tế đo được là
+heartbeat VẪN publish đúng mỗi 30 phút (bám theo sleep_ms), KHÔNG
+PHẢI mỗi 15 phút như người dùng muốn. Con số heartbeat_ms=900s
+hiện tại không tạo ra khác biệt hành vi nào so với heartbeat_ms=
+1800s hay bất kỳ giá trị nào <= sleep_ms.
 
-Người dùng hỏi tiếp "code hiện tại có dùng QA mode không" — grep xác
-nhận: KHÔNG dùng Q&A mode lúc hoạt động bình thường. Luồng thật:
-  - Lúc thức (ON_PUMP->SENSING->SENDING): Active Upload mode xuyên
-    suốt.
-  - Lúc chuẩn bị sleep (sx_sleep_manager.c's _gas_sensor_qa_mode_
-    start(), step 5 trong sleep sequence): chuyển sang Q&A mode —
-    NHƯNG chỉ để tránh UART5 nhận rác lúc MCU ngủ, KHÔNG cắt nguồn
-    module, KHÔNG phải low-power state thực sự.
-  - Lúc wake (sx_sleep_manager.c's _gas_sensor_active_mode_start(),
-    step 5 wake sequence): chuyển ngay lại Active Upload mode.
-  => Module ZE12A được cấp nguồn LIÊN TỤC xuyên suốt cả sleep lẫn
-     wake. Q&A mode chỉ đổi giao thức UART, không tiết kiệm điện đáng
-     kể theo cách hệ thống đang dùng nó.
+ĐÃ TỪNG THIẾT KẾ + VIẾT DỞ 1 GIẢI PHÁP CHO VIỆC NÀY TRONG PHIÊN
+NÀY (state machine APP_MODE_HB_ONLY, app_hb_only_process(), chia
+sleep_ms thành các đoạn heartbeat_ms, dậy riêng mỗi 15p chỉ bật
+modem+IMU pub heartbeat rồi ngủ lại, không đụng GPS/bơm/SPS30) —
+NHƯNG SAU ĐÓ NGƯỜI DÙNG YÊU CẦU BỎ ĐI (để pull sạch code watchdog
+"add watchdog" mới trên remote, tránh xung đột merge) VÀ CHƯA VIẾT
+LẠI. Code đó KHÔNG CÒN TỒN TẠI trong working tree hiện tại (đã bị
+discard qua git checkout --, không có trong stash).
 
-KẾT LUẬN: KHÔNG SỬA GÌ — người dùng chưa yêu cầu cắt nguồn ZE12A sau
-khi nghe giải thích trade-off này, có thể sẽ hỏi lại ở phiên sau nếu
-muốn triển khai (sẽ cần thêm GPIO cắt nguồn VDD giống cách SPS30 dùng
-EN_PW_DUST — CHƯA CÓ SẴN cho ZE12A).
+THIẾT KẾ CŨ (tham khảo lại nếu viết lại theo hướng này) — ĐÃ
+NGHIÊN CỨU KỸ, CÓ THỂ DÙNG LẠI TRỰC TIẾP, KHÔNG CẦN NGHIÊN CỨU LẠI
+TỪ ĐẦU:
+  1. Chia sx_sleep_manager_enter_sleep(sleep_ms/1000) (hiện đang
+     ngủ 1 mạch 1800s) thành nhiều đoạn ngủ ngắn hơn, mỗi đoạn dài
+     heartbeat_ms (900s), lặp lại cho tới khi tổng đủ sleep_ms.
+  2. Đoạn ngủ ĐẦU TIÊN trong 1 lap: chạy sx_sleep_manager_enter_
+     sleep() ĐẦY ĐỦ như hiện tại (7 sleep_steps: tắt GPS/modem/
+     SPS30/bơm/ZE12A/accel, rồi STOP mode) — vì lúc đó GPS/bơm/
+     SPS30 vẫn đang bật từ ON_PUMP/SENSING/SENDING.
+  3. Các đoạn ngủ TIẾP THEO trong cùng lap: dùng tier-1 STOP mode
+     TRẦN (sx_sleep_set_rtc_wake() + sx_sleep_enter_stop() gọi trực
+     tiếp, KHÔNG chạy lại 7 sleep_steps) — vì GPS/SPS30/bơm/ZE12A
+     đã được parked từ đoạn đầu, không cần tắt lại.
+  4. Sau mỗi đoạn ngủ ngắn thức dậy: kiểm tra đã đủ sleep_ms chưa.
+     - Nếu ĐỦ rồi -> chạy full wake sequence hiện có (GPS wait_fix,
+       modem, MQTT...) như bình thường, không đổi gì.
+     - Nếu CHƯA đủ -> chạy 1 "mini wake sequence" riêng: CHỈ bật
+       modem (resume UART qua sx_board_uart_resume_it(), comm_reset(),
+       power_on_start(), rồi start() đúng lúc !power_is_busy()) +
+       accel (accel_app_wake_step_start(), rẻ, đồng bộ) — KHÔNG
+       đụng GPS/bơm/SPS30. Đợi modem is_ready() + MQTT connect
+       (sx_user_mqtt_is_connected()), gọi send_heartbeat_if_due(),
+       đợi publish xong (sx_user_mqtt_is_publishing()==0), rồi tắt
+       modem (power_off_start(), comm_reset()) + accel suspend, quay
+       lại ngủ đoạn kế tiếp.
+  5. Cần 1 flag kiểu "đã chạy đủ 7 sleep_steps trong lap này chưa"
+     để biết đoạn ngủ hiện tại là đoạn đầu (full sleep_steps) hay
+     đoạn sau (bare STOP) — reset flag về false ở đầu mỗi lap mới
+     (APP_CYCLE_ON_PUMP, first tick).
+  6. Payload heartbeat GIỮ NGUYÊN như build_heartbeat_payload() đã
+     có (deviceID, timestamp, signalStrength, operator, motionState)
+     — không cần thêm/bớt field nào, người dùng đã xác nhận "chỉ cần
+     pub những thứ như heartbeat hiện tại thôi".
+  7. Cần mở rộng is_modem_owned_by_sleep_manager() (app.c) để bao
+     gồm cả trạng thái đang chạy mini wake sequence, tránh
+     sx_mqtt.c's recovery ladder gọi start() chồng lấn — đã có tiền
+     lệ y hệt (bug đã fix 2026-08-01 giữa sleep_manager và
+     recovery ladder), lý luận giống hệt, chỉ thêm 1 điều kiện OR.
 
-============================================================
-MỤC D — GPS LOG PERSISTENCE + fix_gps FIELD — ĐÃ CODE XONG, CHƯA PUSH
-(xem MỤC QUAN TRỌNG NHẤT ở đầu file)
-============================================================
-Yêu cầu người dùng (xác nhận từng điểm rõ ràng qua nhiều lượt hỏi-
-đáp): khi GPS bắt được fix, lưu vào file trên exflash; khi có fix
-MỚI (transition 0->1, kể cả chập chờn nhiều lần trong 1 cycle) thì
-erase (delete) file cũ rồi ghi lại (KHÔNG dùng overwrite ngầm của
-sx_storage_write(), người dùng muốn 2 bước delete-rồi-write tường
-minh); payload thêm field "fix_gps": 1 (đang fix) / 0 (không fix);
-khi fix_gps=0 thì lấy tọa độ từ file đã lưu thay vì null.
-
-CHỈ SỬA 1 FILE: SynaptiX_FDK/app/app.c. Tóm tắt:
-1. Macro GPS_LOG_PATH "/log_gps" (LƯU Ý: sau đó ở mục E phát hiện
-   app_config.h vốn có sẵn 1 macro TÊN GIỐNG "GPS_LOG_FILE_PATH"
-   nhưng KHÔNG được dùng ở đâu — đã xóa macro rác đó ở mục E, macro
-   GPS_LOG_PATH trong app.c là macro THẬT đang dùng, không đổi tên
-   theo GPS_LOG_FILE_PATH vì macro kia đã bị xóa hoàn toàn).
-2. struct gps_log_record_t { float latitude; float longtitude; } —
-   record duy nhất, không phải lịch sử nhiều điểm.
-3. static bool s_gps_was_fixed — nhớ trạng thái fix tick trước, dùng
-   để edge-detect 0->1 (không ghi flash mỗi tick khi fix ổn định
-   nhiều tick liên tục).
-4. gps_log_save_fix(lat, lon) — gọi sx_storage_delete(GPS_LOG_PATH)
-   RỒI sx_storage_write(GPS_LOG_PATH, &rec, sizeof(rec)) — 2 bước
-   tường minh theo đúng yêu cầu người dùng. sx_storage_delete() trả
-   SX_STORAGE_ERR_NOT_FOUND nếu file chưa tồn tại (lần lưu đầu tiên)
-   NHƯNG không log lỗi ồn ào, an toàn gọi vô điều kiện — đã xác nhận
-   bằng cách đọc sx_ex_storage.c's sx_storage_delete() implementation
-   (dùng remove(), trả NOT_FOUND nếu remove() < 0, không crash).
-5. gps_log_read_last(*out_lat, *out_lon) — trả false nếu file chưa
-   từng tồn tại (board mới/chưa từng fix từ lúc sống), dùng
-   sx_storage_exists() trước rồi mới sx_storage_read().
-6. Edge-detect đặt NGAY SAU gps_process(&board.gps, delta_ms) trong
-   app_process() (chạy mỗi tick, không phải chỉ lúc SENDING) — per
-   yêu cầu người dùng: bắt fix ngay khi nó xảy ra giữa cycle, không
-   đợi tới lúc build payload.
-7. Cả build_telemetry_payload() VÀ build_heartbeat_payload() đều sửa
-   giống nhau (2 chỗ, ~dòng 541 và ~641 sau khi mục E chèn thêm dòng
-   phía trên làm lệch số dòng — XEM LẠI SỐ DÒNG THẬT bằng grep
-   "fix_gps" trước khi sửa tiếp, đừng tin số dòng ghi ở đây):
-   - Nếu board.gps.latitude/longtitude != 0 (đang có fix): publish
-     tọa độ RAM hiện tại + fix_gps:1.
-   - Nếu không: gọi gps_log_read_last(), nếu có dữ liệu thì publish
-     tọa độ đó (STALE, không phải live) + fix_gps:0; nếu chưa từng
-     lưu (board mới) thì null/null + fix_gps:0.
-
-CHƯA BUILD/TEST được (không có compiler) — VIỆC ĐẦU PHIÊN 9: sau khi
-xác nhận người dùng đã copy/build, kiểm tra qua log thật:
-  - Lúc GPS mới fix lần đầu sau boot: có log "GPS fix acquired, saved
-    to /log_gps: lat=... lon=..." không.
-  - Payload telemetry/heartbeat có field "fix_gps" đúng 1/0 theo tình
-    trạng fix hiện tại không.
-  - Lúc GPS mất fix giữa chừng (ví dụ che ăng-ten), payload có
-    fallback đúng về tọa độ đã lưu (không phải null) không, và
-    fix_gps chuyển về 0 đúng không.
-  - Test lại tình huống chập chờn (fix rồi mất rồi fix lại nhiều lần
-    trong ngắn hạn) xem có ghi flash lặp lại nhiều lần như kỳ vọng
-    không (log "GPS fix acquired..." xuất hiện mỗi lần re-fix).
+ĐIỂM CẦN CẨN THẬN KHI VIẾT LẠI (rút kinh nghiệm từ lần viết dở
+trước, để không lặp lại sai sót):
+  - state machine mini-wake PHẢI resume UART + comm_reset() TRƯỚC
+    power_on_start(), không phải sau power_off — đây là lỗi tôi đã
+    tự phát hiện và sửa giữa chừng lần viết trước, xem kỹ đúng thứ
+    tự trong sx_sleep_manager.c's _modem_power_on_start()/
+    _modem_wait_ready_is_done() làm mẫu.
+  - start() modem chỉ được gửi ĐÚNG 1 LẦN, tại đúng lúc
+    !power_is_busy() lần đầu, không phải mỗi tick — cần 1 flag
+    kiểu s_hb_start_sent, reset về 0 mỗi khi bắt đầu chu kỳ mini-
+    wake mới.
+  - Cẩn thận trường hợp chunk_ms tính ra 0 (do sleep_ms không chia
+    hết cho heartbeat_ms) — không được gọi sleep(0/1000), cần fallback
+    hợp lý (đã có hướng xử lý ở thiết kế cũ, xem lại nếu cần).
+  - accel_app_wake_step_start()/sleep_step_start() gọi lặp đi lặp
+    lại nhiều lần trong 1 lap (1 lần bởi mini-wake, 1 lần nữa bởi
+    full sleep_steps ở đoạn cuối lap) — CHƯA XÁC NHẬN có an toàn
+    tuyệt đối không, cần kiểm tra kỹ accel_app.c hoặc hỏi người
+    dùng test thử trước khi tin tưởng hoàn toàn.
 
 ============================================================
-MỤC E — DỌN MACRO PARTITION RÁC + ĐỔI TÊN EX_FLASH_OFFSET/EXFLASH_
-SIZE — ĐÃ CODE XONG, CHƯA PUSH
+2A. WATCHDOG (IWDG) — VIẾT XONG, CHƯA BUILD/TEST, CHƯA COMMIT
 ============================================================
-Người dùng nghi ngờ 1 khối macro trong app_config.h là "code rác từ
-project cũ":
-    PART_BOOTLOADER_OFFSET/SIZE, PART_MQTT_CONFIG_OFFSET/SIZE,
-    PART_MISC_OFFSET/SIZE, PART_MSC_DISK_WIN/SIZE, PART_GPS_LOG_
-    OFFSET/SIZE
-Đã grep toàn bộ codebase (--include="*.c" --include="*.h") để kiểm
-tra TRƯỚC KHI xóa gì (đúng quy tắc bắt buộc) — kết quả:
-  - 8 macro: PART_BOOTLOADER_*, PART_MQTT_CONFIG_*, PART_MISC_*,
-    PART_MSC_DISK_* — XÁC NHẬN THẬT SỰ LÀ RÁC, không dùng ở bất kỳ
-    đâu ngoài định nghĩa. ĐÃ XÓA.
-  - PART_GPS_LOG_OFFSET và PART_GPS_LOG_SIZE — PHÁT HIỆN QUAN TRỌNG:
-    KHÔNG PHẢI RÁC, đang được dùng thật trong SynaptiX_FDK/services/
-    filesystem/sx_fs.c (lfs_flash_read/write/erase, sx_fs_init) —
-    đây chính là offset+size của TOÀN BỘ vùng flash mà LittleFS mount
-    vào (tức toàn bộ hệ thống file /queue, /log_gps, mọi thứ
-    sx_storage_*() dùng). Tên gọi "PART_GPS_LOG_*" là tàn dư gây hiểu
-    lầm từ thiết kế cũ (có thể từng định dành 1 vùng riêng chỉ cho
-    GPS log), thực tế đang phục vụ TOÀN BỘ filesystem, không riêng
-    GPS.
-  - Các macro path liên quan (GPS_LOG_FILE_PATH, IMU_CALIB_FILE_PATH,
-    GPS_CSV_FILE_PATH, GPS_CSV_HEADER, GPS_LOG_READ_CHUNK) — cũng
-    grep xác nhận KHÔNG dùng ở đâu — ĐÃ XÓA (rác thật).
+Người dùng yêu cầu: watchdog ~30s, CHỈ hoạt động lúc full-power và
+wakeup, "tắt" lúc sleep. Do giới hạn phần cứng IWDG (không thể tắt
+bằng software, LSI vẫn chạy xuyên STOP mode trừ khi có option byte
+đặc biệt), đã dùng WWDG ban đầu (không khả thi, timeout tối đa chỉ
+~1s) rồi chuyển sang IWDG (khả thi, đạt đúng 30s).
 
-Theo yêu cầu người dùng (dùng toàn bộ 16MB chip cho LittleFS thay vì
-chỉ ~9MB như PART_GPS_LOG_SIZE cũ tính toán, và đổi tên cho đúng ý
-nghĩa thật):
-  #define EX_FLASH_OFFSET   (0x000000U)        // = 0, toàn bộ chip
-  #define EXFLASH_SIZE      FLASH_TOTAL_SIZE    // = 16MB, không phải ~9MB
+Cấu hình CubeMX đã set (đã pull, đã xác nhận đúng số):
+  Prescaler = IWDG_PRESCALER_256
+  Reload    = 3750
+  Window    = 4095 (không giới hạn, refresh lúc nào cũng được)
+  -> timeout = 3750 x (256/32000) = 30.000s chính xác (LSI danh
+     định 32kHz, dao động thực tế có thể ±5-10% theo datasheet)
 
-sx_fs.c: đổi mọi PART_GPS_LOG_OFFSET -> EX_FLASH_OFFSET,
-PART_GPS_LOG_SIZE -> EXFLASH_SIZE (3+1 chỗ dùng: lfs_flash_read,
-lfs_flash_write, lfs_flash_erase dùng OFFSET; sx_fs_init dùng SIZE).
+Cơ chế "đóng băng lúc sleep" dùng FLASH OPTION BYTE (không phải
+runtime register) IWDG_STOP=FREEZE — counter tự đóng băng phần
+cứng khi vào STOP mode, không đếm tiếp, bất kể sleep_ms dài bao
+nhiêu. Option byte này set 1 lần, lưu vĩnh viễn trong flash, sống
+sót qua power-cycle/reflash bình thường.
 
-PHÁT HIỆN PHỤ QUAN TRỌNG: sx_fs.c TRƯỚC ĐÓ KHÔNG include app_config.h
-ở đâu cả (chỉ include sx_fs.h + logger.h) — macro PART_GPS_LOG_*
-trước đây chỉ compile được nhờ 1 chain include gián tiếp không rõ
-ràng nào đó trong toàn project (rất có thể qua global/precompiled
-header của IDE, không tường minh trong code). ĐÃ THÊM
-#include "app_config.h" TƯỜNG MINH vào đầu sx_fs.c để không phụ
-thuộc vào may rủi build-order nữa — ĐÂY LÀ THAY ĐỔI CẦN THIẾT, không
-phải optional, nếu thiếu dòng include này rất có thể build sẽ lỗi
-"undefined identifier EX_FLASH_OFFSET/EXFLASH_SIZE" tùy vào cách IDE
-generate Makefile.
+5 file đã sửa (xem mục TRẠNG THÁI GIT ở đầu handoff):
+  1. Core/Src/main.c — hàm ensure_iwdg_frozen_in_stop_option_byte(),
+     gọi ngay sau HAL_Init(), TRƯỚC SystemClock_Config() và TRƯỚC
+     MX_IWDG_Init(). Tự kiểm tra option byte hiện tại, nếu đã đúng
+     thì no-op (mọi lần boot sau lần đầu), nếu chưa đúng thì ghi +
+     gọi HAL_FLASH_OB_Launch() (hàm này TỰ RESET MCU NGAY LẬP TỨC
+     để nạp lại option byte mới — LẦN BOOT ĐẦU TIÊN trên board
+     chưa từng set sẽ có thêm 1 lần reset phụ, đây LÀ HÀNH VI BÌNH
+     THƯỜNG, không phải lỗi, cần báo trước cho người dùng khi họ
+     test lần đầu để không hoảng).
+  2. SynaptiX_FDK/app/app.c — thêm #include "iwdg.h". Refresh
+     HAL_IWDG_Refresh(&hiwdg) ở ĐẦU app_process(), CHỈ khi
+     s_app_mode == APP_MODE_FULL_POWER hoặc APP_MODE_WAKEUP. Thêm 1
+     lần refresh cuối cùng NGAY TRƯỚC lời gọi
+     sx_sleep_manager_enter_sleep() (để "nạp đầy" 30s countdown
+     trước khi vào STOP).
+  3. SynaptiX_FDK/services/sleep_service/sx_sleep_service.h — thêm
+     field pre_stop_refresh (function pointer void(void), NULLable,
+     không phá vỡ caller khác) vào sx_sleep_service_t. Thêm tham số
+     cùng tên vào prototype sx_sleep_service_init().
+  4. SynaptiX_FDK/services/sleep_service/sx_sleep_service.c — sửa
+     sx_sleep_service_init() nhận + lưu tham số pre_stop_refresh.
+     Gọi callback này (nếu khác NULL) trong
+     sx_sleep_service_enter_sleep(), NGAY SAU khi 7 sleep_steps chạy
+     xong, NGAY TRƯỚC sx_sleep_enter_stop() — đây là điểm refresh
+     "sát nhất" trước khi counter bị đóng băng, phòng trường hợp 7
+     sleep_steps mất nhiều thời gian hơn dự kiến trong tương lai.
+  5. SynaptiX_FDK/app/user/sx_sleep_manager/sx_sleep_manager.c —
+     thêm #include "iwdg.h" (đây là tier 3, project-specific, được
+     phép biết IWDG là gì — tier 2 sx_sleep_service.c KHÔNG được
+     phép biết, giữ đúng ranh giới kiến trúc 3 tầng sẵn có của dự
+     án). Viết hàm static _iwdg_refresh(void) gọi
+     HAL_IWDG_Refresh(&hiwdg), truyền vào sx_sleep_service_init()
+     làm tham số pre_stop_refresh cuối cùng.
 
-AN TOÀN DỮ LIỆU: vì offset không đổi (vẫn 0, chỉ là trước đây macro
-tính offset lệch dựa trên tổng nhiều PART_* cộng dồn, giờ = 0 thẳng)
-— CẦN LƯU Ý: offset thật sự CÓ THỂ ĐÃ THAY ĐỔI nếu board hiện tại
-đang chạy firmware CŨ (trước phiên 8) vì PART_GPS_LOG_OFFSET cũ =
-PART_MSC_DISK_WIN + PART_MSC_DISK_SIZE = 1MB+2MB+1MB+3MB = 7MB, KHÔNG
-PHẢI 0! Tức là: NẾU BOARD ĐANG CÓ DỮ LIỆU THẬT TRONG /queue hoặc
-/log_gps TỪ FIRMWARE CŨ (trước phiên 8), sau khi flash firmware mới
-với EX_FLASH_OFFSET=0, LittleFS SẼ MOUNT VÀO VÙNG FLASH KHÁC (offset
-0 thay vì offset 7MB) — DỮ LIỆU CŨ SẼ KHÔNG ĐỌC ĐƯỢC NỮA (không mất
-vật lý, vẫn nằm ở offset 7MB cũ, nhưng LittleFS mount ở offset 0 sẽ
-thấy vùng đó là chưa format/rác). Đây LÀ ĐIỀU CẦN CẢNH BÁO NGƯỜI DÙNG
-Ở PHIÊN 9 nếu chưa kịp nói: nếu board có dữ liệu quan trọng trong
-queue/log_gps từ trước, việc đổi offset này sẽ khiến LittleFS coi
-như đang mount vào 1 chip trống rỗng lúc đầu (không phải lỗi, nhưng
-mất khả năng đọc lại dữ liệu cũ) — sx_fs_init()/file_system_init() sẽ
-tự format lại nếu chưa nhận diện được filesystem hợp lệ ở vùng mới
-(giống board hoàn toàn mới). Nếu người dùng cần giữ dữ liệu cũ, PHẢI
-đọc ra trước khi flash firmware mới, hoặc chấp nhận mất/ tự cân nhắc.
-MÌNH CHƯA KỊP CẢNH BÁO ĐIỀU NÀY CHO NGƯỜI DÙNG TRƯỚC KHI HẾT TOKEN —
-VIỆC ĐẦU PHIÊN 9 PHẢI NÓI RÕ ĐIỀU NÀY.
+Đã kiểm tra: ngoặc cân bằng cả 5 file (script Python đếm { }, không
+phải build thật), không sót tham chiếu biến/hàm cũ, thứ tự gọi
+HAL_Init() trước ensure_iwdg_frozen... đúng, include đầy đủ
+(HAL_IWDG_MODULE_ENABLED và HAL_FLASH_MODULE_ENABLED đã bật sẵn
+trong stm32h5xx_hal_conf.h, không cần sửa thêm).
 
-============================================================
-MỤC F — CÂU HỎI VỀ TIM1/PWM BƠM — CHỈ TRẢ LỜI, KHÔNG SỬA (code đã
-đúng sẵn)
-============================================================
-Người dùng muốn: chỉ chạy TIM1 (PWM) khi cần bật bơm, không cần thì
-thôi. Đã đọc sx_pwm_sw.h, sx_pump.c, sx_timer.c — XÁC NHẬN CODE HIỆN
-TẠI ĐÃ ĐÚNG YÊU CẦU NÀY TỪ TRƯỚC, KHÔNG CẦN SỬA GÌ:
-  - Đây là software (bit-banged) PWM qua GPIO, TIM1 chỉ dùng làm
-    nguồn ngắt định kỳ (ISR tick generator), KHÔNG phải hardware PWM
-    output channel thật.
-  - pump_off() -> sx_pwm_software_stop() -> sx_timer_stop() ->
-    HAL_TIM_Base_Stop_IT() — DỪNG HẲN counter + interrupt của TIM1.
-  - pump_on()/pump_set_power() -> sx_pwm_software_start() ->
-    sx_timer_start_hw() (nếu !pwm->running) -> HAL_TIM_Base_Start_IT()
-    — CHỈ KHỞI ĐỘNG LẠI counter khi thật sự cần bật bơm.
-  - MX_TIM1_Init() (CubeMX-generated, gọi 1 lần lúc boot trong
-    main.c) chỉ cấu hình thanh ghi (Prescaler/ARR/ClockSource), KHÔNG
-    tự start counter (HAL_TIM_Base_Init() không start) — clock TIM1
-    được RCC-enable qua MspInit nhưng timer không đếm/không tốn điện
-    đáng kể cho tới khi Start_IT được gọi thật sự lúc bơm bật.
-  => KẾT LUẬN: hệ thống đã tự động chỉ chạy TIM1 khi bơm đang hoạt
-     động. Không có việc gì cần làm thêm ở mục này trừ khi người dùng
-     có bằng chứng đo đạc thực tế (dòng tiêu thụ, hiện tượng gì đó)
-     mâu thuẫn với những gì code cho thấy — NẾU CÓ, cần đo/log cụ thể
-     trước khi nghi ngờ tiếp (theo đúng quy tắc debug phần cứng).
+CHƯA KIỂM TRA (cần làm ở phiên sau hoặc người dùng tự test):
+  - Build thật bằng toolchain ARM (không có trong môi trường làm
+    việc của phiên này).
+  - Chạy thật trên board — đặc biệt xác nhận: (a) lần boot đầu có
+    reset phụ 1 lần như dự kiến rồi hoạt động bình thường từ lần
+    2 trở đi; (b) board ngủ được xuyên suốt 1800s không bị IWDG
+    reset giữa chừng; (c) nếu cố tình làm treo code ở
+    FULL_POWER/WAKEUP quá 30s, IWDG có thực sự reset board (xác
+    nhận bảo vệ thật hoạt động, không chỉ lý thuyết).
 
 ============================================================
-MỤC G — YÊU CẦU MỚI CHƯA LÀM: HEARTBEAT INTERVAL RUNTIME-CONFIG +
-RÚT GỌN PAYLOAD + SLEEP 20 PHÚT
+FOTA — GHI CHÚ, KHÔNG PHẢI VIỆC CẦN LÀM
 ============================================================
-Người dùng yêu cầu (CHƯA CODE GÌ, mới dừng ở bước mình đọc code nền
-tảng liên quan rồi hỏi làm rõ — NGƯỜI DÙNG CHƯA TRẢ LỜI CÁC CÂU HỎI
-LÀM RÕ, chuyển sang hỏi mục F rồi giờ hỏi viết handoff):
-
-1. Topic heartbeat sẽ bắn theo khoảng thời gian TIME_PUB_HEARTBEAT
-   trong app_config.h (tên biến người dùng tự đề xuất, hiện app_
-   config.h CHƯA CÓ macro này, cần tạo mới) — hiện tại heartbeat đang
-   bắn theo HEARTBEAT_CYCLE_INTERVAL=4U (đếm SỐ CHU KỲ SENDING, không
-   phải mili giây trực tiếp, xem app.c's s_sending_cycle_count) mỗi 4
-   cycle. Người dùng nói "hiện tại heartbeat bắn 5 phút 1 lần" — đây
-   là kết quả GIÁN TIẾP của 4 cycles x period hiện tại (SLEEP_TIME_MS
-   mặc định 5 phút x ~1 cycle time), CẦN XÁC NHẬN LẠI công thức thật
-   ở phiên 9 vì SLEEP_TIME_MS sắp đổi thành 20 phút (xem điểm 3) —
-   nếu vẫn giữ HEARTBEAT_CYCLE_INTERVAL=4 dạng đếm cycle, heartbeat
-   interval thực tế sẽ tự động giãn ra thành ~80 phút một khi sleep
-   đổi thành 20 phút, KHÔNG PHẢI 5 phút như người dùng muốn giữ — đây
-   CHÍNH LÀ LÝ DO người dùng muốn tách heartbeat interval ra thành
-   1 giá trị thời gian ĐỘC LẬP với sleep cycle, không đếm theo số
-   cycle nữa.
-
-2. Cần thêm: shell CLI command MỚI + MQTT RPC command MỚI để
-   config runtime giá trị TIME_PUB_HEARTBEAT này — ĐÃ XEM CONVENTION
-   CÓ SẴN (network_config_t's pump_on_ms/sensing_ms/sleep_ms +
-   network_config_set_pump_on_ms() etc. + shell_commands.c's
-   "settings -c -pump/-sensing/-sleep ..." + mqtt_rpc.c's "setParams"
-   method) — RẤT CÓ KHẢ NĂNG heartbeat_ms nên là 1 field MỚI trong
-   network_config_t (SynaptiX_FDK/app/user/network_config/
-   network_config.h/.c) theo đúng pattern đã có, KHÔNG PHẢI define
-   cứng trong app_config.h như người dùng gợi ý ban đầu — CẦN HỎI LẠI
-   người dùng ở phiên 9 xác nhận hướng này (network_config runtime-
-   editable, giống pump/sensing/sleep) thay vì app_config.h compile-
-   time #define, vì người dùng đã nói rõ muốn "thêm lệnh shell, rpc
-   để config nó" — tức chắc chắn cần runtime-editable, app_config.h
-   #define đơn thuần KHÔNG đủ (giống cách 3 field pump_on_ms/
-   sensing_ms/sleep_ms cũ đã chuyển từ #define sang network_config_t
-   từ phiên trước, xem app.c dòng ~73-85 comment giải thích lý do).
-
-3. Payload heartbeat: người dùng muốn "chỉ cần bắn signal strength" —
-   CHƯA XÁC NHẬN RÕ có giữ deviceID/timestamp không (để biết bản tin
-   của thiết bị nào lúc nào) hay bỏ hết chỉ còn đúng 1 field
-   signalStrength — ĐÃ HỎI NGƯỜI DÙNG NHƯNG CHƯA CÓ CÂU TRẢ LỜI. Hiện
-   trạng build_heartbeat_payload() (app.c dòng ~505 trở đi, SỐ DÒNG
-   CÓ THỂ ĐÃ XÊ DỊCH do mục D/E chèn thêm code phía trên — grep lại
-   trước khi sửa) đang có: deviceID, timestamp, uptimeMs,
-   firmwareVersion, signalStrength, operator, railVoltage,
-   railCurrent, motionState, latitude/longitude/fix_gps (vừa thêm ở
-   mục D), object "sensors" (per-sensor OK/FAIL: tempHumi, sps30,
-   so2, no2, o3, accel — cần grep lại thứ tự đầy đủ, đoạn cuối hàm
-   chưa xem hết ở phiên 8). CẦN NGƯỜI DÙNG XÁC NHẬN RÕ payload cuối
-   cùng trước khi sửa — đừng tự đoán field nào giữ/bỏ.
-
-4. Sleep 20 phút: người dùng muốn "cho device ngủ 20 phút mới dậy đo
-   cảm biến + bật bơm bắn topic data" — ĐÃ XÁC NHẬN ĐÂY LÀ ĐÚNG CHU KỲ
-   sleep_ms HIỆN CÓ SẴN trong network_config_t (không phải state mới)
-   — chỉ cần đổi giá trị thành 1200000U (20 phút = 20*60*1000). CẦN
-   HỎI: đổi default trong app_config.h's SLEEP_TIME_MS (hiện
-   5*60*1000) hay chỉ set runtime qua CLI "settings -c -sleep 1200"
-   trên board thật (không đổi compile-time default)? CHƯA CÓ CÂU TRẢ
-   LỜI của người dùng.
-
-VIỆC ĐẦU PHIÊN 9 CHO MỤC G (sau khi xử lý xong mục Quan Trọng Nhất ở
-đầu file): hỏi lại người dùng rõ ràng 3 điểm chưa xác nhận ở trên
-(network_config_t field mới hay app_config.h #define; payload
-heartbeat rút gọn còn field gì chính xác; đổi default SLEEP_TIME_MS
-hay chỉ set runtime) rồi mới bắt tay sửa. Việc sửa dự kiến động vào
-CẢ 4 FILE: network_config.h/.c (field mới + getter/setter),
-shell_commands.c (command mới, theo mẫu "-pump"/"-sensing"/"-sleep"
-đã có ở dòng ~205-222 và ví dụ dùng ở dòng ~58), mqtt_rpc.c ("setParams"
-method mở rộng), app.c (build_heartbeat_payload() rút gọn + logic
-tính heartbeat theo thời gian thay vì đếm cycle — CẦN THIẾT KẾ LẠI
-s_sending_cycle_count/HEARTBEAT_CYCLE_INTERVAL, có thể chuyển sang
-1 biến tick_ms riêng cộng dồn qua app_process() giống cách sleep/
-pump/sensing đang cộng dồn s_cycle_tick_ms, KHÔNG PHẢI đếm số lần
-SENDING nữa vì SENDING giờ cách nhau 20 phút thay vì vài phút).
+Nhánh main HIỆN TẠI KHÔNG CÓ FOTA. Có 1 commit cũ (c9352dc "build
+fail") từng gọi fota_is_pending()/fota_download()/fota_init()/
+fota_on_message() + #include "fota.h" nhưng fota.c/fota.h CHƯA
+TỪNG tồn tại trong repo trên nhánh này -> code không build được.
+Đã gỡ sạch cả 4 điểm gọi + include khỏi app.c ở 1 thời điểm trong
+phiên này, NHƯNG SAU ĐÓ người dùng yêu cầu discard để pull code
+watchdog mới -> bản gỡ FOTA đó KHÔNG CÒN trong working tree hiện
+tại. Cần kiểm tra lại: app.c hiện tại (sau các lần pull mới nhất)
+CÓ CÒN gọi fota_* hay không trước khi build — nếu commit "add
+watchdog"/"add peripheral iwdg" không đụng gì tới đoạn FOTA cũ, rất
+có thể vẫn còn tồn tại y nguyên, cần gỡ lại theo đúng cách đã làm
+trước đó (xem lịch sử chat phiên này nếu cần đối chiếu chi tiết
+từng đoạn đã xóa). FOTA thật (nếu cần) nằm ở nhánh ft/fota_ws,
+KHÔNG được trộn vào main cho tới khi fota.c/fota.h thực sự được
+thêm vào.
 
 ============================================================
-VIỆC TỒN ĐỌNG TỪ CÁC PHIÊN TRƯỚC — CHƯA ĐỘNG VÀO Ở PHIÊN 8
+QUY TẮC BẮT BUỘC (kế thừa, không đổi)
 ============================================================
-  - test_sleep.c dòng 159 còn "co"/"h2s" trong gas_keys[] (xem mục A)
-    — ưu tiên thấp, không lỗi build, chỉ không nhất quán schema.
-  - Log test_ze12a.c cho thấy SO2/NO2 "disconnected" xuyên suốt trong
-    khi O3 đọc được — CHƯA GIẢI QUYẾT, người dùng chưa trả lời câu
-    hỏi làm rõ (board có đổi gì vật lý không, log có bị cắt đầu
-    không) — nếu người dùng quay lại chủ đề này, hỏi lại 2 câu đó
-    trước khi đoán tiếp, và xin log ĐẦY ĐỦ tối thiểu 15-20s liên tục
-    không cắt.
-  - ACCEL_APP_FILTER_ALPHA chưa điều chỉnh theo period mới (từ phiên
-    3-4) — càng cũ càng ít liên quan, có thể bỏ qua trừ khi được nhắc
-    lại.
-  - log_debug -> log_info cho temp/humi — ưu tiên thấp, chưa ai yêu
-    cầu.
-  - err=-4 SPS30 SHDLC CRC mismatch — thấy 1 lần lẻ tẻ ở STOP_
-    MEASUREMENT trong phiên 6/7, chưa xác định pattern hay nhiễu 1
-    lần — theo dõi tiếp nếu người dùng báo lại.
-
-============================================================
-VIỆC CẦN LÀM ĐẦU PHIÊN 9 (thứ tự ưu tiên)
-============================================================
-1. Re-clone, git status/diff — xác nhận 3 file mục D+E đã được người
-   dùng copy/build/push chưa. Nếu chưa, trình chiếu lại đủ CẢ 3 FILE
-   (app.c, app_config.h, sx_fs.c — thiếu 1 file là build lỗi ngay do
-   macro EX_FLASH_OFFSET/EXFLASH_SIZE).
-2. CẢNH BÁO NGƯỜI DÙNG về rủi ro mất khả năng đọc dữ liệu cũ trên
-   exflash nếu board đang có dữ liệu quan trọng từ firmware trước khi
-   đổi EX_FLASH_OFFSET (xem chi tiết mục E) — CHƯA KỊP NÓI Ở PHIÊN 8.
-3. Xác nhận qua log thật: GPS fix log lưu đúng, fix_gps field đúng,
-   fallback đọc flash đúng khi mất fix (xem checklist đầy đủ ở cuối
-   mục D).
-4. Hỏi lại 3 điểm chưa xác nhận của mục G (network_config field mới
-   hay define cứng; payload heartbeat rút gọn còn field gì; đổi
-   default sleep hay chỉ set runtime) rồi mới code phần heartbeat +
-   sleep 20 phút.
-5. Nếu có thời gian dư: hỏi người dùng có muốn dọn nốt test_sleep.c's
-   gas_keys[] (mục A) và theo dõi lại vụ SO2/NO2 disconnected trong
-   test_ze12a.c log (mục B/tồn đọng) không.
+- Nhánh làm việc: main (không phải ft/fota_ws).
+- RE-CLONE/PULL đầu phiên: git pull origin main ngay khi bắt đầu,
+  luôn kiểm tra git status trước để biết có thay đổi local chưa
+  commit không (phiên này liên tục gặp tình huống này, đã xử lý
+  bằng cách hỏi người dùng discard hay giữ).
+- KHÔNG tin log/mô tả cũ mà không tự đọc lại code thật.
+- KHÔNG có compiler ARM thật trong container — không build được.
+  Người dùng tự build + flash + gửi log qua chat. Chỉ kiểm tra được
+  cú pháp cơ bản (ngoặc cân bằng) bằng script, KHÔNG thay thế cho
+  build thật.
+- Board test vật lý duy nhất: STM32H563RIV6.
+- Log thật/phép đo tay LUÔN thắng datasheet khi có xung đột.
+- KHÔNG khẳng định chắc chắn hơn những gì bằng chứng thật sự cho
+  thấy.

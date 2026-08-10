@@ -21,6 +21,7 @@
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
+#include "iwdg.h"
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
@@ -1004,6 +1005,22 @@ void app_init(void){
     s_app_mode      = APP_MODE_FULL_POWER;
 }
 void app_process(uint32_t delta_ms){
+    /* IWDG (~30s timeout, see iwdg.c / main.c's
+     * ensure_iwdg_frozen_in_stop_option_byte()) must be refreshed here,
+     * every tick, but ONLY while the board is actually awake and running
+     * (FULL_POWER or WAKEUP) — NOT during APP_MODE_ENTER_SLEEP, since that
+     * branch below is what blocks inside sx_sleep_manager_enter_sleep()
+     * for the whole STOP-mode duration; refreshing unconditionally here
+     * would be a no-op while parked anyway (execution is paused), but
+     * gating it explicitly documents intent and matches the "watchdog
+     * only lives during full-power/wakeup" requirement. If FULL_POWER
+     * work (app_cycle_process(), MQTT recovery ladder retries, etc.) ever
+     * blocks longer than ~30s without returning here, IWDG resets the
+     * board — that is the protection working as designed, not a bug. */
+    if (s_app_mode == APP_MODE_FULL_POWER || s_app_mode == APP_MODE_WAKEUP) {
+        HAL_IWDG_Refresh(&hiwdg);
+    }
+
     /* Only the sensors that need per-tick driving from the app layer.
      * gas_sensor_app_poll() must run every tick regardless of the main
      * app state machine so ZE12A's mux round-robin + byte assembly keeps
@@ -1073,6 +1090,16 @@ void app_process(uint32_t delta_ms){
         {
             uint32_t sleep_ms = network_config_get()->sleep_ms;
             log_info(TAG, "Entering sleep for %lu ms", (unsigned long)sleep_ms);
+            /* Top off IWDG's countdown right before the blocking sleep
+             * call below, so the full ~30s budget is available to cover
+             * sx_sleep_manager_enter_sleep()'s 7 sleep_steps (GPS/modem/
+             * SPS30/pump/ZE12A/accel power-down) before IWDG gets frozen
+             * by the FLASH_OPTR.IWDG_STOP option byte once STOP mode is
+             * entered. Complements, not replaces, sx_sleep_service.c's own
+             * pre_stop_refresh callback (_iwdg_refresh() in
+             * sx_sleep_manager.c), which refreshes again even later, right
+             * before sx_sleep_enter_stop(). */
+            HAL_IWDG_Refresh(&hiwdg);
             sx_sleep_manager_enter_sleep(&s_sleep_mgr, sleep_ms / 1000);
         }
         /* Execution resumes here after the RTC wakeup timer fires. */

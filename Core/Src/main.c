@@ -122,7 +122,24 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void)
      * etc) exactly as some other part of the provisioning process set
      * them, rather than silently reverting them to whatever this
      * function's own OBInit struct would otherwise imply. */
-    if ((ob_current.USERConfig & OB_USER_IWDG_STOP) == OB_IWDG_STOP_FREEZE) {
+    /* BUG FIX (2026-08-10): this check used to mask ob_current.USERConfig
+     * with OB_USER_IWDG_STOP (0x100, bit 8) instead of
+     * FLASH_OPTSR_IWDG_STOP (bit 20). OB_USER_IWDG_STOP is the HAL's
+     * *field-selector* namespace used only for OBProgram()'s USERType
+     * argument -- it does NOT match the bit position ob_current.USERConfig
+     * actually uses, because HAL_FLASHEx_OBGetConfig() fills USERConfig
+     * straight from the raw FLASH->OPTSR_CUR register (see
+     * FLASH_OB_GetUser() in stm32h5xx_hal_flash_ex.c), which uses real
+     * hardware bit positions (FLASH_OPTSR_IWDG_STOP = bit 20). Masking
+     * with the wrong bit (8) read an unrelated, essentially-always-zero
+     * bit, so this check almost always read as "already FREEZE" and
+     * returned early -- meaning the option byte write below never
+     * actually ran, IWDG_STOP stayed at its power-on-default ACTIVE, and
+     * IWDG kept counting straight through STOP mode, resetting the board
+     * ~30s into every sleep regardless of sleep_ms. Confirmed on real
+     * hardware: board reset immediately after ">>> Entering STOP mode
+     * NOW" instead of sleeping for the configured 1800s. */
+    if ((ob_current.USERConfig & FLASH_OPTSR_IWDG_STOP) == OB_IWDG_STOP_FREEZE) {
         /* Already frozen-in-STOP -- normal case on every boot after the
          * very first one on a given board. Nothing to do. */
         return;

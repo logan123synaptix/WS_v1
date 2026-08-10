@@ -332,6 +332,8 @@ int main(void)
   #if TEST
   // test_ze12a_init();
   // test_gps_init();
+  test_shell_init();
+
   #else
   app_init();
   #endif
@@ -355,6 +357,7 @@ int main(void)
         
         #if TEST
         // test_gps_poll(delta);
+        test_shell_poll(delta);
         #else
         app_process(delta);
         #endif

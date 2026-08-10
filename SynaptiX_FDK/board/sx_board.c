@@ -285,8 +285,8 @@ void sx_board_init(void)
     // sensing cycle starts, and pump_off() to stop it (sx_sleep_manager.c
     // also calls pump_off() on its own sleep step).
     pump_on(&board.sx_pwm_sw);
-    // sx_delay_ms(2500U);  // let the pump spin up a bit before setting duty
-    // pump_set_power(&board.sx_pwm_sw, 40U);
+    sx_delay_ms(1000U);  // let the pump spin up a bit before setting duty
+    pump_set_power(&board.sx_pwm_sw, 15U);
 
     // Tier-1 generic sleep driver — this board's pre_stop/post_wake hooks
     // (defined below) are what actually know about LTE (USART1) + GPS

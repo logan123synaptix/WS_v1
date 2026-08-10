@@ -26,6 +26,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "usb.h"
+#include "wwdg.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -128,6 +129,7 @@ int main(void)
   MX_UART4_Init();
   MX_UART5_Init();
   MX_USART6_UART_Init();
+  MX_WWDG_Init();
   /* USER CODE BEGIN 2 */
   uint32_t last_tick = 0, last_ticks = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);

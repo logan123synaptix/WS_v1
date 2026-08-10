@@ -18,7 +18,6 @@
 #include "shell_app.h"
 #include "time_sync.h"
 #include "mqtt_rpc.h"
-#include "fota.h"
 #include "ze12a.h"
 #include "gps.h"
 #include "cJSON.h"
@@ -803,33 +802,17 @@ static void app_cycle_process(uint32_t delta_ms)
                          (unsigned long)s_cycle_tick_ms);
             }
 
-            /* FOTA check/download goes here — AFTER telemetry publish is
-             * confirmed done (or timed out), BEFORE APP_CYCLE_SLEEPING —
-             * exactly matching fota.h's documented wiring intent
-             * ("explicitly called from app.c's APP_CYCLE_WAIT_PUBLISH ->
-             * APP_CYCLE_SLEEPING transition"). Ordering matters: if a FOTA
-             * download fails or is slow, that must never delay/corrupt
-             * this cycle's telemetry publish, which already completed
-             * (or was given up on) by the time this line runs.
-             *
-             * fota_download() is BLOCKING — the entire HTTPS range-download
-             * + flash erase/write/verify sequence runs synchronously here,
-             * potentially for a long time (see fota.c's own timing notes;
-             * not yet measured with real timestamps end-to-end). This
-             * means app_cycle_process() itself will not return, and the
-             * rest of this tick's/main loop's other work (sensors, sleep
-             * manager, any watchdog) is blocked for that whole duration.
-             * NOT YET CONFIRMED acceptable by the user for the shipped
-             * app.c flow specifically (it was fine for test_fota.c, a
-             * throwaway test harness) — flagged here rather than silently
-             * assumed fine, per this project's rule of not deciding
-             * architecture-level tradeoffs without asking first. If a
-             * watchdog timer turns out to be enabled anywhere in this
-             * build, this call is the first place to check for a reset
-             * during a long FOTA download. */
-            if (fota_is_pending()) {
-                fota_download();
-            }
+            /* FOTA is not wired up on this branch (main) — fota.c/fota.h
+             * do not exist in this repo yet (a previous commit here,
+             * c9352dc "build fail", called fota_is_pending()/
+             * fota_download()/fota_init()/fota_on_message() without ever
+             * adding those files, so main would not build). Removed
+             * rather than stubbed out — see ft/fota_ws for the branch
+             * actually wiring FOTA in. If/when FOTA lands on main for
+             * real, this is the right spot for it: AFTER telemetry
+             * publish is confirmed done (or timed out) above, BEFORE
+             * APP_CYCLE_SLEEPING below, so a slow/failed download can
+             * never delay or corrupt this cycle's telemetry publish. */
 
             s_cycle_tick_ms = 0;
             s_cycle_state   = APP_CYCLE_SLEEPING;
@@ -897,29 +880,21 @@ static uint8_t is_modem_owned_by_sleep_manager(void)
 }
 
 /* mqtt_cfg (below, in app_init()) has exactly ONE on_connected slot and ONE
- * on_message slot (sx_user_mqtt_cfg_t, sx_user_mqtt.h) — but this app now
- * has TWO independent consumers of MQTT events: mqtt_rpc.c (config-set
- * channel, existing) and fota.c (new, this wiring). Each filters its own
- * topic internally and does nothing for topics it doesn't own (confirmed
- * by reading fota_on_message()'s and mqtt_rpc_on_message()'s doc-comments)
- * — so simply calling both, unconditionally, in each dispatcher below is
- * safe: neither call can affect the other's handling of a given message.
- * on_connected re-runs mqtt_rpc_init()+fota_init() on every reconnect too
- * (not just the first connect), which matters for fota_init() specifically
- * since it (re-)subscribes to the retained FOTA-check topic — needed after
- * any drop/reconnect, same reasoning mqtt_rpc_init()'s existing comment
- * (below, at its mqtt_cfg.on_connected assignment) already gives for why
- * on_connected was chosen over a one-time call right after *_init(). */
+ * on_message slot (sx_user_mqtt_cfg_t, sx_user_mqtt.h). Currently only one
+ * consumer (mqtt_rpc.c) is wired in here — FOTA is not on this branch yet
+ * (see the removed-FOTA comment in APP_CYCLE_WAIT_PUBLISH above for why).
+ * If/when a second consumer is added, the safe pattern is: each consumer
+ * filters its own topic internally and does nothing for topics it doesn't
+ * own, so simply calling all of them unconditionally from these two
+ * dispatchers is safe — same reasoning fota.c's wiring used before removal. */
 static void mqtt_on_connected_dispatch(void)
 {
     mqtt_rpc_init();
-    fota_init();
 }
 
 static void mqtt_on_message_dispatch(const char *topic, const char *message)
 {
     mqtt_rpc_on_message(topic, message);
-    fota_on_message(topic, message);
 }
 
 void app_init(void){

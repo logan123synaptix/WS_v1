@@ -35,6 +35,7 @@
 #define TEST        0
 #include "sx_board.h"
 #include "sx_ex_storage.h"
+#include "logger.h"
 #if TEST
 #include "test_lte_mqtt.h"
 #include "test_sht3x.h"
@@ -107,10 +108,24 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void);
  * (see the call site) so that if this does reset the MCU, it does so as
  * early and cheaply as possible rather than after clock/peripheral init
  * has already run. */
+/* Diagnostic snapshot for ensure_iwdg_frozen_in_stop_option_byte() below --
+ * captured here (before UART exists) and logged later, after
+ * MX_USART1_UART_Init() has run, so we can actually SEE on the console
+ * whether IWDG_STOP really reads back as FREEZE on this specific board,
+ * instead of trusting the reset-count theory alone. g_iwdg_stop_ob_raw is
+ * the raw bit-20-masked USERConfig value read on THIS boot, BEFORE any
+ * write this function might perform; g_iwdg_stop_ob_was_already_frozen
+ * records whether the early-return branch was taken (1) or the
+ * write+OB_Launch path was taken (0, meaning this boot is about to reset
+ * itself via HAL_FLASH_OB_Launch()). */
+uint32_t g_iwdg_stop_ob_raw = 0xFFFFFFFFU;
+uint8_t  g_iwdg_stop_ob_was_already_frozen = 0xFF;
+
 static void ensure_iwdg_frozen_in_stop_option_byte(void)
 {
     FLASH_OBProgramInitTypeDef ob_current = {0};
     HAL_FLASHEx_OBGetConfig(&ob_current);
+    g_iwdg_stop_ob_raw = (ob_current.USERConfig & FLASH_OPTSR_IWDG_STOP);
 
     /* ob_current.USERConfig is a bitmask covering ALL user option bytes
      * (IWDG_SW, WWDG_SW, nRST_STOP, nRST_STANDBY, IWDG_STOP,
@@ -142,8 +157,10 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void)
     if ((ob_current.USERConfig & FLASH_OPTSR_IWDG_STOP) == OB_IWDG_STOP_FREEZE) {
         /* Already frozen-in-STOP -- normal case on every boot after the
          * very first one on a given board. Nothing to do. */
+        g_iwdg_stop_ob_was_already_frozen = 1;
         return;
     }
+    g_iwdg_stop_ob_was_already_frozen = 0;
 
     if (HAL_FLASH_Unlock() != HAL_OK) {
         /* Cannot safely proceed with an option byte write without this
@@ -242,6 +259,22 @@ int main(void)
   uint32_t last_tick = 0, last_ticks = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);
   sx_board_init();
+
+  /* DIAGNOSTIC (2026-08-10): confirm on real hardware whether the
+   * FLASH_OPTR.IWDG_STOP option byte actually reads back as FREEZE after
+   * ensure_iwdg_frozen_in_stop_option_byte() ran above -- board still
+   * resets ~30s into STOP mode even after fixing that function's
+   * bit-mask bug, so we need to SEE the real bit instead of trusting the
+   * fix worked. g_iwdg_stop_ob_raw == 0 means FREEZE (bit 20 clear),
+   * non-zero means ACTIVE (bit 20 set, i.e. IWDG still counts through
+   * STOP -- would fully explain the ~30s resets independent of anything
+   * else in the sleep path). g_iwdg_stop_ob_was_already_frozen == 0 means
+   * THIS boot just wrote the option byte and is about to self-reset via
+   * HAL_FLASH_OB_Launch() (so this log line won't be reached this boot --
+   * check the NEXT boot's log instead in that case). Remove once the
+   * ~30s-in-STOP reset is confirmed fixed. */
+  log_info("DIAG", "IWDG_STOP option byte: raw=0x%08lX (0=FREEZE, nonzero=ACTIVE) already_frozen_flag=%u",
+           (unsigned long)g_iwdg_stop_ob_raw, (unsigned)g_iwdg_stop_ob_was_already_frozen);
   // sx_storage_factory_reset();
   #if TEST
   // test_ze12a_init();

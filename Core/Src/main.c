@@ -20,13 +20,13 @@
 #include "main.h"
 #include "i2c.h"
 #include "icache.h"
+#include "iwdg.h"
 #include "lptim.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb.h"
-#include "wwdg.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -129,7 +129,7 @@ int main(void)
   MX_UART4_Init();
   MX_UART5_Init();
   MX_USART6_UART_Init();
-  MX_WWDG_Init();
+  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   uint32_t last_tick = 0, last_ticks = 0;
   HAL_RTCEx_DeactivateWakeUpTimer(&hrtc);

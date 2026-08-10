@@ -120,6 +120,16 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void);
  * itself via HAL_FLASH_OB_Launch()). */
 uint32_t g_iwdg_stop_ob_raw = 0xFFFFFFFFU;
 uint8_t  g_iwdg_stop_ob_was_already_frozen = 0xFF;
+/* Further diagnostics (2026-08-10, round 2): raw==0x00100000 (ACTIVE) on
+ * EVERY boot, already_frozen_flag==0 on EVERY boot -- meaning the write
+ * path below runs every single boot and NEVER successfully persists.
+ * Since HAL_FLASH_OB_Launch() (which unconditionally self-resets on
+ * success) never seems to "stick" either, capture exactly which step
+ * failed so we stop guessing. 0xFF = step never reached this boot. */
+uint8_t g_iwdg_ob_flash_unlock_status    = 0xFF;
+uint8_t g_iwdg_ob_ob_unlock_status       = 0xFF;
+uint8_t g_iwdg_ob_program_status         = 0xFF;
+uint32_t g_iwdg_ob_program_flash_error   = 0xFFFFFFFFU;
 
 static void ensure_iwdg_frozen_in_stop_option_byte(void)
 {
@@ -170,12 +180,16 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void)
          * counting through STOP, ~30s resets during sleep) until this
          * function can succeed on some later boot -- safer than blocking
          * boot entirely over a flash-unlock failure. */
+        g_iwdg_ob_flash_unlock_status = 1; /* fail */
         return;
     }
+    g_iwdg_ob_flash_unlock_status = 0; /* ok */
     if (HAL_FLASH_OB_Unlock() != HAL_OK) {
+        g_iwdg_ob_ob_unlock_status = 1; /* fail */
         HAL_FLASH_Lock();
         return;
     }
+    g_iwdg_ob_ob_unlock_status = 0; /* ok */
 
     FLASH_OBProgramInitTypeDef ob_write = {0};
     ob_write.OptionType = OPTIONBYTE_USER;
@@ -188,6 +202,8 @@ static void ensure_iwdg_frozen_in_stop_option_byte(void)
     ob_write.USERConfig = OB_IWDG_STOP_FREEZE;
 
     HAL_StatusTypeDef program_status = HAL_FLASHEx_OBProgram(&ob_write);
+    g_iwdg_ob_program_status       = (program_status == HAL_OK) ? 0 : 1;
+    g_iwdg_ob_program_flash_error  = HAL_FLASH_GetError();
 
     HAL_FLASH_OB_Lock();
     HAL_FLASH_Lock();
@@ -275,6 +291,11 @@ int main(void)
    * ~30s-in-STOP reset is confirmed fixed. */
   log_info("DIAG", "IWDG_STOP option byte: raw=0x%08lX (0=FREEZE, nonzero=ACTIVE) already_frozen_flag=%u",
            (unsigned long)g_iwdg_stop_ob_raw, (unsigned)g_iwdg_stop_ob_was_already_frozen);
+  log_info("DIAG", "IWDG_STOP OB write path: flash_unlock=%u(0=ok,1=fail,0xFF=skipped) ob_unlock=%u program=%u(0=ok,1=fail,0xFF=skipped) flash_err=0x%08lX",
+           (unsigned)g_iwdg_ob_flash_unlock_status,
+           (unsigned)g_iwdg_ob_ob_unlock_status,
+           (unsigned)g_iwdg_ob_program_status,
+           (unsigned long)g_iwdg_ob_program_flash_error);
   // sx_storage_factory_reset();
   #if TEST
   // test_ze12a_init();

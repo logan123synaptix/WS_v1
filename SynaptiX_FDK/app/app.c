@@ -737,8 +737,18 @@ static void app_cycle_process(uint32_t delta_ms)
         if (s_cycle_tick_ms >= network_config_get()->pump_on_ms) {
             s_cycle_tick_ms = 0;
             s_cycle_state = APP_CYCLE_SENSING;
+            /* BUG FIX (2026-08-11, per user request): pump must be OFF
+             * during SENSING, not left running through the whole sensing
+             * window and only switched off at the end. Turned off here,
+             * right at the ON_PUMP -> SENSING transition, before
+             * sps30_app_start_cycle() kicks off the SPS30 measurement --
+             * previously this call was at the SENSING -> SENDING
+             * transition below (see the removed pump_off() there), so the
+             * pump used to stay on for the pump_on_ms + sensing_ms
+             * duration instead of just pump_on_ms. */
+            pump_off(sx_board_get_pump_pwm());
             sps30_app_start_cycle(&s_sps30_app);
-            log_info(TAG, "Sensing started");
+            log_info(TAG, "Pump off, sensing started");
         }
         break;
 
@@ -748,8 +758,7 @@ static void app_cycle_process(uint32_t delta_ms)
         if (s_cycle_tick_ms >= network_config_get()->sensing_ms) {
             s_cycle_tick_ms = 0;
             s_cycle_state = APP_CYCLE_SENDING;
-            pump_off(sx_board_get_pump_pwm());
-            log_info(TAG, "Pump off, sending data");
+            log_info(TAG, "Sensing done, sending data");
         }
         break;
 

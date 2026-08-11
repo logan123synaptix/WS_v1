@@ -610,38 +610,56 @@ static uint8_t _hb_only_publish_process(sx_sleep_manager_t *mgr, uint32_t delta_
     }
 
     if (!mgr->hb_only_publish_kicked) {
-        /* BUG FIX (2026-08-11), confirmed on real hardware: right after a
-         * fresh MQTT connect, mqtt_rpc_init()'s on_connected-triggered
-         * subscribe can still be in flight at the driver layer (a7677s.c's
-         * dce->mqtt_state temporarily leaves A7677S_MQTT_CONNECTED for one
-         * of the A7677S_MQTT_SUB_* states) even though sx_mqtt_t.state (and
-         * therefore sx_user_mqtt_is_connected(), checked just above) is
-         * already CONNECTED. publish_heartbeat_now() -> sx_user_mqtt_
-         * publish() now re-queues instead of losing the heartbeat outright
-         * when that race hits (see sx_user_mqtt.c's fix), but that means
-         * sx_user_mqtt_is_publishing() can read back 0 immediately after
-         * this call even though nothing was actually sent -- the fixed
-         * sx_user_mqtt_publish() resets s_publishing back to 0 on an
-         * immediate driver rejection. Retrying here (up to
-         * HB_ONLY_PUBLISH_MAX_ATTEMPTS times, spaced
-         * HB_ONLY_PUBLISH_RETRY_GAP_MS apart) covers that: if is_publishing()
-         * never turns on after a kick, the original attempt was rejected
-         * and silently re-queued, so try kicking it again -- dispatch_next()
-         * inside sx_user_mqtt.c will pick the re-queued item back up once
-         * s_publishing is 0, so a second publish_heartbeat_now() call here
-         * (which itself calls sx_user_mqtt_publish() again, queueing a
-         * second copy) is not quite right either -- instead this checks
-         * queue_empty() so it does not double-publish if the item is still
-         * sitting in the queue waiting for dispatch_next() to naturally
-         * pick it up on its own. */
+        /* BUG FIX (2026-08-11), confirmed on real hardware, take 2 -- the
+         * first version of this fix (see git history) gated retries on
+         * sx_user_mqtt_queue_empty() being true, on the assumption that
+         * sx_user_mqtt.c's own dispatch_next() would naturally drain the
+         * re-queued item on its own between retries here. That assumption
+         * was wrong: dispatch_next() (sx_user_mqtt.c, static) is only ever
+         * called from _on_publish(), which only fires once a publish
+         * actually reached the modem and completed -- an immediately-
+         * rejected publish never reaches that point, so the re-queued item
+         * just sits in the queue forever, queue_empty() stays permanently
+         * false after the very first rejection, and this whole retry
+         * branch could never fire again: HB_ONLY hung indefinitely with
+         * the modem left powered on and MQTT connected, never publishing
+         * and never returning to sleep (confirmed hang, ft/heartbeat,
+         * 2026-08-11).
+         *
+         * Root cause of the rejection itself is unchanged from the first
+         * write-up: right after a fresh MQTT connect, mqtt_rpc_init()'s
+         * on_connected-triggered subscribe can still be in flight at the
+         * driver layer (a7677s.c's dce->mqtt_state temporarily leaves
+         * A7677S_MQTT_CONNECTED for one of the A7677S_MQTT_SUB_* states)
+         * even though sx_mqtt_t.state (and therefore
+         * sx_user_mqtt_is_connected(), checked just above) is already
+         * CONNECTED.
+         *
+         * Fix: only the very FIRST attempt calls publish_heartbeat_now()
+         * (which enqueues a heartbeat item). Every retry after that calls
+         * sx_user_mqtt_dispatch_pending() instead -- a thin wrapper around
+         * the same dispatch_next() the success path uses, which re-attempts
+         * whatever is already sitting at the head of the queue WITHOUT
+         * enqueuing a second copy. This actually drains the queue instead
+         * of waiting on a condition (queue_empty()) that a rejected publish
+         * makes permanently false. */
         if (mgr->hb_only_publish_attempts == 0 ||
-            (!sx_user_mqtt_is_publishing() && sx_user_mqtt_queue_empty() &&
+            (!sx_user_mqtt_is_publishing() &&
              mgr->hb_only_elapsed_ms - mgr->hb_only_last_publish_attempt_ms >= HB_ONLY_PUBLISH_RETRY_GAP_MS)) {
             if (mgr->hb_only_publish_attempts < HB_ONLY_PUBLISH_MAX_ATTEMPTS) {
                 log_info(TAG, "HB_ONLY: modem ready, publishing heartbeat (attempt %u/%u)",
                          (unsigned)(mgr->hb_only_publish_attempts + 1), (unsigned)HB_ONLY_PUBLISH_MAX_ATTEMPTS);
-                if (mgr->publish_heartbeat != NULL) {
-                    mgr->publish_heartbeat();
+                if (mgr->hb_only_publish_attempts == 0) {
+                    if (mgr->publish_heartbeat != NULL) {
+                        mgr->publish_heartbeat();
+                    }
+                } else {
+                    /* Not the first attempt: the heartbeat item is already
+                     * queued from attempt 0 (either sent successfully, in
+                     * which case is_publishing()/queue state below already
+                     * reflects that, or rejected and sitting in the queue)
+                     * -- just nudge dispatch, never enqueue again. */
+                    sx_user_mqtt_dispatch_pending();
                 }
                 mgr->hb_only_publish_attempts++;
                 mgr->hb_only_last_publish_attempt_ms = mgr->hb_only_elapsed_ms;

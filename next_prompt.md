@@ -4,6 +4,9 @@ Ngày: 2026-08-10
 Nhánh làm việc: main (KHÔNG phải ft/fota_ws — nhánh đó có FOTA,
 main thì không, xem mục "FOTA" bên dưới)
 
+repo: https://github.com/logan123synaptix/WS_v1.git
+branch: ft/heartbeat
+
 ============================================================
 TRẠNG THÁI GIT — QUAN TRỌNG, ĐỌC TRƯỚC
 ============================================================

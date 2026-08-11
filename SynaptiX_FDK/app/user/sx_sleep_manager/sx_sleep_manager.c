@@ -548,15 +548,25 @@ static uint8_t _hb_only_publish_process(sx_sleep_manager_t *mgr, uint32_t delta_
     }
     mgr->hb_only_elapsed_ms += delta_ms;
 
-    /* Tick the modem driver's own state machine forward -- same fix as
-     * _modem_power_off_is_done() above needed: this function runs from
-     * app.c's app_process() once per tick (not inside a blocking
-     * _run_steps_blocking() loop like the sleep_steps/wake_steps do), so
-     * modem_handle_poll() would normally be reached via sx_user_mqtt_poll()
-     * elsewhere in that same app_process() tick -- ticking it again here
-     * is redundant but harmless (mirrors the defensive style already used
-     * throughout this file rather than assuming poll ordering elsewhere). */
-    modem_handle_poll(mgr->modem, delta_ms);
+    /* BUG FIX (2026-08-11), confirmed on real hardware: this used to call
+     * modem_handle_poll(mgr->modem, delta_ms) manually here, on the
+     * (wrong) assumption that this function needed to drive the modem's
+     * state machine itself, the same way _modem_power_off_is_done() above
+     * has to. That assumption doesn't hold here: unlike
+     * _modem_power_off_is_done() (which runs inside sx_sleep_service.c's
+     * BLOCKING _run_steps_blocking() loop, where app_process() -- and
+     * therefore sx_user_mqtt_poll() -> sx_mqtt_poll() ->
+     * modem_handle_poll() -- never runs again until that whole loop
+     * returns), this function runs directly from app_process() every
+     * single tick, which ALREADY calls sx_user_mqtt_poll(delta_ms)
+     * unconditionally (see app.c, runs regardless of s_app_mode) ->
+     * sx_mqtt_poll() -> modem_handle_poll(mqtt->modem, ts) on its own.
+     * The extra manual call here ticked the modem's state machine TWICE
+     * per app tick, at effectively double real-time speed -- confirmed by
+     * the actual failure mode on hardware: endless "TIMEOUT response:
+     * [NULL]" spam right after "Power On start", the AT command sequence
+     * racing far ahead of the UART's real response latency. Removed;
+     * sx_user_mqtt_poll()'s own single call is sufficient. */
 
     if (!mgr->hb_only_start_sent && !mgr->modem->ops->power_is_busy(mgr->modem->ctx)) {
         mgr->modem->ops->start(mgr->modem->ctx);

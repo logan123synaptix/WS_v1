@@ -66,6 +66,32 @@ uint8_t sx_user_mqtt_is_publishing(void);
 uint8_t sx_user_mqtt_queue_empty(void);
 void sx_user_mqtt_queue_flush(void);
 
+/* BUG FIX (2026-08-11 hang, root-caused during ft/heartbeat debugging):
+ * re-attempts dispatch of whatever is already sitting at the head of the
+ * publish queue, WITHOUT enqueuing a new item. This exists because
+ * dispatch_next() (sx_user_mqtt.c, static) is otherwise only ever called
+ * from _on_publish() -- i.e. only after a publish actually reached the
+ * modem and completed. If a publish is rejected immediately by the driver
+ * (dce->mqtt_state momentarily not A7677S_MQTT_CONNECTED right after
+ * connect, while mqtt_rpc_init()'s on_connected subscribe is still in
+ * flight -- see a7677s_mqtt_publish()'s "not connected" check), the
+ * existing fix in sx_user_mqtt_publish()/dispatch_next() re-queues the
+ * rejected item and resets s_publishing to 0, but nothing then ever calls
+ * dispatch_next() again on its own: _on_publish() never fires (nothing was
+ * actually sent), so the re-queued item sits forever. Confirmed on real
+ * hardware: sx_sleep_manager.c's HB_ONLY retry loop used to gate its own
+ * retry on sx_user_mqtt_queue_empty() being true, which is now permanently
+ * false after the first rejection (the rejected item IS the queue content),
+ * so HB_ONLY's retry condition could never fire again either -- the mini-
+ * wake state machine spun forever waiting for a condition that could never
+ * become true, modem left powered on, board never returned to sleep. This
+ * function lets a caller like that retry loop nudge the queue forward
+ * (calls the same dispatch_next() the internal success path already uses)
+ * without risking a duplicate heartbeat the way calling
+ * sx_user_mqtt_publish() again would. No-op if the queue is empty or a
+ * publish is already in flight. */
+void sx_user_mqtt_dispatch_pending(void);
+
 /* Forwards to sx_mqtt_set_modem_owned_elsewhere_check() (sx_mqtt.h) --
  * see that typedef's doc-comment for why this exists (sx_sleep_manager.c
  * and sx_mqtt.c independently calling modem->ops->start() during the same

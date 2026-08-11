@@ -392,6 +392,18 @@ uint8_t sx_user_mqtt_is_publishing(void) {
     return s_publishing;
 }
 
+/* See sx_user_mqtt.h's doc-comment for the full hardware-confirmed hang
+ * this exists to fix. Deliberately just calls the same dispatch_next()
+ * the success path (_on_publish()) already uses -- dispatch_next() itself
+ * already guards on !cqueue_is_empty() && sx_mqtt_is_connected(), so this
+ * is a safe no-op whenever there's nothing to do, and it never enqueues a
+ * new item (unlike calling sx_user_mqtt_publish() again would), so it
+ * cannot produce a duplicate heartbeat. */
+void sx_user_mqtt_dispatch_pending(void) {
+    if (s_publishing) return; /* already sending something -- nothing to kick */
+    dispatch_next();
+}
+
 uint8_t sx_user_mqtt_queue_empty(void) {
     return cqueue_is_empty(&s_queue);
 }

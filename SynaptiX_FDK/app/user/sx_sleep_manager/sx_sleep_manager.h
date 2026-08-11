@@ -110,6 +110,17 @@ typedef struct {
      * subscribe still in flight at the driver layer). */
     uint8_t  hb_only_publish_attempts;
     uint32_t hb_only_last_publish_attempt_ms;
+
+    /* Modem power-on cooldown gate (2026-08-12) -- see
+     * HB_ONLY_MODEM_COOLDOWN_MS's doc-comment below. Tracks elapsed time
+     * within phase 2 SEPARATELY from hb_only_elapsed_ms (which phase 1
+     * already owns and resets to 0 when phase 2 starts -- reusing it here
+     * would conflate "time since publish phase began" with "time since
+     * modem was last powered off", two different clocks). Set once when
+     * phase 2 starts (mirrors hb_only_start_sent's "kick off once" shape);
+     * power_on_start() is not called until this many ms have elapsed. */
+    uint8_t  hb_only_cooldown_done;
+    uint32_t hb_only_cooldown_elapsed_ms;
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:
@@ -233,6 +244,42 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr);
                                           * (4 * 2000 = 8000) so every
                                           * channel gets at least one full
                                           * dwell window. */
+
+/* Modem power-off -> next-power-on cooldown gate (2026-08-12).
+ *
+ * SUSPECTED root cause (not yet confirmed on hardware, needs real-board
+ * verification -- see below) of the "HB_ONLY: TIMEOUT response: [NULL]"
+ * hang reported on real hardware: the ordinary full wake_steps sequence
+ * (s_wake_steps[] above) runs ext_flash_wake + gps_on + gps_wait_fix
+ * (bounded by network_config_get()->gps_timeout_ms, typically tens of
+ * seconds or more) BEFORE _modem_power_on_start() ever pulses PWRKEY --
+ * i.e. there's always a long, variable gap between the modem's previous
+ * power_off_start() completing and the next power_on_start() pulse.
+ * HB_ONLY's phase 1 (sensor check) only waits HB_ONLY_ZE12A_ACTIVE_MS
+ * (9500ms, fixed) before phase 2 pulses PWRKEY again -- a much shorter,
+ * fixed gap. If the A7677S needs a real hardware cooldown longer than
+ * 9.5s after a power-off before it will respond to the next PWRKEY pulse
+ * (power-path capacitor discharge / internal reset settling -- not
+ * documented in a76xx_at_cmd.md, would need to be measured), that would
+ * explain why telemetry wake (long gap, works) and heartbeat wake (short
+ * gap, times out with no response at all -- not even a malformed one)
+ * differ despit calling power_on_start() the exact same way.
+ *
+ * Value chosen conservatively (matches A7677S_OFF_SETTLE_MS's own 4500ms
+ * plus generous margin, since the true minimum is unmeasured) -- ADJUST
+ * once real-hardware testing confirms the actual minimum cooldown needed,
+ * or confirms this hypothesis is wrong entirely (in which case look
+ * elsewhere: this alone will not fix the bug if the real cause is
+ * something else, e.g. a separate main-power rail this driver doesn't
+ * control -- see chat history 2026-08-11/12 for the full elimination
+ * process already carried out in code review).
+ *
+ * Deliberately a SEPARATE clock from hb_only_elapsed_ms (owned by phase 1,
+ * reset to 0 when phase 2 begins) and from HB_ONLY_ZE12A_ACTIVE_MS (a
+ * different concern -- gas sensor mux dwell time, not modem power
+ * timing) -- conflating the two would silently change ZE12A's dwell
+ * budget every time this constant is tuned, or vice versa. */
+#define HB_ONLY_MODEM_COOLDOWN_MS  15000U
 
 void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr);
 

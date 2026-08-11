@@ -499,6 +499,8 @@ void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
     mgr->hb_only_publish_kicked = 0;
     mgr->hb_only_publish_attempts = 0;
     mgr->hb_only_last_publish_attempt_ms = 0;
+    mgr->hb_only_cooldown_done         = 0;
+    mgr->hb_only_cooldown_elapsed_ms   = 0;
 
     /* Accel resumed for the whole mini-wake (both phases) per the user's
      * explicit choice (2026-08-10): "Accel bật xuyên suốt cả 2 giai
@@ -553,9 +555,32 @@ static uint8_t _hb_only_sensor_check_process(sx_sleep_manager_t *mgr, uint32_t d
  * own sim_wait_elapsed_ms/sim_start_sent usage. */
 static uint8_t _hb_only_publish_process(sx_sleep_manager_t *mgr, uint32_t delta_ms)
 {
+    /* Cooldown gate (2026-08-12) -- see HB_ONLY_MODEM_COOLDOWN_MS's
+     * doc-comment in sx_sleep_manager.h for why this exists: phase 1
+     * (sensor check) only takes HB_ONLY_ZE12A_ACTIVE_MS (9.5s, fixed)
+     * between the previous power_off_start() completing (end of the
+     * lap's first chunk's 7 sleep_steps, or the previous HB_ONLY cycle's
+     * own power-off below) and this phase's power_on_start() pulse --
+     * much shorter than the ordinary full wake sequence's ext_flash_wake
+     * + gps_on + gps_wait_fix gap. Hold here, WITHOUT touching the modem
+     * or UART at all yet, until HB_ONLY_MODEM_COOLDOWN_MS has elapsed
+     * since phase 2 began, before doing anything else in this function.
+     * Runs once per phase-2 entry (hb_only_cooldown_done latches true
+     * right after the gate clears, same one-shot shape as
+     * hb_only_start_sent below). */
+    if (!mgr->hb_only_cooldown_done) {
+        mgr->hb_only_cooldown_elapsed_ms += delta_ms;
+        if (mgr->hb_only_cooldown_elapsed_ms < HB_ONLY_MODEM_COOLDOWN_MS) {
+            return 0;
+        }
+        mgr->hb_only_cooldown_done = 1;
+        log_info(TAG, "HB_ONLY: cooldown elapsed (%lu ms), proceeding to modem power-on",
+                 (unsigned long)mgr->hb_only_cooldown_elapsed_ms);
+    }
+
     if (mgr->hb_only_elapsed_ms == 0) {
-        /* First tick of this phase -- kick off the modem, same sequence
-         * as _modem_power_on_start(). */
+        /* First tick after the cooldown gate above -- kick off the modem,
+         * same sequence as _modem_power_on_start(). */
         log_info(TAG, "HB_ONLY: resume UART + power on modem");
         sx_board_uart_resume_it();
         mgr->modem->ops->comm_reset(mgr->modem->ctx);

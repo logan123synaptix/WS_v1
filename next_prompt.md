@@ -6,6 +6,7 @@ main thì không, xem mục "FOTA" bên dưới)
 
 repo: https://github.com/logan123synaptix/WS_v1.git
 branch: ft/heartbeat
+clone và pull repo trước
 
 ============================================================
 TRẠNG THÁI GIT — QUAN TRỌNG, ĐỌC TRƯỚC

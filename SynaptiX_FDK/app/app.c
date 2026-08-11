@@ -135,6 +135,14 @@ static app_cycle_state_t s_cycle_state   = APP_CYCLE_ON_PUMP;
 static uint32_t          s_cycle_tick_ms = 0;
 static volatile app_mode_t s_app_mode    = APP_MODE_FULL_POWER;
 
+/* Chunked-sleep state for the heartbeat_ms/sleep_ms split (2026-08-10) --
+ * see the doc-comment above APP_MODE_ENTER_SLEEP's branch in app_process()
+ * for the full design. Both reset to 0 whenever a lap's sleep_ms total is
+ * reached (i.e. right before flipping to APP_MODE_WAKEUP), so a fresh lap
+ * always starts its first chunk with the full 7 sleep_steps again. */
+static uint32_t s_lap_slept_ms                   = 0;
+static uint8_t  s_full_sleep_steps_done_this_lap = 0;
+
 #define TELEMETRY_JSON_BUFF_SIZE 512
 
 /* Bug fix (2026-07-31): APP_CYCLE_SENDING used to fall straight through
@@ -299,6 +307,27 @@ static bool gps_log_read_last(float *out_lat, float *out_lon)
     *out_lon = rec.longtitude;
     return true;
 }
+
+/* Actually builds + publishes one heartbeat, unconditionally -- no
+ * elapsed-time check. Split out of send_heartbeat_if_due() (2026-08-10)
+ * so sx_sleep_manager.c's HB_ONLY mini-wake can call it directly: HB_ONLY
+ * already decides *when* to publish by construction (it only runs after
+ * sleeping exactly one heartbeat_ms-sized chunk -- see app.c's
+ * APP_MODE_ENTER_SLEEP branch), so re-checking elapsed time here via
+ * send_heartbeat_if_due()'s (now_ms - s_last_heartbeat_tick_ms) test would
+ * be actively wrong: HAL_GetTick() (SysTick) is frozen throughout STOP
+ * mode (same root cause as the heartbeat-never-fires bug this whole
+ * HB_ONLY feature exists to work around -- see the top-level handoff
+ * notes), so the elapsed-tick delta between consecutive HB_ONLY wakes
+ * would almost always read as less than heartbeat_ms and silently skip
+ * every single one. Still updates s_last_heartbeat_tick_ms so
+ * send_heartbeat_if_due()'s own (unrelated, SENDING-time) elapsed check
+ * doesn't immediately re-fire right after an HB_ONLY publish. Defined
+ * further down (after build_heartbeat_payload()), not here -- see that
+ * definition for the actual body; this forward-declares it so
+ * app_init()'s sx_sleep_manager_init() call (which happens earlier in
+ * this file) can pass it as a function pointer. */
+static void publish_heartbeat_now(void);
 
 /* Heartbeat now fires by wall-clock elapsed time (network_config_get()'s
  * heartbeat_ms), not by counting SENDING passes — see heartbeat_ms's
@@ -668,6 +697,26 @@ static const char *build_heartbeat_payload(void)
     return s_heartbeat_json;
 }
 
+/* Actual definition (forward-declared earlier in this file, right after
+ * build_heartbeat_topic() -- see that declaration's doc-comment for why).
+ * Builds + publishes one heartbeat unconditionally, no elapsed-time
+ * check. */
+static void publish_heartbeat_now(void)
+{
+    if (!sx_user_mqtt_is_connected()) {
+        log_warn(TAG, "MQTT not connected, heartbeat skipped this cycle");
+        return;
+    }
+
+    s_last_heartbeat_tick_ms = HAL_GetTick();
+
+    const char *payload = build_heartbeat_payload();
+    char topic[TOPIC_BUFF_SIZE];
+    build_heartbeat_topic(topic, sizeof(topic));
+    sx_user_mqtt_publish(topic, payload);
+    log_info(TAG, "Heartbeat published: %s", payload);
+}
+
 /* Unlike telemetry, a heartbeat that fails to send (not connected) is
  * simply skipped for this cycle, not queued — same as WS_v0's
  * push_last_telemetry_json() (its heartbeat publish returns early on
@@ -688,6 +737,15 @@ static void send_heartbeat_if_due(void)
         return;
     }
 
+    /* publish_heartbeat_now() already re-checks MQTT connectivity and
+     * updates s_last_heartbeat_tick_ms itself -- but deliberately does
+     * NOT skip re-arming s_last_heartbeat_tick_ms when disconnected here,
+     * unlike this function's old inline behavior (which left
+     * s_last_heartbeat_tick_ms untouched on failure so the next SENDING
+     * pass would retry immediately). To preserve that specific retry
+     * behavior for the ordinary SENDING path, check connectivity here
+     * too before delegating, rather than relying on
+     * publish_heartbeat_now()'s own check. */
     if (!sx_user_mqtt_is_connected()) {
         log_warn(TAG, "MQTT not connected, heartbeat skipped this cycle");
         /* Do NOT update s_last_heartbeat_tick_ms here — leave it due so
@@ -696,13 +754,7 @@ static void send_heartbeat_if_due(void)
         return;
     }
 
-    s_last_heartbeat_tick_ms = now_ms;
-
-    const char *payload = build_heartbeat_payload();
-    char topic[TOPIC_BUFF_SIZE];
-    build_heartbeat_topic(topic, sizeof(topic));
-    sx_user_mqtt_publish(topic, payload);
-    log_info(TAG, "Heartbeat published: %s", payload);
+    publish_heartbeat_now();
 }
 
 /* ===================== FULL_POWER cycle: ON_PUMP -> SENSING -> SENDING
@@ -886,7 +938,8 @@ static void app_cycle_process(uint32_t delta_ms)
  * after wake -- MQTT never reconnects, telemetry stays queued offline. */
 static uint8_t is_modem_owned_by_sleep_manager(void)
 {
-    return sx_sleep_manager_is_waking(&s_sleep_mgr);
+    return sx_sleep_manager_is_waking(&s_sleep_mgr) ||
+           sx_sleep_manager_hb_only_modem_owned(&s_sleep_mgr);
 }
 
 /* mqtt_cfg (below, in app_init()) has exactly ONE on_connected slot and ONE
@@ -916,7 +969,8 @@ void app_init(void){
     power_monitor_app_init(&s_power_monitor, &board.ads1115);
 
     sx_sleep_manager_init(&s_sleep_mgr, &board.sleep, &board.modem, &board.gps,
-                           &s_sps30_app, sx_board_get_pump_pwm(), &s_accel_app);
+                           &s_sps30_app, sx_board_get_pump_pwm(), &s_accel_app,
+                           publish_heartbeat_now);
 
     /* Per the user (2026-07-15): Thingsboard is NOT used for now — no real
      * Thingsboard broker exists yet, and app_config.h's USE_THINGSBOARD==1
@@ -1026,7 +1080,8 @@ void app_process(uint32_t delta_ms){
      * work (app_cycle_process(), MQTT recovery ladder retries, etc.) ever
      * blocks longer than ~30s without returning here, IWDG resets the
      * board — that is the protection working as designed, not a bug. */
-    if (s_app_mode == APP_MODE_FULL_POWER || s_app_mode == APP_MODE_WAKEUP) {
+    if (s_app_mode == APP_MODE_FULL_POWER || s_app_mode == APP_MODE_WAKEUP ||
+        s_app_mode == APP_MODE_HB_ONLY) {
         HAL_IWDG_Refresh(&hiwdg);
     }
 
@@ -1079,14 +1134,24 @@ void app_process(uint32_t delta_ms){
      * states drive the sleep/wake transition below:
      *
      *  - APP_MODE_ENTER_SLEEP: set once by app_cycle_process()'s SENDING
-     *    case right after publish. sx_sleep_manager_enter_sleep() is a
-     *    BLOCKING call — it runs every registered sleep_step (GPS/modem
-     *    power-down, SPS30 SHDLC-sleep+EN_PW_DUST-low, pump off, ZE12A to
-     *    QA mode, accel suspend) and then parks the STM32 itself in STOP
-     *    mode via tier 1. It does not return until the RTC wakeup timer
-     *    fires (sleep_sec derived from APP_CYCLE_PERIOD_MS) and the MCU
-     *    resumes — so this call itself is where "the whole board sleeps"
-     *    actually happens; everything after it below is post-wake.
+     *    case right after publish. sleep_ms is split into chunks of
+     *    heartbeat_ms (2026-08-10, per the user: heartbeat every 15 min,
+     *    telemetry every 30 min, independently runtime-configurable). The
+     *    FIRST chunk of a lap runs the full sx_sleep_manager_enter_sleep()
+     *    (7 sleep_steps: GPS/modem/SPS30/pump/ZE12A/accel power-down, then
+     *    STOP) exactly as before, since those peripherals are still on
+     *    from ON_PUMP/SENSING/SENDING. Every chunk AFTER the first uses
+     *    sx_sleep_manager_bare_sleep() instead (RTC wake + STOP only, no
+     *    sleep_steps) since those peripherals are already parked. Each
+     *    wake between chunks either: (a) the lap's sleep_ms total isn't
+     *    reached yet -> runs APP_MODE_HB_ONLY (mini-wake: sensor check +
+     *    heartbeat publish, see sx_sleep_manager.c's HB_ONLY block) and
+     *    goes back into APP_MODE_ENTER_SLEEP for the next chunk; or
+     *    (b) sleep_ms IS reached -> proceeds to APP_MODE_WAKEUP exactly as
+     *    before, resuming the ordinary full wake sequence.
+     *  - APP_MODE_HB_ONLY: drives sx_sleep_manager_hb_only_process() every
+     *    tick until sx_sleep_manager_hb_only_is_done(), then returns to
+     *    APP_MODE_ENTER_SLEEP for the next chunk.
      *  - APP_MODE_WAKEUP: drives sx_sleep_manager_wake_process() every
      *    tick until sx_sleep_manager_is_wake_done() reports the wake
      *    step sequence (GPS on, modem on + wait ready, gas sensor back to
@@ -1096,25 +1161,59 @@ void app_process(uint32_t delta_ms){
     if (s_app_mode == APP_MODE_FULL_POWER) {
         app_cycle_process(delta_ms);
     } else if (s_app_mode == APP_MODE_ENTER_SLEEP) {
-        {
-            uint32_t sleep_ms = network_config_get()->sleep_ms;
-            log_info(TAG, "Entering sleep for %lu ms", (unsigned long)sleep_ms);
-            /* Top off IWDG's countdown right before the blocking sleep
-             * call below, so the full ~30s budget is available to cover
-             * sx_sleep_manager_enter_sleep()'s 7 sleep_steps (GPS/modem/
-             * SPS30/pump/ZE12A/accel power-down) before IWDG gets frozen
-             * by the FLASH_OPTR.IWDG_STOP option byte once STOP mode is
-             * entered. Complements, not replaces, sx_sleep_service.c's own
-             * pre_stop_refresh callback (_iwdg_refresh() in
-             * sx_sleep_manager.c), which refreshes again even later, right
-             * before sx_sleep_enter_stop(). */
-            HAL_IWDG_Refresh(&hiwdg);
-            sx_sleep_manager_enter_sleep(&s_sleep_mgr, sleep_ms / 1000);
+        uint32_t sleep_ms     = network_config_get()->sleep_ms;
+        uint32_t heartbeat_ms = network_config_get()->heartbeat_ms;
+
+        /* heartbeat_ms >= sleep_ms (or 0, meaning "disabled"/misconfigured)
+         * means there is no room for a mini-wake inside this lap at all --
+         * fall back to the original single-shot behavior (heartbeat only
+         * ever fires alongside telemetry at SENDING, once per lap), same
+         * as before this feature existed. Guards against a 0ms or
+         * degenerate chunk_ms below. */
+        uint32_t remaining_ms = (sleep_ms > s_lap_slept_ms) ? (sleep_ms - s_lap_slept_ms) : 0;
+        uint32_t chunk_ms;
+        if (heartbeat_ms == 0 || heartbeat_ms >= sleep_ms) {
+            chunk_ms = remaining_ms;
+        } else {
+            chunk_ms = (remaining_ms < heartbeat_ms) ? remaining_ms : heartbeat_ms;
+        }
+
+        log_info(TAG, "Entering sleep chunk: %lu ms (slept %lu/%lu ms so far this lap)",
+                 (unsigned long)chunk_ms, (unsigned long)s_lap_slept_ms, (unsigned long)sleep_ms);
+
+        /* Top off IWDG's countdown right before the blocking sleep call
+         * below, whichever variant runs -- covers sx_sleep_manager_
+         * enter_sleep()'s 7 sleep_steps on the first chunk, and is a
+         * cheap no-op-equivalent refresh immediately before
+         * sx_sleep_manager_bare_sleep()'s own STOP call on later chunks
+         * (which does not call sx_sleep_service.c's pre_stop_refresh
+         * itself -- see that function's doc-comment). */
+        HAL_IWDG_Refresh(&hiwdg);
+
+        if (!s_full_sleep_steps_done_this_lap) {
+            sx_sleep_manager_enter_sleep(&s_sleep_mgr, chunk_ms / 1000);
+            s_full_sleep_steps_done_this_lap = 1;
+        } else {
+            sx_sleep_manager_bare_sleep(&s_sleep_mgr, chunk_ms / 1000);
         }
         /* Execution resumes here after the RTC wakeup timer fires. */
-        s_app_mode    = APP_MODE_WAKEUP;
-        s_cycle_state = APP_CYCLE_WAKING;
-        log_info(TAG, "Woke up - running wake sequence");
+        s_lap_slept_ms += chunk_ms;
+
+        if (s_lap_slept_ms >= sleep_ms) {
+            s_app_mode    = APP_MODE_WAKEUP;
+            s_cycle_state = APP_CYCLE_WAKING;
+            s_lap_slept_ms                    = 0;
+            s_full_sleep_steps_done_this_lap  = 0;
+            log_info(TAG, "Woke up - running wake sequence");
+        } else {
+            s_app_mode = APP_MODE_HB_ONLY;
+            sx_sleep_manager_hb_only_start(&s_sleep_mgr);
+        }
+    } else if (s_app_mode == APP_MODE_HB_ONLY) {
+        sx_sleep_manager_hb_only_process(&s_sleep_mgr, delta_ms);
+        if (sx_sleep_manager_hb_only_is_done(&s_sleep_mgr)) {
+            s_app_mode = APP_MODE_ENTER_SLEEP;
+        }
     } else if (s_app_mode == APP_MODE_WAKEUP) {
         sx_sleep_manager_wake_process(&s_sleep_mgr, delta_ms);
         app_cycle_process(delta_ms);

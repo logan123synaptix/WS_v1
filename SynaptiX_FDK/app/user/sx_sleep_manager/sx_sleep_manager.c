@@ -1,5 +1,6 @@
 #include "sx_sleep_manager.h"
 #include "ze12a.h"
+#include "gas_sensor_app.h"
 #include "app_config.h"
 #include "network_config.h"
 #include "sx_board.h"
@@ -350,7 +351,8 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
                             sx_gps_t           *gps,
                             sps30_app_t        *sps30_app,
                             sx_pwm_software_t  *pump_pwm,
-                            accel_app_t        *accel_app)
+                            accel_app_t        *accel_app,
+                            void (*publish_heartbeat)(void))
 {
     mgr->modem     = modem;
     mgr->gps       = gps;
@@ -360,6 +362,12 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
     mgr->gps_wait_elapsed_ms = 0;
     mgr->sim_wait_elapsed_ms = 0;
     mgr->sim_start_sent      = 0;
+
+    mgr->publish_heartbeat      = publish_heartbeat;
+    mgr->hb_only_phase          = 0;
+    mgr->hb_only_elapsed_ms     = 0;
+    mgr->hb_only_start_sent     = 0;
+    mgr->hb_only_publish_kicked = 0;
 
     s_wake_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_wake_start, .is_done = _ext_flash_wake_is_done, .ctx = NULL, .name = "ext_flash_wake" };
     s_wake_steps[1] = (sx_sleep_step_t){ .start = _gps_on_start,          .is_done = _gps_on_is_done,          .ctx = mgr, .name = "gps_on" };
@@ -448,4 +456,207 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr)
     mgr->sim_wait_elapsed_ms = 0;
     mgr->sim_start_sent      = 0;
     sx_sleep_service_reset_wake(&mgr->svc);
+}
+
+/* ===================== HB_ONLY mini-wake ===================== *
+ * See the doc-comment block in sx_sleep_manager.h for the full design.
+ * Deliberately hand-rolled here as its own tiny state machine rather than
+ * routed through sx_sleep_service.c's generic wake_steps runner (tier 2):
+ * tier 2 always runs its full fixed-size step array in order (7 wake
+ * steps), with no way to run "just modem+accel" -- reusing the individual
+ * _modem_power_on_start()/_modem_wait_ready_is_done() etc. step functions
+ * directly here, exactly the way s_wake_steps[]/s_sleep_steps[] already
+ * wire them up for the full sequence, keeps one source of truth for the
+ * actual modem power-on/ready/power-off mechanics without duplicating
+ * that logic or bypassing tier 2 for the full-wake case. */
+
+/* IWDG refresh here mirrors app.c's own APP_MODE_FULL_POWER/WAKEUP
+ * refresh -- HB_ONLY is a third "board is awake and doing work" mode from
+ * the watchdog's point of view, so it needs the same per-tick refresh.
+ * app.c's app_process() gates its refresh on s_app_mode; since HB_ONLY is
+ * now a distinct app_mode_t value that gate already covers it once app.c
+ * is updated (see app.c's changes) -- no separate refresh needed here. */
+
+void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
+{
+    log_info(TAG, "HB_ONLY: starting mini-wake (sensor check + heartbeat)");
+    mgr->hb_only_phase          = 0;
+    mgr->hb_only_elapsed_ms     = 0;
+    mgr->hb_only_start_sent     = 0;
+    mgr->hb_only_publish_kicked = 0;
+
+    /* Accel resumed for the whole mini-wake (both phases) per the user's
+     * explicit choice (2026-08-10): "Accel bật xuyên suốt cả 2 giai
+     * đoạn ... để motionState luôn đúng". accel_app_wake_step_start()/
+     * is_done() already match sx_sleep_step_t's signature (see
+     * accel_app.h) but are called directly here rather than through a
+     * sx_sleep_step_t array, same reasoning as the rest of this file. */
+    accel_app_wake_step_start(mgr->accel_app);
+
+    /* Phase 1: sensor check. ZE12A never loses power during sleep (only
+     * its UART mode changes between Active Upload and Q&A, see
+     * gas_sensor_switch_to_qa_mode()'s doc-comment) -- switching back to
+     * Active Upload here just makes it start broadcasting readings again
+     * so gas_sensor_app_poll() below can refresh gas_sensor[i].isConnected
+     * before HB_ONLY_ZE12A_ACTIVE_MS's dwell-time budget runs out. */
+    gas_sensor_switch_to_active_mode();
+}
+
+/* Phase 1: keep polling the gas sensor driver so gas_sensor[i].isConnected
+ * gets refreshed as frames arrive, for HB_ONLY_ZE12A_ACTIVE_MS -- long
+ * enough for the mux to dwell on every channel at least once (see the
+ * macro's doc-comment in sx_sleep_manager.h). Returns 1 once that budget
+ * has elapsed (not once every channel is confirmed connected -- a
+ * genuinely disconnected channel would never confirm, so waiting on that
+ * would hang this phase forever; the point of this phase is to give
+ * connected channels a fair chance to refresh, not to enforce that all of
+ * them must be connected). */
+static uint8_t _hb_only_sensor_check_process(sx_sleep_manager_t *mgr, uint32_t delta_ms)
+{
+    gas_sensor_app_poll(delta_ms);
+    accel_app_poll(mgr->accel_app, delta_ms);
+
+    mgr->hb_only_elapsed_ms += delta_ms;
+    if (mgr->hb_only_elapsed_ms >= HB_ONLY_ZE12A_ACTIVE_MS) {
+        /* Back to Q&A mode immediately, per the user's explicit choice
+         * (2026-08-10): "xác nhận cảm biến nào ok thì lập tức tắt luôn
+         * cảm biến đấy" -- i.e. don't leave ZE12A broadcasting in Active
+         * mode any longer than this phase needs. */
+        gas_sensor_switch_to_qa_mode();
+        log_info(TAG, "HB_ONLY: sensor check done, entering publish phase");
+        return 1;
+    }
+    return 0;
+}
+
+/* Phase 2: publish. Mirrors _modem_power_on_start()/_modem_wait_ready_
+ * is_done() above almost exactly (same UART-resume-before-power-on-start
+ * ordering bug this file's wake steps already had to get right once --
+ * see _modem_power_on_start()'s doc-comment) but scoped to mgr->hb_only_*
+ * fields instead of mgr->sim_*, since this can run interleaved with (in
+ * practice: between, never concurrently with) an ordinary wake sequence's
+ * own sim_wait_elapsed_ms/sim_start_sent usage. */
+static uint8_t _hb_only_publish_process(sx_sleep_manager_t *mgr, uint32_t delta_ms)
+{
+    if (mgr->hb_only_elapsed_ms == 0) {
+        /* First tick of this phase -- kick off the modem, same sequence
+         * as _modem_power_on_start(). */
+        log_info(TAG, "HB_ONLY: resume UART + power on modem");
+        sx_board_uart_resume_it();
+        mgr->modem->ops->comm_reset(mgr->modem->ctx);
+        mgr->modem->ops->power_on_start(mgr->modem->ctx);
+    }
+    mgr->hb_only_elapsed_ms += delta_ms;
+
+    /* Tick the modem driver's own state machine forward -- same fix as
+     * _modem_power_off_is_done() above needed: this function runs from
+     * app.c's app_process() once per tick (not inside a blocking
+     * _run_steps_blocking() loop like the sleep_steps/wake_steps do), so
+     * modem_handle_poll() would normally be reached via sx_user_mqtt_poll()
+     * elsewhere in that same app_process() tick -- ticking it again here
+     * is redundant but harmless (mirrors the defensive style already used
+     * throughout this file rather than assuming poll ordering elsewhere). */
+    modem_handle_poll(mgr->modem, delta_ms);
+
+    if (!mgr->hb_only_start_sent && !mgr->modem->ops->power_is_busy(mgr->modem->ctx)) {
+        mgr->modem->ops->start(mgr->modem->ctx);
+        mgr->hb_only_start_sent = 1;
+    }
+
+    if (!mgr->hb_only_start_sent) {
+        /* Still waiting for power_on_start()'s async sequence to settle
+         * before start() can be sent -- same 90s ceiling as
+         * _modem_wait_ready_is_done() uses for consistency, though in
+         * practice this branch clears in well under a second. */
+        if (mgr->hb_only_elapsed_ms >= SX_SLEEP_MGR_SIM_WAIT_TIMEOUT_MS) {
+            log_warn(TAG, "HB_ONLY: modem power-on timeout, giving up this cycle");
+            return 1;
+        }
+        return 0;
+    }
+
+    if (!mgr->modem->ops->is_ready(mgr->modem->ctx) ||
+        !sx_user_mqtt_is_connected()) {
+        if (mgr->hb_only_elapsed_ms >= SX_SLEEP_MGR_SIM_WAIT_TIMEOUT_MS) {
+            log_warn(TAG, "HB_ONLY: modem/MQTT not ready after timeout, giving up this cycle");
+            return 1;
+        }
+        return 0;
+    }
+
+    if (!mgr->hb_only_publish_kicked) {
+        log_info(TAG, "HB_ONLY: modem ready, publishing heartbeat");
+        if (mgr->publish_heartbeat != NULL) {
+            mgr->publish_heartbeat();
+        }
+        mgr->hb_only_publish_kicked = 1;
+        return 0; /* give sx_user_mqtt_is_publishing() a tick to turn on */
+    }
+
+    if (sx_user_mqtt_is_publishing()) {
+        return 0; /* still sending -- keep waiting */
+    }
+
+    /* Publish finished (or was skipped because MQTT wasn't connected --
+     * either way there is nothing left to wait for). Power the modem back
+     * down before returning to sleep, same as _modem_power_off_start()/
+     * _modem_power_off_is_done() above, reusing that exact pair instead
+     * of re-deriving the same PWRKEY-pulse + poll-driving logic here. */
+    log_info(TAG, "HB_ONLY: publish done, powering modem back off");
+    _modem_power_off_start(mgr);
+    while (!_modem_power_off_is_done(mgr)) {
+        sx_delay_ms(10);
+    }
+    return 1;
+}
+
+void sx_sleep_manager_hb_only_process(sx_sleep_manager_t *mgr, uint32_t delta_ms)
+{
+    uint8_t phase_done;
+
+    if (mgr->hb_only_phase == 0) {
+        phase_done = _hb_only_sensor_check_process(mgr, delta_ms);
+        if (phase_done) {
+            mgr->hb_only_phase      = 1;
+            mgr->hb_only_elapsed_ms = 0; /* re-used as phase 2's own elapsed counter */
+        }
+    } else if (mgr->hb_only_phase == 1) {
+        phase_done = _hb_only_publish_process(mgr, delta_ms);
+        if (phase_done) {
+            accel_app_sleep_step_start(mgr->accel_app);
+            mgr->hb_only_phase = 2;
+            log_info(TAG, "HB_ONLY: mini-wake complete");
+        }
+    }
+}
+
+uint8_t sx_sleep_manager_hb_only_is_done(sx_sleep_manager_t *mgr)
+{
+    return mgr->hb_only_phase == 2;
+}
+
+uint8_t sx_sleep_manager_hb_only_modem_owned(sx_sleep_manager_t *mgr)
+{
+    /* Only phase 1 (publish) actually touches the modem -- phase 0
+     * (sensor check) never powers it on, so the recovery ladder is free
+     * to act during phase 0 same as any other idle period. */
+    return mgr->hb_only_phase == 1;
+}
+
+void sx_sleep_manager_bare_sleep(sx_sleep_manager_t *mgr, uint32_t sleep_sec)
+{
+    if (sleep_sec == 0) sleep_sec = 1;
+
+    log_info(TAG, "Bare STOP: setting RTC wakeup = %lu sec (no sleep_steps -- "
+                   "already parked from this lap's first chunk or the last "
+                   "HB_ONLY publish)", (unsigned long)sleep_sec);
+    sx_sleep_set_rtc_wake(mgr->svc.sleep, sleep_sec);
+
+    log_info(TAG, ">>> Entering STOP mode NOW (bare)");
+    sx_delay_ms(10);
+
+    sx_sleep_enter_stop(mgr->svc.sleep);
+
+    log_info(TAG, "<<< Woke from STOP mode (bare)");
+    sx_sleep_cancel_rtc(mgr->svc.sleep);
 }

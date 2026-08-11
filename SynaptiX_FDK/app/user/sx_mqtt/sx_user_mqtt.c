@@ -60,7 +60,16 @@ static void dispatch_next(void){
     if (!cqueue_is_empty(&s_queue) && sx_mqtt_is_connected(&s_mqtt)) {
         if (cqueue_receive(&s_queue, &s_current_item)) {
             s_publishing = 1;
-            sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+            /* Same fix and same reasoning as sx_user_mqtt_publish()'s own
+             * call site below -- see that doc-comment for the full
+             * hardware-confirmed failure mode this guards against. */
+            if (sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0) != 0) {
+                log_warn(TAG, "dispatch_next: driver rejected immediately, re-queueing: %s", s_current_item.topic);
+                s_publishing = 0;
+                if (!cqueue_send(&s_queue, &s_current_item)) {
+                    log_warn(TAG, "publish queue full, drop after re-queue: %s", s_current_item.topic);
+                }
+            }
         }
     }
 }
@@ -280,7 +289,49 @@ void sx_user_mqtt_publish(const char *topic, const char *message){
     if (!s_publishing) {
         if (cqueue_receive(&s_queue, &s_current_item)) {
             s_publishing = 1;
-            sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0);
+            /* BUG FIX (2026-08-11), confirmed on real hardware: sx_mqtt_
+             * publish()'s return value used to be discarded here. It
+             * returns -1 (never actually sending anything to the modem,
+             * never triggering cb_publish_done()/_on_publish() above)
+             * whenever sx_mqtt_is_connected(&s_mqtt) has gone false
+             * between this function's own check at the top and this
+             * point, OR -- the case that actually happened on hardware --
+             * whenever the driver layer's own dce->mqtt_state isn't
+             * A7677S_MQTT_CONNECTED even though sx_mqtt_t.state IS
+             * SX_MQTT_STATE_CONNECTED (see a7677s_mqtt_publish()'s "not
+             * connected" check): e.g. right after connecting, while
+             * mqtt_rpc_init()'s on_connected-triggered subscribe is still
+             * in flight and has temporarily moved dce->mqtt_state to one
+             * of the A7677S_MQTT_SUB_* states. Since _on_publish() (the
+             * only other place that resets s_publishing back to 0) is
+             * never called in that case, s_publishing stayed stuck at 1
+             * forever -- every later sx_user_mqtt_publish() call
+             * (including ordinary telemetry on subsequent laps) then
+             * silently just queued into s_queue and never actually sent
+             * anything again for the rest of the session, since dispatch_
+             * next() and this function both gate on "!s_publishing" before
+             * ever dequeuing. Confirmed on real hardware: an HB_ONLY
+             * heartbeat published moments after a fresh MQTT connect hit
+             * exactly this race (logged "mqtt_publish: not connected"
+             * despite "MQTT connected" already having fired) and the
+             * queue never recovered afterwards. */
+            if (sx_mqtt_publish(&s_mqtt, s_current_item.topic, s_current_item.message, 1, 0) != 0) {
+                log_warn(TAG, "publish: driver rejected immediately (not connected or busy), re-queueing: %s", topic);
+                s_publishing = 0;
+                /* Put it back at the front of the logical queue instead of
+                 * silently dropping it -- cqueue_send() appends to the
+                 * tail, so this item goes behind whatever else is already
+                 * queued rather than jumping ahead of it. That is an
+                 * acceptable ordering trade-off here (this is an
+                 * already-rare, already-transient failure path) in
+                 * exchange for not adding a second, higher-priority queue
+                 * just for this one retry. If the queue is now full,
+                 * cqueue_send() drops it the same way any other full-queue
+                 * publish would -- no worse than before this fix. */
+                if (!cqueue_send(&s_queue, &s_current_item)) {
+                    log_warn(TAG, "publish queue full, drop after re-queue: %s", topic);
+                }
+            }
         }
     }
 }

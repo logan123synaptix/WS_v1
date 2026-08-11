@@ -109,6 +109,17 @@ static uint8_t _modem_power_on_is_done(void *ctx)
  * sx_sleep_manager_enter()'s behavior. */
 #define SX_SLEEP_MGR_SIM_WAIT_TIMEOUT_MS  90000U
 
+/* HB_ONLY publish retry (2026-08-11) -- see _hb_only_publish_process()'s
+ * doc-comment at the publish-kick site for the real-hardware race this
+ * covers (heartbeat publish landing while mqtt_rpc_init()'s subscribe is
+ * still in flight at the driver layer). 500ms gap and 3 attempts is
+ * generous relative to how fast a subscribe round-trip normally completes
+ * (well under 500ms on the logs seen so far) without adding meaningfully
+ * to HB_ONLY's total wake time in the worst case (<=1.5s of retry gaps on
+ * top of whatever the actual publish takes). */
+#define HB_ONLY_PUBLISH_MAX_ATTEMPTS     3U
+#define HB_ONLY_PUBLISH_RETRY_GAP_MS     500U
+
 static void _modem_wait_ready_start(void *ctx)
 {
     (void)ctx;
@@ -368,6 +379,8 @@ void sx_sleep_manager_init(sx_sleep_manager_t *mgr,
     mgr->hb_only_elapsed_ms     = 0;
     mgr->hb_only_start_sent     = 0;
     mgr->hb_only_publish_kicked = 0;
+    mgr->hb_only_publish_attempts = 0;
+    mgr->hb_only_last_publish_attempt_ms = 0;
 
     s_wake_steps[0] = (sx_sleep_step_t){ .start = _ext_flash_wake_start, .is_done = _ext_flash_wake_is_done, .ctx = NULL, .name = "ext_flash_wake" };
     s_wake_steps[1] = (sx_sleep_step_t){ .start = _gps_on_start,          .is_done = _gps_on_is_done,          .ctx = mgr, .name = "gps_on" };
@@ -484,6 +497,8 @@ void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
     mgr->hb_only_elapsed_ms     = 0;
     mgr->hb_only_start_sent     = 0;
     mgr->hb_only_publish_kicked = 0;
+    mgr->hb_only_publish_attempts = 0;
+    mgr->hb_only_last_publish_attempt_ms = 0;
 
     /* Accel resumed for the whole mini-wake (both phases) per the user's
      * explicit choice (2026-08-10): "Accel bật xuyên suốt cả 2 giai
@@ -595,12 +610,51 @@ static uint8_t _hb_only_publish_process(sx_sleep_manager_t *mgr, uint32_t delta_
     }
 
     if (!mgr->hb_only_publish_kicked) {
-        log_info(TAG, "HB_ONLY: modem ready, publishing heartbeat");
-        if (mgr->publish_heartbeat != NULL) {
-            mgr->publish_heartbeat();
+        /* BUG FIX (2026-08-11), confirmed on real hardware: right after a
+         * fresh MQTT connect, mqtt_rpc_init()'s on_connected-triggered
+         * subscribe can still be in flight at the driver layer (a7677s.c's
+         * dce->mqtt_state temporarily leaves A7677S_MQTT_CONNECTED for one
+         * of the A7677S_MQTT_SUB_* states) even though sx_mqtt_t.state (and
+         * therefore sx_user_mqtt_is_connected(), checked just above) is
+         * already CONNECTED. publish_heartbeat_now() -> sx_user_mqtt_
+         * publish() now re-queues instead of losing the heartbeat outright
+         * when that race hits (see sx_user_mqtt.c's fix), but that means
+         * sx_user_mqtt_is_publishing() can read back 0 immediately after
+         * this call even though nothing was actually sent -- the fixed
+         * sx_user_mqtt_publish() resets s_publishing back to 0 on an
+         * immediate driver rejection. Retrying here (up to
+         * HB_ONLY_PUBLISH_MAX_ATTEMPTS times, spaced
+         * HB_ONLY_PUBLISH_RETRY_GAP_MS apart) covers that: if is_publishing()
+         * never turns on after a kick, the original attempt was rejected
+         * and silently re-queued, so try kicking it again -- dispatch_next()
+         * inside sx_user_mqtt.c will pick the re-queued item back up once
+         * s_publishing is 0, so a second publish_heartbeat_now() call here
+         * (which itself calls sx_user_mqtt_publish() again, queueing a
+         * second copy) is not quite right either -- instead this checks
+         * queue_empty() so it does not double-publish if the item is still
+         * sitting in the queue waiting for dispatch_next() to naturally
+         * pick it up on its own. */
+        if (mgr->hb_only_publish_attempts == 0 ||
+            (!sx_user_mqtt_is_publishing() && sx_user_mqtt_queue_empty() &&
+             mgr->hb_only_elapsed_ms - mgr->hb_only_last_publish_attempt_ms >= HB_ONLY_PUBLISH_RETRY_GAP_MS)) {
+            if (mgr->hb_only_publish_attempts < HB_ONLY_PUBLISH_MAX_ATTEMPTS) {
+                log_info(TAG, "HB_ONLY: modem ready, publishing heartbeat (attempt %u/%u)",
+                         (unsigned)(mgr->hb_only_publish_attempts + 1), (unsigned)HB_ONLY_PUBLISH_MAX_ATTEMPTS);
+                if (mgr->publish_heartbeat != NULL) {
+                    mgr->publish_heartbeat();
+                }
+                mgr->hb_only_publish_attempts++;
+                mgr->hb_only_last_publish_attempt_ms = mgr->hb_only_elapsed_ms;
+            } else {
+                log_warn(TAG, "HB_ONLY: giving up on heartbeat publish after %u attempts",
+                         (unsigned)HB_ONLY_PUBLISH_MAX_ATTEMPTS);
+                mgr->hb_only_publish_kicked = 1; /* stop retrying, fall through to power-off below */
+            }
         }
-        mgr->hb_only_publish_kicked = 1;
-        return 0; /* give sx_user_mqtt_is_publishing() a tick to turn on */
+        if (sx_user_mqtt_is_publishing()) {
+            mgr->hb_only_publish_kicked = 1;
+        }
+        return 0; /* give sx_user_mqtt_is_publishing() a tick to turn on, or retry above */
     }
 
     if (sx_user_mqtt_is_publishing()) {

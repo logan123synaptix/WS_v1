@@ -102,6 +102,14 @@ typedef struct {
     uint32_t hb_only_elapsed_ms;     /* elapsed time within the current phase */
     uint8_t  hb_only_start_sent;     /* mirrors sim_start_sent, scoped to HB_ONLY's own modem_power_on/wait_ready cycle */
     uint8_t  hb_only_publish_kicked; /* publish_heartbeat() called exactly once per HB_ONLY cycle */
+
+    /* Publish retry tracking (2026-08-11) -- see HB_ONLY_PUBLISH_MAX_
+     * ATTEMPTS/HB_ONLY_PUBLISH_RETRY_GAP_MS and _hb_only_publish_process()'s
+     * doc-comment for why a single publish_heartbeat() call is not always
+     * enough (real-hardware race with mqtt_rpc_init()'s post-connect
+     * subscribe still in flight at the driver layer). */
+    uint8_t  hb_only_publish_attempts;
+    uint32_t hb_only_last_publish_attempt_ms;
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:

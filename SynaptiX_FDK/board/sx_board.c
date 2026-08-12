@@ -266,7 +266,9 @@ void sx_board_init(void)
     // keeps round-robin advancing but no channel ever produces a valid
     // frame, so/no2/o3/co/h2s all sit at null in every telemetry payload
     // for the entire session. Must be switch_to_ACTIVE_mode, not QA.
+    sx_delay_ms(500U);  // let the ZE12A boot up a bit before sending the command
     gas_sensor_switch_to_active_mode();
+    sx_delay_ms(500U);  // let the ZE12A process the command before starting polling
 
     // TIMER (TIM1) — sx_timer_init_regs() applies Prescaler/Period directly,
     // no auto-derivation. PSC=31, Period=99 chosen to match tim.c's own

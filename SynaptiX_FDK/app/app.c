@@ -271,6 +271,15 @@ typedef struct {
  * as a 0->1 transition and saved. */
 static bool s_gps_was_fixed = false;
 
+/* Guards the one-shot ZE12A Active-Upload-mode retry in APP_CYCLE_ON_PUMP
+ * below (2026-08-12, per the user) so it only fires on the very first
+ * ON_PUMP tick after a genuine cold boot, not on every lap's ON_PUMP —
+ * see that call site's doc-comment for the full reasoning. Re-sending
+ * the mode command every lap would be harmless (fire-and-forget no-op
+ * once ZE12A is already in Active mode) but would spam the log
+ * pointlessly for every lap after the first. */
+static bool s_ze12a_boot_retry_done = false;
+
 /* Called once per 0->1 fix transition (see s_gps_was_fixed's doc-comment
  * above) with the just-acquired coordinates. Explicit delete-then-write
  * per the user's request, rather than relying on sx_storage_write()'s own
@@ -827,6 +836,47 @@ static void app_cycle_process(uint32_t delta_ms)
              * mqtt_rpc.c's "-duty" flag for how it's set. */
             pump_set_power(sx_board_get_pump_pwm(), network_config_get()->pump_duty_percent);
             log_info(TAG, "Pump on at %u%% duty", network_config_get()->pump_duty_percent);
+
+            /* Re-send ZE12A Active Upload mode here too (2026-08-12, per
+             * the user), on top of sx_board_init()'s call right after
+             * gas_sensor_init() — see that call site's doc-comment in
+             * sx_board.c for the fuller writeup. Confirmed on real
+             * hardware: a genuine cold power-on (board's 5V rail,
+             * covering both MCU and all 4 ZE12A modules through the
+             * mux, per the user — no separate EN_PW-style gate for
+             * ZE12A the way SPS30/pump have one) produces exactly 3
+             * checksum-mismatch warnings on mux ch 0 within the first
+             * ~1s, then total silence (not even further checksum
+             * mismatches, just dwell_ceiling timeouts) on every channel
+             * for the rest of the session — while a plain MCU reset
+             * right after (ZE12A never loses power across a reset)
+             * reads clean frames from the very first byte. This is
+             * consistent with ZE12A's own power-on settling racing
+             * MCU boot: the MCU runs sx_board_init()'s call within tens
+             * of ms of power going live, likely before ZE12A's own
+             * internal startup has finished, so the first bytes it
+             * receives back are garbage the RX byte-assembly state
+             * machine can't resync from cleanly (see
+             * ze12a_handle_frame()'s doc-comment in ze12a.c). This
+             * second call lands here, after app_init()'s entire
+             * network_config_init()/sx_mqtt_init()/etc. sequence (real
+             * wall-clock time, typically already several hundred ms to
+             * low seconds past power-on by the time ON_PUMP's first
+             * tick runs) as a later-chance retry. Same fire-and-forget
+             * broadcast either way — harmless as a no-op if ZE12A was
+             * already fine from the first call. Not a confirmed root
+             * cause (datasheet gives no command-readiness timing spec
+             * to check against, see gas_sensor_switch_to_active_mode()'s
+             * doc-comment in ze12a.c), just the simplest change that
+             * costs nothing and covers the failure pattern actually
+             * observed on hardware -- if cold-boot still fails after
+             * this, the next step is measuring real elapsed time from
+             * power-on to first ZE12A byte with a scope/logic analyzer
+             * rather than guessing a third call site. */
+            if (!s_ze12a_boot_retry_done) {
+                s_ze12a_boot_retry_done = true;
+                gas_sensor_switch_to_active_mode();
+            }
         }
         if (s_cycle_tick_ms >= network_config_get()->pump_on_ms) {
             s_cycle_tick_ms = 0;

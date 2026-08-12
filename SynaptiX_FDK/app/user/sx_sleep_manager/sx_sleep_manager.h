@@ -124,22 +124,51 @@ typedef struct {
     uint8_t  hb_only_cooldown_done;
     uint32_t hb_only_cooldown_elapsed_ms;
 
-    /* Gas sensor connection-status snapshot (2026-08-12, generalized
-     * 2026-08-12 to cover full-wake too -- see doc-comment on
-     * sx_sleep_manager_gas_snapshot_capture() below for the full
-     * root-cause writeup and why this is no longer HB_ONLY-only).
+    /* Gas sensor connection-status flag for heartbeat's sensorStatus[]
+     * (2026-08-12, REDESIGNED same day per the user's explicit direction
+     * after two earlier attempts still produced wrong SO2/NO2/O3 status
+     * on real hardware):
      *
-     * NOT indexed by GasSensorType_t's raw enum value directly -- those
-     * values (0x03..0x2C per ze12a.h, non-contiguous) are too sparse for
-     * a direct-index array. Indexed 0..GAS_SENSOR_COUNT-1 instead,
-     * parallel to gas_sensor[] (ze12a.h) itself: slot i here corresponds
-     * to gas_sensor[i], same order, same GAS_SENSOR_COUNT. Snapshotting
-     * captures both the type and the flag together so app.c doesn't need
-     * its own copy of ze12a.h's internal ordering to read this back --
-     * see gas_snapshot_type[]. Field names kept without an "hb_only_"
-     * prefix now that both wake paths share this same snapshot. */
-    GasSensorType_t gas_snapshot_type[GAS_SENSOR_COUNT];
-    bool             gas_snapshot_connected[GAS_SENSOR_COUNT];
+     * Attempt 1 (isConnected read live): failed -- isConnected is a 10s
+     * self-expiring flag, read at one instant, so a slow modem/GPS step
+     * between the last good frame and the read could age it out even
+     * though the channel was fine.
+     *
+     * Attempt 2 (per-window "everConnectedThisWindow" snapshot, reset at
+     * the start of SENSING and of HB_ONLY's own phase 1, read at the end
+     * of that same window): failed differently -- confirmed on real
+     * hardware that HB_ONLY's phase 1 (9.5s budget) does not reliably
+     * cycle the ZE12A mux through all populated channels at all (a
+     * separate, still-open mux-round-robin bug -- see the DIAGNOSTIC log
+     * added in ze12a.c's gas_sensor_poll()). HB_ONLY trying to take its
+     * own fresh reading in such a short window is fundamentally fragile
+     * regardless of the snapshot mechanism layered on top of it.
+     *
+     * Attempt 3 (this one, per the user 2026-08-12): stop having HB_ONLY
+     * take its own gas-sensor reading for sensorStatus purposes at all.
+     * Full-wake's SENSING phase (40s, mux has time to cycle through every
+     * channel multiple times -- see APP_SENSING_MS) is the only place
+     * that actually attempts a fresh read. This flag is written ONLY at
+     * the APP_CYCLE_SENSING -> APP_CYCLE_SENDING transition (app.c):
+     * reset to false right when SENSING starts, then set true for
+     * whichever channels produced at least one valid frame anywhere in
+     * that SENSING window (same "at least once this window" semantics as
+     * the old everConnectedThisWindow latch, just no longer read/written
+     * by HB_ONLY at all). HB_ONLY's heartbeat (build_heartbeat_payload())
+     * simply reads whatever this flag currently holds -- the result of
+     * the MOST RECENT full-wake SENSING, however many HB_ONLY cycles ago
+     * that was. Persists across HB_ONLY cycles by design (that is the
+     * whole point -- HB_ONLY no longer measures anything of its own), but
+     * is NOT sticky forever: the very next full-wake's SENSING always
+     * resets and re-measures every channel from scratch, so a channel
+     * that genuinely fails going forward will correctly flip to FAIL
+     * again next lap instead of being stuck reporting a stale OK. Same
+     * indexing convention as the old gas_snapshot_type[]/
+     * gas_snapshot_connected[] arrays this replaces: index 0..
+     * GAS_SENSOR_COUNT-1 parallel to gas_sensor[] (ze12a.h), not
+     * GasSensorType_t's own sparse enum values. */
+    GasSensorType_t gas_last_full_wake_type[GAS_SENSOR_COUNT];
+    bool             gas_last_full_wake_ok[GAS_SENSOR_COUNT];
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:
@@ -235,16 +264,20 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr);
  * machine once (APP_MODE_HB_ONLY) before sleeping again, instead of
  * running the full 7-step wake_steps sequence:
  *
- *   Phase 1 (sensor check) — gas_sensor_switch_to_active_mode(), poll
- *   gas_sensor_app_poll() for HB_ONLY_ZE12A_ACTIVE_MS (long enough for
- *   the mux to dwell on all GAS_SENSOR_MUX_CHANNEL_COUNT channels at
- *   GAS_SENSOR_CHANNEL_DWELL_MS each, refreshing gas_sensor[i].isConnected
- *   before it can age out per GAS_SENSOR_TIMEOUT_MS), then immediately
- *   gas_sensor_switch_to_qa_mode() again. accel_app_wake_step_start() is
- *   kicked off at the very start of this phase and stays resumed through
- *   phase 2 as well, so motionState in the heartbeat payload reflects
- *   this mini-wake's own accel reading (2026-08-10, per user request:
- *   "Accel bật xuyên suốt cả 2 giai đoạn").
+ *   Phase 1 (2026-08-12, REDESIGNED -- see gas_last_full_wake_ok's
+ *   doc-comment in the header struct for the full history of why): no
+ *   longer takes its own gas-sensor reading. Two earlier attempts at
+ *   having HB_ONLY measure ZE12A itself in this short window (live
+ *   isConnected, then a per-window snapshot) both proved unreliable on
+ *   real hardware -- confirmed the ZE12A mux does not reliably round-robin
+ *   through every channel within HB_ONLY's short budget. Per the user's
+ *   explicit direction (2026-08-12): HB_ONLY's heartbeat now reports
+ *   whatever gas_last_full_wake_ok[] currently holds -- the result of the
+ *   most recent full-wake SENSING's actual measurement -- instead of
+ *   attempting a fresh read of its own. This phase is now just accel
+ *   resume (so motionState stays accurate) with no gas-sensor step at
+ *   all; HB_ONLY_ZE12A_ACTIVE_MS/gas_sensor_switch_to_active_mode()/
+ *   gas_sensor_switch_to_qa_mode() are no longer called from here.
  *
  *   Phase 2 (publish) — resume UART, power on modem (mirrors
  *   _modem_power_on_start()/_modem_wait_ready_is_done() above), wait for
@@ -257,13 +290,6 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr);
  * app.c's s_full_sleep_steps_done_this_lap) and stay parked until the
  * lap's final chunk triggers the ordinary full wake_steps sequence. */
 
-#define HB_ONLY_ZE12A_ACTIVE_MS  9500U  /* < GAS_SENSOR_TIMEOUT_MS (10000),
-                                          * >= GAS_SENSOR_MUX_CHANNEL_COUNT *
-                                          * GAS_SENSOR_CHANNEL_DWELL_MS
-                                          * (4 * 2000 = 8000) so every
-                                          * channel gets at least one full
-                                          * dwell window. */
-
 /* Modem power-off -> next-power-on cooldown gate (2026-08-12).
  *
  * SUSPECTED root cause (not yet confirmed on hardware, needs real-board
@@ -274,15 +300,16 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr);
  * seconds or more) BEFORE _modem_power_on_start() ever pulses PWRKEY --
  * i.e. there's always a long, variable gap between the modem's previous
  * power_off_start() completing and the next power_on_start() pulse.
- * HB_ONLY's phase 1 (sensor check) only waits HB_ONLY_ZE12A_ACTIVE_MS
- * (9500ms, fixed) before phase 2 pulses PWRKEY again -- a much shorter,
- * fixed gap. If the A7677S needs a real hardware cooldown longer than
- * 9.5s after a power-off before it will respond to the next PWRKEY pulse
- * (power-path capacitor discharge / internal reset settling -- not
- * documented in a76xx_at_cmd.md, would need to be measured), that would
- * explain why telemetry wake (long gap, works) and heartbeat wake (short
- * gap, times out with no response at all -- not even a malformed one)
- * differ despit calling power_on_start() the exact same way.
+ * HB_ONLY used to wait HB_ONLY_ZE12A_ACTIVE_MS (9500ms, fixed, before
+ * the 2026-08-12 redesign removed HB_ONLY's own sensor-check phase --
+ * see above) before phase 2 pulsed PWRKEY again -- a much shorter, fixed
+ * gap than full-wake's. If the A7677S needs a real hardware cooldown
+ * longer than that after a power-off before it will respond to the next
+ * PWRKEY pulse (power-path capacitor discharge / internal reset settling
+ * -- not documented in a76xx_at_cmd.md, would need to be measured), that
+ * would explain why telemetry wake (long gap, works) and heartbeat wake
+ * (short gap, times out with no response at all -- not even a malformed
+ * one) differ despit calling power_on_start() the exact same way.
  *
  * Value chosen conservatively (matches A7677S_OFF_SETTLE_MS's own 4500ms
  * plus generous margin, since the true minimum is unmeasured) -- ADJUST
@@ -293,11 +320,8 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr);
  * control -- see chat history 2026-08-11/12 for the full elimination
  * process already carried out in code review).
  *
- * Deliberately a SEPARATE clock from hb_only_elapsed_ms (owned by phase 1,
- * reset to 0 when phase 2 begins) and from HB_ONLY_ZE12A_ACTIVE_MS (a
- * different concern -- gas sensor mux dwell time, not modem power
- * timing) -- conflating the two would silently change ZE12A's dwell
- * budget every time this constant is tuned, or vice versa. */
+ * Deliberately its own clock, separate from hb_only_elapsed_ms (owned by
+ * phase 1, reset to 0 when phase 2 begins). */
 #define HB_ONLY_MODEM_COOLDOWN_MS  15000U
 
 void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr);
@@ -324,50 +348,35 @@ uint8_t sx_sleep_manager_hb_only_modem_owned(sx_sleep_manager_t *mgr);
 /* BUG (real hardware, reported by user, 2026-08-12): heartbeat's
  * sensorStatus[] for CO/SO2/NO2/O3/H2S was reporting FAIL even for gas
  * types with real, fresh readings confirmed in the same lap's telemetry
- * payload and ze12a.c's own per-frame log line. Root cause: app.c's
- * build_heartbeat_payload() calls gas_sensor_app_is_connected(type),
- * which reads gas_sensor[i].isConnected LIVE off ze12a.c's own
- * GAS_SENSOR_TIMEOUT_MS (10000ms) countdown. Originally fixed for
- * HB_ONLY only (phase 1 ends, then phase 2's modem cooldown/handshake/
- * connect alone easily exceeds 10000ms before build_heartbeat_payload()
- * runs, aging every channel's isConnected back out to false regardless
- * of real sensor health). BUT real logs (2026-08-12 session) showed the
- * exact same symptom on the ordinary FULL-WAKE path too -- e.g. a
- * data-topic payload with so2:50/no2:16/o3:14 immediately followed
- * (0.3s later) by that lap's heartbeat correctly showing OK, while a
- * different lap's heartbeat (further from its last valid gas frame,
- * e.g. after a long GPS-fix wait during SENSING) showed FAIL for every
- * channel despite ZE12A never having lost power or gone silent -- same
- * age-out race, just against APP_CYCLE_SENSING -> APP_CYCLE_SENDING's
- * timing instead of HB_ONLY phase 1 -> phase 2's. GAS_SENSOR_TIMEOUT_MS
- * was never actually safe to assume "not at risk" on the full-wake path
- * either, since sensing_ms + any slow step before SENDING (GPS fix wait
- * in particular, observed up to 110000ms in a real log) can just as
- * easily run the same clock out.
+ * payload and ze12a.c's own per-frame log line. Went through three
+ * attempts before landing on the current design -- see
+ * gas_last_full_wake_ok's doc-comment on the struct field itself (this
+ * header, above) for the full history of why the first two (live
+ * isConnected read, then a per-window "everConnectedThisWindow" snapshot
+ * taken by BOTH wake paths) each failed on real hardware, and why HB_ONLY
+ * no longer attempts its own gas-sensor reading at all as of this fix.
  *
- * Fix: generalized the HB_ONLY-only snapshot into one used by BOTH
- * paths. sx_sleep_manager_gas_snapshot_capture() below must be called
- * once, right when sensor-checking ends and before any subsequent step
- * risks running GAS_SENSOR_TIMEOUT_MS out -- HB_ONLY's phase 1 already
- * does this (sx_sleep_manager_hb_only_process()'s internal sensor-check
- * step); app.c's app_cycle_process() now does the same at the
- * APP_CYCLE_SENSING -> APP_CYCLE_SENDING transition, before SENDING's
- * build_heartbeat_payload()/build_telemetry_payload() calls. Both wake
- * paths then read back through the single getter below instead of
- * calling gas_sensor_app_is_connected() live. */
+ * Current design: sx_sleep_manager_gas_snapshot_capture() below is now
+ * called ONLY from app.c's APP_CYCLE_SENSING -> APP_CYCLE_SENDING
+ * transition (full-wake), never from HB_ONLY. It resets then re-measures
+ * gas_last_full_wake_ok[] for every channel based on that SENSING
+ * window's own frames. HB_ONLY's heartbeat reads the same getter below,
+ * which now just returns whatever full-wake last measured -- possibly
+ * several HB_ONLY cycles ago, by design, since HB_ONLY no longer takes
+ * its own reading. */
 void sx_sleep_manager_gas_snapshot_capture(sx_sleep_manager_t *mgr);
 
-/* Read back the snapshot captured by sx_sleep_manager_gas_snapshot_
- * capture() for one gas type (see that function's doc-comment for why
+/* Read back gas_last_full_wake_ok[] for one gas type (see
+ * sx_sleep_manager_gas_snapshot_capture()'s doc-comment above for why
  * this exists instead of app.c calling gas_sensor_app_is_connected()
- * live at heartbeat-build time). Returns false for any type not found
- * in the snapshot (should not happen in practice -- the snapshot always
- * covers exactly ze12a.h's gas_sensor[GAS_SENSOR_COUNT], the same set
- * app.c's gas_status_channels[] iterates). Only meaningful once capture()
- * has run at least once this cycle; before that it reads back whatever
- * the previous cycle left behind (harmless in practice -- both call
- * sites always run capture() earlier in the same cycle before this is
- * ever read). */
+ * live, or HB_ONLY taking its own reading, at heartbeat-build time).
+ * Returns false for any type not found (should not happen in practice --
+ * always covers exactly ze12a.h's gas_sensor[GAS_SENSOR_COUNT], the same
+ * set app.c's gas_status_channels[] iterates). Reflects whatever the
+ * MOST RECENT full-wake SENSING measured, which may be several HB_ONLY
+ * cycles old by the time HB_ONLY reads it -- that staleness is expected
+ * and intentional under the current design, not a bug; see the struct
+ * field's doc-comment for why. */
 bool sx_sleep_manager_gas_snapshot_connected(sx_sleep_manager_t *mgr, GasSensorType_t type);
 
 /* Sleeps for sleep_sec WITHOUT running the 7 sleep_steps first -- used for

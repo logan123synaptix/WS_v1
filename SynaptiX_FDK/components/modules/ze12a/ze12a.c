@@ -255,6 +255,26 @@ void gas_sensor_poll(uint32_t time_stamp_ms)
      * for the full elimination reasoning. Root cause still unknown as of
      * this revert — see next diagnostic step. */
     if (advance_channel || s_channel_dwell_ms >= GAS_SENSOR_CHANNEL_DWELL_MS) {
+        /* DIAGNOSTIC (2026-08-12): added while investigating a real-
+         * hardware report of the mux appearing to stay parked on channel
+         * 1 (SO2) indefinitely during a 9.5s HB_ONLY sensor-check window
+         * -- four consecutive valid SO2 frames logged, zero frames ever
+         * seen from any other channel, with no log evidence the mux GPIO
+         * lines were ever actually toggled in between. This line makes
+         * every channel transition (both the fast advance_channel path
+         * and the 2s dwell-ceiling path) visible in the log with the
+         * reason it fired, so a hardware run can show definitively
+         * whether ze12a_select_mux_channel() is even being reached at
+         * the expected cadence, and if so, whether the *next* channel's
+         * module ever responds at all vs. the mux/GPIO change itself
+         * silently not taking effect. Not a fix by itself -- read-only
+         * instrumentation to disambiguate "mux never told to switch" from
+         * "mux told to switch but next module never answers" before
+         * touching the switching logic itself. */
+        log_info(TAG, "ZE12A mux advance: ch %u -> %u (reason=%s, dwell_ms=%lu)",
+                 s_mux_channel, (uint8_t)((s_mux_channel + 1U) % GAS_SENSOR_MUX_CHANNEL_COUNT),
+                 advance_channel ? "fast_frame" : "dwell_ceiling",
+                 (unsigned long)s_channel_dwell_ms);
         s_channel_dwell_ms = 0;
         s_mux_channel = (uint8_t)((s_mux_channel + 1U) % GAS_SENSOR_MUX_CHANNEL_COUNT);
         ze12a_select_mux_channel(s_mux_channel);

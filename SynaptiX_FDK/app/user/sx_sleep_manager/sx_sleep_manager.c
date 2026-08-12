@@ -492,8 +492,8 @@ void sx_sleep_manager_reset_wake(sx_sleep_manager_t *mgr)
 
 void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
 {
-    log_info(TAG, "HB_ONLY: starting mini-wake (sensor check + heartbeat)");
-    mgr->hb_only_phase          = 0;
+    log_info(TAG, "HB_ONLY: starting mini-wake (publish only, no gas-sensor read -- see gas_last_full_wake_ok's doc-comment)");
+    mgr->hb_only_phase          = 1; /* jump straight to publish -- no sensor-check phase anymore */
     mgr->hb_only_elapsed_ms     = 0;
     mgr->hb_only_start_sent     = 0;
     mgr->hb_only_publish_kicked = 0;
@@ -502,33 +502,16 @@ void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
     mgr->hb_only_cooldown_done         = 0;
     mgr->hb_only_cooldown_elapsed_ms   = 0;
 
-    /* BUG FIX (2026-08-12), reported on real hardware: HB_ONLY heartbeats
-     * were reporting SO2/NO2/O3 as FAIL even right after a lap where the
-     * ordinary full-wake path (same board, same session) read fresh
-     * values for the same channels. Root cause: board_sleep_pre_stop_
-     * hook() (sx_board.c) calls HAL_UART_Abort(hal_uart[UART_EXTEND])
-     * every time the MCU enters STOP mode, regardless of whether ZE12A
-     * itself stayed powered (it does — only its UART mode changes, see
-     * the doc-comment on the gas_sensor_switch_to_active_mode() call
-     * below). After STOP, UART5's RX interrupt stays dead until
-     * something calls board_extend_uart_resume_it() to re-arm it. The
-     * full-wake path's own gas_sensor_active_mode wake step
-     * (_gas_sensor_active_mode_start() above) already calls this before
-     * switching ZE12A back to active mode — but this function (HB_ONLY's
-     * equivalent entry point) did not, despite an earlier session's
-     * handoff notes claiming this exact fix had already been made here.
-     * It had not: grep confirms board_extend_uart_resume_it() was only
-     * called from the full-wake step, never from here. Net effect: every
-     * HB_ONLY cycle, ZE12A kept broadcasting fine on the wire, but UART5
-     * RX being dead meant gas_sensor_app_poll() below never saw a single
-     * byte, gas_sensor[i].isConnected never got set true, and
-     * sx_sleep_manager_gas_snapshot_capture() (see phase 1's end below)
-     * faithfully snapshotted "not connected" for every channel — matching
-     * the reported symptom exactly, and explaining why this only ever
-     * showed up on the HB_ONLY path specifically (full-wake's own resume
-     * call meant its UART was never actually left dead). Must run before
-     * gas_sensor_switch_to_active_mode() below, same ordering as the
-     * full-wake step. */
+    /* Still needed: UART5/UART_EXTEND's RX interrupt is left dead after
+     * STOP mode (board_sleep_pre_stop_hook() aborts it every time, see
+     * sx_board.c) regardless of whether this cycle reads ZE12A itself.
+     * Nothing else currently re-arms UART_EXTEND before phase 2's modem
+     * work, and leaving it dead has no known ill effect today -- but
+     * there is no reason to leave a peripheral's RX interrupt disabled
+     * for an entire HB_ONLY cycle when re-arming it costs nothing here,
+     * in case anything added later (this cycle or a future change) ends
+     * up depending on it. Kept for safety/consistency with the full-wake
+     * path's own resume call, not because HB_ONLY reads gas data anymore. */
     board_extend_uart_resume_it();
 
     /* Accel resumed for the whole mini-wake (both phases) per the user's
@@ -539,58 +522,18 @@ void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
      * sx_sleep_step_t array, same reasoning as the rest of this file. */
     accel_app_wake_step_start(mgr->accel_app);
 
-    /* BUG FIX (2026-08-12): reset everConnectedThisWindow for every
-     * channel right at phase-1 start, before switching ZE12A back to
-     * Active Upload mode -- see GasSensor_t's doc-comment (ze12a.h) and
-     * sx_sleep_manager_gas_snapshot_capture()'s doc-comment above for the
-     * full root-cause writeup. Must happen before gas_sensor_switch_to_
-     * active_mode() below so a frame arriving in the very first tick of
-     * this window isn't discarded by a reset that runs after it. */
-    gas_sensor_reset_window();
-
-    /* Phase 1: sensor check. ZE12A never loses power during sleep (only
-     * its UART mode changes between Active Upload and Q&A, see
-     * gas_sensor_switch_to_qa_mode()'s doc-comment) -- switching back to
-     * Active Upload here just makes it start broadcasting readings again
-     * so gas_sensor_app_poll() below can refresh gas_sensor[i].isConnected
-     * before HB_ONLY_ZE12A_ACTIVE_MS's dwell-time budget runs out. */
-    gas_sensor_switch_to_active_mode();
-}
-
-/* Phase 1: keep polling the gas sensor driver so gas_sensor[i].isConnected
- * gets refreshed as frames arrive, for HB_ONLY_ZE12A_ACTIVE_MS -- long
- * enough for the mux to dwell on every channel at least once (see the
- * macro's doc-comment in sx_sleep_manager.h). Returns 1 once that budget
- * has elapsed (not once every channel is confirmed connected -- a
- * genuinely disconnected channel would never confirm, so waiting on that
- * would hang this phase forever; the point of this phase is to give
- * connected channels a fair chance to refresh, not to enforce that all of
- * them must be connected). */
-static uint8_t _hb_only_sensor_check_process(sx_sleep_manager_t *mgr, uint32_t delta_ms)
-{
-    gas_sensor_app_poll(delta_ms);
-    accel_app_poll(mgr->accel_app, delta_ms);
-
-    mgr->hb_only_elapsed_ms += delta_ms;
-    if (mgr->hb_only_elapsed_ms >= HB_ONLY_ZE12A_ACTIVE_MS) {
-        /* Snapshot isConnected for every gas type RIGHT HERE, before
-         * phase 2's modem cooldown/handshake/connect (well past
-         * GAS_SENSOR_TIMEOUT_MS on its own -- see
-         * sx_sleep_manager_gas_snapshot_capture()'s doc-comment in the
-         * header) has a chance to age every channel's flag back out to
-         * false before app.c ever reads it. This is the freshest point
-         * this phase has for each channel's real status. */
-        sx_sleep_manager_gas_snapshot_capture(mgr);
-
-        /* Back to Q&A mode immediately, per the user's explicit choice
-         * (2026-08-10): "xác nhận cảm biến nào ok thì lập tức tắt luôn
-         * cảm biến đấy" -- i.e. don't leave ZE12A broadcasting in Active
-         * mode any longer than this phase needs. */
-        gas_sensor_switch_to_qa_mode();
-        log_info(TAG, "HB_ONLY: sensor check done, entering publish phase");
-        return 1;
-    }
-    return 0;
+    /* BUG FIX (2026-08-12), per the user's explicit direction: HB_ONLY no
+     * longer switches ZE12A to Active Upload mode, polls it, or takes its
+     * own gas-sensor reading at all. See gas_last_full_wake_ok's
+     * doc-comment (this file's header) for the full history of why the
+     * previous two attempts at having HB_ONLY measure gas sensors itself
+     * both failed on real hardware, and sx_sleep_manager_gas_snapshot_
+     * capture()'s doc-comment for where the reading HB_ONLY's heartbeat
+     * now uses instead actually comes from (full-wake's SENSING phase,
+     * exclusively). ZE12A stays in whatever mode the last full-wake or
+     * HB_ONLY cycle left it in (Q&A, not broadcasting) for the whole
+     * duration of this mini-wake -- that is fine, since nothing here
+     * reads it. */
 }
 
 /* Phase 2: publish. Mirrors _modem_power_on_start()/_modem_wait_ready_
@@ -768,13 +711,15 @@ void sx_sleep_manager_hb_only_process(sx_sleep_manager_t *mgr, uint32_t delta_ms
 {
     uint8_t phase_done;
 
-    if (mgr->hb_only_phase == 0) {
-        phase_done = _hb_only_sensor_check_process(mgr, delta_ms);
-        if (phase_done) {
-            mgr->hb_only_phase      = 1;
-            mgr->hb_only_elapsed_ms = 0; /* re-used as phase 2's own elapsed counter */
-        }
-    } else if (mgr->hb_only_phase == 1) {
+    /* BUG FIX (2026-08-12): phase 0 (sensor check) removed entirely --
+     * sx_sleep_manager_hb_only_start() now initializes hb_only_phase
+     * directly to 1, so this only ever drives the publish phase. Kept as
+     * an if (not switching straight to the phase-1 body unconditionally)
+     * so a stray phase==0 from before this fix (e.g. mid-flash-update)
+     * fails safe by simply doing nothing that tick rather than
+     * dereferencing something unexpected -- phase can only ever legally
+     * be 1 or 2 now. */
+    if (mgr->hb_only_phase == 1) {
         phase_done = _hb_only_publish_process(mgr, delta_ms);
         if (phase_done) {
             accel_app_sleep_step_start(mgr->accel_app);

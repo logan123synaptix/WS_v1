@@ -173,7 +173,7 @@ int sx_W25Q128_write(uint32_t addr, const uint8_t *buf, uint32_t len)
         uint8_t stx[2] = { W25Q128_CMD_READ_STATUS1, 0x00 };
         uint8_t srx[2] = { 0 };
         sx_spi_write_read(s_dev->spi, stx, srx, 2);
-        log_info(TAG, "STATUS1 before write addr=0x%06lX: 0x%02X (WEL=%d)", (unsigned long)(addr + offset), srx[1], (srx[1] >> 1) & 1);
+        log_debug(TAG, "STATUS1 before write addr=0x%06lX: 0x%02X (WEL=%d)", (unsigned long)(addr + offset), srx[1], (srx[1] >> 1) & 1);
 
         uint8_t tx[4 + W25Q128_PAGE_SIZE];
         uint32_t cur_addr = addr + offset;

@@ -249,7 +249,24 @@ void sx_board_init(void)
     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
-    gas_sensor_switch_to_qa_mode(); 
+    // Force ZE12A into Active Upload mode right at boot (2026-08-12, per
+    // the user) — do not assume the module already starts in Active
+    // Upload mode. It may still be latched in Question & Answer mode
+    // from before the last power cycle (QA mode is a state on the
+    // module's own MCU, not something a bare power-cycle or reflash of
+    // the STM32 side resets — see gas_sensor_switch_to_qa_mode()'s
+    // doc-comment in ze12a.h), in which case gas_sensor_poll()'s frame-
+    // assembly state machine would never see another unsolicited frame
+    // and every channel would sit at isConnected == false / FAIL
+    // forever, with no wake_step ever running to correct it (wake_steps
+    // only run after a sleep -> wake transition, not on this cold-boot
+    // path). Confirmed on real hardware (2026-08-12 log): calling
+    // gas_sensor_switch_to_qa_mode() here by mistake reproduces exactly
+    // this symptom -- board boots straight into Q&A mode, ZE12A mux
+    // keeps round-robin advancing but no channel ever produces a valid
+    // frame, so/no2/o3/co/h2s all sit at null in every telemetry payload
+    // for the entire session. Must be switch_to_ACTIVE_mode, not QA.
+    gas_sensor_switch_to_active_mode();
 
     // TIMER (TIM1) — sx_timer_init_regs() applies Prescaler/Period directly,
     // no auto-derivation. PSC=31, Period=99 chosen to match tim.c's own

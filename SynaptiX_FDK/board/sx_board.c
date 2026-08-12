@@ -249,7 +249,7 @@ void sx_board_init(void)
     gas_sensor_init(&uart_config[UART_EXTEND], &sx_gpio_ops, &s_uart5_s0_pin, &s_uart5_s1_pin);
     bsp_uart[UART_EXTEND] = gas_sensor_get_uart();
     HAL_UART_Receive_IT(hal_uart[UART_EXTEND], &uart_rx_char[UART_EXTEND], 1);
-    
+    gas_sensor_switch_to_qa_mode(); 
 
     // TIMER (TIM1) — sx_timer_init_regs() applies Prescaler/Period directly,
     // no auto-derivation. PSC=31, Period=99 chosen to match tim.c's own

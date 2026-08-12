@@ -693,28 +693,36 @@ static const char *build_heartbeat_payload(void)
         { GAS_SENSOR_O3,  "O3_Sensor"  },
         { GAS_SENSOR_H2S, "H2S_Sensor" },
     };
-    /* BUG FIX (2026-08-12), reported on real hardware: gas_sensor_app_
-     * is_connected() reads gas_sensor[i].isConnected LIVE off ze12a.c's
-     * own GAS_SENSOR_TIMEOUT_MS (10s) countdown. Originally only
-     * suspected during HB_ONLY (phase 2's modem cooldown/handshake/
-     * connect alone runs well past 10s), so this used to read the
-     * snapshot only for HB_ONLY and stay live for full-wake. But a real
-     * log this same session showed the identical symptom on full-wake
-     * too: a data-topic payload with fresh so2/no2/o3 readings,
-     * immediately followed by that lap's heartbeat correctly OK, versus
-     * a different lap (further from its last valid gas frame — e.g.
-     * after a long GPS-fix wait during SENSING) whose heartbeat showed
-     * FAIL for every channel despite ZE12A never losing power. SENSING's
-     * duration plus any slow step before SENDING can just as easily run
-     * GAS_SENSOR_TIMEOUT_MS out on the full-wake path — "sensor check
-     * runs right up until this point" was true for the SENSING window
-     * itself but not for however long SENDING takes to actually reach
-     * this line. Now ALWAYS read the snapshot (captured at the
-     * APP_CYCLE_SENSING -> APP_CYCLE_SENDING transition for full-wake,
-     * or at phase 1's end for HB_ONLY — see
-     * sx_sleep_manager_gas_snapshot_capture()'s call sites) instead of
-     * ever calling gas_sensor_app_is_connected() live here, for both
-     * wake paths uniformly. */
+    /* Gas-sensor sensorStatus[] design (2026-08-12, Attempt 3 -- final,
+     * per the user's explicit direction; see gas_last_full_wake_ok's
+     * doc-comment in sx_sleep_manager.h for the full history of why
+     * Attempts 1 and 2 both failed on real hardware):
+     *
+     * gas_sensor_app_is_connected() reads gas_sensor[i].isConnected LIVE
+     * off ze12a.c's own GAS_SENSOR_TIMEOUT_MS (10s) countdown -- reading
+     * it at one specific instant is fragile regardless of how close that
+     * instant is to the last good frame, and a real log this session
+     * showed FULL-WAKE laps (not just HB_ONLY) failing this way too: a
+     * data-topic payload with fresh so2/no2/o3 readings, immediately
+     * followed by that lap's heartbeat wrongly showing FAIL, because
+     * SENDING was reached more than 10s after SENSING's last good frame
+     * (e.g. after a long GPS-fix wait).
+     *
+     * Final design: only full-wake's SENSING phase ever takes a fresh
+     * reading. sx_sleep_manager_gas_snapshot_capture() is called ONCE,
+     * at the APP_CYCLE_SENSING -> APP_CYCLE_SENDING transition below,
+     * writing gas_last_full_wake_ok[] from each channel's
+     * everConnectedThisWindow latch (see that function's doc-comment in
+     * sx_sleep_manager.c). HB_ONLY does NOT take its own reading and
+     * does NOT call gas_snapshot_capture() at all -- its own gas-sensor
+     * mux round-robin was confirmed unreliable in a 9.5s budget (see
+     * ze12a.c's gas_sensor_poll() DIAGNOSTIC log), so HB_ONLY's
+     * heartbeat, like full-wake's own, simply reads whatever
+     * gas_last_full_wake_ok[] currently holds via
+     * sx_sleep_manager_gas_snapshot_connected() below -- the result of
+     * the MOST RECENT full-wake SENSING, however many HB_ONLY cycles ago
+     * that was. Never read gas_sensor_app_is_connected() live here for
+     * either wake path. */
     for (size_t i = 0; i < sizeof(gas_status_channels) / sizeof(gas_status_channels[0]); i++) {
         bool connected = sx_sleep_manager_gas_snapshot_connected(&s_sleep_mgr, gas_status_channels[i].type);
         cJSON *g = cJSON_CreateObject();

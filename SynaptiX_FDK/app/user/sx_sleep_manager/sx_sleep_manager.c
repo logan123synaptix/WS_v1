@@ -502,6 +502,35 @@ void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
     mgr->hb_only_cooldown_done         = 0;
     mgr->hb_only_cooldown_elapsed_ms   = 0;
 
+    /* BUG FIX (2026-08-12), reported on real hardware: HB_ONLY heartbeats
+     * were reporting SO2/NO2/O3 as FAIL even right after a lap where the
+     * ordinary full-wake path (same board, same session) read fresh
+     * values for the same channels. Root cause: board_sleep_pre_stop_
+     * hook() (sx_board.c) calls HAL_UART_Abort(hal_uart[UART_EXTEND])
+     * every time the MCU enters STOP mode, regardless of whether ZE12A
+     * itself stayed powered (it does — only its UART mode changes, see
+     * the doc-comment on the gas_sensor_switch_to_active_mode() call
+     * below). After STOP, UART5's RX interrupt stays dead until
+     * something calls board_extend_uart_resume_it() to re-arm it. The
+     * full-wake path's own gas_sensor_active_mode wake step
+     * (_gas_sensor_active_mode_start() above) already calls this before
+     * switching ZE12A back to active mode — but this function (HB_ONLY's
+     * equivalent entry point) did not, despite an earlier session's
+     * handoff notes claiming this exact fix had already been made here.
+     * It had not: grep confirms board_extend_uart_resume_it() was only
+     * called from the full-wake step, never from here. Net effect: every
+     * HB_ONLY cycle, ZE12A kept broadcasting fine on the wire, but UART5
+     * RX being dead meant gas_sensor_app_poll() below never saw a single
+     * byte, gas_sensor[i].isConnected never got set true, and
+     * sx_sleep_manager_gas_snapshot_capture() (see phase 1's end below)
+     * faithfully snapshotted "not connected" for every channel — matching
+     * the reported symptom exactly, and explaining why this only ever
+     * showed up on the HB_ONLY path specifically (full-wake's own resume
+     * call meant its UART was never actually left dead). Must run before
+     * gas_sensor_switch_to_active_mode() below, same ordering as the
+     * full-wake step. */
+    board_extend_uart_resume_it();
+
     /* Accel resumed for the whole mini-wake (both phases) per the user's
      * explicit choice (2026-08-10): "Accel bật xuyên suốt cả 2 giai
      * đoạn ... để motionState luôn đúng". accel_app_wake_step_start()/

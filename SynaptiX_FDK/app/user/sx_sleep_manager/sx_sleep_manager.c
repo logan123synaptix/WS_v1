@@ -539,6 +539,15 @@ void sx_sleep_manager_hb_only_start(sx_sleep_manager_t *mgr)
      * sx_sleep_step_t array, same reasoning as the rest of this file. */
     accel_app_wake_step_start(mgr->accel_app);
 
+    /* BUG FIX (2026-08-12): reset everConnectedThisWindow for every
+     * channel right at phase-1 start, before switching ZE12A back to
+     * Active Upload mode -- see GasSensor_t's doc-comment (ze12a.h) and
+     * sx_sleep_manager_gas_snapshot_capture()'s doc-comment above for the
+     * full root-cause writeup. Must happen before gas_sensor_switch_to_
+     * active_mode() below so a frame arriving in the very first tick of
+     * this window isn't discarded by a reset that runs after it. */
+    gas_sensor_reset_window();
+
     /* Phase 1: sensor check. ZE12A never loses power during sleep (only
      * its UART mode changes between Active Upload and Q&A, see
      * gas_sensor_switch_to_qa_mode()'s doc-comment) -- switching back to
@@ -780,16 +789,37 @@ uint8_t sx_sleep_manager_hb_only_is_done(sx_sleep_manager_t *mgr)
     return mgr->hb_only_phase == 2;
 }
 
-/* See doc-comment in sx_sleep_manager.h. Captures every gas channel's
- * current isConnected flag into mgr->gas_snapshot_*[] right now -- call
- * this at the moment sensor-checking ends on whichever wake path is
- * active, before any later step risks running GAS_SENSOR_TIMEOUT_MS
- * out. */
+/* See doc-comment in sx_sleep_manager.h. Captures, per gas channel, into
+ * mgr->gas_snapshot_*[] -- call this at the moment sensor-checking ends
+ * on whichever wake path is active, before any later step risks running
+ * GAS_SENSOR_TIMEOUT_MS out.
+ *
+ * BUG FIX (2026-08-12): now reads gas_sensor[i].everConnectedThisWindow
+ * instead of gas_sensor[i].isConnected. isConnected is a live,
+ * self-expiring flag (10s countdown, refreshed only by a fresh valid
+ * frame -- see ze12a.c) -- reading it at one specific instant means a
+ * single dropped/checksum-failed frame in the last ~8s mux round-trip
+ * right before this call flips a perfectly healthy channel to FAIL, even
+ * though it produced good frames throughout the rest of the window.
+ * Confirmed on real hardware: SO2/NO2/O3 sensorStatus flipping FAIL
+ * inconsistently lap to lap despite fresh telemetry values every time.
+ * everConnectedThisWindow instead answers "did this channel produce at
+ * least one good frame ANYWHERE in the current window" -- set once by
+ * ze12a_handle_frame() on first valid frame, never auto-expires, only
+ * cleared by gas_sensor_reset_window() at the window's start (see that
+ * function's call sites: app.c's APP_CYCLE_SENSING entry and this file's
+ * sx_sleep_manager_hb_only_start()). This trades a small amount of
+ * staleness (a channel that failed early in a 40s SENSING window but
+ * then genuinely disconnected for the rest of it would still report OK)
+ * for eliminating the far more common false-FAIL — acceptable since a
+ * channel that produced even one valid frame this window is demonstrably
+ * not disconnected/wired wrong, just possibly noisy right at the
+ * snapshot instant. */
 void sx_sleep_manager_gas_snapshot_capture(sx_sleep_manager_t *mgr)
 {
     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
         mgr->gas_snapshot_type[i]      = gas_sensor[i].type;
-        mgr->gas_snapshot_connected[i] = gas_sensor[i].isConnected;
+        mgr->gas_snapshot_connected[i] = gas_sensor[i].everConnectedThisWindow;
     }
 }
 

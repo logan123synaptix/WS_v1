@@ -11,6 +11,21 @@ GasSensor_t gas_sensor[GAS_SENSOR_COUNT];
  * slot. 0xFF = never written yet. See comment in ze12a_handle_frame(). */
 static uint8_t s_last_write_channel[GAS_SENSOR_COUNT];
 
+/* DIAGNOSTIC (2026-08-12), added alongside everConnectedThisWindow to
+ * measure the real checksum/frame-loss rate on hardware instead of only
+ * guessing from symptoms. Free-running (never reset by
+ * gas_sensor_reset_window()) -- these are lifetime totals since boot,
+ * meant to be read via a debug/shell command or logged periodically, not
+ * tied to any one SENSING window. s_frames_checksum_fail_total counts
+ * every checksum mismatch regardless of which mux channel it happened on
+ * (ze12a_handle_frame() doesn't know the gas type yet at that point --
+ * the frame's own type byte is what failed checksum). s_frames_valid_
+ * total counts every frame that both passed checksum AND matched a known
+ * gas_sensor[] type. */
+static uint32_t s_frames_valid_total;
+static uint32_t s_frames_checksum_fail_total;
+static uint32_t s_frames_unknown_type_total;
+
 /* Shared UART5 link (through the TMUX4052 mux) and the two GPIOs that
  * select which physical ZE12A module (SR1/SR2/SR3, plus one unused
  * channel) is currently connected to it. See the schematic: UART5_S0/S1
@@ -70,9 +85,14 @@ void gas_sensor_init(sx_uart_config_t *_uart_cfg, sx_gpio_ops_t *_gpio_ops,
         gas_sensor[i].value = 0;
         gas_sensor[i].unitPPB = 0;
         gas_sensor[i].timeout = 0;
+        gas_sensor[i].everConnectedThisWindow = false;
         memset(&gas_sensor[i].Frame, 0, sizeof(gas_sensor[i].Frame));
         s_last_write_channel[i] = 0xFFU; /* DIAGNOSTIC: not yet written */
     }
+
+    s_frames_valid_total          = 0;
+    s_frames_checksum_fail_total  = 0;
+    s_frames_unknown_type_total   = 0;
 
     sx_uart_init(&s_comm, _uart_cfg, sizeof(s_rx_buf) * 4, sizeof(s_rx_buf) * 4);
 
@@ -107,6 +127,7 @@ static bool ze12a_handle_frame(const uint8_t *frame)
     uint8_t crc = ze12a_checksum(frame);
     if (crc != frame[8]) {
         log_warn(TAG, "ZE12A checksum mismatch on mux ch %u", s_mux_channel);
+        s_frames_checksum_fail_total++; /* DIAGNOSTIC, see decl. comment */
         return false;
     }
 
@@ -138,9 +159,16 @@ static bool ze12a_handle_frame(const uint8_t *frame)
             s_last_write_channel[i] = s_mux_channel;
 
             gas_sensor[i].isConnected = true;
+            /* See GasSensor_t's doc-comment (ze12a.h) for the full
+             * root-cause writeup this latch fixes. Set unconditionally
+             * here (same call site, same trigger as isConnected=true) --
+             * never cleared by this function, only by
+             * gas_sensor_reset_window(). */
+            gas_sensor[i].everConnectedThisWindow = true;
             gas_sensor[i].unitPPB = frame[2];
             gas_sensor[i].value = value;
             gas_sensor[i].timeout = GAS_SENSOR_TIMEOUT_MS;
+            s_frames_valid_total++; /* DIAGNOSTIC, see decl. comment */
             log_info(TAG, "ZE12A type=0x%02X value=%u unit=0x%02X (mux ch %u)",
                      type, value, frame[2], s_mux_channel);
             return true;
@@ -148,7 +176,20 @@ static bool ze12a_handle_frame(const uint8_t *frame)
     }
 
     log_warn(TAG, "ZE12A frame with unknown gas code 0x%02X", frame[1]);
+    s_frames_unknown_type_total++; /* DIAGNOSTIC, see decl. comment */
     return false;
+}
+
+void gas_sensor_reset_window(void)
+{
+    for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
+        gas_sensor[i].everConnectedThisWindow = false;
+    }
+    log_debug(TAG, "Window reset (frame totals so far: valid=%lu "
+              "checksum_fail=%lu unknown_type=%lu)",
+              (unsigned long)s_frames_valid_total,
+              (unsigned long)s_frames_checksum_fail_total,
+              (unsigned long)s_frames_unknown_type_total);
 }
 
 void gas_sensor_poll(uint32_t time_stamp_ms)

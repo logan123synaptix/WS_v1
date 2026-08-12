@@ -59,6 +59,36 @@ typedef struct GasSensor{
     bool isConnected;
     uint8_t unitPPB;
     uint32_t timeout;
+
+    /* everConnectedThisWindow (2026-08-12) -- BUG FIX for sensorStatus
+     * false-FAIL on real hardware: isConnected above is a live, self-
+     * expiring flag (GAS_SENSOR_TIMEOUT_MS=10s countdown, reset on every
+     * valid frame -- see ze12a_handle_frame()/gas_sensor_poll() below).
+     * The snapshot mechanism in sx_sleep_manager.c reads isConnected at a
+     * single instant (end of SENSING / end of HB_ONLY phase 1) to decide
+     * heartbeat's sensorStatus OK/FAIL. But GAS_SENSOR_CHANNEL_DWELL_MS
+     * (2s) x GAS_SENSOR_MUX_CHANNEL_COUNT (4) means a full mux round-trip
+     * can take up to ~8s -- close enough to the 10s timeout that a single
+     * dropped/checksum-failed frame in the last round right before the
+     * snapshot instant is enough to flip isConnected back to false even
+     * though the channel worked fine throughout the rest of the window.
+     * Confirmed on real hardware: SO2/NO2/O3 sensorStatus flipped FAIL
+     * inconsistently between otherwise-identical laps despite fresh
+     * so2/no2/o3 values in the same lap's telemetry.
+     *
+     * everConnectedThisWindow is a separate, non-expiring latch: set true
+     * the moment ANY valid frame is parsed for this gas type (same call
+     * site as isConnected=true), and only ever cleared by an explicit
+     * gas_sensor_reset_window() call -- never by a timeout. The snapshot
+     * now reads THIS flag instead of isConnected, so "this channel
+     * produced at least one good frame anywhere in the whole SENSING/
+     * phase-1 window" is what heartbeat reports, not "produced a frame in
+     * the specific last few seconds before the snapshot happened to
+     * fire". isConnected itself is untouched and still drives whatever
+     * else in the codebase wants a live, self-expiring view (there is
+     * currently no other consumer, but no reason to remove a correct,
+     * independently-useful signal). */
+    bool everConnectedThisWindow;
 }GasSensor_t;
 
 /* Non-blocking SHDLC-style byte assembly state for the single shared
@@ -95,6 +125,18 @@ void gas_sensor_switch_to_qa_mode(void);
 void gas_sensor_switch_to_active_mode(void);
 
 void gas_sensor_request_reading(void);
+
+/* Clears everConnectedThisWindow (see GasSensor_t's doc-comment above)
+ * for every gas type, WITHOUT touching isConnected/timeout/value/etc.
+ * Call this once at the start of whichever window the caller wants
+ * "connected at least once during X" semantics for -- currently
+ * app.c's APP_CYCLE_SENSING entry and sx_sleep_manager.c's HB_ONLY
+ * phase-1 entry (sx_sleep_manager_hb_only_start()), immediately before
+ * gas_sensor_switch_to_active_mode() so no valid frame arriving right
+ * at window-start is missed. Calling this mid-window would silently
+ * discard the "already saw a good frame" signal for whatever's elapsed
+ * so far -- only call at a window's actual start. */
+void gas_sensor_reset_window(void);
 
 extern GasSensor_t gas_sensor[GAS_SENSOR_COUNT];
 

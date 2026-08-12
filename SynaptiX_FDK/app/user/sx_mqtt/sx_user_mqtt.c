@@ -35,8 +35,29 @@ typedef struct {
      * <nothing>), exactly at the 255-byte mark. Matched to
      * TELEMETRY_JSON_BUFF_SIZE here rather than picking an arbitrary
      * larger number, so the two buffers stay in sync if more fields are
-     * added to the telemetry payload later. */
-    char message[512];
+     * added to the telemetry payload later.
+     *
+     * Bug fix (2026-08-12), confirmed on real hardware via
+     * mqtt_log_subscriber.py: this 512-byte buffer was itself the actual
+     * cause of the heartbeat-payload-cut-off-mid-JSON bug (previously
+     * mis-attributed to A7677S_TIMEOUT_AT in a7677s.c's raw-byte send
+     * step -- that fix was real but insufficient). The
+     * strncpy(item.message, message, sizeof(item.message) - 1) below
+     * silently truncates at exactly 511 bytes + NUL. The heartbeat JSON
+     * built by app.c's build_heartbeat_payload() (into a 1024-byte
+     * HEARTBEAT_JSON_BUFF_SIZE buffer -- see app.c) runs ~550+ bytes once
+     * WS_v0-parity fields + the full sensorStatus[] array are populated,
+     * so every heartbeat was silently cut off here, in this layer, well
+     * before the a7677s.c driver or the modem ever saw the full string --
+     * every heartbeat captured in log_test_weatherstation.log this
+     * session was truncated at precisely 511 characters, confirming this
+     * exact boundary. Bumped to 1024 to match HEARTBEAT_JSON_BUFF_SIZE
+     * (the larger of the two current payload producers), so both
+     * telemetry and heartbeat fit with room to spare. If either producer
+     * buffer grows again later, bump this one to match -- it must always
+     * be >= the largest payload any caller of sx_user_mqtt_publish()
+     * builds. */
+    char message[1024];
 } mqtt_queue_item_t;
 
 static mqtt_queue_item_t s_queue_buf[MQTT_QUEUE_SIZE];

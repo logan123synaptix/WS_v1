@@ -834,6 +834,17 @@ static void app_cycle_process(uint32_t delta_ms)
              * duration instead of just pump_on_ms. */
             pump_off(sx_board_get_pump_pwm());
             sps30_app_start_cycle(&s_sps30_app);
+            /* BUG FIX (2026-08-12): reset gas_sensor[]'s
+             * everConnectedThisWindow latch right at SENSING's start, so
+             * sx_sleep_manager_gas_snapshot_capture() at SENSING's end
+             * (below) reflects "connected at least once during THIS
+             * SENSING window" rather than carrying over a stale true from
+             * a previous lap or, worse, a stale false left over if this
+             * window's own first valid frame hasn't arrived yet when
+             * reset runs. See gas_sensor_reset_window()'s doc-comment
+             * (ze12a.h) and sx_sleep_manager_gas_snapshot_capture()'s
+             * doc-comment for the full root-cause writeup. */
+            gas_sensor_reset_window();
             log_info(TAG, "Pump off, sensing started");
         }
         break;

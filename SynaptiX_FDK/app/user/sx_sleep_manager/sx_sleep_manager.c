@@ -537,15 +537,12 @@ static uint8_t _hb_only_sensor_check_process(sx_sleep_manager_t *mgr, uint32_t d
     if (mgr->hb_only_elapsed_ms >= HB_ONLY_ZE12A_ACTIVE_MS) {
         /* Snapshot isConnected for every gas type RIGHT HERE, before
          * phase 2's modem cooldown/handshake/connect (well past
-         * GAS_SENSOR_TIMEOUT_MS on its own -- see the doc-comment on
-         * hb_only_gas_snapshot_type[]/hb_only_gas_snapshot_connected[]
-         * in the header) has a chance to age every channel's flag back
-         * out to false before app.c ever reads it. This is the freshest
-         * point this phase has for each channel's real status. */
-        for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
-            mgr->hb_only_gas_snapshot_type[i]      = gas_sensor[i].type;
-            mgr->hb_only_gas_snapshot_connected[i] = gas_sensor[i].isConnected;
-        }
+         * GAS_SENSOR_TIMEOUT_MS on its own -- see
+         * sx_sleep_manager_gas_snapshot_capture()'s doc-comment in the
+         * header) has a chance to age every channel's flag back out to
+         * false before app.c ever reads it. This is the freshest point
+         * this phase has for each channel's real status. */
+        sx_sleep_manager_gas_snapshot_capture(mgr);
 
         /* Back to Q&A mode immediately, per the user's explicit choice
          * (2026-08-10): "xác nhận cảm biến nào ok thì lập tức tắt luôn
@@ -754,11 +751,24 @@ uint8_t sx_sleep_manager_hb_only_is_done(sx_sleep_manager_t *mgr)
     return mgr->hb_only_phase == 2;
 }
 
-bool sx_sleep_manager_hb_only_gas_connected(sx_sleep_manager_t *mgr, GasSensorType_t type)
+/* See doc-comment in sx_sleep_manager.h. Captures every gas channel's
+ * current isConnected flag into mgr->gas_snapshot_*[] right now -- call
+ * this at the moment sensor-checking ends on whichever wake path is
+ * active, before any later step risks running GAS_SENSOR_TIMEOUT_MS
+ * out. */
+void sx_sleep_manager_gas_snapshot_capture(sx_sleep_manager_t *mgr)
 {
     for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
-        if (mgr->hb_only_gas_snapshot_type[i] == type) {
-            return mgr->hb_only_gas_snapshot_connected[i];
+        mgr->gas_snapshot_type[i]      = gas_sensor[i].type;
+        mgr->gas_snapshot_connected[i] = gas_sensor[i].isConnected;
+    }
+}
+
+bool sx_sleep_manager_gas_snapshot_connected(sx_sleep_manager_t *mgr, GasSensorType_t type)
+{
+    for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
+        if (mgr->gas_snapshot_type[i] == type) {
+            return mgr->gas_snapshot_connected[i];
         }
     }
     return false;

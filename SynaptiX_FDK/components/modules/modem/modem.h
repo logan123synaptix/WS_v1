@@ -9,7 +9,30 @@ extern "C" {
 #include "cqueue.h"
 #include <string.h>
 
-#define MODEM_RX_BUFFER_SIZE 512
+/* BUG FIX (2026-08-12), reported on real hardware: MQTT publish payloads
+ * (heartbeat/data JSON, up to A7677S_MQTT_PAYLOAD_MAX = 10240 bytes) were
+ * arriving at the broker truncated mid-JSON, even though firmware logs
+ * showed the full JSON string built correctly before publish, and
+ * HAL_UART_Transmit() (see sx_uart_write()) reported success for the
+ * whole length. Root cause: AT echo is enabled on this modem (no ATE0 --
+ * see a7677s.c's cb_get_imei() doc-comment, which already had to work
+ * around echoed command text elsewhere), so after sending the payload
+ * bytes for AT+CMQTTPAYLOAD=..., the modem echoes the ENTIRE payload
+ * back over UART before it finally sends "\r\nOK\r\n". modem_poll()
+ * (modem.c) only reads new bytes when they fit entirely under this
+ * buffer's remaining space (`(buff_id + available) < MODEM_RX_BUFFER_SIZE`);
+ * once the echoed payload pushed buff_id past the old 512-byte size,
+ * every subsequent poll silently stopped reading ANY bytes (not just the
+ * overflow) for the rest of that command, so strstr() never found
+ * "\r\nOK\r\n" and the command eventually timed out or fired its callback
+ * on a partial buffer -- explaining both the truncation and why it only
+ * showed up on real, longer payloads (short AT commands like AT+CGSN
+ * never got anywhere near 512 bytes of echo). Sized to comfortably fit
+ * the largest possible MQTT payload echo (10240) plus its AT command
+ * echo prefix and response markers, with headroom. There is only one
+ * modem_t instance on this board (a7677s_t.base), so this is a one-time
+ * ~11KB static RAM cost, not per-instance. */
+#define MODEM_RX_BUFFER_SIZE 11264
 
 typedef struct modem modem_t;
 

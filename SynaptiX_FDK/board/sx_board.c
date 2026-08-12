@@ -186,7 +186,19 @@ void sx_board_init(void)
     sx_gpio_init(&board.a7677s.base.pwrPin, &sx_gpio_ops, &s_lte_pwrkey_pin);
     sx_gpio_init(&board.a7677s.resetPin, &sx_gpio_ops, &s_lte_reset_pin);
     a7677s_set_full_apn(&board.a7677s, APN, USERNAME_APN, PASSWORD_APN);
-    sx_uart_init(&board.a7677s.base.uart, &uart_config[UART_LTE], 512, 512);
+    /* BUG FIX (2026-08-12): was 512/512. With AT echo enabled on this
+     * modem, publishing an MQTT payload up to A7677S_MQTT_PAYLOAD_MAX
+     * (10240 bytes) causes the modem to echo that many bytes back over
+     * UART before its final "\r\nOK\r\n" — see MODEM_RX_BUFFER_SIZE's
+     * doc-comment in modem.h for the full root-cause writeup (same bug,
+     * this is the peripheral-level ring buffer feeding modem_poll()'s
+     * own 512-byte buff before this fix). A 512-byte rxQueue could not
+     * hold that echo without modem_poll() draining it fast enough every
+     * single tick, so a slow tick (e.g. main loop briefly busy elsewhere)
+     * risked dropping bytes at the HAL ring-buffer level before
+     * modem_poll() ever saw them, compounding the now-fixed 512-byte
+     * modem->buff overflow. Sized to match MODEM_RX_BUFFER_SIZE. */
+    sx_uart_init(&board.a7677s.base.uart, &uart_config[UART_LTE], MODEM_RX_BUFFER_SIZE, MODEM_RX_BUFFER_SIZE);
     HAL_UART_Receive_IT(hal_uart[UART_LTE], &uart_rx_char[UART_LTE], 1);
 
     board.modem.ops = &a7677s_ops;

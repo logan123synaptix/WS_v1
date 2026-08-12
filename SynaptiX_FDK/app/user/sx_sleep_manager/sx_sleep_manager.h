@@ -124,32 +124,10 @@ typedef struct {
     uint8_t  hb_only_cooldown_done;
     uint32_t hb_only_cooldown_elapsed_ms;
 
-    /* Gas sensor connection-status snapshot (2026-08-12).
-     *
-     * BUG (real hardware, reported by user): heartbeat's sensorStatus[]
-     * for CO/SO2/NO2/O3/H2S was reporting FAIL even for gas types with
-     * real, fresh readings confirmed in the same session's telemetry
-     * payload and ze12a.c's own per-frame log line. Root cause: app.c's
-     * build_heartbeat_payload() (called from phase 2, AFTER modem
-     * power-on + cooldown + AT handshake + MQTT connect all complete)
-     * calls gas_sensor_app_is_connected(type), which reads gas_sensor[i].
-     * isConnected LIVE off ze12a.c's own GAS_SENSOR_TIMEOUT_MS (10000ms)
-     * countdown. Phase 1 (sensor check) only guarantees a channel's last
-     * valid frame arrived within its own HB_ONLY_ZE12A_ACTIVE_MS (9500ms)
-     * window -- phase 2's own duration (HB_ONLY_MODEM_COOLDOWN_MS's
-     * 15000ms alone, before modem handshake/connect/publish are even
-     * counted) is already well past the 10000ms timeout, so by the time
-     * build_heartbeat_payload() runs, every gas type's isConnected has
-     * very likely already aged back out to false regardless of real
-     * sensor health -- matches the reported symptom exactly (fresh
-     * SO2/NO2/O3 readings in the same lap's telemetry, FAIL in the same
-     * lap's heartbeat).
-     *
-     * Fix: snapshot each gas type's isConnected right when phase 1 ends
-     * (see sx_sleep_manager_hb_only_process()), before phase 2's modem
-     * work has a chance to run the clock out, and have app.c's HB_ONLY
-     * heartbeat build read this snapshot instead of calling
-     * gas_sensor_app_is_connected() live.
+    /* Gas sensor connection-status snapshot (2026-08-12, generalized
+     * 2026-08-12 to cover full-wake too -- see doc-comment on
+     * sx_sleep_manager_gas_snapshot_capture() below for the full
+     * root-cause writeup and why this is no longer HB_ONLY-only).
      *
      * NOT indexed by GasSensorType_t's raw enum value directly -- those
      * values (0x03..0x2C per ze12a.h, non-contiguous) are too sparse for
@@ -158,9 +136,10 @@ typedef struct {
      * to gas_sensor[i], same order, same GAS_SENSOR_COUNT. Snapshotting
      * captures both the type and the flag together so app.c doesn't need
      * its own copy of ze12a.h's internal ordering to read this back --
-     * see hb_only_gas_snapshot_type[]. */
-    GasSensorType_t hb_only_gas_snapshot_type[GAS_SENSOR_COUNT];
-    bool             hb_only_gas_snapshot_connected[GAS_SENSOR_COUNT];
+     * see gas_snapshot_type[]. Field names kept without an "hb_only_"
+     * prefix now that both wake paths share this same snapshot. */
+    GasSensorType_t gas_snapshot_type[GAS_SENSOR_COUNT];
+    bool             gas_snapshot_connected[GAS_SENSOR_COUNT];
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:
@@ -342,18 +321,54 @@ uint8_t sx_sleep_manager_hb_only_is_done(sx_sleep_manager_t *mgr);
  * finished. */
 uint8_t sx_sleep_manager_hb_only_modem_owned(sx_sleep_manager_t *mgr);
 
-/* Read back phase 1's isConnected snapshot for one gas type (see
- * hb_only_gas_snapshot_type[]/hb_only_gas_snapshot_connected[] above for
- * why this exists instead of app.c calling gas_sensor_app_is_connected()
- * live during HB_ONLY's heartbeat build). Returns false for any type not
- * found in the snapshot (should not happen in practice -- the snapshot
- * always covers exactly ze12a.h's gas_sensor[GAS_SENSOR_COUNT], the same
- * set app.c's gas_status_channels[] iterates). Only meaningful once
- * phase 1 has completed at least once this HB_ONLY cycle; before that it
- * reads back the previous cycle's snapshot (harmless -- app.c only calls
- * this from within phase 2, which is always preceded by phase 1 in the
- * same cycle). */
-bool sx_sleep_manager_hb_only_gas_connected(sx_sleep_manager_t *mgr, GasSensorType_t type);
+/* BUG (real hardware, reported by user, 2026-08-12): heartbeat's
+ * sensorStatus[] for CO/SO2/NO2/O3/H2S was reporting FAIL even for gas
+ * types with real, fresh readings confirmed in the same lap's telemetry
+ * payload and ze12a.c's own per-frame log line. Root cause: app.c's
+ * build_heartbeat_payload() calls gas_sensor_app_is_connected(type),
+ * which reads gas_sensor[i].isConnected LIVE off ze12a.c's own
+ * GAS_SENSOR_TIMEOUT_MS (10000ms) countdown. Originally fixed for
+ * HB_ONLY only (phase 1 ends, then phase 2's modem cooldown/handshake/
+ * connect alone easily exceeds 10000ms before build_heartbeat_payload()
+ * runs, aging every channel's isConnected back out to false regardless
+ * of real sensor health). BUT real logs (2026-08-12 session) showed the
+ * exact same symptom on the ordinary FULL-WAKE path too -- e.g. a
+ * data-topic payload with so2:50/no2:16/o3:14 immediately followed
+ * (0.3s later) by that lap's heartbeat correctly showing OK, while a
+ * different lap's heartbeat (further from its last valid gas frame,
+ * e.g. after a long GPS-fix wait during SENSING) showed FAIL for every
+ * channel despite ZE12A never having lost power or gone silent -- same
+ * age-out race, just against APP_CYCLE_SENSING -> APP_CYCLE_SENDING's
+ * timing instead of HB_ONLY phase 1 -> phase 2's. GAS_SENSOR_TIMEOUT_MS
+ * was never actually safe to assume "not at risk" on the full-wake path
+ * either, since sensing_ms + any slow step before SENDING (GPS fix wait
+ * in particular, observed up to 110000ms in a real log) can just as
+ * easily run the same clock out.
+ *
+ * Fix: generalized the HB_ONLY-only snapshot into one used by BOTH
+ * paths. sx_sleep_manager_gas_snapshot_capture() below must be called
+ * once, right when sensor-checking ends and before any subsequent step
+ * risks running GAS_SENSOR_TIMEOUT_MS out -- HB_ONLY's phase 1 already
+ * does this (sx_sleep_manager_hb_only_process()'s internal sensor-check
+ * step); app.c's app_cycle_process() now does the same at the
+ * APP_CYCLE_SENSING -> APP_CYCLE_SENDING transition, before SENDING's
+ * build_heartbeat_payload()/build_telemetry_payload() calls. Both wake
+ * paths then read back through the single getter below instead of
+ * calling gas_sensor_app_is_connected() live. */
+void sx_sleep_manager_gas_snapshot_capture(sx_sleep_manager_t *mgr);
+
+/* Read back the snapshot captured by sx_sleep_manager_gas_snapshot_
+ * capture() for one gas type (see that function's doc-comment for why
+ * this exists instead of app.c calling gas_sensor_app_is_connected()
+ * live at heartbeat-build time). Returns false for any type not found
+ * in the snapshot (should not happen in practice -- the snapshot always
+ * covers exactly ze12a.h's gas_sensor[GAS_SENSOR_COUNT], the same set
+ * app.c's gas_status_channels[] iterates). Only meaningful once capture()
+ * has run at least once this cycle; before that it reads back whatever
+ * the previous cycle left behind (harmless in practice -- both call
+ * sites always run capture() earlier in the same cycle before this is
+ * ever read). */
+bool sx_sleep_manager_gas_snapshot_connected(sx_sleep_manager_t *mgr, GasSensorType_t type);
 
 /* Sleeps for sleep_sec WITHOUT running the 7 sleep_steps first -- used for
  * every chunk in a lap after the first (GPS/modem/SPS30/pump/ZE12A/accel

@@ -563,7 +563,19 @@ static const char *build_telemetry_payload(void)
 
     /* Gas sensor channels — see gas_sensor_app.h: value is only meaningful
      * when is_connected() is true, so null it out otherwise rather than
-     * publishing a stale/zeroed reading. */
+     * publishing a stale/zeroed reading.
+     *
+     * NOTE (2026-08-12): deliberately still reads is_connected() LIVE
+     * here, unlike build_heartbeat_payload()'s sensorStatus[] (which now
+     * always reads the phase-1/SENSING-end snapshot — see
+     * sx_sleep_manager_gas_snapshot_capture()). This function decides
+     * whether to publish an actual NUMBER or null, so snapshotting it
+     * the same way would risk publishing a stale numeric reading as if
+     * still live merely because it was connected earlier in the cycle —
+     * a worse failure mode than sensorStatus's cosmetic FAIL text. The
+     * two call sites intentionally answer different questions ("was this
+     * channel healthy a moment ago" vs "is this specific number safe to
+     * publish right now") and should not be unified. */
     static const struct { GasSensorType_t type; const char *key; } gas_channels[] = {
         { GAS_SENSOR_CO,  "co"  },
         { GAS_SENSOR_SO2, "so2" },
@@ -683,23 +695,28 @@ static const char *build_heartbeat_payload(void)
     };
     /* BUG FIX (2026-08-12), reported on real hardware: gas_sensor_app_
      * is_connected() reads gas_sensor[i].isConnected LIVE off ze12a.c's
-     * own GAS_SENSOR_TIMEOUT_MS (10s) countdown. During an HB_ONLY
-     * mini-wake heartbeat, this runs from phase 2 -- AFTER modem
-     * power-on cooldown + AT handshake + MQTT connect, all well past
-     * 10s on their own -- so by the time this runs, every gas type's
-     * isConnected has very likely already aged back out to false
-     * regardless of real sensor health, even for types with fresh
-     * readings in the very same lap's telemetry. Use phase 1's snapshot
-     * (captured the moment sensor-check ended, before phase 2's clock
-     * could run out) instead of the live flag when this is an HB_ONLY
-     * mini-wake; the ordinary full-wake SENDING path (sensor check runs
-     * right up until this point) keeps reading live, since
-     * GAS_SENSOR_TIMEOUT_MS was never at risk of lapsing there. */
-    uint8_t is_hb_only = sx_sleep_manager_hb_only_modem_owned(&s_sleep_mgr);
+     * own GAS_SENSOR_TIMEOUT_MS (10s) countdown. Originally only
+     * suspected during HB_ONLY (phase 2's modem cooldown/handshake/
+     * connect alone runs well past 10s), so this used to read the
+     * snapshot only for HB_ONLY and stay live for full-wake. But a real
+     * log this same session showed the identical symptom on full-wake
+     * too: a data-topic payload with fresh so2/no2/o3 readings,
+     * immediately followed by that lap's heartbeat correctly OK, versus
+     * a different lap (further from its last valid gas frame — e.g.
+     * after a long GPS-fix wait during SENSING) whose heartbeat showed
+     * FAIL for every channel despite ZE12A never losing power. SENSING's
+     * duration plus any slow step before SENDING can just as easily run
+     * GAS_SENSOR_TIMEOUT_MS out on the full-wake path — "sensor check
+     * runs right up until this point" was true for the SENSING window
+     * itself but not for however long SENDING takes to actually reach
+     * this line. Now ALWAYS read the snapshot (captured at the
+     * APP_CYCLE_SENSING -> APP_CYCLE_SENDING transition for full-wake,
+     * or at phase 1's end for HB_ONLY — see
+     * sx_sleep_manager_gas_snapshot_capture()'s call sites) instead of
+     * ever calling gas_sensor_app_is_connected() live here, for both
+     * wake paths uniformly. */
     for (size_t i = 0; i < sizeof(gas_status_channels) / sizeof(gas_status_channels[0]); i++) {
-        bool connected = is_hb_only
-            ? sx_sleep_manager_hb_only_gas_connected(&s_sleep_mgr, gas_status_channels[i].type)
-            : gas_sensor_app_is_connected(gas_status_channels[i].type);
+        bool connected = sx_sleep_manager_gas_snapshot_connected(&s_sleep_mgr, gas_status_channels[i].type);
         cJSON *g = cJSON_CreateObject();
         cJSON_AddStringToObject(g, "sensor", gas_status_channels[i].name);
         cJSON_AddStringToObject(g, "status", connected ? "OK" : "FAIL");
@@ -827,6 +844,17 @@ static void app_cycle_process(uint32_t delta_ms)
         if (s_cycle_tick_ms >= network_config_get()->sensing_ms) {
             s_cycle_tick_ms = 0;
             s_cycle_state = APP_CYCLE_SENDING;
+            /* BUG FIX (2026-08-12): snapshot each gas channel's
+             * isConnected RIGHT HERE, at the SENSING -> SENDING
+             * transition, before build_telemetry_payload()/
+             * build_heartbeat_payload() in APP_CYCLE_SENDING (and
+             * whatever MQTT connect/publish work runs before send_
+             * heartbeat_if_due() actually gets to build its JSON) has a
+             * chance to run GAS_SENSOR_TIMEOUT_MS out on a channel that
+             * was genuinely fine moments ago. Same pattern as HB_ONLY's
+             * phase-1-end snapshot — see
+             * sx_sleep_manager_gas_snapshot_capture()'s doc-comment. */
+            sx_sleep_manager_gas_snapshot_capture(&s_sleep_mgr);
             log_info(TAG, "Sensing done, sending data");
         }
         break;

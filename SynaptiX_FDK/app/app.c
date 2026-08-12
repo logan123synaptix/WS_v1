@@ -681,11 +681,28 @@ static const char *build_heartbeat_payload(void)
         { GAS_SENSOR_O3,  "O3_Sensor"  },
         { GAS_SENSOR_H2S, "H2S_Sensor" },
     };
+    /* BUG FIX (2026-08-12), reported on real hardware: gas_sensor_app_
+     * is_connected() reads gas_sensor[i].isConnected LIVE off ze12a.c's
+     * own GAS_SENSOR_TIMEOUT_MS (10s) countdown. During an HB_ONLY
+     * mini-wake heartbeat, this runs from phase 2 -- AFTER modem
+     * power-on cooldown + AT handshake + MQTT connect, all well past
+     * 10s on their own -- so by the time this runs, every gas type's
+     * isConnected has very likely already aged back out to false
+     * regardless of real sensor health, even for types with fresh
+     * readings in the very same lap's telemetry. Use phase 1's snapshot
+     * (captured the moment sensor-check ended, before phase 2's clock
+     * could run out) instead of the live flag when this is an HB_ONLY
+     * mini-wake; the ordinary full-wake SENDING path (sensor check runs
+     * right up until this point) keeps reading live, since
+     * GAS_SENSOR_TIMEOUT_MS was never at risk of lapsing there. */
+    uint8_t is_hb_only = sx_sleep_manager_hb_only_modem_owned(&s_sleep_mgr);
     for (size_t i = 0; i < sizeof(gas_status_channels) / sizeof(gas_status_channels[0]); i++) {
+        bool connected = is_hb_only
+            ? sx_sleep_manager_hb_only_gas_connected(&s_sleep_mgr, gas_status_channels[i].type)
+            : gas_sensor_app_is_connected(gas_status_channels[i].type);
         cJSON *g = cJSON_CreateObject();
         cJSON_AddStringToObject(g, "sensor", gas_status_channels[i].name);
-        cJSON_AddStringToObject(g, "status",
-                                 gas_sensor_app_is_connected(gas_status_channels[i].type) ? "OK" : "FAIL");
+        cJSON_AddStringToObject(g, "status", connected ? "OK" : "FAIL");
         cJSON_AddItemToArray(sensorStatus, g);
     }
 

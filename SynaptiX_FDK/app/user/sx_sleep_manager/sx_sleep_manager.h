@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "sx_sleep_service.h"
 #include "modem_ops.h"
 #include "gps.h"
@@ -15,6 +16,7 @@ extern "C" {
 #include "sps30_app.h"
 #include "accel_app.h"
 #include "sx_ex_storage.h"
+#include "ze12a.h"
 
 /* Tier 3 of the 3-tier sleep architecture (see sx_sleep_service.h for the
  * full tier breakdown). This is the ONLY place in the sleep stack that
@@ -121,6 +123,44 @@ typedef struct {
      * power_on_start() is not called until this many ms have elapsed. */
     uint8_t  hb_only_cooldown_done;
     uint32_t hb_only_cooldown_elapsed_ms;
+
+    /* Gas sensor connection-status snapshot (2026-08-12).
+     *
+     * BUG (real hardware, reported by user): heartbeat's sensorStatus[]
+     * for CO/SO2/NO2/O3/H2S was reporting FAIL even for gas types with
+     * real, fresh readings confirmed in the same session's telemetry
+     * payload and ze12a.c's own per-frame log line. Root cause: app.c's
+     * build_heartbeat_payload() (called from phase 2, AFTER modem
+     * power-on + cooldown + AT handshake + MQTT connect all complete)
+     * calls gas_sensor_app_is_connected(type), which reads gas_sensor[i].
+     * isConnected LIVE off ze12a.c's own GAS_SENSOR_TIMEOUT_MS (10000ms)
+     * countdown. Phase 1 (sensor check) only guarantees a channel's last
+     * valid frame arrived within its own HB_ONLY_ZE12A_ACTIVE_MS (9500ms)
+     * window -- phase 2's own duration (HB_ONLY_MODEM_COOLDOWN_MS's
+     * 15000ms alone, before modem handshake/connect/publish are even
+     * counted) is already well past the 10000ms timeout, so by the time
+     * build_heartbeat_payload() runs, every gas type's isConnected has
+     * very likely already aged back out to false regardless of real
+     * sensor health -- matches the reported symptom exactly (fresh
+     * SO2/NO2/O3 readings in the same lap's telemetry, FAIL in the same
+     * lap's heartbeat).
+     *
+     * Fix: snapshot each gas type's isConnected right when phase 1 ends
+     * (see sx_sleep_manager_hb_only_process()), before phase 2's modem
+     * work has a chance to run the clock out, and have app.c's HB_ONLY
+     * heartbeat build read this snapshot instead of calling
+     * gas_sensor_app_is_connected() live.
+     *
+     * NOT indexed by GasSensorType_t's raw enum value directly -- those
+     * values (0x03..0x2C per ze12a.h, non-contiguous) are too sparse for
+     * a direct-index array. Indexed 0..GAS_SENSOR_COUNT-1 instead,
+     * parallel to gas_sensor[] (ze12a.h) itself: slot i here corresponds
+     * to gas_sensor[i], same order, same GAS_SENSOR_COUNT. Snapshotting
+     * captures both the type and the flag together so app.c doesn't need
+     * its own copy of ze12a.h's internal ordering to read this back --
+     * see hb_only_gas_snapshot_type[]. */
+    GasSensorType_t hb_only_gas_snapshot_type[GAS_SENSOR_COUNT];
+    bool             hb_only_gas_snapshot_connected[GAS_SENSOR_COUNT];
 } sx_sleep_manager_t;
 
 /* wake_steps run, in order, on every wake:
@@ -301,6 +341,19 @@ uint8_t sx_sleep_manager_hb_only_is_done(sx_sleep_manager_t *mgr);
  * phase 1 (sensor check) and once phase 2's publish+power-off has
  * finished. */
 uint8_t sx_sleep_manager_hb_only_modem_owned(sx_sleep_manager_t *mgr);
+
+/* Read back phase 1's isConnected snapshot for one gas type (see
+ * hb_only_gas_snapshot_type[]/hb_only_gas_snapshot_connected[] above for
+ * why this exists instead of app.c calling gas_sensor_app_is_connected()
+ * live during HB_ONLY's heartbeat build). Returns false for any type not
+ * found in the snapshot (should not happen in practice -- the snapshot
+ * always covers exactly ze12a.h's gas_sensor[GAS_SENSOR_COUNT], the same
+ * set app.c's gas_status_channels[] iterates). Only meaningful once
+ * phase 1 has completed at least once this HB_ONLY cycle; before that it
+ * reads back the previous cycle's snapshot (harmless -- app.c only calls
+ * this from within phase 2, which is always preceded by phase 1 in the
+ * same cycle). */
+bool sx_sleep_manager_hb_only_gas_connected(sx_sleep_manager_t *mgr, GasSensorType_t type);
 
 /* Sleeps for sleep_sec WITHOUT running the 7 sleep_steps first -- used for
  * every chunk in a lap after the first (GPS/modem/SPS30/pump/ZE12A/accel

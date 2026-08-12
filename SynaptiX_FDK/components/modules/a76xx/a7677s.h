@@ -101,6 +101,31 @@ extern "C" {
                                           * every A7677S_BOOT_PROBE_MS as before. */
 #define A7677S_TIMEOUT_AT      2500U
 #define A7677S_TIMEOUT_CPOF    5000U
+
+/* Timeout for sending the raw MQTT payload bytes (AT+CMQTTPAYLOAD's data
+ * phase, cb_mqtt_pub_payload_data() -- NOT the AT+CMQTTPUB command that
+ * follows it, which already has its own generous A7677S_TIMEOUT_MQTT_PUB
+ * below). BUG FIX (2026-08-12), reported via a live MQTT subscriber log
+ * on real hardware: this used to reuse A7677S_TIMEOUT_AT (2500ms), sized
+ * for short plain AT commands (a few dozen chars). Heartbeat/telemetry
+ * payloads run several hundred bytes, and the modem must receive +
+ * internally buffer the ENTIRE payload before it echoes back "\r\nOK\r\n" --
+ * on real-network conditions (vs. the quiet test environment where this
+ * always looked fine) that echo can apparently take longer than 2500ms.
+ * When it does, send_mqtt_dynamic() times out and treats the attempt as
+ * failed/aborted mid-transfer, but the modem has already buffered
+ * whatever bytes arrived before the abort -- so the eventual "MQTT
+ * publish OK" that follows (from a stale/partial buffer state) publishes
+ * a truncated payload instead of failing outright, matching the exact
+ * symptom reported: a subscriber logging raw payload bytes (not a UI
+ * that might just be truncating its own display) received JSON cut off
+ * mid-string, always at a plausible ~2.5s-worth-of-transfer point.
+ * 8000ms is a conservative bump (well past anything the fixed-content
+ * fields need, keeps headroom under AT+CMQTTPAYLOAD's own inputs) --
+ * revisit if a still-longer payload is ever added and this needs to
+ * scale with payload size instead of being a flat constant. */
+#define A7677S_TIMEOUT_MQTT_PUB_PAYLOAD_DATA  8000U
+
 #define A7677S_TIMEOUT_NETWORK 9000U    /* CGDCONT/CGAUTH/CGACT/COPS, per a76xx_at_cmd.md MaxResponseTime */
 #define A7677S_TIMEOUT_CFUN    9000U    /* AT+CFUN=0/1, MaxResponseTime per a76xx_at_cmd.md section 3.2.1 */
 #define A7677S_TIMEOUT_CSQ     9000U    /* AT+CSQ, MaxResponseTime per a76xx_at_cmd.md section 3.2.2 */

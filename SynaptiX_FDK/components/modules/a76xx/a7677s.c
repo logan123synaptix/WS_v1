@@ -2439,7 +2439,7 @@ static void cb_mqtt_pub_topic(modem_t *modem, const char *response,
      * arrived (timeout) or to misread subsequent AT traffic as topic data. */
     dce->mqtt_state = A7677S_MQTT_PUB_TOPIC_DATA;
     send_mqtt_dynamic(dce, dce->mqtt_pub_topic, "\r\nOK\r\n", "\r\nERROR\r\n",
-                      cb_mqtt_pub_topic_data, A7677S_TIMEOUT_AT);
+                      cb_mqtt_pub_topic_data, A7677S_TIMEOUT_MQTT_PUB_PAYLOAD_DATA);
 }
 
 static void cb_mqtt_pub_topic_data(modem_t *modem, const char *response,
@@ -2492,7 +2492,7 @@ static void cb_mqtt_pub_payload(modem_t *modem, const char *response,
      * pointer directly instead. */
     dce->mqtt_state = A7677S_MQTT_PUB_PAYLOAD_DATA;
     send_mqtt_dynamic(dce, dce->mqtt_pub_payload, "\r\nOK\r\n", "\r\nERROR\r\n",
-                      cb_mqtt_pub_payload_data, A7677S_TIMEOUT_AT);
+                      cb_mqtt_pub_payload_data, A7677S_TIMEOUT_MQTT_PUB_PAYLOAD_DATA);
 }
 
 static void cb_mqtt_pub_payload_data(modem_t *modem, const char *response,

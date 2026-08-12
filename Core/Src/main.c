@@ -330,9 +330,9 @@ int main(void)
            (unsigned long)g_iwdg_ob_program_flash_error);
   // sx_storage_factory_reset();
   #if TEST
-  // test_ze12a_init();
+  test_ze12a_init();
   // test_gps_init();
-  test_shell_init();
+  // test_shell_init();
 
   #else
   app_init();
@@ -357,7 +357,8 @@ int main(void)
         
         #if TEST
         // test_gps_poll(delta);
-        test_shell_poll(delta);
+        // test_shell_poll(delta);
+        test_ze12a_poll(delta);
         #else
         app_process(delta);
         #endif

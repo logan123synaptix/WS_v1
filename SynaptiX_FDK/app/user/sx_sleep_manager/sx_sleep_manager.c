@@ -535,6 +535,18 @@ static uint8_t _hb_only_sensor_check_process(sx_sleep_manager_t *mgr, uint32_t d
 
     mgr->hb_only_elapsed_ms += delta_ms;
     if (mgr->hb_only_elapsed_ms >= HB_ONLY_ZE12A_ACTIVE_MS) {
+        /* Snapshot isConnected for every gas type RIGHT HERE, before
+         * phase 2's modem cooldown/handshake/connect (well past
+         * GAS_SENSOR_TIMEOUT_MS on its own -- see the doc-comment on
+         * hb_only_gas_snapshot_type[]/hb_only_gas_snapshot_connected[]
+         * in the header) has a chance to age every channel's flag back
+         * out to false before app.c ever reads it. This is the freshest
+         * point this phase has for each channel's real status. */
+        for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
+            mgr->hb_only_gas_snapshot_type[i]      = gas_sensor[i].type;
+            mgr->hb_only_gas_snapshot_connected[i] = gas_sensor[i].isConnected;
+        }
+
         /* Back to Q&A mode immediately, per the user's explicit choice
          * (2026-08-10): "xác nhận cảm biến nào ok thì lập tức tắt luôn
          * cảm biến đấy" -- i.e. don't leave ZE12A broadcasting in Active
@@ -740,6 +752,16 @@ void sx_sleep_manager_hb_only_process(sx_sleep_manager_t *mgr, uint32_t delta_ms
 uint8_t sx_sleep_manager_hb_only_is_done(sx_sleep_manager_t *mgr)
 {
     return mgr->hb_only_phase == 2;
+}
+
+bool sx_sleep_manager_hb_only_gas_connected(sx_sleep_manager_t *mgr, GasSensorType_t type)
+{
+    for (uint8_t i = 0; i < GAS_SENSOR_COUNT; i++) {
+        if (mgr->hb_only_gas_snapshot_type[i] == type) {
+            return mgr->hb_only_gas_snapshot_connected[i];
+        }
+    }
+    return false;
 }
 
 uint8_t sx_sleep_manager_hb_only_modem_owned(sx_sleep_manager_t *mgr)

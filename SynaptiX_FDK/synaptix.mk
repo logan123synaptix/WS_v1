@@ -86,8 +86,16 @@ SERVICES_FILES = ${SYNAPTIX_DIR}/services/logger/logger.c \
 UTILS_FILES = ${SYNAPTIX_DIR}/utils/cqueue/cqueue.c \
 			  ${SYNAPTIX_DIR}/utils/mem/sx_mem.c \
 			  ${SYNAPTIX_DIR}/utils/delay/sx_delay.c \
-			  ${SYNAPTIX_DIR}/utils/filter/sx_filter.c \
-
+			  ${SYNAPTIX_DIR}/utils/filter/IIR_filter/bpf_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/IIR_filter/ema_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/IIR_filter/hpf_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/IIR_filter/hsh_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/IIR_filter/lpf_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/IIR_filter/notch_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/IIR_filter/peq_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/Kalman_filter/kalman_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/MA_filter/ma_filt.c \
+			  ${SYNAPTIX_DIR}/utils/filter/Median_filter/median_filt.c \
 
 SYNAPTIX_SOURCES = $(APP_FILES) \
 				   $(BOARD_FILES) \

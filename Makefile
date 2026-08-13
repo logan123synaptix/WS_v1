@@ -194,7 +194,10 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/utils/delay \
 			  -I$(SYNAPTIX_DIR)/utils/def \
 			  -I$(SYNAPTIX_DIR)/utils/delay \
-			  -I$(SYNAPTIX_DIR)/utils/filter \
+			  -I$(SYNAPTIX_DIR)/utils/filter/IIR_filter \
+			  -I$(SYNAPTIX_DIR)/utils/filter/Kalman_filter \
+			  -I$(SYNAPTIX_DIR)/utils/filter/MA_filter \
+			  -I$(SYNAPTIX_DIR)/utils/filter/Median_filter \
 			  -I$(SYNAPTIX_DIR)/components/peripherals/flash \
 			  -I$(SYNAPTIX_DIR)/components/peripherals/gpio \
 			  -I$(SYNAPTIX_DIR)/components/peripherals/i2c \

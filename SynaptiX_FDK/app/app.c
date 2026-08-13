@@ -650,13 +650,30 @@ static const char *build_heartbeat_payload(void)
     cJSON_AddNumberToObject(root, "uptime", (double)HAL_GetTick());
 
     cJSON *network = cJSON_CreateObject();
-    /* sx_user_mqtt_get_rssi()/get_operator() read board.modem.ops-> under
-     * the hood — no readiness gate at this layer, published as-is same as
-     * before the WS_v0-parity restore (see a7677s.c's cb_cops_query() and
-     * a7677s_get_rssi() doc-comments for their own default-until-ready
-     * caveats). */
+    /* sx_user_mqtt_get_rssi() reads board.modem.ops-> under the hood — no
+     * readiness gate at this layer, published as-is same as before the
+     * WS_v0-parity restore (see a7677s_get_rssi()'s doc-comment for its
+     * own default-until-ready caveat). */
     cJSON_AddNumberToObject(network, "signalStrength", sx_user_mqtt_get_rssi());
-    const char *op = sx_user_mqtt_get_operator();
+
+    /* Operator name (2026-08-13, per the user): prefer the configured
+     * APN's known carrier over the modem's own AT+COPS? read. Confirmed
+     * on real hardware that sx_user_mqtt_get_operator() (a7677s.c's
+     * operator_name, read once per network attach via cb_cops_query())
+     * can come back genuinely empty ("+COPS: 0,0,\"\",7" from the modem
+     * itself, not a parse bug) even with good signal, and heartbeat.
+     * network.operator then published null with no retry — see
+     * network_config_get_carrier_name()'s doc-comment in
+     * network_config.h for the full writeup. The APN is config data the
+     * user already provided and known correct independent of whatever
+     * COPS? happens to return on any given attach, so check it first.
+     * Only fall back to the modem's own COPS read for an APN not yet in
+     * that lookup table (e.g. a still-undocumented carrier or a custom
+     * APN), and only report null if neither source has anything. */
+    const char *op = network_config_get_carrier_name();
+    if (!op || op[0] == '\0') {
+        op = sx_user_mqtt_get_operator();
+    }
     if (op && op[0] != '\0') {
         cJSON_AddStringToObject(network, "operator", op);
     } else {

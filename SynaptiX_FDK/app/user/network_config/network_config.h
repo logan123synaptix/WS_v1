@@ -205,6 +205,23 @@ bool network_config_save(void);
  * as a fresh default). */
 void network_config_reset_to_defaults(void);
 
+/* Maps the currently configured APN (network_config_get()->apn) to a
+ * human-readable Vietnamese carrier name, e.g. "m3-world" -> "VinaPhone"
+ * (2026-08-13, per the user). Added as a reliable stand-in for
+ * a7677s_get_operator_name()/AT+COPS?, which is read from the modem only
+ * once per network attach and confirmed on real hardware to sometimes
+ * come back genuinely empty ("+COPS: 0,0,\"\",7") right after CREG
+ * reports registered — see cb_cops_query()'s doc-comment in a7677s.c.
+ * The APN, by contrast, is operator-config data the user already
+ * provided via network_config_set_apn()/flash and known correct the
+ * whole time the modem is up, independent of whatever COPS? happens to
+ * return on any given attach. Table covers the 3 Vietnamese carriers
+ * with known APN strings as of this writing (m3-world/VinaPhone,
+ * v-internet/Viettel, m-wap/MobiFone); returns NULL for any APN not in
+ * the table (e.g. a from-scratch custom APN not yet mapped) so the
+ * caller can fall back to something else rather than fabricate a name. */
+const char *network_config_get_carrier_name(void);
+
 #ifdef __cplusplus
 }
 #endif

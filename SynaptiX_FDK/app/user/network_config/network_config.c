@@ -258,3 +258,33 @@ void network_config_reset_to_defaults(void)
         log_error(TAG, "Failed to save default network config to flash");
     }
 }
+
+/* APN -> Vietnamese carrier name table backing
+ * network_config_get_carrier_name() — see that function's doc-comment in
+ * network_config.h for why this exists instead of trusting
+ * a7677s_get_operator_name()/AT+COPS? alone. strcmp is case-sensitive on
+ * purpose: the APN strings here come from app_config.h's #define APN /
+ * network_config_set_apn() callers, which are expected to match a
+ * carrier's documented APN exactly (lowercase, per every Vietnamese
+ * carrier's published APN, e.g. a76xx_at_cmd.md's own examples) rather
+ * than needing case-insensitive matching for a value nothing normally
+ * randomizes the case of. */
+static const struct {
+    const char *apn;
+    const char *carrier_name;
+} s_apn_carrier_table[] = {
+    { "m3-world",   "VinaPhone" },
+    { "v-internet", "Viettel" },
+    { "m-wap",      "MobiFone" },
+};
+
+const char *network_config_get_carrier_name(void)
+{
+    const char *apn = s_cfg.apn;
+    for (size_t i = 0; i < sizeof(s_apn_carrier_table) / sizeof(s_apn_carrier_table[0]); i++) {
+        if (strcmp(apn, s_apn_carrier_table[i].apn) == 0) {
+            return s_apn_carrier_table[i].carrier_name;
+        }
+    }
+    return NULL;
+}

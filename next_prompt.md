@@ -216,8 +216,8 @@ CÔNG CỤ MỚI/THAY ĐỔI PHIÊN NÀY
 ============================================================
 QUY TẮC BẮT BUỘC (kế thừa, không đổi)
 ============================================================
-- Nhánh làm việc: ft/heartbeat.
-- RE-CLONE/PULL đầu phiên: git pull origin ft/heartbeat ngay khi
+- Nhánh làm việc: ft/calib_vel.
+- RE-CLONE/PULL đầu phiên: git pull origin ft/calib_vel ngay khi
   bắt đầu, luôn kiểm tra git status trước để biết có thay đổi local
   chưa commit không.
 - KHÔNG tin log/mô tả cũ mà không tự đọc lại code thật.

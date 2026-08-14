@@ -1,6 +1,6 @@
 HANDOFF — WS_v1 (nhánh ft/heartbeat) — TIẾN ĐỘ PHIÊN NÀY
 ============================================================
-Ngày: 2026-08-12
+Ngày: 2026-08-13
 Nhánh làm việc: ft/heartbeat
 
 repo: https://github.com/logan123synaptix/WS_v1.git
@@ -9,168 +9,209 @@ clone và pull ft/heartbeat trước
 ============================================================
 TRẠNG THÁI GIT — QUAN TRỌNG, ĐỌC TRƯỚC
 ============================================================
-5 file đang có thay đổi CHƯA COMMIT trên máy làm việc (chưa push),
-đã kiểm tra ngoặc cân bằng (script Python đếm { } ( )), KHÔNG BUILD
-THẬT (không có toolchain ARM trong môi trường làm việc), CHƯA CHẠY
-TRÊN BOARD:
+File đang có thay đổi CHƯA COMMIT trên máy làm việc (chưa push),
+KHÔNG BUILD THẬT (không có toolchain ARM trong môi trường làm việc),
+CHƯA CHẠY TRÊN BOARD:
 
+    Makefile
     SynaptiX_FDK/app/app.c
-    SynaptiX_FDK/app/user/sx_sleep_manager/sx_sleep_manager.c
-    SynaptiX_FDK/app/user/sx_sleep_manager/sx_sleep_manager.h
-    SynaptiX_FDK/components/modules/a76xx/a7677s.c
-    SynaptiX_FDK/components/modules/a76xx/a7677s.h
+    SynaptiX_FDK/components/modules/imu/bno055.c
+    SynaptiX_FDK/components/modules/imu/bno055.h
+    SynaptiX_FDK/synaptix.mk
+
+Untracked (file mới, chưa git add):
+    SynaptiX_FDK/app/user/imu_velocity/           (imu_velocity.c/.h)
+    SynaptiX_FDK/components/third_party/embfilt/  (vendored MA + median
+                                                     filter, MIT license,
+                                                     xem README.md trong
+                                                     thư mục đó)
+
+Chỉ kiểm tra được ngoặc cân bằng (script Python đếm { } ( )) qua mọi
+file trên — KHÔNG THAY THẾ CHO BUILD THẬT.
 
 ============================================================
-ĐÃ FIX, ĐÃ XÁC NHẬN QUA HARDWARE THẬT (ổn định)
+ĐÃ FIX, ĐÃ XÁC NHẬN QUA HARDWARE THẬT (phiên trước + phiên này)
 ============================================================
 
-1. HB_ONLY modem PWRKEY không lên nguồn — ĐÃ FIX, ĐÃ CONFIRM HW
---------------------------------------------------------------
-Triệu chứng: heartbeat mini-wake (HB_ONLY) power-on modem xong bắn
-toàn TIMEOUT [NULL], trong khi full-wake (lúc publish data) luôn
-power-on modem thành công.
-
-Nguyên nhân: full-wake có ext_flash_wake + gps_on + gps_wait_fix
-(có thể tới cả phút) chạy TRƯỚC modem_power_on — tạo ra khoảng nghỉ
-nguồn dài giữa power-off trước đó và power-on tiếp theo. HB_ONLY chỉ
-đợi HB_ONLY_ZE12A_ACTIVE_MS=9.5s cố định rồi power-on ngay — không
-đủ thời gian cooldown thật sự modem cần sau power-off (con số chính
-xác chưa đo được, không có trong datasheet).
-
-Fix: thêm cổng cooldown riêng HB_ONLY_MODEM_COOLDOWN_MS=15000
-(sx_sleep_manager.h) — giữ 15s KHÔNG ĐỤNG modem/UART trước khi
-_hb_only_publish_process() gọi power_on_start(), tách biệt hoàn
-toàn khỏi HB_ONLY_ZE12A_ACTIVE_MS (ý nghĩa khác nhau — dwell time
-cảm biến khí, không phải cooldown nguồn modem). Field mới trong
-struct: hb_only_cooldown_done, hb_only_cooldown_elapsed_ms.
-XÁC NHẬN: đã build+flash+test trên board thật, modem power-on
-thành công trở lại trong HB_ONLY, không còn TIMEOUT [NULL].
-15000ms là số chọn bảo thủ (dựa theo A7677S_OFF_SETTLE_MS=4500ms +
-margin rộng) — CHƯA ĐO ĐƯỢC con số tối thiểu thật sự cần thiết,
-có thể giảm nếu muốn heartbeat publish nhanh hơn, cần test dần.
-
-2. Payload MQTT bị cắt giữa chừng — ĐÃ FIX, CHƯA CONFIRM HW
---------------------------------------------------------------
-Triệu chứng: log firmware in ra JSON đầy đủ trước khi publish,
-nhưng subscriber Python độc lập (mqtt_log_subscriber.py, xem file
-đính kèm phiên này) nhận được payload bị cắt cụt giữa chừng —
-xác nhận cắt xảy ra thật trên đường truyền, không phải do MQTT
-Explorer hiển thị rút gọn (giả thuyết ban đầu, đã loại trừ).
-
-Nguyên nhân: cb_mqtt_pub_payload_data() và cb_mqtt_pub_topic_data()
-(a7677s.c) — bước gửi RAW BYTES (topic string / payload JSON) qua
-UART rồi chờ modem echo lại "\r\nOK\r\n" xác nhận đã nhận đủ — dùng
-chung A7677S_TIMEOUT_AT=2500ms, vốn chỉ để dành cho AT command NGẮN
-(AT+CREG?, AT+CGSN, vài chục ký tự). Với payload ~500 byte, trên
-điều kiện mạng thật (khác môi trường bàn/test yên tĩnh lúc trước
-luôn ổn), modem có thể mất hơn 2.5s để nhận+đệm xong rồi mới echo
-OK — timeout xảy ra giữa chừng, phần data chưa gửi hết bị bỏ dở,
-nhưng AT+CMQTTPUB phía sau vẫn chạy tiếp trên state dở dang -> báo
-"MQTT publish OK" nhưng nội dung thực chất bị cắt.
-
-Fix: tách hằng số riêng A7677S_TIMEOUT_MQTT_PUB_PAYLOAD_DATA=8000ms
-(a7677s.h) dùng cho cả 2 bước gửi raw bytes (topic data, payload
-data), thay A7677S_TIMEOUT_AT cũ.
-CHƯA CONFIRM: người dùng cần build+flash+chạy lại
-mqtt_log_subscriber.py để xác nhận payload không còn bị cắt. Nếu
-vẫn còn cắt ở 8000ms, có thể cần tăng thêm hoặc tính theo tỷ lệ độ
-dài payload thay vì hằng số cố định.
+Các bug sau đã fix và CONFIRM trên board thật (kế thừa từ phiên
+2026-08-12, không đổi gì thêm phiên này — xem lại nếu cần chi tiết):
+  - HB_ONLY modem PWRKEY cooldown (HB_ONLY_MODEM_COOLDOWN_MS=15000)
+  - sensorStatus SO2/NO2/O3 sai (gas_last_full_wake_ok[] snapshot,
+    field-name mismatch giữa .h/.c đã fix, giờ build được)
+  - ZE12A cold-boot không đọc được khí (gọi gas_sensor_switch_to_
+    active_mode() 2 lớp: sx_board.c ngay sau init + app.c's
+    APP_CYCLE_ON_PUMP's first tick — CONFIRMED bởi người dùng, hết
+    lỗi sau power-cycle thật)
 
 ============================================================
-★★★ VẤN ĐỀ CÒN LẠI CHƯA XONG — TRỌNG TÂM CẦN LÀM TIẾP ★★★
+FIX PHIÊN NÀY — operator: null trong heartbeat
 ============================================================
+Nguyên nhân: AT+COPS? có thể trả "+COPS: 0,0,\"\",7" (tên operator
+rỗng THẬT từ modem, không phải bug parse) ngay sau CREG registered —
+race condition mạng thật, chỉ đọc 1 lần mỗi lần network attach,
+không retry.
 
-3. sensorStatus trong heartbeat sai trạng thái 3 cảm biến khí
---------------------------------------------------------------
-Board thật chỉ có 3 module ZE12A cắm thật: SO2/NO2/O3 (đã xác nhận
-với người dùng — CO/H2S không có phần cứng, mãi mãi FAIL là đúng,
-KHÔNG PHẢI bug).
+Fix: network_config_get_carrier_name() (network_config.c/.h) — bảng
+map tĩnh APN -> tên nhà mạng VN (m3-world->VinaPhone, v-internet->
+Viettel, m-wap->MobiFone, đã tra cứu web xác nhận đúng APN từng nhà
+mạng). app.c's build_heartbeat_payload() ưu tiên đọc bảng map này
+trước (dựa network_config_get()->apn, đọc từ flash, ổn định suốt
+session), chỉ fallback về sx_user_mqtt_get_operator() (đọc modem)
+nếu APN không có trong bảng.
 
-TRIỆU CHỨNG: SO2/NO2/O3 dù đọc được số liệu thật tốt trong cùng
-lap's telemetry (ví dụ so2:53, no2:5, o3:12 trong payload data),
-sensorStatus trong heartbeat CÙNG LAP đó vẫn báo FAIL cho một số/
-tất cả 3 loại này — không nhất quán giữa các lần chạy (có lúc
-SO2/O3 lên OK còn NO2 FAIL, có lúc cả 3 FAIL).
+TRẠNG THÁI: code đã fix, đã push, NHƯNG người dùng báo log thật
+(chạy liên tục >12h không reboot) vẫn cho ra "operator": null XEN
+KẼ với "VinaPhone" trong CÙNG 1 session — điều này KHÔNG khớp logic
+(network_config_get()->apn là giá trị tĩnh, load 1 lần lúc boot,
+không đổi giữa các lap). ĐÃ THÊM 1 dòng debug log tạm trong app.c:
 
-ĐÃ ĐIỀU TRA, ĐÃ LOẠI TRỪ CÁC GIẢ THUYẾT SAU (không phải nguyên
-nhân, đã xác nhận bằng log/test cụ thể):
-  - KHÔNG PHẢI lỗi mux/GPIO S0-S1 phần cứng: test_ze12a.c chạy
-    standalone (không qua STOP mode) luôn đọc đủ cả 3 kênh (0,1,2)
-    ổn định, ngay cả sau khi reset MCU nhiều lần.
-  - KHÔNG PHẢI vấn đề round-robin/modulo trong ze12a.c: công thức
-    (channel & 0x01 -> S0, channel & 0x02 -> S1) đã verify đúng
-    qua code lẫn qua test_ze12a.c.
-  - Field hb_only_gas_snapshot_type[]/hb_only_gas_snapshot_connected[]
-    (sx_sleep_manager.h/.c, thêm trong phiên trước) và
-    sx_sleep_manager_hb_only_gas_connected() (app.c dùng thay
-    gas_sensor_app_is_connected() live khi đang trong ngữ cảnh
-    HB_ONLY) — fix này ĐÃ ĐÚNG cho vấn đề nó nhắm tới (isConnected
-    bị age-out theo GAS_SENSOR_TIMEOUT_MS=10s do phase 2 tốn hơn
-    10s modem handshake) nhưng KHÔNG PHẢI nguyên nhân chính của bug
-    #3 này (log thật cho thấy sai cả ở đường full-wake, không chỉ
-    HB_ONLY, nơi fix đó không áp dụng).
+    log_info(TAG, "[DEBUG OPERATOR] apn=[%s] carrier_lookup=[%s] cops_operator=[%s]", ...);
 
-NGHI VẤN MẠNH NHẤT, CHƯA XÁC NHẬN, CẦN ĐIỀU TRA TIẾP:
-  UART_EXTEND (ZE12A's UART5) bị board_sleep_pre_stop_hook()
-  (sx_board.c) gọi HAL_UART_Abort() MỌI LẦN vào STOP mode — kể cả
-  khi ZE12A vẫn có điện xuyên suốt. Sau khi thoát STOP, UART5's RX
-  interrupt CHẾT cho tới khi có ai gọi board_extend_uart_resume_it()
-  re-arm lại. Full-wake's wake step 'gas_sensor_active_mode'
-  (_gas_sensor_active_mode_start(), sx_sleep_manager.c dòng ~170)
-  ĐÃ gọi resume đúng. HB_ONLY's sx_sleep_manager_hb_only_start()
-  TRƯỚC ĐÂY KHÔNG gọi resume trước gas_sensor_switch_to_active_mode()
-  — ĐÃ FIX field này ở phiên trước đó (thêm board_extend_uart_resume_it()
-  vào sx_sleep_manager_hb_only_start(), xem sx_sleep_manager.c). Fix
-  này NẰM TRONG các file đã sửa nhưng CHƯA COMMIT ở trên.
-
-  TUY NHIÊN: log thật gần nhất (phiên này) cho thấy sensorStatus
-  sai CẢ Ở LAP FULL-WAKE (không chỉ HB_ONLY) — nơi resume UART đã
-  luôn đúng từ trước. Vậy giả thuyết "thiếu resume UART_EXTEND"
-  CHỈ giải thích được PHẦN HB_ONLY của bug, KHÔNG giải thích được
-  phần full-wake. Cần điều tra thêm ở full-wake path — hướng gợi ý:
-    a. Kiểm tra timing giữa gas_sensor_active_mode wake step (sớm
-       trong wake sequence) và lúc build_heartbeat_payload() thực
-       sự chạy (SENDING state, cuối chu kỳ) — khoảng cách này có
-       thể vẫn vượt GAS_SENSOR_TIMEOUT_MS=10s cho một số kênh nếu
-       SENSING/GPS-wait kéo dài, y hệt cơ chế age-out đã fix cho
-       HB_ONLY nhưng full-wake CHƯA CÓ snapshot tương tự — có thể
-       cần áp dụng CÙNG PATTERN snapshot (chụp isConnected ngay
-       cuối SENSING, trước khi build payload) cho cả đường full-wake,
-       không chỉ HB_ONLY.
-    b. Log GPS timeout dài (110000ms, thấy trong log phiên trước)
-       kéo dài toàn bộ wake sequence trước khi tới SENDING — rất
-       có khả năng đủ để làm một số kênh ZE12A age-out dù ZE12A đã
-       broadcast đều đặn suốt session (không phải lỗi ZE12A, mà là
-       khoảng cách quá xa giữa "sensor check ổn" và "lúc build
-       payload" trong cùng 1 lap dài).
-    c. CẦN LOG THẬT có timestamp rõ ràng (dùng mqtt_log_subscriber.py
-       đối chiếu với firmware log có timestamp) để đo chính xác
-       khoảng cách thời gian giữa lần cuối mỗi kênh ZE12A có frame
-       hợp lệ và lúc sensorStatus thực sự được build, so với 10s
-       threshold — hiện chưa có bằng chứng đo trực tiếp, chỉ mới
-       suy luận từ log gần đúng.
-
-  Nếu giả thuyết (a) đúng: cách fix hợp lý là tổng quát hoá cơ chế
-  snapshot đã làm cho HB_ONLY (hb_only_gas_snapshot_type[]/
-  hb_only_gas_snapshot_connected[]) thành 1 snapshot dùng chung cho
-  CẢ 2 đường (full-wake và HB_ONLY), chụp ngay khi SENSING/sensor
-  check kết thúc, thay vì đọc live isConnected() lúc build payload
-  — tránh phụ thuộc vào GAS_SENSOR_TIMEOUT_MS's 10s so với khoảng
-  cách thời gian thực tế biến động (GPS timeout, mạng chậm, v.v.)
-  của từng lap.
+CHƯA XÁC ĐỊNH ĐƯỢC NGUYÊN NHÂN THẬT của việc null/VinaPhone xen kẽ.
+Cần người dùng build+flash+chạy vài lap (cả HB_ONLY và full-wake),
+gửi lại đoạn log [DEBUG OPERATOR] để xác định — có thể là race
+condition đọc s_cfg.apn, hoặc network_config_get_carrier_name() bị
+gọi trước network_config_init() hoàn tất ở 1 số lap nào đó, hoặc
+nguyên nhân khác chưa nghĩ tới. KHÔNG ĐOÁN THÊM khi chưa có log này.
+Nhớ xóa dòng debug log này sau khi xác định xong nguyên nhân.
 
 ============================================================
-CÔNG CỤ MỚI TẠO PHIÊN NÀY
+★★★ TÍNH NĂNG MỚI ĐANG PHÁT TRIỂN — TRỌNG TÂM PHIÊN NÀY ★★★
+Pump-on-speed-threshold (dùng lỗ thông khí tự nhiên khi xe > 20km/h)
 ============================================================
-mqtt_log_subscriber.py (Python, cần `pip install paho-mqtt`) —
-subscribe hanoi/air_quality/data/# và hanoi/air_quality/heartbeat/#
-trên broker.hivemq.com:1883, log mọi message (timestamp + topic +
-payload, không tự cắt bớt) vào log_test_weatherstation.log. Dùng
-công cụ này để verify payload không còn bị cắt (mục 2) VÀ để đo
-chính xác timing cho bug #3 (đối chiếu timestamp nhận được với
-firmware log's timestamp nội bộ). Chạy:
-    python3 mqtt_log_subscriber.py
-    python3 mqtt_log_subscriber.py --device-id 001   (lọc theo device)
+
+Ý tưởng gốc (người dùng): trạm có lỗ thông khí tự nhiên — xe di
+chuyển đủ nhanh thì khí tự lùa vào, không cần bật bơm (tiết kiệm
+điện/mòn bơm). Chỉ bật bơm khi xe dừng/đi chậm (< threshold km/h,
+default 20, cần config được qua shell) — ví dụ trong hầm, đèn đỏ.
+
+NGUỒN TỐC ĐỘ: GPS speed (gps->speed, đã có sẵn trong gps.c, đơn vị
+knots) là nguồn duy nhất cho số km/h chính xác — nhưng GPS hay mất
+fix đúng lúc cần nhất (hầm). Người dùng yêu cầu: khi mất GPS fix,
+dùng IMU (BNO055) để tự ước lượng vận tốc, calib theo GPS làm tham
+chiếu khi có fix.
+
+--- ĐÃ KIỂM TRA, KHÔNG PHẢI GIẢ ĐỊNH ---
+- accel_app_is_movement_detected() (accel_app.c) hiện tại CHỈ phát
+  hiện rung động/thay đổi gia tốc (magnitude, low-pass filter, so
+  độ lệch với threshold) — KHÔNG PHẢI tốc độ km/h thật, không dùng
+  được trực tiếp cho ngưỡng cụ thể.
+- BNO055 datasheet (Documents/bno055.md) TỰ CẢNH BÁO: "linear
+  acceleration signal typically cannot be integrated to recover
+  velocity... error typically becomes larger than the signal within
+  less than 1 second if other sensor sources are not used to
+  compensate". Cũng cảnh báo riêng: fusion algorithm không thiết kế
+  cho xe cộ (cornering/braking mạnh kéo dài có thể làm sai lệch
+  gravity vector). Đây là giới hạn VẬT LÝ của MEMS + tích phân số,
+  không phải thiếu sót code — đã giải thích rõ với người dùng.
+- gps.c CHƯA parse course/heading (minmea hỗ trợ field này nhưng
+  code hiện tại bỏ qua) — cần thêm nếu làm tiếp Stage B's forward-
+  axis (xem dưới).
+- Không có EN_PW/GPIO enable riêng cho ZE12A (đã biết từ phiên
+  trước) — không liên quan tính năng này, nhắc lại cho đủ ngữ cảnh.
+
+--- KIẾN TRÚC: GPS-Referenced IMU Velocity Estimator, 3 giai đoạn ---
+(xem doc-comment đầy đủ, rất chi tiết, ở đầu file
+SynaptiX_FDK/app/user/imu_velocity/imu_velocity.h — ĐỌC FILE ĐÓ
+TRƯỚC KHI SỬA GÌ, comment ở đó là nguồn thông tin đầy đủ nhất)
+
+  STAGE A — Bias calibration: TRỪ giá trị offset tĩnh của accel khi
+  đứng yên (nếu không trừ, tích phân sẽ tạo vận tốc "ảo" ngay cả lúc
+  đứng im). ĐÃ CODE XONG, TEST ĐƯỢC NGAY LÚC ĐỨNG YÊN (không cần xe,
+  không cần GPS).
+
+  STAGE A2 — Temperature-compensated bias (thêm giữa phiên, theo
+  yêu cầu người dùng "phải có cách nào đó giảm sai số"): bias KHÔNG
+  phải hằng số cố định — trôi theo nhiệt độ (well-known trong MEMS
+  accelerometer literature, đã tra cứu web, trích dẫn cụ thể trong
+  code: PMC8124870, guidenav.com 2025). Giờ bias(T) = intercept +
+  slope * T thay vì 1 số cố định. Cơ chế: mỗi lần đứng yên, sample
+  được tự phân vào 1 trong 2 "cluster" nhiệt độ (lạnh nhất/nóng nhất
+  đã thấy, ngưỡng tách biệt tối thiểu
+  IMU_VELOCITY_TEMP_CLUSTER_MIN_SEPARATION_C=10°C) — khi đủ 2
+  cluster tách biệt, tự tính slope. ĐÃ CODE XONG, TEST ĐƯỢC NGAY LÚC
+  ĐỨNG YÊN (cần để board qua vài lần đứng yên ở nhiệt độ khác nhau
+  để thấy slope != 0, ví dụ mới bật máy vs sau khi chạy lâu ấm lên).
+
+  STAGE A3 — Re-calib mỗi lần dừng (ZUPT + refresh bias): mỗi khi
+  xe dừng hẳn, KHÔNG CHỈ reset velocity=0 (ZUPT chuẩn INS) mà còn
+  tiếp tục feed sample mới vào Stage A2's fit — bias "học" liên tục
+  suốt vòng đời vận hành, không chỉ 1 lần lúc boot. ĐÃ TÍCH HỢP
+  trong app.c (xem dưới).
+
+  STAGE B — Trục tham chiếu: phần "trục xuống" (dùng
+  bno055_get_gravity()) TEST ĐƯỢC ĐỨNG YÊN, ĐÃ CODE XONG. Phần
+  "trục tiến" (forward axis, hướng xe chạy) KHÔNG THỂ xác định lúc
+  đứng yên — cần xe di chuyển thật + so với GPS course. CHƯA CODE
+  (cần thêm course vào gps.c trước). Hiện tại dùng giá trị giả định
+  IMU_VELOCITY_ASSUMED_FORWARD_AXIS (mặc định trục X), có log rõ
+  "ASSUMED, not measured" để không ai nhầm là đã calib thật.
+
+  STAGE C — Scale factor (2 tầng, theo yêu cầu người dùng "tầng 1
+  nhiệt độ, tầng 2 hàm theo GPS"): sau khi trừ bias theo nhiệt độ
+  (tầng 1) và tích phân ra vận tốc thô, NHÂN thêm scale_factor để
+  bù sai số hệ thống còn sót (scale error cảm biến, sai số chiếu
+  trục...). imu_velocity_scale_calib_update(state, gps_speed_kph)
+  — CHỈ CÓ KHUNG, chưa chạy được, người dùng xác nhận CHƯA CÓ điều
+  kiện chạy xe thật (chỉ test đứng yên/trong phòng). Hiện tại
+  scale_factor là 1 hằng số nhân duy nhất (running average đơn
+  giản, alpha=0.05) — ĐANG DỞ DANG CÂU HỎI: người dùng được hỏi có
+  muốn scale_factor phức tạp hơn (đổi theo dải tốc độ thay vì 1 số
+  cố định) hay giữ đơn giản — CHƯA CÓ CÂU TRẢ LỜI, session bị ngắt
+  giữa chừng ngay lúc chờ người dùng chọn. HỎI LẠI CÂU NÀY TRƯỚC
+  KHI SỬA STAGE C.
+
+--- GIỚI HẠN THẬT, ĐÃ GIẢI THÍCH RÕ VỚI NGƯỜI DÙNG, KHÔNG PHẢI CHE GIẤU ---
+Ngay cả với cả 3 tầng calib (A + A2 + A3 + B + C) hoàn chỉnh, drift
+KHÔNG BAO GIỜ bị loại bỏ hoàn toàn — đây là giới hạn vật lý của MEMS
++ tích phân số, không phải thiếu sót thuật toán (đã trích dẫn
+nguồn: "Even with strong hardware design, precise calibration, and
+real-time compensation, small residual drift will always remain").
+ZUPT (reset về 0 mỗi lần dừng hẳn) là cơ chế chính giữ sai số trong
+tầm kiểm soát — phù hợp cho use-case cụ thể này (hầm/dừng ngắn vài
+chục giây tới vài phút giữa các lần ZUPT), KHÔNG phù hợp cho dead-
+reckoning dài hạn không có GPS. Người dùng đã được thông báo rõ,
+đồng ý hướng đi này ("phải có 1 cách nào đó... + zupt").
+
+--- ĐÃ TÍCH HỢP VÀO app.c, CHƯA TÍCH HỢP VÀO LOGIC BƠM ---
+- imu_velocity_state_t s_imu_velocity (biến static mới)
+- imu_velocity_init() gọi trong app_init() cạnh accel_app_init()
+- Mỗi tick trong vòng lặp chính: nếu
+  accel_app_is_movement_detected()==false liên tục
+  >=IMU_VELOCITY_STATIONARY_CONFIRM_MS (3000ms, ngưỡng riêng của
+  module này, nghiêm ngặt hơn accel_app's per-tick flag) thì gọi
+  imu_velocity_bias_calib_sample() + imu_velocity_axis_calib_sample()
+- CHƯA gọi imu_velocity_zero_velocity_update() ở đâu cả (cần thêm)
+- CHƯA gọi imu_velocity_poll() ở đâu cả trong vòng lặp chính lúc xe
+  đang di chuyển — cần thêm khi bắt đầu tích hợp vào logic bơm thật
+- CHƯA có logic thay đổi hành vi bơm (APP_CYCLE_ON_PUMP) dựa theo
+  tốc độ — toàn bộ phần "khi nào bật/tắt bơm dựa threshold" CHƯA
+  LÀM, mới chỉ có phần đo vận tốc (nền tảng)
+
+============================================================
+BUILD SYSTEM — ĐÃ CẬP NHẬT
+============================================================
+- Makefile: thêm -I cho app/user/imu_velocity và
+  components/third_party/embfilt
+- synaptix.mk: thêm imu_velocity.c, ma_filt.c, median_filt.c vào
+  danh sách source (chú ý: sx_pump.c trước đây là dòng CUỐI của
+  COMPONENT_FILES, không có \ cuối dòng — đã thêm \ vào và nối thêm
+  2 dòng mới, kiểm tra lại nếu thêm file component mới sau này)
+
+============================================================
+CÔNG CỤ MỚI/THAY ĐỔI PHIÊN NÀY
+============================================================
+- bno055_get_temperature() — hàm mới trong driver
+  (SynaptiX_FDK/components/modules/imu/bno055.c/.h), đọc register
+  TEMP (0x34), 1 byte signed, 1 LSB = 1°C, không cần scale. Trước
+  đây driver hoàn toàn chưa expose hàm này dù chip hỗ trợ.
+- SynaptiX_FDK/components/third_party/embfilt/ — vendored 2 file từ
+  https://github.com/huunghiaspkt/embfilt (MIT), theo yêu cầu người
+  dùng tham khảo bộ lọc có sẵn thay vì tự viết lại: ma_filt.*
+  (moving average, circular buffer) và median_filt.* (loại outlier).
+  Repo gốc còn có EMA/Kalman/IIR filter khác chưa vendor — lấy thêm
+  nếu giai đoạn sau cần (ví dụ Stage C có thể cần EMA thay vì running
+  average tay hiện tại nếu người dùng muốn tunable cutoff frequency).
 
 ============================================================
 QUY TẮC BẮT BUỘC (kế thừa, không đổi)
@@ -186,9 +227,14 @@ QUY TẮC BẮT BUỘC (kế thừa, không đổi)
   build thật.
 - Board test vật lý duy nhất: STM32H563RIV6.
 - Log thật/phép đo tay LUÔN thắng datasheet/giả thuyết khi có xung
-  đột — bug #3 phiên này là ví dụ điển hình: giả thuyết ban đầu
-  (mux GPIO hỏng) bị loại trừ hoàn toàn nhờ test_ze12a.c standalone.
+  đột.
 - KHÔNG khẳng định chắc chắn hơn những gì bằng chứng thật sự cho
-  thấy — bug #3 vẫn CHƯA XÁC ĐỊNH được nguyên nhân gốc chắc chắn,
-  chỉ mới có nghi vấn mạnh (mục a/b/c ở trên), cần log có timestamp
-  chính xác hơn để xác nhận trước khi sửa tiếp.
+  thấy. Bug operator:null phiên này là ví dụ điển hình — code fix
+  ĐÚNG VỀ MẶT LOGIC nhưng log thật cho thấy vẫn còn vấn đề chưa hiểu
+  hết, KHÔNG được báo "đã xong" cho tới khi có log [DEBUG OPERATOR]
+  xác nhận.
+- Với tính năng imu_velocity: đây là công nghệ có giới hạn vật lý
+  thật (đã giải thích, đã dẫn nguồn khoa học cụ thể trong code) —
+  KHÔNG được hứa hẹn "chính xác tuyệt đối không cần GPS" với người
+  dùng, luôn nói rõ đây là giảm drift + ZUPT, không phải loại bỏ
+  hoàn toàn.

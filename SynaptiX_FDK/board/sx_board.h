@@ -29,7 +29,6 @@ extern "C" {
 #include "sx_pwm_sw.h"
 #include "sx_ex_rtc.h"
 #include "bno055.h"
-#include "sx_filter.h"
 #include "sx_read_bat.h"
 #include "sensirion_uart_hal.h"
 #include "sht3x.h"

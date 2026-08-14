@@ -177,6 +177,7 @@ C_INCLUDES += -I$(SYNAPTIX_DIR)/app \
 			  -I$(SYNAPTIX_DIR)/app/user/mqtt_rpc \
 			  -I$(SYNAPTIX_DIR)/app/user/ota_trigger \
 			  -I$(SYNAPTIX_DIR)/app/user/test \
+			  -I$(SYNAPTIX_DIR)/app/user/calib_vel \
 			  -I$(SYNAPTIX_DIR)/board \
 			  -I$(SYNAPTIX_DIR)/services/logger \
 			  -I$(SYNAPTIX_DIR)/services/littlefs \

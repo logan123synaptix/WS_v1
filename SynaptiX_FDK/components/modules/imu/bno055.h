@@ -96,6 +96,7 @@ int bno055_get_mag(bno055_t *dev, bno055_vec3_t *out);
 int bno055_get_gyro(bno055_t *dev, bno055_vec3_t *out);
 int bno055_get_linear_accel(bno055_t *dev, bno055_vec3_t *out);
 int bno055_get_gravity(bno055_t *dev, bno055_vec3_t *out);
+int bno055_get_temperature(bno055_t *dev, int8_t *out_celsius);
 int bno055_get_euler(bno055_t *dev, bno055_euler_t *out);
 int bno055_get_quat(bno055_t *dev, bno055_quat_t *out);
 

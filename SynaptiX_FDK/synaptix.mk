@@ -31,7 +31,8 @@ APP_FILES = ${SYNAPTIX_DIR}/app/app.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_shell.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_ads1115.c \
 			$(SYNAPTIX_DIR)/app/user/test/test_mux_select.c \
-			$(SYNAPTIX_DIR)/app/user/calib_vel/imu_velocity.c \
+			$(SYNAPTIX_DIR)/app/user/calib/calib_imu/calib_imu.c \
+			$(SYNAPTIX_DIR)/app/user/calib/calib_vel/imu_velocity.c \
 
 
 BOARD_FILES = ${SYNAPTIX_DIR}/board/sx_board.c

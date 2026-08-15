@@ -13,6 +13,7 @@ static const char* TAG = "IMU";
 #define REG_QUA_DATA_W_LSB   0x20U
 #define REG_LIA_DATA_X_LSB   0x28U
 #define REG_GRV_DATA_X_LSB   0x2EU
+#define REG_TEMP             0x34U
 #define REG_CALIB_STAT       0x35U
 #define REG_SYS_STATUS       0x39U
 #define REG_SYS_ERR          0x3AU
@@ -135,6 +136,20 @@ int bno055_get_gravity(bno055_t *dev, bno055_vec3_t *out)
     if (!dev || !out) return BNO055_ERR_PARAM;
     if (!dev->initialized) return BNO055_ERR_NOT_INIT;
     return _read_vec3(dev, REG_GRV_DATA_X_LSB, out);
+}
+
+int bno055_get_temperature(bno055_t *dev, int8_t *out_celsius)
+{
+    if (!dev || !out_celsius) return BNO055_ERR_PARAM;
+    if (!dev->initialized) return BNO055_ERR_NOT_INIT;
+    /* TEMP register (0x34): 1 byte, signed, 1 LSB = 1 degC (default unit
+     * select, REG_UNIT_SEL left at 0x00 in bno055_init() — matches the
+     * rest of this driver's convention of never touching unit select
+     * after init). No scaling needed, unlike the vec3 registers. */
+    uint8_t raw;
+    if (_reg_read(dev, REG_TEMP, &raw, 1) != 0) return BNO055_ERR_I2C;
+    *out_celsius = (int8_t)raw;
+    return BNO055_OK;
 }
 
 int bno055_get_euler(bno055_t *dev, bno055_euler_t *out)

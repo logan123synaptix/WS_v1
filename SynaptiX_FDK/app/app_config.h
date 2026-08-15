@@ -181,4 +181,6 @@
 #define OVERSAMPLE_COUNT    12U
 #endif
 
+#define FILE_SAVE_IMU_CALIBRATION  "imu_calibration.bin"
+
 #endif /* APP_CONFIG_H */

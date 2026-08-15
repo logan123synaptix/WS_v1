@@ -4,6 +4,8 @@
 #include "logger.h"
 #include "ma_filt.h"
 #include "median_filt.h"
+#include "app_config.h"
+#include "sx_ex_storage.h"
 
 static const char *TAG = "IMU_VELOCITY";
 
@@ -249,7 +251,7 @@ static void _bias_at_current_temp(imu_velocity_state_t *state, bno055_t *imu, fl
 void imu_velocity_init(imu_velocity_state_t *state)
 {
     memset(state, 0, sizeof(*state));
-    state->forward_axis  = IMU_VELOCITY_ASSUMED_FORWARD_AXIS;
+    state->forward_axis  = IMU_VELOCITY_AXIS_FORWARD_ASSUMED;
     state->scale_factor  = 1.0f;
     _bias_filters_init();
 }
@@ -361,7 +363,7 @@ void imu_velocity_poll(imu_velocity_state_t *state, bno055_t *imu, uint32_t delt
      * error, or the vehicle on a grade) gets that component removed
      * rather than leaking into the horizontal magnitude the same way a
      * naive single-axis read would. Falls back to
-     * IMU_VELOCITY_ASSUMED_FORWARD_AXIS's plain magnitude-of-all-3-axes
+     * IMU_VELOCITY_AXIS_FORWARD_ASSUMED's plain magnitude-of-all-3-axes
      * if Stage B hasn't sampled gravity_axis_down yet (all zero vector)
      * -- see the zero-vector guard below. */
     float down[3] = { state->gravity_axis_down[0], state->gravity_axis_down[1], state->gravity_axis_down[2] };
@@ -399,4 +401,168 @@ void imu_velocity_poll(imu_velocity_state_t *state, bno055_t *imu, uint32_t delt
 void imu_velocity_zero_velocity_update(imu_velocity_state_t *state)
 {
     state->velocity_kph = 0.0f;
+}
+
+/* ===== Stage A/A2 persistence (flash) ===== */
+
+/* On-flash layout. Deliberately its own struct (not
+ * imu_velocity_state_t written verbatim) so the fields NOT persisted
+ * (gravity_axis_down, forward_axis*, scale_factor*, velocity_kph,
+ * last_gps_fix_tick_ms -- see this struct's rationale in
+ * imu_velocity.h's Stage A/A2 persistence section) can never
+ * accidentally leak into or out of the saved file, and so this file's
+ * on-disk layout doesn't silently change size/shape if
+ * imu_velocity_state_t grows a new runtime-only field later. Bump a
+ * version field here rather than changing this struct in place if its
+ * layout ever needs to change -- same "don't reinterpret stale bytes"
+ * posture network_config.c takes with NETWORK_CONFIG_VERSION, just not
+ * needed yet since this is the struct's first version. */
+typedef struct {
+    float bias_intercept[3];
+    float bias_slope[3];
+    float temp_cluster_low_c;
+    float temp_cluster_high_c;
+    bool  bias_calibrated;
+    bool  bias_slope_calibrated;
+} imu_velocity_flash_bias_t;
+
+/* The cluster temperatures actually written to flash on the last
+ * successful save this boot (or after a successful load) -- what
+ * imu_velocity_bias_calib_save_if_needed() compares state's current
+ * RAM-side clusters against to decide whether drift has exceeded
+ * IMU_VELOCITY_FLASH_SAVE_MIN_DRIFT_C. NOT the same thing as state's
+ * own temp_cluster_low_c/high_c, which keep moving every stationary
+ * period per Stage A3 regardless of whether a save happened -- this is
+ * specifically "what's on flash right now", deliberately kept separate
+ * so the drift comparison has a stable reference point between saves. */
+static float s_flash_temp_cluster_low_c;
+static float s_flash_temp_cluster_high_c;
+static bool  s_flash_has_saved_this_boot;
+
+bool imu_velocity_bias_calib_load(imu_velocity_state_t *state)
+{
+    int32_t size = sx_storage_size(FILE_SAVE_IMU_CALIBRATION);
+    if (size <= 0) {
+        log_info(TAG, "No saved bias calibration file - Stage A will "
+                       "calibrate from scratch");
+        return false;
+    }
+
+    imu_velocity_flash_bias_t saved;
+    if ((uint32_t)size != sizeof(saved)) {
+        log_warn(TAG, "Saved bias calibration file size mismatch (got %ld, "
+                       "expected %u) - ignoring, Stage A will calibrate "
+                       "from scratch", (long)size, (unsigned)sizeof(saved));
+        return false;
+    }
+
+    sx_storage_err_t err = sx_storage_read(FILE_SAVE_IMU_CALIBRATION, &saved, sizeof(saved));
+    if (err != SX_STORAGE_OK) {
+        log_warn(TAG, "Failed to read saved bias calibration (err=%d) - "
+                       "Stage A will calibrate from scratch", err);
+        return false;
+    }
+
+    memcpy(state->bias_intercept, saved.bias_intercept, sizeof(state->bias_intercept));
+    memcpy(state->bias_slope,     saved.bias_slope,     sizeof(state->bias_slope));
+    state->temp_cluster_low_c    = saved.temp_cluster_low_c;
+    state->temp_cluster_high_c   = saved.temp_cluster_high_c;
+    state->bias_calibrated       = saved.bias_calibrated;
+    state->bias_slope_calibrated = saved.bias_slope_calibrated;
+
+    s_flash_temp_cluster_low_c  = saved.temp_cluster_low_c;
+    s_flash_temp_cluster_high_c = saved.temp_cluster_high_c;
+    /* Deliberately NOT set true here -- loading a file is not the same
+     * event as this boot having written one. See this flag's other use
+     * in imu_velocity_bias_calib_save_if_needed()'s "always save the
+     * first time bias_calibrated/bias_slope_calibrated flips true"
+     * rule, which must still be free to fire this boot even though a
+     * file already existed, if e.g. only bias_calibrated (not
+     * bias_slope_calibrated) was true in the saved file and this boot
+     * is the first to also reach bias_slope_calibrated. */
+    s_flash_has_saved_this_boot = false;
+
+    log_info(TAG, "Loaded bias calibration from flash (intercept=(%.4f,%.4f,%.4f) "
+                   "slope=(%.5f,%.5f,%.5f) temp_low=%.1f temp_high=%.1f "
+                   "slope_calibrated=%s)",
+              saved.bias_intercept[0], saved.bias_intercept[1], saved.bias_intercept[2],
+              saved.bias_slope[0], saved.bias_slope[1], saved.bias_slope[2],
+              saved.temp_cluster_low_c, saved.temp_cluster_high_c,
+              saved.bias_slope_calibrated ? "yes" : "no");
+    return true;
+}
+
+bool imu_velocity_bias_calib_save_if_needed(const imu_velocity_state_t *state)
+{
+    /* Nothing calibrated yet at all -- nothing to save. */
+    if (!state->bias_calibrated) return false;
+
+    /* Track "first time this boot bias_calibrated/bias_slope_calibrated
+     * became true" locally rather than relying solely on
+     * s_flash_has_saved_this_boot, since a save can also be triggered
+     * later purely by drift (case below) without either flag having
+     * just flipped -- these two static locals only answer "have we
+     * already unconditionally-saved once for reaching bias_calibrated"
+     * and "...for bias_slope_calibrated" specifically. */
+    static bool s_saved_for_bias_calibrated       = false;
+    static bool s_saved_for_bias_slope_calibrated = false;
+
+    bool should_save = false;
+    const char *reason = "";
+
+    if (!s_saved_for_bias_calibrated) {
+        should_save = true;
+        reason = "bias_calibrated reached for the first time this boot";
+    } else if (state->bias_slope_calibrated && !s_saved_for_bias_slope_calibrated) {
+        should_save = true;
+        reason = "bias_slope_calibrated reached for the first time this boot";
+    } else if (s_flash_has_saved_this_boot || s_flash_temp_cluster_low_c != 0.0f
+               || s_flash_temp_cluster_high_c != 0.0f) {
+        /* Only meaningful once something has actually been saved at
+         * least once (this boot, via the two branches above, or a
+         * prior boot via imu_velocity_bias_calib_load() populating
+         * s_flash_temp_cluster_*) -- compare current RAM clusters
+         * against what's on flash, per IMU_VELOCITY_FLASH_SAVE_MIN_
+         * DRIFT_C (see imu_velocity.h's Stage A/A2 persistence
+         * section). */
+        float drift_low  = fabsf(state->temp_cluster_low_c  - s_flash_temp_cluster_low_c);
+        float drift_high = fabsf(state->temp_cluster_high_c - s_flash_temp_cluster_high_c);
+        if (drift_low > IMU_VELOCITY_FLASH_SAVE_MIN_DRIFT_C
+            || drift_high > IMU_VELOCITY_FLASH_SAVE_MIN_DRIFT_C) {
+            should_save = true;
+            reason = "temperature cluster drifted from last saved value";
+        }
+    }
+
+    if (!should_save) return false;
+
+    imu_velocity_flash_bias_t out;
+    memcpy(out.bias_intercept, state->bias_intercept, sizeof(out.bias_intercept));
+    memcpy(out.bias_slope,     state->bias_slope,     sizeof(out.bias_slope));
+    out.temp_cluster_low_c    = state->temp_cluster_low_c;
+    out.temp_cluster_high_c   = state->temp_cluster_high_c;
+    out.bias_calibrated       = state->bias_calibrated;
+    out.bias_slope_calibrated = state->bias_slope_calibrated;
+
+    sx_storage_err_t err = sx_storage_write(FILE_SAVE_IMU_CALIBRATION, &out, sizeof(out));
+    if (err != SX_STORAGE_OK) {
+        log_error(TAG, "Failed to save bias calibration to flash (err=%d, "
+                        "reason: %s) - will retry next call", err, reason);
+        return false;
+    }
+
+    s_saved_for_bias_calibrated       = true;
+    if (state->bias_slope_calibrated) s_saved_for_bias_slope_calibrated = true;
+    s_flash_temp_cluster_low_c  = state->temp_cluster_low_c;
+    s_flash_temp_cluster_high_c = state->temp_cluster_high_c;
+    s_flash_has_saved_this_boot = true;
+
+    log_info(TAG, "Saved bias calibration to flash (reason: %s) - "
+                   "intercept=(%.4f,%.4f,%.4f) slope=(%.5f,%.5f,%.5f) "
+                   "temp_low=%.1f temp_high=%.1f",
+              reason,
+              out.bias_intercept[0], out.bias_intercept[1], out.bias_intercept[2],
+              out.bias_slope[0], out.bias_slope[1], out.bias_slope[2],
+              out.temp_cluster_low_c, out.temp_cluster_high_c);
+    return true;
 }

@@ -77,7 +77,7 @@
  *     compare against GPS course. Until Stage C runs for the first time
  *     with real vehicle motion, forward_axis_calibrated stays false and
  *     the module falls back to a configurable assumed mounting axis
- *     (see IMU_VELOCITY_ASSUMED_FORWARD_AXIS) — this is a guess, not a
+ *     (see IMU_VELOCITY_AXIS_FORWARD_ASSUMED) — this is a guess, not a
  *     calibrated value, and is logged as such.
  *
  *   STAGE C — Scale factor (NOT testable without a real GPS-fixed drive
@@ -164,7 +164,21 @@ extern "C" {
  * on how the board is expected to be mounted, not a measurement --
  * imu_velocity_get_state()'s forward_axis_calibrated tells the caller
  * whether to trust it as more than that. */
-#define IMU_VELOCITY_ASSUMED_FORWARD_AXIS   0U
+#define IMU_VELOCITY_AXIS_FORWARD_ASSUMED   0U
+
+/* How far (degC) the RAM-side temp_cluster_low_c/high_c must have
+ * drifted from what is currently saved in flash before
+ * imu_velocity_bias_calib_save_if_needed() writes again. Deliberately
+ * reuses IMU_VELOCITY_TEMP_CLUSTER_MIN_SEPARATION_C's own value (not a
+ * new, independently-tuned constant) -- both thresholds answer the same
+ * underlying question ("has the temperature moved far enough to be a
+ * meaningfully different operating point"), just applied to two
+ * different comparisons (RAM cluster vs. RAM cluster, here RAM cluster
+ * vs. last-saved-to-flash cluster). Revisit as a separate constant only
+ * if real flash-wear data ever shows this coupling was wrong -- e.g. if
+ * saves are still happening more often than flash wear tolerates even
+ * though bias accuracy would be fine re-triggering saves less often. */
+#define IMU_VELOCITY_FLASH_SAVE_MIN_DRIFT_C   IMU_VELOCITY_TEMP_CLUSTER_MIN_SEPARATION_C
 
 typedef struct {
     /* Stage A / A2 / A3 state: temperature-compensated bias, per axis.
@@ -184,7 +198,7 @@ typedef struct {
 
     /* Stage B state */
     bool     forward_axis_calibrated;   /* true once Stage C has run at least once */
-    uint8_t  forward_axis;              /* 0/1/2 -- IMU_VELOCITY_ASSUMED_FORWARD_AXIS until calibrated */
+    uint8_t  forward_axis;              /* 0/1/2 -- IMU_VELOCITY_AXIS_FORWARD_ASSUMED until calibrated */
     float    gravity_axis_down[3];      /* unit vector, from bno055_get_gravity() while stationary */
 
     /* Stage C state (framework only -- see this header's top comment) */
@@ -235,7 +249,7 @@ void imu_velocity_bias_calib_sample(imu_velocity_state_t *state, bno055_t *imu);
  * as Stage A, can be the same call site) to capture which raw axis is
  * "down" via bno055_get_gravity(). Does not determine the forward axis
  * (see this header's top comment) -- state->forward_axis stays at
- * IMU_VELOCITY_ASSUMED_FORWARD_AXIS/forward_axis_calibrated==false until
+ * IMU_VELOCITY_AXIS_FORWARD_ASSUMED/forward_axis_calibrated==false until
  * Stage C runs with real motion. */
 void imu_velocity_axis_calib_sample(imu_velocity_state_t *state, bno055_t *imu);
 
@@ -281,6 +295,65 @@ void imu_velocity_poll(imu_velocity_state_t *state, bno055_t *imu, uint32_t delt
  * after Stage A/A3 sampling already ran this tick) isn't forced to
  * re-sample. */
 void imu_velocity_zero_velocity_update(imu_velocity_state_t *state);
+
+/* ===== Stage A/A2 persistence (flash) ===== */
+
+/* Only bias_intercept[3], bias_slope[3], temp_cluster_low_c,
+ * temp_cluster_high_c, bias_calibrated, bias_slope_calibrated are
+ * persisted -- NOT gravity_axis_down (re-measured every boot, cheap,
+ * and mounting-dependent so a stale saved value is a real risk if the
+ * board is ever remounted -- see this header's Stage B doc-comment),
+ * NOT forward_axis (same reasoning, and not yet measurable at all until
+ * a real drive test exists), NOT scale_factor/scale_calibrated (Stage C
+ * is framework-only, nothing to persist yet), and NOT velocity_kph /
+ * last_gps_fix_tick_ms (purely runtime -- meaningless across a reboot).
+ * The raw per-cluster filter state inside imu_velocity.c
+ * (s_cluster_settled_bias, the median/MA filter chains feeding it) is
+ * NOT persisted either -- only the two clusters' settled *results* are.
+ * This means Stage A3 refinement after a restore restarts each
+ * cluster's own smoothing from scratch rather than continuing the exact
+ * same running average that was in progress before the reboot; the
+ * settled bias_intercept/bias_slope loaded from flash are usable
+ * immediately regardless, this only affects how quickly *further*
+ * refinement re-smooths after the first post-boot sample near each
+ * cluster.
+ *
+ * Storage location: FILE_SAVE_IMU_CALIBRATION (app_config.h). Layout is
+ * a private detail of imu_velocity.c (imu_velocity_flash_bias_t) --
+ * callers only ever see imu_velocity_state_t, never the on-flash
+ * struct directly. */
+
+/* Call once at boot, after imu_velocity_init(state), before any Stage A
+ * sampling. If a saved file exists (and its size matches the current
+ * on-flash struct layout), loads it directly into state's bias fields
+ * and flips bias_calibrated/bias_slope_calibrated accordingly -- no
+ * waiting for the vehicle to sit stationary before bias-corrected
+ * integration is usable. If no valid file exists, leaves state
+ * untouched (imu_velocity_init()'s defaults stand: uncalibrated, same
+ * as if this were never called) — Stage A starts from scratch as usual.
+ * Returns true if a file was loaded, false otherwise (informational
+ * only, e.g. for status logging — nothing in this module branches on
+ * the caller checking the return value). */
+bool imu_velocity_bias_calib_load(imu_velocity_state_t *state);
+
+/* Call after every imu_velocity_bias_calib_sample() (i.e. at the same
+ * call site, every confirmed-stationary period per Stage A3 — see
+ * imu_velocity_bias_calib_sample()'s doc-comment). Internally decides
+ * whether a flash write is actually warranted this call, per this
+ * header's top-of-section comment:
+ *   - always saves the first time bias_calibrated flips true
+ *   - always saves the first time bias_slope_calibrated flips true
+ *   - after that, only saves when temp_cluster_low_c or
+ *     temp_cluster_high_c has drifted more than
+ *     IMU_VELOCITY_FLASH_SAVE_MIN_DRIFT_C away from what is currently
+ *     saved in flash
+ * Cheap to call every time regardless — the drift comparison itself is
+ * just a few float subtractions; the expensive part (sx_storage_write())
+ * only runs on an actual save. Returns true if a write happened this
+ * call (informational, e.g. for status logging), false if the call was
+ * a no-op (nothing warranted saving yet) or the write itself failed
+ * (logged internally either way). */
+bool imu_velocity_bias_calib_save_if_needed(const imu_velocity_state_t *state);
 
 #ifdef __cplusplus
 }
